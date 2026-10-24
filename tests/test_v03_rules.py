@@ -139,6 +139,7 @@ class TestV03Rules(unittest.TestCase):
         player = engine.state.players[0]
         player.money = 2
         player.secrets = 6
+        player.patches = 0  # Zero patches to test direct cash-to-secret leak
 
         # 5 unblocked Red: drains $2 to $0, remaining 3 unpaid leaks 3 secrets -> 3 secrets left
         engine._resolve_player_defense_and_wear(
@@ -164,6 +165,7 @@ class TestV03Rules(unittest.TestCase):
         player = engine.state.players[0]
         player.money = 1
         player.secrets = 6
+        player.patches = 0  # Zero patches to test direct cash-to-secret leak
 
         # 10 unblocked Red: drains $1 to $0, unpaid 9 damage reduces secrets to -3
         engine._resolve_player_defense_and_wear(
@@ -205,6 +207,7 @@ class TestV03Rules(unittest.TestCase):
         # Case B: $0 money, 2 secrets, takes 2 unblocked Red -> secrets drops to 0 -> Patient Zero!
         player.money = 0
         player.secrets = 2
+        player.patches = 0  # Zero patches to test direct cash-to-secret leak
         engine._resolve_player_defense_and_wear(
             player=player,
             rolled_dice=list(player.ready_dice),
@@ -453,7 +456,9 @@ class TestV03Rules(unittest.TestCase):
         p1.secrets = 2
         p1.money = 0
 
-        commitments = engine._execute_phase_1()
+        engine._execute_phase_1()
+        # Commit zero shields to ensure all damage is unblocked
+        commitments = [(p0, p0.ready_dice, {}), (p1, p1.ready_dice, {})]
 
         # Drop 4 Blue cubes: p0 takes 4 damage (secrets -> -3), p1 takes 4 damage (secrets -> -2)
         engine.state.staging_cup = {

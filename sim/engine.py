@@ -590,15 +590,25 @@ class GameEngine:
 
         # 3. Apply Unblocked Damage
         # Red (Ransomware): Lose $1 per unblocked Red cube.
-        # Unpaid Ransom Leak: If money is exhausted ($0), unpaid Red damage leaks Secrets (1 Secret per unpaid $1).
-        # Money is strictly non-negative (>= 0).
+        # Tier 1: Cash pays min(player.money, unblocked_red).
+        # Tier 2: Emergency Patch Absorption - patches absorb min(player.patches, unpaid_ransom).
+        # Tier 3: Unpaid Ransom Leak - remaining unpaid ransom leaks Secrets (1 Secret per unpaid $1).
+        # Money and patches are strictly non-negative (>= 0).
         if unblocked_red > 0:
-            if player.money >= unblocked_red:
-                player.money -= unblocked_red
-            else:
-                unpaid_ransom = unblocked_red - player.money
-                player.money = 0
+            cash_paid = min(player.money, unblocked_red)
+            player.money -= cash_paid
+            unpaid_ransom = unblocked_red - cash_paid
+
+            if unpaid_ransom > 0 and player.patches > 0:
+                patches_absorbed = min(player.patches, unpaid_ransom)
+                player.patches -= patches_absorbed
+                unpaid_ransom -= patches_absorbed
+
+            if unpaid_ransom > 0:
                 player.secrets -= unpaid_ransom
+
+            player.money = max(0, player.money)
+            player.patches = max(0, player.patches)
 
         # Blue (Spyware): Lose 1 Corporate Secret per unblocked Blue cube
         if unblocked_blue > 0:
@@ -650,8 +660,13 @@ class GameEngine:
             plan = player.bot.take_phase3_actions(player, self.state, self.rng)
 
             # 1. Dirty Income ("Monetize the Rogue Agent" — Limit 1x per turn)
-            # Requires at least 1 ready die for Technical Debt Backlash
-            if plan.take_dirty_income and len(player.ready_dice) > 0:
+            # Preconditions: secrets > dirty_income_secret_cost and at least 1 ready die for Backlash
+            if (
+                plan.take_dirty_income
+                and player.secrets > self.state.config.dirty_income_secret_cost
+                and len(player.ready_dice) > 0
+            ):
+                player.secrets -= self.state.config.dirty_income_secret_cost
                 player.money += self.state.config.dirty_income_cash
                 self.state.staging_cup[CubeColor.BLACK] = (
                     self.state.staging_cup.get(CubeColor.BLACK, 0)

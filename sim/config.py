@@ -57,11 +57,13 @@ class GameConfig:
     dice_per_color_multiplier: int = 2  # 2 * num_players dice per colored die type
 
     # Corruption track
-    corruption_spaces_per_player: int = 1
-    corruption_spaces_base: int = 1  # Track length = num_players + 1
+    corruption_track_flat_capacity: int = 4  # v0.4: Flat 4 spaces across all player counts
+    corruption_spaces_per_player: int = 1  # Deprecated in v0.4
+    corruption_spaces_base: int = 1  # Deprecated in v0.4
 
     # Operations & Economy
     dirty_income_cash: int = 3  # [TUNE: $2–$4]
+    dirty_income_secret_cost: int = 1  # v0.4: Monetizing the Rogue Agent costs 1 Secret
     dirty_income_attack_cubes: int = 0  # Obsolete in v0.3 (no attack cubes added)
     dirty_income_black_cubes: int = 1
     patch_cash_cost: int = 2  # [TUNE: $1–$3]
@@ -97,5 +99,5 @@ class GameConfig:
 
     @property
     def corruption_track_capacity(self) -> int:
-        """Returns the number of spaces on the corruption track: Players + 1."""
-        return self.num_players * self.corruption_spaces_per_player + self.corruption_spaces_base
+        """Returns the number of spaces on the corruption track: flat 4 spaces across all player counts in v0.4."""
+        return self.corruption_track_flat_capacity

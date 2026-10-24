@@ -19,10 +19,14 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Code & Rules-Fidelity Review Gate (`staff-engineer`):* Review line-by-line diffs, verify 100% test pass via WSL, audit edge cases (APPROVED)
   - [x] *Verification Monte Carlo Sweeps (`product-owner`):* Run Experiments 1–4 across player counts and bot pods via WSL
   - [x] *Balance Assessment & Final Log (`game-designer`):* Evaluate telemetry against Healthy Game targets and update `FINDINGS.md`
-- [ ] **Phase 4: Economy Tuning & Accelerationist Countermeasures (`v0.4`)**
-  - [ ] *Design Review:* Align on Dirty Income costing 1 Secret, Patch absorption of Red ransom, and 4-space corruption track
-  - [ ] *Engine & Bot Update:* Refine bot heuristics (shield prioritization of Blue over Red) and sim rules
-  - [ ] *Monte Carlo Validation:* Re-run Tournament Pods to verify bot balance within $\le 38\%$ win rate target
+- [x] **Phase 4: Economy Tuning & Accelerationist Countermeasures (`v0.4`)**
+  - [x] *Design Review:* Align on Dirty Income costing 1 Secret, Patch absorption of Red ransom, and 4-space corruption track
+  - [x] *Engine & Bot Update:* Refine bot heuristics (shield prioritization of Blue over Red) and sim rules
+  - [x] *Monte Carlo Validation:* Re-run Tournament Pods to verify bot balance within $\le 38\%$ win rate target (Verified: Accelerationist reduced from 87.5% to 21.6%–38.0%)
+- [ ] **Phase 5: Starting Secrets Baseline & 2P Resilience (`v0.5`)**
+  - [ ] *Design Review:* Test 7 Starting Secrets baseline and 2P resilience buffers (+1 Secret, +1 Starting Patch)
+  - [ ] *Engine Update:* Parameterize 2P buffer overrides and update starting secrets baseline
+  - [ ] *Monte Carlo Validation:* Confirm 4P mean length >= 5.5 rounds and 2P wipeout reduction under 20%
 
 ---
 

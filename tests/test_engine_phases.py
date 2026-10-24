@@ -73,8 +73,8 @@ class TestEnginePhases(unittest.TestCase):
         # Force 100% exit probability
         engine.state.tower.calculate_exit_probability = lambda count: 1.0
 
-        # Stage 3 Black cubes to fill v1.0 track (Script Kiddie -> RaaS)
-        engine.state.staging_cup = {CubeColor.BLACK: 3, CubeColor.RED: 0, CubeColor.BLUE: 0, CubeColor.GREEN: 0}
+        # Stage 4 Black cubes to fill v1.0 track (flat capacity = 4 in v0.4)
+        engine.state.staging_cup = {CubeColor.BLACK: 4, CubeColor.RED: 0, CubeColor.BLUE: 0, CubeColor.GREEN: 0}
 
         commitments = [(engine.state.players[0], engine.state.players[0].ready_dice, {}),
                        (engine.state.players[1], engine.state.players[1].ready_dice, {})]
@@ -98,7 +98,7 @@ class TestEnginePhases(unittest.TestCase):
 
         # Set version to v3.0 (index 2)
         engine.state.current_version_index = 2
-        engine.state.corruption_track = 2  # 1 space away from full (cap = 3)
+        engine.state.corruption_track = cfg.corruption_track_capacity - 1  # 1 space away from full (cap = 4)
 
         engine.state.staging_cup = {CubeColor.BLACK: 1, CubeColor.RED: 0, CubeColor.BLUE: 0, CubeColor.GREEN: 0}
         commitments = [(engine.state.players[0], engine.state.players[0].ready_dice, {}),

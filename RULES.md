@@ -1,4 +1,4 @@
-# Rogue Agent — Rules Draft (v0.3)
+# Rogue Agent — Rules Draft (v0.4)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival
 
@@ -22,7 +22,7 @@ When the dust settles, any corporation that suffers a **Total Data Breach** (`<=
 * **1 Cube Tower** (the AI's unstable compiler)
 * **1 Staging Cup** (open bowl/mat visible to all players showing code queued for the next compile)
 * **Rogue Agent Cubes (4 Colors):**
-  * **Red Cubes (Ransomware):** Extorts corporate **Money**; leaks **Secrets** if unpaid.
+  * **Red Cubes (Ransomware):** Extorts corporate **Money**; unpaid ransom can be absorbed by **Patch Tokens (`🔧`)** or leaks **Secrets**.
   * **Blue Cubes (Spyware):** Directly steals **Corporate Secrets**.
   * **Green Cubes (Malware):** Degrades Ready dice to **Unpatched** (or destroys dice if overwhelmed).
   * **Black Cubes (Corrupted Code):** Advances the active **Version Corruption Track**.
@@ -48,7 +48,7 @@ When the dust settles, any corporation that suffers a **Total Data Breach** (`<=
 ## 3. Setup
 
 1. **Rogue Agent Roadmap:** Deal **1 `v1.0` card**, **1 `v2.0` card**, and **1 `v3.0` card** face-up in a row next to the Cube Tower. Place the Version Marker on `v1.0`.
-   * Each Version card has a **Corruption Track** equal to **`Players + 1` spaces** (`3 / 4 / 5` spaces for `2 / 3 / 4` players) `[TUNE]`.
+   * Each Version card has a **Corruption Track** equal to **`4` spaces** (flat across all player counts) `[TUNE]` (12 total Black cubes to Singularity).
    * Place the starting Attack Cubes listed on the `v1.0` card plus `1 Black Cube` into the **Staging Cup** (baseline: `1 Red, 1 Blue, 1 Green, 1 Black`). The Cube Tower starts empty.
 2. **Software Market:** For each of the 5 Colored Dice (**Red, Blue, Green, Yellow, Purple**), shuffle its Variant Cards, place **1 Variant Card** face-up in the center, and stack **`2 × Players`** dice of that color on it.
 3. **Corporate Headquarters (Each Player):**
@@ -88,13 +88,13 @@ Take **all cubes** from the **Staging Cup** and drop them into the **Cube Tower*
 
 #### Step 2A: Resolve Black (Corruption) Cubes & Version Upgrades
 Move exited **Black Cubes** onto the active Version's **Corruption Track** one at a time:
-* **Upgrading (`v1.0 → v2.0` or `v2.0 → v3.0`):** When the `Players + 1`th space fills:
+* **Upgrading (`v1.0 → v2.0` or `v2.0 → v3.0`):** When the 4th space fills:
   1. Clear all Black Cubes from the track back to the supply.
   2. Move the Version Marker to the next Version card (`v2.0` or `v3.0`).
   3. Add the new Version card's **Upgrade Payload** cubes to the **Staging Cup** *(they will drop starting next round)*.
   4. The new Version's **Active Directive** takes effect immediately (including for Step 2B this round).
   5. Place any remaining Black Cubes from this drop onto the new Version's track.
-* **Singularity (`v3.0` Track Fills):** If the `Players + 1`th space of `v3.0` fills, **Singularity is triggered!** Step 2B resolves normally for this drop, and the game enters its final round wrap-up.
+* **Singularity (`v3.0` Track Fills):** If the 4th space of `v3.0` fills, **Singularity is triggered!** Step 2B resolves normally for this drop, and the game enters its final round wrap-up.
 
 #### Step 2B: Resolve Attack Cubes (Red, Blue, Green)
 Calculate the total attack strength of **Red**, **Blue**, and **Green** (exited cubes + any active Version Directive modifiers). Each player simultaneously resolves all three colors against their committed Shields:
@@ -102,7 +102,8 @@ Calculate the total attack strength of **Red**, **Blue**, and **Green** (exited 
 1. **Dice Wear (Software Adaptation):** Any die assigned as a Shield that **actively blocks at least 1 cube** moves to your **Unpatched Zone**. *(If 0 cubes of that color dropped, or another die already absorbed all cubes of that color, unused Shield dice remain Ready!)*
 2. **Unblocked Damage:**
    * **Red (Ransomware):** Lose **`$1`** per unblocked Red cube.
-     * **Unpaid Ransom Leak:** If you have `$0` Money, any remaining unpaid Red damage leaks proprietary source code to the dark web: lose **`1 Corporate Secret` per unpaid `$1`**! Money is strictly non-negative and never drops below `$0`.
+     * **Emergency Patch Absorption:** If cash is insufficient to pay the full ransom, each available **`1 🔧` token** automatically absorbs **`$1`** of unpaid ransom.
+     * **Unpaid Ransom Leak:** If any ransom remains unpaid after exhausting cash and patch tokens, proprietary source code leaks to the dark web: lose **`1 Corporate Secret` per unpaid `$1`**! Money is strictly non-negative and never drops below `$0`.
    * **Blue (Spyware):** Lose **`1` Corporate Secret** per unblocked Blue cube.
    * **Green (Malware):** For each unblocked Green cube, move **`1` Ready die** (that was not already worn down this round) to your **Unpatched Zone**. If you have **no Ready dice left**, you must instead **Destroy (return to box) `1` Unpatched die** of your choice! *(If you have 0 dice remaining anywhere, track unfulfilled destructions for wipeout scoring).*
    * **Patient Zero Check:** If your Corporate Secrets reach **`0` (or below)**, your network suffers a **Total Data Breach** and you become **Patient Zero** *(track negative Secrets below 0 if needed for total-wipeout tiebreakers)*.
@@ -126,6 +127,7 @@ Starting with the First Player and proceeding clockwise, each surviving player t
 2. **Patch Worn-Out Dice (Unlimited):**
    * Spend **`1 🔧` token** *or* pay **`$2`** `[TUNE: test $1–$3]` to move **1 die** from your **Unpatched Zone** back to your **Ready Zone**.
 3. **Corrupt the Rogue Agent ("Dirty Income" — Limit `1×` per turn):**
+   * Pay **`1 Corporate Secret`** (cannot be taken if you have $\le 1$ Secret).
    * Gain **`+$3`** `[TUNE: test $2–$4]` from the bank.
    * Place **`1 Black Cube`** from the supply into the **Staging Cup**.
    * **Technical Debt Backlash:** Immediately move **`1 Ready die`** of your choice to your **Unpatched Zone**.

@@ -81,7 +81,7 @@ class BaseBot:
             face = die.current_face
             if face and face.is_shield:
                 if face.shield_color == ShieldColor.ANY:
-                    assignments[idx] = ShieldColor.RED
+                    assignments[idx] = ShieldColor.BLUE  # Prioritize Blue over Red/Green
                 else:
                     assignments[idx] = face.shield_color
         return assignments
@@ -187,24 +187,23 @@ class AdaptiveBalancedBot(BaseBot):
             elif face.shield_color == ShieldColor.ANY:
                 any_shield_indices.append(idx)
 
-        # Assign Generic Any shields to the color with the highest remaining deficit
+        # Assign Generic Any shields prioritizing Blue (protect Secrets) first, then Red, then Green
         for idx in any_shield_indices:
-            deficits = {
-                ShieldColor.RED: threats[CubeColor.RED] - committed_red,
-                ShieldColor.BLUE: threats[CubeColor.BLUE] - committed_blue,
-                ShieldColor.GREEN: threats[CubeColor.GREEN] - committed_green,
-            }
-            # Pick color with max deficit (favoring Blue to protect Secrets, then Red for Money)
-            best_color = max(
-                [ShieldColor.BLUE, ShieldColor.RED, ShieldColor.GREEN],
-                key=lambda c: (deficits[c], c == ShieldColor.BLUE, c == ShieldColor.RED),
-            )
+            if threats[CubeColor.BLUE] > committed_blue:
+                best_color = ShieldColor.BLUE
+            elif threats[CubeColor.RED] > committed_red:
+                best_color = ShieldColor.RED
+            elif threats[CubeColor.GREEN] > committed_green:
+                best_color = ShieldColor.GREEN
+            else:
+                best_color = ShieldColor.BLUE
+
             assignments[idx] = best_color
-            amt = rolled_dice[idx].current_face.block_amount
-            if best_color == ShieldColor.RED:
-                committed_red += amt
-            elif best_color == ShieldColor.BLUE:
+            amt = rolled_dice[idx].current_face.block_amount if rolled_dice[idx].current_face else 1
+            if best_color == ShieldColor.BLUE:
                 committed_blue += amt
+            elif best_color == ShieldColor.RED:
+                committed_red += amt
             elif best_color == ShieldColor.GREEN:
                 committed_green += amt
 
@@ -228,8 +227,13 @@ class AdaptiveBalancedBot(BaseBot):
         }
         total_threat = sum(threats.values())
 
-        # 1. Dirty Income: take dirty income if broke, has ready dice, and threat is manageable
-        if current_money < 3 and len(player_state.ready_dice) > 0 and total_threat <= 6:
+        # 1. Dirty Income: take dirty income if broke, has ready dice, secrets > 1, and threat is manageable
+        if (
+            current_money < 3
+            and player_state.secrets > game_state.config.dirty_income_secret_cost
+            and len(player_state.ready_dice) > 0
+            and total_threat <= 6
+        ):
             plan.take_dirty_income = True
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
             current_money += game_state.config.dirty_income_cash
@@ -371,8 +375,12 @@ class SecOpsTurtleBot(BaseBot):
                     plan.market_purchases.append(color)
                     current_money -= cost
 
-        # Never take Dirty Income unless literally $0 and has ready dice
-        if current_money == 0 and len(player_state.ready_dice) > 0:
+        # Never take Dirty Income unless literally $0, secrets > 1, and has ready dice
+        if (
+            current_money == 0
+            and player_state.secrets > game_state.config.dirty_income_secret_cost
+            and len(player_state.ready_dice) > 0
+        ):
             plan.take_dirty_income = True
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
 
@@ -419,7 +427,7 @@ class VentureGreedBot(BaseBot):
             face = die.current_face
             if face and face.is_shield:
                 if face.shield_color == ShieldColor.ANY:
-                    assignments[idx] = ShieldColor.BLUE if player_state.secrets <= 3 else ShieldColor.RED
+                    assignments[idx] = ShieldColor.BLUE  # Prioritize Blue over Red/Green
                 else:
                     assignments[idx] = face.shield_color
         return assignments
@@ -435,8 +443,12 @@ class VentureGreedBot(BaseBot):
         is_final_round = getattr(game_state, "is_final_round", False)
         cash_cushion = 0 if is_final_round else 2
 
-        # Greed bot takes Dirty Income aggressively to fund purchases (requires ready dice)
-        if current_money < 5 and len(player_state.ready_dice) > 0:
+        # Greed bot takes Dirty Income aggressively to fund purchases (requires ready dice and >1 secret)
+        if (
+            current_money < 5
+            and player_state.secrets > game_state.config.dirty_income_secret_cost
+            and len(player_state.ready_dice) > 0
+        ):
             plan.take_dirty_income = True
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
             current_money += game_state.config.dirty_income_cash
@@ -475,14 +487,19 @@ class VentureGreedBot(BaseBot):
 
         # Only patch if ready dice is critically low (<= 2)
         if len(player_state.ready_dice) <= 2:
+            patch_cash_cost = (
+                3
+                if game_state.active_directive_code == "POLYMORPHIC_WORM"
+                else game_state.config.patch_cash_cost
+            )
             current_patches = player_state.patches
             for idx in range(len(player_state.unpatched_dice)):
                 if current_patches > 0:
                     plan.patch_actions.append({"die_index": idx, "use_cash": False})
                     current_patches -= 1
-                elif current_money - 2 >= cash_cushion:
+                elif current_money - patch_cash_cost >= cash_cushion:
                     plan.patch_actions.append({"die_index": idx, "use_cash": True})
-                    current_money -= 2
+                    current_money -= patch_cash_cost
 
         return plan
 
@@ -523,8 +540,11 @@ class AccelerationistBot(BaseBot):
         is_final_round = getattr(game_state, "is_final_round", False)
         cash_cushion = 0 if is_final_round else 2
 
-        # Always take Dirty Income if ready dice available to accelerate corruption track
-        if len(player_state.ready_dice) > 0:
+        # Always take Dirty Income if ready dice available and secrets > 1 to accelerate corruption track
+        if (
+            player_state.secrets > game_state.config.dirty_income_secret_cost
+            and len(player_state.ready_dice) > 0
+        ):
             plan.take_dirty_income = True
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
             current_money += game_state.config.dirty_income_cash
@@ -587,8 +607,7 @@ class RecklessSaboteurBot(BaseBot):
             face = die.current_face
             if face and face.is_shield:
                 if face.shield_color == ShieldColor.ANY:
-                    # Saboteur dumps Any shields into Green
-                    assignments[idx] = ShieldColor.GREEN
+                    assignments[idx] = ShieldColor.BLUE  # Prioritize Blue over Red/Green
                 else:
                     assignments[idx] = face.shield_color
         return assignments
@@ -604,8 +623,11 @@ class RecklessSaboteurBot(BaseBot):
         is_final_round = getattr(game_state, "is_final_round", False)
         cash_cushion = 0 if is_final_round else 2
 
-        # Always take Dirty Income if ready dice available
-        if len(player_state.ready_dice) > 0:
+        # Always take Dirty Income if ready dice available and secrets > 1
+        if (
+            player_state.secrets > game_state.config.dirty_income_secret_cost
+            and len(player_state.ready_dice) > 0
+        ):
             plan.take_dirty_income = True
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
             current_money += game_state.config.dirty_income_cash
@@ -632,8 +654,16 @@ class RecklessSaboteurBot(BaseBot):
                     current_money -= cost
                     purchases += 1
 
-        # Never patch unless completely depleted (0 ready dice)
+        # Never patch unless completely depleted (0 ready dice), preserving cash cushion
+        patch_cash_cost = (
+            3
+            if game_state.active_directive_code == "POLYMORPHIC_WORM"
+            else game_state.config.patch_cash_cost
+        )
         if len(player_state.ready_dice) == 0 and len(player_state.unpatched_dice) > 0:
-            plan.patch_actions.append({"die_index": 0, "use_cash": player_state.patches == 0})
+            if player_state.patches > 0:
+                plan.patch_actions.append({"die_index": 0, "use_cash": False})
+            elif current_money - patch_cash_cost >= cash_cushion:
+                plan.patch_actions.append({"die_index": 0, "use_cash": True})
 
         return plan
