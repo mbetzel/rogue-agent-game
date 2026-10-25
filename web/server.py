@@ -84,6 +84,16 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
         assert data is not None
 
         try:
+            # Helper to resolve player_id if not explicitly provided in the request
+            def get_target_pid(default_to_human: bool = False) -> int:
+                if "player_id" in data:
+                    return int(data["player_id"])
+                if default_to_human:
+                    for pid, meta in self.controller.player_meta.items():
+                        if meta.get("is_human", False):
+                            return pid
+                return self.controller.active_player_index
+
             if clean_path == "/api/game/new":
                 num_players = int(data.get("num_players", 4))
                 players_config = data.get("players")
@@ -100,13 +110,13 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                 self._send_json_response(payload, code)
 
             elif clean_path == "/api/game/action/roll":
-                pid = int(data.get("player_id", self.controller.active_player_index))
+                pid = get_target_pid(default_to_human=True)
                 state = self.controller.roll_pool(pid)
                 payload, code = success_response({"state": state})
                 self._send_json_response(payload, code)
 
             elif clean_path == "/api/game/action/hotfix":
-                pid = int(data.get("player_id", self.controller.active_player_index))
+                pid = get_target_pid(default_to_human=True)
                 if "die_index" not in data:
                     payload, code = error_response("Missing required field 'die_index'", 400)
                     self._send_json_response(payload, code)
@@ -117,7 +127,7 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                 self._send_json_response(payload, code)
 
             elif clean_path == "/api/game/action/commit":
-                pid = int(data.get("player_id", self.controller.active_player_index))
+                pid = get_target_pid(default_to_human=True)
                 commitments = data.get("commitments", {})
                 state = self.controller.commit_defenses(pid, commitments)
                 payload, code = success_response({"state": state})
@@ -129,7 +139,7 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                 self._send_json_response(payload, code)
 
             elif clean_path == "/api/game/action/buy":
-                pid = int(data.get("player_id", self.controller.active_player_index))
+                pid = get_target_pid(default_to_human=False)
                 if "color" not in data:
                     payload, code = error_response("Missing required field 'color'", 400)
                     self._send_json_response(payload, code)
@@ -140,7 +150,7 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                 self._send_json_response(payload, code)
 
             elif clean_path == "/api/game/action/patch":
-                pid = int(data.get("player_id", self.controller.active_player_index))
+                pid = get_target_pid(default_to_human=False)
                 if "die_index" not in data:
                     payload, code = error_response("Missing required field 'die_index'", 400)
                     self._send_json_response(payload, code)
@@ -152,14 +162,14 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                 self._send_json_response(payload, code)
 
             elif clean_path == "/api/game/action/dirty_income":
-                pid = int(data.get("player_id", self.controller.active_player_index))
+                pid = get_target_pid(default_to_human=False)
                 backlash_idx = int(data.get("backlash_die_index", 0))
                 state = self.controller.take_dirty_income(pid, backlash_idx)
                 payload, code = success_response({"state": state})
                 self._send_json_response(payload, code)
 
             elif clean_path == "/api/game/action/star":
-                pid = int(data.get("player_id", self.controller.active_player_index))
+                pid = get_target_pid(default_to_human=False)
                 action_type = str(data.get("action_type", ""))
                 cube_color = data.get("cube_color")
                 state = self.controller.execute_star_action(pid, action_type, cube_color)
@@ -167,7 +177,7 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                 self._send_json_response(payload, code)
 
             elif clean_path == "/api/game/action/end_turn":
-                pid = int(data.get("player_id", self.controller.active_player_index))
+                pid = get_target_pid(default_to_human=False)
                 state = self.controller.end_turn(pid)
                 payload, code = success_response({"state": state})
                 self._send_json_response(payload, code)

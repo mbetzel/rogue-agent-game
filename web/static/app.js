@@ -46,6 +46,12 @@ async function refreshState() {
 }
 
 // User Actions
+function getHumanPlayerId() {
+  if (!state || !state.players) return 0;
+  const human = state.players.find((p) => p.is_human);
+  return human ? human.player_id : (state.active_player_index || 0);
+}
+
 async function startNewGame(numPlayers = 4, customPlayers = null, seed = null) {
   const payload = { num_players: numPlayers };
   if (customPlayers) payload.players = customPlayers;
@@ -61,7 +67,7 @@ async function startNewGame(numPlayers = 4, customPlayers = null, seed = null) {
 }
 
 async function doRoll() {
-  const newState = await apiCall("/api/game/action/roll", "POST", {});
+  const newState = await apiCall("/api/game/action/roll", "POST", { player_id: getHumanPlayerId() });
   if (newState) {
     state = newState;
     selectedCommitments = {};
@@ -70,7 +76,7 @@ async function doRoll() {
 }
 
 async function doHotfix(dieIndex) {
-  const newState = await apiCall("/api/game/action/hotfix", "POST", { die_index: dieIndex });
+  const newState = await apiCall("/api/game/action/hotfix", "POST", { player_id: getHumanPlayerId(), die_index: dieIndex });
   if (newState) {
     state = newState;
     renderApp();
@@ -78,7 +84,7 @@ async function doHotfix(dieIndex) {
 }
 
 async function doCommit() {
-  const newState = await apiCall("/api/game/action/commit", "POST", { commitments: selectedCommitments });
+  const newState = await apiCall("/api/game/action/commit", "POST", { player_id: getHumanPlayerId(), commitments: selectedCommitments });
   if (newState) {
     state = newState;
     selectedCommitments = {};
@@ -95,7 +101,7 @@ async function doCompile() {
 }
 
 async function doBuy(color) {
-  const newState = await apiCall("/api/game/action/buy", "POST", { color: color });
+  const newState = await apiCall("/api/game/action/buy", "POST", { player_id: getHumanPlayerId(), color: color });
   if (newState) {
     state = newState;
     renderApp();
@@ -104,6 +110,7 @@ async function doBuy(color) {
 
 async function doPatch(dieIndex, useCash) {
   const newState = await apiCall("/api/game/action/patch", "POST", {
+    player_id: getHumanPlayerId(),
     die_index: dieIndex,
     use_cash: useCash,
   });
@@ -115,6 +122,7 @@ async function doPatch(dieIndex, useCash) {
 
 async function doDirtyIncome() {
   const newState = await apiCall("/api/game/action/dirty_income", "POST", {
+    player_id: getHumanPlayerId(),
     backlash_die_index: selectedBacklashIndex,
   });
   if (newState) {
@@ -124,7 +132,7 @@ async function doDirtyIncome() {
 }
 
 async function doStarAction(actionType, cubeColor = null) {
-  const payload = { action_type: actionType };
+  const payload = { player_id: getHumanPlayerId(), action_type: actionType };
   if (cubeColor) payload.cube_color = cubeColor;
   const newState = await apiCall("/api/game/action/star", "POST", payload);
   if (newState) {
@@ -134,7 +142,7 @@ async function doStarAction(actionType, cubeColor = null) {
 }
 
 async function doEndTurn() {
-  const newState = await apiCall("/api/game/action/end_turn", "POST", {});
+  const newState = await apiCall("/api/game/action/end_turn", "POST", { player_id: getHumanPlayerId() });
   if (newState) {
     state = newState;
     renderApp();
