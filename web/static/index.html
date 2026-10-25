@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rogue Agent — Web Playtesting Application</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Header Bar -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div class="app-title">ROGUE AGENT</div>
+      <div class="version-badge">v0.5 RULES BASELINE</div>
+    </div>
+
+    <div class="game-status-bar">
+      <div class="status-badge">
+        <span class="status-label">Round</span>
+        <span class="status-value" id="roundDisplay">Round 1</span>
+      </div>
+      <div class="status-badge">
+        <span class="status-label">Phase</span>
+        <span class="status-value" id="phaseDisplay">Phase 1: Boot & Configure</span>
+      </div>
+      <div class="status-badge" style="max-width: 280px;">
+        <span class="status-label">Rogue Agent Version</span>
+        <span class="status-value" id="versionCardDisplay" style="font-size: 0.8rem; font-weight: normal;">
+          Script Kiddie (v1.0)
+        </span>
+      </div>
+      <div class="corruption-bar">
+        <span class="status-label">Corruption Track:</span>
+        <div class="corruption-cells" id="corruptionCells"></div>
+      </div>
+      <div id="singularityAlert" style="display: none; color: #ff0055; font-weight: 800; font-size: 0.85rem; animation: pulse 1.5s infinite;"></div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-primary" onclick="openModal('newGameModal')">New Match</button>
+    </div>
+  </header>
+
+  <!-- Main Dashboard Grid -->
+  <main class="dashboard-grid">
+    <!-- Left / Center: Compiler & Player Mats -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      
+      <!-- Central Compiler & Cube Tower -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Central Threat & Compiler (Cube Tower)</div>
+        </div>
+
+        <div class="compiler-threat-grid">
+          <!-- Staging Cup Card -->
+          <div class="threat-card">
+            <h4>Staging Cup (Queued for Next Compile)</h4>
+            <div class="cube-tray" id="stagingCupTray"></div>
+          </div>
+
+          <!-- Cube Tower Stuck Card -->
+          <div class="threat-card">
+            <h4>Cube Tower (Internal Baffles)</h4>
+            <div class="cube-tray" id="towerStuckTray"></div>
+          </div>
+        </div>
+
+        <!-- Last Compile Results Readout -->
+        <div class="threat-card" style="background: rgba(0,0,0,0.25);" id="lastCompileResult"></div>
+      </section>
+
+      <!-- Player Mats Grid -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Corporate Headquarters (Player Mats)</div>
+        </div>
+        <div class="players-grid" id="playersContainer"></div>
+      </section>
+
+    </div>
+
+    <!-- Right: Market Board & Live Event Log -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      
+      <!-- Market Board -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Software Module Market</div>
+        </div>
+        <div class="market-grid" id="marketContainer"></div>
+      </section>
+
+      <!-- Event Log -->
+      <section class="panel" style="flex: 1;">
+        <div class="panel-header">
+          <div class="panel-title">Network Activity Log</div>
+        </div>
+        <div class="event-log-container" id="eventLog"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Context-Sensitive Action Dock -->
+  <footer class="action-dock">
+    <div style="display: flex; flex-direction: column;">
+      <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim); font-weight: 700;">Tactical Operations Dock</span>
+      <span style="font-size: 0.85rem; color: #fff;">Execute active phase actions below</span>
+    </div>
+    <div class="action-dock-controls" id="dockControls"></div>
+  </footer>
+
+  <!-- Modal: New Game Setup -->
+  <div class="modal-overlay" id="newGameModal">
+    <div class="modal-content">
+      <h3 style="color: #fff; font-size: 1.2rem;">Start New Rogue Agent Match</h3>
+      
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <label style="font-size: 0.85rem; color: var(--text-dim);">Player Count:</label>
+        <select id="modalPlayerCount" style="padding: 8px; background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); border-radius: 4px;">
+          <option value="4" selected>4 Players (1 Human vs 3 Bots)</option>
+          <option value="3">3 Players (1 Human vs 2 Bots)</option>
+          <option value="2">2 Players (1 Human vs 1 Bot - Resilience Buffer: 8 Secrets, 2 🔧)</option>
+          <option value="1">1 Player (Solo Survival Practice)</option>
+        </select>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <label style="font-size: 0.85rem; color: var(--text-dim);">RNG Master Seed (Optional):</label>
+        <input type="number" id="modalSeed" placeholder="Leave empty for random seed" style="padding: 8px; background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); border-radius: 4px;">
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+        <button class="action-btn" onclick="closeModal('newGameModal')">Cancel</button>
+        <button class="action-btn btn-accent" onclick="
+          const count = parseInt(document.getElementById('modalPlayerCount').value, 10);
+          const seed = document.getElementById('modalSeed').value;
+          startNewGame(count, null, seed);
+        ">Launch Match</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Game Over Standings -->
+  <div class="modal-overlay" id="gameOverModal">
+    <div class="modal-content" style="max-width: 650px;" id="gameOverContent"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

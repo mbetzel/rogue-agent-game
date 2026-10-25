@@ -27,6 +27,12 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Design Review:* Align on scaling Starting Secrets by player count (4P: 7 Secrets; 3P: 7 Secrets; 2P: 8 Secrets + 2 starting 🔧 resilience buffer) and capture in [RULES.md](./RULES.md) v0.5
   - [x] *Engine Update:* Parameterize 2P buffer overrides and update starting secrets baseline in `sim/`
   - [x] *Monte Carlo Validation:* Confirm 4P mean length >= 5.5 rounds (5.52 achieved, 10.0% Singularity) and assess 2P wipeout (reduced to 31.2%)
+- [x] **Phase 6: Web Playtesting Application (`v0.5` Baseline)**
+  - [x] *Architecture Spec (`principal-engineer`):* REST API contract, state machine adapter design, Single Page Application layout, and 15 verification unit & integration test specs
+  - [x] *Implementation (`senior-engineer`):* Build `web/` package (`schemas.py`, `game_controller.py`, `server.py`, `static/index.html`, `static/app.js`, `static/style.css`) and 15 API verification tests in `tests/test_web_api.py`
+  - [x] *Code Review Gate (`staff-engineer`):* Comprehensive audit of web architecture against [RULES.md](./RULES.md) v0.5 and Principal Engineer spec; identified 6 edge-case defects, verified Senior Engineer remediations and additions to 17 tests in `tests/test_web_api.py` (APPROVED)
+  - [x] *Operational Verification & Playtest Execution (`product-owner`):* Validated test suite (88/88 passing), verified CLI arguments and server startup, audited all REST API endpoints and state transitions, and confirmed local browser playtesting UX readiness
+  - [x] *Game Designer Sign-Off (`game-designer`):* Evaluated ergonomics, core design pillars, dice wear loop, damage transparency, and human-bot playtesting flow (APPROVED)
 
 ---
 
