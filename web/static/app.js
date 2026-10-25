@@ -79,6 +79,7 @@ async function doHotfix(dieIndex) {
   const newState = await apiCall("/api/game/action/hotfix", "POST", { player_id: getHumanPlayerId(), die_index: dieIndex });
   if (newState) {
     state = newState;
+    delete selectedCommitments[dieIndex];
     renderApp();
   }
 }
@@ -429,8 +430,16 @@ function renderActionDock() {
     }
 
     if (caps.can_commit) {
-      // Build Shield Commitment selectors for rolled shields
+      // Clean up stale commitments for dice that are no longer shields (e.g. after reroll)
       const rolled = human.rolled_pool;
+      Object.keys(selectedCommitments).forEach((idxStr) => {
+        const i = parseInt(idxStr, 10);
+        if (!rolled[i] || !rolled[i].current_face || !rolled[i].current_face.is_shield) {
+          delete selectedCommitments[idxStr];
+        }
+      });
+
+      // Build Shield Commitment selectors for rolled shields
       let hasShields = false;
 
       rolled.forEach((d, idx) => {

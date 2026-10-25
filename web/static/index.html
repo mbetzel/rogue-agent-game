@@ -69,6 +69,32 @@
 
         <!-- Last Compile Results Readout -->
         <div class="threat-card" style="background: rgba(0,0,0,0.25);" id="lastCompileResult"></div>
+
+        <!-- Threat Cube Effects Reference Summary -->
+        <div class="threat-card threat-effects-summary" style="background: rgba(13, 20, 33, 0.6); border-top: 1px dashed var(--border-color);">
+          <h4 style="display: flex; align-items: center; justify-content: space-between;">
+            <span>Agent Cube Effects Reference</span>
+            <span style="font-size: 0.7rem; text-transform: none; color: var(--text-dim); font-weight: normal;">Simultaneous Step 2A/2B Resolution</span>
+          </h4>
+          <div class="cube-effects-grid">
+            <div class="cube-effect-item">
+              <span class="cube-badge red">Red (Ransomware)</span>
+              <p>Extorts <strong>$1</strong> per unblocked cube. If cash is empty, <strong>1 🔧</strong> absorbs $1 unpaid ransom; any remaining unpaid ransom leaks <strong>1 Secret</strong> per $1!</p>
+            </div>
+            <div class="cube-effect-item">
+              <span class="cube-badge blue">Blue (Spyware)</span>
+              <p>Directly steals <strong>1 Corporate Secret</strong> per unblocked cube. Reaching <strong>0 Secrets</strong> triggers Patient Zero breach!</p>
+            </div>
+            <div class="cube-effect-item">
+              <span class="cube-badge green">Malware (Green)</span>
+              <p>For each unblocked cube, degrades <strong>1 Ready die</strong> to <strong>Unpatched</strong>. If no Ready dice remain, <strong>destroys 1 Unpatched die</strong> to the box!</p>
+            </div>
+            <div class="cube-effect-item">
+              <span class="cube-badge black">Black (Corruption)</span>
+              <p>Advances the active Version's <strong>Corruption Track</strong>. At 4 cubes, triggers Version upgrade payload; filling v3.0 triggers <strong>Singularity</strong>!</p>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- Player Mats Grid -->

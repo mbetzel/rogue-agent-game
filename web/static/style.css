@@ -252,6 +252,44 @@ button.btn-primary:hover {
 .cube-badge.green { background: var(--color-green-dim); color: var(--color-green); border: 1px solid var(--color-green); }
 .cube-badge.black { background: rgba(0, 0, 0, 0.6); color: #fff; border: 1px solid var(--color-black-glow); }
 
+/* Threat Cube Effects Summary */
+.threat-effects-summary {
+  margin-top: 4px;
+}
+
+.cube-effects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.cube-effect-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+}
+
+.cube-effect-item .cube-badge {
+  align-self: flex-start;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+}
+
+.cube-effect-item p {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.cube-effect-item p strong {
+  color: var(--text-main);
+}
+
 .compile-action-banner {
   background: linear-gradient(90deg, #1c2636 0%, #253347 100%);
   border: 1px solid var(--border-color);
