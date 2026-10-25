@@ -50,7 +50,10 @@
       <!-- Central Compiler & Cube Tower -->
       <section class="panel">
         <div class="panel-header">
-          <div class="panel-title">Central Threat & Compiler (Cube Tower)</div>
+          <div class="panel-title">
+            <span>Central Threat & Compiler (Cube Tower)</span>
+            <button class="info-icon-btn" onclick="openModal('cubeEffectsModal')" title="View Agent Cube Effects Reference">ℹ</button>
+          </div>
         </div>
 
         <div class="compiler-threat-grid">
@@ -69,32 +72,6 @@
 
         <!-- Last Compile Results Readout -->
         <div class="threat-card" style="background: rgba(0,0,0,0.25);" id="lastCompileResult"></div>
-
-        <!-- Threat Cube Effects Reference Summary -->
-        <div class="threat-card threat-effects-summary" style="background: rgba(13, 20, 33, 0.6); border-top: 1px dashed var(--border-color);">
-          <h4 style="display: flex; align-items: center; justify-content: space-between;">
-            <span>Agent Cube Effects Reference</span>
-            <span style="font-size: 0.7rem; text-transform: none; color: var(--text-dim); font-weight: normal;">Simultaneous Step 2A/2B Resolution</span>
-          </h4>
-          <div class="cube-effects-grid">
-            <div class="cube-effect-item">
-              <span class="cube-badge red">Red (Ransomware)</span>
-              <p>Extorts <strong>$1</strong> per unblocked cube. If cash is empty, <strong>1 🔧</strong> absorbs $1 unpaid ransom; any remaining unpaid ransom leaks <strong>1 Secret</strong> per $1!</p>
-            </div>
-            <div class="cube-effect-item">
-              <span class="cube-badge blue">Blue (Spyware)</span>
-              <p>Directly steals <strong>1 Corporate Secret</strong> per unblocked cube. Reaching <strong>0 Secrets</strong> triggers Patient Zero breach!</p>
-            </div>
-            <div class="cube-effect-item">
-              <span class="cube-badge green">Malware (Green)</span>
-              <p>For each unblocked cube, degrades <strong>1 Ready die</strong> to <strong>Unpatched</strong>. If no Ready dice remain, <strong>destroys 1 Unpatched die</strong> to the box!</p>
-            </div>
-            <div class="cube-effect-item">
-              <span class="cube-badge black">Black (Corruption)</span>
-              <p>Advances the active Version's <strong>Corruption Track</strong>. At 4 cubes, triggers Version upgrade payload; filling v3.0 triggers <strong>Singularity</strong>!</p>
-            </div>
-          </div>
-        </div>
       </section>
 
       <!-- Player Mats Grid -->
@@ -172,6 +149,60 @@
   <!-- Modal: Game Over Standings -->
   <div class="modal-overlay" id="gameOverModal">
     <div class="modal-content" style="max-width: 650px;" id="gameOverContent"></div>
+  </div>
+
+  <!-- Modal: Agent Cube Effects Reference -->
+  <div class="modal-overlay" id="cubeEffectsModal" onclick="if (event.target === this) closeModal('cubeEffectsModal')">
+    <div class="modal-content" style="max-width: 580px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+        <h3 style="color: #fff; font-size: 1.15rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+          <span>Rogue Agent Threat Cubes</span>
+        </h3>
+        <button class="action-btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="closeModal('cubeEffectsModal')">✕</button>
+      </div>
+
+      <p style="font-size: 0.8rem; color: var(--text-dim); margin: 0;">
+        During <strong>Phase 2 (Compile)</strong>, cubes exit the Cube Tower into the tray. Resolve Black cubes first in Step 2A, then Red, Blue, and Green attacks simultaneously in Step 2B.
+      </p>
+
+      <div class="cube-effects-grid" style="grid-template-columns: 1fr;">
+        <div class="cube-effect-item">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span class="cube-badge red">Red (Ransomware)</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Red Shield</span>
+          </div>
+          <p>Extorts <strong>$1</strong> per unblocked cube. If cash is empty, <strong>1 🔧 token</strong> automatically absorbs $1 of unpaid ransom. Any remaining unpaid ransom leaks proprietary code: lose <strong>1 Corporate Secret per $1 unpaid</strong>!</p>
+        </div>
+
+        <div class="cube-effect-item">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span class="cube-badge blue">Blue (Spyware)</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Blue Shield</span>
+          </div>
+          <p>Directly exfiltrates data: lose <strong>1 Corporate Secret</strong> per unblocked cube. Reaching <strong>0 (or fewer) Secrets</strong> immediately triggers a <strong>Total Data Breach (Patient Zero)</strong>!</p>
+        </div>
+
+        <div class="cube-effect-item">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span class="cube-badge green">Green (Malware)</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Green Shield</span>
+          </div>
+          <p>Corrupts systems: for each unblocked cube, move <strong>1 Ready die</strong> to your <strong>Unpatched Zone</strong>. If you have <strong>no Ready dice left</strong>, you must instead <strong>Destroy 1 Unpatched die</strong> (returned to box)!</p>
+        </div>
+
+        <div class="cube-effect-item">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span class="cube-badge black">Black (Corruption)</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Step 2A: System Upgrade</span>
+          </div>
+          <p>Exited Black cubes advance the active Version's <strong>Corruption Track</strong>. When the 4th cell fills, the Rogue Agent upgrades to the next Version card, adding its Upgrade Payload into the Staging Cup. If <strong>v3.0 fills</strong>, <strong>Singularity</strong> is triggered!</p>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
+        <button class="action-btn btn-accent" onclick="closeModal('cubeEffectsModal')">Got It</button>
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>
