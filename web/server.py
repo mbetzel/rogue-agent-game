@@ -163,7 +163,8 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
 
             elif clean_path == "/api/game/action/dirty_income":
                 pid = get_target_pid(default_to_human=False)
-                backlash_idx = int(data.get("backlash_die_index", 0))
+                backlash_raw = data.get("backlash_die_index")
+                backlash_idx = int(backlash_raw) if backlash_raw is not None else 0
                 state = self.controller.take_dirty_income(pid, backlash_idx)
                 payload, code = success_response({"state": state})
                 self._send_json_response(payload, code)

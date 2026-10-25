@@ -401,6 +401,16 @@ class TestWebAPI(unittest.TestCase):
             urllib.request.urlopen(req)
         self.assertEqual(ctx.exception.code, 400)
 
+        # Ensure missing or None backlash_die_index does not fail with 500 TypeError
+        p0.secrets = 5
+        body_none = json.dumps({"player_id": 0, "backlash_die_index": None}).encode("utf-8")
+        req_none = urllib.request.Request(url, data=body_none, headers={"Content-Type": "application/json"}, method="POST")
+        resp_none = urllib.request.urlopen(req_none)
+        self.assertEqual(resp_none.code, 200)
+
+        # Reset for subsequent tests
+        ctrl.player_meta[0]["dirty_income_taken_this_turn"] = False
+
         # Block at 0 Ready dice
         p0.secrets = 5
         p0.unpatched_dice.extend(p0.ready_dice)

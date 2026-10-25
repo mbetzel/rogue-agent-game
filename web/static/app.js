@@ -122,9 +122,14 @@ async function doPatch(dieIndex, useCash) {
 }
 
 async function doDirtyIncome() {
+  const backlashSelect = document.getElementById("dirtyBacklashSelect");
+  const backlashIdx = backlashSelect && backlashSelect.value !== ""
+    ? parseInt(backlashSelect.value, 10)
+    : (selectedBacklashIndex ?? 0);
+
   const newState = await apiCall("/api/game/action/dirty_income", "POST", {
     player_id: getHumanPlayerId(),
-    backlash_die_index: selectedBacklashIndex,
+    backlash_die_index: Number.isNaN(backlashIdx) ? 0 : backlashIdx,
   });
   if (newState) {
     state = newState;
