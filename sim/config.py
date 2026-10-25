@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict
+from typing import Dict, Optional
 
 
 class CubeColor(str, Enum):
@@ -50,8 +50,14 @@ class GameConfig:
     # Player count & setup
     num_players: int = 4
     starting_money: int = 7  # [TUNE: $6–$8]
-    starting_secrets: int = 6  # [TUNE: 4–10]
-    starting_patches: int = 1  # [TUNE: 0–2]
+    starting_secrets_by_player_count: Dict[int, int] = field(
+        default_factory=lambda: {2: 8, 3: 7, 4: 7}
+    )
+    starting_patches_by_player_count: Dict[int, int] = field(
+        default_factory=lambda: {2: 2, 3: 1, 4: 1}
+    )
+    starting_secrets: Optional[int] = None  # Optional scalar override for backwards compatibility
+    starting_patches: Optional[int] = None  # Optional scalar override for backwards compatibility
     max_patch_tokens: int = 3  # [TUNE: 3]
     starting_gray_dice: int = 4
     dice_per_color_multiplier: int = 2  # 2 * num_players dice per colored die type
@@ -101,3 +107,23 @@ class GameConfig:
     def corruption_track_capacity(self) -> int:
         """Returns the number of spaces on the corruption track: flat 4 spaces across all player counts in v0.4."""
         return self.corruption_track_flat_capacity
+
+    def get_starting_secrets(self, num_players: Optional[int] = None) -> int:
+        """Returns starting secrets for the specified player count (or self.num_players).
+
+        Scalar override starting_secrets takes precedence if provided.
+        """
+        if self.starting_secrets is not None:
+            return self.starting_secrets
+        n = num_players if num_players is not None else self.num_players
+        return self.starting_secrets_by_player_count.get(n, 7)
+
+    def get_starting_patches(self, num_players: Optional[int] = None) -> int:
+        """Returns starting patch tokens for the specified player count (or self.num_players).
+
+        Scalar override starting_patches takes precedence if provided.
+        """
+        if self.starting_patches is not None:
+            return self.starting_patches
+        n = num_players if num_players is not None else self.num_players
+        return self.starting_patches_by_player_count.get(n, 1)

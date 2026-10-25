@@ -1,4 +1,4 @@
-# Rogue Agent — Rules Draft (v0.4)
+# Rogue Agent — Rules Draft (v0.5)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival
 
@@ -30,9 +30,10 @@ When the dust settles, any corporation that suffers a **Total Data Breach** (`<=
 
 ### Player & Market Components
 * **4 Player Mats**, each featuring:
-  * **Ready Zone** (dice available to roll this round)
-  * **Unpatched Zone** (worn-down dice offline until patched)
+  * **Ready Zone** (available dice ready to roll at round start)
+  * **Active Pool (Rolled Area)** (rolled dice resolving immediate outputs, hotfixes, or waiting for Phase 3)
   * **Shield Assignment Slots** (`Red`, `Blue`, `Green`)
+  * **Unpatched Zone** (worn-down dice offline until patched)
 * **16 Gray "Legacy Code" Starter Dice** (4 per player)
 * **Colored Software Module Dice (5 Colors, `2 × Players` dice per color):**
   * **Red Dice** — *FinSec / Encryption*
@@ -54,8 +55,10 @@ When the dust settles, any corporation that suffers a **Total Data Breach** (`<=
 3. **Corporate Headquarters (Each Player):**
    * Place **4 Gray Legacy Dice** into your **Ready Zone**.
    * Take **`$7` Starting Money** `[TUNE: test $6–$8]`.
-   * Take **`6` Corporate Secrets** `[TUNE: test 5–8]`.
-   * Take **`1` Patch Token (`🔧`)** `[TUNE: test 0–2]`.
+   * **Corporate Secrets & Starting Patch Tokens by Player Count:**
+     * **2 Players (Resilience Buffer):** Take **`8` Corporate Secrets** and **`2` Patch Tokens (`🔧`)**.
+     * **3 Players:** Take **`7` Corporate Secrets** and **`1` Patch Token (`🔧`)**.
+     * **4 Players:** Take **`7` Corporate Secrets** and **`1` Patch Token (`🔧`)**.
 4. Randomly assign the **First Player Marker** (used only to resolve Market purchase order in Phase 3).
 
 ---
@@ -72,13 +75,14 @@ Rogue Agent is played over a series of rounds (~8–11 rounds). Each round consi
 ### Phase 1: Boot & Configure (Simultaneous)
 
 1. **Autonomous AI Corruption Pulse:** The Rogue Agent compiles new malicious subroutines in the background. Take **`1 Black Cube`** from the general supply and place it into the **Staging Cup**.
-2. **Roll Ready Pool:** Every player simultaneously rolls all dice in their **Ready Zone**. *(Dice in your **Unpatched Zone** are not rolled.)*
-3. **Hotfix (Luck Mitigation):** Before finalizing faces, you may spend **`1 🔧` token** from your pool (or from a kept rolled die) to reroll any **1** of your dice (repeatable).
+2. **Roll Ready Pool:** Every player simultaneously rolls all dice in their **Ready Zone** into their **Active Pool**. *(Dice in your **Unpatched Zone** are not rolled.)*
+3. **Hotfix (Luck Mitigation):** Before finalizing faces, you may spend **`1 🔧` token** from your pool (or from a kept rolled die) to reroll any **1** of your dice (repeatable). *If spending a `🔧` showing on a rolled die, set that die aside in your Active Pool; it cannot be rerolled again this round and does not produce a Patch Token in Step 4.*
 4. **Gain Immediate Outputs:**
-   * Collect any **`$`** and **Patch Tokens (`🔧`)** on your final rolled faces (you may hold at most **`3 🔧`** tokens at once `[TUNE]`).
+   * Collect any **`$`**, **Patch Tokens (`🔧`)**, and immediate `★` outputs from your final rolled faces in the Active Pool (you may hold at most **`3 🔧`** tokens at once `[TUNE]`).
 5. **Commit Defenses:**
-   * Assign rolled Shield dice (and Shield `★` abilities) to your **Red**, **Blue**, or **Green** Shield slots.
+   * Assign rolled Shield dice (and Shield `★` abilities) from your Active Pool to your **Red**, **Blue**, or **Green** Shield slots.
    * **Generic (`Any`) Shields** must be committed to a specific color (`Red`, `Blue`, or `Green`) *before* Phase 2 begins.
+   * All rolled non-shield dice remain in your Active Pool.
 
 ---
 
@@ -99,10 +103,10 @@ Move exited **Black Cubes** onto the active Version's **Corruption Track** one a
 #### Step 2B: Resolve Attack Cubes (Red, Blue, Green)
 Calculate the total attack strength of **Red**, **Blue**, and **Green** (exited cubes + any active Version Directive modifiers). Each player simultaneously resolves all three colors against their committed Shields:
 
-1. **Dice Wear (Software Adaptation):** Any die assigned as a Shield that **actively blocks at least 1 cube** moves to your **Unpatched Zone**. *(If 0 cubes of that color dropped, or another die already absorbed all cubes of that color, unused Shield dice remain Ready!)*
+1. **Dice Wear (Software Adaptation):** Any die assigned as a Shield that **actively blocks at least 1 cube** moves to your **Unpatched Zone**. If multiple dice were committed to a color and fewer cubes dropped than total shield strength, the defending player chooses which die absorbs the attack and wears down. *(If 0 cubes of that color dropped, or another die already absorbed all cubes of that color, unused Shield dice remain Ready and return to your Ready Zone!)*
 2. **Unblocked Damage:**
    * **Red (Ransomware):** Lose **`$1`** per unblocked Red cube.
-     * **Emergency Patch Absorption:** If cash is insufficient to pay the full ransom, each available **`1 🔧` token** automatically absorbs **`$1`** of unpaid ransom.
+     * **Emergency Patch Absorption:** If cash is insufficient to pay the full ransom, each available **`1 🔧` token** automatically absorbs **`$1`** of unpaid ransom before secrets leak.
      * **Unpaid Ransom Leak:** If any ransom remains unpaid after exhausting cash and patch tokens, proprietary source code leaks to the dark web: lose **`1 Corporate Secret` per unpaid `$1`**! Money is strictly non-negative and never drops below `$0`.
    * **Blue (Spyware):** Lose **`1` Corporate Secret** per unblocked Blue cube.
    * **Green (Malware):** For each unblocked Green cube, move **`1` Ready die** (that was not already worn down this round) to your **Unpatched Zone**. If you have **no Ready dice left**, you must instead **Destroy (return to box) `1` Unpatched die** of your choice! *(If you have 0 dice remaining anywhere, track unfulfilled destructions for wipeout scoring).*
@@ -116,6 +120,8 @@ The current round is declared the **Final Round** if **either**:
 
 If triggered, any player who became **Patient Zero** is immediately eliminated and skips Phase 3. **All surviving players proceed to Phase 3 to execute one final operations turn** before game scoring.
 
+*(Exception: If all remaining players suffer a Total Data Breach simultaneously, the game ends immediately. Phase 3 is skipped entirely, and players proceed directly to Total Wipeout Scoring.)*
+
 ---
 
 ### Phase 3: Corporate Operations (Clockwise Turns)
@@ -127,7 +133,8 @@ Starting with the First Player and proceeding clockwise, each surviving player t
 2. **Patch Worn-Out Dice (Unlimited):**
    * Spend **`1 🔧` token** *or* pay **`$2`** `[TUNE: test $1–$3]` to move **1 die** from your **Unpatched Zone** back to your **Ready Zone**.
 3. **Corrupt the Rogue Agent ("Dirty Income" — Limit `1×` per turn):**
-   * Pay **`1 Corporate Secret`** (cannot be taken if you have $\le 1$ Secret).
+   * **Prerequisites:** You must have at least **`1` Ready die** to move to Unpatched and at least **`2` Corporate Secrets** (cannot be taken if you have $\le 1$ Secret or 0 Ready dice).
+   * Pay **`1 Corporate Secret`**.
    * Gain **`+$3`** `[TUNE: test $2–$4]` from the bank.
    * Place **`1 Black Cube`** from the supply into the **Staging Cup**.
    * **Technical Debt Backlash:** Immediately move **`1 Ready die`** of your choice to your **Unpatched Zone**.
@@ -135,7 +142,7 @@ Starting with the First Player and proceeding clockwise, each surviving player t
 After all players finish Phase 3:
 * If the Final Round was triggered, proceed directly to **Section 5: End Game & Victory Scoring**.
 * Otherwise:
-  * Return all non-worn dice to your **Ready Zone**.
+  * Return all non-worn dice from your Active Pool and un-worn Shield slots to your **Ready Zone**.
   * Keep all Money, Secrets, and up to **`3 🔧`** tokens.
   * Pass the **First Player Marker** clockwise and begin the next round.
 
@@ -145,8 +152,9 @@ After all players finish Phase 3:
 
 Calculate **Portfolio Value** `[TUNE weights]`:
 * **`4 VP`** per remaining **Corporate Secret**
-* **`3–5 VP`** per owned **Colored Module Die** *(Ready or Unpatched; Gray starter dice = `0 VP`)*
+* **VP per owned Colored Module Die** as printed on its Market Card (Red: `3 VP`, Blue: `4 VP`, Green: `3 VP`, Yellow: `5 VP`, Purple: `3 VP`; Gray starter dice = `0 VP`)
 * **`1 VP`** per **`$2`** remaining *(rounded down)*
+* Unused **Patch Tokens (`🔧`)** are worth **`0 VP`**.
 
 ### Determining the Winner
 * **Standard Ending (1+ Corporations Survive):** Any player who became **Patient Zero** (`<= 0 Secrets`) is **eliminated**. The surviving player with the highest **Portfolio Value** wins! *(Tiebreakers: 1. Most Corporate Secrets, 2. Most Money.)*
@@ -169,25 +177,25 @@ Calculate **Portfolio Value** `[TUNE weights]`:
 
 ### B. Sample Module Variant Cards (`★` Effects)
 * **Red `★` Variants:**
-  * *R1 — Ransom Insurance:* `Block 1 Red` + gain `+$2`.
-  * *R2 — Threat Bounty:* `Block 2 Red`; if you take `0` unblocked Red damage this round, gain `+$2`.
-  * *R3 — Short Squeeze:* Gain `+$3` (or `+$4` if 3+ Red cubes exit the tower this round).
+  * *R1 — Ransom Insurance:* `[Phase 2 — Defense]` `Block 1 Red` + `[Phase 1 — Boot]` gain `+$2`.
+  * *R2 — Threat Bounty:* `[Phase 2 — Defense]` `Block 2 Red`; if you take `0` unblocked Red damage this round, `[Phase 2 — Damage]` gain `+$2`.
+  * *R3 — Short Squeeze:* `[Phase 2 — Compile]` Gain `+$3` (or `+$4` if 3+ Red cubes exit the tower this round).
 * **Blue `★` Variants:**
-  * *B1 — Honeypot Telemetry:* `Block 2 Blue`; if 1+ Blue cubes exit the tower and you take `0` Blue damage, gain `+$3`.
-  * *B2 — Deep R&D Vault:* `Block 1 Blue`, **OR** pay `$2` during Phase 3 to gain `+1 Corporate Secret` (max 10).
-  * *B3 — Air-Gapped Backup:* `Block 1 Blue` and this die does **not** move to Unpatched when blocking.
+  * *B1 — Honeypot Telemetry:* `[Phase 2 — Defense]` `Block 2 Blue`; if 1+ Blue cubes exit the tower and you take `0` Blue damage, `[Phase 2 — Damage]` gain `+$3`.
+  * *B2 — Deep R&D Vault:* `[Phase 2 — Defense]` `Block 1 Blue`, **OR** `[Phase 3 — Operations]` pay `$2` during Phase 3 to gain `+1 Corporate Secret` (max 10).
+  * *B3 — Air-Gapped Backup:* `[Phase 2 — Defense]` `Block 1 Blue` and this die does **not** move to Unpatched when blocking.
 * **Green `★` Variants:**
-  * *G1 — Self-Healing Kernel:* `Block 2 Green` + gain `+1 🔧`.
-  * *G2 — Universal Sandbox:* `Block 1 Any` + gain `+1 🔧`.
-  * *G3 — Live Reboot:* Gain `+2 🔧` + `+$1`.
+  * *G1 — Self-Healing Kernel:* `[Phase 2 — Defense]` `Block 2 Green` + `[Phase 1 — Boot]` gain `+1 🔧`.
+  * *G2 — Universal Sandbox:* `[Phase 2 — Defense]` `Block 1 Any` + `[Phase 1 — Boot]` gain `+1 🔧`.
+  * *G3 — Live Reboot:* `[Phase 1 — Boot]` Gain `+2 🔧` + `+$1`.
 * **Yellow `★` Variants:**
-  * *Y1 — Algorithmic Trading:* Gain `+$4`, **OR** pay `$2` in Phase 3 to gain `+1 Corporate Secret`.
-  * *Y2 — Cloud Monopoly:* Gain `+$2`, plus `+$1` per Yellow die you own (max `+$5`).
-  * *Y3 — Proprietary Training:* Gain `+1 Corporate Secret`, then move this die to **Unpatched**.
+  * *Y1 — Algorithmic Trading:* `[Phase 1 — Boot]` Gain `+$4`, **OR** `[Phase 3 — Operations]` pay `$2` in Phase 3 to gain `+1 Corporate Secret`.
+  * *Y2 — Cloud Monopoly:* `[Phase 1 — Boot]` Gain `+$2`, plus `+$1` per Yellow die you own (max `+$5`).
+  * *Y3 — Proprietary Training:* `[Phase 1 — Boot]` Gain `+1 Corporate Secret`, then immediately move this die to **Unpatched**.
 * **Purple `★` Variants:**
-  * *P1 — Zero-Day Injection:* Gain `+$2`; in Phase 3 you may add `1` Attack Cube (Red/Blue/Green) to the Staging Cup *(no Black cube added)*.
-  * *P2 — Chaos Profiteer:* Gain `+$1` now, plus `+$2` per Black Cube that exits the tower in Phase 2.
-  * *P3 — Packet Deflection:* `Block 2` of any single color; in Phase 3 add `1` cube of that color from the supply to the Staging Cup.
+  * *P1 — Zero-Day Injection:* `[Phase 1 — Boot]` Gain `+$2`; `[Phase 3 — Operations]` in Phase 3 you may add `1` Attack Cube (Red/Blue/Green) from the supply to the Staging Cup *(no Black cube added)*.
+  * *P2 — Chaos Profiteer:* `[Phase 1 — Boot]` Gain `+$1` now, plus `[Phase 2 — Compile]` `+$2` per Black Cube that exits the tower in Phase 2.
+  * *P3 — Packet Deflection:* `[Phase 2 — Defense]` `Block 2` of any single color; `[Phase 3 — Operations]` in Phase 3 add `1` cube of that color from the supply to the Staging Cup.
 
 ### C. Sample Rogue Agent Version Cards
 

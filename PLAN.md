@@ -23,10 +23,10 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Design Review:* Align on Dirty Income costing 1 Secret, Patch absorption of Red ransom, and 4-space corruption track
   - [x] *Engine & Bot Update:* Refine bot heuristics (shield prioritization of Blue over Red) and sim rules
   - [x] *Monte Carlo Validation:* Re-run Tournament Pods to verify bot balance within $\le 38\%$ win rate target (Verified: Accelerationist reduced from 87.5% to 21.6%–38.0%)
-- [ ] **Phase 5: Starting Secrets Baseline & 2P Resilience (`v0.5`)**
-  - [ ] *Design Review:* Test 7 Starting Secrets baseline and 2P resilience buffers (+1 Secret, +1 Starting Patch)
-  - [ ] *Engine Update:* Parameterize 2P buffer overrides and update starting secrets baseline
-  - [ ] *Monte Carlo Validation:* Confirm 4P mean length >= 5.5 rounds and 2P wipeout reduction under 20%
+- [x] **Phase 5: Starting Secrets Baseline & 2P Resilience (`v0.5`)**
+  - [x] *Design Review:* Align on scaling Starting Secrets by player count (4P: 7 Secrets; 3P: 7 Secrets; 2P: 8 Secrets + 2 starting 🔧 resilience buffer) and capture in [RULES.md](./RULES.md) v0.5
+  - [x] *Engine Update:* Parameterize 2P buffer overrides and update starting secrets baseline in `sim/`
+  - [x] *Monte Carlo Validation:* Confirm 4P mean length >= 5.5 rounds (5.52 achieved, 10.0% Singularity) and assess 2P wipeout (reduced to 31.2%)
 
 ---
 

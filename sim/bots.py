@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
 
@@ -85,6 +85,27 @@ class BaseBot:
                 else:
                     assignments[idx] = face.shield_color
         return assignments
+
+    def choose_shield_wear_order(
+        self,
+        player_state: PlayerState,
+        color: ShieldColor,
+        assigned_dice: List[Die],
+        cubes_to_absorb: Optional[int] = None,
+    ) -> List[Die]:
+        """Returns assigned shield dice ordered by absorption priority.
+
+        Default heuristics:
+        1. Prioritize B3 (Air-Gapped Backup) first (absorbs damage without wearing down).
+        2. Lowest VP die next (preserves valuable dice in Ready zone).
+        3. Lowest cost die next.
+        """
+        def wear_priority_key(d: Die) -> Tuple[int, int, int]:
+            face = d.current_face
+            is_b3 = 0 if (face and face.star_code == "B3") else 1
+            return (is_b3, d.vp, d.cost)
+
+        return sorted(assigned_dice, key=wear_priority_key)
 
     def take_phase3_actions(
         self,
@@ -231,7 +252,7 @@ class AdaptiveBalancedBot(BaseBot):
         if (
             current_money < 3
             and player_state.secrets > game_state.config.dirty_income_secret_cost
-            and len(player_state.ready_dice) > 0
+            and len(player_state.ready_dice) >= 1
             and total_threat <= 6
         ):
             plan.take_dirty_income = True
@@ -379,7 +400,7 @@ class SecOpsTurtleBot(BaseBot):
         if (
             current_money == 0
             and player_state.secrets > game_state.config.dirty_income_secret_cost
-            and len(player_state.ready_dice) > 0
+            and len(player_state.ready_dice) >= 1
         ):
             plan.take_dirty_income = True
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
@@ -447,7 +468,7 @@ class VentureGreedBot(BaseBot):
         if (
             current_money < 5
             and player_state.secrets > game_state.config.dirty_income_secret_cost
-            and len(player_state.ready_dice) > 0
+            and len(player_state.ready_dice) >= 1
         ):
             plan.take_dirty_income = True
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
@@ -543,7 +564,7 @@ class AccelerationistBot(BaseBot):
         # Always take Dirty Income if ready dice available and secrets > 1 to accelerate corruption track
         if (
             player_state.secrets > game_state.config.dirty_income_secret_cost
-            and len(player_state.ready_dice) > 0
+            and len(player_state.ready_dice) >= 1
         ):
             plan.take_dirty_income = True
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
@@ -626,7 +647,7 @@ class RecklessSaboteurBot(BaseBot):
         # Always take Dirty Income if ready dice available and secrets > 1
         if (
             player_state.secrets > game_state.config.dirty_income_secret_cost
-            and len(player_state.ready_dice) > 0
+            and len(player_state.ready_dice) >= 1
         ):
             plan.take_dirty_income = True
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)

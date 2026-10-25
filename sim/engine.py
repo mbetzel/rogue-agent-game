@@ -156,8 +156,8 @@ class GameEngine:
                 player_id=i,
                 bot=bot,
                 money=config.starting_money + starting_cash_bonus,
-                secrets=config.starting_secrets,
-                patches=config.starting_patches,
+                secrets=self.config.get_starting_secrets(self.config.num_players),
+                patches=self.config.get_starting_patches(self.config.num_players),
                 ready_dice=ready_dice,
             )
             players.append(player)
@@ -455,6 +455,7 @@ class GameEngine:
 
         if all_patient_zero:
             self.state.game_over = True
+            self.state.is_final_round = False
             self.state.end_reason = EndGameReason.TOTAL_WIPEOUT
         elif any_patient_zero:
             self.state.is_final_round = True
@@ -552,8 +553,15 @@ class GameEngine:
             (ShieldColor.BLUE, blocked_blue),
             (ShieldColor.GREEN, blocked_green),
         ]:
+            assigned_dice = [die for _, die in color_dice_map[s_color]]
+            ordered_dice = player.bot.choose_shield_wear_order(
+                player_state=player,
+                color=s_color,
+                assigned_dice=assigned_dice,
+                cubes_to_absorb=attack_blocked,
+            )
             cubes_remaining_to_absorb = attack_blocked
-            for _, die in color_dice_map[s_color]:
+            for die in ordered_dice:
                 if cubes_remaining_to_absorb <= 0:
                     break  # Unused shields remain Ready!
 
@@ -643,6 +651,9 @@ class GameEngine:
 
     def _execute_phase_3(self) -> None:
         """Executes Phase 3: Clockwise player operations (Dirty Income, Patching, Purchasing, Stars)."""
+        if self.state.game_over or all(p.is_patient_zero for p in self.state.players):
+            return
+
         num_players = len(self.state.players)
         patch_cash_cost = (
             3
@@ -664,7 +675,7 @@ class GameEngine:
             if (
                 plan.take_dirty_income
                 and player.secrets > self.state.config.dirty_income_secret_cost
-                and len(player.ready_dice) > 0
+                and len(player.ready_dice) >= 1
             ):
                 player.secrets -= self.state.config.dirty_income_secret_cost
                 player.money += self.state.config.dirty_income_cash
