@@ -270,6 +270,15 @@ class TestWebAPI(unittest.TestCase):
         self.assertEqual(state["phase"], 3)
         self.assertEqual(state["phase_name"], "Corporate Operations")
 
+        # Verify dice zones live update: no dice in unpatched appear in rolled_pool or ready_dice
+        for p in state["players"]:
+            unpatched_ids = {d["die_id"] for d in p["unpatched_dice"]}
+            rolled_ids = {d["die_id"] for d in p["rolled_pool"]}
+            ready_ids = {d["die_id"] for d in p["ready_dice"]}
+            self.assertEqual(len(unpatched_ids.intersection(rolled_ids)), 0)
+            self.assertEqual(len(unpatched_ids.intersection(ready_ids)), 0)
+            self.assertEqual(len(rolled_ids.intersection(ready_ids)), 0)
+
     # -------------------------------------------------------------------------
     # 9. Phase 3: Market Purchase
     # -------------------------------------------------------------------------

@@ -540,6 +540,20 @@ class GameController:
         self.phase_name = "Corporate Operations"
         self.subphase = "player_turn"
 
+        # Update per-player metadata after Phase 2 attack and wear resolution
+        for pid, player in enumerate(self.state.players):
+            meta = self.player_meta[pid]
+            # Shield slots have finished blocking/resolving for the round
+            meta["shield_slots"] = {"red": [], "blue": [], "green": []}
+            # Remove any dice that were worn down to unpatched or destroyed from the rolled pool
+            unpatched_ids = {d.die_id for d in player.unpatched_dice}
+            ready_ids = {d.die_id for d in player.ready_dice}
+            # Active pool in Phase 3 contains non-worn rolled dice that remain active
+            meta["rolled_pool"] = [
+                d for d in meta.get("rolled_pool", [])
+                if d.die_id not in unpatched_ids and d.die_id in ready_ids
+            ]
+
         # Initialize Phase 3 clockwise queue starting with First Player
         num_players = len(self.state.players)
         self.phase3_turn_queue = [

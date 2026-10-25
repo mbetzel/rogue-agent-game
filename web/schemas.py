@@ -89,12 +89,19 @@ class GameStateSerializer:
         rank: Optional[int] = None,
     ) -> Dict[str, Any]:
         vp = cls.calculate_player_vp(player, config)
-        rolled_dice = [cls.serialize_die(d) for d in (rolled_pool or [])]
 
-        # In Phase 1 or 2, when dice have been rolled into rolled_pool, exclude them from ready_dice visual list to avoid visual duplication
+        # In Phase 1 or 2, when dice have been rolled into rolled_pool, exclude active rolled dice from ready_dice visual list to avoid visual duplication.
+        # Any worn dice (in unpatched_dice) must never appear in rolled_pool or ready_dice.
+        unpatched_ids = {d.die_id for d in player.unpatched_dice}
+        active_rolled_dice = [
+            d for d in (rolled_pool or [])
+            if d.die_id not in unpatched_ids
+        ]
+        rolled_dice = [cls.serialize_die(d) for d in active_rolled_dice]
+
         if has_rolled:
-            rolled_ids = {d.die_id for d in (rolled_pool or [])}
-            visual_ready = [d for d in player.ready_dice if d.die_id not in rolled_ids]
+            active_rolled_ids = {d.die_id for d in active_rolled_dice}
+            visual_ready = [d for d in player.ready_dice if d.die_id not in active_rolled_ids]
         else:
             visual_ready = player.ready_dice
 
@@ -105,7 +112,12 @@ class GameStateSerializer:
         }
         if shield_slots:
             for color_key, dice_list in shield_slots.items():
-                slots_serialized[color_key] = [cls.serialize_die(d) for d in dice_list]
+                # Only include shield dice that haven't worn into unpatched
+                slots_serialized[color_key] = [
+                    cls.serialize_die(d)
+                    for d in dice_list
+                    if d.die_id not in unpatched_ids
+                ]
 
         return {
             "player_id": player.player_id,

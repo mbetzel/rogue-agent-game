@@ -330,8 +330,8 @@ function renderPlayerMats() {
           <div class="dice-tray" id="rolled_tray_${p.player_id}"></div>
         </div>
 
-        <!-- Shield Slots -->
-        <div class="shield-slots-row">
+        <!-- Shield Slots (visible in Phase 1 and 2 during defense configuration and compile) -->
+        <div class="shield-slots-row" style="${state.phase >= 3 ? 'display: none;' : ''}">
           <div class="shield-slot red">
             <div class="shield-slot-title" style="color: var(--color-red);">Red (${p.shield_slots.red.length})</div>
             <div id="shields_red_${p.player_id}"></div>
