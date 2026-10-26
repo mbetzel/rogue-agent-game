@@ -31,43 +31,36 @@ class TestCardsAndDirectives(unittest.TestCase):
         self.assertEqual(engine.state.players[1].money, 6)
 
     def test_directive_raas_red_strength_boost(self) -> None:
+        """v0.6 RAAS Encrypted Memory: Any rolled die showing cash is locked immediately."""
         cfg = GameConfig(num_players=2)
         deck = [self.all_versions["SCRIPT_KIDDIE"], self.all_versions["RAAS"], self.all_versions["ZERO_DAY_OVERRIDE"]]
         engine = GameEngine(cfg, [self.bot, AdaptiveBalancedBot(1)], version_deck=deck, seed=42)
         engine.state.current_version_index = 1  # Active: RAAS
 
-        engine.state.tower.calculate_exit_probability = lambda count: 1.0
-        engine.state.staging_cup = {CubeColor.RED: 1, CubeColor.BLUE: 0, CubeColor.GREEN: 0, CubeColor.BLACK: 0}
+        player = engine.state.players[0]
+        cash_face = Face("+$1", money=1)
+        gray_die = create_colored_die(DieColor.GRAY, 1)
+        gray_die.faces = [cash_face] * 6
+        player.ready_dice = [gray_die]
 
-        telemetry = engine._execute_phase_2([])
-        # 1 Red cube dropped -> RAAS boosts Red strength to 2
-        self.assertEqual(telemetry.attack_strengths[CubeColor.RED], 2)
+        engine._execute_phase_1()
+        self.assertTrue(gray_die.is_locked, "Under RAAS, rolled cash die must be locked")
 
     def test_directive_zero_day_override_reduces_shields(self) -> None:
+        """v0.6 ZERO_DAY_OVERRIDE Kernel Lock: Any rolled die showing a shield is locked immediately."""
         cfg = GameConfig(num_players=2)
         deck = [self.all_versions["SCRIPT_KIDDIE"], self.all_versions["RAAS"], self.all_versions["ZERO_DAY_OVERRIDE"]]
         engine = GameEngine(cfg, [self.bot, AdaptiveBalancedBot(1)], version_deck=deck, seed=42)
         engine.state.current_version_index = 2  # Active: ZERO_DAY_OVERRIDE
 
-        player = PlayerState(player_id=0, bot=self.bot, money=5, secrets=6, patches=0)
-        die = create_colored_die(DieColor.RED, 1, self.all_variants["R1"])
-        die.current_face = Face("Block 2 Red", block_amount=2, shield_color=ShieldColor.RED)
-        player.ready_dice = [die]
+        player = engine.state.players[0]
+        shield_face = Face("Block 1 Blue", block_amount=1, shield_color=ShieldColor.BLUE)
+        gray_die = create_colored_die(DieColor.GRAY, 1)
+        gray_die.faces = [shield_face] * 6
+        player.ready_dice = [gray_die]
 
-        commitments = {0: ShieldColor.RED}
-
-        # 2 Red attack vs 2 Red shield with Zero-Day Override (-1 shield -> effective shield = 1)
-        engine._resolve_player_defense_and_wear(
-            player=player,
-            rolled_dice=[die],
-            commitments=commitments,
-            attack_strengths={CubeColor.RED: 2, CubeColor.BLUE: 0, CubeColor.GREEN: 0},
-            exited_cubes={CubeColor.RED: 2, CubeColor.BLUE: 0, CubeColor.GREEN: 0},
-            active_directive="ZERO_DAY_OVERRIDE",
-        )
-
-        # 1 blocked, 1 unblocked -> loses $1
-        self.assertEqual(player.money, 4)
+        engine._execute_phase_1()
+        self.assertTrue(gray_die.is_locked, "Under ZERO_DAY_OVERRIDE, rolled shield die must be locked")
 
     def test_variant_r2_threat_bounty(self) -> None:
         """R2 gives +$2 if player takes 0 unblocked Red damage."""

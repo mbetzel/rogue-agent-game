@@ -33,6 +33,19 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Code Review Gate (`staff-engineer`):* Comprehensive audit of web architecture against [RULES.md](./RULES.md) v0.5 and Principal Engineer spec; identified 6 edge-case defects, verified Senior Engineer remediations and additions to 17 tests in `tests/test_web_api.py` (APPROVED)
   - [x] *Operational Verification & Playtest Execution (`product-owner`):* Validated test suite (88/88 passing), verified CLI arguments and server startup, audited all REST API endpoints and state transitions, and confirmed local browser playtesting UX readiness
   - [x] *Game Designer Sign-Off (`game-designer`):* Evaluated ergonomics, core design pillars, dice wear loop, damage transparency, and human-bot playtesting flow (APPROVED)
+- [x] **Phase 7: Tactical Yahtzee Rerolls, Rogue Agent Locks & Contractor Staffing (`v0.6` Baseline)**
+  - [x] *Rules Draft `v0.6` Baseline:* Captured in [RULES.md](./RULES.md) (White Contractor dice, 2 free rerolls, Rogue Agent directive locks & debug unlocks, malware sacrifice)
+  - [x] *Architecture Spec (`principal-engineer`):* Technical spec for `sim/` contracts, bot decision schemas for rerolling/contractors/debugging, web API schemas, and unit test specifications
+  - [x] *Implementation (`senior-engineer`):* Implement White die & directive updates in `sim/` and `web/`, update bot heuristics, and create comprehensive test suite (`tests/test_v06_rules.py`)
+  - [x] *Code Review Gate (`staff-engineer`):* Audit line-by-line implementation against [RULES.md](./RULES.md) v0.6, verify 100% test pass via WSL, check edge cases (APPROVED)
+  - [x] *Scenario Execution & Monte Carlo Telemetry (`product-owner`):* Run tournament and resource sweeps under v0.6 rules
+  - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Evaluate player agency metrics, contractor adoption, death spiral mitigation, and log in `FINDINGS.md` (CONDITIONAL APPROVAL: Pacing & agency goals achieved; VentureGreed meta tuning required)
+- [x] **Phase 8: Meta Rebalancing & 2P Scaling (`v0.7` Baseline)**
+  - [x] *Design Review & Rules Update:* Align on Progressive Contractor Pricing ($1/$2/$3), Contractor die face rebalance, Yellow die 4 VP / $2 face tune, Commercial Exposure, and 2P Version payload scaling (RULES.md v0.7 updated; Yahtzee rerolls retained at 2 free rerolls per user decision)
+  - [x] *Technical Architecture Spec (`principal-engineer`):* Module contracts, bot heuristics, and test matrix for v0.7 (Approved)
+  - [x] *Implementation (`senior-engineer`):* Update `sim/`, `web/`, and unit test suite
+  - [x] *Code Review Gate (`staff-engineer`):* Verify 100% test pass and rules fidelity (APPROVED — 126/126 unit tests passing)
+  - [x] *Scenario Execution & Balance Validation (`product-owner` & `game-designer`):* Re-run Tournament Pods to verify VentureGreed $\le 38\%$ balance ceiling (Pod C achieved 31.0%; Pod A dropped 10.8% to 52.0% with 2 free rerolls retained; Section 8 documented in FINDINGS.md)
 
 ---
 

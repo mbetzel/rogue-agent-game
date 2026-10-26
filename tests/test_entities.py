@@ -52,7 +52,7 @@ class TestEntities(unittest.TestCase):
 
         yellow = create_colored_die(DieColor.YELLOW, 4, variants[DieColor.YELLOW])
         self.assertEqual(yellow.cost, 5)
-        self.assertEqual(yellow.vp, 5)
+        self.assertEqual(yellow.vp, 4)
 
         purple = create_colored_die(DieColor.PURPLE, 5, variants[DieColor.PURPLE])
         self.assertEqual(purple.cost, 4)

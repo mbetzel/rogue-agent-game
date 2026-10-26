@@ -36,6 +36,8 @@ class ExperimentMetrics:
     round_limit_pct: float
     early_death_pct: float  # % games ending <= Round 4
     mean_dirty_income: float
+    mean_contractors_hired: float = 0.0
+    mean_rerolls_used: float = 0.0
     win_rates: Dict[str, float] = field(default_factory=dict)
     outlier_seeds: List[Dict] = field(default_factory=list)
 
@@ -52,6 +54,8 @@ def run_batch(
     end_reasons: Dict[EndGameReason, int] = {reason: 0 for reason in EndGameReason}
     early_deaths = 0
     total_dirty_income = 0
+    total_contractors_hired = 0
+    total_rerolls_used = 0
     wins_by_bot: Dict[str, int] = {}
     outliers: List[Dict] = []
 
@@ -106,9 +110,13 @@ def run_batch(
         if result.total_rounds <= 4:
             early_deaths += 1
 
-        # Track dirty income taken across players
-        dirty_taken = sum(r["total_dirty_income"] for r in result.rankings)
+        # Track dirty income, contractors, and rerolls across players
+        dirty_taken = sum(r.get("total_dirty_income", 0) for r in result.rankings)
         total_dirty_income += dirty_taken
+        contractors_hired = sum(r.get("total_contractors_hired", 0) for r in result.rankings)
+        total_contractors_hired += contractors_hired
+        rerolls_used = sum(r.get("total_rerolls_used", 0) for r in result.rankings)
+        total_rerolls_used += rerolls_used
 
         # Track winner
         if result.rankings:
@@ -148,6 +156,8 @@ def run_batch(
         round_limit_pct=end_reasons[EndGameReason.ROUND_LIMIT] / num_runs,
         early_death_pct=early_deaths / num_runs,
         mean_dirty_income=total_dirty_income / num_runs,
+        mean_contractors_hired=total_contractors_hired / num_runs,
+        mean_rerolls_used=total_rerolls_used / num_runs,
         win_rates=win_rates,
         outlier_seeds=outliers,
     )
@@ -166,8 +176,8 @@ def run_experiment_1(runs: int = 500, base_seed: int = 42) -> None:
     money_options = [3, 5, 7, 9]
     secret_options = [4, 6, 8, 10]
 
-    print("| Money | Secrets | Mean Rounds | Min | Max | Early Death (<5) | Singularity % | Wipeout % |")
-    print("| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |")
+    print("| Money | Secrets | Mean Rounds | Min | Max | Early Death (<5) | Singularity % | Wipeout % | Contractors/Gm | Rerolls/Gm |")
+    print("| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |")
 
     for money in money_options:
         for secrets in secret_options:
@@ -188,7 +198,9 @@ def run_experiment_1(runs: int = 500, base_seed: int = 42) -> None:
                 f"{metrics.min_rounds} | {metrics.max_rounds} | "
                 f"{metrics.early_death_pct * 100:.1f}% | "
                 f"{metrics.singularity_pct * 100:.1f}% | "
-                f"{metrics.total_wipeout_pct * 100:.1f}% |"
+                f"{metrics.total_wipeout_pct * 100:.1f}% | "
+                f"{metrics.mean_contractors_hired:.2f} | "
+                f"{metrics.mean_rerolls_used:.2f} |"
             )
 
 
@@ -198,8 +210,8 @@ def run_experiment_2(runs: int = 500, base_seed: int = 42) -> None:
     print("Experiment 2: Player-Count Scaling (2P, 3P, 4P)")
     print("========================================================\n")
 
-    print("| Players | Mean Rounds | Std Dev | Singularity % | Patient Zero % | Wipeout % | Dirty Income/Gm |")
-    print("| :---: | :---: | :---: | :---: | :---: | :---: | :---: |")
+    print("| Players | Mean Rounds | Std Dev | Singularity % | Patient Zero % | Wipeout % | Dirty Income/Gm | Contractors/Gm | Rerolls/Gm |")
+    print("| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |")
 
     bot_pool = [
         AdaptiveBalancedBot(0),
@@ -221,7 +233,9 @@ def run_experiment_2(runs: int = 500, base_seed: int = 42) -> None:
             f"{metrics.singularity_pct * 100:.1f}% | "
             f"{metrics.patient_zero_pct * 100:.1f}% | "
             f"{metrics.total_wipeout_pct * 100:.1f}% | "
-            f"{metrics.mean_dirty_income:.2f} |"
+            f"{metrics.mean_dirty_income:.2f} | "
+            f"{metrics.mean_contractors_hired:.2f} | "
+            f"{metrics.mean_rerolls_used:.2f} |"
         )
 
 
@@ -231,8 +245,8 @@ def run_experiment_3(runs: int = 500, base_seed: int = 42) -> None:
     print("Experiment 3: Dirty Income & Patch Cost Economy")
     print("========================================================\n")
 
-    print("| Dirty Income | Patch Cost | Mean Rounds | Mean Dirty Income | Wipeout % |")
-    print("| :---: | :---: | :---: | :---: | :---: |")
+    print("| Dirty Income | Patch Cost | Mean Rounds | Mean Dirty Income | Wipeout % | Contractors/Gm | Rerolls/Gm |")
+    print("| :---: | :---: | :---: | :---: | :---: | :---: | :---: |")
 
     for dirty_cash in [2, 3, 4]:
         for patch_cost in [1, 2, 3]:
@@ -251,7 +265,9 @@ def run_experiment_3(runs: int = 500, base_seed: int = 42) -> None:
             print(
                 f"| ${dirty_cash} | ${patch_cost} | {metrics.mean_rounds:.2f} | "
                 f"{metrics.mean_dirty_income:.2f} | "
-                f"{metrics.total_wipeout_pct * 100:.1f}% |"
+                f"{metrics.total_wipeout_pct * 100:.1f}% | "
+                f"{metrics.mean_contractors_hired:.2f} | "
+                f"{metrics.mean_rerolls_used:.2f} |"
             )
 
 
@@ -303,6 +319,7 @@ def run_experiment_4(runs: int = 1000, base_seed: int = 42) -> None:
         )
         print(f"- **Mean Rounds:** {metrics.mean_rounds:.2f} (±{metrics.std_rounds:.2f})")
         print(f"- **End Triggers:** Singularity {metrics.singularity_pct * 100:.1f}%, Patient Zero {metrics.patient_zero_pct * 100:.1f}%, Wipeout {metrics.total_wipeout_pct * 100:.1f}%")
+        print(f"- **Tactical Telemetry:** Contractors Hired/Gm {metrics.mean_contractors_hired:.2f}, Yahtzee Rerolls/Gm {metrics.mean_rerolls_used:.2f}")
         print("- **Win Rates:**")
         for bot_name, rate in sorted(metrics.win_rates.items(), key=lambda x: x[1], reverse=True):
             print(f"  - {bot_name}: {rate * 100:.1f}%")

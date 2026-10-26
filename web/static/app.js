@@ -7,6 +7,7 @@ let state = null;
 let selectedCommitments = {};
 let selectedBacklashIndex = 0;
 let patchCashSelected = false;
+let selectedRerollIndices = new Set();
 
 // API Client Helper
 async function apiCall(endpoint, method = "GET", body = null) {
@@ -66,11 +67,48 @@ async function startNewGame(numPlayers = 4, customPlayers = null, seed = null) {
   }
 }
 
+async function doHireContractors(count = 1) {
+  const newState = await apiCall("/api/game/action/hire_contractors", "POST", {
+    player_id: getHumanPlayerId(),
+    count: count,
+  });
+  if (newState) {
+    state = newState;
+    renderApp();
+  }
+}
+
+async function doReroll() {
+  const indices = Array.from(selectedRerollIndices);
+  if (indices.length === 0) return;
+  const newState = await apiCall("/api/game/action/reroll", "POST", {
+    player_id: getHumanPlayerId(),
+    reroll_indices: indices,
+  });
+  if (newState) {
+    state = newState;
+    selectedRerollIndices.clear();
+    renderApp();
+  }
+}
+
+async function doDebugUnlock(dieIndex) {
+  const newState = await apiCall("/api/game/action/debug_unlock", "POST", {
+    player_id: getHumanPlayerId(),
+    die_index: dieIndex,
+  });
+  if (newState) {
+    state = newState;
+    renderApp();
+  }
+}
+
 async function doRoll() {
   const newState = await apiCall("/api/game/action/roll", "POST", { player_id: getHumanPlayerId() });
   if (newState) {
     state = newState;
     selectedCommitments = {};
+    selectedRerollIndices.clear();
     renderApp();
   }
 }
@@ -358,34 +396,60 @@ function renderPlayerMats() {
 
     // Populate Dice in Zones
     const readyTray = document.getElementById(`ready_tray_${p.player_id}`);
-    p.ready_dice.forEach((d, idx) => {
+    p.ready_dice.forEach((d) => {
       const chip = document.createElement("div");
       chip.className = `die-chip ${d.color}`;
       chip.innerHTML = `<span>${d.color.toUpperCase()}</span>`;
       readyTray.appendChild(chip);
     });
+    if (p.contractor_dice) {
+      p.contractor_dice.forEach((d) => {
+        const chip = document.createElement("div");
+        chip.className = `die-chip ${d.color}`;
+        chip.innerHTML = `<span>${d.color.toUpperCase()} <span class="badge-contractor">CONTRACTOR</span></span>`;
+        readyTray.appendChild(chip);
+      });
+    }
 
     const rolledTray = document.getElementById(`rolled_tray_${p.player_id}`);
-    const lockedSet = new Set(p.locked_reroll_indices || []);
     p.rolled_pool.forEach((d, idx) => {
       const chip = document.createElement("div");
-      const isLocked = lockedSet.has(idx);
-      const canHotfix = (p.is_human && state.action_capabilities.can_hotfix && !isLocked);
-      chip.className = `die-chip ${d.color} ${canHotfix ? "clickable" : ""} ${isLocked ? "locked" : ""}`;
-      if (isLocked) {
-        chip.style.opacity = "0.5";
-        chip.style.borderStyle = "dashed";
-      }
+      const isLocked = Boolean(d.is_locked);
+      const isContractor = Boolean(d.is_contractor || d.color === "white");
+      const isSelectedReroll = selectedRerollIndices.has(idx);
+
+      chip.className = `die-chip ${d.color} ${isLocked ? "locked" : ""} ${isSelectedReroll ? "selected-reroll" : ""}`;
       const faceName = d.current_face ? d.current_face.name : "Unrolled";
+
+      let badgeHtml = "";
+      if (isContractor) badgeHtml += `<span class="badge-contractor">CONTRACTOR</span> `;
+      if (isLocked) badgeHtml += `<span class="badge-locked">🔒 LOCKED</span> `;
+
       chip.innerHTML = `
-        <span>${d.color.toUpperCase()}${isLocked ? " [SPENT]" : ""}</span>
+        <div style="display: flex; gap: 4px; align-items: center;">
+          <span>${d.color.toUpperCase()}</span>
+          ${badgeHtml}
+        </div>
         <span class="die-face-name">${faceName}</span>
       `;
-      if (canHotfix) {
-        chip.title = "Click to spend 1 🔧 and hotfix reroll this die";
-        chip.onclick = () => doHotfix(idx);
-      } else if (isLocked) {
-        chip.title = "This die was spent as a patch token and is locked from rerolling";
+
+      if (p.is_human && state.phase === 1 && !p.has_committed) {
+        if (!isLocked && (p.rerolls_remaining || 0) > 0) {
+          chip.classList.add("clickable");
+          chip.title = "Click to toggle for Yahtzee reroll";
+          chip.onclick = () => {
+            if (selectedRerollIndices.has(idx)) {
+              selectedRerollIndices.delete(idx);
+            } else {
+              selectedRerollIndices.add(idx);
+            }
+            renderApp();
+          };
+        } else if (isLocked && p.patches > 0) {
+          chip.classList.add("clickable");
+          chip.title = "Click to spend 1 🔧 and Debug Unlock this die";
+          chip.onclick = () => doDebugUnlock(idx);
+        }
       }
       rolledTray.appendChild(chip);
     });
@@ -426,15 +490,79 @@ function renderActionDock() {
   const human = state.players.find((p) => p.is_human) || state.players[0];
 
   if (state.phase === 1) {
-    if (caps.can_roll) {
-      const btn = document.createElement("button");
-      btn.className = "action-btn btn-accent";
-      btn.innerText = "Roll Ready Pool";
-      btn.onclick = doRoll;
-      controls.appendChild(btn);
+    if (caps.can_hire_contractors || caps.can_roll) {
+      if (caps.can_hire_contractors) {
+        const hireWrap = document.createElement("div");
+        hireWrap.style.display = "inline-flex";
+        hireWrap.style.alignItems = "center";
+        hireWrap.style.gap = "6px";
+
+        const hiredCount = human.hired_contractors || 0;
+        const maxHire = state.contractor_max_hire || 3;
+        const hireLabel = document.createElement("span");
+        hireLabel.style.fontSize = "0.8rem";
+        hireLabel.style.color = "var(--text-dim)";
+        hireLabel.innerText = `Contractors: ${hiredCount}/${maxHire} (Supply: ${state.contractor_supply})`;
+
+        const prog = state.contractor_cost_progression || [1, 2, 3];
+        let nextCost = null;
+        if (caps.next_contractor_cost !== undefined && caps.next_contractor_cost !== null) {
+          nextCost = caps.next_contractor_cost;
+        } else if (human.next_contractor_cost !== undefined && human.next_contractor_cost !== null) {
+          nextCost = human.next_contractor_cost;
+        } else if (hiredCount < prog.length) {
+          nextCost = prog[hiredCount];
+        }
+
+        const hireBtn = document.createElement("button");
+        hireBtn.className = "action-btn";
+        if (hiredCount >= maxHire) {
+          hireBtn.innerText = "Max Contractors Hired";
+        } else if (nextCost !== null) {
+          hireBtn.innerText = `Hire Contractor ($${nextCost})`;
+        } else {
+          hireBtn.innerText = `Hire Contractor ($${state.contractor_hire_cost || 1})`;
+        }
+        hireBtn.disabled = !caps.can_hire_contractors;
+        hireBtn.onclick = () => doHireContractors(1);
+
+        hireWrap.appendChild(hireLabel);
+        hireWrap.appendChild(hireBtn);
+        controls.appendChild(hireWrap);
+      }
+
+      if (caps.can_roll) {
+        const btn = document.createElement("button");
+        btn.className = "action-btn btn-accent";
+        const poolSize = human.ready_dice.length + (human.contractor_dice ? human.contractor_dice.length : 0);
+        btn.innerText = `Roll Active Pool (${poolSize} dice)`;
+        btn.onclick = () => {
+          selectedRerollIndices.clear();
+          doRoll();
+        };
+        controls.appendChild(btn);
+      }
     }
 
-    if (caps.can_commit) {
+    if (caps.can_commit || caps.can_reroll || caps.can_debug_unlock) {
+      const rerollsLeft = human.rerolls_remaining !== undefined ? human.rerolls_remaining : 0;
+      const maxRerolls = human.max_rerolls !== undefined ? human.max_rerolls : 2;
+
+      const rerollInfo = document.createElement("span");
+      rerollInfo.style.fontSize = "0.8rem";
+      rerollInfo.style.color = "#38bdf8";
+      rerollInfo.style.fontWeight = "600";
+      rerollInfo.innerText = `Rerolls: ${rerollsLeft}/${maxRerolls} left (click dice to select)`;
+      controls.appendChild(rerollInfo);
+
+      if (caps.can_reroll && selectedRerollIndices.size > 0) {
+        const rerollBtn = document.createElement("button");
+        rerollBtn.className = "action-btn btn-accent";
+        rerollBtn.innerText = `Reroll Selected (${selectedRerollIndices.size})`;
+        rerollBtn.onclick = doReroll;
+        controls.appendChild(rerollBtn);
+      }
+
       // Clean up stale commitments for dice that are no longer shields (e.g. after reroll)
       const rolled = human.rolled_pool;
       Object.keys(selectedCommitments).forEach((idxStr) => {
@@ -512,7 +640,8 @@ function renderActionDock() {
               selectedCommitments[idx] = e.target.value;
             };
 
-            wrap.innerHTML = `<span>Die #${idx + 1} (${d.color}):</span>`;
+            const colStr = d.color === "white" ? "#f8fafc" : `var(--color-${d.color})`;
+            wrap.innerHTML = `<span style="color: ${colStr};">Die #${idx + 1} (${d.color}):</span>`;
             wrap.appendChild(select);
           } else {
             selectedCommitments[idx] = face.shield_color;
@@ -525,7 +654,10 @@ function renderActionDock() {
       const commitBtn = document.createElement("button");
       commitBtn.className = "action-btn btn-accent";
       commitBtn.innerText = "Commit Defenses";
-      commitBtn.onclick = doCommit;
+      commitBtn.onclick = () => {
+        selectedRerollIndices.clear();
+        doCommit();
+      };
       controls.appendChild(commitBtn);
     }
   } else if (state.phase === 2) {

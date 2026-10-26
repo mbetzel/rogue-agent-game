@@ -14,8 +14,24 @@ class DummyControlledBot(BaseBot):
     def __init__(self, bot_id: int) -> None:
         super().__init__(bot_id, name="DummyControlledBot")
         self.next_rerolls: list[int] = []
+        self.next_unlocks: list[int] = []
         self.next_commitments: dict[int, ShieldColor] = {}
         self.next_plan = Phase3ActionPlan()
+
+    def choose_debug_unlocks(self, *args, **kwargs) -> list[int]:
+        if self.next_unlocks:
+            u = self.next_unlocks
+            self.next_unlocks = []
+            return u
+        active = kwargs.get("active_dice", [])
+        return [idx for idx in self.next_rerolls if 0 <= idx < len(active) and active[idx].is_locked]
+
+    def choose_yahtzee_rerolls(self, *args, **kwargs):
+        if self.next_rerolls:
+            rerolls = self.next_rerolls
+            self.next_rerolls = []
+            return ([rerolls[0]], rerolls)
+        return ([], [])
 
     def choose_hotfix_rerolls(self, *args, **kwargs) -> list[int]:
         return self.next_rerolls
@@ -47,21 +63,29 @@ class TestEnginePhases(unittest.TestCase):
         self.assertEqual(p0.patches, 2)  # 1 + 1
 
     def test_hotfix_reroll_costs_patch_token(self) -> None:
+        """In v0.6, unlocking a locked die via debug unlock costs 1 🔧 token."""
         cfg = GameConfig(num_players=2, starting_patches=2)
         bot0 = DummyControlledBot(0)
         bot1 = DummyControlledBot(1)
-        bot0.next_rerolls = [0]  # Request reroll on index 0
+        bot0.next_unlocks = [0]  # Request debug unlock on index 0
+        bot0.next_rerolls = [0]  # Reroll unlocked die 0
         engine = GameEngine(cfg, [bot0, bot1], seed=10)
 
         p0 = engine.state.players[0]
-        # Override die.roll on all p0 dice to return Idle (0) to eliminate random patch face gains
-        for d in p0.ready_dice:
+        # Die 0 rolls Glitch (Locked) initially, then rerolls into Idle (0)
+        rolls = [Face("Glitch (Locked)", is_glitch=True), Face("Idle (0)")]
+
+        def roll_sequence(rng=None):
+            return rolls.pop(0) if rolls else Face("Idle (0)")
+
+        p0.ready_dice[0].roll = roll_sequence
+        for d in p0.ready_dice[1:]:
             d.roll = lambda rng=None: Face("Idle (0)")
 
         p0.patches = 2
         engine._execute_phase_1()
 
-        # Started with 2 patches, spent 1 on hotfix reroll, gained 0 from Idle -> exactly 1 left
+        # Started with 2 patches, spent 1 on debug unlock -> exactly 1 left
         self.assertEqual(p0.patches, 1)
 
     def test_phase2_black_cubes_and_version_upgrade(self) -> None:
@@ -85,8 +109,8 @@ class TestEnginePhases(unittest.TestCase):
         # Version should advance to v2.0 (index 1)
         self.assertEqual(engine.state.current_version_index, 1)
         self.assertEqual(engine.state.corruption_track, 0)
-        # RaaS upgrade payload (+2 Red, +1 Green) should now be in Staging Cup
-        self.assertEqual(engine.state.staging_cup[CubeColor.RED], 2)
+        # In 2P, RaaS upgrade payload is +1 Red, +1 Green (scaled in v0.7)
+        self.assertEqual(engine.state.staging_cup[CubeColor.RED], 1)
         self.assertEqual(engine.state.staging_cup[CubeColor.GREEN], 1)
 
     def test_phase2_singularity_trigger_on_v3(self) -> None:
@@ -166,9 +190,9 @@ class TestEnginePhases(unittest.TestCase):
 
         engine._execute_phase_1()
 
-        # Money must remain $5 (the +$2 was discarded), patches should be 0 (1 spent on reroll)
+        # Money must remain $5 (the +$2 was discarded), patches remain 1 (free reroll in v0.6)
         self.assertEqual(p0.money, 5)
-        self.assertEqual(p0.patches, 0)
+        self.assertEqual(p0.patches, 1)
 
 
 if __name__ == "__main__":

@@ -60,8 +60,53 @@ class BaseBot:
         stuck_cubes: Dict[CubeColor, int],
         rng: random.Random,
     ) -> List[int]:
-        """Returns the indices of rolled dice to reroll using available patch tokens."""
+        """Returns the indices of rolled dice to reroll using available patch tokens (legacy v0.5)."""
         return []
+
+    def choose_contractor_hires(
+        self,
+        player_state: PlayerState,
+        contractor_supply: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        rng: random.Random,
+    ) -> int:
+        """Returns the number of contractor dice to hire (0 to 3) in Phase 1 Step 2."""
+        return 0
+
+    def choose_yahtzee_rerolls(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        rerolls_remaining: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+    ) -> List[int]:
+        """Returns indices of active_dice to reroll (must be unlocked)."""
+        return []
+
+    def choose_debug_unlocks(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+    ) -> List[int]:
+        """Returns indices of locked dice to unlock by spending 1 🔧 token each."""
+        return []
+
+    def choose_malware_sacrifice(
+        self,
+        player_state: PlayerState,
+        unblocked_green: int,
+        rng: random.Random,
+    ) -> bool:
+        """Returns True if the player chooses to sacrifice an active White contractor die to absorb Green malware."""
+        return len(player_state.contractor_dice) > 0
 
     def commit_shields(
         self,
@@ -96,14 +141,16 @@ class BaseBot:
         """Returns assigned shield dice ordered by absorption priority.
 
         Default heuristics:
-        1. Prioritize B3 (Air-Gapped Backup) first (absorbs damage without wearing down).
-        2. Lowest VP die next (preserves valuable dice in Ready zone).
-        3. Lowest cost die next.
+        1. Prioritize White contractor dice (immune to wear, returns to supply at round end).
+        2. Prioritize B3 (Air-Gapped Backup) next (absorbs damage without wearing down).
+        3. Lowest VP die next (preserves valuable dice in Ready zone).
+        4. Lowest cost die next.
         """
-        def wear_priority_key(d: Die) -> Tuple[int, int, int]:
+        def wear_priority_key(d: Die) -> Tuple[int, int, int, int]:
+            is_white = 0 if d.color == DieColor.WHITE else 1
             face = d.current_face
             is_b3 = 0 if (face and face.star_code == "B3") else 1
-            return (is_b3, d.vp, d.cost)
+            return (is_white, is_b3, d.vp, d.cost)
 
         return sorted(assigned_dice, key=wear_priority_key)
 
@@ -130,6 +177,93 @@ class AdaptiveBalancedBot(BaseBot):
             color: staging_cubes.get(color, 0) + stuck_cubes.get(color, 0)
             for color in [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN]
         }
+
+    def choose_contractor_hires(
+        self,
+        player_state: PlayerState,
+        contractor_supply: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        rng: random.Random,
+    ) -> int:
+        if contractor_supply <= 0 or player_state.money < 4:
+            return 0
+        threats = self._get_threat_levels(staging_cubes, stuck_cubes)
+        total_threat = sum(threats.values())
+        if total_threat >= 8 and player_state.money >= 9:
+            return min(3, contractor_supply)
+        elif total_threat >= 6 and player_state.money >= 6:
+            return min(2, contractor_supply)
+        elif total_threat >= 3 and player_state.money >= 4:
+            return min(1, contractor_supply)
+        return 0
+
+    def choose_debug_unlocks(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+    ) -> List[int]:
+        if player_state.patches <= 0:
+            return []
+        unlocks: List[int] = []
+        for idx, die in enumerate(active_dice):
+            if len(unlocks) >= player_state.patches:
+                break
+            if die.is_locked:
+                unlocks.append(idx)
+        return unlocks
+
+    def choose_yahtzee_rerolls(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        rerolls_remaining: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+    ) -> List[int]:
+        if rerolls_remaining <= 0:
+            return []
+        threats = self._get_threat_levels(staging_cubes, stuck_cubes)
+        red_shields = sum(
+            d.current_face.block_amount
+            for d in active_dice
+            if d.current_face and d.current_face.shield_color in (ShieldColor.RED, ShieldColor.ANY)
+        )
+        blue_shields = sum(
+            d.current_face.block_amount
+            for d in active_dice
+            if d.current_face and d.current_face.shield_color in (ShieldColor.BLUE, ShieldColor.ANY)
+        )
+        green_shields = sum(
+            d.current_face.block_amount
+            for d in active_dice
+            if d.current_face and d.current_face.shield_color in (ShieldColor.GREEN, ShieldColor.ANY)
+        )
+
+        rerolls: List[int] = []
+        for idx, die in enumerate(active_dice):
+            if die.is_locked:
+                continue
+            face = die.current_face
+            if not face:
+                continue
+            if face.is_glitch:
+                rerolls.append(idx)
+            elif not face.is_shield and (
+                threats[CubeColor.BLUE] > blue_shields
+                or threats[CubeColor.RED] > red_shields
+                or threats[CubeColor.GREEN] > green_shields
+            ):
+                rerolls.append(idx)
+            elif not face.is_shield and face.money <= 1 and face.patches == 0:
+                rerolls.append(idx)
+        return rerolls
 
     def choose_hotfix_rerolls(
         self,
@@ -220,13 +354,12 @@ class AdaptiveBalancedBot(BaseBot):
                 best_color = ShieldColor.BLUE
 
             assignments[idx] = best_color
-            amt = rolled_dice[idx].current_face.block_amount if rolled_dice[idx].current_face else 1
             if best_color == ShieldColor.BLUE:
-                committed_blue += amt
+                committed_blue += 1
             elif best_color == ShieldColor.RED:
-                committed_red += amt
-            elif best_color == ShieldColor.GREEN:
-                committed_green += amt
+                committed_red += 1
+            else:
+                committed_green += 1
 
         return assignments
 
@@ -239,14 +372,10 @@ class AdaptiveBalancedBot(BaseBot):
         plan = Phase3ActionPlan()
         current_money = player_state.money
         current_patches = player_state.patches
+        threats = self._get_threat_levels(game_state.staging_cup, game_state.tower.stuck_cubes)
+        total_threat = sum(threats.values())
         is_final_round = getattr(game_state, "is_final_round", False)
         cash_cushion = 0 if is_final_round else 2
-
-        threats = {
-            c: game_state.staging_cup.get(c, 0) + game_state.tower.stuck_cubes.get(c, 0)
-            for c in [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN]
-        }
-        total_threat = sum(threats.values())
 
         # 1. Dirty Income: take dirty income if broke, has ready dice, secrets > 1, and threat is manageable
         if (
@@ -309,6 +438,65 @@ class SecOpsTurtleBot(BaseBot):
     def __init__(self, bot_id: int) -> None:
         super().__init__(bot_id, name="SecOpsTurtleBot")
 
+    def choose_contractor_hires(
+        self,
+        player_state: PlayerState,
+        contractor_supply: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        rng: random.Random,
+    ) -> int:
+        if contractor_supply <= 0 or player_state.money < 3:
+            return 0
+        threat = sum(staging_cubes.get(c, 0) + stuck_cubes.get(c, 0) for c in [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN])
+        if threat >= 6 and player_state.money >= 8:
+            return min(3, contractor_supply)
+        elif threat >= 3 and player_state.money >= 5:
+            return min(2, contractor_supply)
+        elif player_state.money >= 3:
+            return min(1, contractor_supply)
+        return 0
+
+    def choose_debug_unlocks(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+    ) -> List[int]:
+        if player_state.patches <= 0:
+            return []
+        unlocks: List[int] = []
+        for idx, die in enumerate(active_dice):
+            if len(unlocks) >= player_state.patches:
+                break
+            if die.is_locked:
+                unlocks.append(idx)
+        return unlocks
+
+    def choose_yahtzee_rerolls(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        rerolls_remaining: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+    ) -> List[int]:
+        if rerolls_remaining <= 0:
+            return []
+        rerolls: List[int] = []
+        for idx, die in enumerate(active_dice):
+            if die.is_locked:
+                continue
+            face = die.current_face
+            if face and (not face.is_shield or face.is_glitch):
+                rerolls.append(idx)
+        return rerolls
+
     def choose_hotfix_rerolls(
         self,
         player_state: PlayerState,
@@ -323,7 +511,6 @@ class SecOpsTurtleBot(BaseBot):
             if available_patches <= len(rerolls):
                 break
             face = die.current_face
-            # Reroll non-shield faces aggressively
             if face and not face.is_shield:
                 rerolls.append(idx)
         return rerolls
@@ -338,13 +525,11 @@ class SecOpsTurtleBot(BaseBot):
         rng: random.Random,
     ) -> Dict[int, ShieldColor]:
         assignments: Dict[int, ShieldColor] = {}
-        # Protect Secrets first (BLUE), then Money (RED), then Dice (GREEN)
         for idx, die in enumerate(rolled_dice):
             face = die.current_face
             if not face or not face.is_shield:
                 continue
             if face.shield_color == ShieldColor.ANY:
-                # Default ANY shields to Blue to safeguard Secrets
                 assignments[idx] = ShieldColor.BLUE
             else:
                 assignments[idx] = face.shield_color
@@ -368,7 +553,6 @@ class SecOpsTurtleBot(BaseBot):
             else game_state.config.patch_cash_cost
         )
 
-        # Turtle aggressively patches all dice (preserving cushion for cash)
         for idx in range(len(player_state.unpatched_dice)):
             if current_patches > 0:
                 plan.patch_actions.append({"die_index": idx, "use_cash": False})
@@ -377,7 +561,6 @@ class SecOpsTurtleBot(BaseBot):
                 plan.patch_actions.append({"die_index": idx, "use_cash": True})
                 current_money -= patch_cash_cost
 
-        # Buy Blue > Green > Red dice (respecting cushion)
         for color in [DieColor.BLUE, DieColor.GREEN, DieColor.RED]:
             if len(plan.market_purchases) >= game_state.config.max_market_purchases_per_turn:
                 break
@@ -386,7 +569,6 @@ class SecOpsTurtleBot(BaseBot):
                 plan.market_purchases.append(color)
                 current_money -= cost
 
-        # In Final Round: spend out remaining cash on any available dice
         if is_final_round and len(plan.market_purchases) < game_state.config.max_market_purchases_per_turn:
             for color in [DieColor.BLUE, DieColor.GREEN, DieColor.RED, DieColor.YELLOW, DieColor.PURPLE]:
                 if len(plan.market_purchases) >= game_state.config.max_market_purchases_per_turn:
@@ -396,7 +578,6 @@ class SecOpsTurtleBot(BaseBot):
                     plan.market_purchases.append(color)
                     current_money -= cost
 
-        # Never take Dirty Income unless literally $0, secrets > 1, and has ready dice
         if (
             current_money == 0
             and player_state.secrets > game_state.config.dirty_income_secret_cost
@@ -414,6 +595,64 @@ class VentureGreedBot(BaseBot):
     def __init__(self, bot_id: int) -> None:
         super().__init__(bot_id, name="VentureGreedBot")
 
+    def choose_contractor_hires(
+        self,
+        player_state: PlayerState,
+        contractor_supply: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        rng: random.Random,
+    ) -> int:
+        if contractor_supply <= 0 or player_state.money < 6:
+            return 0
+        if player_state.money >= 11:
+            return min(3, contractor_supply)
+        elif player_state.money >= 8:
+            return min(2, contractor_supply)
+        return min(1, contractor_supply)
+
+    def choose_debug_unlocks(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+    ) -> List[int]:
+        if player_state.patches <= 0:
+            return []
+        unlocks: List[int] = []
+        for idx, die in enumerate(active_dice):
+            if len(unlocks) >= player_state.patches:
+                break
+            if die.is_locked and die.current_face and die.current_face.is_glitch:
+                unlocks.append(idx)
+        return unlocks
+
+    def choose_yahtzee_rerolls(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        rerolls_remaining: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+    ) -> List[int]:
+        if rerolls_remaining <= 0:
+            return []
+        rerolls: List[int] = []
+        for idx, die in enumerate(active_dice):
+            if die.is_locked:
+                continue
+            face = die.current_face
+            if not face:
+                continue
+            if face.is_glitch or (face.money == 0 and not face.is_star):
+                rerolls.append(idx)
+        return rerolls
+
     def choose_hotfix_rerolls(
         self,
         player_state: PlayerState,
@@ -424,7 +663,6 @@ class VentureGreedBot(BaseBot):
     ) -> List[int]:
         rerolls: List[int] = []
         available_patches = player_state.patches
-        # Reroll shield faces into money/secrets if we aren't in lethal danger
         if player_state.secrets > 2 and player_state.money > 2:
             for idx, die in enumerate(rolled_dice):
                 if available_patches <= len(rerolls):
@@ -433,103 +671,6 @@ class VentureGreedBot(BaseBot):
                 if face and (face.is_shield or face.name == "Idle (0)"):
                     rerolls.append(idx)
         return rerolls
-
-    def commit_shields(
-        self,
-        player_state: PlayerState,
-        rolled_dice: List[Die],
-        staging_cubes: Dict[CubeColor, int],
-        stuck_cubes: Dict[CubeColor, int],
-        directive_code: str,
-        rng: random.Random,
-    ) -> Dict[int, ShieldColor]:
-        assignments: Dict[int, ShieldColor] = {}
-        for idx, die in enumerate(rolled_dice):
-            face = die.current_face
-            if face and face.is_shield:
-                if face.shield_color == ShieldColor.ANY:
-                    assignments[idx] = ShieldColor.BLUE  # Prioritize Blue over Red/Green
-                else:
-                    assignments[idx] = face.shield_color
-        return assignments
-
-    def take_phase3_actions(
-        self,
-        player_state: PlayerState,
-        game_state: GameState,
-        rng: random.Random,
-    ) -> Phase3ActionPlan:
-        plan = Phase3ActionPlan()
-        current_money = player_state.money
-        is_final_round = getattr(game_state, "is_final_round", False)
-        cash_cushion = 0 if is_final_round else 2
-
-        # Greed bot takes Dirty Income aggressively to fund purchases (requires ready dice and >1 secret)
-        if (
-            current_money < 5
-            and player_state.secrets > game_state.config.dirty_income_secret_cost
-            and len(player_state.ready_dice) >= 1
-        ):
-            plan.take_dirty_income = True
-            plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
-            current_money += game_state.config.dirty_income_cash
-
-        # Buy Secrets only if special abilities are eligible and affordable (preserving cushion)
-        if player_state.b2_available and (current_money - 2 >= cash_cushion) and player_state.secrets < 10:
-            plan.use_b2_secret = True
-            current_money -= 2
-
-        if player_state.y1_available and (current_money - 6 >= cash_cushion) and player_state.secrets < 10:
-            plan.use_y1_secret = True
-            current_money -= 6
-
-        # Greed bot buys Yellow dice first, then Blue (respecting cushion)
-        purchases = 0
-        for _ in range(game_state.config.max_market_purchases_per_turn):
-            if game_state.market.get(DieColor.YELLOW, 0) > 0 and (current_money - 5 >= cash_cushion):
-                plan.market_purchases.append(DieColor.YELLOW)
-                current_money -= 5
-                purchases += 1
-            elif game_state.market.get(DieColor.BLUE, 0) > 0 and (current_money - 5 >= cash_cushion):
-                plan.market_purchases.append(DieColor.BLUE)
-                current_money -= 5
-                purchases += 1
-
-        # In Final Round: spend out remaining cash on any available dice
-        if is_final_round and purchases < game_state.config.max_market_purchases_per_turn:
-            for color in [DieColor.YELLOW, DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.PURPLE]:
-                if purchases >= game_state.config.max_market_purchases_per_turn:
-                    break
-                cost = 4 if color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5
-                if game_state.market.get(color, 0) > 0 and current_money >= cost:
-                    plan.market_purchases.append(color)
-                    current_money -= cost
-                    purchases += 1
-
-        # Only patch if ready dice is critically low (<= 2)
-        if len(player_state.ready_dice) <= 2:
-            patch_cash_cost = (
-                3
-                if game_state.active_directive_code == "POLYMORPHIC_WORM"
-                else game_state.config.patch_cash_cost
-            )
-            current_patches = player_state.patches
-            for idx in range(len(player_state.unpatched_dice)):
-                if current_patches > 0:
-                    plan.patch_actions.append({"die_index": idx, "use_cash": False})
-                    current_patches -= 1
-                elif current_money - patch_cash_cost >= cash_cushion:
-                    plan.patch_actions.append({"die_index": idx, "use_cash": True})
-                    current_money -= patch_cash_cost
-
-        return plan
-
-
-class AccelerationistBot(BaseBot):
-    """Rushes corruption and Singularity by weaponizing the Cube Tower and taking Dirty Income."""
-
-    def __init__(self, bot_id: int) -> None:
-        super().__init__(bot_id, name="AccelerationistBot")
 
     def commit_shields(
         self,
@@ -561,58 +702,119 @@ class AccelerationistBot(BaseBot):
         is_final_round = getattr(game_state, "is_final_round", False)
         cash_cushion = 0 if is_final_round else 2
 
-        # Always take Dirty Income if ready dice available and secrets > 1 to accelerate corruption track
         if (
-            player_state.secrets > game_state.config.dirty_income_secret_cost
+            current_money < 5
+            and player_state.secrets > game_state.config.dirty_income_secret_cost
             and len(player_state.ready_dice) >= 1
         ):
             plan.take_dirty_income = True
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
             current_money += game_state.config.dirty_income_cash
 
-        # Use P1 / P3 attack cube additions only if eligible
-        if player_state.p1_available:
-            plan.p1_cube_choice = CubeColor.RED
-        if player_state.p3_available is not None:
-            plan.p3_cube_choice = CubeColor(player_state.p3_available.value)
+        if player_state.b2_available and (current_money - 2 >= cash_cushion) and player_state.secrets < 10:
+            plan.use_b2_secret = True
+            current_money -= 2
 
-        # Buy Purple (Black-Hat) or Blue dice (respecting cushion)
+        if player_state.y1_available and (current_money - 6 >= cash_cushion) and player_state.secrets < 10:
+            plan.use_y1_secret = True
+            current_money -= 6
+
         purchases = 0
-        for color in [DieColor.PURPLE, DieColor.BLUE]:
-            if purchases >= game_state.config.max_market_purchases_per_turn:
-                break
-            cost = 4 if color == DieColor.PURPLE else 5
-            if game_state.market.get(color, 0) > 0 and (current_money - cost >= cash_cushion):
-                plan.market_purchases.append(color)
-                current_money -= cost
+        for _ in range(game_state.config.max_market_purchases_per_turn):
+            if game_state.market.get(DieColor.YELLOW, 0) > 0 and (current_money - 5 >= cash_cushion):
+                plan.market_purchases.append(DieColor.YELLOW)
+                current_money -= 5
+                purchases += 1
+            elif game_state.market.get(DieColor.BLUE, 0) > 0 and (current_money - 5 >= cash_cushion):
+                plan.market_purchases.append(DieColor.BLUE)
+                current_money -= 5
                 purchases += 1
 
-        # In Final Round: spend remaining cash on any available dice
         if is_final_round and purchases < game_state.config.max_market_purchases_per_turn:
-            for color in [DieColor.PURPLE, DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]:
+            for color in [DieColor.YELLOW, DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.PURPLE]:
                 if purchases >= game_state.config.max_market_purchases_per_turn:
                     break
-                cost = 4 if color in (DieColor.PURPLE, DieColor.RED, DieColor.GREEN) else 5
+                cost = 4 if color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5
                 if game_state.market.get(color, 0) > 0 and current_money >= cost:
                     plan.market_purchases.append(color)
                     current_money -= cost
                     purchases += 1
 
-        # Patch using tokens
-        current_patches = player_state.patches
-        for idx in range(len(player_state.unpatched_dice)):
-            if current_patches > 0:
-                plan.patch_actions.append({"die_index": idx, "use_cash": False})
-                current_patches -= 1
+        if len(player_state.ready_dice) <= 2:
+            patch_cash_cost = (
+                3
+                if game_state.active_directive_code == "POLYMORPHIC_WORM"
+                else game_state.config.patch_cash_cost
+            )
+            current_patches = player_state.patches
+            for idx in range(len(player_state.unpatched_dice)):
+                if current_patches > 0:
+                    plan.patch_actions.append({"die_index": idx, "use_cash": False})
+                    current_patches -= 1
+                elif current_money - patch_cash_cost >= cash_cushion:
+                    plan.patch_actions.append({"die_index": idx, "use_cash": True})
+                    current_money -= patch_cash_cost
 
         return plan
 
 
-class RecklessSaboteurBot(BaseBot):
-    """Chaos bot: forces extreme threat escalations and pushes for simultaneous total wipeout."""
+class AccelerationistBot(BaseBot):
+    """Rushes corruption and Singularity by weaponizing the Cube Tower and taking Dirty Income."""
 
     def __init__(self, bot_id: int) -> None:
-        super().__init__(bot_id, name="RecklessSaboteurBot")
+        super().__init__(bot_id, name="AccelerationistBot")
+
+    def choose_contractor_hires(
+        self,
+        player_state: PlayerState,
+        contractor_supply: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        rng: random.Random,
+    ) -> int:
+        if contractor_supply > 0 and player_state.money >= 5 and player_state.secrets <= 3:
+            return 1
+        return 0
+
+    def choose_debug_unlocks(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+    ) -> List[int]:
+        if player_state.patches <= 0:
+            return []
+        unlocks: List[int] = []
+        for idx, die in enumerate(active_dice):
+            if len(unlocks) >= player_state.patches:
+                break
+            if die.is_locked and die.current_face and die.current_face.is_glitch:
+                unlocks.append(idx)
+        return unlocks
+
+    def choose_yahtzee_rerolls(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        rerolls_remaining: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+    ) -> List[int]:
+        if rerolls_remaining <= 0:
+            return []
+        rerolls: List[int] = []
+        for idx, die in enumerate(active_dice):
+            if die.is_locked:
+                continue
+            face = die.current_face
+            if face and (face.is_glitch or (face.money == 0 and not face.is_star and not face.is_shield)):
+                rerolls.append(idx)
+        return rerolls
 
     def commit_shields(
         self,
@@ -628,7 +830,7 @@ class RecklessSaboteurBot(BaseBot):
             face = die.current_face
             if face and face.is_shield:
                 if face.shield_color == ShieldColor.ANY:
-                    assignments[idx] = ShieldColor.BLUE  # Prioritize Blue over Red/Green
+                    assignments[idx] = ShieldColor.BLUE
                 else:
                     assignments[idx] = face.shield_color
         return assignments
@@ -644,7 +846,6 @@ class RecklessSaboteurBot(BaseBot):
         is_final_round = getattr(game_state, "is_final_round", False)
         cash_cushion = 0 if is_final_round else 2
 
-        # Always take Dirty Income if ready dice available and secrets > 1
         if (
             player_state.secrets > game_state.config.dirty_income_secret_cost
             and len(player_state.ready_dice) >= 1
@@ -653,7 +854,142 @@ class RecklessSaboteurBot(BaseBot):
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
             current_money += game_state.config.dirty_income_cash
 
-        # Buy Purple or Red (respecting cushion)
+        if player_state.p1_available:
+            plan.p1_cube_choice = CubeColor.RED
+        if player_state.p3_available is not None:
+            plan.p3_cube_choice = CubeColor(player_state.p3_available.value)
+
+        purchases = 0
+        for color in [DieColor.PURPLE, DieColor.BLUE]:
+            if purchases >= game_state.config.max_market_purchases_per_turn:
+                break
+            cost = 4 if color == DieColor.PURPLE else 5
+            if game_state.market.get(color, 0) > 0 and (current_money - cost >= cash_cushion):
+                plan.market_purchases.append(color)
+                current_money -= cost
+                purchases += 1
+
+        if is_final_round and purchases < game_state.config.max_market_purchases_per_turn:
+            for color in [DieColor.PURPLE, DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]:
+                if purchases >= game_state.config.max_market_purchases_per_turn:
+                    break
+                cost = 4 if color in (DieColor.PURPLE, DieColor.RED, DieColor.GREEN) else 5
+                if game_state.market.get(color, 0) > 0 and current_money >= cost:
+                    plan.market_purchases.append(color)
+                    current_money -= cost
+                    purchases += 1
+
+        current_patches = player_state.patches
+        for idx in range(len(player_state.unpatched_dice)):
+            if current_patches > 0:
+                plan.patch_actions.append({"die_index": idx, "use_cash": False})
+                current_patches -= 1
+
+        return plan
+
+
+class RecklessSaboteurBot(BaseBot):
+    """Chaos bot: forces extreme threat escalations and pushes for simultaneous total wipeout."""
+
+    def __init__(self, bot_id: int) -> None:
+        super().__init__(bot_id, name="RecklessSaboteurBot")
+
+    def choose_contractor_hires(
+        self,
+        player_state: PlayerState,
+        contractor_supply: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        rng: random.Random,
+    ) -> int:
+        if contractor_supply <= 0 or player_state.money < 3:
+            return 0
+        if player_state.money >= 8:
+            return min(3, contractor_supply)
+        elif player_state.money >= 5:
+            return min(2, contractor_supply)
+        elif player_state.money >= 3:
+            return min(1, contractor_supply)
+        return 0
+
+    def choose_debug_unlocks(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+    ) -> List[int]:
+        if player_state.patches <= 0:
+            return []
+        unlocks: List[int] = []
+        for idx, die in enumerate(active_dice):
+            if len(unlocks) >= player_state.patches:
+                break
+            if die.is_locked:
+                unlocks.append(idx)
+        return unlocks
+
+    def choose_yahtzee_rerolls(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        rerolls_remaining: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+    ) -> List[int]:
+        if rerolls_remaining <= 0:
+            return []
+        rerolls: List[int] = []
+        for idx, die in enumerate(active_dice):
+            if die.is_locked:
+                continue
+            face = die.current_face
+            if face and (face.is_glitch or face.money < 1):
+                rerolls.append(idx)
+        return rerolls
+
+    def commit_shields(
+        self,
+        player_state: PlayerState,
+        rolled_dice: List[Die],
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+    ) -> Dict[int, ShieldColor]:
+        assignments: Dict[int, ShieldColor] = {}
+        for idx, die in enumerate(rolled_dice):
+            face = die.current_face
+            if face and face.is_shield:
+                if face.shield_color == ShieldColor.ANY:
+                    assignments[idx] = ShieldColor.BLUE
+                else:
+                    assignments[idx] = face.shield_color
+        return assignments
+
+    def take_phase3_actions(
+        self,
+        player_state: PlayerState,
+        game_state: GameState,
+        rng: random.Random,
+    ) -> Phase3ActionPlan:
+        plan = Phase3ActionPlan()
+        current_money = player_state.money
+        is_final_round = getattr(game_state, "is_final_round", False)
+        cash_cushion = 0 if is_final_round else 2
+
+        if (
+            player_state.secrets > game_state.config.dirty_income_secret_cost
+            and len(player_state.ready_dice) >= 1
+        ):
+            plan.take_dirty_income = True
+            plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
+            current_money += game_state.config.dirty_income_cash
+
         purchases = 0
         for color in [DieColor.PURPLE, DieColor.RED]:
             if purchases >= game_state.config.max_market_purchases_per_turn:
@@ -664,7 +1000,6 @@ class RecklessSaboteurBot(BaseBot):
                 current_money -= cost
                 purchases += 1
 
-        # In Final Round: spend out on any available dice
         if is_final_round and purchases < game_state.config.max_market_purchases_per_turn:
             for color in [DieColor.PURPLE, DieColor.RED, DieColor.GREEN, DieColor.BLUE, DieColor.YELLOW]:
                 if purchases >= game_state.config.max_market_purchases_per_turn:
@@ -675,7 +1010,6 @@ class RecklessSaboteurBot(BaseBot):
                     current_money -= cost
                     purchases += 1
 
-        # Never patch unless completely depleted (0 ready dice), preserving cash cushion
         patch_cash_cost = (
             3
             if game_state.active_directive_code == "POLYMORPHIC_WORM"

@@ -21,6 +21,7 @@ from sim.entities import (
     VariantCard,
     VersionCard,
     create_colored_die,
+    create_white_die,
     get_default_variant_cards,
     get_default_version_deck,
 )
@@ -159,6 +160,12 @@ class GameController:
         )
 
         # Reset per-round metadata for all players
+        max_rerolls = (
+            self.state.config.throttled_free_rerolls
+            if self.state.active_directive_code == "POLYMORPHIC_WORM"
+            else self.state.config.default_free_rerolls
+        )
+
         for i, p in enumerate(self.state.players):
             meta = self.player_meta[i]
             meta["rolled_pool"] = []
@@ -170,6 +177,11 @@ class GameController:
             meta["dirty_income_taken_this_turn"] = False
             meta["spent_from_kept"] = 0
             meta["locked_reroll_indices"] = []
+            meta["hired_contractors"] = 0
+            meta["rerolls_remaining"] = max_rerolls
+            meta["max_rerolls"] = max_rerolls
+            p.contractor_dice.clear()
+            p.hired_contractor_count = 0
 
             # Reset star ability eligibility
             p.b2_available = False
@@ -188,8 +200,51 @@ class GameController:
     # Phase 1: Boot & Configure (Interactive)
     # =========================================================================
 
+    def hire_contractors(self, player_id: int, count: int) -> Dict[str, Any]:
+        """Hires 1-3 temporary White Contractor dice during Phase 1 before rolling."""
+        if self.phase != 1:
+            raise ValueError(f"Cannot hire contractors in phase {self.phase} ({self.phase_name})")
+        if player_id not in self.player_meta:
+            raise ValueError(f"Invalid player_id {player_id}")
+
+        meta = self.player_meta[player_id]
+        player = self.state.players[player_id]
+
+        if player.is_patient_zero:
+            raise ValueError(f"Player {player_id} is eliminated")
+        if meta["has_rolled"]:
+            raise ValueError("Cannot hire contractors after rolling pool")
+        if not isinstance(count, int) or not (1 <= count <= self.state.config.contractor_max_hire):
+            raise ValueError(f"Contractor hire count must be between 1 and {self.state.config.contractor_max_hire}, got {count}")
+
+        already_hired = meta.get("hired_contractors", 0)
+        if already_hired + count > self.state.config.contractor_max_hire:
+            raise ValueError(f"Cannot hire {count} contractors: already hired {already_hired}, max allowed is {self.state.config.contractor_max_hire}")
+
+        cost = self.state.config.get_contractor_cost_for_hire(count, already_hired=already_hired)
+        if player.money < cost:
+            raise ValueError(f"Insufficient funds: need ${cost}, have ${player.money}")
+        if self.state.contractor_supply < count:
+            raise ValueError(f"Insufficient contractor supply: requested {count}, available {self.state.contractor_supply}")
+
+        player.money -= cost
+        self.state.contractor_supply -= count
+        player.hired_contractor_count += count
+        player.total_contractors_hired += count
+        meta["hired_contractors"] = already_hired + count
+
+        for _ in range(count):
+            c_die = create_white_die(self.state.next_die_id)
+            self.state.next_die_id += 1
+            player.contractor_dice.append(c_die)
+
+        self.event_log.append(
+            f"{meta['name']} hired {count} Contractor dice for ${cost} (Total hired: {meta['hired_contractors']}, Remaining supply: {self.state.contractor_supply})."
+        )
+        return self.get_full_state()
+
     def roll_pool(self, player_id: int) -> Dict[str, Any]:
-        """Rolls the ready pool for an interactive human player in Phase 1."""
+        """Rolls the ready pool and contractor dice for an interactive human player in Phase 1."""
         if self.phase != 1:
             raise ValueError(f"Cannot roll pool in phase {self.phase} ({self.phase_name})")
         if player_id not in self.player_meta:
@@ -203,18 +258,126 @@ class GameController:
         if meta["has_rolled"]:
             raise ValueError(f"Player {player_id} has already rolled their pool this round")
 
-        # Roll each ready die
-        rolled_dice: List[Die] = []
-        for die in player.ready_dice:
+        # Roll active pool (ready_dice + contractor_dice)
+        active_dice: List[Die] = list(player.ready_dice) + list(player.contractor_dice)
+        for die in active_dice:
+            die.is_locked = False
             die.roll(self.engine.rng)
-            rolled_dice.append(die)
 
-        meta["rolled_pool"] = list(rolled_dice)
+        meta["rolled_pool"] = list(active_dice)
         meta["has_rolled"] = True
         self.subphase = "waiting_for_commit"
 
-        face_names = [d.current_face.name if d.current_face else "?" for d in rolled_dice]
-        self.event_log.append(f"{meta['name']} rolled {len(rolled_dice)} dice: {', '.join(face_names)}")
+        # Evaluate locks per RULES.md v0.6
+        active_directive = self.state.active_directive_code
+        for die in active_dice:
+            face = die.current_face
+            if not face:
+                continue
+            if face.is_glitch:
+                die.is_locked = True
+            elif active_directive == "RAAS" and face.money > 0:
+                die.is_locked = True
+            elif active_directive == "ZERO_DAY_OVERRIDE" and face.is_shield:
+                die.is_locked = True
+
+        face_names = [
+            f"{d.current_face.name}{' [LOCKED]' if d.is_locked else ''}" if d.current_face else "?"
+            for d in active_dice
+        ]
+        self.event_log.append(f"{meta['name']} rolled {len(active_dice)} dice: {', '.join(face_names)}")
+        return self.get_full_state()
+
+    def perform_reroll(self, player_id: int, reroll_indices: List[int]) -> Dict[str, Any]:
+        """Performs a Yahtzee free reroll on a subset of unlocked rolled dice."""
+        if self.phase != 1:
+            raise ValueError(f"Cannot reroll in phase {self.phase}")
+        if player_id not in self.player_meta:
+            raise ValueError(f"Invalid player_id {player_id}")
+
+        meta = self.player_meta[player_id]
+        player = self.state.players[player_id]
+
+        if player.is_patient_zero:
+            raise ValueError(f"Player {player_id} is eliminated")
+        if not meta["has_rolled"]:
+            raise ValueError("Must roll pool before rerolling")
+        if meta["has_committed"]:
+            raise ValueError("Cannot reroll after committing defenses")
+        if meta.get("rerolls_remaining", 0) <= 0:
+            raise ValueError("No free rerolls remaining this round")
+        if not isinstance(reroll_indices, list) or len(reroll_indices) == 0:
+            raise ValueError("reroll_indices must be a non-empty list of integers")
+
+        rolled = meta["rolled_pool"]
+        for idx in reroll_indices:
+            if not isinstance(idx, int) or not (0 <= idx < len(rolled)):
+                raise ValueError(f"Invalid die index {idx}. Rolled pool size: {len(rolled)}")
+            if rolled[idx].is_locked:
+                raise ValueError(f"Die #{idx + 1} ({rolled[idx].color.value}) is locked and cannot be rerolled")
+
+        rerolled_faces = []
+        for idx in reroll_indices:
+            die = rolled[idx]
+            new_face = die.roll(self.engine.rng)
+            die.is_locked = False
+            rerolled_faces.append(f"#{idx + 1} ({new_face.name})")
+
+        meta["rerolls_remaining"] -= 1
+        player.total_rerolls_used += 1
+
+        # Re-evaluate locks on all dice in rolled_pool
+        active_directive = self.state.active_directive_code
+        for d in rolled:
+            face = d.current_face
+            if not face:
+                continue
+            if face.is_glitch:
+                d.is_locked = True
+            elif active_directive == "RAAS" and face.money > 0:
+                d.is_locked = True
+            elif active_directive == "ZERO_DAY_OVERRIDE" and face.is_shield:
+                d.is_locked = True
+
+        self.event_log.append(
+            f"{meta['name']} rerolled dice {', '.join(rerolled_faces)} ({meta['rerolls_remaining']} rerolls remaining)."
+        )
+        return self.get_full_state()
+
+    def debug_unlock_die(self, player_id: int, die_index: int) -> Dict[str, Any]:
+        """Spends 1 🔧 token to unlock a locked die, allowing it to be rerolled in remaining rerolls."""
+        if self.phase != 1:
+            raise ValueError(f"Cannot debug unlock in phase {self.phase}")
+        if player_id not in self.player_meta:
+            raise ValueError(f"Invalid player_id {player_id}")
+
+        meta = self.player_meta[player_id]
+        player = self.state.players[player_id]
+
+        if player.is_patient_zero:
+            raise ValueError(f"Player {player_id} is eliminated")
+        if not meta["has_rolled"]:
+            raise ValueError("Must roll pool before debug unlocking")
+        if meta["has_committed"]:
+            raise ValueError("Cannot debug unlock after committing defenses")
+
+        rolled = meta["rolled_pool"]
+        if not (0 <= die_index < len(rolled)):
+            raise ValueError(f"Invalid die_index {die_index}. Rolled pool size: {len(rolled)}")
+
+        die = rolled[die_index]
+        if not die.is_locked:
+            raise ValueError(f"Die #{die_index + 1} is not locked")
+
+        if player.patches < 1:
+            raise ValueError("Not enough patch tokens (🔧) to debug unlock")
+
+        player.patches -= 1
+        die.is_locked = False
+
+        self.event_log.append(
+            f"{meta['name']} spent 1 🔧 to debug unlock die #{die_index + 1} ({die.color.value})."
+        )
         return self.get_full_state()
 
     def hotfix_reroll(self, player_id: int, die_index: int) -> Dict[str, Any]:
@@ -309,7 +472,7 @@ class GameController:
 
             die = rolled[idx]
             face = die.current_face
-            if not face or not face.is_shield:
+            if not face or not face.is_shield or face.is_glitch:
                 raise ValueError(f"Die #{idx + 1} ({die.color.value}) is not a shield die ({face.name if face else 'None'})")
 
             shield_target = ShieldColor(color_str.lower())
@@ -385,7 +548,7 @@ class GameController:
         return self.get_full_state()
 
     def _auto_execute_bots_phase_1(self) -> None:
-        """Runs Phase 1 roll, hotfix heuristics, and defense commitments for bot players."""
+        """Runs Phase 1 contractor hiring, roll, Yahtzee rerolls/debug, and defense commitments for bot players."""
         staging_copy = dict(self.state.staging_cup)
         stuck_copy = self.state.tower.get_stuck_copy()
 
@@ -394,79 +557,146 @@ class GameController:
             if meta["is_human"] or player.is_patient_zero:
                 continue
 
-            # 1. Roll ready pool
-            for die in player.ready_dice:
-                die.roll(self.engine.rng)
-
-            # 2. Hotfix rerolls
-            reroll_indices = player.bot.choose_hotfix_rerolls(
+            # 1. Temp Staffing (Contractor Hiring)
+            max_hire = self.state.config.get_max_affordable_contractors(
+                money=player.money,
+                already_hired=player.hired_contractor_count,
+                supply=self.state.contractor_supply,
+            )
+            desired_hire = player.bot.choose_contractor_hires(
                 player_state=player,
-                rolled_dice=player.ready_dice,
+                contractor_supply=self.state.contractor_supply,
                 staging_cubes=staging_copy,
                 stuck_cubes=stuck_copy,
                 rng=self.engine.rng,
             )
-            valid_rerolls = [idx for idx in reroll_indices if 0 <= idx < len(player.ready_dice)]
-            kept_patches = sum(
-                player.ready_dice[i].current_face.patches
-                for i in range(len(player.ready_dice))
-                if i not in valid_rerolls and player.ready_dice[i].current_face
+            actual_hire = max(0, min(desired_hire, max_hire))
+            if actual_hire > 0:
+                cost = self.state.config.get_contractor_cost_for_hire(
+                    actual_hire, already_hired=player.hired_contractor_count
+                )
+                player.money -= cost
+                self.state.contractor_supply -= actual_hire
+                player.hired_contractor_count += actual_hire
+                player.total_contractors_hired += actual_hire
+                meta["hired_contractors"] = player.hired_contractor_count
+                for _ in range(actual_hire):
+                    c_die = create_white_die(self.state.next_die_id)
+                    self.state.next_die_id += 1
+                    player.contractor_dice.append(c_die)
+
+            # 2. Roll Active Pool
+            active_dice: List[Die] = list(player.ready_dice) + list(player.contractor_dice)
+            for die in active_dice:
+                die.is_locked = False
+                die.roll(self.engine.rng)
+
+            # 3. Yahtzee Rerolls & Lock Resolution
+            active_directive = self.state.active_directive_code
+            max_free_rerolls = (
+                self.state.config.throttled_free_rerolls
+                if active_directive == "POLYMORPHIC_WORM"
+                else self.state.config.default_free_rerolls
             )
-            total_avail = player.patches + kept_patches
 
-            rerolls_done = 0
-            for idx in valid_rerolls:
-                if rerolls_done < total_avail:
-                    rerolls_done += 1
-                    player.ready_dice[idx].roll(self.engine.rng)
+            def _eval_locks(dice_list: List[Die]) -> None:
+                for d in dice_list:
+                    face = d.current_face
+                    if not face:
+                        continue
+                    if face.is_glitch:
+                        d.is_locked = True
+                    elif active_directive == "RAAS" and face.money > 0:
+                        d.is_locked = True
+                    elif active_directive == "ZERO_DAY_OVERRIDE" and face.is_shield:
+                        d.is_locked = True
 
-            if rerolls_done <= player.patches:
-                player.patches -= rerolls_done
-                spent_from_kept = 0
-            else:
-                spent_from_kept = rerolls_done - player.patches
-                player.patches = 0
+            _eval_locks(active_dice)
 
-            # 3. Collect immediate face outputs
-            self.engine._apply_immediate_face_outputs(player)
-            player.patches = max(0, player.patches - spent_from_kept)
+            rerolls_remaining = max_free_rerolls
+            while rerolls_remaining > 0:
+                if player.patches > 0:
+                    unlock_indices = player.bot.choose_debug_unlocks(
+                        player_state=player,
+                        active_dice=active_dice,
+                        staging_cubes=staging_copy,
+                        stuck_cubes=stuck_copy,
+                        directive_code=active_directive,
+                        rng=self.engine.rng,
+                    )
+                    for u_idx in unlock_indices:
+                        if player.patches <= 0:
+                            break
+                        if 0 <= u_idx < len(active_dice) and active_dice[u_idx].is_locked:
+                            active_dice[u_idx].is_locked = False
+                            player.patches -= 1
+
+                reroll_indices = player.bot.choose_yahtzee_rerolls(
+                    player_state=player,
+                    active_dice=active_dice,
+                    rerolls_remaining=rerolls_remaining,
+                    staging_cubes=staging_copy,
+                    stuck_cubes=stuck_copy,
+                    directive_code=active_directive,
+                    rng=self.engine.rng,
+                )
+                valid_rerolls = [
+                    idx for idx in reroll_indices
+                    if 0 <= idx < len(active_dice) and not active_dice[idx].is_locked
+                ]
+                if not valid_rerolls:
+                    break
+
+                for r_idx in valid_rerolls:
+                    active_dice[r_idx].roll(self.engine.rng)
+                    active_dice[r_idx].is_locked = False
+
+                _eval_locks(active_dice)
+                player.total_rerolls_used += 1
+                rerolls_remaining -= 1
+
+            _eval_locks(active_dice)
+
+            # 4. Collect immediate face outputs
+            for die in active_dice:
+                self.engine._apply_single_die_immediate_output(player, die)
             player.patches = min(player.patches, self.state.config.max_patch_tokens)
 
-            # 4. Commit defenses
+            # 5. Commit defenses
             commitments = player.bot.commit_shields(
                 player_state=player,
-                rolled_dice=player.ready_dice,
+                rolled_dice=active_dice,
                 staging_cubes=staging_copy,
                 stuck_cubes=stuck_copy,
-                directive_code=self.state.active_directive_code,
+                directive_code=active_directive,
                 rng=self.engine.rng,
             )
             validated: Dict[int, ShieldColor] = {}
-            for idx, die in enumerate(player.ready_dice):
+            for idx, die in enumerate(active_dice):
                 face = die.current_face
-                if not face or not face.is_shield:
+                if not face or not face.is_shield or face.is_glitch:
                     continue
                 if idx in commitments:
                     c = commitments[idx]
-                    validated[idx] = c if c in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN) else ShieldColor.RED
+                    validated[idx] = c if c in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN) else ShieldColor.BLUE
                 elif face.shield_color in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN):
                     if face.star_code != "B2":
                         validated[idx] = face.shield_color
                 elif face.shield_color == ShieldColor.ANY:
-                    validated[idx] = ShieldColor.RED
+                    validated[idx] = ShieldColor.BLUE
 
-            meta["rolled_pool"] = list(player.ready_dice)
+            meta["rolled_pool"] = list(active_dice)
             meta["commitments"] = {idx: color.value for idx, color in validated.items()}
             meta["has_rolled"] = True
             meta["has_committed"] = True
 
             slots = {"red": [], "blue": [], "green": []}
             for idx, color in validated.items():
-                slots[color.value].append(player.ready_dice[idx])
+                slots[color.value].append(active_dice[idx])
             meta["shield_slots"] = slots
 
-            # 5. Track Star availability
-            for idx, die in enumerate(player.ready_dice):
+            # 6. Track Star availability
+            for idx, die in enumerate(active_dice):
                 face = die.current_face
                 if not face or not face.is_star:
                     continue
@@ -543,6 +773,7 @@ class GameController:
         # Update per-player metadata after Phase 2 attack and wear resolution
         for pid, player in enumerate(self.state.players):
             meta = self.player_meta[pid]
+            meta["hired_contractors"] = 0
             # Shield slots have finished blocking/resolving for the round
             meta["shield_slots"] = {"red": [], "blue": [], "green": []}
             # Remove any dice that were worn down to unpatched or destroyed from the rolled pool
@@ -975,11 +1206,44 @@ class GameController:
         avail_patches = player.patches + max(0, kept_patches - meta.get("spent_from_kept", 0))
 
         can_roll = (self.phase == 1 and not meta["has_rolled"] and not is_eliminated)
+        already_hired = meta.get("hired_contractors", 0)
+        max_contractors = self.state.config.contractor_max_hire
+        if already_hired < max_contractors:
+            next_contractor_cost = self.state.config.get_contractor_cost_for_hire(1, already_hired=already_hired)
+        else:
+            next_contractor_cost = None
+
+        can_hire_contractors = (
+            self.phase == 1
+            and not meta["has_rolled"]
+            and not is_eliminated
+            and already_hired < max_contractors
+            and self.state.contractor_supply > 0
+            and next_contractor_cost is not None
+            and player.money >= next_contractor_cost
+        )
+        rolled_pool = meta.get("rolled_pool", [])
+        can_reroll = (
+            self.phase == 1
+            and meta["has_rolled"]
+            and not meta["has_committed"]
+            and not is_eliminated
+            and meta.get("rerolls_remaining", 0) > 0
+            and any(not getattr(d, "is_locked", False) for d in rolled_pool)
+        )
+        can_debug_unlock = (
+            self.phase == 1
+            and meta["has_rolled"]
+            and not meta["has_committed"]
+            and not is_eliminated
+            and player.patches > 0
+            and any(getattr(d, "is_locked", False) for d in rolled_pool)
+        )
         can_hotfix = (self.phase == 1 and meta["has_rolled"] and not meta["has_committed"] and avail_patches > 0 and not is_eliminated)
         can_commit = (self.phase == 1 and meta["has_rolled"] and not meta["has_committed"] and not is_eliminated)
         can_compile = (self.phase == 2 and self.subphase == "ready_for_compile")
 
-        patch_cost = 3 if self.state.active_directive_code == "POLYMORPHIC_WORM" else self.state.config.patch_cash_cost
+        patch_cost = self.state.config.patch_cash_cost
         can_patch_cash = (
             self.phase == 3
             and is_active
@@ -1027,6 +1291,10 @@ class GameController:
 
         return {
             "can_roll": can_roll,
+            "can_hire_contractors": can_hire_contractors,
+            "next_contractor_cost": next_contractor_cost,
+            "can_reroll": can_reroll,
+            "can_debug_unlock": can_debug_unlock,
             "can_hotfix": can_hotfix,
             "can_commit": can_commit,
             "can_compile": can_compile,

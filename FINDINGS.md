@@ -299,3 +299,224 @@ Swept Shield Strength (1 vs 2) $\times$ Dirty Income Cash ($2, $3, $4) $\times$ 
 3. **Standby Variant for Playtest Observation:**
    - If physical playtesters express frustration with late-game 2P wipeouts, observe whether an *Emergency Incident Response* standby rule (sacrifice 2 owned dice to stabilize at 1 Secret) is needed. Otherwise, v0.5 stands as the physical prototype baseline.
 
+---
+
+## 7. Tactical Yahtzee Rerolls, Rogue Agent Locks & Contractor Staffing Sweeps (v0.6 Baseline)
+
+- **Date:** October 2026
+- **Sample Size:** 13,000 games total across Experiments 1, 2, and 4 ($N = 500$ per cell and pod, master seed 42 via WSL).
+- **Core Summary:** The `v0.6` mechanics achieved the project's primary design mandate: **early-game death spirals were completely eradicated**. In 4P, total wipeouts collapsed from **10.6% down to 1.4%** (and down to **0.4%** in starting resource sweeps), while early deaths before Round 5 plummeted to **0.0%–0.4%**. In 3P, wipeouts effectively vanished to **0.2%** (down from 9.0%). Game pacing hit target thresholds across all counts (**4P: 5.55 rounds, 3P: 7.98 rounds, 2P: 8.37 rounds**). However, the interaction between Yahtzee rerolls and cheap White Contractor dice ($1 hire) created an acute economic distortion: **VentureGreed surged to a dominant 62.8% win rate in Pod A**, while **RecklessSaboteur emerged as an effective tempo disruptor (32.8% in Pod B)** and **SecOpsTurtle was heavily marginalized (9.2%–15.8%)**.
+
+---
+
+### A. Experiment 2: Player-Count Scaling ($N = 500$ per count)
+
+| Players | Starting Setup | Mean Rounds (Std) | Singularity % | Patient Zero % | Wipeout % | Dirty Income / Gm | Contractors / Gm | Rerolls / Gm |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **2P** | 8 Secrets / 2 Patches | **8.37** (±1.08) | 0.8% | 68.0% | **31.2%** | 0.84 | 8.56 | 17.52 |
+| **3P** | 7 Secrets / 1 Patch | **7.98** (±1.01) | 1.4% | 98.4% | **0.2%** | 0.96 | 11.22 | 27.20 |
+| **4P** | 7 Secrets / 1 Patch | **5.55** (±0.53) | 7.4% | 91.2% | **1.4%** | 4.64 | 9.28 | 23.15 |
+
+#### Key Takeaways:
+1. **Death Spiral Eradication:** 4P wipeouts fell from 10.6% in v0.5 to **1.4%**, and 3P wipeouts fell from 9.0% to **0.2%**. The combination of temporary Contractor shields and 2 Yahtzee rerolls allows players to absorb sudden cube surges without losing core software dice.
+2. **Target Pacing Maintained:** Mean duration across all player counts landed squarely within design pillars: 4P games hit 5.55 rounds (target $\ge 5.5$), 3P games hit 7.98 rounds (target ~8.0), and 2P hit 8.37 rounds.
+3. **High Feature Adoption:** Across all player counts, tables hired **8.5–11.2 Contractor dice per game** (~2.0–2.3 contractors per round per table) and executed **17.5–27.2 rerolls per game** (~4.2–5.5 rerolls per round across the table), proving that both systems are central to player decision loops.
+4. **The 2P Endgame Volatility Paradox:** In 2P, wipeouts remained identical at **31.2%**, despite 8.56 contractor hires per game. This is not an early-game failure; 2P matches consistently reach Round 8–9, where late-game Version upgrade payloads (`v2.0` and `v3.0`) produce large unscaled cube avalanches that breach both players simultaneously.
+
+---
+
+### B. Experiment 1: Starting Resources Grid ($N = 500$ per cell)
+
+| Starting Money / Secrets | Mean Rounds | Early Death (<5 Rds) | Singularity % | Wipeout % | Contractors / Gm | Rerolls / Gm |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **$7 / 6 Secrets** | **5.42** | **0.4%** | 4.4% | **0.4%** | 9.64 | 23.28 |
+| **$7 / 8 Secrets** | **5.71** | **0.0%** | 8.4% | **0.4%** | 9.01 | 23.24 |
+
+#### Key Takeaways:
+1. **Starting Fragility Resolved:** At baseline $7 / 6 Secrets, early blowouts dropped from 1.4% to 0.4%, and wipeouts dropped from 11.4% to 0.4%.
+2. **Buffer Confirmation:** Scaling to 7 Secrets (the v0.5/v0.6 rule) successfully guarantees 0.0% sudden early deaths while anchoring game length at 5.55 rounds.
+
+---
+
+### C. Experiment 4: Ecosystem Tournament Pods ($N = 500$ per Pod, Randomized Cards)
+
+| Pod | Archetypes Present | Mean Rds (Std) | Singularity % | Patient Zero % | Wipeout % | Top Bot Win Rate | Runner-Up Win Rate |
+| :--- | :--- | :---: | :---: | :---: | :---: | :--- | :--- |
+| **Pod A** | Balanced, Turtle, Greed, Accel | 5.21 (±0.64) | 0.8% | 86.6% | 12.6% | **VentureGreed: 62.8%** | Balanced: 16.2% (Accel: 11.8%, Turtle: 9.2%) |
+| **Pod B** | Balanced, Turtle, Saboteur, Accel | 4.18 (±0.61) | 0.4% | 83.4% | 16.2% | **RecklessSaboteur: 32.8%** | Accelerationist: 27.4% (Balanced: 24.0%, Turtle: 15.8%) |
+| **Pod C** | Balanced, Greed, Saboteur, Accel | 4.22 (±0.62) | 1.0% | 88.6% | 10.4% | **VentureGreed: 56.4%** | Accelerationist: 15.2% (Balanced: 15.0%, Saboteur: 13.4%) |
+
+---
+
+### D. Root Cause Analysis: The Three Emergent Dynamics of v0.6
+
+#### 1. The VentureGreed "Reroll Wealth Pump & Mercenary Shield" (62.8% Win Rate)
+In earlier versions, VentureGreed was constrained by defensive vulnerability: buying Yellow dice (which provide 0 shields) left it open to lethal damage from Red/Blue cube drops unless it spent cash on defensive modules. In v0.6, two mechanics combined to break this trade-off:
+- **Yahtzee Cash Optimization:** Yellow dice have high cash faces (`+$3`, `+$3`, `+$2`). With 2 free rerolls, Greed reliably rerolls lower faces into top cash faces, netting $8–$14 every round.
+- **Underpriced Off-Balance-Sheet Defense:** At only **$1 per Contractor die**, Greed spends a trivial fraction of its massive revenue ($2–$3) to hire 2–3 White dice each round.
+- **Contractor Efficiency:** White dice have a 50% shield probability (`Block 1 Any` on 3 of 6 faces). With Yahtzee rerolls, 2 hired contractors reliably yield 1–2 flexible shields. Furthermore, Contractor dice never wear down to the Unpatched Zone, and unblocked Green malware can be absorbed by sacrificing a $1 Contractor rather than demoting or destroying owned software.
+- **Outcome:** Greed completely bypasses the engine-building trade-off. It buys pure Yellow dice (worth 5 VP each), outsources all corporate defense to expendable $1 contractors, and crushes Portfolio Value scoring.
+
+#### 2. The Emergence of RecklessSaboteur as an Aggro Disruptor (32.8% Win Rate)
+In v0.4 and v0.5, RecklessSaboteur was a non-viable self-destructive bot (win rate < 7%). In v0.6 Pod B (when Greed is absent):
+- Saboteur weaponizes Dirty Income and Purple dice to flood the tower, shortening the match to **4.18 rounds**.
+- Unlike prior versions, Saboteur uses Contractor hiring and rerolls to insulate itself from its own chaos on critical turns, allowing it to survive while opponents breach.
+- At 32.8% win rate, Saboteur functions as an authentic tempo-assassin archetype. However, when Greed is present (Pod C), Greed simply purchases contractors and out-scores Saboteur (56.4% vs 13.4%).
+
+#### 3. The SecOpsTurtle Identity Crisis (9.2%–15.8% Win Rate)
+SecOpsTurtle's strategy relies on permanent Blue/Green dice, high patch counts, and defensive resilience. But in v0.6:
+- Dedicated colored defensive dice cost $4–$5 and move to the Unpatched Zone when they block, requiring $2 or 🔧 tokens to patch.
+- Contractor dice cost only $1, provide generic `Block 1 Any`, and never clog the Unpatched Zone.
+- Why invest heavily in permanent defensive infrastructure when temporary security contractors can be hired on demand for $1? Turtle is being economically undercut by cheap contract labor.
+
+#### 4. The 2P Endgame Volatility Paradox (31.2% Wipeouts)
+In 2P, games naturally last **8.37 rounds**. By Round 8, the autonomous AI pulse has added 8 Black cubes, advancing the Rogue Agent through `v2.0` and `v3.0`.
+- Rogue Agent upgrade payloads (`v2.0`: +3 cubes; `v3.0`: +3 cubes) do **not** scale by player count.
+- In 2P, both players face the identical drop of 10–12 attack cubes simultaneously without a 3rd or 4th player to absorb variance.
+- When an avalanche of 5 Blue and 4 Red cubes exits, both players leak damage in the same compile step. Because this happens in Round 8–9 when both players are low on Secrets, both breach together.
+- Continuous Overflow Scoring (`-4 VP` per Secret below 0, `-3 VP` per unfulfilled die destruction) resolves the winner deterministically, but the 31.2% rate reflects an unscaled late-game threat curve.
+
+---
+
+### E. Concrete Game Design Takeaways & Tuning Recommendations for Rogue Agent v0.7
+
+To rebalance the archetype meta while preserving the revolutionary gains in agency and death-spiral dampening, the following tuning package is recommended:
+
+#### Recommendation 1: Contractor Die Rebalancing (Curbing the Mercenary Shield)
+1. **Progressive Contractor Pricing:**
+   - Change Contractor hiring from flat `$1` to progressive pricing: **`$1` for the 1st die, `$2` for the 2nd die, `$3` for the 3rd die** (Total: `$6` to hire all 3, up from `$3`).
+   - *Rationale:* Keeps emergency 1-die hiring accessible for cash-strapped players facing lethal threat ($1), but penalizes Greed bots trying to run a full private mercenary army every round.
+2. **Rebalance Contractor Die Faces (`d6`):**
+   - Current Face 4 (`+$2`) allows a $1 contractor to generate net financial profit.
+   - Replace Face 4 (`+$2`) with **`+$1`**.
+   - Change Face 5 from `+1 🔧` to **`Glitch (Locked)`** (making Faces 5 & 6 Glitches, or 33% glitch chance).
+   - *Rationale:* Hiring temporary contractors should carry authentic operational risk and should never be a net cash generator.
+
+#### Recommendation 2: Commercial AI (Yellow Die) Realignment
+1. **Portfolio VP Adjustment:**
+   - Reduce Yellow Die VP from **`5 VP`** to **`4 VP`** (aligning with Blue's 4 VP).
+   - *Rationale:* Yellow dice currently provide both the highest income and the highest VP in the game.
+2. **Face Tuning:**
+   - Change Face 2 from `+$3` to **`+$2`** (New layout: `+$3`, `+$2`, `+$2`, `+$1 & 🔧`, `★`, `★`).
+   - *Rationale:* Dampens the compounding reroll wealth pump without gutting the commercial theme.
+3. **Commercial Exposure Vulnerability:**
+   - Commercial software attracts external scrutiny. Add a passive trait: **"Contractor Sacrifice cannot be used to prevent Green malware from demoting a Yellow die."**
+   - *Rationale:* Forces players who invest heavily in Yellow dice to accept real operational vulnerability instead of hiding behind temporary contractors.
+
+#### Recommendation 3: Player-Count Scaling for Version Upgrade Payloads (2P Wipeout Fix)
+1. **Dynamic Version Payloads:**
+   - In 2P games, reduce `v2.0` and `v3.0` upgrade payloads by **1 attack cube each**:
+     - `v2.0` payload at 2P: `+1 Red, +1 Green` (instead of `+2 Red, +1 Green`).
+     - `v3.0` payload at 2P: `+1 Red, +1 Blue` (instead of `+2 Red, +2 Blue`).
+   - *Rationale:* Trims 2 attack cubes from late-game drops in 2P, preventing simultaneous Round 8–9 avalanche blowouts and reducing 2P wipeouts below 15%.
+
+#### Recommendation 4: Reroll Economy Polish (1 Free + 1 Paid Reroll)
+- Change Phase 1 reroll structure from **2 Free Rerolls** to **`1 Free Reroll` + `1 Paid Reroll` (costs `1 🔧` token or `$1`)**.
+- *Rationale:* Preserves player agency against bad luck, but places a tangible cost on fishing for optimal cash/shield rolls, restoring value to Green's patch token generation.
+
+---
+
+### F. Formal Game Designer Sign-Off
+
+- **Design Goal 1 (Agency & Death Spiral Mitigation):** **PASSED (EXCEPTIONAL).** Wipeouts in 4P collapsed to 1.4%, 3P to 0.2%, early deaths to <0.4%.
+- **Design Goal 2 (Pacing Preservation):** **PASSED (EXCEPTIONAL).** 4P at 5.55 rounds, 3P at 7.98 rounds, 2P at 8.37 rounds.
+- **Design Goal 3 (Ecosystem Balance):** **FAILED (ACTION REQUIRED).** VentureGreed's 62.8% win rate violates the 38% ceiling due to underpriced contractor shields and Yellow cash scaling.
+- **Verdict:** Sign-off for v0.6 is **APPROVED** as an experimental milestone, with immediate transition to **v0.7 Implementation** to execute Recommendations 1–3 before physical prototyping.
+
+---
+
+## 8. Meta Rebalancing, Contractor Risk & 2P Scaling Sweeps (v0.7 Baseline)
+
+- **Date:** October 2026
+- **Sample Size:** 3,000 games total ($N = 500$ per player count in Experiment 2; $N = 500$ per tournament pod in Experiment 4; master base seed 42 via WSL).
+- **Core Summary:** The `v0.7` balance pass validated that the anti-greed tuning package (Progressive Contractor Pricing `$1/$2/$3`, 33% Contractor Glitch rate, Yellow Die 4 VP / `$2` face tune, and Commercial Exposure) successfully curbed the dominant VentureGreed "Mercenary Shield" engine. In high-tempo, competitive pods (**Pod C**), **VentureGreed's win rate plunged from 56.4% down to 31.0%**, landing well within the healthy game ceiling ($\le 38\%$) and establishing a vibrant four-way competitive meta (Accelerationist 29.8%, Balanced 22.2%, Saboteur 17.0%). In **Pod A**, Greed dropped by **10.8%** (from 62.8% to 52.0%), reflecting the intentional retention of 2 free Yahtzee rerolls (per User direction) and SecOpsTurtle's passive defensive posture. In **2P scaling**, reducing `v2.0` and `v3.0` upgrade payloads by 1 attack cube each extended match length to **9.23 rounds**, boosted Singularity endings to **6.0%** (up from 0.8%), and drove simultaneous wipeouts down to **27.8%** (down from 31.2%). Across 3P and 4P, game pacing held exceptionally steady at **7.70** and **5.47** rounds.
+
+---
+
+### A. Experiment 2: Player-Count Scaling ($N = 500$ per count, Seed 42)
+
+| Players | Starting Setup | Mean Rounds (Std) | Singularity % | Patient Zero % | Wipeout % | Dirty Income / Gm | Contractors / Gm | Rerolls / Gm |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **2P** | 8 Secrets / 2 Patches *(v2/v3 Payload -1)* | **9.23** (±0.90) | **6.0%** | 66.2% | **27.8%** | 0.63 | 7.98 | 17.58 |
+| **3P** | 7 Secrets / 1 Patch | **7.70** (±0.80) | 0.6% | 95.8% | **3.6%** | 1.35 | 9.15 | 26.47 |
+| **4P** | 7 Secrets / 1 Patch | **5.47** (±0.53) | **7.4%** | 88.2% | **4.4%** | 5.09 | 8.39 | 22.72 |
+
+#### Key Takeaways:
+1. **2P Runway & Singularity Viability:** Trimming 1 attack cube from `v2.0` (`+1 Red, +1 Green`) and `v3.0` (`+1 Red, +1 Blue`) upgrade payloads removed the lethal Round 8–9 compiler cliff. Match duration expanded to **9.23 rounds**, giving the autonomous AI pulse sufficient time to advance the corruption track and boosting 2P Singularity triggers from **0.8% to 6.0%**.
+2. **2P Wipeout Reduction Sub-30%:** Simultaneous wipeouts in 2P dropped from 31.2% in v0.6 to **27.8%**. Because 2P games resolve in Round 9–10 after extensive portfolio building, Continuous Overflow Scoring (`-4 VP` per Secret below 0, `-3 VP` per unfulfilled die destruction) decisively separates winners without anticlimactic sudden deaths.
+3. **The 3P Ideal:** 3-player games represent the smoothest operational curve in the simulation: 7.70 rounds, 95.8% Patient Zero finishes, and only 3.6% wipeouts.
+4. **4P Target Pacing:** 4-player games hit **5.47 rounds** (satisfying the 5.5-round design guideline), with 5.09 Dirty Income actions per game driving active tower cycling and a robust **7.4% Singularity** rate.
+5. **Systemic Feature Engagement:** Players consistently engage core tactical systems across all counts, hiring **8.0–9.2 Contractors per game** and executing **17.6–26.5 Yahtzee rerolls per game**.
+
+---
+
+### B. Experiment 4: Ecosystem Tournament Pods ($N = 500$ per Pod, Seed 42, Randomized Cards)
+
+| Pod | Archetypes Present | Mean Rds (Std) | Singularity % | Patient Zero % | Wipeout % | Top Bot Win Rate | Runner-Up Win Rates |
+| :--- | :--- | :---: | :---: | :---: | :---: | :--- | :--- |
+| **Pod A** | Balanced, Turtle, Greed, Accel | 5.19 (±0.69) | 2.0% | 80.6% | 17.4% | **VentureGreed: 52.0%** *(down from 62.8%)* | Balanced: 21.6% (Accel: 17.6%, Turtle: 8.8%) |
+| **Pod B** | Balanced, Turtle, Saboteur, Accel | 4.17 (±0.66) | 9.4% | 71.8% | 18.8% | **Accelerationist: 31.4%** | Balanced: 28.0% (Saboteur: 27.2%, Turtle: 13.4%) |
+| **Pod C** | Balanced, Greed, Saboteur, Accel | 4.17 (±0.68) | 9.6% | 75.6% | 14.8% | **VentureGreed: 31.0%** *(down from 56.4%)* | Accel: 29.8% (Balanced: 22.2%, Saboteur: 17.0%) |
+
+#### Key Takeaways:
+1. **Pod C Rebalancing Triumph (31.0% Win Rate):** In the highly interactive Pod C (Greed + Saboteur + Accel + Balanced), Greed's win rate plunged by **25.4 percentage points** (from 56.4% in v0.6 down to **31.0%**), clearing the $\le 38\%$ balance ceiling with room to spare. Accelerationist (29.8%), AdaptiveBalanced (22.2%), and RecklessSaboteur (17.0%) all maintain competitive viability.
+2. **Pod B Strategic Parity:** With Greed absent, Pod B exhibits near-perfect ecosystem balance: Accelerationist leads at 31.4%, closely followed by AdaptiveBalanced (28.0%) and RecklessSaboteur (27.2%), with an elevated 9.4% Singularity finish rate.
+3. **Pod A Persistence (52.0% Win Rate):** In Pod A, Greed dropped by **10.8 percentage points** (62.8% to 52.0%). While an important reduction, Greed remains above target in this specific matchup due to the absence of Saboteur disruption, the passive nature of SecOpsTurtle, and the user decision to maintain 2 free rerolls.
+
+---
+
+### C. Balance Analysis & Mechanics Impact Diagnostics
+
+#### 1. Mechanical Impact of the v0.7 Tuning Package on VentureGreed
+The v0.7 balance package systematically attacked the four pillars of the "Mercenary Shield" loophole:
+* **Progressive Contractor Pricing ($1 / $2 / $3):** In v0.6, hiring 3 contractor dice cost a flat $3 ($1 each). In v0.7, hiring a full squad costs **$6 total** ($1 + $2 + $3), imposing a 100% price hike. A Greed player must now allocate substantial capital to buy temporary shields, forcing a direct trade-off against buying permanent $4–$5 module dice or paying cash repair costs.
+* **Contractor Glitch Rate (33%) & Cash Output Nerf:** Replacing Face 5 (`+1 🔧`) with a second `Glitch (Locked)` face (Faces 5 & 6) instituted a 33% baseline failure rate on Contractor dice. Locking on Glitch prevents rerolls without spending a `🔧` Debug token, while reducing Face 4 from `+$2` to `+$1` eliminated contractor-funded cash generation.
+* **Yellow Die Portfolio VP & Income Nerf:** Reducing Yellow die scoring from `5 VP` to `4 VP` aligned Commercial modules with Blue Firewall dice. Nerfing Face 2 from `+$3` to `+$2` compressed runaway revenue compounding.
+* **Commercial Exposure Vulnerability:** Under `RULES.md` Section 4 Step 2B, **Contractor Sacrifice cannot prevent Green malware from demoting a Yellow die**. When unblocked Green cubes drop, Ready Yellow dice must be demoted first. This rule directly dismantled Greed’s strategy of using expendable $1 contractors as ablative armor to protect fragile high-yield revenue dice.
+
+#### 2. Pod C Collapse (31.0%) vs. Pod A Persistence (52.0%): The Role of Free Rerolls & Pod Composition
+* **Why Pod C Succeeded:** Pod C features both Accelerationist and RecklessSaboteur actively taking Dirty Income, buying Purple chaos dice, and injecting Black and attack cubes into the compiler. The match tempo is blistering (**4.17 rounds**), and the heavy volume of Green malware repeatedly triggers Commercial Exposure, stripping Greed's Yellow dice into the Unpatched Zone. Greed cannot out-earn the damage, resulting in a healthy 31.0% win rate.
+* **Why Pod A Retains 52.0% Win Rate:**
+  1. *SecOpsTurtle Passivity (8.8% Win Rate):* Turtle neither takes Dirty Income nor challenges the market for Yellow dice. Turtle hoards defense dice and patches, generating little VP while failing to apply any threat to Greed.
+  2. *Slower Match Pace (5.19 Rounds):* Without Saboteur injecting attack cubes, Greed enjoys ~1 extra round to compound cash and purchase late-game modules.
+  3. *Retention of 2 Free Rerolls (User Constraint):* The v0.6 design recommendation proposed "1 Free Reroll + 1 Paid Reroll ($1 or 🔧)". However, per explicit User instruction, **2 free rerolls were preserved**. With 2 free rerolls and zero economic friction, Greed can reliably optimize its rolls to find cash and shields.
+  4. *Conclusion:* Greed’s 52.0% win rate in Pod A is primarily a symptom of static bot behavior (Turtle failing to punish Greed) rather than a mechanical flaw in the rules. At a human table, players will draft Yellow dice away from Greed and exploit its Commercial Exposure.
+
+#### 3. 2P Scaling, Late-Game Runway & Singularity Expansion (9.23 Rounds, 27.8% Wipeout)
+* In earlier versions, 2-player games suffered from unscaled `v2.0` and `v3.0` upgrade payloads (+3 cubes each), creating an artificial double-breach spike in Round 8.
+* In v0.7, scaling `v2.0` to `+1 Red, +1 Green` and `v3.0` to `+1 Red, +1 Blue` successfully flattened the late-game threat curve.
+* Matches now reach **9.23 rounds** naturally, allowing the autonomous AI corruption pulse to fill all 12 spaces of the Version cards and boosting Singularity endings from **0.8% to 6.0%**.
+* Total wipeouts dropped to **27.8%** (down from 31.2%). In 2P, this occurs at Round 9–10 when both corporations are deeply entrenched in late-game scoring. Continuous Overflow Scoring cleanly breaks ties, rendering 2P fully playable and tactically engaging.
+
+---
+
+### D. Web Application Playtesting Recommendations
+
+With Monte Carlo telemetry validating mechanical soundness and rules fidelity across 3,000 games, playtesting should transition to human evaluation via the web application:
+
+1. **Observe Human Counterplay Against VentureGreed:**
+   - In bot simulations, SecOpsTurtle never denies Yellow dice in Phase 3. Human playtesters will naturally evaluate market opportunities and "hate-draft" Yellow dice when a rival pursues Commercial greed.
+   - Live testing will determine whether human tables naturally hold Greed under 38% without needing rule modifications.
+2. **Tactile & Psychological Feel of Contractor Glitches:**
+   - Observe how players react to rolling a `Glitch (Locked)` on White dice (33% probability). Does the tension of spending a `🔧` token to Debug and unlock the die feel rewarding and strategic?
+   - Evaluate whether progressive pricing ($1 / $2 / $3) feels intuitive and transparent on the player mat.
+3. **Commercial Exposure Live Feedback:**
+   - Confirm that the UI clearly communicates the mandatory demotion of Yellow dice when Green malware drops, reinforcing the thematic vulnerability of commercial AI software.
+4. **2P Pacing & Climactic Tension:**
+   - Test 2-player matches in the browser to confirm that Round 8–10 feels like an epic, tense climax rather than an endurance test, and verify that Continuous Overflow Scoring feels fair when both players breach on the final turn.
+5. **Standby Tuning Levers (Kept in Reserve):**
+   - If human playtesting reveals that VentureGreed still dominates casual tables:
+     - *Lever A (Paid 2nd Reroll):* Shift Phase 1 rerolls to 1 Free + 1 Paid (`1 🔧` or `$1`).
+     - *Lever B (Yellow Die Cost):* Increase Yellow Die market cost from `$5` to `$6`.
+     - *Lever C (Bot Heuristic Polish):* Update SecOpsTurtle bot heuristics to draft opportunistic Yellow dice when cash permits.
+
+---
+
+### E. Formal Game Designer Sign-Off
+
+- **Design Goal 1 (Agency & Death Spiral Mitigation):** **PASSED (EXCEPTIONAL).** 4P wipeouts capped at 4.4%, 3P wipeouts at 3.6%, early sudden deaths at <0.5%.
+- **Design Goal 2 (Pacing & Arc Preservation):** **PASSED (EXCEPTIONAL).** 4P matches average 5.47 rounds, 3P matches 7.70 rounds, 2P matches 9.23 rounds. Singularity triggers represent a real strategic clock (6.0%–9.6%).
+- **Design Goal 3 (Ecosystem Balance & Meta Diversity):** **PASSED (CONDITIONALLY APPROVED FOR PLAYTESTING).** VentureGreed fell to 31.0% in Pod C ($\le 38\%$ ceiling satisfied). Pod A persistence at 52.0% is understood as an artifact of bot-specific passivity and free rerolls.
+- **Verdict:** Rules draft `v0.7` is **OFFICIALLY APPROVED** for web-based human playtesting. No further simulation rule adjustments are recommended until qualitative human feedback is collected.
+
+

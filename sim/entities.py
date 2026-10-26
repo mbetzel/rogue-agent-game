@@ -21,10 +21,11 @@ class Face:
     secrets: int = 0
     is_star: bool = False
     star_code: Optional[str] = None  # e.g. "R1", "B3", etc.
+    is_glitch: bool = False
 
     @property
     def is_shield(self) -> bool:
-        return self.block_amount > 0 and self.shield_color is not None
+        return self.block_amount > 0 and self.shield_color is not None and not self.is_glitch
 
 
 @dataclass
@@ -38,6 +39,7 @@ class Die:
     faces: List[Face]
     current_face: Optional[Face] = None
     variant_code: Optional[str] = None
+    is_locked: bool = False
 
     def roll(self, rng: random.Random) -> Face:
         """Roll the die and record the rolled face."""
@@ -65,6 +67,13 @@ class VersionCard:
     staging_payload: Dict[CubeColor, int]
     directive_description: str
     directive_code: str  # SCRIPT_KIDDIE, DATA_SCRAPER, RAAS, POLYMORPHIC_WORM, ZERO_DAY_OVERRIDE, CORRUPTED_KERNEL
+    staging_payload_2p: Optional[Dict[CubeColor, int]] = None
+
+    def get_staging_payload(self, num_players: int = 4) -> Dict[CubeColor, int]:
+        """Returns the version's staging payload cubes scaled for player count (2P vs 3P/4P)."""
+        if num_players == 2 and self.staging_payload_2p is not None:
+            return dict(self.staging_payload_2p)
+        return dict(self.staging_payload)
 
 
 # =====================================================================
@@ -317,22 +326,25 @@ def get_all_version_cards() -> List[VersionCard]:
             version_str="v2.0",
             name="Ransomware-as-a-Service",
             staging_payload={CubeColor.RED: 2, CubeColor.GREEN: 1},
-            directive_description="If 1+ Red cubes exit the tower, Red Strength gets +1.",
+            directive_description="Encrypted Memory: Any rolled die showing Cash (+$1 or +$2) is Locked immediately.",
             directive_code="RAAS",
+            staging_payload_2p={CubeColor.RED: 1, CubeColor.GREEN: 1},
         ),
         VersionCard(
             version_str="v2.0",
             name="Polymorphic Worm",
             staging_payload={CubeColor.GREEN: 2, CubeColor.BLUE: 1},
-            directive_description="Cash Patching in Phase 3 costs $3 instead of $2.",
+            directive_description="Subroutine Throttling: Players receive only 1 free reroll in Phase 1 (instead of 2).",
             directive_code="POLYMORPHIC_WORM",
+            staging_payload_2p={CubeColor.GREEN: 1, CubeColor.BLUE: 1},
         ),
         VersionCard(
             version_str="v3.0",
             name="Zero-Day Override",
             staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1},
-            directive_description="Each player's total Shield value in each active color is reduced by 1 (min 0).",
+            directive_description="Kernel Lock: Any rolled die showing a Shield (Block 1 or Block 2) is Locked immediately.",
             directive_code="ZERO_DAY_OVERRIDE",
+            staging_payload_2p={CubeColor.RED: 1, CubeColor.BLUE: 1},
         ),
         VersionCard(
             version_str="v3.0",
@@ -340,6 +352,7 @@ def get_all_version_cards() -> List[VersionCard]:
             staging_payload={CubeColor.RED: 2, CubeColor.BLUE: 2},
             directive_description="Each Black Cube that exits the tower adds +1 Strength to the Attack Color with the most exited cubes.",
             directive_code="CORRUPTED_KERNEL",
+            staging_payload_2p={CubeColor.RED: 1, CubeColor.BLUE: 1},
         ),
     ]
 
@@ -369,6 +382,25 @@ def create_gray_die(die_id: int) -> Die:
     )
 
 
+def create_white_die(die_id: int) -> Die:
+    """Creates a White (Contractor) temporary staffing die per RULES.md Section 6A (v0.7)."""
+    faces = [
+        Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
+        Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
+        Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
+        Face(name="+$1", money=1),
+        Face(name="Glitch (Locked)", is_glitch=True),
+        Face(name="Glitch (Locked)", is_glitch=True),
+    ]
+    return Die(
+        die_id=die_id,
+        color=DieColor.WHITE,
+        cost=1,
+        vp=0,
+        faces=faces,
+    )
+
+
 def create_colored_die(
     color: DieColor,
     die_id: int,
@@ -377,6 +409,8 @@ def create_colored_die(
     """Creates a colored die of the specified color, applying the active Variant Card to faces 5 & 6."""
     if color == DieColor.GRAY:
         return create_gray_die(die_id)
+    if color == DieColor.WHITE:
+        return create_white_die(die_id)
 
     star_face = variant_card.star_face if variant_card else Face(name=f"{color.value} ★", is_star=True)
     var_code = variant_card.code if variant_card else None
@@ -417,13 +451,13 @@ def create_colored_die(
     elif color == DieColor.YELLOW:
         faces = [
             Face(name="+$3", money=3),
-            Face(name="+$3", money=3),
+            Face(name="+$2", money=2),
             Face(name="+$2", money=2),
             Face(name="+$1 & +1 🔧", money=1, patches=1),
             star_face,
             star_face,
         ]
-        return Die(die_id=die_id, color=color, cost=5, vp=5, faces=faces, variant_code=var_code)
+        return Die(die_id=die_id, color=color, cost=5, vp=4, faces=faces, variant_code=var_code)
 
     elif color == DieColor.PURPLE:
         faces = [

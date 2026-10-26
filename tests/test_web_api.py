@@ -577,5 +577,49 @@ class TestWebAPI(unittest.TestCase):
         self.assertEqual(state["phase_name"], "Boot & Configure")
 
 
+    # -------------------------------------------------------------------------
+    # 18. Phase 1: Hire Contractors API
+    # -------------------------------------------------------------------------
+    def test_phase1_hire_contractors_api(self) -> None:
+        """POST /api/game/action/hire_contractors hires white contractor dice."""
+        self._post("/api/game/new", {"num_players": 4, "seed": 42})
+        res = self._post("/api/game/action/hire_contractors", {"player_id": 0, "count": 2})
+        self.assertTrue(res["success"])
+        p0 = res["state"]["players"][0]
+        self.assertEqual(p0["hired_contractors"], 2)
+        self.assertEqual(len(p0["contractor_dice"]), 2)
+        self.assertEqual(res["state"]["contractor_supply"], 10)
+
+    # -------------------------------------------------------------------------
+    # 19. Phase 1: Perform Reroll API
+    # -------------------------------------------------------------------------
+    def test_phase1_perform_reroll_api(self) -> None:
+        """POST /api/game/action/reroll rerolls selected unlocked dice."""
+        self._post("/api/game/new", {"num_players": 4, "seed": 42})
+        self._post("/api/game/action/roll", {"player_id": 0})
+        res = self._post("/api/game/action/reroll", {"player_id": 0, "reroll_indices": [0, 1]})
+        self.assertTrue(res["success"])
+        p0 = res["state"]["players"][0]
+        self.assertEqual(p0["rerolls_remaining"], 1)
+
+    # -------------------------------------------------------------------------
+    # 20. Phase 1: Debug Unlock API
+    # -------------------------------------------------------------------------
+    def test_phase1_debug_unlock_api(self) -> None:
+        """POST /api/game/action/debug_unlock spends 1 patch to unlock die."""
+        self._post("/api/game/new", {"num_players": 4, "seed": 42})
+        self._post("/api/game/action/roll", {"player_id": 0})
+
+        ctrl = RogueAgentRequestHandler.controller
+        ctrl.state.players[0].patches = 2
+        ctrl.player_meta[0]["rolled_pool"][0].is_locked = True
+
+        res = self._post("/api/game/action/debug_unlock", {"player_id": 0, "die_index": 0})
+        self.assertTrue(res["success"])
+        p0 = res["state"]["players"][0]
+        self.assertEqual(p0["patches"], 1)
+        self.assertFalse(p0["rolled_pool"][0]["is_locked"])
+
+
 if __name__ == "__main__":
     unittest.main()

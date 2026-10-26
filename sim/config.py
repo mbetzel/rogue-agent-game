@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 
 class CubeColor(str, Enum):
@@ -16,6 +16,7 @@ class CubeColor(str, Enum):
 
 class DieColor(str, Enum):
     GRAY = "gray"
+    WHITE = "white"
     RED = "red"
     BLUE = "blue"
     GREEN = "green"
@@ -77,6 +78,14 @@ class GameConfig:
     max_market_purchases_per_turn: int = 2  # [TUNE: 2]
     max_rounds: int = 30  # Safety cap for simulation termination
 
+    # Temp Staffing & Yahtzee Rerolls (v0.6 / v0.7)
+    contractor_hire_cost: int = 1
+    contractor_cost_progression: Tuple[int, ...] = (1, 2, 3)
+    contractor_max_hire: int = 3
+    contractor_supply_total: int = 12
+    default_free_rerolls: int = 2
+    throttled_free_rerolls: int = 1
+
     # Cube Tower mechanics
     tower_mode: TowerMode = TowerMode.LEDGE_AVALANCHE
     tower_flat_exit_prob: float = 0.70  # [0.60–0.80]
@@ -89,10 +98,11 @@ class GameConfig:
     vp_per_die: Dict[DieColor, int] = field(
         default_factory=lambda: {
             DieColor.GRAY: 0,
+            DieColor.WHITE: 0,
             DieColor.RED: 3,
             DieColor.BLUE: 4,
             DieColor.GREEN: 3,
-            DieColor.YELLOW: 5,
+            DieColor.YELLOW: 4,
             DieColor.PURPLE: 3,
         }
     )
@@ -127,3 +137,33 @@ class GameConfig:
             return self.starting_patches
         n = num_players if num_players is not None else self.num_players
         return self.starting_patches_by_player_count.get(n, 1)
+
+    def get_contractor_cost_for_hire(self, count: int, already_hired: int = 0) -> int:
+        """Returns the total cost to hire `count` additional contractors given `already_hired` in the current round."""
+        if count <= 0:
+            return 0
+        total_cost = 0
+        for i in range(already_hired, already_hired + count):
+            if i < len(self.contractor_cost_progression):
+                total_cost += self.contractor_cost_progression[i]
+            else:
+                total_cost += self.contractor_cost_progression[-1]
+        return total_cost
+
+    def get_max_affordable_contractors(
+        self, money: int, already_hired: int = 0, supply: Optional[int] = None
+    ) -> int:
+        """Calculates the maximum number of contractors that can be afforded given money, already_hired, and supply."""
+        max_possible = self.contractor_max_hire - already_hired
+        if supply is not None:
+            max_possible = min(max_possible, supply)
+        if max_possible <= 0 or money <= 0:
+            return 0
+
+        affordable = 0
+        for c in range(1, max_possible + 1):
+            if self.get_contractor_cost_for_hire(c, already_hired) <= money:
+                affordable = c
+            else:
+                break
+        return affordable

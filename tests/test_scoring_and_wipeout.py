@@ -28,7 +28,7 @@ class TestScoringAndWipeout(unittest.TestCase):
                 create_colored_die(DieColor.BLUE, 3),  # 4 VP
             ],
             unpatched_dice=[
-                create_colored_die(DieColor.YELLOW, 4),  # 5 VP
+                create_colored_die(DieColor.YELLOW, 4),  # 4 VP
             ],
         )
 
@@ -38,8 +38,8 @@ class TestScoringAndWipeout(unittest.TestCase):
         res = engine.evaluate_end_game()
         p0_eval = [r for r in res.rankings if r["player_id"] == 0][0]
 
-        # 20 (secrets) + (0+3+4+5=12) (dice) + 3 (cash) = 35 VP
-        self.assertEqual(p0_eval["portfolio_value"], 35)
+        # 20 (secrets) + (0+3+4+4=11) (dice) + 3 (cash) = 34 VP
+        self.assertEqual(p0_eval["portfolio_value"], 34)
 
     def test_standard_ending_patient_zero_eliminated(self) -> None:
         """Patient Zero must be ranked behind all survivors, regardless of raw VP."""
@@ -82,9 +82,9 @@ class TestScoringAndWipeout(unittest.TestCase):
             debt=0,
             breach_depth=3,
             unfulfilled_destructions=1,
-            ready_dice=[create_colored_die(DieColor.YELLOW, 2)],  # 5 VP
+            ready_dice=[create_colored_die(DieColor.YELLOW, 2)],  # 4 VP
         )
-        # Raw VP = max(0, -3)*4 + 5 + 2 = 7 VP. Penalty = 3 * (-4) + 1 * (-3) = -15 VP. Net = -8 VP.
+        # Raw VP = max(0, -3)*4 + 4 + 2 = 6 VP. Penalty = 3 * (-4) + 1 * (-3) = -15 VP. Net = -9 VP.
 
         engine = GameEngine(self.config, [self.bot0, self.bot1], seed=42)
         engine.state.players = [p0, p1]
@@ -99,7 +99,7 @@ class TestScoringAndWipeout(unittest.TestCase):
         self.assertEqual(r0["net_score"], 0)
 
         self.assertEqual(r1["overflow_penalties"], -15)
-        self.assertEqual(r1["net_score"], -8)
+        self.assertEqual(r1["net_score"], -9)
 
         self.assertEqual(res.rankings[0]["player_id"], 0)
         self.assertEqual(res.rankings[1]["player_id"], 1)

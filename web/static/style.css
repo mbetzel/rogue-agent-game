@@ -520,11 +520,17 @@ button.btn-compile:disabled {
 }
 
 .die-chip.gray { border-color: var(--color-gray); color: #fff; }
+.die-chip.white { border-color: #cbd5e1; color: #f8fafc; background: #1e293b; }
 .die-chip.red { border-color: var(--color-red); color: var(--color-red); }
 .die-chip.blue { border-color: var(--color-blue); color: var(--color-blue); }
 .die-chip.green { border-color: var(--color-green); color: var(--color-green); }
 .die-chip.yellow { border-color: var(--color-yellow); color: var(--color-yellow); }
 .die-chip.purple { border-color: var(--color-purple); color: var(--color-purple); }
+.die-chip.locked { border-color: #ef4444 !important; background: rgba(239, 68, 68, 0.15) !important; }
+.die-chip.selected-reroll { border-color: #38bdf8 !important; box-shadow: 0 0 8px #38bdf8; }
+
+.badge-contractor { background: #475569; color: #f8fafc; font-size: 0.65rem; padding: 1px 4px; border-radius: 2px; }
+.badge-locked { background: #ef4444; color: #fff; font-size: 0.65rem; padding: 1px 4px; border-radius: 2px; font-weight: 800; }
 
 .die-face-name {
   font-size: 0.7rem;

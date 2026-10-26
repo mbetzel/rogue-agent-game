@@ -15,6 +15,7 @@ from sim.entities import (
     VersionCard,
     create_colored_die,
     create_gray_die,
+    create_white_die,
     get_default_variant_cards,
     get_default_version_deck,
 )
@@ -32,6 +33,8 @@ class PlayerState:
     patches: int
     ready_dice: List[Die] = field(default_factory=list)
     unpatched_dice: List[Die] = field(default_factory=list)
+    contractor_dice: List[Die] = field(default_factory=list)
+    hired_contractor_count: int = 0
     is_patient_zero: bool = False
     elimination_round: Optional[int] = None
     elimination_reason: Optional[str] = None
@@ -39,6 +42,8 @@ class PlayerState:
     breach_depth: int = 0  # Secret deficit below 0
     unfulfilled_destructions: int = 0  # Unfulfilled die destructions
     total_dirty_income_taken: int = 0
+    total_contractors_hired: int = 0
+    total_rerolls_used: int = 0
     b2_available: bool = False
     y1_available: bool = False
     p1_available: bool = False
@@ -107,6 +112,7 @@ class GameState:
     is_final_round: bool = False
     end_reason: EndGameReason = EndGameReason.NONE
     singularity_triggered: bool = False
+    contractor_supply: int = 12
     next_die_id: int = 1
     rng: random.Random = field(default_factory=random.Random)
 
@@ -179,7 +185,7 @@ class GameEngine:
             CubeColor.GREEN: 0,
             CubeColor.BLACK: 0,
         }
-        for color, count in self.version_deck[0].staging_payload.items():
+        for color, count in self.version_deck[0].get_staging_payload(self.config.num_players).items():
             staging_cup[color] = count
 
         # Setup First Player randomly per RULES.md Section 3 Step 4
@@ -193,6 +199,7 @@ class GameEngine:
             version_deck=self.version_deck,
             staging_cup=staging_cup,
             first_player_index=first_player_index,
+            contractor_supply=config.contractor_supply_total,
             next_die_id=next_die_id,
             rng=self.rng,
         )
@@ -204,7 +211,7 @@ class GameEngine:
     # =========================================================================
 
     def _execute_phase_1(self) -> List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]]:
-        """Executes Phase 1: Autonomous AI Pulse, Roll Ready Pool, collect immediate outputs, hotfix rerolls, and commit defenses."""
+        """Executes Phase 1 per RULES.md v0.6: Autonomous AI Pulse, Contractor Hiring, Roll Active Pool, Yahtzee Rerolls & Lock Resolution, collect immediate outputs, and commit defenses."""
         # 1. Autonomous AI Corruption Pulse
         self.state.staging_cup[CubeColor.BLACK] = (
             self.state.staging_cup.get(CubeColor.BLACK, 0) + 1
@@ -215,6 +222,41 @@ class GameEngine:
         staging_copy = dict(self.state.staging_cup)
         stuck_copy = self.state.tower.get_stuck_copy()
 
+        # 2. Temp Staffing (Contractor Hiring)
+        for player in self.state.players:
+            if player.is_patient_zero:
+                continue
+
+            player.contractor_dice = []
+            player.hired_contractor_count = 0
+
+            max_hire = self.config.get_max_affordable_contractors(
+                money=player.money,
+                already_hired=player.hired_contractor_count,
+                supply=self.state.contractor_supply,
+            )
+            desired_hire = player.bot.choose_contractor_hires(
+                player_state=player,
+                contractor_supply=self.state.contractor_supply,
+                staging_cubes=staging_copy,
+                stuck_cubes=stuck_copy,
+                rng=self.rng,
+            )
+            actual_hire = max(0, min(desired_hire, max_hire))
+            if actual_hire > 0:
+                cost = self.config.get_contractor_cost_for_hire(
+                    actual_hire, already_hired=player.hired_contractor_count
+                )
+                player.money -= cost
+                self.state.contractor_supply -= actual_hire
+                player.hired_contractor_count += actual_hire
+                player.total_contractors_hired += actual_hire
+                for _ in range(actual_hire):
+                    c_die = create_white_die(self.state.next_die_id)
+                    self.state.next_die_id += 1
+                    player.contractor_dice.append(c_die)
+
+        # 3. Roll Active Pool, Yahtzee Rerolls, Outputs, Commit Defenses
         for player in self.state.players:
             if player.is_patient_zero:
                 continue
@@ -225,61 +267,116 @@ class GameEngine:
             player.p1_available = False
             player.p3_available = None
 
-            # 1. Roll Ready Pool
-            for die in player.ready_dice:
-                die.roll(self.rng)
+            # Roll Active Pool (ready_dice + contractor_dice)
+            active_dice: List[Die] = list(player.ready_dice) + list(player.contractor_dice)
+            for die in active_dice:
+                die.is_locked = False
+                res_face = die.roll(self.rng)
+                if res_face and die.current_face != res_face:
+                    die.current_face = res_face
 
-            # 2. Hotfix Rerolls (spend 🔧 to reroll any die)
-            # Old face outputs are NOT credited before rerolling to avoid double-dipping.
-            # Newly rolled patch tokens may only be spent to reroll other dice if they are not themselves being rerolled.
-            reroll_indices = player.bot.choose_hotfix_rerolls(
-                player_state=player,
-                rolled_dice=player.ready_dice,
-                staging_cubes=staging_copy,
-                stuck_cubes=stuck_copy,
-                rng=self.rng,
+            # 4. Lock Evaluation & Yahtzee Rerolls Loop
+            active_directive = self.state.active_directive_code
+            max_free_rerolls = (
+                self.config.throttled_free_rerolls
+                if active_directive == "POLYMORPHIC_WORM"
+                else self.config.default_free_rerolls
             )
-            valid_rerolls = [idx for idx in reroll_indices if 0 <= idx < len(player.ready_dice)]
-            kept_new_patches = sum(
-                player.ready_dice[i].current_face.patches
-                for i in range(len(player.ready_dice))
-                if i not in valid_rerolls and player.ready_dice[i].current_face
-            )
-            total_available_patches = player.patches + kept_new_patches
 
-            rerolls_performed = 0
-            for idx in valid_rerolls:
-                if rerolls_performed < total_available_patches:
-                    rerolls_performed += 1
-                    player.ready_dice[idx].roll(self.rng)
+            def _evaluate_locks(dice_list: List[Die]) -> None:
+                for d in dice_list:
+                    face = d.current_face
+                    if not face:
+                        continue
+                    if face.is_glitch:
+                        d.is_locked = True
+                    elif active_directive == "RAAS" and face.money > 0:
+                        d.is_locked = True
+                    elif active_directive == "ZERO_DAY_OVERRIDE" and face.is_shield:
+                        d.is_locked = True
 
-            if rerolls_performed <= player.patches:
-                player.patches -= rerolls_performed
-                spent_from_kept = 0
-            else:
-                spent_from_kept = rerolls_performed - player.patches
-                player.patches = 0
+            _evaluate_locks(active_dice)
 
-            # 3. Collect Immediate Outputs on Final Faces
-            self._apply_immediate_face_outputs(player)
-            player.patches = max(0, player.patches - spent_from_kept)
+            rerolls_remaining = max_free_rerolls
+            while rerolls_remaining > 0:
+                # Debug action: spend 1 🔧 to unlock 1 locked die
+                if player.patches > 0:
+                    unlock_indices = player.bot.choose_debug_unlocks(
+                        player_state=player,
+                        active_dice=active_dice,
+                        staging_cubes=staging_copy,
+                        stuck_cubes=stuck_copy,
+                        directive_code=active_directive,
+                        rng=self.rng,
+                    )
+                    for u_idx in unlock_indices:
+                        if player.patches <= 0:
+                            break
+                        if 0 <= u_idx < len(active_dice) and active_dice[u_idx].is_locked:
+                            active_dice[u_idx].is_locked = False
+                            player.patches -= 1
+
+                # Choose rerolls among unlocked dice
+                reroll_res = player.bot.choose_yahtzee_rerolls(
+                    player_state=player,
+                    active_dice=active_dice,
+                    rerolls_remaining=rerolls_remaining,
+                    staging_cubes=staging_copy,
+                    stuck_cubes=stuck_copy,
+                    directive_code=active_directive,
+                    rng=self.rng,
+                )
+                if isinstance(reroll_res, tuple) and len(reroll_res) == 2:
+                    extra_unlocks, reroll_indices = reroll_res
+                    for u_idx in extra_unlocks:
+                        if player.patches <= 0:
+                            break
+                        if 0 <= u_idx < len(active_dice) and active_dice[u_idx].is_locked:
+                            active_dice[u_idx].is_locked = False
+                            player.patches -= 1
+                else:
+                    reroll_indices = reroll_res or []
+
+                valid_rerolls = [
+                    idx for idx in reroll_indices
+                    if 0 <= idx < len(active_dice) and not active_dice[idx].is_locked
+                ]
+                if not valid_rerolls:
+                    break
+
+                for r_idx in valid_rerolls:
+                    res_face = active_dice[r_idx].roll(self.rng)
+                    if res_face and active_dice[r_idx].current_face != res_face:
+                        active_dice[r_idx].current_face = res_face
+                    active_dice[r_idx].is_locked = False
+
+                _evaluate_locks(active_dice)
+                player.total_rerolls_used += 1
+                rerolls_remaining -= 1
+
+            # Final lock evaluation pass
+            _evaluate_locks(active_dice)
+
+            # 5. Collect Immediate Outputs on Final Faces
+            for die in active_dice:
+                self._apply_single_die_immediate_output(player, die)
             player.patches = min(player.patches, self.config.max_patch_tokens)
 
-            # 4. Commit Defenses
+            # 6. Commit Defenses
             shield_commitments = player.bot.commit_shields(
                 player_state=player,
-                rolled_dice=player.ready_dice,
+                rolled_dice=active_dice,
                 staging_cubes=staging_copy,
                 stuck_cubes=stuck_copy,
-                directive_code=self.state.active_directive_code,
+                directive_code=active_directive,
                 rng=self.rng,
             )
 
             # Validate assignments & auto-assign fixed colored shields if omitted
             validated_commitments: Dict[int, ShieldColor] = {}
-            for idx, die in enumerate(player.ready_dice):
+            for idx, die in enumerate(active_dice):
                 face = die.current_face
-                if not face or not face.is_shield:
+                if not face or not face.is_shield or face.is_glitch:
                     continue
 
                 if idx in shield_commitments:
@@ -287,25 +384,22 @@ class GameEngine:
                     if face.shield_color == ShieldColor.ANY:
                         validated_commitments[idx] = (
                             color if color in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN)
-                            else ShieldColor.RED
+                            else ShieldColor.BLUE
                         )
                     else:
                         validated_commitments[idx] = face.shield_color
                 else:
-                    # Auto-assign unmapped fixed colored shields
                     if face.shield_color in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN):
                         validated_commitments[idx] = face.shield_color
                     elif face.shield_color == ShieldColor.ANY:
-                        validated_commitments[idx] = ShieldColor.RED
+                        validated_commitments[idx] = ShieldColor.BLUE
 
-            # 5. Track rolled Star abilities for Phase 3 eligibility
-            for idx, die in enumerate(player.ready_dice):
+            # Track rolled Star abilities for Phase 3 eligibility
+            for idx, die in enumerate(active_dice):
                 face = die.current_face
                 if not face or not face.is_star:
                     continue
                 if face.star_code == "B2":
-                    # B2: "Block 1 Blue, OR pay $2 in Phase 3 for +1 Secret"
-                    # Only eligible if NOT committed to block
                     if idx not in validated_commitments:
                         player.b2_available = True
                 elif face.star_code == "Y1":
@@ -313,18 +407,16 @@ class GameEngine:
                 elif face.star_code == "P1":
                     player.p1_available = True
                 elif face.star_code == "P3":
-                    # P3: "Block 2 of any single color; in Phase 3 add 1 cube of that color"
-                    # Only eligible if committed to block
                     if idx in validated_commitments:
                         player.p3_available = validated_commitments[idx]
 
-            player_commitments.append((player, list(player.ready_dice), validated_commitments))
+            player_commitments.append((player, list(active_dice), validated_commitments))
 
         return player_commitments
 
     def _apply_single_die_immediate_output(self, player: PlayerState, die: Die) -> None:
         face = die.current_face
-        if not face:
+        if not face or face.is_glitch:
             return
 
         # Basic money and patches
@@ -347,7 +439,7 @@ class GameEngine:
 
     def _apply_immediate_face_outputs(self, player: PlayerState) -> None:
         """Gains immediate money, patches, secrets, and special star activations from rolled faces."""
-        for die in list(player.ready_dice):
+        for die in list(player.ready_dice) + list(player.contractor_dice):
             self._apply_single_die_immediate_output(player, die)
 
     # =========================================================================
@@ -387,7 +479,7 @@ class GameEngine:
                     self.state.current_version_index += 1
                     # Add new version upgrade payload to Staging Cup (drops starting next round)
                     new_version = self.state.active_version
-                    for color, count in new_version.staging_payload.items():
+                    for color, count in new_version.get_staging_payload(self.config.num_players).items():
                         self.state.staging_cup[color] = self.state.staging_cup.get(color, 0) + count
 
         # Apply P2 (Chaos Profiteer) Star bonus: +$2 per exited black cube
@@ -404,11 +496,7 @@ class GameEngine:
 
         # Apply Active Version Directives to Attack Strength
         active_directive = self.state.active_directive_code
-        if active_directive == "RAAS":
-            # Ransomware-as-a-Service: If 1+ Red cubes exit, Red Strength gets +1
-            if red_strength >= 1:
-                red_strength += 1
-        elif active_directive == "CORRUPTED_KERNEL":
+        if active_directive == "CORRUPTED_KERNEL":
             # Corrupted Kernel: Each Black Cube adds +1 Strength to the Attack Color with the most exited cubes
             if black_dropped > 0:
                 highest_color = max(
@@ -449,6 +537,12 @@ class GameEngine:
                 self.state.staging_cup.get(color, 0) + exited_cubes.get(color, 0)
             )
 
+        # Contractor Expiration: All remaining White Contractor dice across all players return to supply
+        for player in self.state.players:
+            self.state.contractor_supply += len(player.contractor_dice)
+            player.contractor_dice.clear()
+            player.hired_contractor_count = 0
+
         # Step 2C: Check End Game Triggers
         any_patient_zero = any(p.is_patient_zero for p in self.state.players)
         all_patient_zero = all(p.is_patient_zero for p in self.state.players)
@@ -474,6 +568,7 @@ class GameEngine:
                 "patches": p.patches,
                 "ready_dice_count": len(p.ready_dice),
                 "unpatched_dice_count": len(p.unpatched_dice),
+                "contractor_dice_count": len(p.contractor_dice),
                 "is_patient_zero": p.is_patient_zero,
             }
             for p in self.state.players
@@ -522,17 +617,11 @@ class GameEngine:
                 raw_shields[color] += face.block_amount
                 color_dice_map[color].append((idx, die))
 
-        # Directive: ZERO_DAY_OVERRIDE reduces total shield value in each active color by 1 (min 0)
-        effective_shields: Dict[CubeColor, int] = {}
-        for color, s_color in [
-            (CubeColor.RED, ShieldColor.RED),
-            (CubeColor.BLUE, ShieldColor.BLUE),
-            (CubeColor.GREEN, ShieldColor.GREEN),
-        ]:
-            total_shield = raw_shields[s_color]
-            if active_directive == "ZERO_DAY_OVERRIDE" and total_shield > 0:
-                total_shield = max(0, total_shield - 1)
-            effective_shields[color] = total_shield
+        effective_shields: Dict[CubeColor, int] = {
+            CubeColor.RED: raw_shields[ShieldColor.RED],
+            CubeColor.BLUE: raw_shields[ShieldColor.BLUE],
+            CubeColor.GREEN: raw_shields[ShieldColor.GREEN],
+        }
 
         # Calculate blocked and unblocked attacks
         blocked_red = min(effective_shields[CubeColor.RED], attack_strengths[CubeColor.RED])
@@ -544,7 +633,8 @@ class GameEngine:
         blocked_green = min(effective_shields[CubeColor.GREEN], attack_strengths[CubeColor.GREEN])
         unblocked_green = attack_strengths[CubeColor.GREEN] - blocked_green
 
-        # 1. Dice Wear: Any die assigned as a shield that actively blocks at least 1 cube moves to Unpatched
+        # 1. Dice Wear: Any permanent die assigned as a shield that actively blocks at least 1 cube moves to Unpatched
+        # White Contractor dice have wear immunity (return to supply at round end).
         # Dice that block 0 cubes remain Ready
         worn_dice_set: set[int] = set()
 
@@ -568,6 +658,10 @@ class GameEngine:
                 face = die.current_face
                 amt = face.block_amount if face else 0
                 cubes_remaining_to_absorb -= amt
+
+                # White contractor dice wear immunity!
+                if die.color == DieColor.WHITE:
+                    continue
 
                 # B3 — Air-Gapped Backup: does NOT move to unpatched when blocking
                 if face and face.star_code == "B3":
@@ -629,21 +723,38 @@ class GameEngine:
             player.elimination_reason = "Total Breach (<= 0 Secrets)"
             player.breach_depth = max(0, -player.secrets)
 
-        # Green (Malware): Move 1 Ready die (not already worn this round) to Unpatched per cube.
-        # If no Ready dice left, destroy 1 Unpatched die!
+        # Green (Malware): Move 1 Ready die to Unpatched per cube.
+        # Commercial Exposure: Ready Yellow dice must be demoted first before Contractor Sacrifice or other ready dice can absorb malware.
+        # Contractor Sacrifice: You may discard 1 active White Contractor die instead (if no ready yellow dice)!
         for _ in range(unblocked_green):
-            # Check for Ready dice not worn this round
-            if len(player.ready_dice) > 0:
-                # Move first ready die to unpatched
-                demoted = player.ready_dice.pop(0)
-                player.unpatched_dice.append(demoted)
-            elif len(player.unpatched_dice) > 0:
-                # Destroy 1 Unpatched die of player's choice (destroy lowest VP die first)
-                player.unpatched_dice.sort(key=lambda d: d.vp)
-                player.unpatched_dice.pop(0)
+            ready_yellow_idx = next(
+                (idx for idx, d in enumerate(player.ready_dice) if d.color == DieColor.YELLOW),
+                None,
+            )
+            if ready_yellow_idx is not None:
+                # Commercial Exposure: demote ready Yellow die first
+                demoted_yellow = player.ready_dice.pop(ready_yellow_idx)
+                player.unpatched_dice.append(demoted_yellow)
             else:
-                # Completely wiped out; record unfulfilled die destruction
-                player.unfulfilled_destructions += 1
+                sacrifice = player.bot.choose_malware_sacrifice(
+                    player_state=player,
+                    unblocked_green=unblocked_green,
+                    rng=self.rng,
+                )
+                if sacrifice and len(player.contractor_dice) > 0:
+                    sacrificed_die = player.contractor_dice.pop(0)
+                    self.state.contractor_supply += 1
+                elif len(player.ready_dice) > 0:
+                    # Move first ready die to unpatched
+                    demoted = player.ready_dice.pop(0)
+                    player.unpatched_dice.append(demoted)
+                elif len(player.unpatched_dice) > 0:
+                    # Destroy 1 Unpatched die of player's choice (destroy lowest VP die first)
+                    player.unpatched_dice.sort(key=lambda d: d.vp)
+                    player.unpatched_dice.pop(0)
+                else:
+                    # Completely wiped out; record unfulfilled die destruction
+                    player.unfulfilled_destructions += 1
 
     # =========================================================================
     # Phase 3: Corporate Operations (Clockwise Turns)
@@ -655,11 +766,7 @@ class GameEngine:
             return
 
         num_players = len(self.state.players)
-        patch_cash_cost = (
-            3
-            if self.state.active_directive_code == "POLYMORPHIC_WORM"
-            else self.state.config.patch_cash_cost
-        )
+        patch_cash_cost = self.state.config.patch_cash_cost
 
         for offset in range(num_players):
             idx = (self.state.first_player_index + offset) % num_players
@@ -848,6 +955,8 @@ class GameEngine:
                     "ready_dice_count": len(p.ready_dice),
                     "unpatched_dice_count": len(p.unpatched_dice),
                     "total_dirty_income": p.total_dirty_income_taken,
+                    "total_contractors_hired": p.total_contractors_hired,
+                    "total_rerolls_used": p.total_rerolls_used,
                 }
             )
 

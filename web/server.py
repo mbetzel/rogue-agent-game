@@ -109,6 +109,31 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                 payload, code = success_response({"state": state})
                 self._send_json_response(payload, code)
 
+            elif clean_path == "/api/game/action/hire_contractors":
+                pid = get_target_pid(default_to_human=True)
+                count = int(data.get("count", 1))
+                state = self.controller.hire_contractors(pid, count)
+                payload, code = success_response({"state": state})
+                self._send_json_response(payload, code)
+
+            elif clean_path == "/api/game/action/reroll":
+                pid = get_target_pid(default_to_human=True)
+                reroll_indices = data.get("reroll_indices", [])
+                state = self.controller.perform_reroll(pid, reroll_indices)
+                payload, code = success_response({"state": state})
+                self._send_json_response(payload, code)
+
+            elif clean_path == "/api/game/action/debug_unlock":
+                pid = get_target_pid(default_to_human=True)
+                if "die_index" not in data:
+                    payload, code = error_response("Missing required field 'die_index'", 400)
+                    self._send_json_response(payload, code)
+                    return
+                die_idx = int(data["die_index"])
+                state = self.controller.debug_unlock_die(pid, die_idx)
+                payload, code = success_response({"state": state})
+                self._send_json_response(payload, code)
+
             elif clean_path == "/api/game/action/roll":
                 pid = get_target_pid(default_to_human=True)
                 state = self.controller.roll_pool(pid)

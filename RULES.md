@@ -1,4 +1,4 @@
-# Rogue Agent — Rules Draft (v0.5)
+# Rogue Agent — Rules Draft (v0.7)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival
 
@@ -35,6 +35,7 @@ When the dust settles, any corporation that suffers a **Total Data Breach** (`<=
   * **Shield Assignment Slots** (`Red`, `Blue`, `Green`)
   * **Unpatched Zone** (worn-down dice offline until patched)
 * **16 Gray "Legacy Code" Starter Dice** (4 per player)
+* **12 White "Contractor" Dice** (Temporary on-demand staffing available for hire in Phase 1)
 * **Colored Software Module Dice (5 Colors, `2 × Players` dice per color):**
   * **Red Dice** — *FinSec / Encryption*
   * **Blue Dice** — *Firewall / Data Vault*
@@ -75,13 +76,21 @@ Rogue Agent is played over a series of rounds (~8–11 rounds). Each round consi
 ### Phase 1: Boot & Configure (Simultaneous)
 
 1. **Autonomous AI Corruption Pulse:** The Rogue Agent compiles new malicious subroutines in the background. Take **`1 Black Cube`** from the general supply and place it into the **Staging Cup**.
-2. **Roll Ready Pool:** Every player simultaneously rolls all dice in their **Ready Zone** into their **Active Pool**. *(Dice in your **Unpatched Zone** are not rolled.)*
-3. **Hotfix (Luck Mitigation):** Before finalizing faces, you may spend **`1 🔧` token** from your pool (or from a kept rolled die) to reroll any **1** of your dice (repeatable). *If spending a `🔧` showing on a rolled die, set that die aside in your Active Pool; it cannot be rerolled again this round and does not produce a Patch Token in Step 4.*
-4. **Gain Immediate Outputs:**
-   * Collect any **`$`**, **Patch Tokens (`🔧`)**, and immediate `★` outputs from your final rolled faces in the Active Pool (you may hold at most **`3 🔧`** tokens at once `[TUNE]`).
-5. **Commit Defenses:**
+2. **Temp Staffing (Contractor Dice):** Before rolling, each player may hire temporary White Contractor Dice for this round. Hiring uses **Progressive Contractor Pricing**: **`$1` for the 1st die, `$2` for the 2nd die, and `$3` for the 3rd die** (up to a maximum of **`3` White Dice** per round; hiring all 3 costs **`$6`** total `[TUNE]`). All hired White Contractor dice are added to your Active Pool for this round.
+3. **Roll Ready Pool:** Every player simultaneously rolls all dice in their **Ready Zone** plus any hired **White Contractor Dice** into their **Active Pool**. *(Dice in your **Unpatched Zone** are not rolled.)*
+4. **Yahtzee Rerolls & Lock Resolution (Simultaneous):**
+   * Each player may perform up to **`2` free rerolls** of any subset of their rolled dice (3 rolls total).
+   * Between rerolls, players may set aside (keep) any dice, or pick previously kept dice back up for subsequent rerolls.
+   * **Locked Dice:** Certain conditions cause dice to be **Locked**:
+     * A White Contractor Die that rolls a **`Glitch (Locked)`** face is locked immediately.
+     * Active **Rogue Agent Version Directives** may lock specific faces (e.g., Cash in `v2.0 RaaS`, or Shields in `v3.0 Zero-Day Override`).
+     * Locked dice **cannot** be rerolled during your free rerolls.
+   * **Debug Action (`🔧` Token Utility):** At any time during your reroll sequence, you may spend **`1 🔧` token** from your pool (or permanently set aside and lock a rolled die showing `+1 🔧`) to **Unlock `1` locked die**, allowing it to be rerolled in remaining rerolls.
+5. **Gain Immediate Outputs:**
+   * Collect any **`$`**, **Patch Tokens (`🔧`)**, and immediate `★` outputs from your final rolled faces in the Active Pool (you may hold at most **`3 🔧`** tokens at once `[TUNE]`). Dice showing `Glitch (Locked)` produce 0 outputs.
+6. **Commit Defenses:**
    * Assign rolled Shield dice (and Shield `★` abilities) from your Active Pool to your **Red**, **Blue**, or **Green** Shield slots.
-   * **Generic (`Any`) Shields** must be committed to a specific color (`Red`, `Blue`, or `Green`) *before* Phase 2 begins.
+   * **Generic (`Any`) Shields** (including rolled White Contractor shields) must be committed to a specific color (`Red`, `Blue`, or `Green`) *before* Phase 2 begins.
    * All rolled non-shield dice remain in your Active Pool.
 
 ---
@@ -95,7 +104,7 @@ Move exited **Black Cubes** onto the active Version's **Corruption Track** one a
 * **Upgrading (`v1.0 → v2.0` or `v2.0 → v3.0`):** When the 4th space fills:
   1. Clear all Black Cubes from the track back to the supply.
   2. Move the Version Marker to the next Version card (`v2.0` or `v3.0`).
-  3. Add the new Version card's **Upgrade Payload** cubes to the **Staging Cup** *(they will drop starting next round)*.
+  3. Add the new Version card's **Upgrade Payload** cubes to the **Staging Cup** *(they will drop starting next round; in 2-player games, `v2.0` and `v3.0` upgrade payloads are reduced by 1 attack cube each to prevent unscaled late-game cube avalanches: see Section 6C)* `[TUNE]`.
   4. The new Version's **Active Directive** takes effect immediately (including for Step 2B this round).
   5. Place any remaining Black Cubes from this drop onto the new Version's track.
 * **Singularity (`v3.0` Track Fills):** If the 4th space of `v3.0` fills, **Singularity is triggered!** Step 2B resolves normally for this drop, and the game enters its final round wrap-up.
@@ -103,15 +112,15 @@ Move exited **Black Cubes** onto the active Version's **Corruption Track** one a
 #### Step 2B: Resolve Attack Cubes (Red, Blue, Green)
 Calculate the total attack strength of **Red**, **Blue**, and **Green** (exited cubes + any active Version Directive modifiers). Each player simultaneously resolves all three colors against their committed Shields:
 
-1. **Dice Wear (Software Adaptation):** Any die assigned as a Shield that **actively blocks at least 1 cube** moves to your **Unpatched Zone**. If multiple dice were committed to a color and fewer cubes dropped than total shield strength, the defending player chooses which die absorbs the attack and wears down. *(If 0 cubes of that color dropped, or another die already absorbed all cubes of that color, unused Shield dice remain Ready and return to your Ready Zone!)*
+1. **Dice Wear (Software Adaptation):** Any permanent die assigned as a Shield that **actively blocks at least 1 cube** moves to your **Unpatched Zone**. *(White Contractor dice that block damage return to the general supply at round end; they never move to the Unpatched Zone).* If multiple dice were committed to a color and fewer cubes dropped than total shield strength, the defending player chooses which die absorbs the attack and wears down. *(If 0 cubes of that color dropped, or another die already absorbed all cubes of that color, unused permanent Shield dice remain Ready and return to your Ready Zone!)*
 2. **Unblocked Damage:**
    * **Red (Ransomware):** Lose **`$1`** per unblocked Red cube.
      * **Emergency Patch Absorption:** If cash is insufficient to pay the full ransom, each available **`1 🔧` token** automatically absorbs **`$1`** of unpaid ransom before secrets leak.
      * **Unpaid Ransom Leak:** If any ransom remains unpaid after exhausting cash and patch tokens, proprietary source code leaks to the dark web: lose **`1 Corporate Secret` per unpaid `$1`**! Money is strictly non-negative and never drops below `$0`.
    * **Blue (Spyware):** Lose **`1` Corporate Secret** per unblocked Blue cube.
-   * **Green (Malware):** For each unblocked Green cube, move **`1` Ready die** (that was not already worn down this round) to your **Unpatched Zone**. If you have **no Ready dice left**, you must instead **Destroy (return to box) `1` Unpatched die** of your choice! *(If you have 0 dice remaining anywhere, track unfulfilled destructions for wipeout scoring).*
+   * **Green (Malware):** For each unblocked Green cube, move **`1` Ready die** (that was not already worn down this round) to your **Unpatched Zone**. **Contractor Sacrifice:** You may choose to **discard `1` active White Contractor die** to the supply instead of demoting a permanent Ready die! *(**Commercial Exposure (Yellow Dice):** Commercial software attracts heavy scrutiny. Contractor Sacrifice cannot be used to prevent Green malware from demoting a Yellow die. When resolving unblocked Green malware, Ready Yellow dice must be demoted to Unpatched first before Contractor Sacrifice or non-Yellow dice can absorb malware).* If you have **no Ready dice or Contractor dice left**, you must instead **Destroy (return to box) `1` Unpatched die** of your choice! *(If you have 0 dice remaining anywhere, track unfulfilled destructions for wipeout scoring).*
    * **Patient Zero Check:** If your Corporate Secrets reach **`0` (or below)**, your network suffers a **Total Data Breach** and you become **Patient Zero** *(track negative Secrets below 0 if needed for total-wipeout tiebreakers)*.
-3. **Snowball Recycle:** Place **all exited Red, Blue, and Green cubes** from the tray back into the **Staging Cup** for next round.
+3. **Snowball Recycle & Contractor Expiration:** Place **all exited Red, Blue, and Green cubes** from the tray back into the **Staging Cup** for next round. All White Contractor dice (whether they blocked, sacrificed, or remained unused) return to the general supply.
 
 #### Step 2C: Check End Game Triggers
 The current round is declared the **Final Round** if **either**:
@@ -152,7 +161,7 @@ After all players finish Phase 3:
 
 Calculate **Portfolio Value** `[TUNE weights]`:
 * **`4 VP`** per remaining **Corporate Secret**
-* **VP per owned Colored Module Die** as printed on its Market Card (Red: `3 VP`, Blue: `4 VP`, Green: `3 VP`, Yellow: `5 VP`, Purple: `3 VP`; Gray starter dice = `0 VP`)
+* **VP per owned Colored Module Die** as printed on its Market Card (Red: `3 VP`, Blue: `4 VP`, Green: `3 VP`, Yellow: `4 VP`, Purple: `3 VP`; Gray starter dice = `0 VP`, White contractor dice = `0 VP`)
 * **`1 VP`** per **`$2`** remaining *(rounded down)*
 * Unused **Patch Tokens (`🔧`)** are worth **`0 VP`**.
 
@@ -169,10 +178,11 @@ Calculate **Portfolio Value** `[TUNE weights]`:
 | Die Type | Cost | VP | Face 1 | Face 2 | Face 3 | Face 4 | Face 5 | Face 6 |
 | :--- | :---: | :---: | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Gray (Legacy)** | Starter | `0` | `Block 1 Any` | `Block 1 Any` | `+$1` | `+$1` | `+$1` | `+1 🔧` |
+| **White (Contractor)** | Prog. `$1/$2/$3` | `0` | `Block 1 Any` | `Block 1 Any` | `Block 1 Any` | `+$1` | `Glitch (Locked)` | `Glitch (Locked)` |
 | **Red (FinSec)** | `$4` | `3` | `Block 2 Red` | `Block 2 Red` | `+$2` | `+$2` | `Red ★` | `Red ★` |
 | **Blue (Firewall)** | `$5` | `4` | `Block 2 Blue` | `Block 2 Blue` | `+$1` | `+1 🔧` | `Blue ★` | `Blue ★` |
 | **Green (Antivirus)** | `$4` | `3` | `Block 2 Green` | `Block 2 Green` | `+2 🔧` | `+2 🔧` | `Green ★` | `Green ★` |
-| **Yellow (Commercial)**| `$5` | `5` | `+$3` | `+$3` | `+$2` | `+$1 & +1 🔧` | `Yellow ★` | `Yellow ★` |
+| **Yellow (Commercial)**| `$5` | `4` | `+$3` | `+$2` | `+$2` | `+$1 & +1 🔧` | `Yellow ★` | `Yellow ★` |
 | **Purple (Black-Hat)** | `$4` | `3` | `Block 1 Any` | `Block 1 Any` | `+$2` | `+$1 & +1 🔧` | `Purple ★` | `Purple ★` |
 
 ### B. Sample Module Variant Cards (`★` Effects)
@@ -203,7 +213,7 @@ Calculate **Portfolio Value** `[TUNE weights]`:
 | :--- | :--- | :--- | :--- |
 | **`v1.0`** | *Script Kiddie* | `1 Red, 1 Blue, 1 Green, 1 Black` | None. |
 | **`v1.0`** | *Data Scraper* | `2 Blue, 1 Red, 1 Black` | Players start with `+$1` extra Money ($8 total). |
-| **`v2.0`** | *Ransomware-as-a-Service* | `+2 Red, +1 Green` | If `1+` Red cubes exit the tower, Red Strength gets `+1`. |
-| **`v2.0`** | *Polymorphic Worm* | `+2 Green, +1 Blue` | Cash Patching in Phase 3 costs `$3` instead of `$2` (`🔧` tokens unaffected). |
-| **`v3.0`** | *Zero-Day Override* | `+1 Red, +1 Blue, +1 Green` | Each player's total Shield value in each active color is reduced by `1` (min 0). |
-| **`v3.0`** | *Corrupted Kernel* | `+2 Red, +2 Blue` | Each Black Cube that exits the tower also adds `+1` Strength to the Attack Color with the most exited cubes this round. |
+| **`v2.0`** | *Ransomware-as-a-Service* | `+2 Red, +1 Green` *(2P: `+1 Red, +1 Green`)* | **Encrypted Memory:** Any rolled die showing Cash (`+$1` or `+$2`) is **Locked** immediately (cannot be rerolled unless unlocked with `1 🔧`). |
+| **`v2.0`** | *Polymorphic Worm* | `+2 Green, +1 Blue` *(2P: `+1 Green, +1 Blue`)* | **Subroutine Throttling:** Players receive only **`1` free reroll** in Phase 1 (instead of 2). |
+| **`v3.0`** | *Zero-Day Override* | `+1 Red, +1 Blue, +1 Green` *(2P: `+1 Red, +1 Blue`)* | **Kernel Lock:** Any rolled die showing a Shield (`Block 1` or `Block 2`) is **Locked** immediately (cannot be rerolled unless unlocked with `1 🔧`). |
+| **`v3.0`** | *Corrupted Kernel* | `+2 Red, +2 Blue` *(2P: `+1 Red, +1 Blue`)* | Each Black Cube that exits the tower also adds `+1` Strength to the Attack Color with the most exited cubes this round. |

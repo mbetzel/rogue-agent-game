@@ -27,6 +27,7 @@ class GameStateSerializer:
             "is_star": face.is_star,
             "star_code": face.star_code,
             "is_shield": face.is_shield,
+            "is_glitch": getattr(face, "is_glitch", False),
         }
 
     @staticmethod
@@ -37,6 +38,8 @@ class GameStateSerializer:
             "cost": die.cost,
             "vp": die.vp,
             "variant_code": die.variant_code,
+            "is_locked": getattr(die, "is_locked", False),
+            "is_contractor": die.color == DieColor.WHITE,
             "current_face": GameStateSerializer.serialize_face(die.current_face),
         }
         if include_faces:
@@ -61,6 +64,9 @@ class GameStateSerializer:
             "staging_payload": {c.value: count for c, count in card.staging_payload.items()},
             "directive_description": card.directive_description,
             "directive_code": card.directive_code,
+            "staging_payload_2p": {c.value: count for c, count in card.staging_payload_2p.items()}
+            if card.staging_payload_2p is not None
+            else None,
         }
 
     @staticmethod
@@ -86,6 +92,10 @@ class GameStateSerializer:
         purchases_this_turn: int = 0,
         dirty_income_taken_this_turn: bool = False,
         locked_reroll_indices: Optional[List[int]] = None,
+        hired_contractors: int = 0,
+        contractor_dice: Optional[List[Die]] = None,
+        rerolls_remaining: int = 0,
+        max_rerolls: int = 2,
         rank: Optional[int] = None,
     ) -> Dict[str, Any]:
         vp = cls.calculate_player_vp(player, config)
@@ -119,6 +129,13 @@ class GameStateSerializer:
                     if d.die_id not in unpatched_ids
                 ]
 
+        hired_count = hired_contractors if hired_contractors else getattr(player, "hired_contractor_count", len(player.contractor_dice))
+        max_hire = getattr(config, "contractor_max_hire", 3)
+        if hired_count < max_hire and hasattr(config, "get_contractor_cost_for_hire"):
+            next_contractor_cost = config.get_contractor_cost_for_hire(1, already_hired=hired_count)
+        else:
+            next_contractor_cost = None
+
         return {
             "player_id": player.player_id,
             "name": name,
@@ -146,6 +163,12 @@ class GameStateSerializer:
             "has_committed": has_committed,
             "commitments": commitments or {},
             "locked_reroll_indices": locked_reroll_indices or [],
+            "hired_contractors": hired_count,
+            "next_contractor_cost": next_contractor_cost,
+            "contractor_dice": [cls.serialize_die(d) for d in (contractor_dice if contractor_dice is not None else getattr(player, "contractor_dice", []))],
+            "rerolls_remaining": rerolls_remaining,
+            "max_rerolls": max_rerolls,
+            "unlocked_dice_indices": [i for i, d in enumerate(active_rolled_dice) if not getattr(d, "is_locked", False)],
             # Phase 3 interaction state
             "purchases_this_turn": purchases_this_turn,
             "dirty_income_taken_this_turn": dirty_income_taken_this_turn,
@@ -204,6 +227,10 @@ class GameStateSerializer:
                 purchases_this_turn=p_meta.get("purchases_this_turn", 0),
                 dirty_income_taken_this_turn=p_meta.get("dirty_income_taken_this_turn", False),
                 locked_reroll_indices=p_meta.get("locked_reroll_indices", []),
+                hired_contractors=p_meta.get("hired_contractors", getattr(p, "hired_contractor_count", 0)),
+                contractor_dice=getattr(p, "contractor_dice", []),
+                rerolls_remaining=p_meta.get("rerolls_remaining", 0),
+                max_rerolls=p_meta.get("max_rerolls", 2),
                 rank=player_ranks.get(p.player_id),
             )
             players_serialized.append(p_data)
@@ -224,6 +251,12 @@ class GameStateSerializer:
             "game_over": state.game_over,
             "end_reason": state.end_reason.value if isinstance(state.end_reason, EndGameReason) else str(state.end_reason),
             "singularity_triggered": state.singularity_triggered,
+            # Temp Staffing & Contractors (v0.6 / v0.7)
+            "contractor_supply": getattr(state, "contractor_supply", 12),
+            "contractor_hire_cost": getattr(state.config, "contractor_hire_cost", 1),
+            "contractor_cost_progression": list(getattr(state.config, "contractor_cost_progression", (1, 2, 3))),
+            "contractor_max_hire": getattr(state.config, "contractor_max_hire", 3),
+            "next_contractor_cost": controller_meta.get("action_capabilities", {}).get("next_contractor_cost"),
             # Compiler / Tower & Corruption
             "staging_cup": staged,
             "tower_stuck_cubes": stuck,
