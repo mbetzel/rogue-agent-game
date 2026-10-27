@@ -1,4 +1,4 @@
-# Rogue Agent — Rules Draft (v0.8)
+# Rogue Agent — Rules Draft (v0.8.2)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival
 
@@ -219,7 +219,7 @@ Calculate **Portfolio Value** `[TUNE weights]`:
 | :--- | :--- | :--- | :--- |
 | **`v1.0`** | *Script Kiddie* | `1 Red, 1 Blue, 1 Green, 1 Black` | None. |
 | **`v1.0`** | *Data Scraper* | `2 Blue, 1 Red, 1 Black` | Players start with `+$1` extra Money ($8 total). |
-| **`v2.0`** | *Ransomware-as-a-Service* | `+2 Red, +1 Green` *(2P: `+1 Red, +1 Green`)* | **Encrypted Memory:** Any rolled die showing Cash (`+$1` or `+$2`) is **Locked** immediately (cannot be rerolled unless unlocked with `1 🔧`). |
-| **`v2.0`** | *Polymorphic Worm* | `+2 Green, +1 Blue` *(2P: `+1 Green, +1 Blue`)* | **Subroutine Throttling:** Players receive only **`1` free reroll** in Phase 1 (instead of 2). |
-| **`v3.0`** | *Zero-Day Override* | `+1 Red, +1 Blue, +1 Green` *(2P: `+1 Red, +1 Blue`)* | **Kernel Lock:** Any rolled die showing a Shield (`Block 1` or `Block 2`) is **Locked** immediately (cannot be rerolled unless unlocked with `1 🔧`). |
-| **`v3.0`** | *Corrupted Kernel* | `+2 Red, +1 Blue` *(2P: `+1 Red, +1 Blue`)* | If 2+ Black Cubes exit the tower this round, the Attack Color with the most exited cubes gains `+2 Strength` total. `[TUNE]` |
+| **`v2.0`** | *Ransomware-as-a-Service* | `+2 Red, +1 Green` *(2P: `+1 Red, +1 Green`)* | **Encrypted Memory:** Any rolled die showing Cash (`+$1` or `+$2`) is **Locked** immediately (cannot be rerolled unless unlocked with `1 🔧`). *(Kinetic profile: 0 Black).* |
+| **`v2.0`** | *Polymorphic Worm* | `+1 Green, +1 Blue, +1 Black` *(2P: `+1 Green, +1 Black`)* | **Subroutine Throttling:** Players receive only **`1` free reroll** in Phase 1 (instead of 2). *(Contagion profile: +1 Black).* |
+| **`v3.0`** | *Zero-Day Override* | `+1 Red, +1 Blue, +1 Black` *(2P: `+1 Red, +1 Black`)* | **Kernel Lock:** Any rolled die showing a Shield (`Block 1` or `Block 2`) is **Locked** immediately (cannot be rerolled unless unlocked with `1 🔧`). *(Singularity profile: +1 Black).* |
+| **`v3.0`** | *Corrupted Kernel* | `+2 Red, +1 Blue` *(2P: `+1 Red, +1 Blue`)* | If 2+ Black Cubes exit the tower this round, the Attack Color with the most exited cubes gains `+2 Strength` total. `[TUNE]` *(Kinetic profile: 0 Black).* |

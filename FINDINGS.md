@@ -994,6 +994,115 @@ The `v0.8` rules baseline captured in `RULES.md` is **OFFICIALLY APPROVED**. No 
 #### 2. Final Sign-Off Verdict
 The post-tuning rules baseline (`v0.8.1`) as documented in [RULES.md](./RULES.md) satisfies all Core Design Pillars and passes all quantitative stress-test benchmarks. **Phase 10 is formally signed off and complete.** All systems are green for web UI deployment and human playtesting.
 
+---
+
+## 11. Phase 12: Asymmetric Version Payloads & Dynamic Corruption Balancing (`v0.8.2` Baseline)
+
+- **Date:** October 2026
+- **Rules Baseline:** [RULES.md](./RULES.md) v0.8.2 Section 6C
+- **Core Motivation:** In v0.8.0, `v2.0` and `v3.0` upgrade payloads contained exclusively kinetic attack cubes (`Red`, `Blue`, `Green`) with 0 Black cubes added. In low-dirty-income games (particularly in 3-player pods or risk-averse playgroups), corruption progressed too slowly (advancing strictly via the 1-cube/round Autonomous AI pulse), causing games to conclude via corporate breach around Round 5–7 while the Rogue Agent was still in `v2.0`. Singularity triggers dropped to $\le 4\%$, and players rarely experienced `v3.0` directives.
+- **Architectural Solution (Option B):** Implemented asymmetric version payloads trading 1 kinetic attack cube for 1 Black corruption cube on contagion/singularity profiles, creating 4 distinct Roadmap trajectories across the $2 \times 2$ matrix of `v2.0` and `v3.0` cards:
+
+### A. Asymmetric Version Payload Table (RULES.md v0.8.2)
+
+| Version | Card Name | Staging Cup Payload (3P/4P) | Staging Cup Payload (2P Scaled) | Profile | Net Black Added |
+| :--- | :--- | :--- | :--- | :--- | :---: |
+| **`v1.0`** | *Script Kiddie* | `1 Red, 1 Blue, 1 Green, 1 Black` | `1 Red, 1 Blue, 1 Green, 1 Black` | Starter Baseline | Flat (+1 Black) |
+| **`v1.0`** | *Data Scraper* | `2 Blue, 1 Red, 1 Black` | `2 Blue, 1 Red, 1 Black` | Starter Alternate | Flat (+1 Black) |
+| **`v2.0`** | *Ransomware-as-a-Service* | `+2 Red, +1 Green` | `+1 Red, +1 Green` | **Kinetic Extortion** | **0 Black** |
+| **`v2.0`** | *Polymorphic Worm* | `+1 Green, +1 Blue, +1 Black` | `+1 Green, +1 Black` | **Autonomous Contagion** | **+1 Black** |
+| **`v3.0`** | *Zero-Day Override* | `+1 Red, +1 Blue, +1 Black` | `+1 Red, +1 Black` | **Singularity Surge** | **+1 Black** |
+| **`v3.0`** | *Corrupted Kernel* | `+2 Red, +1 Blue` | `+1 Red, +1 Blue` | **Kinetic Avalanche** | **0 Black** |
+
+### B. Mathematical Cube Volume Conservation Audit
+
+| Roadmap Path | Profile Definition | Total Cubes Added (4P/3P) | Total Cubes Added (2P) | Attack : Black Ratio | Conservation Status |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **Path 1** | **Kinetic:** RaaS + Corrupted Kernel | 10 Cubes (4 setup + 3 v2 + 3 v3) | 8 Cubes (4 setup + 2 v2 + 2 v3) | 9 Attack : 1 Black | ✅ Conserved |
+| **Path 2** | **Contagion:** Worm + Zero-Day Override | 10 Cubes (4 setup + 3 v2 + 3 v3) | 8 Cubes (4 setup + 2 v2 + 2 v3) | 7 Attack : 3 Black | ✅ Conserved |
+| **Path 3** | **Mixed A:** RaaS + Zero-Day Override | 10 Cubes (4 setup + 3 v2 + 3 v3) | 8 Cubes (4 setup + 2 v2 + 2 v3) | 8 Attack : 2 Black | ✅ Conserved |
+| **Path 4** | **Mixed B:** Worm + Corrupted Kernel | 10 Cubes (4 setup + 3 v2 + 3 v3) | 8 Cubes (4 setup + 2 v2 + 2 v3) | 8 Attack : 2 Black | ✅ Conserved |
+
+### C. Implementation & Automated Test Verification
+- `sim/entities.py`: Updated `get_all_version_cards()` and implemented `get_roadmap_deck(path_id: int)`.
+- `tests/test_v082_payloads.py`: 13 comprehensive test cases covering payload scaling, compiler state machines, and web serialization.
+- `sim/experiments.py`: Added `run_experiment_6` benchmarking all 12 cells ($N=500$ per cell, Base Seed 42, 6,000 games).
+- **Test Gate:** 182/182 unit tests passing via WSL (`python3 -m unittest discover -s tests`).
+
+---
+
+### D. Experiment 6: 4-Way Roadmap Matrix Benchmark Telemetry
+
+- **Date:** October 2026
+- **Sample Size:** 6,000 games total ($N = 500$ across 12 cells, Base Seed 42 via WSL)
+- **Pods Tested:**
+  - 4P: Pod A (`AdaptiveBalanced`, `SecOpsTurtle`, `VentureGreed`, `Accelerationist`)
+  - 3P: Pod A (`AdaptiveBalanced`, `SecOpsTurtle`, `VentureGreed`)
+  - 2P: Pod A (`AdaptiveBalanced`, `SecOpsTurtle`)
+
+#### 1. Pacing & Triggers Telemetry across Roadmap Paths
+
+| Path | Players | Mean Rounds (Std) | Singularity % | Patient Zero % | Wipeout % | Early Death % (≤4 Rds) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Path 1 (Kinetic: RaaS / Corrupted Kernel)** | **4P** | 5.17 (±0.42) | **2.0%** | 93.2% | 4.8% | 1.8% |
+| **Path 1 (Kinetic: RaaS / Corrupted Kernel)** | **3P** | 7.45 (±0.76) | **0.6%** | 96.0% | 3.4% | 0.0% |
+| **Path 1 (Kinetic: RaaS / Corrupted Kernel)** | **2P** | 9.06 (±0.98) | **5.4%** | 78.2% | 16.4% | 0.0% |
+| **Path 2 (Contagion: Worm / Zero-Day)** | **4P** | 5.32 (±0.49) | **38.8%** | 59.2% | 2.0% | 0.4% |
+| **Path 2 (Contagion: Worm / Zero-Day)** | **3P** | 8.19 (±0.82) | **22.4%** | 74.6% | 3.0% | 0.0% |
+| **Path 2 (Contagion: Worm / Zero-Day)** | **2P** | 8.90 (±0.80) | **94.2%** | 5.8% | **0.0%** | 0.0% |
+| **Path 3 (Mixed A: RaaS / Zero-Day)** | **4P** | 5.37 (±0.48) | **20.0%** | 78.8% | 1.2% | 0.0% |
+| **Path 3 (Mixed A: RaaS / Zero-Day)** | **3P** | 7.70 (±0.80) | **13.2%** | 85.8% | 1.0% | 0.0% |
+| **Path 3 (Mixed A: RaaS / Zero-Day)** | **2P** | 9.32 (±0.88) | **47.8%** | 46.4% | 5.8% | 0.0% |
+| **Path 4 (Mixed B: Worm / Corrupted Kernel)** | **4P** | 5.13 (±0.48) | **4.2%** | 86.6% | 9.2% | 5.4% |
+| **Path 4 (Mixed B: Worm / Corrupted Kernel)** | **3P** | 7.75 (±0.90) | **1.0%** | 89.8% | 9.2% | 0.0% |
+| **Path 4 (Mixed B: Worm / Corrupted Kernel)** | **2P** | 9.19 (±0.90) | **36.6%** | 55.2% | 8.2% | 0.0% |
+
+#### 2. Bot Archetype Performance & Score Telemetry
+
+| Path | Players | Top Bot (Win %) | Runner-Up Win Rates | Mean Win VP |
+| :--- | :---: | :--- | :--- | :---: |
+| **Path 1 (Kinetic)** | 4P | VentureGreedBot (65.6%) | AdaptiveBalanced (22.8%), Accel (11.4%), Turtle (0.2%) | 24.5 VP |
+| **Path 1 (Kinetic)** | 3P | VentureGreedBot (80.0%) | AdaptiveBalanced (20.0%), Turtle (0.0%) | 33.7 VP |
+| **Path 1 (Kinetic)** | 2P | AdaptiveBalancedBot (90.0%) | SecOpsTurtleBot (10.0%) | 24.8 VP |
+| **Path 2 (Contagion)** | 4P | **AdaptiveBalancedBot (45.4%)** | VentureGreed (40.8%), Accel (13.2%), Turtle (0.6%) | 31.1 VP |
+| **Path 2 (Contagion)** | 3P | VentureGreedBot (55.2%) | AdaptiveBalanced (42.6%), Turtle (2.2%) | 35.7 VP |
+| **Path 2 (Contagion)** | 2P | AdaptiveBalancedBot (93.0%) | SecOpsTurtleBot (7.0%) | 38.7 VP |
+| **Path 3 (Mixed A)** | 4P | VentureGreedBot (66.4%) | AdaptiveBalanced (23.8%), Accel (9.6%), Turtle (0.2%) | 30.5 VP |
+| **Path 3 (Mixed A)** | 3P | VentureGreedBot (78.2%) | AdaptiveBalanced (21.4%), Turtle (0.4%) | 37.8 VP |
+| **Path 3 (Mixed A)** | 2P | AdaptiveBalancedBot (92.0%) | SecOpsTurtleBot (8.0%) | 31.0 VP |
+| **Path 4 (Mixed B)** | 4P | **AdaptiveBalancedBot (47.6%)** | VentureGreed (37.6%), Accel (12.4%), Turtle (2.4%) | 24.3 VP |
+| **Path 4 (Mixed B)** | 3P | **AdaptiveBalancedBot (51.4%)** | VentureGreed (45.4%), Turtle (3.2%) | 30.0 VP |
+| **Path 4 (Mixed B)** | 2P | AdaptiveBalancedBot (88.8%) | SecOpsTurtleBot (11.2%) | 28.6 VP |
+
+---
+
+### E. Game Designer Analysis & Strategic Insights
+
+#### 1. The Dynamic Spectrum of Option B: Empirical Confirmation
+Experiment 6 validates that Option B achieves the design objective:
+* **The Contagion Awakening (Path 2):** In v0.8.0, Singularity was practically nonexistent in clean 3P games (0.6%). Under Path 2 (`Worm` + `Zero-Day Override`), **Singularity surges to 22.4% in 3P and 38.8% in 4P**, while Total Wipeouts fall to just **2.0%** (and **0.0% in 2P**!). The Rogue Agent transforms into an active, escalating existential clock.
+* **The Kinetic Gauntlet (Path 1):** In Path 1 (`RaaS` + `Corrupted Kernel`), the AI drops zero Black cubes from upgrades. As expected, Singularity drops to 0.6%–2.0% in 3P/4P, and games resolve almost exclusively via corporate survival and attrition (**Patient Zero at 93.2%–96.0%**).
+* **The Mixed Paths (Paths 3 & 4):** Provide a smooth gradient between the extremes: Path 3 unlocks 13.2%–20.0% Singularity in 3P/4P and 47.8% in 2P, establishing a rich middle ground where both victory conditions remain authentic threats.
+
+#### 2. Dethroning VentureGreed via Contagion (AdaptiveBalanced at 45.4%–51.4%)
+In prior sweeps with fixed baseline setups, `VentureGreedBot` could reliably win by purchasing Yellow Commercial dice and ignoring defense. Under the Contagion paths (Paths 2 & 4):
+* **`AdaptiveBalancedBot` dethrones Greed**, capturing **45.4% in Path 2 (4P)**, **47.6% in Path 4 (4P)**, and **51.4% in Path 4 (3P)**!
+* *Why:* When `Polymorphic Worm` throttles rerolls to 1, greed bots cannot fish for high cash faces. When `Zero-Day Override` locks shields or Singularity approaches rapidly, corporations with agile, diversified modular dice pools out-perform one-dimensional revenue hoarding.
+
+#### 3. 2-Player Climax Transformation (94.2% Singularity, 0.0% Wipeout in Path 2)
+In 2-player games under Path 2:
+* **Simultaneous Wipeouts completely vanish to 0.0%** (down from 16.4% in Path 1 and 27.8% in v0.7).
+* **Singularity finishes reach 94.2%**.
+* Because Path 2 exchanges kinetic attack cubes for corruption cubes, 2P players are not crushed by multi-cube avalanches in Round 8–9. Instead, both players build thriving corporate engines and race to maximize Portfolio Value before the Rogue Agent hits Singularity on Round 9. This delivers the exact climactic Euro finish envisioned for the game.
+
+---
+
+### F. Formal Game Designer Sign-Off
+
+- **Date:** October 2026
+- **Status:** **OFFICIALLY APPROVED & SIGNED OFF**
+- **Verdict:** Option B Asymmetric Version Payloads (`RULES.md v0.8.2`) solve the "stalled corruption" flaw in clean games, create 4 distinct thematic game experiences, elevate Singularity to an authentic competitive trigger (up to 38.8% in 4P and 94.2% in 2P), and preserve cube volume conservation across all player counts. All tests pass (182/182), and the system is ready for web UI deployment and physical prototype playtesting.
+
 
 
 

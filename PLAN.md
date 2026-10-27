@@ -65,6 +65,13 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Software Module Market Variety:* Defaulted `randomize_cards` to True in web server startup (`main()`), New Match modal (`modalRandomizeCards` checked by default), and `startNewGame()` client helper; added `.variant-code-badge` styling (`[R2]`, `[B3]`, etc.) in the Software Module Market.
   - [x] *Rogue Agent Versions Roadmap Modal:* Added prominent "Rogue Agent Versions" action button in the top navigation header, an interactive version badge button in the status bar, and a "Version Roadmap" button in the Central Threat panel; created `versionsModal` displaying all 3 versions (`v1.0`, `v2.0`, `v3.0`), active/completed/upcoming status, corruption progress dots, starting/upgrade cube payloads with 2P scaling, and active directive text.
   - [x] *Automated Verification:* 169/169 unit tests passing via WSL.
+- [x] **Phase 12: Asymmetric Version Payloads & Dynamic Corruption Balancing (`v0.8.2` Baseline)**
+  - [x] *Design Alignment:* Option B approved by User: Asymmetric Version Payloads trading attack cubes for Black corruption cubes (Polymorphic Worm `+1 Green, +1 Blue, +1 Black` [2P: `+1 Green, +1 Black`]; Zero-Day Override `+1 Red, +1 Blue, +1 Black` [2P: `+1 Red, +1 Black`]; RaaS and Corrupted Kernel retaining kinetic 0 Black payloads).
+  - [x] *Technical Architecture Spec (`principal-engineer`):* Module contracts, invariant updates, schema updates in `sim/entities.py`, web controller synchronization, and test matrix.
+  - [x] *Implementation (`senior-engineer`):* Update `sim/entities.py`, `web/`, unit tests, and CLI runner (`sim/experiments.py`).
+  - [x] *Code Review Gate (`staff-engineer`):* Review line-by-line diffs, verify 100% test pass via WSL (182/182 passing), audit edge cases (APPROVED).
+  - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Run Experiment 6 (4-Way Roadmap Matrix Benchmark across 4P, 3P, and 2P) via WSL.
+  - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Evaluate Singularity vitality, pacing across kinetic vs corruption roadmaps, log Section 11 in `FINDINGS.md` (OFFICIALLY APPROVED).
 
 ---
 

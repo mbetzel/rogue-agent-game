@@ -384,18 +384,18 @@ def get_all_version_cards() -> List[VersionCard]:
         VersionCard(
             version_str="v2.0",
             name="Polymorphic Worm",
-            staging_payload={CubeColor.GREEN: 2, CubeColor.BLUE: 1},
+            staging_payload={CubeColor.GREEN: 1, CubeColor.BLUE: 1, CubeColor.BLACK: 1},
             directive_description="Subroutine Throttling: Players receive only 1 free reroll in Phase 1 (instead of 2).",
             directive_code="POLYMORPHIC_WORM",
-            staging_payload_2p={CubeColor.GREEN: 1, CubeColor.BLUE: 1},
+            staging_payload_2p={CubeColor.GREEN: 1, CubeColor.BLACK: 1},
         ),
         VersionCard(
             version_str="v3.0",
             name="Zero-Day Override",
-            staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1},
+            staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.BLACK: 1},
             directive_description="Kernel Lock: Any rolled die showing a Shield (Block 1 or Block 2) is Locked immediately.",
             directive_code="ZERO_DAY_OVERRIDE",
-            staging_payload_2p={CubeColor.RED: 1, CubeColor.BLUE: 1},
+            staging_payload_2p={CubeColor.RED: 1, CubeColor.BLACK: 1},
         ),
         VersionCard(
             version_str="v3.0",
@@ -412,6 +412,27 @@ def get_default_version_deck() -> List[VersionCard]:
     """Returns the default baseline version cards: Script Kiddie (v1.0), RaaS (v2.0), Zero-Day Override (v3.0)."""
     cards = get_all_version_cards()
     return [cards[0], cards[2], cards[4]]
+
+
+def get_roadmap_deck(path_id: int) -> List[VersionCard]:
+    """Returns a deterministic 3-card roadmap deck for a designated path ID (1-4).
+
+    Path 1 (Kinetic): Script Kiddie (v1.0), RaaS (v2.0), Corrupted Kernel (v3.0)
+    Path 2 (Contagion): Script Kiddie (v1.0), Polymorphic Worm (v2.0), Zero-Day Override (v3.0)
+    Path 3 (Mixed A): Script Kiddie (v1.0), RaaS (v2.0), Zero-Day Override (v3.0)
+    Path 4 (Mixed B): Script Kiddie (v1.0), Polymorphic Worm (v2.0), Corrupted Kernel (v3.0)
+    """
+    cards = {c.directive_code: c for c in get_all_version_cards()}
+    if path_id == 1:
+        return [cards["SCRIPT_KIDDIE"], cards["RAAS"], cards["CORRUPTED_KERNEL"]]
+    elif path_id == 2:
+        return [cards["SCRIPT_KIDDIE"], cards["POLYMORPHIC_WORM"], cards["ZERO_DAY_OVERRIDE"]]
+    elif path_id == 3:
+        return [cards["SCRIPT_KIDDIE"], cards["RAAS"], cards["ZERO_DAY_OVERRIDE"]]
+    elif path_id == 4:
+        return [cards["SCRIPT_KIDDIE"], cards["POLYMORPHIC_WORM"], cards["CORRUPTED_KERNEL"]]
+    else:
+        raise ValueError(f"Unknown roadmap path_id: {path_id}. Must be 1, 2, 3, or 4.")
 
 
 def get_random_version_deck(rng: random.Random) -> List[VersionCard]:

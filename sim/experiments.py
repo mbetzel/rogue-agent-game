@@ -26,6 +26,7 @@ from sim.entities import (
     get_default_variant_cards,
     get_default_version_deck,
     get_random_setup,
+    get_roadmap_deck,
 )
 
 
@@ -426,14 +427,76 @@ def run_experiment_5(runs: int = 500, base_seed: int = 42) -> None:
     run_experiment_5b(runs=runs, base_seed=base_seed)
 
 
+def run_experiment_6(runs: int = 500, base_seed: int = 42) -> None:
+    """Experiment 6: 4-Way Roadmap Matrix Benchmark across 4P, 3P, and 2P (v0.8.2 Asymmetric Payloads)."""
+    print("\n========================================================")
+    print("Experiment 6: 4-Way Roadmap Matrix Benchmark (v0.8.2)")
+    print("========================================================\n")
+
+    paths = [
+        (1, "Path 1 (Kinetic: RaaS / Corrupted Kernel)"),
+        (2, "Path 2 (Contagion: Worm / Zero-Day)"),
+        (3, "Path 3 (Mixed A: RaaS / Zero-Day)"),
+        (4, "Path 4 (Mixed B: Worm / Corrupted Kernel)"),
+    ]
+    player_counts = [4, 3, 2]
+    all_results = []
+
+    print("### 1. Pacing & Triggers Telemetry")
+    print("| Path | Players | Mean Rounds (Std) | Singularity % | Patient Zero % | Wipeout % | Early Death % |")
+    print("| :--- | :---: | :---: | :---: | :---: | :---: | :---: |")
+
+    for path_id, path_name in paths:
+        deck = get_roadmap_deck(path_id)
+        for p_count in player_counts:
+            def cfg_fn(p=p_count):
+                return GameConfig(num_players=p)
+
+            def bots_fn(p=p_count):
+                return [
+                    AdaptiveBalancedBot(0),
+                    SecOpsTurtleBot(1),
+                    VentureGreedBot(2),
+                    AccelerationistBot(3),
+                ][:p]
+
+            metrics = run_batch(cfg_fn, bots_fn, num_runs=runs, base_seed=base_seed, version_deck=deck)
+            all_results.append((path_name, p_count, metrics))
+            print(
+                f"| {path_name} | {p_count}P | {metrics.mean_rounds:.2f} (±{metrics.std_rounds:.2f}) | "
+                f"{metrics.singularity_pct * 100:.1f}% | "
+                f"{metrics.patient_zero_pct * 100:.1f}% | "
+                f"{metrics.total_wipeout_pct * 100:.1f}% | "
+                f"{metrics.early_death_pct * 100:.1f}% |"
+            )
+
+    print("\n### 2. Bot Balance & Scores Telemetry")
+    print("| Path | Players | Top Bot (Win %) | Runner-Up Win Rates | Mean Win VP |")
+    print("| :--- | :---: | :--- | :--- | :---: |")
+    for path_name, p_count, m in all_results:
+        sorted_bots = sorted(m.win_rates.items(), key=lambda x: x[1], reverse=True)
+        top_str = f"{sorted_bots[0][0]} ({sorted_bots[0][1] * 100:.1f}%)" if sorted_bots else "None"
+        runner_ups = ", ".join(f"{b} ({w * 100:.1f}%)" for b, w in sorted_bots[1:]) if len(sorted_bots) > 1 else "None"
+        print(
+            f"| {path_name} | {p_count}P | {top_str} | "
+            f"{runner_ups} | "
+            f"{m.mean_winning_score:.1f} |"
+        )
+
+    print("\n### 3. Outlier Game Seeds")
+    for path_name, p_count, m in all_results:
+        if m.outlier_seeds:
+            print(f"- **{path_name} ({p_count}P):** {m.outlier_seeds[:5]}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Rogue Agent Monte Carlo Simulation Suite")
     parser.add_argument(
         "--experiment",
         "-e",
-        choices=["1", "2", "3", "4", "5", "all"],
+        choices=["1", "2", "3", "4", "5", "6", "all"],
         default="all",
-        help="Which experiment to run (1-5 or all)",
+        help="Which experiment to run (1-6 or all)",
     )
     parser.add_argument(
         "--runs",
@@ -462,6 +525,8 @@ def main() -> None:
         run_experiment_4(runs=args.runs, base_seed=args.seed)
     if args.experiment in ("5", "all"):
         run_experiment_5(runs=args.runs, base_seed=args.seed)
+    if args.experiment in ("6", "all"):
+        run_experiment_6(runs=args.runs, base_seed=args.seed)
 
 
 if __name__ == "__main__":

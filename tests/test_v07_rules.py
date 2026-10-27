@@ -157,15 +157,15 @@ class TestV07Rules(unittest.TestCase):
         self.assertEqual(raas.get_staging_payload(2), {CubeColor.RED: 1, CubeColor.GREEN: 1})
         self.assertEqual(raas.get_staging_payload(4), {CubeColor.RED: 2, CubeColor.GREEN: 1})
 
-        # Polymorphic Worm: 2P = 1 Green, 1 Blue (vs 4P = 2 Green, 1 Blue)
+        # Polymorphic Worm (v0.8.2): 2P = 1 Green, 1 Black (vs 4P = 1 Green, 1 Blue, 1 Black)
         worm = cards["POLYMORPHIC_WORM"]
-        self.assertEqual(worm.get_staging_payload(2), {CubeColor.GREEN: 1, CubeColor.BLUE: 1})
-        self.assertEqual(worm.get_staging_payload(4), {CubeColor.GREEN: 2, CubeColor.BLUE: 1})
+        self.assertEqual(worm.get_staging_payload(2), {CubeColor.GREEN: 1, CubeColor.BLACK: 1})
+        self.assertEqual(worm.get_staging_payload(4), {CubeColor.GREEN: 1, CubeColor.BLUE: 1, CubeColor.BLACK: 1})
 
-        # Zero-Day Override: 2P = 1 Red, 1 Blue (vs 4P = 1 Red, 1 Blue, 1 Green)
+        # Zero-Day Override (v0.8.2): 2P = 1 Red, 1 Black (vs 4P = 1 Red, 1 Blue, 1 Black)
         zero_day = cards["ZERO_DAY_OVERRIDE"]
-        self.assertEqual(zero_day.get_staging_payload(2), {CubeColor.RED: 1, CubeColor.BLUE: 1})
-        self.assertEqual(zero_day.get_staging_payload(4), {CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1})
+        self.assertEqual(zero_day.get_staging_payload(2), {CubeColor.RED: 1, CubeColor.BLACK: 1})
+        self.assertEqual(zero_day.get_staging_payload(4), {CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.BLACK: 1})
 
         # Corrupted Kernel: 2P = 1 Red, 1 Blue (vs 4P = 2 Red, 1 Blue)
         kernel = cards["CORRUPTED_KERNEL"]
