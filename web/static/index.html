@@ -25,8 +25,11 @@
         <span class="status-value" id="phaseDisplay">Phase 1: Boot & Configure</span>
       </div>
       <div class="status-badge" style="max-width: 280px;">
-        <span class="status-label">Rogue Agent Version</span>
-        <span class="status-value" id="versionCardDisplay" style="font-size: 0.8rem; font-weight: normal;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span class="status-label">Rogue Agent Version</span>
+          <button class="info-icon-btn" onclick="openModal('versionsModal')" title="View All Rogue Agent Versions for this Match" style="width: 16px; height: 16px; font-size: 0.65rem;">📋</button>
+        </div>
+        <span class="status-value" id="versionCardDisplay" style="font-size: 0.8rem; font-weight: normal; cursor: pointer;" onclick="openModal('versionsModal')" title="Click to view all match versions">
           Script Kiddie (v1.0)
         </span>
       </div>
@@ -38,6 +41,7 @@
     </div>
 
     <div class="header-actions">
+      <button class="action-btn" id="btnViewVersions" onclick="openModal('versionsModal')" title="View all Rogue Agent versions and upgrade roadmap for this match">Rogue Agent Versions</button>
       <button class="btn-primary" onclick="openModal('newGameModal')">New Match</button>
     </div>
   </header>
@@ -53,6 +57,7 @@
           <div class="panel-title">
             <span>Central Threat & Compiler (Cube Tower)</span>
             <button class="info-icon-btn" onclick="openModal('cubeEffectsModal')" title="View Agent Cube Effects Reference">ℹ</button>
+            <button class="action-btn" style="font-size: 0.72rem; padding: 2px 8px; margin-left: 6px;" onclick="openModal('versionsModal')" title="View all Rogue Agent Versions for this match">Version Roadmap</button>
           </div>
         </div>
 
@@ -136,8 +141,8 @@
       </div>
 
       <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
-        <input type="checkbox" id="modalRandomizeCards" style="cursor: pointer; width: 16px; height: 16px;">
-        <label for="modalRandomizeCards" style="font-size: 0.85rem; color: #fff; cursor: pointer;">Randomize Variant (★) & Version Cards</label>
+        <input type="checkbox" id="modalRandomizeCards" checked style="cursor: pointer; width: 16px; height: 16px;">
+        <label for="modalRandomizeCards" style="font-size: 0.85rem; color: #fff; cursor: pointer;">Randomize Variant (★) &amp; Version Cards (Standard Rules)</label>
       </div>
 
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
@@ -207,6 +212,35 @@
 
       <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
         <button class="action-btn btn-accent" onclick="closeModal('cubeEffectsModal')">Got It</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Rogue Agent Versions Roadmap -->
+  <div class="modal-overlay" id="versionsModal" onclick="if (event.target === this) closeModal('versionsModal')">
+    <div class="modal-content" style="max-width: 820px; width: 95%;">
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+        <div>
+          <h3 style="color: #fff; font-size: 1.25rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+            <span>Rogue Agent Versions Roadmap</span>
+            <span class="version-badge" id="versionsModalRoundBadge">Round 1</span>
+          </h3>
+          <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 4px; margin-bottom: 0;">
+            All Rogue Agent version cards selected for this match. The AI compiles code and advances toward Singularity across these versions.
+          </p>
+        </div>
+        <button class="action-btn" style="padding: 4px 10px; font-size: 0.85rem;" onclick="closeModal('versionsModal')">✕</button>
+      </div>
+
+      <div class="versions-roadmap-grid" id="versionsModalDeck">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px; flex-wrap: wrap; gap: 10px;">
+        <span style="font-size: 0.8rem; color: var(--text-dim);">
+          Each Version card requires <strong>4 Black Cubes</strong> on its Corruption Track before upgrading. Filling v3.0 triggers <strong>Singularity</strong>!
+        </span>
+        <button class="action-btn btn-accent" onclick="closeModal('versionsModal')">Close</button>
       </div>
     </div>
   </div>

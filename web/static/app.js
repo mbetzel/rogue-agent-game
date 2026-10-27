@@ -54,7 +54,7 @@ function getHumanPlayerId() {
   return human ? human.player_id : (state.active_player_index || 0);
 }
 
-async function startNewGame(numPlayers = 4, customPlayers = null, seed = null, randomizeCards = false) {
+async function startNewGame(numPlayers = 4, customPlayers = null, seed = null, randomizeCards = true) {
   const payload = { num_players: numPlayers, randomize_cards: Boolean(randomizeCards) };
   if (customPlayers) payload.players = customPlayers;
   if (seed !== null && seed !== "") payload.seed = parseInt(seed, 10);
@@ -201,6 +201,9 @@ async function doEndTurn() {
 
 // Modal Helpers
 function openModal(id) {
+  if (id === "versionsModal") {
+    renderVersionsModal();
+  }
   const el = document.getElementById(id);
   if (el) el.classList.add("open");
 }
@@ -220,6 +223,7 @@ function renderApp() {
   renderPlayerMats();
   renderActionDock();
   renderEventLog();
+  renderVersionsModal();
 
   if (state.game_over && state.final_result) {
     renderGameOverModal();
@@ -318,7 +322,7 @@ function renderMarket() {
           Cost: $${item.cost} | Value: ${item.vp} VP
         </div>
         <div class="market-variant-card">
-          ★ ${item.variant ? item.variant.name + ': ' + item.variant.description : 'Standard'}
+          ${item.variant ? `<span class="variant-code-badge">${item.variant.code}</span> <strong>${item.variant.name}</strong>: ${item.variant.description}` : '★ Standard'}
         </div>
       </div>
       <div>
@@ -943,6 +947,107 @@ function renderGameOverModal() {
   `;
 
   openModal("gameOverModal");
+}
+
+function renderVersionsModal() {
+  if (!state || !state.version_deck) return;
+  const container = document.getElementById("versionsModalDeck");
+  if (!container) return;
+  container.innerHTML = "";
+
+  const roundBadge = document.getElementById("versionsModalRoundBadge");
+  if (roundBadge) {
+    roundBadge.innerText = `Round ${state.current_round}`;
+  }
+
+  const is2P = state.players && state.players.length === 2;
+
+  state.version_deck.forEach((ver, idx) => {
+    const isActive = idx === state.current_version_index;
+    const isCompleted = idx < state.current_version_index;
+    const isUpcoming = idx > state.current_version_index;
+
+    const card = document.createElement("div");
+    card.className = `version-roadmap-card ${isActive ? "active-version-card" : ""} ${isCompleted ? "completed-version-card" : ""}`;
+
+    // Status badge
+    let statusBadgeHtml = "";
+    if (isActive) {
+      statusBadgeHtml = `<span class="version-status-badge active">● Active (${state.corruption_track}/${state.corruption_capacity})</span>`;
+    } else if (isCompleted) {
+      statusBadgeHtml = `<span class="version-status-badge completed">✓ Completed</span>`;
+    } else {
+      statusBadgeHtml = `<span class="version-status-badge upcoming">Upcoming</span>`;
+    }
+
+    // Payload: If 2P and staging_payload_2p exists, use it
+    const payload = (is2P && ver.staging_payload_2p) ? ver.staging_payload_2p : ver.staging_payload;
+    const isStarting = idx === 0;
+    const payloadLabel = isStarting ? "Starting Payload:" : (is2P && ver.staging_payload_2p ? "Upgrade Payload (2P Scaled):" : "Upgrade Payload:");
+
+    let cubesHtml = "";
+    const colorOrder = ["red", "blue", "green", "black"];
+    for (const c of colorOrder) {
+      const count = (payload && payload[c]) ? payload[c] : 0;
+      if (count > 0) {
+        cubesHtml += `<span class="cube-badge ${c}" style="font-size: 0.72rem; padding: 2px 7px;">${isStarting ? "" : "+"}${count} ${c.toUpperCase()}</span>`;
+      }
+    }
+    if (!cubesHtml) {
+      cubesHtml = `<span style="font-size: 0.75rem; color: var(--text-dim);">None</span>`;
+    }
+
+    // Directive description
+    const directiveHtml = `
+      <div class="version-directive-section">
+        <strong style="color: var(--text-highlight);">Directive:</strong> ${ver.directive_description || "None."}
+      </div>
+    `;
+
+    // Corruption progress
+    let corruptionInfo = "";
+    if (isActive) {
+      let dots = "";
+      for (let i = 0; i < state.corruption_capacity; i++) {
+        dots += (i < state.corruption_track) ? "● " : "○ ";
+      }
+      corruptionInfo = `
+        <div class="version-corruption-progress">
+          <span style="color: var(--color-red); font-weight: 700;">Corruption:</span>
+          <span style="letter-spacing: 2px; color: ${state.corruption_track >= state.corruption_capacity - 1 ? '#ff0055' : 'var(--text-highlight)'}; font-size: 0.85rem;">${dots}</span>
+          <span>(${state.corruption_track} / ${state.corruption_capacity})</span>
+        </div>
+      `;
+    } else if (isCompleted) {
+      corruptionInfo = `
+        <div class="version-corruption-progress">
+          <span style="color: var(--text-dim);">Corruption: 4 / 4 (Resolved)</span>
+        </div>
+      `;
+    } else {
+      corruptionInfo = `
+        <div class="version-corruption-progress">
+          <span style="color: var(--text-dim);">Corruption: 0 / 4 (Pending)</span>
+        </div>
+      `;
+    }
+
+    card.innerHTML = `
+      <div class="version-card-header">
+        <span class="version-card-tag">${ver.version_str}</span>
+        ${statusBadgeHtml}
+      </div>
+      <div class="version-card-title">${ver.name}</div>
+      <div class="version-payload-section">
+        <div class="version-payload-label">${payloadLabel}</div>
+        <div class="version-payload-cubes">${cubesHtml}</div>
+      </div>
+      ${directiveHtml}
+      ${corruptionInfo}
+    `;
+
+    container.appendChild(card);
+  });
 }
 
 // Initial Boot

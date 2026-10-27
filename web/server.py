@@ -223,10 +223,10 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
             self._send_json_response(payload, code)
 
 
-def create_server(host: str = "127.0.0.1", port: int = 8080) -> ThreadingHTTPServer:
+def create_server(host: str = "127.0.0.1", port: int = 8080, randomize_cards: bool = False) -> ThreadingHTTPServer:
     """Creates a ThreadingHTTPServer instance for the Rogue Agent web app."""
     # Initialize default game upon server start
-    RogueAgentRequestHandler.controller.new_game()
+    RogueAgentRequestHandler.controller.new_game(randomize_cards=randomize_cards)
     server = ThreadingHTTPServer((host, port), RogueAgentRequestHandler)
     return server
 
@@ -237,7 +237,7 @@ def main() -> None:
     parser.add_argument("--port", type=int, default=8080, help="Port to listen on (default: 8080)")
     args = parser.parse_args()
 
-    server = create_server(args.host, args.port)
+    server = create_server(args.host, args.port, randomize_cards=True)
     print(f"Rogue Agent Web Server running at http://{args.host}:{args.port}/")
     print(f"Serving static assets from: {STATIC_DIR}")
     try:

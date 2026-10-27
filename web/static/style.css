@@ -391,7 +391,24 @@ button.btn-compile:disabled {
 .market-variant-card {
   font-size: 0.75rem;
   color: var(--text-highlight);
-  font-style: italic;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.variant-code-badge {
+  display: inline-block;
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: 3px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 1px 5px;
+  font-family: monospace;
+  font-style: normal;
+  letter-spacing: 0.5px;
 }
 
 /* Player Mats Grid */
@@ -666,4 +683,138 @@ button.action-btn.btn-accent {
   flex-direction: column;
   gap: 16px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+}
+
+/* Rogue Agent Versions Roadmap Modal */
+.versions-roadmap-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 6px;
+}
+
+@media (max-width: 768px) {
+  .versions-roadmap-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.version-roadmap-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+.version-roadmap-card.active-version-card {
+  border-color: var(--text-highlight);
+  background: linear-gradient(180deg, #1e2c3f 0%, #172231 100%);
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.2);
+}
+
+.version-roadmap-card.completed-version-card {
+  opacity: 0.65;
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(19, 27, 38, 0.6);
+}
+
+.version-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.version-card-tag {
+  font-family: monospace;
+  font-weight: 800;
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 212, 255, 0.15);
+  color: var(--text-highlight);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+}
+
+.version-status-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.version-status-badge.active {
+  background: rgba(0, 255, 136, 0.2);
+  color: var(--color-green);
+  border: 1px solid var(--color-green);
+  animation: pulse 2s infinite;
+}
+
+.version-status-badge.completed {
+  background: rgba(148, 163, 184, 0.2);
+  color: var(--text-dim);
+  border: 1px solid var(--border-color);
+}
+
+.version-status-badge.upcoming {
+  background: rgba(255, 202, 40, 0.15);
+  color: var(--color-yellow);
+  border: 1px solid rgba(255, 202, 40, 0.3);
+}
+
+.version-card-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.version-payload-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.version-payload-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  font-weight: 700;
+}
+
+.version-payload-cubes {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.version-directive-section {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--text-main);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--text-highlight);
+}
+
+.version-corruption-progress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-top: auto;
 }

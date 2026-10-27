@@ -61,6 +61,10 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Run Experiment 5a (Version Directives Benchmark) and Experiment 5b (Colored Module Variant Benchmark) across 4P Pod A ($N=500$, Seed 42); compile structured telemetry.
   - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Evaluate card relative power levels, identify degenerate loops (Y2, B2, B3, Corrupted Kernel), construct comprehensive S/A/B/C/Trap card-tiering matrix, and log Section 10 in `FINDINGS.md`.
   - [x] *Post-Tuning Verification & Balance Sign-Off (`game-designer`):* Evaluate post-tuning Experiment 5 sweeps; verify elimination of Corrupted Kernel wipeout cliff (20.4% → 4.8%), score compression on Y2 Cloud Monopoly (36.0 → 32.5 VP), Wear Loop integrity on B3 Air-Gapped Backup (sacrificial wear redirection), and P3 Packet Deflection aggro dampening (7.8% → 4.6% wipeout); log Section 10.G & 10.H in `FINDINGS.md` (APPROVED).
+- [x] **Phase 11: Web UX Polish — Setup Randomization Variety & Rogue Agent Versions Roadmap**
+  - [x] *Software Module Market Variety:* Defaulted `randomize_cards` to True in web server startup (`main()`), New Match modal (`modalRandomizeCards` checked by default), and `startNewGame()` client helper; added `.variant-code-badge` styling (`[R2]`, `[B3]`, etc.) in the Software Module Market.
+  - [x] *Rogue Agent Versions Roadmap Modal:* Added prominent "Rogue Agent Versions" action button in the top navigation header, an interactive version badge button in the status bar, and a "Version Roadmap" button in the Central Threat panel; created `versionsModal` displaying all 3 versions (`v1.0`, `v2.0`, `v3.0`), active/completed/upcoming status, corruption progress dots, starting/upgrade cube payloads with 2P scaling, and active directive text.
+  - [x] *Automated Verification:* 169/169 unit tests passing via WSL.
 
 ---
 

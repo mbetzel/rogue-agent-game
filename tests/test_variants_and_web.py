@@ -747,6 +747,46 @@ class TestGroupEWebAPIServer(unittest.TestCase):
         market_codes = {k: v["variant"]["code"] for k, v in state["market"].items()}
         self.assertEqual(market_codes, baseline_codes)
 
+    def test_server_create_with_randomize_cards_true(self) -> None:
+        """18. create_server(randomize_cards=True) initializes randomized match upon server startup."""
+        test_server = create_server(host="127.0.0.1", port=0, randomize_cards=True)
+        try:
+            ctrl = test_server.RequestHandlerClass.controller
+            self.assertIsNotNone(ctrl.engine)
+            # Randomized setup has 5 variant cards and 3 version cards in state
+            self.assertEqual(len(ctrl.state.variant_cards), 5)
+            self.assertEqual(len(ctrl.state.version_deck), 3)
+        finally:
+            test_server.server_close()
+
+    def test_api_get_state_includes_all_versions_roadmap(self) -> None:
+        """19. GET /api/game/state provides complete version_deck roadmap for the match."""
+        # Initialize match with seed 42 and randomized cards
+        data = self._post("/api/game/new", {"num_players": 4, "seed": 42, "randomize_cards": True})
+        self.assertTrue(data["success"])
+
+        # Fetch state via GET
+        req = urllib.request.Request(f"{self.base_url}/api/game/state", method="GET")
+        with urllib.request.urlopen(req, timeout=5) as res:
+            res_data = json.loads(res.read().decode("utf-8"))
+
+        self.assertTrue(res_data["success"])
+        state = res_data["state"]
+
+        self.assertIn("version_deck", state)
+        version_deck = state["version_deck"]
+        self.assertEqual(len(version_deck), 3)
+
+        expected_versions = ["v1.0", "v2.0", "v3.0"]
+        for idx, ver in enumerate(version_deck):
+            self.assertEqual(ver["version_str"], expected_versions[idx])
+            self.assertTrue(len(ver["name"]) > 0)
+            self.assertIn("directive_description", ver)
+            self.assertIn("staging_payload", ver)
+
+        self.assertIn("current_version_index", state)
+        self.assertEqual(state["current_version_index"], 0)
+
 
 # =====================================================================
 # Group F: Experiments Telemetry & Batch Simulation
