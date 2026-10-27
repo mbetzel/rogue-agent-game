@@ -25,7 +25,7 @@ class Phase3ActionPlan:
     # Market purchases: list of die colors to buy (up to 2)
     market_purchases: List[DieColor] = field(default_factory=list)
     # Special star actions
-    use_b2_secret: bool = False  # Pay $2 for +1 Secret
+    use_b2_secret: bool = False  # Pay $4 for +1 Secret
     use_y1_secret: bool = False  # Pay $2 for +1 Secret
     p1_cube_choice: Optional[CubeColor] = None  # Add 1 Attack cube via P1
     p3_cube_choice: Optional[CubeColor] = None  # Add 1 Attack cube via P3
@@ -188,17 +188,33 @@ class BaseBot:
 
         Default heuristics:
         1. Prioritize White contractor dice (immune to wear, returns to supply at round end).
-        2. Prioritize B3 (Air-Gapped Backup) next (absorbs damage without wearing down).
+        2. Prioritize B3 (Air-Gapped Backup) next if other ready dice are available to be sacrificed.
         3. Lowest VP die next (preserves valuable dice in Ready zone).
         4. Lowest cost die next.
         """
         def wear_priority_key(d: Die) -> Tuple[int, int, int, int]:
             is_white = 0 if d.color == DieColor.WHITE else 1
             face = d.effective_face or d.current_face
-            is_b3 = 0 if (face and face.star_code == "B3") else 1
+            has_other_ready = any(rd.die_id != d.die_id for rd in player_state.ready_dice)
+            is_b3 = 0 if (face and face.star_code == "B3" and has_other_ready) else 1
             return (is_white, is_b3, d.vp, d.cost)
 
         return sorted(assigned_dice, key=wear_priority_key)
+
+    def choose_b3_sacrificial_die(
+        self,
+        player_state: PlayerState,
+        other_ready_dice: List[Die],
+    ) -> Die:
+        """Picks a sacrificial ready die to move to Unpatched instead of B3 when B3 blocks damage.
+
+        Default heuristic: picks lowest VP die, preferring Gray starter dice.
+        """
+        def sacrifice_key(d: Die) -> Tuple[int, int, int]:
+            is_gray = 0 if d.color == DieColor.GRAY else 1
+            return (is_gray, d.vp, d.cost)
+
+        return min(other_ready_dice, key=sacrifice_key)
 
     def take_phase3_actions(
         self,
@@ -688,6 +704,16 @@ class SecOpsTurtleBot(BaseBot):
                 plan.patch_actions.append({"die_index": idx, "use_cash": True})
                 current_money -= patch_cash_cost
 
+        b2_cost = game_state.config.b2_secret_cost
+        b2_cap = game_state.config.b2_secret_cap
+        if (
+            player_state.b2_available
+            and (current_money - b2_cost >= cash_cushion)
+            and player_state.secrets < b2_cap
+        ):
+            plan.use_b2_secret = True
+            current_money -= b2_cost
+
         for color in [DieColor.BLUE, DieColor.GREEN, DieColor.RED]:
             if len(plan.market_purchases) >= game_state.config.max_market_purchases_per_turn:
                 break
@@ -876,9 +902,11 @@ class VentureGreedBot(BaseBot):
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
             current_money += game_state.config.dirty_income_cash
 
-        if player_state.b2_available and (current_money - 2 >= cash_cushion) and player_state.secrets < 10:
+        b2_cost = game_state.config.b2_secret_cost
+        b2_cap = game_state.config.b2_secret_cap
+        if player_state.b2_available and (current_money - b2_cost >= cash_cushion) and player_state.secrets < b2_cap:
             plan.use_b2_secret = True
-            current_money -= 2
+            current_money -= b2_cost
 
         if player_state.y1_available and (current_money - 6 >= cash_cushion) and player_state.secrets < 10:
             plan.use_y1_secret = True
@@ -1059,8 +1087,12 @@ class AccelerationistBot(BaseBot):
 
         if player_state.p1_available:
             plan.p1_cube_choice = CubeColor.RED
-        if player_state.p3_available is not None:
+        if (
+            player_state.p3_available is not None
+            and current_money - game_state.config.p3_cube_cash_cost >= cash_cushion
+        ):
             plan.p3_cube_choice = CubeColor(player_state.p3_available.value)
+            current_money -= game_state.config.p3_cube_cash_cost
 
         purchases = 0
         for color in [DieColor.PURPLE, DieColor.BLUE]:

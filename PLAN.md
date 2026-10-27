@@ -53,6 +53,14 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Code Review Gate (`staff-engineer`):* Verify 100% test pass and rules fidelity via WSL (APPROVED — 145/145 unit tests passing).
   - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Run Tournament Pods and player-count sweeps to evaluate choice face adoption and impact on Pod A / 2P resilience; record in `FINDINGS.md`.
   - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Evaluate telemetry package, validate ecosystem targets, and sign off on v0.8 (APPROVED).
+- [x] **Phase 10: Version Directives & Colored Module Variant Balancing (`v0.8` Modular Matrix)**
+  - [x] *Design Review & Rules Reference:* Catalog 15 Variant Cards (★) and 6 Version Cards across v1.0/v2.0/v3.0 as defined in [RULES.md](./RULES.md).
+  - [x] *Technical Architecture Spec (`principal-engineer`):* Modular variant schema, version directive hooks, card randomization engine (`sim/entities.py`), web state controller support, and 19-test verification matrix.
+  - [x] *Implementation (`senior-engineer`):* Implement setup randomization, variant and version mechanics in `sim/` and `web/`, update bot heuristics, and create `tests/test_variants_and_web.py`.
+  - [x] *Code Review Gate (`staff-engineer`):* Comprehensive line-by-line code and rules audit, verification of 100% test pass (165/165 passing via WSL), seed reproducibility check (APPROVED).
+  - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Run Experiment 5a (Version Directives Benchmark) and Experiment 5b (Colored Module Variant Benchmark) across 4P Pod A ($N=500$, Seed 42); compile structured telemetry.
+  - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Evaluate card relative power levels, identify degenerate loops (Y2, B2, B3, Corrupted Kernel), construct comprehensive S/A/B/C/Trap card-tiering matrix, and log Section 10 in `FINDINGS.md`.
+  - [x] *Post-Tuning Verification & Balance Sign-Off (`game-designer`):* Evaluate post-tuning Experiment 5 sweeps; verify elimination of Corrupted Kernel wipeout cliff (20.4% → 4.8%), score compression on Y2 Cloud Monopoly (36.0 → 32.5 VP), Wear Loop integrity on B3 Air-Gapped Backup (sacrificial wear redirection), and P3 Packet Deflection aggro dampening (7.8% → 4.6% wipeout); log Section 10.G & 10.H in `FINDINGS.md` (APPROVED).
 
 ---
 
@@ -133,6 +141,7 @@ Pure Python 3 standard library (`dataclasses`, `random`, `statistics`, `argparse
 | **2. Player-Count Scaling** | `Players ∈ {2, 3, 4}` across fixed vs. scaled rules | Similar round count (`±1.5` rounds) and survival rates across `2P`, `3P`, and `4P`. |
 | **3. Dirty Income & Wear** | `Dirty Income ∈ {$2, $3, $4}`, `Patch Cost ∈ {$1, $2, $3}`, `Colored Shield ∈ {1, 2}` | Players take Dirty Income ~`2–4` times/game; dice wear creates real triage without locking everyone at `0` Ready dice. |
 | **4. Ecosystem Tournament** | Mixed pods of all 5 Bot Archetypes + randomized Variant/Version setups | No single bot exceeds **`38%` win rate** in `4P` pods; both organic End-Game Triggers (Total Breach, Singularity) occur meaningfully (`> 15%` each). |
+| **5. Modular Variants & Directives** | Version Directives (5a) × 15 Module Variants (5b) across 4P Pod A | Variance assessment, degenerate loop prevention, card tiering, win rate ceiling ($\le 38\%$), Singularity viability. |
 
 ---
 
@@ -153,3 +162,10 @@ Pure Python 3 standard library (`dataclasses`, `random`, `statistics`, `argparse
    - Execute Experiments 1–4 under `v0.3` via WSL (`python3 -m sim.experiments`) with reproducible seeds.
 4. **Balance Validation Gate (`game-designer` → Orchestrator & User):**
    - Validate `v0.3` scenario telemetry against "Healthy Game" targets, log findings in `FINDINGS.md`, and present final results to User.
+5. **Phase 10 Modular Balance & Variant Gate (`all roles`):**
+   - `principal-engineer`: High-level spec for variant schema, version hooks, and setup randomization.
+   - `senior-engineer`: Implement features in `sim/` and `web/` with 19 new tests in `tests/test_variants_and_web.py`.
+   - `staff-engineer`: Review code and verify 100% test pass (165/165 passing via WSL) — `APPROVED`.
+   - `product-owner`: Execute Experiment 5a and 5b ($N=500$, Seed 42) and compile telemetry.
+   - `game-designer`: Comprehensive balance critique, card tiering (S/A/B/C/Trap), degenerate loop identification (Y2, B2, B3, Corrupted Kernel), and Section 10 documentation in `FINDINGS.md` — `APPROVED`.
+   - `game-designer`: Post-tuning telemetry evaluation (Corrupted Kernel 20.4% → 4.8% wipeouts, P3 7.8% → 4.6% wipeouts, Y2 36.0 → 32.5 VP compression, B3 wear loop preservation), updated tier classifications, and Section 10.G & 10.H documentation in `FINDINGS.md` — `OFFICIALLY APPROVED`.

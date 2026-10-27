@@ -428,8 +428,9 @@ class GameEngine:
                         player.secrets += eff.secrets
                         if eff.is_star:
                             if eff.star_code == "Y2":
-                                yellow_count = sum(1 for d in player.total_dice if d.color == DieColor.YELLOW)
-                                bonus = min(5, 2 + yellow_count) - 2
+                                count = len({d.color for d in player.colored_dice})
+                                total_payout = min(self.config.y2_max_payout, self.config.y2_base_payout + count)
+                                bonus = total_payout - eff.money
                                 player.money += max(0, bonus)
                             elif eff.star_code == "Y3":
                                 if die in player.ready_dice:
@@ -475,9 +476,10 @@ class GameEngine:
         # Star faces
         if eff.is_star:
             if eff.star_code == "Y2":
-                # Cloud Monopoly: +$2, plus +$1 per Yellow die owned (max +$5)
-                yellow_count = sum(1 for d in player.total_dice if d.color == DieColor.YELLOW)
-                bonus = min(5, 2 + yellow_count) - 2  # base 2 already added in eff.money
+                # Cloud Monopoly: +$2, plus +$1 per different colored module die owned (max +$5)
+                count = len({d.color for d in player.colored_dice})
+                total_payout = min(self.config.y2_max_payout, self.config.y2_base_payout + count)
+                bonus = total_payout - eff.money  # base 2 already added in eff.money
                 player.money += max(0, bonus)
             elif eff.star_code == "Y3":
                 # Proprietary Training: gain 1 secret (already in eff.secrets), move die to unpatched
@@ -545,8 +547,8 @@ class GameEngine:
         # Apply Active Version Directives to Attack Strength
         active_directive = self.state.active_directive_code
         if active_directive == "CORRUPTED_KERNEL":
-            # Corrupted Kernel: Each Black Cube adds +1 Strength to the Attack Color with the most exited cubes
-            if black_dropped > 0:
+            # Corrupted Kernel: If 2+ Black Cubes exit the tower this round, the Attack Color with the most exited cubes gains +2 Strength total.
+            if black_dropped >= self.config.corrupted_kernel_black_threshold:
                 highest_color = max(
                     [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN],
                     key=lambda c: (
@@ -555,12 +557,13 @@ class GameEngine:
                         c == CubeColor.BLUE,
                     ),
                 )
+                bonus = self.config.corrupted_kernel_strength_bonus
                 if highest_color == CubeColor.RED:
-                    red_strength += black_dropped
+                    red_strength += bonus
                 elif highest_color == CubeColor.BLUE:
-                    blue_strength += black_dropped
+                    blue_strength += bonus
                 elif highest_color == CubeColor.GREEN:
-                    green_strength += black_dropped
+                    green_strength += bonus
 
         attack_strengths = {
             CubeColor.RED: red_strength,
@@ -711,9 +714,26 @@ class GameEngine:
                 if die.color == DieColor.WHITE:
                     continue
 
-                # B3 — Air-Gapped Backup: does NOT move to unpatched when blocking
+                # B3 — Air-Gapped Backup: when actively blocking, move 1 other Ready die of your choice to Unpatched instead of this die (if no other Ready die, this die moves to Unpatched)
                 if face and face.star_code == "B3":
-                    continue
+                    other_ready = [d for d in player.ready_dice if d.die_id != die.die_id]
+                    if other_ready:
+                        sacrificial_die = player.bot.choose_b3_sacrificial_die(
+                            player_state=player, other_ready_dice=other_ready
+                        )
+                        if sacrificial_die not in other_ready:
+                            sacrificial_die = other_ready[0]
+                        if sacrificial_die in player.ready_dice:
+                            player.ready_dice.remove(sacrificial_die)
+                            player.unpatched_dice.append(sacrificial_die)
+                            worn_dice_set.add(sacrificial_die.die_id)
+                        continue
+                    else:
+                        if die in player.ready_dice:
+                            player.ready_dice.remove(die)
+                            player.unpatched_dice.append(die)
+                            worn_dice_set.add(die.die_id)
+                        continue
 
                 if die in player.ready_dice:
                     player.ready_dice.remove(die)
@@ -848,9 +868,12 @@ class GameEngine:
 
             # 2. Star Special Actions in Phase 3 (Guarded by Phase 1 eligibility)
             if plan.use_b2_secret and player.b2_available:
-                if player.money >= 2 and player.secrets < 10:
-                    player.money -= 2
-                    player.secrets = min(10, player.secrets + 1)
+                if (
+                    player.money >= self.config.b2_secret_cost
+                    and player.secrets < self.config.b2_secret_cap
+                ):
+                    player.money -= self.config.b2_secret_cost
+                    player.secrets = min(self.config.b2_secret_cap, player.secrets + 1)
                     player.b2_available = False
 
             if plan.use_y1_secret and player.y1_available:
@@ -873,12 +896,14 @@ class GameEngine:
                 plan.p3_cube_choice in (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN)
                 and player.p3_available is not None
             ):
-                # Must match the color that P3 blocked!
+                # Must match the color that P3 blocked and player must afford cash cost!
                 if plan.p3_cube_choice.value == player.p3_available.value:
-                    self.state.staging_cup[plan.p3_cube_choice] = (
-                        self.state.staging_cup.get(plan.p3_cube_choice, 0) + 1
-                    )
-                    player.p3_available = None
+                    if player.money >= self.config.p3_cube_cash_cost:
+                        player.money -= self.config.p3_cube_cash_cost
+                        self.state.staging_cup[plan.p3_cube_choice] = (
+                            self.state.staging_cup.get(plan.p3_cube_choice, 0) + 1
+                        )
+                        player.p3_available = None
 
             # 3. Patching Worn-Out Dice (Unlimited)
             for patch_action in plan.patch_actions:

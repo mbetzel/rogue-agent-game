@@ -198,20 +198,20 @@ Calculate **Portfolio Value** `[TUNE weights]`:
   * *R3 — Short Squeeze:* `[Phase 2 — Compile]` Gain `+$3` (or `+$4` if 3+ Red cubes exit the tower this round).
 * **Blue `★` Variants:**
   * *B1 — Honeypot Telemetry:* `[Phase 2 — Defense]` `Block 2 Blue`; if 1+ Blue cubes exit the tower and you take `0` Blue damage, `[Phase 2 — Damage]` gain `+$3`.
-  * *B2 — Deep R&D Vault:* `[Phase 2 — Defense]` `Block 1 Blue`, **OR** `[Phase 3 — Operations]` pay `$2` during Phase 3 to gain `+1 Corporate Secret` (max 10).
-  * *B3 — Air-Gapped Backup:* `[Phase 2 — Defense]` `Block 1 Blue` and this die does **not** move to Unpatched when blocking.
+  * *B2 — Deep R&D Vault:* `[Phase 2 — Defense]` `Block 1 Blue`, **OR** `[Phase 3 — Operations]` pay `$4` during Phase 3 to gain `+1 Corporate Secret` (max 10) `[TUNE]`.
+  * *B3 — Air-Gapped Backup:* `[Phase 2 — Defense]` `Block 1 Blue`; when this die actively blocks, you may move `1` other Ready die of your choice to **Unpatched** instead of this die (if you have no other Ready dice, this die moves to Unpatched) `[TUNE]`.
 * **Green `★` Variants:**
   * *G1 — Self-Healing Kernel:* `[Phase 2 — Defense]` `Block 2 Green` + `[Phase 1 — Boot]` gain `+1 🔧`.
   * *G2 — Universal Sandbox:* `[Phase 2 — Defense]` `Block 1 Any` + `[Phase 1 — Boot]` gain `+1 🔧`.
   * *G3 — Live Reboot:* `[Phase 1 — Boot]` Gain `+2 🔧` + `+$1`.
 * **Yellow `★` Variants:**
   * *Y1 — Algorithmic Trading:* `[Phase 1 — Boot]` Gain `+$4`, **OR** `[Phase 3 — Operations]` pay `$2` in Phase 3 to gain `+1 Corporate Secret`.
-  * *Y2 — Cloud Monopoly:* `[Phase 1 — Boot]` Gain `+$2`, plus `+$1` per Yellow die you own (max `+$5`).
+  * *Y2 — Cloud Monopoly:* `[Phase 1 — Boot]` Gain `+$2`, plus `+$1` per different colored module die you own (max `+$5`) `[TUNE]`.
   * *Y3 — Proprietary Training:* `[Phase 1 — Boot]` Gain `+1 Corporate Secret`, then immediately move this die to **Unpatched**.
 * **Purple `★` Variants:**
   * *P1 — Zero-Day Injection:* `[Phase 1 — Boot]` Gain `+$2`; `[Phase 3 — Operations]` in Phase 3 you may add `1` Attack Cube (Red/Blue/Green) from the supply to the Staging Cup *(no Black cube added)*.
   * *P2 — Chaos Profiteer:* `[Phase 1 — Boot]` Gain `+$1` now, plus `[Phase 2 — Compile]` `+$2` per Black Cube that exits the tower in Phase 2.
-  * *P3 — Packet Deflection:* `[Phase 2 — Defense]` `Block 2` of any single color; `[Phase 3 — Operations]` in Phase 3 add `1` cube of that color from the supply to the Staging Cup.
+  * *P3 — Packet Deflection:* `[Phase 2 — Defense]` `Block 2` of any single color; `[Phase 3 — Operations]` in Phase 3 you may pay `$1` to add `1` cube of that color from the supply to the Staging Cup `[TUNE]`.
 
 ### C. Sample Rogue Agent Version Cards
 
@@ -222,4 +222,4 @@ Calculate **Portfolio Value** `[TUNE weights]`:
 | **`v2.0`** | *Ransomware-as-a-Service* | `+2 Red, +1 Green` *(2P: `+1 Red, +1 Green`)* | **Encrypted Memory:** Any rolled die showing Cash (`+$1` or `+$2`) is **Locked** immediately (cannot be rerolled unless unlocked with `1 🔧`). |
 | **`v2.0`** | *Polymorphic Worm* | `+2 Green, +1 Blue` *(2P: `+1 Green, +1 Blue`)* | **Subroutine Throttling:** Players receive only **`1` free reroll** in Phase 1 (instead of 2). |
 | **`v3.0`** | *Zero-Day Override* | `+1 Red, +1 Blue, +1 Green` *(2P: `+1 Red, +1 Blue`)* | **Kernel Lock:** Any rolled die showing a Shield (`Block 1` or `Block 2`) is **Locked** immediately (cannot be rerolled unless unlocked with `1 🔧`). |
-| **`v3.0`** | *Corrupted Kernel* | `+2 Red, +2 Blue` *(2P: `+1 Red, +1 Blue`)* | Each Black Cube that exits the tower also adds `+1` Strength to the Attack Color with the most exited cubes this round. |
+| **`v3.0`** | *Corrupted Kernel* | `+2 Red, +1 Blue` *(2P: `+1 Red, +1 Blue`)* | If 2+ Black Cubes exit the tower this round, the Attack Color with the most exited cubes gains `+2 Strength` total. `[TUNE]` |

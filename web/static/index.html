@@ -12,7 +12,7 @@
   <header class="app-header">
     <div class="brand-section">
       <div class="app-title">ROGUE AGENT</div>
-      <div class="version-badge">v0.6 RULES BASELINE</div>
+      <div class="version-badge">v0.8 RULES BASELINE</div>
     </div>
 
     <div class="game-status-bar">
@@ -135,12 +135,18 @@
         <input type="number" id="modalSeed" placeholder="Leave empty for random seed" style="padding: 8px; background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); border-radius: 4px;">
       </div>
 
+      <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+        <input type="checkbox" id="modalRandomizeCards" style="cursor: pointer; width: 16px; height: 16px;">
+        <label for="modalRandomizeCards" style="font-size: 0.85rem; color: #fff; cursor: pointer;">Randomize Variant (★) & Version Cards</label>
+      </div>
+
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
         <button class="action-btn" onclick="closeModal('newGameModal')">Cancel</button>
         <button class="action-btn btn-accent" onclick="
           const count = parseInt(document.getElementById('modalPlayerCount').value, 10);
           const seed = document.getElementById('modalSeed').value;
-          startNewGame(count, null, seed);
+          const randomizeCards = document.getElementById('modalRandomizeCards').checked;
+          startNewGame(count, null, seed, randomizeCards);
         ">Launch Match</button>
       </div>
     </div>

@@ -148,7 +148,7 @@ class TestV06Rules(unittest.TestCase):
         self.assertIn("Kernel Lock: Any rolled die showing a Shield (Block 1 or Block 2) is Locked immediately.", cards["ZERO_DAY_OVERRIDE"].directive_description)
 
         self.assertIn("CORRUPTED_KERNEL", cards)
-        self.assertIn("adds +1 Strength to the Attack Color", cards["CORRUPTED_KERNEL"].directive_description)
+        self.assertIn("gains +2 Strength total", cards["CORRUPTED_KERNEL"].directive_description)
 
     # -------------------------------------------------------------------------
     # 5. Contractor Hiring Deduction and Supply

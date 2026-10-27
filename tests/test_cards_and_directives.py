@@ -84,18 +84,18 @@ class TestCardsAndDirectives(unittest.TestCase):
         self.assertEqual(player.money, 7)  # 5 + 2
 
     def test_variant_y2_cloud_monopoly(self) -> None:
-        """Y2 gives +$2 plus +$1 per Yellow die owned (max +$5)."""
+        """Y2 gives +$2 plus +$1 per different colored module die owned (max +$5)."""
         player = PlayerState(player_id=0, bot=self.bot, money=5, secrets=6, patches=0)
         y_card = self.all_variants["Y2"]
         die1 = create_colored_die(DieColor.YELLOW, 1, y_card)
-        die2 = create_colored_die(DieColor.YELLOW, 2, y_card)
+        die2 = create_colored_die(DieColor.RED, 2)
         die1.current_face = y_card.star_face
         die2.current_face = Face("+$2", money=2)
 
         player.ready_dice = [die1, die2]
         engine = GameEngine(GameConfig(num_players=2), [self.bot, AdaptiveBalancedBot(1)], seed=42)
 
-        # Owned yellow dice = 2. Bonus = 2 + 2 = $4 from die1, plus $2 from die2 = +$6
+        # Owned distinct colored dice = 2 (Yellow, Red). Payout = 2 + 2 = $4 from die1, plus $2 from die2 = +$6
         engine._apply_immediate_face_outputs(player)
         self.assertEqual(player.money, 11)  # 5 + 4 + 2
 

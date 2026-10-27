@@ -18,7 +18,15 @@ from sim.bots import (
 )
 from sim.config import DieColor, EndGameReason, GameConfig
 from sim.engine import EndGameResult, GameEngine
-from sim.entities import get_all_variant_cards, get_all_version_cards
+from sim.entities import (
+    VariantCard,
+    VersionCard,
+    get_all_variant_cards,
+    get_all_version_cards,
+    get_default_variant_cards,
+    get_default_version_deck,
+    get_random_setup,
+)
 
 
 @dataclass
@@ -39,6 +47,8 @@ class ExperimentMetrics:
     mean_contractors_hired: float = 0.0
     mean_rerolls_used: float = 0.0
     win_rates: Dict[str, float] = field(default_factory=dict)
+    mean_winning_score: float = 0.0
+    mean_scores: Dict[str, float] = field(default_factory=dict)
     outlier_seeds: List[Dict] = field(default_factory=list)
 
 
@@ -48,6 +58,8 @@ def run_batch(
     num_runs: int = 1000,
     base_seed: int = 42,
     randomize_cards: bool = False,
+    variant_cards: Optional[Dict[DieColor, VariantCard]] = None,
+    version_deck: Optional[List[VersionCard]] = None,
 ) -> ExperimentMetrics:
     """Executes a Monte Carlo batch of matches with reproducible seeding."""
     round_counts: List[int] = []
@@ -57,49 +69,28 @@ def run_batch(
     total_contractors_hired = 0
     total_rerolls_used = 0
     wins_by_bot: Dict[str, int] = {}
+    winning_scores: List[float] = []
+    scores_by_bot: Dict[str, List[float]] = {}
     outliers: List[Dict] = []
-
-    all_variants = list(get_all_variant_cards().values())
-    all_versions = get_all_version_cards()
 
     for run_idx in range(num_runs):
         seed = base_seed + run_idx
         config = config_factory()
         bots = bot_factory()
 
-        variant_cards = None
-        version_deck = None
+        run_variant_cards = variant_cards
+        run_version_deck = version_deck
 
         if randomize_cards:
             rng_setup = random.Random(seed * 17)
-            # Pick 1 variant per colored die
-            variant_cards = {}
-            for color in [
-                DieColor.RED,
-                DieColor.BLUE,
-                DieColor.GREEN,
-                DieColor.YELLOW,
-                DieColor.PURPLE,
-            ]:
-                matching = [v for v in all_variants if v.die_color == color]
-                variant_cards[color] = rng_setup.choice(matching)
-
-            # Pick 1 v1.0, 1 v2.0, 1 v3.0
-            v1_pool = [v for v in all_versions if v.version_str == "v1.0"]
-            v2_pool = [v for v in all_versions if v.version_str == "v2.0"]
-            v3_pool = [v for v in all_versions if v.version_str == "v3.0"]
-            version_deck = [
-                rng_setup.choice(v1_pool),
-                rng_setup.choice(v2_pool),
-                rng_setup.choice(v3_pool),
-            ]
+            run_variant_cards, run_version_deck = get_random_setup(rng_setup)
 
         engine = GameEngine(
             config=config,
             bots=bots,
             seed=seed,
-            variant_cards=variant_cards,
-            version_deck=version_deck,
+            variant_cards=run_variant_cards,
+            version_deck=run_version_deck,
         )
 
         result: EndGameResult = engine.run_game()
@@ -118,11 +109,17 @@ def run_batch(
         rerolls_used = sum(r.get("total_rerolls_used", 0) for r in result.rankings)
         total_rerolls_used += rerolls_used
 
-        # Track winner
+        # Track winner and scores
         if result.rankings:
             winner = result.rankings[0]
             w_name = winner["bot_name"]
             wins_by_bot[w_name] = wins_by_bot.get(w_name, 0) + 1
+            winning_scores.append(float(winner["net_score"]))
+            for r in result.rankings:
+                b_name = r["bot_name"]
+                if b_name not in scores_by_bot:
+                    scores_by_bot[b_name] = []
+                scores_by_bot[b_name].append(float(r["net_score"]))
 
         # Outlier tracking: ultra-short games (<= 3 rounds) or ultra-long games (>= 20 rounds) or wipeouts
         if (
@@ -143,6 +140,11 @@ def run_batch(
     mean_rounds = statistics.mean(round_counts)
     std_rounds = statistics.stdev(round_counts) if len(round_counts) > 1 else 0.0
     win_rates = {bot: count / num_runs for bot, count in wins_by_bot.items()}
+    mean_winning_score = statistics.mean(winning_scores) if winning_scores else 0.0
+    mean_scores = {
+        b_name: statistics.mean(scores)
+        for b_name, scores in scores_by_bot.items()
+    }
 
     return ExperimentMetrics(
         total_games=num_runs,
@@ -159,6 +161,8 @@ def run_batch(
         mean_contractors_hired=total_contractors_hired / num_runs,
         mean_rerolls_used=total_rerolls_used / num_runs,
         win_rates=win_rates,
+        mean_winning_score=mean_winning_score,
+        mean_scores=mean_scores,
         outlier_seeds=outliers,
     )
 
@@ -327,14 +331,109 @@ def run_experiment_4(runs: int = 1000, base_seed: int = 42) -> None:
             print(f"- **Sample Outlier Seeds:** {metrics.outlier_seeds[:3]}\n")
 
 
+def run_experiment_5a(runs: int = 500, base_seed: int = 42) -> None:
+    """Experiment 5a: Version Directives Benchmark."""
+    print("\n========================================================")
+    print("Experiment 5a: Version Directives Benchmark")
+    print("========================================================\n")
+
+    all_versions = get_all_version_cards()
+    roadmaps = [
+        ("Baseline Roadmap (Script Kiddie / RaaS / Zero-Day)", [all_versions[0], all_versions[2], all_versions[4]]),
+        ("Data Scraper v1.0 (+$1 Starting Money)", [all_versions[1], all_versions[2], all_versions[4]]),
+        ("Polymorphic Worm v2.0 (1 Free Reroll)", [all_versions[0], all_versions[3], all_versions[4]]),
+        ("Corrupted Kernel v3.0 (Black Attack Boost)", [all_versions[0], all_versions[2], all_versions[5]]),
+        ("All-Alternates Roadmap", [all_versions[1], all_versions[3], all_versions[5]]),
+    ]
+
+    print("| Roadmap / Directive | Mean Rounds | Singularity % | Patient Zero % | Wipeout % | Mean Win VP | Top Bot (Win %) |")
+    print("| :--- | :---: | :---: | :---: | :---: | :---: | :--- |")
+
+    for name, deck in roadmaps:
+        def cfg_fn():
+            return GameConfig(num_players=4)
+
+        def bots_fn():
+            return [
+                AdaptiveBalancedBot(0),
+                SecOpsTurtleBot(1),
+                VentureGreedBot(2),
+                AccelerationistBot(3),
+            ]
+
+        metrics = run_batch(cfg_fn, bots_fn, num_runs=runs, base_seed=base_seed, version_deck=deck)
+        top_bot = max(metrics.win_rates.items(), key=lambda x: x[1]) if metrics.win_rates else ("None", 0.0)
+        print(
+            f"| {name} | {metrics.mean_rounds:.2f} | "
+            f"{metrics.singularity_pct * 100:.1f}% | "
+            f"{metrics.patient_zero_pct * 100:.1f}% | "
+            f"{metrics.total_wipeout_pct * 100:.1f}% | "
+            f"{metrics.mean_winning_score:.1f} | "
+            f"{top_bot[0]} ({top_bot[1] * 100:.1f}%) |"
+        )
+
+
+def run_experiment_5b(runs: int = 500, base_seed: int = 42) -> None:
+    """Experiment 5b: Colored Module Variant Benchmark (R1-R3, B1-B3, G1-G3, Y1-Y3, P1-P3)."""
+    print("\n========================================================")
+    print("Experiment 5b: Colored Module Variant Benchmark")
+    print("========================================================\n")
+
+    all_vars = get_all_variant_cards()
+    variant_codes = [
+        "R1", "R2", "R3",
+        "B1", "B2", "B3",
+        "G1", "G2", "G3",
+        "Y1", "Y2", "Y3",
+        "P1", "P2", "P3",
+    ]
+
+    print("| Code | Card Name | Color | Mean Rounds | Singularity % | Wipeout % | Mean Win VP | Top Bot (Win %) |")
+    print("| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :--- |")
+
+    for code in variant_codes:
+        card = all_vars[code]
+        custom_vars = get_default_variant_cards().copy()
+        custom_vars[card.die_color] = card
+
+        def cfg_fn():
+            return GameConfig(num_players=4)
+
+        def bots_fn():
+            return [
+                AdaptiveBalancedBot(0),
+                SecOpsTurtleBot(1),
+                VentureGreedBot(2),
+                AccelerationistBot(3),
+            ]
+
+        metrics = run_batch(cfg_fn, bots_fn, num_runs=runs, base_seed=base_seed, variant_cards=custom_vars)
+        top_bot = max(metrics.win_rates.items(), key=lambda x: x[1]) if metrics.win_rates else ("None", 0.0)
+        is_baseline = " (Baseline)" if code in ("R1", "B1", "G1", "Y1", "P1") else ""
+        print(
+            f"| {code} | {card.name}{is_baseline} | {card.die_color.value.capitalize()} | "
+            f"{metrics.mean_rounds:.2f} | "
+            f"{metrics.singularity_pct * 100:.1f}% | "
+            f"{metrics.total_wipeout_pct * 100:.1f}% | "
+            f"{metrics.mean_winning_score:.1f} | "
+            f"{top_bot[0]} ({top_bot[1] * 100:.1f}%) |"
+        )
+
+
+def run_experiment_5(runs: int = 500, base_seed: int = 42) -> None:
+    """Experiment 5: Version Directives & Colored Module Variants Full Suite."""
+    run_experiment_5a(runs=runs, base_seed=base_seed)
+    run_experiment_5b(runs=runs, base_seed=base_seed)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Rogue Agent Monte Carlo Simulation Suite")
     parser.add_argument(
         "--experiment",
         "-e",
-        choices=["1", "2", "3", "4", "all"],
+        choices=["1", "2", "3", "4", "5", "all"],
         default="all",
-        help="Which experiment to run (1-4 or all)",
+        help="Which experiment to run (1-5 or all)",
     )
     parser.add_argument(
         "--runs",
@@ -361,6 +460,8 @@ def main() -> None:
         run_experiment_3(runs=args.runs, base_seed=args.seed)
     if args.experiment in ("4", "all"):
         run_experiment_4(runs=args.runs, base_seed=args.seed)
+    if args.experiment in ("5", "all"):
+        run_experiment_5(runs=args.runs, base_seed=args.seed)
 
 
 if __name__ == "__main__":

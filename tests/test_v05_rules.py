@@ -360,10 +360,10 @@ class TestV05Rules(unittest.TestCase):
         self.assertEqual(player.secrets, config.get_starting_secrets(2))
 
     # -------------------------------------------------------------------------
-    # 13. Shield Wear Order with B3 Air-Gapped Backup (Zero-Wear Absorption)
+    # 13. Shield Wear Order with B3 Air-Gapped Backup (Sacrificial Demotion)
     # -------------------------------------------------------------------------
     def test_shield_wear_order_b3_air_gapped_backup(self) -> None:
-        """B3 Air-Gapped Backup absorbs damage first without wearing, preserving subsequent shield dice in Ready."""
+        """B3 Air-Gapped Backup absorbs damage first, sacrificing other Ready die to Unpatched while B3 stays Ready."""
         config = GameConfig(num_players=2)
         engine = GameEngine(config=config, bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
@@ -396,10 +396,9 @@ class TestV05Rules(unittest.TestCase):
         commitments = {0: ShieldColor.BLUE, 1: ShieldColor.BLUE}
 
         # 2 Blue cubes attack.
-        # Default wear order prioritizes B3 first.
+        # Default wear order prioritizes B3 first when other ready dice exist.
         # B3 die absorbs 2 cubes -> 0 cubes remaining to absorb.
-        # B3 does NOT wear (remains Ready). Gray die was not needed (remains Ready).
-        # BOTH dice remain in ready_dice!
+        # B3 sacrifices the lowest VP die (gray_die) to Unpatched, while B3 remains Ready!
         engine._resolve_player_defense_and_wear(
             player=player,
             rolled_dice=list(player.ready_dice),
@@ -409,9 +408,9 @@ class TestV05Rules(unittest.TestCase):
             active_directive="NONE",
         )
 
-        self.assertIn(b3_die, player.ready_dice, "B3 die must not wear down")
-        self.assertIn(gray_die, player.ready_dice, "Gray die was unneeded and must remain Ready")
-        self.assertEqual(len(player.unpatched_dice), 0, "No dice should move to Unpatched")
+        self.assertIn(b3_die, player.ready_dice, "B3 die must remain Ready")
+        self.assertIn(gray_die, player.unpatched_dice, "Gray die was sacrificed to Unpatched")
+        self.assertEqual(len(player.unpatched_dice), 1, "Exactly 1 sacrificial die moved to Unpatched")
         self.assertEqual(player.secrets, config.get_starting_secrets(2))
 
 

@@ -54,8 +54,8 @@ function getHumanPlayerId() {
   return human ? human.player_id : (state.active_player_index || 0);
 }
 
-async function startNewGame(numPlayers = 4, customPlayers = null, seed = null) {
-  const payload = { num_players: numPlayers };
+async function startNewGame(numPlayers = 4, customPlayers = null, seed = null, randomizeCards = false) {
+  const payload = { num_players: numPlayers, randomize_cards: Boolean(randomizeCards) };
   if (customPlayers) payload.players = customPlayers;
   if (seed !== null && seed !== "") payload.seed = parseInt(seed, 10);
 
@@ -815,7 +815,7 @@ function renderActionDock() {
     if (caps.can_star && caps.can_star.B2) {
       const b2Btn = document.createElement("button");
       b2Btn.className = "action-btn";
-      b2Btn.innerText = "B2: Deep R&D ($2 -> +1 Secret)";
+      b2Btn.innerText = "B2: Deep R&D ($4 -> +1 Secret)";
       b2Btn.onclick = () => doStarAction("B2");
       controls.appendChild(b2Btn);
     }
@@ -863,7 +863,7 @@ function renderActionDock() {
       const p3Btn = document.createElement("button");
       p3Btn.className = "action-btn";
       p3Btn.style.color = `var(--color-${p3Color})`;
-      p3Btn.innerText = `P3: Deflect ${p3Color.toUpperCase()} Cube to Staging`;
+      p3Btn.innerText = `P3: Deflect ${p3Color.toUpperCase()} Cube to Staging ($1)`;
       p3Btn.onclick = () => doStarAction("P3", p3Color);
       controls.appendChild(p3Btn);
     }

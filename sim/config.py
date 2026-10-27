@@ -86,6 +86,15 @@ class GameConfig:
     default_free_rerolls: int = 2
     throttled_free_rerolls: int = 1
 
+    # Variant & Boss Tunables (Phase 10)
+    y2_base_payout: int = 2
+    y2_max_payout: int = 5
+    b2_secret_cost: int = 4
+    b2_secret_cap: int = 10
+    p3_cube_cash_cost: int = 1
+    corrupted_kernel_black_threshold: int = 2
+    corrupted_kernel_strength_bonus: int = 2
+
     # Cube Tower mechanics
     tower_mode: TowerMode = TowerMode.LEDGE_AVALANCHE
     tower_flat_exit_prob: float = 0.70  # [0.60–0.80]

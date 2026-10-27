@@ -439,14 +439,14 @@ class TestWebAPI(unittest.TestCase):
         ctrl.active_player_index = 0
         p0 = ctrl.state.players[0]
 
-        # Test B2: Pay $2 for +1 Secret
+        # Test B2: Pay $4 for +1 Secret
         p0.b2_available = True
         p0.money = 5
         p0.secrets = 4
         res_b2 = self._post("/api/game/action/star", {"player_id": 0, "action_type": "B2"})
         self.assertTrue(res_b2["success"])
         p0_state = res_b2["state"]["players"][0]
-        self.assertEqual(p0_state["money"], 3)
+        self.assertEqual(p0_state["money"], 1)
         self.assertEqual(p0_state["secrets"], 5)
 
         # Test P1: Inject Red Attack Cube
@@ -507,7 +507,7 @@ class TestWebAPI(unittest.TestCase):
         res_b2 = self._post("/api/game/action/star", {"player_id": 0, "action_type": "B2"})
         self.assertTrue(res_b2["success"])
         p0_after = res_b2["state"]["players"][0]
-        self.assertEqual(p0_after["money"], 3)
+        self.assertEqual(p0_after["money"], 1)
         self.assertEqual(p0_after["secrets"], 5)
         self.assertFalse(p0_after["b2_available"])
 

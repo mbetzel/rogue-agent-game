@@ -100,11 +100,13 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                 seed = data.get("seed")
                 if seed is not None:
                     seed = int(seed)
+                randomize_cards = bool(data.get("randomize_cards", False))
 
                 state = self.controller.new_game(
                     num_players=num_players,
                     players_config=players_config,
                     seed=seed,
+                    randomize_cards=randomize_cards,
                 )
                 payload, code = success_response({"state": state})
                 self._send_json_response(payload, code)

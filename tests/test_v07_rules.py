@@ -167,10 +167,10 @@ class TestV07Rules(unittest.TestCase):
         self.assertEqual(zero_day.get_staging_payload(2), {CubeColor.RED: 1, CubeColor.BLUE: 1})
         self.assertEqual(zero_day.get_staging_payload(4), {CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1})
 
-        # Corrupted Kernel: 2P = 1 Red, 1 Blue (vs 4P = 2 Red, 2 Blue)
+        # Corrupted Kernel: 2P = 1 Red, 1 Blue (vs 4P = 2 Red, 1 Blue)
         kernel = cards["CORRUPTED_KERNEL"]
         self.assertEqual(kernel.get_staging_payload(2), {CubeColor.RED: 1, CubeColor.BLUE: 1})
-        self.assertEqual(kernel.get_staging_payload(4), {CubeColor.RED: 2, CubeColor.BLUE: 2})
+        self.assertEqual(kernel.get_staging_payload(4), {CubeColor.RED: 2, CubeColor.BLUE: 1})
 
         # Script Kiddie (v1.0): flat across 2P and 4P
         kiddie = cards["SCRIPT_KIDDIE"]

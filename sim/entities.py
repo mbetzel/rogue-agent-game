@@ -179,7 +179,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             code="B2",
             name="Deep R&D Vault",
             die_color=DieColor.BLUE,
-            description="Block 1 Blue, OR pay $2 during Phase 3 to gain +1 Corporate Secret (max 10).",
+            description="Block 1 Blue, OR pay $4 during Phase 3 to gain +1 Corporate Secret (max 10).",
             star_face=Face(
                 name="B2: Deep R&D Vault",
                 block_amount=1,
@@ -192,7 +192,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             code="B3",
             name="Air-Gapped Backup",
             die_color=DieColor.BLUE,
-            description="Block 1 Blue and this die does not move to Unpatched when blocking.",
+            description="Block 1 Blue; when this die actively blocks, you may move 1 other Ready die of your choice to Unpatched instead of this die (if you have no other Ready dice, this die moves to Unpatched).",
             star_face=Face(
                 name="B3: Air-Gapped Backup",
                 block_amount=1,
@@ -262,7 +262,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             code="Y2",
             name="Cloud Monopoly",
             die_color=DieColor.YELLOW,
-            description="Gain +$2, plus +$1 per Yellow die you own (max +$5).",
+            description="Gain +$2, plus +$1 per different colored module die owned (max +$5).",
             star_face=Face(
                 name="Y2: Cloud Monopoly",
                 block_amount=0,
@@ -315,7 +315,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             code="P3",
             name="Packet Deflection",
             die_color=DieColor.PURPLE,
-            description="Block 2 of any single color; in Phase 3 add 1 cube of that color to Staging Cup.",
+            description="Block 2 of any single color; in Phase 3 you may pay $1 to add 1 cube of that color from the supply to the Staging Cup.",
             star_face=Face(
                 name="P3: Packet Deflection",
                 block_amount=2,
@@ -338,6 +338,22 @@ def get_default_variant_cards() -> Dict[DieColor, VariantCard]:
         DieColor.YELLOW: all_cards["Y1"],
         DieColor.PURPLE: all_cards["P1"],
     }
+
+
+def get_random_variant_cards(rng: random.Random) -> Dict[DieColor, VariantCard]:
+    """Randomly selects 1 Variant Card per colored die (Red, Blue, Green, Yellow, Purple)."""
+    all_variants = list(get_all_variant_cards().values())
+    chosen: Dict[DieColor, VariantCard] = {}
+    for color in [
+        DieColor.RED,
+        DieColor.BLUE,
+        DieColor.GREEN,
+        DieColor.YELLOW,
+        DieColor.PURPLE,
+    ]:
+        matching = [v for v in all_variants if v.die_color == color]
+        chosen[color] = rng.choice(matching)
+    return chosen
 
 
 def get_all_version_cards() -> List[VersionCard]:
@@ -384,8 +400,8 @@ def get_all_version_cards() -> List[VersionCard]:
         VersionCard(
             version_str="v3.0",
             name="Corrupted Kernel",
-            staging_payload={CubeColor.RED: 2, CubeColor.BLUE: 2},
-            directive_description="Each Black Cube that exits the tower adds +1 Strength to the Attack Color with the most exited cubes.",
+            staging_payload={CubeColor.RED: 2, CubeColor.BLUE: 1},
+            directive_description="If 2+ Black Cubes exit the tower this round, the Attack Color with the most exited cubes gains +2 Strength total.",
             directive_code="CORRUPTED_KERNEL",
             staging_payload_2p={CubeColor.RED: 1, CubeColor.BLUE: 1},
         ),
@@ -396,6 +412,26 @@ def get_default_version_deck() -> List[VersionCard]:
     """Returns the default baseline version cards: Script Kiddie (v1.0), RaaS (v2.0), Zero-Day Override (v3.0)."""
     cards = get_all_version_cards()
     return [cards[0], cards[2], cards[4]]
+
+
+def get_random_version_deck(rng: random.Random) -> List[VersionCard]:
+    """Randomly selects 1 v1.0 card, 1 v2.0 card, and 1 v3.0 card for the Rogue Agent roadmap."""
+    all_versions = get_all_version_cards()
+    v1_pool = [v for v in all_versions if v.version_str == "v1.0"]
+    v2_pool = [v for v in all_versions if v.version_str == "v2.0"]
+    v3_pool = [v for v in all_versions if v.version_str == "v3.0"]
+    return [
+        rng.choice(v1_pool),
+        rng.choice(v2_pool),
+        rng.choice(v3_pool),
+    ]
+
+
+def get_random_setup(
+    rng: random.Random,
+) -> Tuple[Dict[DieColor, VariantCard], List[VersionCard]]:
+    """Returns randomized variant cards and version deck for game setup."""
+    return get_random_variant_cards(rng), get_random_version_deck(rng)
 
 
 def create_gray_die(die_id: int) -> Die:

@@ -24,6 +24,9 @@ from sim.entities import (
     create_white_die,
     get_default_variant_cards,
     get_default_version_deck,
+    get_random_setup,
+    get_random_variant_cards,
+    get_random_version_deck,
 )
 from web.schemas import GameStateSerializer
 
@@ -61,6 +64,7 @@ class GameController:
         seed: Optional[int] = None,
         variant_cards: Optional[Dict[DieColor, VariantCard]] = None,
         version_deck: Optional[List[VersionCard]] = None,
+        randomize_cards: bool = False,
     ) -> Dict[str, Any]:
         """Creates and initializes a new game match."""
         if not (1 <= num_players <= 4):
@@ -125,6 +129,17 @@ class GameController:
                 "locked_reroll_indices": [],
             }
 
+        if randomize_cards:
+            setup_seed = (seed * 17) if seed is not None else None
+            setup_rng = random.Random(setup_seed)
+            if variant_cards is None and version_deck is None:
+                variant_cards, version_deck = get_random_setup(setup_rng)
+            else:
+                if variant_cards is None:
+                    variant_cards = get_random_variant_cards(setup_rng)
+                if version_deck is None:
+                    version_deck = get_random_version_deck(setup_rng)
+
         self.engine = GameEngine(
             config=config,
             bots=bots,
@@ -133,9 +148,11 @@ class GameController:
             version_deck=version_deck or get_default_version_deck(),
         )
 
+        variant_summary = ", ".join(v.code for v in self.state.variant_cards.values())
         self.event_log = [
             f"Game initialized with {num_players} corporations (Seed: {seed if seed is not None else 'auto'}).",
             f"Active Version: {self.state.active_version.name} ({self.state.active_version.version_str}).",
+            f"Active Variants: {variant_summary}.",
             f"CISO badge awarded to {self.player_meta[self.state.first_player_index]['name']}.",
         ]
         self.last_compile_result = None
@@ -548,8 +565,9 @@ class GameController:
                     player.secrets += eff.secrets
                     if eff.is_star:
                         if eff.star_code == "Y2":
-                            yellow_count = sum(1 for d in player.total_dice if d.color == DieColor.YELLOW)
-                            bonus = min(5, 2 + yellow_count) - 2
+                            distinct_count = len({d.color for d in player.colored_dice})
+                            total_payout = min(self.state.config.y2_max_payout, self.state.config.y2_base_payout + distinct_count)
+                            bonus = total_payout - eff.money
                             player.money += max(0, bonus)
                         elif eff.star_code == "Y3":
                             if die in player.ready_dice:
@@ -777,8 +795,9 @@ class GameController:
                         player.secrets += eff.secrets
                         if eff.is_star:
                             if eff.star_code == "Y2":
-                                yellow_count = sum(1 for d in player.total_dice if d.color == DieColor.YELLOW)
-                                bonus = min(5, 2 + yellow_count) - 2
+                                distinct_count = len({d.color for d in player.colored_dice})
+                                total_payout = min(self.state.config.y2_max_payout, self.state.config.y2_base_payout + distinct_count)
+                                bonus = total_payout - eff.money
                                 player.money += max(0, bonus)
                             elif eff.star_code == "Y3":
                                 if die in player.ready_dice:
@@ -966,11 +985,13 @@ class GameController:
 
         # 2. Star Special Actions
         if plan.use_b2_secret and player.b2_available:
-            if player.money >= 2 and player.secrets < 10:
-                player.money -= 2
-                player.secrets = min(10, player.secrets + 1)
+            cost = self.state.config.b2_secret_cost
+            cap = self.state.config.b2_secret_cap
+            if player.money >= cost and player.secrets < cap:
+                player.money -= cost
+                player.secrets = min(cap, player.secrets + 1)
                 player.b2_available = False
-                self.event_log.append(f"{meta['name']} (Bot) used B2 Deep R&D: +1 Secret for $2.")
+                self.event_log.append(f"{meta['name']} (Bot) used B2 Deep R&D: +1 Secret for ${cost}.")
 
         if plan.use_y1_secret and player.y1_available:
             if player.money >= 6 and player.secrets < 10:
@@ -985,15 +1006,14 @@ class GameController:
 
         if plan.p3_cube_choice in (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN) and player.p3_available:
             if plan.p3_cube_choice.value == player.p3_available.value:
-                self.state.staging_cup[plan.p3_cube_choice] = self.state.staging_cup.get(plan.p3_cube_choice, 0) + 1
-                player.p3_available = None
+                p3_cost = self.state.config.p3_cube_cash_cost
+                if player.money >= p3_cost:
+                    player.money -= p3_cost
+                    self.state.staging_cup[plan.p3_cube_choice] = self.state.staging_cup.get(plan.p3_cube_choice, 0) + 1
+                    player.p3_available = None
 
         # 3. Patching
-        patch_cash_cost = (
-            3
-            if self.state.active_directive_code == "POLYMORPHIC_WORM"
-            else self.state.config.patch_cash_cost
-        )
+        patch_cash_cost = self.state.config.patch_cash_cost
         for patch_act in plan.patch_actions:
             if not player.unpatched_dice:
                 break
@@ -1089,11 +1109,7 @@ class GameController:
         if not (0 <= die_index < len(player.unpatched_dice)):
             raise ValueError(f"Invalid die_index {die_index} in unpatched zone (size: {len(player.unpatched_dice)})")
 
-        patch_cash_cost = (
-            3
-            if self.state.active_directive_code == "POLYMORPHIC_WORM"
-            else self.state.config.patch_cash_cost
-        )
+        patch_cash_cost = self.state.config.patch_cash_cost
 
         if use_cash:
             if player.money < patch_cash_cost:
@@ -1179,14 +1195,16 @@ class GameController:
         if action_type == "B2":
             if not player.b2_available:
                 raise ValueError("B2 Deep R&D Vault ability is not available this turn")
-            if player.money < 2:
-                raise ValueError("B2 requires $2 cash")
-            if player.secrets >= 10:
-                raise ValueError("Secrets already at maximum capacity (10)")
-            player.money -= 2
+            cost = self.state.config.b2_secret_cost
+            cap = self.state.config.b2_secret_cap
+            if player.money < cost:
+                raise ValueError(f"B2 requires ${cost} cash")
+            if player.secrets >= cap:
+                raise ValueError(f"Secrets already at maximum capacity ({cap})")
+            player.money -= cost
             player.secrets += 1
             player.b2_available = False
-            self.event_log.append(f"{meta['name']} activated B2 Deep R&D Vault: +1 Corporate Secret for $2.")
+            self.event_log.append(f"{meta['name']} activated B2 Deep R&D Vault: +1 Corporate Secret for ${cost}.")
 
         elif action_type == "Y1":
             if not player.y1_available:
@@ -1216,10 +1234,14 @@ class GameController:
             blocked_color = player.p3_available.value
             if cube_color and cube_color.lower() != blocked_color:
                 raise ValueError(f"P3 must add a cube matching the blocked color ({blocked_color})")
+            cost = self.state.config.p3_cube_cash_cost
+            if player.money < cost:
+                raise ValueError(f"P3 requires ${cost} cash")
+            player.money -= cost
             chosen = CubeColor(blocked_color)
             self.state.staging_cup[chosen] = self.state.staging_cup.get(chosen, 0) + 1
             player.p3_available = None
-            self.event_log.append(f"{meta['name']} activated P3 Packet Deflection: added 1 {chosen.value.capitalize()} Cube to Staging Cup.")
+            self.event_log.append(f"{meta['name']} activated P3 Packet Deflection: paid ${cost} to add 1 {chosen.value.capitalize()} Cube to Staging Cup.")
 
         else:
             raise ValueError(f"Unsupported star action type: {action_type}")
@@ -1391,10 +1413,21 @@ class GameController:
 
         # Star actions
         can_star = {
-            "B2": bool(self.phase == 3 and is_active and player.b2_available and player.money >= 2 and player.secrets < 10),
+            "B2": bool(
+                self.phase == 3
+                and is_active
+                and player.b2_available
+                and player.money >= self.state.config.b2_secret_cost
+                and player.secrets < self.state.config.b2_secret_cap
+            ),
             "Y1": bool(self.phase == 3 and is_active and player.y1_available and player.money >= 6 and player.secrets < 10),
             "P1": bool(self.phase == 3 and is_active and player.p1_available),
-            "P3": bool(self.phase == 3 and is_active and player.p3_available is not None),
+            "P3": bool(
+                self.phase == 3
+                and is_active
+                and player.p3_available is not None
+                and player.money >= self.state.config.p3_cube_cash_cost
+            ),
         }
 
         return {
