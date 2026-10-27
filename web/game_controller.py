@@ -276,9 +276,9 @@ class GameController:
                 continue
             if face.is_glitch:
                 die.is_locked = True
-            elif active_directive == "RAAS" and face.money > 0:
+            elif active_directive == "RAAS" and face.has_cash_option:
                 die.is_locked = True
-            elif active_directive == "ZERO_DAY_OVERRIDE" and face.is_shield:
+            elif active_directive == "ZERO_DAY_OVERRIDE" and face.has_shield_option:
                 die.is_locked = True
 
         face_names = [
@@ -334,9 +334,9 @@ class GameController:
                 continue
             if face.is_glitch:
                 d.is_locked = True
-            elif active_directive == "RAAS" and face.money > 0:
+            elif active_directive == "RAAS" and face.has_cash_option:
                 d.is_locked = True
-            elif active_directive == "ZERO_DAY_OVERRIDE" and face.is_shield:
+            elif active_directive == "ZERO_DAY_OVERRIDE" and face.has_shield_option:
                 d.is_locked = True
 
         self.event_log.append(
@@ -444,8 +444,9 @@ class GameController:
         self,
         player_id: int,
         commitments: Dict[int, str],
+        choice_declarations: Optional[Dict[int, int]] = None,
     ) -> Dict[str, Any]:
-        """Commits rolled shield dice to Red, Blue, or Green shield slots."""
+        """Commits rolled shield dice to Red, Blue, or Green shield slots and sets choice branches."""
         if self.phase != 1:
             raise ValueError(f"Cannot commit defenses in phase {self.phase}")
         if player_id not in self.player_meta:
@@ -462,6 +463,14 @@ class GameController:
             raise ValueError("Defenses have already been committed this round")
 
         rolled = meta["rolled_pool"]
+        choice_decls: Dict[int, int] = {}
+        if choice_declarations:
+            for k, v in choice_declarations.items():
+                try:
+                    choice_decls[int(k)] = int(v)
+                except (ValueError, TypeError):
+                    pass
+
         validated_commitments: Dict[int, ShieldColor] = {}
 
         # Validate commitments
@@ -472,25 +481,49 @@ class GameController:
 
             die = rolled[idx]
             face = die.current_face
-            if not face or not face.is_shield or face.is_glitch:
-                raise ValueError(f"Die #{idx + 1} ({die.color.value}) is not a shield die ({face.name if face else 'None'})")
+            if not face or face.is_glitch:
+                raise ValueError(f"Die #{idx + 1} ({die.color.value}) cannot be committed ({face.name if face else 'None'})")
 
             shield_target = ShieldColor(color_str.lower())
             if shield_target not in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN):
                 raise ValueError(f"Shield target must be red, blue, or green, got {color_str}")
 
-            if face.shield_color == ShieldColor.ANY:
-                validated_commitments[idx] = shield_target
-            elif face.shield_color in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN):
-                # Fixed colored shields must commit to their color
-                validated_commitments[idx] = face.shield_color
+            if face.is_shield:
+                if face.shield_color == ShieldColor.ANY:
+                    validated_commitments[idx] = shield_target
+                elif face.shield_color in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN):
+                    # Fixed colored shields must commit to their color
+                    validated_commitments[idx] = face.shield_color
+            elif face.has_shield_option:
+                if shield_target == ShieldColor.BLUE:
+                    validated_commitments[idx] = ShieldColor.BLUE
+                    die.chosen_choice_index = 0
+                else:
+                    raise ValueError(f"Die #{idx + 1} ({die.color.value}) can only block Blue, got {color_str}")
+            else:
+                raise ValueError(f"Die #{idx + 1} ({die.color.value}) is not a shield die ({face.name})")
 
-        # Auto-assign any unassigned fixed colored shields (excluding B2, which can be held for Phase 3)
+        # Auto-assign any unassigned fixed colored shields (excluding B2, and excluding choice faces)
         for idx, die in enumerate(rolled):
             face = die.current_face
-            if face and face.is_shield and idx not in validated_commitments:
+            if face and face.is_shield and not face.is_choice and idx not in validated_commitments:
                 if face.shield_color in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN) and face.star_code != "B2":
                     validated_commitments[idx] = face.shield_color
+
+        # Sync choice faces
+        for idx, die in enumerate(rolled):
+            face = die.current_face
+            if face and face.is_choice:
+                if face.has_shield_option:
+                    if idx in validated_commitments and validated_commitments[idx] == ShieldColor.BLUE:
+                        die.chosen_choice_index = 0
+                    else:
+                        die.chosen_choice_index = 1
+                else:
+                    chosen = choice_decls.get(idx, 0)
+                    if not (0 <= chosen < len(face.choices)):
+                        chosen = 0
+                    die.chosen_choice_index = chosen
 
         meta["commitments"] = {idx: color.value for idx, color in validated_commitments.items()}
         meta["has_committed"] = True
@@ -501,8 +534,35 @@ class GameController:
             slots[color.value].append(rolled[idx])
         meta["shield_slots"] = slots
 
-        # Collect immediate outputs on final faces (RULES.md Phase 1 Step 4)
-        self.engine._apply_immediate_face_outputs(player)
+        # Collect resource outputs on effective faces (RULES.md v0.8 Phase 1 Step 6)
+        for idx, die in enumerate(rolled):
+            face = die.current_face
+            if not face or face.is_glitch:
+                continue
+
+            if idx not in validated_commitments:
+                eff = die.effective_face
+                if eff:
+                    player.money += eff.money
+                    player.patches += eff.patches
+                    player.secrets += eff.secrets
+                    if eff.is_star:
+                        if eff.star_code == "Y2":
+                            yellow_count = sum(1 for d in player.total_dice if d.color == DieColor.YELLOW)
+                            bonus = min(5, 2 + yellow_count) - 2
+                            player.money += max(0, bonus)
+                        elif eff.star_code == "Y3":
+                            if die in player.ready_dice:
+                                player.ready_dice.remove(die)
+                                player.unpatched_dice.append(die)
+            else:
+                # Assigned to defense: hybrid star boot outputs
+                if face.is_star:
+                    if face.star_code == "R1":
+                        player.money += 2
+                    elif face.star_code in ("G1", "G2"):
+                        player.patches += 1
+
         spent_from_kept = meta.get("spent_from_kept", 0)
         player.patches = max(0, player.patches - spent_from_kept)
         player.patches = min(player.patches, self.state.config.max_patch_tokens)
@@ -606,9 +666,9 @@ class GameController:
                         continue
                     if face.is_glitch:
                         d.is_locked = True
-                    elif active_directive == "RAAS" and face.money > 0:
+                    elif active_directive == "RAAS" and face.has_cash_option:
                         d.is_locked = True
-                    elif active_directive == "ZERO_DAY_OVERRIDE" and face.is_shield:
+                    elif active_directive == "ZERO_DAY_OVERRIDE" and face.has_shield_option:
                         d.is_locked = True
 
             _eval_locks(active_dice)
@@ -657,12 +717,15 @@ class GameController:
 
             _eval_locks(active_dice)
 
-            # 4. Collect immediate face outputs
-            for die in active_dice:
-                self.engine._apply_single_die_immediate_output(player, die)
-            player.patches = min(player.patches, self.state.config.max_patch_tokens)
-
-            # 5. Commit defenses
+            # 5. Assign Defenses & Declare Choices (RULES.md v0.8)
+            declared_choices = player.bot.declare_choices(
+                player_state=player,
+                active_dice=active_dice,
+                staging_cubes=staging_copy,
+                stuck_cubes=stuck_copy,
+                directive_code=active_directive,
+                rng=self.engine.rng,
+            )
             commitments = player.bot.commit_shields(
                 player_state=player,
                 rolled_dice=active_dice,
@@ -674,16 +737,61 @@ class GameController:
             validated: Dict[int, ShieldColor] = {}
             for idx, die in enumerate(active_dice):
                 face = die.current_face
-                if not face or not face.is_shield or face.is_glitch:
+                if not face or face.is_glitch:
                     continue
-                if idx in commitments:
-                    c = commitments[idx]
-                    validated[idx] = c if c in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN) else ShieldColor.BLUE
-                elif face.shield_color in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN):
-                    if face.star_code != "B2":
-                        validated[idx] = face.shield_color
-                elif face.shield_color == ShieldColor.ANY:
-                    validated[idx] = ShieldColor.BLUE
+
+                if face.is_choice:
+                    if face.has_shield_option:
+                        if idx in commitments and commitments[idx] == ShieldColor.BLUE:
+                            validated[idx] = ShieldColor.BLUE
+                            die.chosen_choice_index = 0
+                        else:
+                            die.chosen_choice_index = 1
+                    else:
+                        chosen = declared_choices.get(idx, 0) if declared_choices else 0
+                        if not (0 <= chosen < len(face.choices)):
+                            chosen = 0
+                        die.chosen_choice_index = chosen
+
+                elif face.is_shield:
+                    if idx in commitments:
+                        c = commitments[idx]
+                        validated[idx] = c if c in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN) else ShieldColor.BLUE
+                    elif face.shield_color in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN):
+                        if face.star_code != "B2":
+                            validated[idx] = face.shield_color
+                    elif face.shield_color == ShieldColor.ANY:
+                        validated[idx] = ShieldColor.BLUE
+
+            # 6. Gain Resource Outputs on Effective Faces (RULES.md v0.8)
+            for idx, die in enumerate(active_dice):
+                face = die.current_face
+                if not face or face.is_glitch:
+                    continue
+
+                if idx not in validated:
+                    eff = die.effective_face
+                    if eff:
+                        player.money += eff.money
+                        player.patches += eff.patches
+                        player.secrets += eff.secrets
+                        if eff.is_star:
+                            if eff.star_code == "Y2":
+                                yellow_count = sum(1 for d in player.total_dice if d.color == DieColor.YELLOW)
+                                bonus = min(5, 2 + yellow_count) - 2
+                                player.money += max(0, bonus)
+                            elif eff.star_code == "Y3":
+                                if die in player.ready_dice:
+                                    player.ready_dice.remove(die)
+                                    player.unpatched_dice.append(die)
+                else:
+                    if face.is_star:
+                        if face.star_code == "R1":
+                            player.money += 2
+                        elif face.star_code in ("G1", "G2"):
+                            player.patches += 1
+
+            player.patches = min(player.patches, self.state.config.max_patch_tokens)
 
             meta["rolled_pool"] = list(active_dice)
             meta["commitments"] = {idx: color.value for idx, color in validated.items()}

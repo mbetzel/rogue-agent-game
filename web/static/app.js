@@ -8,6 +8,7 @@ let selectedCommitments = {};
 let selectedBacklashIndex = 0;
 let patchCashSelected = false;
 let selectedRerollIndices = new Set();
+let selectedChoiceDeclarations = {};
 
 // API Client Helper
 async function apiCall(endpoint, method = "GET", body = null) {
@@ -123,10 +124,15 @@ async function doHotfix(dieIndex) {
 }
 
 async function doCommit() {
-  const newState = await apiCall("/api/game/action/commit", "POST", { player_id: getHumanPlayerId(), commitments: selectedCommitments });
+  const newState = await apiCall("/api/game/action/commit", "POST", {
+    player_id: getHumanPlayerId(),
+    commitments: selectedCommitments,
+    choice_declarations: selectedChoiceDeclarations,
+  });
   if (newState) {
     state = newState;
     selectedCommitments = {};
+    selectedChoiceDeclarations = {};
     renderApp();
   }
 }
@@ -421,16 +427,23 @@ function renderPlayerMats() {
       chip.className = `die-chip ${d.color} ${isLocked ? "locked" : ""} ${isSelectedReroll ? "selected-reroll" : ""}`;
       const faceName = d.current_face ? d.current_face.name : "Unrolled";
 
+      const isChoice = Boolean(d.current_face && d.current_face.is_choice);
       let badgeHtml = "";
       if (isContractor) badgeHtml += `<span class="badge-contractor">CONTRACTOR</span> `;
       if (isLocked) badgeHtml += `<span class="badge-locked">🔒 LOCKED</span> `;
+      if (isChoice) badgeHtml += `<span class="badge-choice">CHOICE</span> `;
+
+      let faceNameDisplay = faceName;
+      if (d.effective_face && d.chosen_choice_index !== null && d.chosen_choice_index !== undefined) {
+        faceNameDisplay += ` [→ ${d.effective_face.name}]`;
+      }
 
       chip.innerHTML = `
         <div style="display: flex; gap: 4px; align-items: center;">
           <span>${d.color.toUpperCase()}</span>
           ${badgeHtml}
         </div>
-        <span class="die-face-name">${faceName}</span>
+        <span class="die-face-name">${faceNameDisplay}</span>
       `;
 
       if (p.is_human && state.phase === 1 && !p.has_committed) {
@@ -563,22 +576,95 @@ function renderActionDock() {
         controls.appendChild(rerollBtn);
       }
 
-      // Clean up stale commitments for dice that are no longer shields (e.g. after reroll)
+      // Clean up stale commitments and choice declarations for dice that changed after reroll
       const rolled = human.rolled_pool;
       Object.keys(selectedCommitments).forEach((idxStr) => {
         const i = parseInt(idxStr, 10);
-        if (!rolled[i] || !rolled[i].current_face || !rolled[i].current_face.is_shield) {
+        if (!rolled[i] || !rolled[i].current_face || (!rolled[i].current_face.is_shield && !rolled[i].current_face.has_shield_option)) {
           delete selectedCommitments[idxStr];
         }
       });
+      Object.keys(selectedChoiceDeclarations).forEach((idxStr) => {
+        const i = parseInt(idxStr, 10);
+        if (!rolled[i] || !rolled[i].current_face || !rolled[i].current_face.is_choice) {
+          delete selectedChoiceDeclarations[idxStr];
+        }
+      });
 
-      // Build Shield Commitment selectors for rolled shields
-      let hasShields = false;
-
+      // Build Shield Commitment & Choice selectors for rolled pool
       rolled.forEach((d, idx) => {
         const face = d.current_face;
-        if (face && face.is_shield) {
-          hasShields = true;
+        if (!face || face.is_glitch) return;
+
+        if (face.is_choice) {
+          const wrap = document.createElement("div");
+          wrap.style.display = "inline-flex";
+          wrap.style.alignItems = "center";
+          wrap.style.gap = "4px";
+          wrap.style.fontSize = "0.8rem";
+
+          const select = document.createElement("select");
+          select.style.padding = "4px 8px";
+          select.style.background = "var(--bg-card)";
+          select.style.color = "#fff";
+          select.style.border = "1px solid var(--border-color)";
+          select.style.borderRadius = "4px";
+
+          if (face.has_shield_option) {
+            // Blue Face 4: Block 1 Blue vs +1 🔧
+            const optShield = document.createElement("option");
+            optShield.value = "shield";
+            optShield.innerText = "Commit Block 1 Blue";
+            const optPatch = document.createElement("option");
+            optPatch.value = "patch";
+            optPatch.innerText = "Gain +1 🔧 (Resource)";
+            select.appendChild(optShield);
+            select.appendChild(optPatch);
+
+            if (selectedCommitments[idx] === "blue") {
+              select.value = "shield";
+              selectedChoiceDeclarations[idx] = 0;
+            } else {
+              select.value = "patch";
+              delete selectedCommitments[idx];
+              selectedChoiceDeclarations[idx] = 1;
+            }
+
+            select.onchange = (e) => {
+              if (e.target.value === "shield") {
+                selectedCommitments[idx] = "blue";
+                selectedChoiceDeclarations[idx] = 0;
+              } else {
+                delete selectedCommitments[idx];
+                selectedChoiceDeclarations[idx] = 1;
+              }
+            };
+            wrap.innerHTML = `<span style="color: var(--color-blue);">Die #${idx + 1} (Blue Choice):</span>`;
+          } else {
+            // Gray or Green Choice Face
+            const choices = face.choices || [];
+            choices.forEach((c, cIdx) => {
+              const opt = document.createElement("option");
+              opt.value = String(cIdx);
+              opt.innerText = c.name;
+              select.appendChild(opt);
+            });
+
+            const curDecl = selectedChoiceDeclarations[idx] !== undefined ? selectedChoiceDeclarations[idx] : 0;
+            select.value = String(curDecl);
+            selectedChoiceDeclarations[idx] = curDecl;
+
+            select.onchange = (e) => {
+              selectedChoiceDeclarations[idx] = parseInt(e.target.value, 10);
+            };
+
+            const colStr = d.color === "gray" ? "#94a3b8" : `var(--color-${d.color})`;
+            wrap.innerHTML = `<span style="color: ${colStr};">Die #${idx + 1} (${d.color.toUpperCase()} Choice):</span>`;
+          }
+
+          wrap.appendChild(select);
+          controls.appendChild(wrap);
+        } else if (face.is_shield) {
           const wrap = document.createElement("div");
           wrap.style.display = "inline-flex";
           wrap.style.alignItems = "center";

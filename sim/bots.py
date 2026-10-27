@@ -108,6 +108,43 @@ class BaseBot:
         """Returns True if the player chooses to sacrifice an active White contractor die to absorb Green malware."""
         return len(player_state.contractor_dice) > 0
 
+    def declare_choices(
+        self,
+        player_state: PlayerState,
+        active_dice: Optional[List[Die]] = None,
+        staging_cubes: Optional[Dict[CubeColor, int]] = None,
+        stuck_cubes: Optional[Dict[CubeColor, int]] = None,
+        directive_code: str = "",
+        rng: Optional[random.Random] = None,
+        rolled_dice: Optional[List[Die]] = None,
+    ) -> Dict[int, int]:
+        """Maps die indices with choice faces to chosen option index (0 or 1).
+
+        Default heuristics:
+        - Gray Face 5 (+$1 / +1 🔧): if patches < 2, choose 1 (+1 🔧), else choose 0 (+$1).
+        - Green Face 4 (+1 🔧 / +$1): if patches < 2, choose 0 (+1 🔧), else choose 1 (+$1).
+        - Blue Face 4 (Block 1 Blue / +1 🔧): if Blue threat > 0, choose 0 (Block 1 Blue), else choose 1 (+1 🔧).
+        """
+        dice = active_dice if active_dice is not None else (rolled_dice or [])
+        staging = staging_cubes or {}
+        stuck = stuck_cubes or {}
+        blue_threat = staging.get(CubeColor.BLUE, 0) + stuck.get(CubeColor.BLUE, 0)
+
+        declarations: Dict[int, int] = {}
+        for idx, die in enumerate(dice):
+            face = die.current_face
+            if not face or not face.is_choice:
+                continue
+            if face.has_shield_option:
+                declarations[idx] = 0 if blue_threat > 0 else 1
+            elif face.name == "+$1 / +1 🔧":
+                declarations[idx] = 1 if player_state.patches < 2 else 0
+            elif face.name == "+1 🔧 / +$1":
+                declarations[idx] = 0 if player_state.patches < 2 else 1
+            else:
+                declarations[idx] = 0
+        return declarations
+
     def commit_shields(
         self,
         player_state: PlayerState,
@@ -120,15 +157,24 @@ class BaseBot:
         """Maps die indices in rolled_dice to assigned ShieldColor (RED, BLUE, GREEN).
 
         Generic (ANY) shields MUST choose a specific color: RED, BLUE, or GREEN.
+        Choice faces with shield options (e.g. Blue Face 4) are committed to their shield color if threatened.
         """
         assignments: Dict[int, ShieldColor] = {}
+        staging = staging_cubes or {}
+        stuck = stuck_cubes or {}
+        blue_threat = staging.get(CubeColor.BLUE, 0) + stuck.get(CubeColor.BLUE, 0)
+
         for idx, die in enumerate(rolled_dice):
             face = die.current_face
-            if face and face.is_shield:
+            if not face or face.is_glitch:
+                continue
+            if face.is_shield:
                 if face.shield_color == ShieldColor.ANY:
                     assignments[idx] = ShieldColor.BLUE  # Prioritize Blue over Red/Green
                 else:
                     assignments[idx] = face.shield_color
+            elif face.has_shield_option and blue_threat > 0:
+                assignments[idx] = ShieldColor.BLUE
         return assignments
 
     def choose_shield_wear_order(
@@ -148,7 +194,7 @@ class BaseBot:
         """
         def wear_priority_key(d: Die) -> Tuple[int, int, int, int]:
             is_white = 0 if d.color == DieColor.WHITE else 1
-            face = d.current_face
+            face = d.effective_face or d.current_face
             is_b3 = 0 if (face and face.star_code == "B3") else 1
             return (is_white, is_b3, d.vp, d.cost)
 
@@ -236,9 +282,12 @@ class AdaptiveBalancedBot(BaseBot):
             if d.current_face and d.current_face.shield_color in (ShieldColor.RED, ShieldColor.ANY)
         )
         blue_shields = sum(
-            d.current_face.block_amount
+            (1 if (d.current_face and d.current_face.has_shield_option) else d.current_face.block_amount)
             for d in active_dice
-            if d.current_face and d.current_face.shield_color in (ShieldColor.BLUE, ShieldColor.ANY)
+            if d.current_face and (
+                d.current_face.shield_color in (ShieldColor.BLUE, ShieldColor.ANY)
+                or d.current_face.has_shield_option
+            )
         )
         green_shields = sum(
             d.current_face.block_amount
@@ -255,13 +304,13 @@ class AdaptiveBalancedBot(BaseBot):
                 continue
             if face.is_glitch:
                 rerolls.append(idx)
-            elif not face.is_shield and (
+            elif not face.is_shield and not face.has_shield_option and (
                 threats[CubeColor.BLUE] > blue_shields
                 or threats[CubeColor.RED] > red_shields
                 or threats[CubeColor.GREEN] > green_shields
             ):
                 rerolls.append(idx)
-            elif not face.is_shield and face.money <= 1 and face.patches == 0:
+            elif not face.is_shield and not face.has_shield_option and not face.has_cash_option and face.money <= 1 and face.patches == 0:
                 rerolls.append(idx)
         return rerolls
 
@@ -284,9 +333,12 @@ class AdaptiveBalancedBot(BaseBot):
             if d.current_face and d.current_face.shield_color in (ShieldColor.RED, ShieldColor.ANY)
         )
         blue_shields = sum(
-            d.current_face.block_amount
+            (1 if (d.current_face and d.current_face.has_shield_option) else d.current_face.block_amount)
             for d in rolled_dice
-            if d.current_face and d.current_face.shield_color in (ShieldColor.BLUE, ShieldColor.ANY)
+            if d.current_face and (
+                d.current_face.shield_color in (ShieldColor.BLUE, ShieldColor.ANY)
+                or d.current_face.has_shield_option
+            )
         )
 
         # Reroll non-shield faces if we lack defense and have patches
@@ -300,11 +352,41 @@ class AdaptiveBalancedBot(BaseBot):
                 rerolls.append(idx)
             elif (
                 not face.is_shield
+                and not face.has_shield_option
                 and (threats[CubeColor.RED] > red_shields or threats[CubeColor.BLUE] > blue_shields)
             ):
                 rerolls.append(idx)
 
         return rerolls
+
+    def declare_choices(
+        self,
+        player_state: PlayerState,
+        active_dice: Optional[List[Die]] = None,
+        staging_cubes: Optional[Dict[CubeColor, int]] = None,
+        stuck_cubes: Optional[Dict[CubeColor, int]] = None,
+        directive_code: str = "",
+        rng: Optional[random.Random] = None,
+        rolled_dice: Optional[List[Die]] = None,
+    ) -> Dict[int, int]:
+        dice = active_dice if active_dice is not None else (rolled_dice or [])
+        threats = self._get_threat_levels(staging_cubes or {}, stuck_cubes or {})
+        declarations: Dict[int, int] = {}
+        for idx, die in enumerate(dice):
+            face = die.current_face
+            if not face or not face.is_choice:
+                continue
+            if face.has_shield_option:
+                declarations[idx] = 0 if threats[CubeColor.BLUE] > 0 else 1
+            elif face.name == "+$1 / +1 🔧":
+                need_patch = (player_state.patches < 2) or (len(player_state.unpatched_dice) > player_state.patches)
+                declarations[idx] = 1 if need_patch else 0
+            elif face.name == "+1 🔧 / +$1":
+                need_patch = (player_state.patches < 2) or (len(player_state.unpatched_dice) > player_state.patches)
+                declarations[idx] = 0 if need_patch else 1
+            else:
+                declarations[idx] = 0
+        return declarations
 
     def commit_shields(
         self,
@@ -324,23 +406,33 @@ class AdaptiveBalancedBot(BaseBot):
         committed_green = 0
 
         any_shield_indices: List[int] = []
+        blue_choice_indices: List[int] = []
 
         for idx, die in enumerate(rolled_dice):
             face = die.current_face
-            if not face or not face.is_shield:
+            if not face or face.is_glitch:
                 continue
 
-            if face.shield_color == ShieldColor.RED:
-                assignments[idx] = ShieldColor.RED
-                committed_red += face.block_amount
-            elif face.shield_color == ShieldColor.BLUE:
+            if face.is_shield:
+                if face.shield_color == ShieldColor.RED:
+                    assignments[idx] = ShieldColor.RED
+                    committed_red += face.block_amount
+                elif face.shield_color == ShieldColor.BLUE:
+                    assignments[idx] = ShieldColor.BLUE
+                    committed_blue += face.block_amount
+                elif face.shield_color == ShieldColor.GREEN:
+                    assignments[idx] = ShieldColor.GREEN
+                    committed_green += face.block_amount
+                elif face.shield_color == ShieldColor.ANY:
+                    any_shield_indices.append(idx)
+            elif face.has_shield_option:
+                blue_choice_indices.append(idx)
+
+        # Assign Blue choice faces if Blue threat > committed_blue
+        for idx in blue_choice_indices:
+            if threats[CubeColor.BLUE] > committed_blue:
                 assignments[idx] = ShieldColor.BLUE
-                committed_blue += face.block_amount
-            elif face.shield_color == ShieldColor.GREEN:
-                assignments[idx] = ShieldColor.GREEN
-                committed_green += face.block_amount
-            elif face.shield_color == ShieldColor.ANY:
-                any_shield_indices.append(idx)
+                committed_blue += 1
 
         # Assign Generic Any shields prioritizing Blue (protect Secrets) first, then Red, then Green
         for idx in any_shield_indices:
@@ -493,7 +585,7 @@ class SecOpsTurtleBot(BaseBot):
             if die.is_locked:
                 continue
             face = die.current_face
-            if face and (not face.is_shield or face.is_glitch):
+            if face and (face.is_glitch or (not face.is_shield and not face.has_shield_option)):
                 rerolls.append(idx)
         return rerolls
 
@@ -511,9 +603,38 @@ class SecOpsTurtleBot(BaseBot):
             if available_patches <= len(rerolls):
                 break
             face = die.current_face
-            if face and not face.is_shield:
+            if face and not face.is_shield and not face.has_shield_option:
                 rerolls.append(idx)
         return rerolls
+
+    def declare_choices(
+        self,
+        player_state: PlayerState,
+        active_dice: Optional[List[Die]] = None,
+        staging_cubes: Optional[Dict[CubeColor, int]] = None,
+        stuck_cubes: Optional[Dict[CubeColor, int]] = None,
+        directive_code: str = "",
+        rng: Optional[random.Random] = None,
+        rolled_dice: Optional[List[Die]] = None,
+    ) -> Dict[int, int]:
+        dice = active_dice if active_dice is not None else (rolled_dice or [])
+        staging = staging_cubes or {}
+        stuck = stuck_cubes or {}
+        blue_threat = staging.get(CubeColor.BLUE, 0) + stuck.get(CubeColor.BLUE, 0)
+        declarations: Dict[int, int] = {}
+        for idx, die in enumerate(dice):
+            face = die.current_face
+            if not face or not face.is_choice:
+                continue
+            if face.has_shield_option:
+                declarations[idx] = 0 if blue_threat > 0 else 1
+            elif face.name == "+$1 / +1 🔧":
+                declarations[idx] = 1 if player_state.patches < 3 else 0
+            elif face.name == "+1 🔧 / +$1":
+                declarations[idx] = 0 if player_state.patches < 3 else 1
+            else:
+                declarations[idx] = 0
+        return declarations
 
     def commit_shields(
         self,
@@ -525,14 +646,20 @@ class SecOpsTurtleBot(BaseBot):
         rng: random.Random,
     ) -> Dict[int, ShieldColor]:
         assignments: Dict[int, ShieldColor] = {}
+        staging = staging_cubes or {}
+        stuck = stuck_cubes or {}
+        blue_threat = staging.get(CubeColor.BLUE, 0) + stuck.get(CubeColor.BLUE, 0)
         for idx, die in enumerate(rolled_dice):
             face = die.current_face
-            if not face or not face.is_shield:
+            if not face or face.is_glitch:
                 continue
-            if face.shield_color == ShieldColor.ANY:
+            if face.is_shield:
+                if face.shield_color == ShieldColor.ANY:
+                    assignments[idx] = ShieldColor.BLUE
+                else:
+                    assignments[idx] = face.shield_color
+            elif face.has_shield_option and blue_threat > 0:
                 assignments[idx] = ShieldColor.BLUE
-            else:
-                assignments[idx] = face.shield_color
         return assignments
 
     def take_phase3_actions(
@@ -649,7 +776,7 @@ class VentureGreedBot(BaseBot):
             face = die.current_face
             if not face:
                 continue
-            if face.is_glitch or (face.money == 0 and not face.is_star):
+            if face.is_glitch or (face.money == 0 and not face.is_star and not face.has_cash_option):
                 rerolls.append(idx)
         return rerolls
 
@@ -672,6 +799,37 @@ class VentureGreedBot(BaseBot):
                     rerolls.append(idx)
         return rerolls
 
+    def declare_choices(
+        self,
+        player_state: PlayerState,
+        active_dice: Optional[List[Die]] = None,
+        staging_cubes: Optional[Dict[CubeColor, int]] = None,
+        stuck_cubes: Optional[Dict[CubeColor, int]] = None,
+        directive_code: str = "",
+        rng: Optional[random.Random] = None,
+        rolled_dice: Optional[List[Die]] = None,
+    ) -> Dict[int, int]:
+        dice = active_dice if active_dice is not None else (rolled_dice or [])
+        staging = staging_cubes or {}
+        stuck = stuck_cubes or {}
+        blue_threat = staging.get(CubeColor.BLUE, 0) + stuck.get(CubeColor.BLUE, 0)
+        declarations: Dict[int, int] = {}
+        for idx, die in enumerate(dice):
+            face = die.current_face
+            if not face or not face.is_choice:
+                continue
+            if face.has_shield_option:
+                declarations[idx] = 0 if (blue_threat > 0 and player_state.secrets <= 2) else 1
+            elif face.name == "+$1 / +1 🔧":
+                need_patch = (player_state.patches == 0 and len(player_state.unpatched_dice) > 0)
+                declarations[idx] = 1 if need_patch else 0
+            elif face.name == "+1 🔧 / +$1":
+                need_patch = (player_state.patches == 0 and len(player_state.unpatched_dice) > 0)
+                declarations[idx] = 0 if need_patch else 1
+            else:
+                declarations[idx] = 0
+        return declarations
+
     def commit_shields(
         self,
         player_state: PlayerState,
@@ -682,13 +840,20 @@ class VentureGreedBot(BaseBot):
         rng: random.Random,
     ) -> Dict[int, ShieldColor]:
         assignments: Dict[int, ShieldColor] = {}
+        staging = staging_cubes or {}
+        stuck = stuck_cubes or {}
+        blue_threat = staging.get(CubeColor.BLUE, 0) + stuck.get(CubeColor.BLUE, 0)
         for idx, die in enumerate(rolled_dice):
             face = die.current_face
-            if face and face.is_shield:
+            if not face or face.is_glitch:
+                continue
+            if face.is_shield:
                 if face.shield_color == ShieldColor.ANY:
                     assignments[idx] = ShieldColor.BLUE
                 else:
                     assignments[idx] = face.shield_color
+            elif face.has_shield_option and blue_threat > 0 and player_state.secrets <= 2:
+                assignments[idx] = ShieldColor.BLUE
         return assignments
 
     def take_phase3_actions(
@@ -812,9 +977,40 @@ class AccelerationistBot(BaseBot):
             if die.is_locked:
                 continue
             face = die.current_face
-            if face and (face.is_glitch or (face.money == 0 and not face.is_star and not face.is_shield)):
+            if face and (face.is_glitch or (face.money == 0 and not face.is_star and not face.is_shield and not face.has_cash_option and not face.has_shield_option)):
                 rerolls.append(idx)
         return rerolls
+
+    def declare_choices(
+        self,
+        player_state: PlayerState,
+        active_dice: Optional[List[Die]] = None,
+        staging_cubes: Optional[Dict[CubeColor, int]] = None,
+        stuck_cubes: Optional[Dict[CubeColor, int]] = None,
+        directive_code: str = "",
+        rng: Optional[random.Random] = None,
+        rolled_dice: Optional[List[Die]] = None,
+    ) -> Dict[int, int]:
+        dice = active_dice if active_dice is not None else (rolled_dice or [])
+        staging = staging_cubes or {}
+        stuck = stuck_cubes or {}
+        blue_threat = staging.get(CubeColor.BLUE, 0) + stuck.get(CubeColor.BLUE, 0)
+        declarations: Dict[int, int] = {}
+        for idx, die in enumerate(dice):
+            face = die.current_face
+            if not face or not face.is_choice:
+                continue
+            if face.has_shield_option:
+                declarations[idx] = 0 if blue_threat > 0 else 1
+            elif face.name == "+$1 / +1 🔧":
+                need_patch = (len(player_state.unpatched_dice) >= 2 or player_state.patches == 0)
+                declarations[idx] = 1 if need_patch else 0
+            elif face.name == "+1 🔧 / +$1":
+                need_patch = (len(player_state.unpatched_dice) >= 2 or player_state.patches == 0)
+                declarations[idx] = 0 if need_patch else 1
+            else:
+                declarations[idx] = 0
+        return declarations
 
     def commit_shields(
         self,
@@ -826,13 +1022,20 @@ class AccelerationistBot(BaseBot):
         rng: random.Random,
     ) -> Dict[int, ShieldColor]:
         assignments: Dict[int, ShieldColor] = {}
+        staging = staging_cubes or {}
+        stuck = stuck_cubes or {}
+        blue_threat = staging.get(CubeColor.BLUE, 0) + stuck.get(CubeColor.BLUE, 0)
         for idx, die in enumerate(rolled_dice):
             face = die.current_face
-            if face and face.is_shield:
+            if not face or face.is_glitch:
+                continue
+            if face.is_shield:
                 if face.shield_color == ShieldColor.ANY:
                     assignments[idx] = ShieldColor.BLUE
                 else:
                     assignments[idx] = face.shield_color
+            elif face.has_shield_option and blue_threat > 0:
+                assignments[idx] = ShieldColor.BLUE
         return assignments
 
     def take_phase3_actions(
@@ -948,7 +1151,7 @@ class RecklessSaboteurBot(BaseBot):
             if die.is_locked:
                 continue
             face = die.current_face
-            if face and (face.is_glitch or face.money < 1):
+            if face and (face.is_glitch or (face.money < 1 and not face.has_cash_option and not face.is_shield and not face.has_shield_option)):
                 rerolls.append(idx)
         return rerolls
 
@@ -962,13 +1165,20 @@ class RecklessSaboteurBot(BaseBot):
         rng: random.Random,
     ) -> Dict[int, ShieldColor]:
         assignments: Dict[int, ShieldColor] = {}
+        staging = staging_cubes or {}
+        stuck = stuck_cubes or {}
+        blue_threat = staging.get(CubeColor.BLUE, 0) + stuck.get(CubeColor.BLUE, 0)
         for idx, die in enumerate(rolled_dice):
             face = die.current_face
-            if face and face.is_shield:
+            if not face or face.is_glitch:
+                continue
+            if face.is_shield:
                 if face.shield_color == ShieldColor.ANY:
                     assignments[idx] = ShieldColor.BLUE
                 else:
                     assignments[idx] = face.shield_color
+            elif face.has_shield_option and blue_threat > 0:
+                assignments[idx] = ShieldColor.BLUE
         return assignments
 
     def take_phase3_actions(

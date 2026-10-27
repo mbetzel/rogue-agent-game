@@ -154,7 +154,8 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
             elif clean_path == "/api/game/action/commit":
                 pid = get_target_pid(default_to_human=True)
                 commitments = data.get("commitments", {})
-                state = self.controller.commit_defenses(pid, commitments)
+                choice_declarations = data.get("choice_declarations", None)
+                state = self.controller.commit_defenses(pid, commitments, choice_declarations)
                 payload, code = success_response({"state": state})
                 self._send_json_response(payload, code)
 

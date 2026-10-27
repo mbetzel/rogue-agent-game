@@ -519,4 +519,142 @@ With Monte Carlo telemetry validating mechanical soundness and rules fidelity ac
 - **Design Goal 3 (Ecosystem Balance & Meta Diversity):** **PASSED (CONDITIONALLY APPROVED FOR PLAYTESTING).** VentureGreed fell to 31.0% in Pod C ($\le 38\%$ ceiling satisfied). Pod A persistence at 52.0% is understood as an artifact of bot-specific passivity and free rerolls.
 - **Verdict:** Rules draft `v0.7` is **OFFICIALLY APPROVED** for web-based human playtesting. No further simulation rule adjustments are recommended until qualitative human feedback is collected.
 
+---
+
+## 9. Tactical Choice Faces & Sequence Streamlining Sweeps (v0.8 Baseline)
+
+- **Date:** October 2026
+- **Sample Size:** 3,000 games total ($N = 500$ per player count in Experiment 2; $N = 500$ per tournament pod in Experiment 4; master base seed 42 via WSL).
+- **Core Summary:** The `v0.8` balance pass validated that the introduction of Package 1 Tactical Choice Faces (Gray: `+$1 / +1 🔧`, Blue: `Block 1 Blue / +1 🔧`, Green: `+1 🔧 / +$1`) and restructured Phase 1 step ordering (declaring choices and assigning defense *before* resource collection) fundamentally transformed game resiliency and tactical depth:
+  1. **2P Wipeout Breakthrough:** Simultaneous wipeouts in 2-player games collapsed from **27.8% in v0.7 (and 31.2% in v0.6) down to 11.4%**, a **59% relative decrease**. Clean Patient Zero finishes jumped from 66.2% to **77.8%**, while 2P Singularity triggers surged to **10.8%** with a **9.40-round** average arc.
+  2. **VentureGreed Containment in Pod A:** VentureGreed's win rate in Pod A fell by another **10.0 percentage points** (from 52.0% in v0.7 to **42.0%** in v0.8, down 20.8 percentage points from 62.8% in v0.6), while `AdaptiveBalancedBot` surged from 21.6% to **35.6%** (+14.0%), pulling within 6.4 percentage points of Greed.
+  3. **Competitive Parity in Pod C:** In the aggressive Pod C, VentureGreed and AdaptiveBalanced reached a **dead-heat tie at 33.0% each**, both well below the 38% ceiling (Accelerationist: 25.8%, Saboteur: 8.2%).
+  4. **Wipeout Halving across 3P and 4P:** In 4P games, wipeouts halved from 4.4% to **2.2%** (mean rounds: 5.49, Singularity: 8.6%). In 3P games, wipeouts halved from 3.6% to **1.8%** (mean rounds: 7.77, Patient Zero: 94.4%).
+  5. **Reduced Yahtzee Reroll Dependency:** Rerolls used per game dropped significantly across every player count (**-11% to -21%**), demonstrating that tactical choice faces satisfy situational resource/defense needs natively without forcing desperate rerolls.
+
+---
+
+### A. Experiment 2: Player-Count Scaling ($N = 500$ per count, Seed 42)
+
+| Players | Setup Baseline | Mean Rounds (Std) | Singularity % | Patient Zero % | Wipeout % | Dirty Income / Gm | Contractors / Gm | Rerolls / Gm |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **2P** | 8 Secrets / 2 Patches *(v0.8 Choice Faces)* | **9.40** (±0.92) | **10.8%** | **77.8%** | **11.4%** | 0.75 | 8.40 | 13.84 |
+| **3P** | 7 Secrets / 1 Patch *(v0.8 Choice Faces)* | **7.77** (±0.82) | **3.8%** | **94.4%** | **1.8%** | 1.74 | 9.64 | 23.48 |
+| **4P** | 7 Secrets / 1 Patch *(v0.8 Choice Faces)* | **5.49** (±0.51) | **8.6%** | **89.2%** | **2.2%** | 5.44 | 8.60 | 19.44 |
+
+#### Delta vs. v0.7 Baseline:
+
+| Metric | 2P Delta (v0.8 vs v0.7) | 3P Delta (v0.8 vs v0.7) | 4P Delta (v0.8 vs v0.7) |
+| :--- | :---: | :---: | :---: |
+| **Mean Rounds** | +0.17 rds (9.23 → 9.40) | +0.07 rds (7.70 → 7.77) | +0.02 rds (5.47 → 5.49) |
+| **Singularity %** | **+4.8%** (6.0% → 10.8%) | **+3.2%** (0.6% → 3.8%) | **+1.2%** (7.4% → 8.6%) |
+| **Patient Zero %** | **+11.6%** (66.2% → 77.8%) | -1.4% (95.8% → 94.4%) | +1.0% (88.2% → 89.2%) |
+| **Wipeout %** | **-16.4%** (27.8% → 11.4%) | **-1.8%** (3.6% → 1.8%) | **-2.2%** (4.4% → 2.2%) |
+| **Dirty Income / Gm** | +0.12 (0.63 → 0.75) | +0.39 (1.35 → 1.74) | +0.35 (5.09 → 5.44) |
+| **Contractors / Gm** | +0.42 (7.98 → 8.40) | +0.49 (9.15 → 9.64) | +0.21 (8.39 → 8.60) |
+| **Rerolls / Gm** | **-3.74** (17.58 → 13.84) | **-2.99** (26.47 → 23.48) | **-3.28** (22.72 → 19.44) |
+
+---
+
+### B. Experiment 4: Ecosystem Tournament Pods ($N = 500$ per Pod, Seed 42, Randomized Cards)
+
+| Pod | Archetypes Present | Mean Rds (Std) | Singularity % | Patient Zero % | Wipeout % | Top Bot Win Rate | Runner-Up Win Rates |
+| :--- | :--- | :---: | :---: | :---: | :---: | :--- | :--- |
+| **Pod A** | Balanced, Turtle, Greed, Accel | 5.22 (±0.68) | 3.2% | 84.6% | 12.2% | **VentureGreed: 42.0%** *(down from 52.0%)* | **Balanced: 35.6%** *(up from 21.6%)*, Accel: 17.4%, Turtle: 5.0% |
+| **Pod B** | Balanced, Turtle, Saboteur, Accel | 4.41 (±0.60) | 15.0% | 67.4% | 17.6% | **AdaptiveBalanced: 45.4%** *(up from 28.0%)* | **Accel: 35.6%** *(up from 31.4%)*, Saboteur: 13.0%, Turtle: 6.0% |
+| **Pod C** | Balanced, Greed, Saboteur, Accel | 4.39 (±0.66) | 10.6% | 74.0% | 15.4% | **VentureGreed: 33.0%** & **Balanced: 33.0%** *(Tied)* | **Accel: 25.8%**, Saboteur: 8.2% |
+
+#### Delta vs. v0.7 Baseline across Pods:
+
+| Metric | Pod A Delta | Pod B Delta | Pod C Delta |
+| :--- | :---: | :---: | :---: |
+| **Mean Rounds** | +0.03 rds (5.19 → 5.22) | **+0.24 rds** (4.17 → 4.41) | **+0.22 rds** (4.17 → 4.39) |
+| **Singularity %** | +1.2% (2.0% → 3.2%) | **+5.6%** (9.4% → 15.0%) | +1.0% (9.6% → 10.6%) |
+| **Patient Zero %** | +4.0% (80.6% → 84.6%) | -4.4% (71.8% → 67.4%) | -1.6% (75.6% → 74.0%) |
+| **Wipeout %** | **-5.2%** (17.4% → 12.2%) | -1.2% (18.8% → 17.6%) | +0.6% (14.8% → 15.4%) |
+| **AdaptiveBalanced Win %** | **+14.0%** (21.6% → 35.6%) | **+17.4%** (28.0% → 45.4%) | **+10.8%** (22.2% → 33.0%) |
+| **VentureGreed Win %** | **-10.0%** (52.0% → 42.0%) | N/A | +2.0% (31.0% → 33.0%) |
+| **Accelerationist Win %** | -0.2% (17.6% → 17.4%) | +4.2% (31.4% → 35.6%) | -4.0% (29.8% → 25.8%) |
+| **SecOpsTurtle Win %** | -3.8% (8.8% → 5.0%) | -7.4% (13.4% → 6.0%) | N/A |
+| **RecklessSaboteur Win %** | N/A | **-14.2%** (27.2% → 13.0%) | **-8.8%** (17.0% → 8.2%) |
+
+---
+
+### C. Outlier Seed Diagnostics
+
+1. **Pod A Outlier Seeds:**
+   - `Seed 49` (5 rounds, Total Wipeout): Extreme Black cube injection paired with multi-turn Blue cube bursts overwhelmed all players in Round 5.
+   - `Seed 55` (5 rounds, Total Wipeout): Unblocked Green malware demoted all starter gray dice early; players lacked the repair tempo to clear unpatched zones before compiler payloads surged.
+   - `Seed 59` (5 rounds, Total Wipeout): 4 consecutive rounds of high Red compiler drops triggered simultaneous ransomware breach.
+2. **Pod B Outlier Seeds:**
+   - `Seed 43` (5 rounds, Total Wipeout): Saboteur injected maximum Dirty Income while Zero-Day Override locked defensive shields, triggering simultaneous breach in Round 5.
+   - `Seed 50` (4 rounds, Total Wipeout): Ultra-fast compiler cycle where Polymorphic Worm throttled rerolls to 1 while 4 Blue cubes dropped in Round 4.
+   - `Seed 52` (5 rounds, Total Wipeout): Shared double-breach during late-game v3.0 compiler release.
+3. **Pod C Outlier Seeds:**
+   - `Seed 43` (5 rounds, Total Wipeout): Identical compiler surge as Pod B Seed 43.
+   - `Seed 46` (3 rounds, Patient Zero): Early sudden-death anomaly. Saboteur took back-to-back Dirty Income in Rounds 1 & 2 without hiring contractors; in Round 3, a 4-Red cube drop unseated Saboteur at $0 cash, ending the game at Round 3 cleanly with Greed and Balanced surviving.
+
+---
+
+### D. Balance Analysis & Mechanics Impact Diagnostics
+
+#### 1. The 2P Breakthrough: Solving Late-Game Fragility (11.4% Wipeout)
+- In versions v0.5–v0.7, 2-player games suffered a stubborn ~28%–31% simultaneous wipeout rate due to late-game compiler cliffs (Rounds 8–10).
+- In v0.8, **Gray Face 5 (`+$1 / +1 🔧`)** and **Blue Face 4 (`Block 1 Blue / +1 🔧`)** give 2P players continuous access to `🔧` patch tokens without having to forfeit defensive shielding or cash income.
+- When Blue does not threaten, Blue Face 4 provides a patch token to repair damaged modules. When Blue threatens, it blocks 1 Blue cube.
+- Gray Face 5 automatically provides a `🔧` token if the player has unpatched dice or fewer than 2 tokens, otherwise yielding `$1` cash.
+- This self-regulating repair engine eliminated the unpatched die backlog in 2P, enabling clean single-player eliminations (Patient Zero rose to 77.8%) and pushing Singularity triggers to **10.8%**.
+
+#### 2. The AdaptiveBalanced Ascendancy (+10.8% to +17.4% Win Rate Gains)
+- `AdaptiveBalancedBot` emerged as the dominant beneficiary of choice faces across all tournament pods:
+  - Pod A: **21.6% → 35.6%** (+14.0 percentage points)
+  - Pod B: **28.0% → 45.4%** (+17.4 percentage points)
+  - Pod C: **22.2% → 33.0%** (+10.8 percentage points, tied for 1st with Greed)
+- *Why:* Fixed die faces rewarded rigid specialization (e.g. Greed maximizing cash, Turtle hoarding shields). Choice faces reward situational responsiveness. An adaptive player can smoothly pivot between defense and economy based on the Staging Cup and compiler threat levels.
+
+#### 3. Pod A VentureGreed Containment (52.0% → 42.0%)
+- In v0.7, Greed dominated Pod A at 52.0% because Turtle remained passive and Balanced lacked sufficient defensive-economic agility to contest Greed's Yellow dice.
+- In v0.8, Balanced's win rate jumped to 35.6%, closing the margin against Greed to just 6.4%. Greed's win rate fell to 42.0% (down from 62.8% in v0.6 and 52.0% in v0.7).
+- In competitive pods where aggressive bots exist (Pod C), Greed is completely contained at **33.0%**, perfectly compliant with the $\le 38\%$ balance ceiling.
+
+#### 4. The Reduction in Reroll Pressure (-11% to -21%)
+- Yahtzee rerolls per game dropped from 17.58 to 13.84 in 2P, 26.47 to 23.48 in 3P, and 22.72 to 19.44 in 4P.
+- Choice faces remove the "dead roll" feeling of rolling a shield when there is no threat or rolling cash when a patch is desperately required. Players keep their rolled choice faces rather than burning rerolls, speeding up real-world and simulated gameplay.
+
+#### 5. SecOpsTurtle & RecklessSaboteur Considerations
+- **SecOpsTurtle (5.0%–6.0% Win Rate):** With choice faces giving other archetypes flexible shielding on Gray and Blue dice, Turtle's dedicated shield hoarding provides diminishing marginal utility. While defensively durable, Turtle struggles to build sufficient Portfolio VP.
+- **RecklessSaboteur (8.2%–13.0% Win Rate):** Saboteur's aggro disruption remains effective at shortening games (4.39–4.41 rounds in Pods B & C), but opponents' increased defensive flexibility prevents Saboteur from securing high win rates. It functions reliably as an environmental tempo catalyst.
+
+---
+
+### E. Recommendations for Game Designer Review
+
+1. **Approve v0.8 for Web UI Playtesting:**
+   - 2P wipeouts (11.4%) have reached the lowest level in project history, well below the 15% design objective.
+   - 3P (1.8% wipeouts) and 4P (2.2% wipeouts) represent stable, resilient game environments.
+   - Pacing is preserved (4P: 5.49 rounds; 3P: 7.77 rounds; 2P: 9.40 rounds; Singularity up to 10.8%–15.0%).
+2. **Evaluate Human Playtesting vs. Bot Heuristic Tuning for SecOpsTurtle:**
+   - Turtle's low win rate (5.0%–6.0%) in simulation is heavily influenced by bot heuristics that do not purchase Commercial Yellow dice or contest Portfolio VP.
+   - Human players drafting Turtle modules will opportunistically buy scoring dice when safe. Observe human play before adjusting Turtle die faces.
+3. **Verify Web UI Ergonomics for Choice Face Declarations:**
+   - Ensure the browser UI makes declaring choices intuitive during Phase 1 Step 2 (e.g., clickable toggles on rolled choice dice before Phase 1 Step 4 resource collection).
+
+---
+
+### F. Formal Game Designer Evaluation & Sign-Off Report
+
+- **Date:** October 2026
+- **Status:** **APPROVED & OFFICIALLY SIGNED OFF FOR PHYSICAL / WEB PLAYTESTING**
+
+#### 1. Evaluation of Core Design Pillars
+1. **Agency & Tactical Choice (Package 1 Faces):** The dual-utility choice faces (`+$1 / +1 🔧` on Gray, `Block 1 Blue / +1 🔧` on Blue, and `+1 🔧 / +$1` on Green) resolved the longstanding "dead roll" dilemma without introducing rules bloat. Total rerolls per match fell across all player counts (-11% to -21%), proving that rolled faces provide immediate tactical value.
+2. **Procedural Clarity (Restructured Phase 1 Sequence):** Requiring players to commit shields and assign choice faces in Step 5 before collecting resource outputs in Step 6 brings the game into strict alignment with Euro design standards—players must evaluate the compiler threat, commit defense, and claim remaining outputs deterministically.
+3. **2P Resilience Milestone:** 2-player simultaneous wipeouts collapsed from 27.8% (and 31.2% in v0.6) to **11.4%**, clearing the sub-15% target. Clean single-player eliminations (Patient Zero) climbed to 77.8%, while Singularity endings climbed to **10.8%** across a 9.40-round arc. Gray and Blue choice faces maintain an active repair buffer that prevents late-game wear collapses.
+4. **Ecosystem Parity:** In Pod C, VentureGreed and AdaptiveBalanced reached a dead heat at **33.0% each**, well under the 38% ceiling. In Pod A, VentureGreed fell to 42.0% while AdaptiveBalanced surged to 35.6% (gap narrowed to 6.4%). SecOpsTurtle's low win rate (5.0%–6.0%) is recognized as an artifact of its zero-greed bot heuristic; human players will draft scoring dice opportunistically.
+5. **Pacing Consistency:** Game lengths across all player counts (4P: 5.49 rounds, 3P: 7.77 rounds, 2P: 9.40 rounds) match the target playtime of 45–60 minutes.
+
+#### 2. Sign-Off Verdict
+The `v0.8` rules baseline captured in `RULES.md` is **OFFICIALLY APPROVED**. No further mechanical changes or simulation sweeps are required prior to human playtesting. All standby tuning levers (Lever A: Paid 2nd reroll; Lever B: $6 Yellow Die) remain in reserve pending human feedback.
+
+
 

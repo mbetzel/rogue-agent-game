@@ -70,18 +70,20 @@ class TestV03Rules(unittest.TestCase):
     # 3. Gray Starter Die Faces
     # -------------------------------------------------------------------------
     def test_gray_starter_die_faces(self) -> None:
-        """Gray die has exactly 2x Block 1 Any, 3x +$1, 1x +1 🔧, and 0 Idle (0) faces."""
+        """Gray die has exactly 2x Block 1 Any, 2x +$1, 1x +$1 / +1 🔧, 1x +1 🔧, and 0 Idle (0) faces."""
         die = create_gray_die(1)
         self.assertEqual(len(die.faces), 6)
 
         any_shields = [f for f in die.faces if f.shield_color == ShieldColor.ANY and f.block_amount == 1]
-        cash_faces = [f for f in die.faces if f.money == 1]
-        patch_faces = [f for f in die.faces if f.patches == 1]
+        cash_faces = [f for f in die.faces if f.has_cash_option]
+        patch_faces = [f for f in die.faces if f.has_patch_option]
+        choice_faces = [f for f in die.faces if f.is_choice]
         idle_faces = [f for f in die.faces if f.name == "Idle (0)"]
 
         self.assertEqual(len(any_shields), 2)
         self.assertEqual(len(cash_faces), 3)
-        self.assertEqual(len(patch_faces), 1)
+        self.assertEqual(len(patch_faces), 2)
+        self.assertEqual(len(choice_faces), 1)
         self.assertEqual(len(idle_faces), 0)
 
     # -------------------------------------------------------------------------

@@ -46,6 +46,13 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Implementation (`senior-engineer`):* Update `sim/`, `web/`, and unit test suite
   - [x] *Code Review Gate (`staff-engineer`):* Verify 100% test pass and rules fidelity (APPROVED — 126/126 unit tests passing)
   - [x] *Scenario Execution & Balance Validation (`product-owner` & `game-designer`):* Re-run Tournament Pods to verify VentureGreed $\le 38\%$ balance ceiling (Pod C achieved 31.0%; Pod A dropped 10.8% to 52.0% with 2 free rerolls retained; Section 8 documented in FINDINGS.md)
+- [x] **Phase 9: Tactical Choice Faces & Sequence Streamlining (`v0.8` Baseline)**
+  - [x] *Design Review & Rules Update:* Align on Package 1 Choice Faces (Gray: `+$1 / +1 🔧`, Blue: `Block 1 Blue / +1 🔧`, Green: `+1 🔧 / +$1`), restructured Phase 1 sequence (Assign Defenses & Choices *before* Collecting Resource Outputs), and Directive lock rules (RULES.md v0.8 updated).
+  - [x] *Technical Architecture Spec (`principal-engineer`):* Schema for choice faces in `sim/entities.py`, bot assignment heuristics for choice faces in `sim/bots.py`, Phase 1 step ordering in `sim/engine.py`, web API & UI updates, and test specs.
+  - [x] *Implementation (`senior-engineer`):* Update `sim/`, `web/`, and unit test suite.
+  - [x] *Code Review Gate (`staff-engineer`):* Verify 100% test pass and rules fidelity via WSL (APPROVED — 145/145 unit tests passing).
+  - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Run Tournament Pods and player-count sweeps to evaluate choice face adoption and impact on Pod A / 2P resilience; record in `FINDINGS.md`.
+  - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Evaluate telemetry package, validate ecosystem targets, and sign off on v0.8 (APPROVED).
 
 ---
 

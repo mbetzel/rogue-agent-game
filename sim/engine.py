@@ -290,9 +290,9 @@ class GameEngine:
                         continue
                     if face.is_glitch:
                         d.is_locked = True
-                    elif active_directive == "RAAS" and face.money > 0:
+                    elif active_directive == "RAAS" and face.has_cash_option:
                         d.is_locked = True
-                    elif active_directive == "ZERO_DAY_OVERRIDE" and face.is_shield:
+                    elif active_directive == "ZERO_DAY_OVERRIDE" and face.has_shield_option:
                         d.is_locked = True
 
             _evaluate_locks(active_dice)
@@ -357,12 +357,15 @@ class GameEngine:
             # Final lock evaluation pass
             _evaluate_locks(active_dice)
 
-            # 5. Collect Immediate Outputs on Final Faces
-            for die in active_dice:
-                self._apply_single_die_immediate_output(player, die)
-            player.patches = min(player.patches, self.config.max_patch_tokens)
-
-            # 6. Commit Defenses
+            # 5. Assign Defenses & Declare Choices (RULES.md v0.8)
+            declared_choices = player.bot.declare_choices(
+                player_state=player,
+                active_dice=active_dice,
+                staging_cubes=staging_copy,
+                stuck_cubes=stuck_copy,
+                directive_code=active_directive,
+                rng=self.rng,
+            )
             shield_commitments = player.bot.commit_shields(
                 player_state=player,
                 rolled_dice=active_dice,
@@ -372,67 +375,112 @@ class GameEngine:
                 rng=self.rng,
             )
 
-            # Validate assignments & auto-assign fixed colored shields if omitted
+            # Validate assignments & sync die.chosen_choice_index
             validated_commitments: Dict[int, ShieldColor] = {}
             for idx, die in enumerate(active_dice):
                 face = die.current_face
-                if not face or not face.is_shield or face.is_glitch:
+                if not face or face.is_glitch:
                     continue
 
-                if idx in shield_commitments:
-                    color = shield_commitments[idx]
-                    if face.shield_color == ShieldColor.ANY:
-                        validated_commitments[idx] = (
-                            color if color in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN)
-                            else ShieldColor.BLUE
-                        )
+                if face.is_choice:
+                    if face.has_shield_option:
+                        # Blue Face 4: if committed to Blue shield, choice 0; if not, choice 1
+                        if idx in shield_commitments and shield_commitments[idx] == ShieldColor.BLUE:
+                            validated_commitments[idx] = ShieldColor.BLUE
+                            die.chosen_choice_index = 0
+                        else:
+                            die.chosen_choice_index = 1
                     else:
-                        validated_commitments[idx] = face.shield_color
-                else:
-                    if face.shield_color in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN):
-                        validated_commitments[idx] = face.shield_color
-                    elif face.shield_color == ShieldColor.ANY:
-                        validated_commitments[idx] = ShieldColor.BLUE
+                        # Gray or Green choice face: use declared choice index or default 0
+                        chosen = declared_choices.get(idx, 0) if declared_choices else 0
+                        if not (0 <= chosen < len(face.choices)):
+                            chosen = 0
+                        die.chosen_choice_index = chosen
 
-            # Track rolled Star abilities for Phase 3 eligibility
+                elif face.is_shield:
+                    if idx in shield_commitments:
+                        color = shield_commitments[idx]
+                        if face.shield_color == ShieldColor.ANY:
+                            validated_commitments[idx] = (
+                                color if color in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN)
+                                else ShieldColor.BLUE
+                            )
+                        else:
+                            validated_commitments[idx] = face.shield_color
+                    else:
+                        if face.shield_color in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN):
+                            if face.star_code != "B2":
+                                validated_commitments[idx] = face.shield_color
+                        elif face.shield_color == ShieldColor.ANY:
+                            validated_commitments[idx] = ShieldColor.BLUE
+
+            # 6. Gain Resource Outputs on Effective Faces (RULES.md v0.8)
             for idx, die in enumerate(active_dice):
                 face = die.current_face
-                if not face or not face.is_star:
+                if not face or face.is_glitch:
                     continue
-                if face.star_code == "B2":
-                    if idx not in validated_commitments:
-                        player.b2_available = True
-                elif face.star_code == "Y1":
-                    player.y1_available = True
-                elif face.star_code == "P1":
-                    player.p1_available = True
-                elif face.star_code == "P3":
-                    if idx in validated_commitments:
-                        player.p3_available = validated_commitments[idx]
+
+                if idx not in validated_commitments:
+                    eff = die.effective_face
+                    if eff:
+                        player.money += eff.money
+                        player.patches += eff.patches
+                        player.secrets += eff.secrets
+                        if eff.is_star:
+                            if eff.star_code == "Y2":
+                                yellow_count = sum(1 for d in player.total_dice if d.color == DieColor.YELLOW)
+                                bonus = min(5, 2 + yellow_count) - 2
+                                player.money += max(0, bonus)
+                            elif eff.star_code == "Y3":
+                                if die in player.ready_dice:
+                                    player.ready_dice.remove(die)
+                                    player.unpatched_dice.append(die)
+                else:
+                    # Die is assigned to defense: collect hybrid star boot outputs
+                    if face.is_star:
+                        if face.star_code == "R1":
+                            player.money += 2
+                        elif face.star_code in ("G1", "G2"):
+                            player.patches += 1
+
+                # Track rolled Star abilities for Phase 3 eligibility
+                if face.is_star:
+                    if face.star_code == "B2":
+                        if idx not in validated_commitments:
+                            player.b2_available = True
+                    elif face.star_code == "Y1":
+                        player.y1_available = True
+                    elif face.star_code == "P1":
+                        player.p1_available = True
+                    elif face.star_code == "P3":
+                        if idx in validated_commitments:
+                            player.p3_available = validated_commitments[idx]
+
+            player.patches = min(player.patches, self.config.max_patch_tokens)
 
             player_commitments.append((player, list(active_dice), validated_commitments))
 
         return player_commitments
 
     def _apply_single_die_immediate_output(self, player: PlayerState, die: Die) -> None:
-        face = die.current_face
-        if not face or face.is_glitch:
+        eff = die.effective_face
+        if not eff or eff.is_glitch:
             return
 
         # Basic money and patches
-        player.money += face.money
-        player.patches += face.patches
-        player.secrets += face.secrets
+        player.money += eff.money
+        player.patches += eff.patches
+        player.secrets += eff.secrets
 
         # Star faces
-        if face.is_star:
-            if face.star_code == "Y2":
+        if eff.is_star:
+            if eff.star_code == "Y2":
                 # Cloud Monopoly: +$2, plus +$1 per Yellow die owned (max +$5)
                 yellow_count = sum(1 for d in player.total_dice if d.color == DieColor.YELLOW)
-                bonus = min(5, 2 + yellow_count) - 2  # base 2 already added in face.money
+                bonus = min(5, 2 + yellow_count) - 2  # base 2 already added in eff.money
                 player.money += max(0, bonus)
-            elif face.star_code == "Y3":
-                # Proprietary Training: gain 1 secret (already in face.secrets), move die to unpatched
+            elif eff.star_code == "Y3":
+                # Proprietary Training: gain 1 secret (already in eff.secrets), move die to unpatched
                 if die in player.ready_dice:
                     player.ready_dice.remove(die)
                     player.unpatched_dice.append(die)
@@ -612,7 +660,7 @@ class GameEngine:
 
         for idx, color in commitments.items():
             die = rolled_dice[idx]
-            face = die.current_face
+            face = die.effective_face or die.current_face
             if face and face.is_shield:
                 raw_shields[color] += face.block_amount
                 color_dice_map[color].append((idx, die))
@@ -655,7 +703,7 @@ class GameEngine:
                 if cubes_remaining_to_absorb <= 0:
                     break  # Unused shields remain Ready!
 
-                face = die.current_face
+                face = die.effective_face or die.current_face
                 amt = face.block_amount if face else 0
                 cubes_remaining_to_absorb -= amt
 
@@ -674,7 +722,7 @@ class GameEngine:
 
         # 2. Star ability damage-dependent bonuses
         for die in rolled_dice:
-            face = die.current_face
+            face = die.effective_face or die.current_face
             if not face or not face.is_star:
                 continue
             if face.star_code == "R2":

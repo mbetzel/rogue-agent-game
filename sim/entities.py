@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
 
@@ -22,10 +22,30 @@ class Face:
     is_star: bool = False
     star_code: Optional[str] = None  # e.g. "R1", "B3", etc.
     is_glitch: bool = False
+    is_choice: bool = False
+    choices: Tuple[Face, ...] = ()
 
     @property
     def is_shield(self) -> bool:
         return self.block_amount > 0 and self.shield_color is not None and not self.is_glitch
+
+    @property
+    def has_cash_option(self) -> bool:
+        if self.is_choice:
+            return any(c.has_cash_option for c in self.choices)
+        return self.money > 0 and not self.is_glitch
+
+    @property
+    def has_shield_option(self) -> bool:
+        if self.is_choice:
+            return any(c.has_shield_option for c in self.choices)
+        return self.is_shield
+
+    @property
+    def has_patch_option(self) -> bool:
+        if self.is_choice:
+            return any(c.has_patch_option for c in self.choices)
+        return self.patches > 0 and not self.is_glitch
 
 
 @dataclass
@@ -40,10 +60,25 @@ class Die:
     current_face: Optional[Face] = None
     variant_code: Optional[str] = None
     is_locked: bool = False
+    chosen_choice_index: Optional[int] = None
 
     def roll(self, rng: random.Random) -> Face:
         """Roll the die and record the rolled face."""
+        self.chosen_choice_index = None
         self.current_face = rng.choice(self.faces)
+        return self.current_face
+
+    @property
+    def effective_face(self) -> Optional[Face]:
+        if self.current_face is None:
+            return None
+        if self.current_face.is_choice:
+            if (
+                self.chosen_choice_index is not None
+                and 0 <= self.chosen_choice_index < len(self.current_face.choices)
+            ):
+                return self.current_face.choices[self.chosen_choice_index]
+            return self.current_face
         return self.current_face
 
 
@@ -370,7 +405,11 @@ def create_gray_die(die_id: int) -> Die:
         Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
         Face(name="+$1", money=1),
         Face(name="+$1", money=1),
-        Face(name="+$1", money=1),
+        Face(
+            name="+$1 / +1 🔧",
+            is_choice=True,
+            choices=(Face("+$1", money=1), Face("+1 🔧", patches=1)),
+        ),
         Face(name="+1 🔧", patches=1),
     ]
     return Die(
@@ -431,7 +470,14 @@ def create_colored_die(
             Face(name="Block 2 Blue", block_amount=2, shield_color=ShieldColor.BLUE),
             Face(name="Block 2 Blue", block_amount=2, shield_color=ShieldColor.BLUE),
             Face(name="+$1", money=1),
-            Face(name="+1 🔧", patches=1),
+            Face(
+                name="Block 1 Blue / +1 🔧",
+                is_choice=True,
+                choices=(
+                    Face("Block 1 Blue", block_amount=1, shield_color=ShieldColor.BLUE),
+                    Face("+1 🔧", patches=1),
+                ),
+            ),
             star_face,
             star_face,
         ]
@@ -442,7 +488,14 @@ def create_colored_die(
             Face(name="Block 2 Green", block_amount=2, shield_color=ShieldColor.GREEN),
             Face(name="Block 2 Green", block_amount=2, shield_color=ShieldColor.GREEN),
             Face(name="+2 🔧", patches=2),
-            Face(name="+2 🔧", patches=2),
+            Face(
+                name="+1 🔧 / +$1",
+                is_choice=True,
+                choices=(
+                    Face("+1 🔧", patches=1),
+                    Face("+$1", money=1),
+                ),
+            ),
             star_face,
             star_face,
         ]

@@ -1,4 +1,4 @@
-# Rogue Agent — Rules Draft (v0.7)
+# Rogue Agent — Rules Draft (v0.8)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival
 
@@ -86,12 +86,15 @@ Rogue Agent is played over a series of rounds (~8–11 rounds). Each round consi
      * Active **Rogue Agent Version Directives** may lock specific faces (e.g., Cash in `v2.0 RaaS`, or Shields in `v3.0 Zero-Day Override`).
      * Locked dice **cannot** be rerolled during your free rerolls.
    * **Debug Action (`🔧` Token Utility):** At any time during your reroll sequence, you may spend **`1 🔧` token** from your pool (or permanently set aside and lock a rolled die showing `+1 🔧`) to **Unlock `1` locked die**, allowing it to be rerolled in remaining rerolls.
-5. **Gain Immediate Outputs:**
-   * Collect any **`$`**, **Patch Tokens (`🔧`)**, and immediate `★` outputs from your final rolled faces in the Active Pool (you may hold at most **`3 🔧`** tokens at once `[TUNE]`). Dice showing `Glitch (Locked)` produce 0 outputs.
-6. **Commit Defenses:**
+5. **Assign Dice & Declare Choices (Simultaneous):**
    * Assign rolled Shield dice (and Shield `★` abilities) from your Active Pool to your **Red**, **Blue**, or **Green** Shield slots.
+   * **Choice Faces:** Any die showing a **Choice Face** must have its role committed now:
+     * If a choice face offers a Shield option (e.g. `Block 1 Blue / +1 🔧` on Blue), the player decides whether to assign it to its Shield slot, or leave it in the Active Pool to generate its alternative resource in Step 6.
+     * If a choice face offers alternative resources (e.g. `+$1 / +1 🔧` on Gray or `+1 🔧 / +$1` on Green), the player declares which resource the die will produce.
    * **Generic (`Any`) Shields** (including rolled White Contractor shields) must be committed to a specific color (`Red`, `Blue`, or `Green`) *before* Phase 2 begins.
-   * All rolled non-shield dice remain in your Active Pool.
+6. **Gain Resource Outputs (Simultaneous):**
+   * For all dice remaining in your Active Pool (unassigned to defense), collect any **`$` Money tokens**, **Patch Tokens (`🔧`)**, and immediate `★` outputs from their final rolled faces into your personal supply.
+   * You may hold at most **`3 🔧`** tokens at once `[TUNE]`. Dice showing `Glitch (Locked)` produce 0 outputs.
 
 ---
 
@@ -177,13 +180,16 @@ Calculate **Portfolio Value** `[TUNE weights]`:
 
 | Die Type | Cost | VP | Face 1 | Face 2 | Face 3 | Face 4 | Face 5 | Face 6 |
 | :--- | :---: | :---: | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Gray (Legacy)** | Starter | `0` | `Block 1 Any` | `Block 1 Any` | `+$1` | `+$1` | `+$1` | `+1 🔧` |
+| **Gray (Legacy)** | Starter | `0` | `Block 1 Any` | `Block 1 Any` | `+$1` | `+$1` | `+$1 / +1 🔧` | `+1 🔧` |
 | **White (Contractor)** | Prog. `$1/$2/$3` | `0` | `Block 1 Any` | `Block 1 Any` | `Block 1 Any` | `+$1` | `Glitch (Locked)` | `Glitch (Locked)` |
 | **Red (FinSec)** | `$4` | `3` | `Block 2 Red` | `Block 2 Red` | `+$2` | `+$2` | `Red ★` | `Red ★` |
-| **Blue (Firewall)** | `$5` | `4` | `Block 2 Blue` | `Block 2 Blue` | `+$1` | `+1 🔧` | `Blue ★` | `Blue ★` |
-| **Green (Antivirus)** | `$4` | `3` | `Block 2 Green` | `Block 2 Green` | `+2 🔧` | `+2 🔧` | `Green ★` | `Green ★` |
+| **Blue (Firewall)** | `$5` | `4` | `Block 2 Blue` | `Block 2 Blue` | `+$1` | `Block 1 Blue / +1 🔧` | `Blue ★` | `Blue ★` |
+| **Green (Antivirus)** | `$4` | `3` | `Block 2 Green` | `Block 2 Green` | `+2 🔧` | `+1 🔧 / +$1` | `Green ★` | `Green ★` |
 | **Yellow (Commercial)**| `$5` | `4` | `+$3` | `+$2` | `+$2` | `+$1 & +1 🔧` | `Yellow ★` | `Yellow ★` |
 | **Purple (Black-Hat)** | `$4` | `3` | `Block 1 Any` | `Block 1 Any` | `+$2` | `+$1 & +1 🔧` | `Purple ★` | `Purple ★` |
+
+* **Choice Faces (`/`):** Faces with a slash (`/`) indicate a Choice Face. During Phase 1 Step 5, the player declares which of the two options the die fulfills for this round.
+  * **Directive Interactions:** A choice face displaying a Cash option (e.g. `+$1 / +1 🔧` on Gray or `+1 🔧 / +$1` on Green) is treated as a Cash face and is immediately locked by `v2.0 RaaS` Encrypted Memory. A choice face displaying a Shield option (e.g. `Block 1 Blue / +1 🔧` on Blue) is treated as a Shield face and is immediately locked by `v3.0 Zero-Day Override` Kernel Lock. Locked dice can be unlocked using `1 🔧` (Debug Action).
 
 ### B. Sample Module Variant Cards (`★` Effects)
 * **Red `★` Variants:**

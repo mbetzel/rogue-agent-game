@@ -531,6 +531,7 @@ button.btn-compile:disabled {
 
 .badge-contractor { background: #475569; color: #f8fafc; font-size: 0.65rem; padding: 1px 4px; border-radius: 2px; }
 .badge-locked { background: #ef4444; color: #fff; font-size: 0.65rem; padding: 1px 4px; border-radius: 2px; font-weight: 800; }
+.badge-choice { background: #8b5cf6; color: #fff; font-size: 0.65rem; padding: 1px 4px; border-radius: 2px; font-weight: 800; }
 
 .die-face-name {
   font-size: 0.7rem;

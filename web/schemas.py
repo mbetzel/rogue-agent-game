@@ -28,6 +28,14 @@ class GameStateSerializer:
             "star_code": face.star_code,
             "is_shield": face.is_shield,
             "is_glitch": getattr(face, "is_glitch", False),
+            "is_choice": getattr(face, "is_choice", False),
+            "choices": [
+                GameStateSerializer.serialize_face(c)
+                for c in getattr(face, "choices", ())
+            ],
+            "has_cash_option": getattr(face, "has_cash_option", False),
+            "has_shield_option": getattr(face, "has_shield_option", False),
+            "has_patch_option": getattr(face, "has_patch_option", False),
         }
 
     @staticmethod
@@ -41,6 +49,8 @@ class GameStateSerializer:
             "is_locked": getattr(die, "is_locked", False),
             "is_contractor": die.color == DieColor.WHITE,
             "current_face": GameStateSerializer.serialize_face(die.current_face),
+            "chosen_choice_index": getattr(die, "chosen_choice_index", None),
+            "effective_face": GameStateSerializer.serialize_face(die.effective_face),
         }
         if include_faces:
             data["faces"] = [GameStateSerializer.serialize_face(f) for f in die.faces]

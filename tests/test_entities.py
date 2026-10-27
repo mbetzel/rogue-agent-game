@@ -25,13 +25,15 @@ class TestEntities(unittest.TestCase):
 
         # Count face types
         any_shields = [f for f in die.faces if f.shield_color == ShieldColor.ANY and f.block_amount == 1]
-        cash_faces = [f for f in die.faces if f.money == 1]
-        patch_faces = [f for f in die.faces if f.patches == 1]
+        cash_faces = [f for f in die.faces if f.has_cash_option]
+        patch_faces = [f for f in die.faces if f.has_patch_option]
+        choice_faces = [f for f in die.faces if f.is_choice]
         idle_faces = [f for f in die.faces if f.name == "Idle (0)"]
 
         self.assertEqual(len(any_shields), 2)
         self.assertEqual(len(cash_faces), 3)
-        self.assertEqual(len(patch_faces), 1)
+        self.assertEqual(len(patch_faces), 2)
+        self.assertEqual(len(choice_faces), 1)
         self.assertEqual(len(idle_faces), 0)
 
     def test_colored_dice_costs_and_vps(self) -> None:
