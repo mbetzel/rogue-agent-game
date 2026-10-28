@@ -6,11 +6,18 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import random
 import statistics
+import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Tuple
+
+# Ensure repository root is in sys.path
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
 
 from sim.bots import (
     AccelerationistBot,
@@ -359,7 +366,21 @@ def execute_all_experiments(runs: int = 1000, base_seed: int = 42) -> Dict[str, 
 
 
 if __name__ == "__main__":
-    results = execute_all_experiments(runs=1000, base_seed=42)
-    with open("phase2_results.json", "w") as f:
+    import argparse
+    import os
+
+    parser = argparse.ArgumentParser(description="Monte Carlo telemetry runner for Rogue Agent.")
+    parser.add_argument("--runs", type=int, default=1000, help="Number of runs per parameter point (default: 1000).")
+    parser.add_argument("--seed", type=int, default=42, help="Base RNG seed (default: 42).")
+    parser.add_argument("--quick", action="store_true", help="Quick mode (sets runs=10 for rapid verification).")
+    default_output = os.path.join(REPO_ROOT, "data", "phase2_results.json")
+    parser.add_argument("--output", type=str, default=default_output, help="Output path for JSON results.")
+    args = parser.parse_args()
+
+    num_runs = 10 if args.quick else args.runs
+    results = execute_all_experiments(runs=num_runs, base_seed=args.seed)
+
+    os.makedirs(os.path.dirname(args.output) or ".", exist_ok=True)
+    with open(args.output, "w") as f:
         json.dump(results, f, indent=2)
-    print("Results saved to phase2_results.json")
+    print(f"Results saved to {args.output}")

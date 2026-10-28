@@ -22,3 +22,4 @@ Follow this workflow across sessions:
 - `PLAN.md` — Active simulation architecture, experiment matrix, and milestone checklist.
 - `FINDINGS.md` — Historical log of simulation sweeps and balance decisions *(created once first experiments run)*.
 - `sim/` — Python 3 Monte Carlo simulation & stress-testing suite *(run via WSL per global rules)*.
+- `scripts/` — Utility scripts for Monte Carlo sweeps and report generation.

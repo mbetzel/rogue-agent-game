@@ -3,64 +3,9 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
-- [x] **Rules Draft `v0.2`** captured in [RULES.md](./RULES.md)
+- [x] **Rules Draft `v0.9.0`** captured in [RULES.md](./RULES.md)
 - [x] **Multi-Agent SDLC Pipeline** defined in Section 2 below
-- [x] **Phase 1: Core Simulation Engine (`sim/`)** *(Signed off by Staff Engineer)*
-  - [x] *Architecture Spec (`principal-engineer`):* Module interfaces, state invariants, RNG seeding, and test plan
-  - [x] *Implementation (`senior-engineer`):* Build `sim/` modules, 5 bot archetypes, and unit test suite
-  - [x] *Code Review Gate (`staff-engineer`):* Audit rules fidelity, determinism, edge cases, and test coverage
-- [x] **Phase 2: Baseline Parameter Sweeps (Experiments 1–4)**
-  - [x] *Scenario Execution (`product-owner`):* Run Monte Carlo matrices via WSL and compile telemetry
-- [x] **Phase 3: Balance Validation & Iteration (`v0.3`)**
-  - [x] *Balance Analysis (`game-designer`):* Validate data points, diagnose degenerate loops, and propose `[TUNE]` / rule updates (Logged in `FINDINGS.md`)
-  - [x] *Rules Baseline Sign-Off:* Update [RULES.md](./RULES.md) to `v0.3` (Autonomous AI Pulse, $7 Starting Money, Non-negative Cash / Ransom Leak to Secrets, Dirty Income Backlash, Gray Die blank face removal, Round-End final operations for survivors)
-  - [x] *Technical Architecture Spec (`principal-engineer`):* Module contracts, invariant updates, bot decision schema, and test matrix for `v0.3`
-  - [x] *Implementation (`senior-engineer`):* Update `sim/config.py`, `sim/entities.py`, `sim/engine.py`, `sim/bots.py`, and `tests/` for `v0.3` rules
-  - [x] *Code & Rules-Fidelity Review Gate (`staff-engineer`):* Review line-by-line diffs, verify 100% test pass via WSL, audit edge cases (APPROVED)
-  - [x] *Verification Monte Carlo Sweeps (`product-owner`):* Run Experiments 1–4 across player counts and bot pods via WSL
-  - [x] *Balance Assessment & Final Log (`game-designer`):* Evaluate telemetry against Healthy Game targets and update `FINDINGS.md`
-- [x] **Phase 4: Economy Tuning & Accelerationist Countermeasures (`v0.4`)**
-  - [x] *Design Review:* Align on Dirty Income costing 1 Secret, Patch absorption of Red ransom, and 4-space corruption track
-  - [x] *Engine & Bot Update:* Refine bot heuristics (shield prioritization of Blue over Red) and sim rules
-  - [x] *Monte Carlo Validation:* Re-run Tournament Pods to verify bot balance within $\le 38\%$ win rate target (Verified: Accelerationist reduced from 87.5% to 21.6%–38.0%)
-- [x] **Phase 5: Starting Secrets Baseline & 2P Resilience (`v0.5`)**
-  - [x] *Design Review:* Align on scaling Starting Secrets by player count (4P: 7 Secrets; 3P: 7 Secrets; 2P: 8 Secrets + 2 starting 🔧 resilience buffer) and capture in [RULES.md](./RULES.md) v0.5
-  - [x] *Engine Update:* Parameterize 2P buffer overrides and update starting secrets baseline in `sim/`
-  - [x] *Monte Carlo Validation:* Confirm 4P mean length >= 5.5 rounds (5.52 achieved, 10.0% Singularity) and assess 2P wipeout (reduced to 31.2%)
-- [x] **Phase 6: Web Playtesting Application (`v0.5` Baseline)**
-  - [x] *Architecture Spec (`principal-engineer`):* REST API contract, state machine adapter design, Single Page Application layout, and 15 verification unit & integration test specs
-  - [x] *Implementation (`senior-engineer`):* Build `web/` package (`schemas.py`, `game_controller.py`, `server.py`, `static/index.html`, `static/app.js`, `static/style.css`) and 15 API verification tests in `tests/test_web_api.py`
-  - [x] *Code Review Gate (`staff-engineer`):* Comprehensive audit of web architecture against [RULES.md](./RULES.md) v0.5 and Principal Engineer spec; identified 6 edge-case defects, verified Senior Engineer remediations and additions to 17 tests in `tests/test_web_api.py` (APPROVED)
-  - [x] *Operational Verification & Playtest Execution (`product-owner`):* Validated test suite (88/88 passing), verified CLI arguments and server startup, audited all REST API endpoints and state transitions, and confirmed local browser playtesting UX readiness
-  - [x] *Game Designer Sign-Off (`game-designer`):* Evaluated ergonomics, core design pillars, dice wear loop, damage transparency, and human-bot playtesting flow (APPROVED)
-- [x] **Phase 7: Tactical Yahtzee Rerolls, Rogue Agent Locks & Contractor Staffing (`v0.6` Baseline)**
-  - [x] *Rules Draft `v0.6` Baseline:* Captured in [RULES.md](./RULES.md) (White Contractor dice, 2 free rerolls, Rogue Agent directive locks & debug unlocks, malware sacrifice)
-  - [x] *Architecture Spec (`principal-engineer`):* Technical spec for `sim/` contracts, bot decision schemas for rerolling/contractors/debugging, web API schemas, and unit test specifications
-  - [x] *Implementation (`senior-engineer`):* Implement White die & directive updates in `sim/` and `web/`, update bot heuristics, and create comprehensive test suite (`tests/test_v06_rules.py`)
-  - [x] *Code Review Gate (`staff-engineer`):* Audit line-by-line implementation against [RULES.md](./RULES.md) v0.6, verify 100% test pass via WSL, check edge cases (APPROVED)
-  - [x] *Scenario Execution & Monte Carlo Telemetry (`product-owner`):* Run tournament and resource sweeps under v0.6 rules
-  - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Evaluate player agency metrics, contractor adoption, death spiral mitigation, and log in `FINDINGS.md` (CONDITIONAL APPROVAL: Pacing & agency goals achieved; VentureGreed meta tuning required)
-- [x] **Phase 8: Meta Rebalancing & 2P Scaling (`v0.7` Baseline)**
-  - [x] *Design Review & Rules Update:* Align on Progressive Contractor Pricing ($1/$2/$3), Contractor die face rebalance, Yellow die 4 VP / $2 face tune, Commercial Exposure, and 2P Version payload scaling (RULES.md v0.7 updated; Yahtzee rerolls retained at 2 free rerolls per user decision)
-  - [x] *Technical Architecture Spec (`principal-engineer`):* Module contracts, bot heuristics, and test matrix for v0.7 (Approved)
-  - [x] *Implementation (`senior-engineer`):* Update `sim/`, `web/`, and unit test suite
-  - [x] *Code Review Gate (`staff-engineer`):* Verify 100% test pass and rules fidelity (APPROVED — 126/126 unit tests passing)
-  - [x] *Scenario Execution & Balance Validation (`product-owner` & `game-designer`):* Re-run Tournament Pods to verify VentureGreed $\le 38\%$ balance ceiling (Pod C achieved 31.0%; Pod A dropped 10.8% to 52.0% with 2 free rerolls retained; Section 8 documented in FINDINGS.md)
-- [x] **Phase 9: Tactical Choice Faces & Sequence Streamlining (`v0.8` Baseline)**
-  - [x] *Design Review & Rules Update:* Align on Package 1 Choice Faces (Gray: `+$1 / +1 🔧`, Blue: `Block 1 Blue / +1 🔧`, Green: `+1 🔧 / +$1`), restructured Phase 1 sequence (Assign Defenses & Choices *before* Collecting Resource Outputs), and Directive lock rules (RULES.md v0.8 updated).
-  - [x] *Technical Architecture Spec (`principal-engineer`):* Schema for choice faces in `sim/entities.py`, bot assignment heuristics for choice faces in `sim/bots.py`, Phase 1 step ordering in `sim/engine.py`, web API & UI updates, and test specs.
-  - [x] *Implementation (`senior-engineer`):* Update `sim/`, `web/`, and unit test suite.
-  - [x] *Code Review Gate (`staff-engineer`):* Verify 100% test pass and rules fidelity via WSL (APPROVED — 145/145 unit tests passing).
-  - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Run Tournament Pods and player-count sweeps to evaluate choice face adoption and impact on Pod A / 2P resilience; record in `FINDINGS.md`.
-  - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Evaluate telemetry package, validate ecosystem targets, and sign off on v0.8 (APPROVED).
-- [x] **Phase 10: Version Directives & Colored Module Variant Balancing (`v0.8` Modular Matrix)**
-  - [x] *Design Review & Rules Reference:* Catalog 15 Variant Cards (★) and 6 Version Cards across v1.0/v2.0/v3.0 as defined in [RULES.md](./RULES.md).
-  - [x] *Technical Architecture Spec (`principal-engineer`):* Modular variant schema, version directive hooks, card randomization engine (`sim/entities.py`), web state controller support, and 19-test verification matrix.
-  - [x] *Implementation (`senior-engineer`):* Implement setup randomization, variant and version mechanics in `sim/` and `web/`, update bot heuristics, and create `tests/test_variants_and_web.py`.
-  - [x] *Code Review Gate (`staff-engineer`):* Comprehensive line-by-line code and rules audit, verification of 100% test pass (165/165 passing via WSL), seed reproducibility check (APPROVED).
-  - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Run Experiment 5a (Version Directives Benchmark) and Experiment 5b (Colored Module Variant Benchmark) across 4P Pod A ($N=500$, Seed 42); compile structured telemetry.
-  - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Evaluate card relative power levels, identify degenerate loops (Y2, B2, B3, Corrupted Kernel), construct comprehensive S/A/B/C/Trap card-tiering matrix, and log Section 10 in `FINDINGS.md`.
-  - [x] *Post-Tuning Verification & Balance Sign-Off (`game-designer`):* Evaluate post-tuning Experiment 5 sweeps; verify elimination of Corrupted Kernel wipeout cliff (20.4% → 4.8%), score compression on Y2 Cloud Monopoly (36.0 → 32.5 VP), Wear Loop integrity on B3 Air-Gapped Backup (sacrificial wear redirection), and P3 Packet Deflection aggro dampening (7.8% → 4.6% wipeout); log Section 10.G & 10.H in `FINDINGS.md` (APPROVED).
+- [x] **Phases 1–10 (Core Sim, v0.3–v0.8 Baselines, Choice Faces, Variants):** Archived in [docs/archive/ROADMAP_HISTORY.md](docs/archive/ROADMAP_HISTORY.md)
 - [x] **Phase 11: Web UX Polish — Setup Randomization Variety & Rogue Agent Versions Roadmap**
   - [x] *Software Module Market Variety:* Defaulted `randomize_cards` to True in web server startup (`main()`), New Match modal (`modalRandomizeCards` checked by default), and `startNewGame()` client helper; added `.variant-code-badge` styling (`[R2]`, `[B3]`, etc.) in the Software Module Market.
   - [x] *Rogue Agent Versions Roadmap Modal:* Added prominent "Rogue Agent Versions" action button in the top navigation header, an interactive version badge button in the status bar, and a "Version Roadmap" button in the Central Threat panel; created `versionsModal` displaying all 3 versions (`v1.0`, `v2.0`, `v3.0`), active/completed/upcoming status, corruption progress dots, starting/upgrade cube payloads with 2P scaling, and active directive text.
@@ -79,6 +24,11 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Code Review Gate (`staff-engineer`):* Comprehensive line-by-line review of archetype triggers, mid-round version flip forfeits, and 100% test pass via WSL (APPROVED).
   - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Run Experiment 7 (Archetype Tournament Matrix across 4P, 3P, and 2P pods, measuring archetype win rates, survival rates, and ability timing).
   - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Evaluated archetype balance parity, diagnosed The Cipher's free-die anomaly, approved 5/6 archetypes, proposed $2 discount retune for The Cipher, and logged Section 12 in `FINDINGS.md`.
+- [x] **Phase 14: Codebase & Architecture Refactoring (Simulation Engine & Web Client)**
+  - [x] *Bot Archetypes Package (`sim/bots/`):* Decomposed monolithic 1,825-line `sim/bots.py` into dedicated modules (`base.py`, `adaptive_balanced.py`, `secops_turtle.py`, `venture_greed.py`, `accelerationist.py`, `reckless_saboteur.py`, and `__init__.py`).
+  - [x] *Game Engine Package (`sim/engine/`):* Decomposed monolithic 1,389-line `sim/engine.py` into phase-based modules (`state.py`, `phase1_boot.py`, `phase2_threat.py`, `phase3_ops.py`, `end_game.py`, `core.py`, and `__init__.py`).
+  - [x] *Web Client Componentization (`web/static/js/`):* Decomposed monolithic 1,351-line `web/static/app.js` into standard browser ES modules (`state.js`, `api.js`, `main.js`, and `components/{header, compiler, market, player_mats, action_dock, event_log, modals}.js`), preserving 100% backward compatibility for inline HTML handlers.
+  - [x] *Automated Verification:* Verified all 209 unit tests pass cleanly via WSL (`python3 -m unittest discover -s tests -t .`).
 
 ---
 

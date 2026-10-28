@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment & IDE
+.venv/
+venv/
+.env
+.idea/
+.vscode/
+
+# Telemetry data dumps & temporary logs
+data/
+output/
+*.json.tmp

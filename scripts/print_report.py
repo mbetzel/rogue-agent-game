@@ -1,6 +1,15 @@
 import json
+import os
+import sys
 
-with open("phase2_results.json") as f:
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+default_path = os.path.join(REPO_ROOT, "data", "phase2_results.json")
+json_path = sys.argv[1] if len(sys.argv) > 1 else default_path
+
+if not os.path.exists(json_path) and os.path.exists("phase2_results.json"):
+    json_path = "phase2_results.json"
+
+with open(json_path) as f:
     d = json.load(f)
 
 print("### EXPERIMENT 1: STARTING RESOURCES GRID (N=1,000 per cell, 16 cells)")
