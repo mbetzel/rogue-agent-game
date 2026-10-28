@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
+from sim.entities import ArchetypeCode
 
 if TYPE_CHECKING:
     from sim.engine import GameState, PlayerState
@@ -29,6 +30,11 @@ class Phase3ActionPlan:
     use_y1_secret: bool = False  # Pay $2 for +1 Secret
     p1_cube_choice: Optional[CubeColor] = None  # Add 1 Attack cube via P1
     p3_cube_choice: Optional[CubeColor] = None  # Add 1 Attack cube via P3
+    # Archetype Phase 3 actions
+    use_phreaker_ability: bool = False
+    use_cipher_ability: bool = False
+    cipher_mode: Optional[str] = None  # "BUY_FREE_DIE" or "DIRTY_INCOME"
+    cipher_free_die_color: Optional[DieColor] = None
 
 
 def choose_backlash_die_index(ready_dice: List[Die]) -> int:
@@ -98,6 +104,73 @@ class BaseBot:
     ) -> List[int]:
         """Returns indices of locked dice to unlock by spending 1 🔧 token each."""
         return []
+
+    def choose_operator_ability(
+        self,
+        player_state: PlayerState,
+        contractor_supply: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> bool:
+        """Returns True if the bot activates The Operator's Redundant Crew ability."""
+        return False
+
+    def choose_operator_buy_third_die(
+        self,
+        player_state: PlayerState,
+        contractor_supply: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> bool:
+        """Returns True if the bot purchases a 3rd contractor die for progressive cost ($3) after using Redundant Crew."""
+        return False
+
+    def choose_prodigy_ability(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        rerolls_remaining: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> bool:
+        """Returns True if the bot activates The Prodigy's Brute-Force Bypass ability."""
+        return False
+
+    def choose_acoustic_ability(
+        self,
+        player_state: PlayerState,
+        qualifying_colors: List[CubeColor],
+        exited_cubes: Dict[CubeColor, int],
+        active_version_str: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> Optional[CubeColor]:
+        """Returns the CubeColor of an exited cube to permanently remove via Baffle Echo, or None."""
+        if not qualifying_colors:
+            return None
+        if CubeColor.BLUE in qualifying_colors:
+            return CubeColor.BLUE
+        if CubeColor.RED in qualifying_colors:
+            return CubeColor.RED
+        return qualifying_colors[0]
+
+    def choose_spook_ability(
+        self,
+        player_state: PlayerState,
+        secrets_at_risk: int,
+        active_version_str: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> int:
+        """Returns the number of dollars to pay from supply to prevent Corporate Secret loss via Slush Fund."""
+        return 0
 
     def choose_malware_sacrifice(
         self,
@@ -259,6 +332,86 @@ class AdaptiveBalancedBot(BaseBot):
         elif total_threat >= 3 and player_state.money >= 4:
             return min(1, contractor_supply)
         return 0
+
+    def choose_operator_ability(
+        self,
+        player_state: PlayerState,
+        contractor_supply: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> bool:
+        if contractor_supply <= 0:
+            return False
+        threats = self._get_threat_levels(staging_cubes, stuck_cubes)
+        total_threat = sum(threats.values())
+        if corruption_track >= 3:
+            return True
+        return total_threat >= 3 or len(player_state.ready_dice) <= 4
+
+    def choose_operator_buy_third_die(
+        self,
+        player_state: PlayerState,
+        contractor_supply: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> bool:
+        if contractor_supply <= 0 or player_state.money < 3:
+            return False
+        threats = self._get_threat_levels(staging_cubes, stuck_cubes)
+        return sum(threats.values()) >= 6
+
+    def choose_prodigy_ability(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        rerolls_remaining: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> bool:
+        has_locked = any(d.is_locked for d in active_dice)
+        if not has_locked:
+            return False
+        if corruption_track >= 3:
+            return True
+        return any(d.current_face and d.current_face.is_glitch for d in active_dice) or has_locked
+
+    def choose_acoustic_ability(
+        self,
+        player_state: PlayerState,
+        qualifying_colors: List[CubeColor],
+        exited_cubes: Dict[CubeColor, int],
+        active_version_str: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> Optional[CubeColor]:
+        if not qualifying_colors:
+            return None
+        if CubeColor.BLUE in qualifying_colors:
+            return CubeColor.BLUE
+        if CubeColor.RED in qualifying_colors:
+            return CubeColor.RED
+        return qualifying_colors[0]
+
+    def choose_spook_ability(
+        self,
+        player_state: PlayerState,
+        secrets_at_risk: int,
+        active_version_str: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> int:
+        if player_state.money <= 0 or secrets_at_risk <= 0:
+            return 0
+        if player_state.secrets <= 4 or secrets_at_risk >= 2 or corruption_track >= 3:
+            return min(player_state.money, secrets_at_risk)
+        return min(player_state.money, min(secrets_at_risk, 1))
 
     def choose_debug_unlocks(
         self,
@@ -485,13 +638,51 @@ class AdaptiveBalancedBot(BaseBot):
         is_final_round = getattr(game_state, "is_final_round", False)
         cash_cushion = 0 if is_final_round else 2
 
-        # 1. Dirty Income: take dirty income if broke, has ready dice, secrets > 1, and threat is manageable
+        active_ver = game_state.active_version.version_str
+
+        # 0. Consultancy Archetype Phase 3 Abilities
         if (
+            player_state.archetype
+            and player_state.archetype.code == ArchetypeCode.PHREAKER
+            and player_state.is_ability_available(active_ver)
+            and len(player_state.unpatched_dice) >= 1
+        ):
+            plan.use_phreaker_ability = True
+
+        preferred_colors = [DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]
+        if threats[CubeColor.RED] > threats[CubeColor.BLUE]:
+            preferred_colors = [DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW]
+
+        if (
+            player_state.archetype
+            and player_state.archetype.code == ArchetypeCode.CIPHER
+            and player_state.is_ability_available(active_ver)
+        ):
+            discounted_colors = []
+            for c in preferred_colors + [DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW, DieColor.PURPLE]:
+                if c not in [dc[0] for dc in discounted_colors] and game_state.market.get(c, 0) > 0:
+                    cost = (4 if c in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5) - game_state.config.cipher_market_discount
+                    if current_money - cost >= cash_cushion:
+                        discounted_colors.append((c, cost))
+
+            if discounted_colors and (current_money >= 3 or player_state.secrets <= 1):
+                plan.use_cipher_ability = True
+                plan.cipher_mode = "BUY_FREE_DIE"
+                plan.cipher_free_die_color = discounted_colors[0][0]
+                current_money -= discounted_colors[0][1]
+            elif player_state.secrets > game_state.config.dirty_income_secret_cost:
+                plan.use_cipher_ability = True
+                plan.cipher_mode = "DIRTY_INCOME"
+
+        # 1. Dirty Income: take dirty income if broke, has ready dice, secrets > 1, and threat is manageable
+        wants_dirty_income = (
             current_money < 3
             and player_state.secrets > game_state.config.dirty_income_secret_cost
-            and len(player_state.ready_dice) >= 1
+            and (plan.cipher_mode == "DIRTY_INCOME" or len(player_state.ready_dice) >= 1)
             and total_threat <= 6
-        ):
+        ) or (plan.use_cipher_ability and plan.cipher_mode == "DIRTY_INCOME")
+
+        if wants_dirty_income and player_state.secrets > game_state.config.dirty_income_secret_cost:
             plan.take_dirty_income = True
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
             current_money += game_state.config.dirty_income_cash
@@ -503,7 +694,8 @@ class AdaptiveBalancedBot(BaseBot):
             else game_state.config.patch_cash_cost
         )
 
-        for idx in range(len(player_state.unpatched_dice)):
+        start_patch_idx = 2 if plan.use_phreaker_ability else 0
+        for idx in range(start_patch_idx, len(player_state.unpatched_dice)):
             if current_patches > 0:
                 plan.patch_actions.append({"die_index": idx, "use_cash": False})
                 current_patches -= 1
@@ -564,6 +756,73 @@ class SecOpsTurtleBot(BaseBot):
         elif player_state.money >= 3:
             return min(1, contractor_supply)
         return 0
+
+    def choose_operator_ability(
+        self,
+        player_state: PlayerState,
+        contractor_supply: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> bool:
+        return contractor_supply > 0
+
+    def choose_operator_buy_third_die(
+        self,
+        player_state: PlayerState,
+        contractor_supply: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> bool:
+        if contractor_supply <= 0 or player_state.money < 2:
+            return False
+        threat = sum(staging_cubes.get(c, 0) + stuck_cubes.get(c, 0) for c in [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN])
+        return threat >= 4 or corruption_track >= 3
+
+    def choose_prodigy_ability(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        rerolls_remaining: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> bool:
+        return any(d.is_locked for d in active_dice)
+
+    def choose_acoustic_ability(
+        self,
+        player_state: PlayerState,
+        qualifying_colors: List[CubeColor],
+        exited_cubes: Dict[CubeColor, int],
+        active_version_str: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> Optional[CubeColor]:
+        if not qualifying_colors:
+            return None
+        if CubeColor.BLUE in qualifying_colors:
+            return CubeColor.BLUE
+        if CubeColor.RED in qualifying_colors:
+            return CubeColor.RED
+        return qualifying_colors[0]
+
+    def choose_spook_ability(
+        self,
+        player_state: PlayerState,
+        secrets_at_risk: int,
+        active_version_str: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> int:
+        if player_state.money <= 0 or secrets_at_risk <= 0:
+            return 0
+        return min(player_state.money, secrets_at_risk)
 
     def choose_debug_unlocks(
         self,
@@ -696,7 +955,31 @@ class SecOpsTurtleBot(BaseBot):
             else game_state.config.patch_cash_cost
         )
 
-        for idx in range(len(player_state.unpatched_dice)):
+        active_ver = game_state.active_version.version_str
+        if (
+            player_state.archetype
+            and player_state.archetype.code == ArchetypeCode.PHREAKER
+            and player_state.is_ability_available(active_ver)
+            and len(player_state.unpatched_dice) >= 1
+        ):
+            plan.use_phreaker_ability = True
+
+        if (
+            player_state.archetype
+            and player_state.archetype.code == ArchetypeCode.CIPHER
+            and player_state.is_ability_available(active_ver)
+        ):
+            for c in [DieColor.BLUE, DieColor.GREEN, DieColor.RED, DieColor.YELLOW, DieColor.PURPLE]:
+                cost = (4 if c in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5) - game_state.config.cipher_market_discount
+                if game_state.market.get(c, 0) > 0 and current_money - cost >= cash_cushion:
+                    plan.use_cipher_ability = True
+                    plan.cipher_mode = "BUY_FREE_DIE"
+                    plan.cipher_free_die_color = c
+                    current_money -= cost
+                    break
+
+        start_patch_idx = 2 if plan.use_phreaker_ability else 0
+        for idx in range(start_patch_idx, len(player_state.unpatched_dice)):
             if current_patches > 0:
                 plan.patch_actions.append({"die_index": idx, "use_cash": False})
                 current_patches -= 1
@@ -763,6 +1046,73 @@ class VentureGreedBot(BaseBot):
         elif player_state.money >= 8:
             return min(2, contractor_supply)
         return min(1, contractor_supply)
+
+    def choose_operator_ability(
+        self,
+        player_state: PlayerState,
+        contractor_supply: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> bool:
+        if contractor_supply <= 0:
+            return False
+        threat = sum(staging_cubes.get(c, 0) + stuck_cubes.get(c, 0) for c in [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN])
+        return threat >= 4 or corruption_track >= 3
+
+    def choose_operator_buy_third_die(
+        self,
+        player_state: PlayerState,
+        contractor_supply: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> bool:
+        return False
+
+    def choose_prodigy_ability(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        rerolls_remaining: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> bool:
+        return any(d.is_locked for d in active_dice)
+
+    def choose_acoustic_ability(
+        self,
+        player_state: PlayerState,
+        qualifying_colors: List[CubeColor],
+        exited_cubes: Dict[CubeColor, int],
+        active_version_str: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> Optional[CubeColor]:
+        if not qualifying_colors:
+            return None
+        if CubeColor.BLUE in qualifying_colors:
+            return CubeColor.BLUE
+        if CubeColor.RED in qualifying_colors:
+            return CubeColor.RED
+        return qualifying_colors[0]
+
+    def choose_spook_ability(
+        self,
+        player_state: PlayerState,
+        secrets_at_risk: int,
+        active_version_str: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> int:
+        if player_state.money <= 0 or secrets_at_risk <= 0:
+            return 0
+        return min(player_state.money, secrets_at_risk)
 
     def choose_debug_unlocks(
         self,
@@ -893,6 +1243,29 @@ class VentureGreedBot(BaseBot):
         is_final_round = getattr(game_state, "is_final_round", False)
         cash_cushion = 0 if is_final_round else 2
 
+        active_ver = game_state.active_version.version_str
+        if (
+            player_state.archetype
+            and player_state.archetype.code == ArchetypeCode.PHREAKER
+            and player_state.is_ability_available(active_ver)
+            and len(player_state.unpatched_dice) >= 1
+        ):
+            plan.use_phreaker_ability = True
+
+        if (
+            player_state.archetype
+            and player_state.archetype.code == ArchetypeCode.CIPHER
+            and player_state.is_ability_available(active_ver)
+        ):
+            for c in [DieColor.YELLOW, DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.PURPLE]:
+                cost = (4 if c in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5) - game_state.config.cipher_market_discount
+                if game_state.market.get(c, 0) > 0 and current_money >= cost:
+                    plan.use_cipher_ability = True
+                    plan.cipher_mode = "BUY_FREE_DIE"
+                    plan.cipher_free_die_color = c
+                    current_money -= cost
+                    break
+
         if (
             current_money < 5
             and player_state.secrets > game_state.config.dirty_income_secret_cost
@@ -940,7 +1313,8 @@ class VentureGreedBot(BaseBot):
                 else game_state.config.patch_cash_cost
             )
             current_patches = player_state.patches
-            for idx in range(len(player_state.unpatched_dice)):
+            start_patch_idx = 2 if plan.use_phreaker_ability else 0
+            for idx in range(start_patch_idx, len(player_state.unpatched_dice)):
                 if current_patches > 0:
                     plan.patch_actions.append({"die_index": idx, "use_cash": False})
                     current_patches -= 1
@@ -967,6 +1341,72 @@ class AccelerationistBot(BaseBot):
     ) -> int:
         if contractor_supply > 0 and player_state.money >= 5 and player_state.secrets <= 3:
             return 1
+        return 0
+
+    def choose_operator_ability(
+        self,
+        player_state: PlayerState,
+        contractor_supply: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> bool:
+        return contractor_supply > 0
+
+    def choose_operator_buy_third_die(
+        self,
+        player_state: PlayerState,
+        contractor_supply: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> bool:
+        return contractor_supply > 0 and player_state.money >= 3
+
+    def choose_prodigy_ability(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        rerolls_remaining: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> bool:
+        return any(d.is_locked for d in active_dice)
+
+    def choose_acoustic_ability(
+        self,
+        player_state: PlayerState,
+        qualifying_colors: List[CubeColor],
+        exited_cubes: Dict[CubeColor, int],
+        active_version_str: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> Optional[CubeColor]:
+        if not qualifying_colors:
+            return None
+        if CubeColor.BLUE in qualifying_colors:
+            return CubeColor.BLUE
+        if CubeColor.RED in qualifying_colors:
+            return CubeColor.RED
+        return qualifying_colors[0]
+
+    def choose_spook_ability(
+        self,
+        player_state: PlayerState,
+        secrets_at_risk: int,
+        active_version_str: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> int:
+        if player_state.money <= 0 or secrets_at_risk <= 0:
+            return 0
+        if player_state.secrets <= 4 or corruption_track >= 3:
+            return min(player_state.money, secrets_at_risk)
         return 0
 
     def choose_debug_unlocks(
@@ -1077,9 +1517,36 @@ class AccelerationistBot(BaseBot):
         is_final_round = getattr(game_state, "is_final_round", False)
         cash_cushion = 0 if is_final_round else 2
 
+        active_ver = game_state.active_version.version_str
+        if (
+            player_state.archetype
+            and player_state.archetype.code == ArchetypeCode.PHREAKER
+            and player_state.is_ability_available(active_ver)
+            and len(player_state.unpatched_dice) >= 1
+        ):
+            plan.use_phreaker_ability = True
+
+        if (
+            player_state.archetype
+            and player_state.archetype.code == ArchetypeCode.CIPHER
+            and player_state.is_ability_available(active_ver)
+        ):
+            if player_state.secrets > 1:
+                plan.use_cipher_ability = True
+                plan.cipher_mode = "DIRTY_INCOME"
+            else:
+                for c in [DieColor.PURPLE, DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]:
+                    cost = (4 if c in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5) - game_state.config.cipher_market_discount
+                    if game_state.market.get(c, 0) > 0 and current_money >= cost:
+                        plan.use_cipher_ability = True
+                        plan.cipher_mode = "BUY_FREE_DIE"
+                        plan.cipher_free_die_color = c
+                        current_money -= cost
+                        break
+
         if (
             player_state.secrets > game_state.config.dirty_income_secret_cost
-            and len(player_state.ready_dice) >= 1
+            and (plan.cipher_mode == "DIRTY_INCOME" or len(player_state.ready_dice) >= 1)
         ):
             plan.take_dirty_income = True
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
@@ -1115,7 +1582,8 @@ class AccelerationistBot(BaseBot):
                     purchases += 1
 
         current_patches = player_state.patches
-        for idx in range(len(player_state.unpatched_dice)):
+        start_patch_idx = 2 if plan.use_phreaker_ability else 0
+        for idx in range(start_patch_idx, len(player_state.unpatched_dice)):
             if current_patches > 0:
                 plan.patch_actions.append({"die_index": idx, "use_cash": False})
                 current_patches -= 1
@@ -1146,6 +1614,70 @@ class RecklessSaboteurBot(BaseBot):
         elif player_state.money >= 3:
             return min(1, contractor_supply)
         return 0
+
+    def choose_operator_ability(
+        self,
+        player_state: PlayerState,
+        contractor_supply: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> bool:
+        return contractor_supply > 0
+
+    def choose_operator_buy_third_die(
+        self,
+        player_state: PlayerState,
+        contractor_supply: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> bool:
+        return contractor_supply > 0 and player_state.money >= 3
+
+    def choose_prodigy_ability(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        rerolls_remaining: int,
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> bool:
+        return any(d.is_locked for d in active_dice)
+
+    def choose_acoustic_ability(
+        self,
+        player_state: PlayerState,
+        qualifying_colors: List[CubeColor],
+        exited_cubes: Dict[CubeColor, int],
+        active_version_str: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> Optional[CubeColor]:
+        if not qualifying_colors:
+            return None
+        if CubeColor.BLUE in qualifying_colors:
+            return CubeColor.BLUE
+        if CubeColor.RED in qualifying_colors:
+            return CubeColor.RED
+        return qualifying_colors[0]
+
+    def choose_spook_ability(
+        self,
+        player_state: PlayerState,
+        secrets_at_risk: int,
+        active_version_str: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> int:
+        if player_state.money <= 0 or secrets_at_risk <= 0:
+            return 0
+        return min(player_state.money, secrets_at_risk)
 
     def choose_debug_unlocks(
         self,
@@ -1224,9 +1756,36 @@ class RecklessSaboteurBot(BaseBot):
         is_final_round = getattr(game_state, "is_final_round", False)
         cash_cushion = 0 if is_final_round else 2
 
+        active_ver = game_state.active_version.version_str
+        if (
+            player_state.archetype
+            and player_state.archetype.code == ArchetypeCode.PHREAKER
+            and player_state.is_ability_available(active_ver)
+            and len(player_state.unpatched_dice) >= 1
+        ):
+            plan.use_phreaker_ability = True
+
+        if (
+            player_state.archetype
+            and player_state.archetype.code == ArchetypeCode.CIPHER
+            and player_state.is_ability_available(active_ver)
+        ):
+            if player_state.secrets > 1:
+                plan.use_cipher_ability = True
+                plan.cipher_mode = "DIRTY_INCOME"
+            else:
+                for c in [DieColor.PURPLE, DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]:
+                    cost = (4 if c in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5) - game_state.config.cipher_market_discount
+                    if game_state.market.get(c, 0) > 0 and current_money >= cost:
+                        plan.use_cipher_ability = True
+                        plan.cipher_mode = "BUY_FREE_DIE"
+                        plan.cipher_free_die_color = c
+                        current_money -= cost
+                        break
+
         if (
             player_state.secrets > game_state.config.dirty_income_secret_cost
-            and len(player_state.ready_dice) >= 1
+            and (plan.cipher_mode == "DIRTY_INCOME" or len(player_state.ready_dice) >= 1)
         ):
             plan.take_dirty_income = True
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
@@ -1257,7 +1816,7 @@ class RecklessSaboteurBot(BaseBot):
             if game_state.active_directive_code == "POLYMORPHIC_WORM"
             else game_state.config.patch_cash_cost
         )
-        if len(player_state.ready_dice) == 0 and len(player_state.unpatched_dice) > 0:
+        if not plan.use_phreaker_ability and len(player_state.ready_dice) == 0 and len(player_state.unpatched_dice) > 0:
             if player_state.patches > 0:
                 plan.patch_actions.append({"die_index": 0, "use_cash": False})
             elif current_money - patch_cash_cost >= cash_cushion:

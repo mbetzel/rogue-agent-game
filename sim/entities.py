@@ -4,9 +4,41 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
+
+
+class ArchetypeCode(str, Enum):
+    """Enumeration of the 6 consultancy archetypes per RULES.md Section 6D."""
+
+    ACOUSTIC = "ACOUSTIC"
+    PHREAKER = "PHREAKER"
+    PRODIGY = "PRODIGY"
+    SPOOK = "SPOOK"
+    CIPHER = "CIPHER"
+    OPERATOR = "OPERATOR"
+
+
+class AbilityStatus(str, Enum):
+    """Lifecycle status of once-per-version archetype special abilities."""
+
+    LOCKED = "LOCKED"
+    AVAILABLE = "AVAILABLE"
+    USED = "USED"
+    FORFEITED = "FORFEITED"
+
+
+@dataclass(frozen=True)
+class ArchetypeCard:
+    """Represents a consultancy archetype card with once-per-version ability."""
+
+    code: ArchetypeCode
+    name: str
+    timing_window: str
+    ability_name: str
+    description: str
 
 
 @dataclass(frozen=True)
@@ -453,6 +485,75 @@ def get_random_setup(
 ) -> Tuple[Dict[DieColor, VariantCard], List[VersionCard]]:
     """Returns randomized variant cards and version deck for game setup."""
     return get_random_variant_cards(rng), get_random_version_deck(rng)
+
+
+# =====================================================================
+# Consultancy Archetypes (RULES.md Section 6D)
+# =====================================================================
+
+def get_all_archetype_cards() -> List[ArchetypeCard]:
+    """Returns all 6 consultancy archetype cards defined in RULES.md Section 6D."""
+    return [
+        ArchetypeCard(
+            code=ArchetypeCode.ACOUSTIC,
+            name="The Acoustic",
+            timing_window="Phase 2: After Tower Drop",
+            ability_name="Baffle Echo",
+            description="If you take unblocked damage from any color, permanently remove 1 cube of that color in the exit tray from the game (return to box).",
+        ),
+        ArchetypeCard(
+            code=ArchetypeCode.PHREAKER,
+            name="The Phreaker",
+            timing_window="Phase 3: Operations Turn",
+            ability_name="Magnetic Splice",
+            description="Move up to 2 worn dice from your Unpatched Zone back to your Ready Zone for free (without spending 🔧 or $).",
+        ),
+        ArchetypeCard(
+            code=ArchetypeCode.PRODIGY,
+            name="The Prodigy",
+            timing_window="Phase 1: Reroll Step",
+            ability_name="Brute-Force Bypass",
+            description="During your rerolls this phase, you may include any number of Locked dice (including Glitch dice) in your free rerolls without spending 🔧 tokens.",
+        ),
+        ArchetypeCard(
+            code=ArchetypeCode.SPOOK,
+            name="The Spook",
+            timing_window="Phase 2: Step 2B Damage",
+            ability_name="Slush Fund",
+            description="When suffering unblocked damage that would cause you to lose Corporate Secrets (from Blue Spyware or unpaid Red Ransom), pay $1 from your supply per Secret to prevent that loss (up to your available cash).",
+        ),
+        ArchetypeCard(
+            code=ArchetypeCode.CIPHER,
+            name="The Cipher",
+            timing_window="Phase 3: Operations Turn",
+            ability_name="Algorithmic Arbitrage",
+            description="Purchase 1 Colored Die from the Market at a $2 discount (minimum cost $0), OR take the Backdoor Siphon (Dirty Income) action without demoting a Ready die to Unpatched.",
+        ),
+        ArchetypeCard(
+            code=ArchetypeCode.OPERATOR,
+            name="The Operator",
+            timing_window="Phase 1: Staffing Step",
+            ability_name="Redundant Crew",
+            description="Hire up to 2 White Contractor Dice for free this round (bypassing progressive contractor costs).",
+        ),
+    ]
+
+
+def get_archetype_by_code(code: ArchetypeCode | str) -> ArchetypeCard:
+    """Retrieves an archetype card by ArchetypeCode enum or string name/code."""
+    code_str = code.value.upper() if isinstance(code, ArchetypeCode) else str(code).upper()
+    for card in get_all_archetype_cards():
+        if card.code.value.upper() == code_str or card.code.name.upper() == code_str or card.name.upper() == code_str:
+            return card
+    raise ValueError(f"Unknown Archetype code: {code}")
+
+
+def get_random_archetypes(num_players: int, rng: random.Random) -> List[ArchetypeCard]:
+    """Randomly selects unique consultancy archetypes without replacement for all players."""
+    all_cards = get_all_archetype_cards()
+    if not (1 <= num_players <= len(all_cards)):
+        raise ValueError(f"num_players must be between 1 and {len(all_cards)}, got {num_players}")
+    return rng.sample(all_cards, num_players)
 
 
 def create_gray_die(die_id: int) -> Die:

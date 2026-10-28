@@ -94,6 +94,7 @@ class GameConfig:
     p3_cube_cash_cost: int = 1
     corrupted_kernel_black_threshold: int = 2
     corrupted_kernel_strength_bonus: int = 2
+    cipher_market_discount: int = 2  # [TUNE: v0.9.1] $2 discount on 1 colored die purchase
 
     # Cube Tower mechanics
     tower_mode: TowerMode = TowerMode.LEDGE_AVALANCHE

@@ -114,14 +114,21 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
             elif clean_path == "/api/game/action/hire_contractors":
                 pid = get_target_pid(default_to_human=True)
                 count = int(data.get("count", 1))
-                state = self.controller.hire_contractors(pid, count)
+                use_op = bool(data.get("use_operator_ability", False))
+                buy_3rd = bool(data.get("buy_third_die", False))
+                state = self.controller.hire_contractors(
+                    pid, count, use_operator_ability=use_op, buy_third_die=buy_3rd
+                )
                 payload, code = success_response({"state": state})
                 self._send_json_response(payload, code)
 
             elif clean_path == "/api/game/action/reroll":
                 pid = get_target_pid(default_to_human=True)
                 reroll_indices = data.get("reroll_indices", [])
-                state = self.controller.perform_reroll(pid, reroll_indices)
+                use_prodigy = bool(data.get("use_prodigy_ability", False))
+                state = self.controller.perform_reroll(
+                    pid, reroll_indices, use_prodigy_ability=use_prodigy
+                )
                 payload, code = success_response({"state": state})
                 self._send_json_response(payload, code)
 
@@ -173,7 +180,8 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     self._send_json_response(payload, code)
                     return
                 color_str = str(data["color"])
-                state = self.controller.buy_die(pid, color_str)
+                use_cipher = bool(data.get("use_cipher_ability", False))
+                state = self.controller.buy_die(pid, color_str, use_cipher_ability=use_cipher)
                 payload, code = success_response({"state": state})
                 self._send_json_response(payload, code)
 
@@ -193,7 +201,39 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                 pid = get_target_pid(default_to_human=False)
                 backlash_raw = data.get("backlash_die_index")
                 backlash_idx = int(backlash_raw) if backlash_raw is not None else 0
-                state = self.controller.take_dirty_income(pid, backlash_idx)
+                use_cipher = bool(data.get("use_cipher_ability", False))
+                state = self.controller.take_dirty_income(
+                    pid, backlash_idx, use_cipher_ability=use_cipher
+                )
+                payload, code = success_response({"state": state})
+                self._send_json_response(payload, code)
+
+            elif clean_path == "/api/game/action/phreaker":
+                pid = get_target_pid(default_to_human=False)
+                count = int(data.get("count", 2))
+                state = self.controller.use_phreaker_ability(pid, count=count)
+                payload, code = success_response({"state": state})
+                self._send_json_response(payload, code)
+
+            elif clean_path == "/api/game/action/acoustic":
+                pid = get_target_pid(default_to_human=False)
+                if "color" not in data:
+                    payload, code = error_response("Missing required field 'color'", 400)
+                    self._send_json_response(payload, code)
+                    return
+                color_str = str(data["color"])
+                state = self.controller.use_acoustic_ability(pid, color_str)
+                payload, code = success_response({"state": state})
+                self._send_json_response(payload, code)
+
+            elif clean_path == "/api/game/action/spook":
+                pid = get_target_pid(default_to_human=False)
+                if "dollars" not in data:
+                    payload, code = error_response("Missing required field 'dollars'", 400)
+                    self._send_json_response(payload, code)
+                    return
+                dollars = int(data["dollars"])
+                state = self.controller.use_spook_ability(pid, dollars)
                 payload, code = success_response({"state": state})
                 self._send_json_response(payload, code)
 

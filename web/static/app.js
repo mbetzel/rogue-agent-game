@@ -7,8 +7,37 @@ let state = null;
 let selectedCommitments = {};
 let selectedBacklashIndex = 0;
 let patchCashSelected = false;
+let cipherDiscountSelected = false;
 let selectedRerollIndices = new Set();
 let selectedChoiceDeclarations = {};
+
+// Helper: Render Version Ability Slot Badge
+function renderVersionSlotBadge(ver, status) {
+  let statusClass = "locked";
+  let icon = "🔒";
+  let label = "LOCKED";
+
+  if (status === "AVAILABLE") {
+    statusClass = "available";
+    icon = "⚡";
+    label = "AVAILABLE";
+  } else if (status === "USED") {
+    statusClass = "used";
+    icon = "✓";
+    label = "USED";
+  } else if (status === "FORFEITED") {
+    statusClass = "forfeited";
+    icon = "✕";
+    label = "FORFEITED";
+  }
+
+  return `
+    <div class="version-ability-slot ${statusClass}" title="${ver}: ${status}">
+      <span class="slot-ver">${ver}</span>
+      <span class="slot-badge">${icon} ${label}</span>
+    </div>
+  `;
+}
 
 // API Client Helper
 async function apiCall(endpoint, method = "GET", body = null) {
@@ -68,10 +97,12 @@ async function startNewGame(numPlayers = 4, customPlayers = null, seed = null, r
   }
 }
 
-async function doHireContractors(count = 1) {
+async function doHireContractors(count = 1, useOperator = false, buyThird = false) {
   const newState = await apiCall("/api/game/action/hire_contractors", "POST", {
     player_id: getHumanPlayerId(),
     count: count,
+    use_operator_ability: Boolean(useOperator),
+    buy_third_die: Boolean(buyThird),
   });
   if (newState) {
     state = newState;
@@ -79,12 +110,13 @@ async function doHireContractors(count = 1) {
   }
 }
 
-async function doReroll() {
+async function doReroll(useProdigy = false) {
   const indices = Array.from(selectedRerollIndices);
   if (indices.length === 0) return;
   const newState = await apiCall("/api/game/action/reroll", "POST", {
     player_id: getHumanPlayerId(),
     reroll_indices: indices,
+    use_prodigy_ability: Boolean(useProdigy),
   });
   if (newState) {
     state = newState;
@@ -145,10 +177,15 @@ async function doCompile() {
   }
 }
 
-async function doBuy(color) {
-  const newState = await apiCall("/api/game/action/buy", "POST", { player_id: getHumanPlayerId(), color: color });
+async function doBuy(color, useCipher = false) {
+  const newState = await apiCall("/api/game/action/buy", "POST", {
+    player_id: getHumanPlayerId(),
+    color: color,
+    use_cipher_ability: Boolean(useCipher),
+  });
   if (newState) {
     state = newState;
+    cipherDiscountSelected = false;
     renderApp();
   }
 }
@@ -165,7 +202,7 @@ async function doPatch(dieIndex, useCash) {
   }
 }
 
-async function doDirtyIncome() {
+async function doDirtyIncome(useCipher = false) {
   const backlashSelect = document.getElementById("dirtyBacklashSelect");
   const backlashIdx = backlashSelect && backlashSelect.value !== ""
     ? parseInt(backlashSelect.value, 10)
@@ -174,6 +211,40 @@ async function doDirtyIncome() {
   const newState = await apiCall("/api/game/action/dirty_income", "POST", {
     player_id: getHumanPlayerId(),
     backlash_die_index: Number.isNaN(backlashIdx) ? 0 : backlashIdx,
+    use_cipher_ability: Boolean(useCipher),
+  });
+  if (newState) {
+    state = newState;
+    renderApp();
+  }
+}
+
+async function doPhreaker(count = 2) {
+  const newState = await apiCall("/api/game/action/phreaker", "POST", {
+    player_id: getHumanPlayerId(),
+    count: count,
+  });
+  if (newState) {
+    state = newState;
+    renderApp();
+  }
+}
+
+async function doAcoustic(color) {
+  const newState = await apiCall("/api/game/action/acoustic", "POST", {
+    player_id: getHumanPlayerId(),
+    color: color,
+  });
+  if (newState) {
+    state = newState;
+    renderApp();
+  }
+}
+
+async function doSpook(dollars) {
+  const newState = await apiCall("/api/game/action/spook", "POST", {
+    player_id: getHumanPlayerId(),
+    dollars: dollars,
   });
   if (newState) {
     state = newState;
@@ -311,7 +382,10 @@ function renderMarket() {
     const el = document.createElement("div");
     el.className = "market-item";
 
-    const canBuy = state.action_capabilities && state.action_capabilities.can_buy && state.action_capabilities.can_buy[color];
+    const baseCanBuy = Boolean(state.action_capabilities && state.action_capabilities.can_buy && state.action_capabilities.can_buy[color]);
+    const cipherCanBuy = Boolean(state.action_capabilities && state.action_capabilities.can_cipher_buy && state.action_capabilities.can_cipher_buy[color]);
+    const canBuy = cipherDiscountSelected ? cipherCanBuy : baseCanBuy;
+    const effectiveCost = cipherDiscountSelected ? Math.max(0, item.cost - 2) : item.cost;
 
     el.innerHTML = `
       <div class="market-die-info">
@@ -319,15 +393,15 @@ function renderMarket() {
           ${color.toUpperCase()} DIE (${item.stock} left)
         </div>
         <div class="market-die-meta">
-          Cost: $${item.cost} | Value: ${item.vp} VP
+          Cost: $${effectiveCost} ${cipherDiscountSelected ? '<span style="color: #c084fc; font-weight: 700;">(-$2 Cipher Arbitrage)</span>' : ''} | Value: ${item.vp} VP
         </div>
         <div class="market-variant-card">
           ${item.variant ? `<span class="variant-code-badge">${item.variant.code}</span> <strong>${item.variant.name}</strong>: ${item.variant.description}` : '★ Standard'}
         </div>
       </div>
       <div>
-        <button class="action-btn btn-accent" ${canBuy ? "" : "disabled"} onclick="doBuy('${color}')">
-          Buy ($${item.cost})
+        <button class="action-btn btn-accent" ${canBuy ? "" : "disabled"} onclick="doBuy('${color}', ${cipherDiscountSelected})">
+          Buy ($${effectiveCost}) ${cipherDiscountSelected ? '[⚡ Cipher]' : ''}
         </button>
       </div>
     `;
@@ -351,6 +425,7 @@ function renderPlayerMats() {
       <div class="player-header">
         <div class="player-name">
           ${p.name} ${p.is_human ? '<span style="font-size: 0.7rem; color: var(--text-highlight);">[HUMAN]</span>' : `<span style="font-size: 0.7rem; color: var(--text-dim);">[${p.bot_archetype || 'BOT'}]</span>`}
+          ${p.archetype ? `<span class="archetype-tag">${p.archetype.name}</span>` : ''}
           ${isCISO ? '<span class="ciso-badge">CISO</span>' : ''}
         </div>
         <div style="font-size: 0.85rem; font-weight: 700; color: var(--accent-gold);">
@@ -364,6 +439,27 @@ function renderPlayerMats() {
         <div class="resource-pill" style="color: var(--color-green);">${p.patches} 🔧</div>
         ${p.is_patient_zero ? '<div class="resource-pill" style="color: #ff0055; font-weight: 800;">BREACHED</div>' : ''}
       </div>
+
+      ${p.archetype ? `
+        <div class="player-archetype-card">
+          <div class="archetype-card-header">
+            <div class="archetype-name">${p.archetype.name}</div>
+            <div class="archetype-timing-badge">${p.archetype.timing_window}</div>
+          </div>
+          <div class="archetype-ability-row">
+            <span class="archetype-ability-name">${p.archetype.ability_name}:</span>
+            <span class="archetype-ability-desc">${p.archetype.description}</span>
+          </div>
+          <div class="version-ability-track">
+            <span class="track-label">Ability Track:</span>
+            <div class="track-slots">
+              ${renderVersionSlotBadge("v1.0", p.ability_v1_status)}
+              ${renderVersionSlotBadge("v2.0", p.ability_v2_status)}
+              ${renderVersionSlotBadge("v3.0", p.ability_v3_status)}
+            </div>
+          </div>
+        </div>
+      ` : ''}
 
       <div class="dice-zones-container">
         <!-- Ready Zone -->
@@ -451,9 +547,26 @@ function renderPlayerMats() {
       `;
 
       if (p.is_human && state.phase === 1 && !p.has_committed) {
+        const canProdigyReroll = Boolean(
+          p.archetype && p.archetype.code === "PRODIGY" &&
+          (Boolean(state.action_capabilities && state.action_capabilities.can_prodigy) ||
+           p.ability_v1_status === "AVAILABLE" || p.ability_v2_status === "AVAILABLE" || p.ability_v3_status === "AVAILABLE")
+        );
+
         if (!isLocked && (p.rerolls_remaining || 0) > 0) {
           chip.classList.add("clickable");
           chip.title = "Click to toggle for Yahtzee reroll";
+          chip.onclick = () => {
+            if (selectedRerollIndices.has(idx)) {
+              selectedRerollIndices.delete(idx);
+            } else {
+              selectedRerollIndices.add(idx);
+            }
+            renderApp();
+          };
+        } else if (isLocked && canProdigyReroll && (p.rerolls_remaining || 0) > 0) {
+          chip.classList.add("clickable");
+          chip.title = "⚡ Prodigy: Click to include locked die in Brute-Force Bypass reroll";
           chip.onclick = () => {
             if (selectedRerollIndices.has(idx)) {
               selectedRerollIndices.delete(idx);
@@ -545,6 +658,17 @@ function renderActionDock() {
 
         hireWrap.appendChild(hireLabel);
         hireWrap.appendChild(hireBtn);
+
+        if (caps.can_operator) {
+          const opBtn = document.createElement("button");
+          opBtn.className = "action-btn";
+          opBtn.style.borderColor = "#38bdf8";
+          opBtn.style.color = "#38bdf8";
+          opBtn.innerText = "⚡ Operator: Redundant Crew (2 Free Contractors)";
+          opBtn.onclick = () => doHireContractors(2, true);
+          hireWrap.appendChild(opBtn);
+        }
+
         controls.appendChild(hireWrap);
       }
 
@@ -573,10 +697,20 @@ function renderActionDock() {
       controls.appendChild(rerollInfo);
 
       if (caps.can_reroll && selectedRerollIndices.size > 0) {
+        const hasLockedSelected = Array.from(selectedRerollIndices).some((i) => {
+          const d = human.rolled_pool[i];
+          return d && d.is_locked;
+        });
         const rerollBtn = document.createElement("button");
         rerollBtn.className = "action-btn btn-accent";
-        rerollBtn.innerText = `Reroll Selected (${selectedRerollIndices.size})`;
-        rerollBtn.onclick = doReroll;
+        if (hasLockedSelected) {
+          rerollBtn.style.borderColor = "#38bdf8";
+          rerollBtn.innerText = `Reroll Selected (${selectedRerollIndices.size}) [⚡ Prodigy Bypass]`;
+          rerollBtn.onclick = () => doReroll(true);
+        } else {
+          rerollBtn.innerText = `Reroll Selected (${selectedRerollIndices.size})`;
+          rerollBtn.onclick = () => doReroll(false);
+        }
         controls.appendChild(rerollBtn);
       }
 
@@ -757,47 +891,208 @@ function renderActionDock() {
     compileBtn.disabled = !caps.can_compile;
     compileBtn.onclick = doCompile;
     controls.appendChild(compileBtn);
+
+    // Archetype Abilities applicable during/after Compile
+    if (caps.can_acoustic && state.last_compile_result) {
+      const exited = state.last_compile_result.exited_cubes || {};
+      const qualifying = ["red", "blue", "green"].filter((c) => (exited[c] || 0) > 0);
+      if (qualifying.length > 0) {
+        const acWrap = document.createElement("div");
+        acWrap.style.display = "inline-flex";
+        acWrap.style.alignItems = "center";
+        acWrap.style.gap = "6px";
+
+        const acSelect = document.createElement("select");
+        acSelect.id = "acousticColorSelect";
+        acSelect.style.padding = "4px 8px";
+        acSelect.style.background = "var(--bg-card)";
+        acSelect.style.color = "#fff";
+        acSelect.style.border = "1px solid var(--border-color)";
+        acSelect.style.borderRadius = "4px";
+
+        qualifying.forEach((c) => {
+          const opt = document.createElement("option");
+          opt.value = c;
+          opt.innerText = `Remove 1 ${c.toUpperCase()} (${exited[c]} exited)`;
+          acSelect.appendChild(opt);
+        });
+
+        const acBtn = document.createElement("button");
+        acBtn.className = "action-btn";
+        acBtn.style.borderColor = "#38bdf8";
+        acBtn.style.color = "#38bdf8";
+        acBtn.innerText = "⚡ Acoustic: Baffle Echo";
+        acBtn.onclick = () => doAcoustic(acSelect.value);
+
+        acWrap.appendChild(acSelect);
+        acWrap.appendChild(acBtn);
+        controls.appendChild(acWrap);
+      }
+    }
+
+    if (caps.can_spook && human.money > 0) {
+      const spookWrap = document.createElement("div");
+      spookWrap.style.display = "inline-flex";
+      spookWrap.style.alignItems = "center";
+      spookWrap.style.gap = "6px";
+
+      const spookInput = document.createElement("input");
+      spookInput.type = "number";
+      spookInput.min = "1";
+      spookInput.max = String(human.money);
+      spookInput.value = "1";
+      spookInput.style.width = "50px";
+      spookInput.style.padding = "4px 8px";
+      spookInput.style.background = "var(--bg-card)";
+      spookInput.style.color = "#fff";
+      spookInput.style.border = "1px solid var(--border-color)";
+      spookInput.style.borderRadius = "4px";
+
+      const spookBtn = document.createElement("button");
+      spookBtn.className = "action-btn";
+      spookBtn.style.borderColor = "#f59e0b";
+      spookBtn.style.color = "#f59e0b";
+      spookBtn.innerText = "⚡ Spook: Slush Fund";
+      spookBtn.onclick = () => {
+        const amt = parseInt(spookInput.value, 10);
+        if (!isNaN(amt) && amt > 0) doSpook(amt);
+      };
+
+      spookWrap.appendChild(document.createTextNode("Pay $"));
+      spookWrap.appendChild(spookInput);
+      spookWrap.appendChild(spookBtn);
+      controls.appendChild(spookWrap);
+    }
   } else if (state.phase === 3) {
     // Dirty Income with Backlash die selector
-    if (caps.can_dirty_income) {
+    if (caps.can_dirty_income || caps.can_cipher_dirty) {
       const dirtyWrap = document.createElement("div");
       dirtyWrap.style.display = "inline-flex";
       dirtyWrap.style.alignItems = "center";
       dirtyWrap.style.gap = "6px";
 
-      const backlashSelect = document.createElement("select");
-      backlashSelect.id = "dirtyBacklashSelect";
-      backlashSelect.style.padding = "4px 8px";
-      backlashSelect.style.background = "var(--bg-card)";
-      backlashSelect.style.color = "#fff";
-      backlashSelect.style.border = "1px solid var(--border-color)";
-      backlashSelect.style.borderRadius = "4px";
+      if (caps.can_dirty_income) {
+        const backlashSelect = document.createElement("select");
+        backlashSelect.id = "dirtyBacklashSelect";
+        backlashSelect.style.padding = "4px 8px";
+        backlashSelect.style.background = "var(--bg-card)";
+        backlashSelect.style.color = "#fff";
+        backlashSelect.style.border = "1px solid var(--border-color)";
+        backlashSelect.style.borderRadius = "4px";
 
-      human.ready_dice.forEach((die, idx) => {
-        const opt = document.createElement("option");
-        opt.value = idx;
-        opt.innerText = `Backlash: #${idx + 1} ${die.color.toUpperCase()}${die.vp ? ' (' + die.vp + 'VP)' : ''}`;
-        backlashSelect.appendChild(opt);
-      });
+        human.ready_dice.forEach((die, idx) => {
+          const opt = document.createElement("option");
+          opt.value = idx;
+          opt.innerText = `Backlash: #${idx + 1} ${die.color.toUpperCase()}${die.vp ? ' (' + die.vp + 'VP)' : ''}`;
+          backlashSelect.appendChild(opt);
+        });
 
-      backlashSelect.value = selectedBacklashIndex < human.ready_dice.length ? selectedBacklashIndex : 0;
-      backlashSelect.onchange = (e) => {
-        selectedBacklashIndex = parseInt(e.target.value, 10);
-      };
+        backlashSelect.value = selectedBacklashIndex < human.ready_dice.length ? selectedBacklashIndex : 0;
+        backlashSelect.onchange = (e) => {
+          selectedBacklashIndex = parseInt(e.target.value, 10);
+        };
 
-      const dirtyBtn = document.createElement("button");
-      dirtyBtn.className = "action-btn";
-      dirtyBtn.style.borderColor = "var(--color-black-glow)";
-      dirtyBtn.style.color = "#ff3377";
-      dirtyBtn.innerText = "Dirty Income (+$3, -1 Secret)";
-      dirtyBtn.onclick = () => {
-        selectedBacklashIndex = parseInt(backlashSelect.value, 10);
-        doDirtyIncome();
-      };
+        const dirtyBtn = document.createElement("button");
+        dirtyBtn.className = "action-btn";
+        dirtyBtn.style.borderColor = "var(--color-black-glow)";
+        dirtyBtn.style.color = "#ff3377";
+        dirtyBtn.innerText = "Dirty Income (+$3, -1 Secret)";
+        dirtyBtn.onclick = () => {
+          selectedBacklashIndex = parseInt(backlashSelect.value, 10);
+          doDirtyIncome(false);
+        };
 
-      dirtyWrap.appendChild(backlashSelect);
-      dirtyWrap.appendChild(dirtyBtn);
+        dirtyWrap.appendChild(backlashSelect);
+        dirtyWrap.appendChild(dirtyBtn);
+      }
+
+      if (caps.can_cipher_dirty) {
+        const cipherDirtyBtn = document.createElement("button");
+        cipherDirtyBtn.className = "action-btn";
+        cipherDirtyBtn.style.borderColor = "#a855f7";
+        cipherDirtyBtn.style.color = "#c084fc";
+        cipherDirtyBtn.innerText = "⚡ Cipher: Backdoor Siphon (No Backlash)";
+        cipherDirtyBtn.onclick = () => doDirtyIncome(true);
+        dirtyWrap.appendChild(cipherDirtyBtn);
+      }
+
       controls.appendChild(dirtyWrap);
+    }
+
+    // Phreaker Ability: Free Repair
+    if (caps.can_phreaker) {
+      const phreakBtn = document.createElement("button");
+      phreakBtn.className = "action-btn";
+      phreakBtn.style.borderColor = "#4ade80";
+      phreakBtn.style.color = "#4ade80";
+      phreakBtn.innerText = "⚡ Phreaker: Magnetic Splice (Repair 2 Dice Free)";
+      phreakBtn.onclick = () => doPhreaker(2);
+      controls.appendChild(phreakBtn);
+    }
+
+    // Cipher Market Discount Toggle
+    const isCipher = Boolean(human.archetype && human.archetype.code === "CIPHER");
+    const cipherAvail = Boolean(
+      isCipher && (
+        (caps.can_cipher_buy && Object.values(caps.can_cipher_buy).some(Boolean)) ||
+        caps.can_cipher_dirty ||
+        human.ability_v1_status === "AVAILABLE" || human.ability_v2_status === "AVAILABLE" || human.ability_v3_status === "AVAILABLE"
+      )
+    );
+    if (cipherAvail) {
+      const cipherToggle = document.createElement("label");
+      cipherToggle.style.fontSize = "0.8rem";
+      cipherToggle.style.display = "inline-flex";
+      cipherToggle.style.alignItems = "center";
+      cipherToggle.style.gap = "4px";
+      cipherToggle.style.color = "#c084fc";
+      cipherToggle.innerHTML = `
+        <input type="checkbox" id="cipherDiscountToggle" ${cipherDiscountSelected ? "checked" : ""}>
+        ⚡ Cipher: -$2 Market Discount
+      `;
+      cipherToggle.querySelector("input").onchange = (e) => {
+        cipherDiscountSelected = e.target.checked;
+        renderMarket();
+      };
+      controls.appendChild(cipherToggle);
+    }
+
+    // Acoustic (if exited cubes remain from last compile)
+    if (caps.can_acoustic && state.last_compile_result) {
+      const exited = state.last_compile_result.exited_cubes || {};
+      const qualifying = ["red", "blue", "green"].filter((c) => (exited[c] || 0) > 0);
+      if (qualifying.length > 0) {
+        const acWrap = document.createElement("div");
+        acWrap.style.display = "inline-flex";
+        acWrap.style.alignItems = "center";
+        acWrap.style.gap = "6px";
+
+        const acSelect = document.createElement("select");
+        acSelect.id = "acousticColorSelectP3";
+        acSelect.style.padding = "4px 8px";
+        acSelect.style.background = "var(--bg-card)";
+        acSelect.style.color = "#fff";
+        acSelect.style.border = "1px solid var(--border-color)";
+        acSelect.style.borderRadius = "4px";
+
+        qualifying.forEach((c) => {
+          const opt = document.createElement("option");
+          opt.value = c;
+          opt.innerText = `Remove 1 ${c.toUpperCase()} (${exited[c]} exited)`;
+          acSelect.appendChild(opt);
+        });
+
+        const acBtn = document.createElement("button");
+        acBtn.className = "action-btn";
+        acBtn.style.borderColor = "#38bdf8";
+        acBtn.style.color = "#38bdf8";
+        acBtn.innerText = "⚡ Acoustic: Baffle Echo";
+        acBtn.onclick = () => doAcoustic(acSelect.value);
+
+        acWrap.appendChild(acSelect);
+        acWrap.appendChild(acBtn);
+        controls.appendChild(acWrap);
+      }
     }
 
     // Patch Toggle

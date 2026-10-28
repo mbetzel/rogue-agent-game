@@ -72,6 +72,13 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Code Review Gate (`staff-engineer`):* Review line-by-line diffs, verify 100% test pass via WSL (182/182 passing), audit edge cases (APPROVED).
   - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Run Experiment 6 (4-Way Roadmap Matrix Benchmark across 4P, 3P, and 2P) via WSL.
   - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Evaluate Singularity vitality, pacing across kinetic vs corruption roadmaps, log Section 11 in `FINDINGS.md` (OFFICIALLY APPROVED).
+- [x] **Phase 13: "Too Many Secrets" Re-Theming & Consultancy Archetypes (`v0.9.0` Baseline)**
+  - [x] *Design Alignment:* Rules Draft `v0.9.0` finalized in [RULES.md](./RULES.md) (Tape-Punk aesthetic, Project: SETEC rogue compiler, Independent White-Hat Consultancies, 6 Consultancy Archetypes with Once-per-Version special abilities and use-it-or-lose-it timing).
+  - [x] *Technical Architecture Spec (`principal-engineer`):* Module contracts for Archetype registry, player state tracking (`v1_used`, `v2_used`, `v3_used`), bot heuristics for archetype power triggers, web API schemas, and 21-test verification matrix.
+  - [x] *Implementation (`senior-engineer`):* Update `sim/entities.py`, `sim/engine.py`, `sim/bots.py`, and `web/` (including full frontend UI player tile archetype badges, Version Ability tracks, and Action Dock interaction controls) to support Archetypes, and write unit tests in `tests/test_archetypes.py` (209/209 tests passing via WSL).
+  - [x] *Code Review Gate (`staff-engineer`):* Comprehensive line-by-line review of archetype triggers, mid-round version flip forfeits, and 100% test pass via WSL (APPROVED).
+  - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Run Experiment 7 (Archetype Tournament Matrix across 4P, 3P, and 2P pods, measuring archetype win rates, survival rates, and ability timing).
+  - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Evaluated archetype balance parity, diagnosed The Cipher's free-die anomaly, approved 5/6 archetypes, proposed $2 discount retune for The Cipher, and logged Section 12 in `FINDINGS.md`.
 
 ---
 
@@ -153,6 +160,8 @@ Pure Python 3 standard library (`dataclasses`, `random`, `statistics`, `argparse
 | **3. Dirty Income & Wear** | `Dirty Income ∈ {$2, $3, $4}`, `Patch Cost ∈ {$1, $2, $3}`, `Colored Shield ∈ {1, 2}` | Players take Dirty Income ~`2–4` times/game; dice wear creates real triage without locking everyone at `0` Ready dice. |
 | **4. Ecosystem Tournament** | Mixed pods of all 5 Bot Archetypes + randomized Variant/Version setups | No single bot exceeds **`38%` win rate** in `4P` pods; both organic End-Game Triggers (Total Breach, Singularity) occur meaningfully (`> 15%` each). |
 | **5. Modular Variants & Directives** | Version Directives (5a) × 15 Module Variants (5b) across 4P Pod A | Variance assessment, degenerate loop prevention, card tiering, win rate ceiling ($\le 38\%$), Singularity viability. |
+| **6. Asymmetric Version Payloads** | 4 Roadmap Combinations (Kinetic vs Contagion vs Singularity) across 4P, 3P, 2P | Pacing parity across roadmaps; Singularity occurrences $\ge 10\%$; 2P wipeout rate $\le 30\%$. |
+| **7. Archetype Tournament** | 6 Consultancy Archetypes across 4P, 3P, 2P Pods × Randomized Setups | Balanced win rates across archetypes ($\le 35\%$ in 4P); healthy push-your-luck timing forfeit rates (~10–25%); no single archetype immune to elimination. |
 
 ---
 
@@ -180,3 +189,7 @@ Pure Python 3 standard library (`dataclasses`, `random`, `statistics`, `argparse
    - `product-owner`: Execute Experiment 5a and 5b ($N=500$, Seed 42) and compile telemetry.
    - `game-designer`: Comprehensive balance critique, card tiering (S/A/B/C/Trap), degenerate loop identification (Y2, B2, B3, Corrupted Kernel), and Section 10 documentation in `FINDINGS.md` — `APPROVED`.
    - `game-designer`: Post-tuning telemetry evaluation (Corrupted Kernel 20.4% → 4.8% wipeouts, P3 7.8% → 4.6% wipeouts, Y2 36.0 → 32.5 VP compression, B3 wear loop preservation), updated tier classifications, and Section 10.G & 10.H documentation in `FINDINGS.md` — `OFFICIALLY APPROVED`.
+6. **Phase 13 Consultancy Archetypes Gate (`all roles`):**
+   - `principal-engineer`: High-level architecture specification for Consultancy Archetypes (Section 6D), version ability lifecycle (`AVAILABLE` -> `USED` / `FORFEITED` / `LOCKED`), bot urgency heuristics, and API/controller endpoints.
+   - `senior-engineer`: Implement features across `sim/entities.py`, `sim/engine.py`, `sim/bots.py`, `web/schemas.py`, `web/game_controller.py`, `web/server.py`, `web/static/app.js`, `web/static/style.css`, and 22 unit tests in `tests/test_archetypes.py` (209/209 tests passing via WSL).
+

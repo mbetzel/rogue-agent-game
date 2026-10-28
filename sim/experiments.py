@@ -27,6 +27,8 @@ from sim.entities import (
     get_default_version_deck,
     get_random_setup,
     get_roadmap_deck,
+    ArchetypeCode,
+    get_all_archetype_cards,
 )
 
 
@@ -489,14 +491,147 @@ def run_experiment_6(runs: int = 500, base_seed: int = 42) -> None:
             print(f"- **{path_name} ({p_count}P):** {m.outlier_seeds[:5]}")
 
 
+def run_experiment_7(runs: int = 500, base_seed: int = 42) -> None:
+    """Experiment 7: Archetype Tournament Matrix across 4P, 3P, and 2P pods."""
+    print("\n========================================================")
+    print("Experiment 7: Archetype Tournament Matrix Benchmark (v0.9.0)")
+    print("========================================================\n")
+
+    player_counts = [4, 3, 2]
+    archetypes_list = get_all_archetype_cards()
+    archetype_names = {a.code.value: a.name for a in archetypes_list}
+
+    for p_count in player_counts:
+        print(f"\n### {p_count}-Player Archetype Tournament Matrix ($N = {runs}$ Games, Randomized Setups)")
+
+        archetype_stats: Dict[str, Dict] = {
+            code: {
+                "games": 0,
+                "wins": 0,
+                "survivals": 0,
+                "scores": [],
+                "v1_used": 0,
+                "v1_forfeited": 0,
+                "v2_used": 0,
+                "v2_forfeited": 0,
+                "v3_used": 0,
+                "v3_forfeited": 0,
+            }
+            for code in archetype_names
+        }
+
+        bot_wins: Dict[str, int] = {}
+        round_counts: List[int] = []
+        end_reasons: Dict[EndGameReason, int] = {reason: 0 for reason in EndGameReason}
+        early_deaths = 0
+
+        for run_idx in range(runs):
+            seed = base_seed + run_idx
+            config = GameConfig(num_players=p_count)
+
+            bots = [
+                AdaptiveBalancedBot(0),
+                SecOpsTurtleBot(1),
+                VentureGreedBot(2),
+                AccelerationistBot(3),
+            ][:p_count]
+
+            rng_setup = random.Random(seed * 17)
+            run_variant_cards, run_version_deck = get_random_setup(rng_setup)
+
+            engine = GameEngine(
+                config=config,
+                bots=bots,
+                seed=seed,
+                variant_cards=run_variant_cards,
+                version_deck=run_version_deck,
+            )
+
+            result: EndGameResult = engine.run_game()
+            round_counts.append(result.total_rounds)
+            end_reasons[result.end_reason] = end_reasons.get(result.end_reason, 0) + 1
+            if result.total_rounds <= 4:
+                early_deaths += 1
+
+            if result.rankings:
+                w_bot = result.rankings[0]["bot_name"]
+                bot_wins[w_bot] = bot_wins.get(w_bot, 0) + 1
+
+            for rank_idx, r in enumerate(result.rankings):
+                arch_code = r.get("archetype_code")
+                if not arch_code or arch_code not in archetype_stats:
+                    continue
+                stats = archetype_stats[arch_code]
+                stats["games"] += 1
+                if rank_idx == 0:
+                    stats["wins"] += 1
+                if not r.get("is_patient_zero", False):
+                    stats["survivals"] += 1
+                stats["scores"].append(float(r.get("net_score", 0.0)))
+
+                if r.get("ability_v1_status") == "USED":
+                    stats["v1_used"] += 1
+                elif r.get("ability_v1_status") == "FORFEITED":
+                    stats["v1_forfeited"] += 1
+
+                if r.get("ability_v2_status") == "USED":
+                    stats["v2_used"] += 1
+                elif r.get("ability_v2_status") == "FORFEITED":
+                    stats["v2_forfeited"] += 1
+
+                if r.get("ability_v3_status") == "USED":
+                    stats["v3_used"] += 1
+                elif r.get("ability_v3_status") == "FORFEITED":
+                    stats["v3_forfeited"] += 1
+
+        mean_rds = statistics.mean(round_counts)
+        std_rds = statistics.stdev(round_counts) if len(round_counts) > 1 else 0.0
+        sing_pct = end_reasons[EndGameReason.SINGULARITY] / runs * 100
+        pz_pct = end_reasons[EndGameReason.PATIENT_ZERO] / runs * 100
+        wipeout_pct = end_reasons[EndGameReason.TOTAL_WIPEOUT] / runs * 100
+        early_pct = early_deaths / runs * 100
+
+        print(
+            f"**Match Overview:** Mean Rounds: {mean_rds:.2f} (±{std_rds:.2f}) | "
+            f"Singularity: {sing_pct:.1f}% | Patient Zero: {pz_pct:.1f}% | "
+            f"Wipeout: {wipeout_pct:.1f}% | Early Deaths (≤4 Rds): {early_pct:.1f}%\n"
+        )
+
+        print("| Archetype | Games | Win Rate % | Survival % | Mean Score | v1 Used (Forfeit) % | v2 Used (Forfeit) % | v3 Used (Forfeit) % |")
+        print("| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |")
+
+        for code, stats in archetype_stats.items():
+            g = stats["games"]
+            if g == 0:
+                continue
+            name = archetype_names.get(code, code)
+            win_pct = stats["wins"] / g * 100
+            surv_pct = stats["survivals"] / g * 100
+            mean_sc = statistics.mean(stats["scores"]) if stats["scores"] else 0.0
+
+            v1_u = stats["v1_used"] / g * 100
+            v1_f = stats["v1_forfeited"] / g * 100
+            v2_u = stats["v2_used"] / g * 100
+            v2_f = stats["v2_forfeited"] / g * 100
+            v3_u = stats["v3_used"] / g * 100
+            v3_f = stats["v3_forfeited"] / g * 100
+
+            print(
+                f"| **{name}** | {g} | **{win_pct:.1f}%** | {surv_pct:.1f}% | {mean_sc:.1f} VP | "
+                f"{v1_u:.1f}% ({v1_f:.1f}%) | {v2_u:.1f}% ({v2_f:.1f}%) | {v3_u:.1f}% ({v3_f:.1f}%) |"
+            )
+
+        print("\n**Bot Pod Distribution:** " + ", ".join(f"{b}: {w / runs * 100:.1f}%" for b, w in sorted(bot_wins.items(), key=lambda x: x[1], reverse=True)))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Rogue Agent Monte Carlo Simulation Suite")
     parser.add_argument(
         "--experiment",
         "-e",
-        choices=["1", "2", "3", "4", "5", "6", "all"],
+        choices=["1", "2", "3", "4", "5", "6", "7", "all"],
         default="all",
-        help="Which experiment to run (1-6 or all)",
+        help="Which experiment to run (1-7 or all)",
     )
     parser.add_argument(
         "--runs",
@@ -527,6 +662,8 @@ def main() -> None:
         run_experiment_5(runs=args.runs, base_seed=args.seed)
     if args.experiment in ("6", "all"):
         run_experiment_6(runs=args.runs, base_seed=args.seed)
+    if args.experiment in ("7", "all"):
+        run_experiment_7(runs=args.runs, base_seed=args.seed)
 
 
 if __name__ == "__main__":

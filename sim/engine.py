@@ -9,6 +9,9 @@ from typing import Dict, List, Optional, Tuple
 from sim.bots import BaseBot, Phase3ActionPlan
 from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
 from sim.entities import (
+    AbilityStatus,
+    ArchetypeCard,
+    ArchetypeCode,
     Die,
     Face,
     VariantCard,
@@ -16,8 +19,11 @@ from sim.entities import (
     create_colored_die,
     create_gray_die,
     create_white_die,
+    get_all_archetype_cards,
+    get_archetype_by_code,
     get_default_variant_cards,
     get_default_version_deck,
+    get_random_archetypes,
 )
 from sim.tower import CubeTower
 
@@ -48,6 +54,10 @@ class PlayerState:
     y1_available: bool = False
     p1_available: bool = False
     p3_available: Optional[ShieldColor] = None
+    archetype: Optional[ArchetypeCard] = None
+    ability_v1_status: AbilityStatus = AbilityStatus.AVAILABLE
+    ability_v2_status: AbilityStatus = AbilityStatus.LOCKED
+    ability_v3_status: AbilityStatus = AbilityStatus.LOCKED
 
     @property
     def total_dice(self) -> List[Die]:
@@ -56,6 +66,97 @@ class PlayerState:
     @property
     def colored_dice(self) -> List[Die]:
         return [d for d in self.total_dice if d.color != DieColor.GRAY]
+
+    @staticmethod
+    def _normalize_version_key(v: str) -> int:
+        s = str(v).strip().lower()
+        if "1" in s:
+            return 1
+        elif "2" in s:
+            return 2
+        elif "3" in s:
+            return 3
+        raise ValueError(f"Unknown version string: {v}")
+
+    def get_ability_status(self, version_str: str) -> AbilityStatus:
+        k = self._normalize_version_key(version_str)
+        if k == 1:
+            return self.ability_v1_status
+        elif k == 2:
+            return self.ability_v2_status
+        elif k == 3:
+            return self.ability_v3_status
+        raise ValueError(f"Unknown version string: {version_str}")
+
+    def is_ability_available(self, version_str: Optional[str] = None) -> bool:
+        if version_str is not None:
+            return self.get_ability_status(version_str) == AbilityStatus.AVAILABLE
+        return (
+            self.ability_v1_status == AbilityStatus.AVAILABLE
+            or self.ability_v2_status == AbilityStatus.AVAILABLE
+            or self.ability_v3_status == AbilityStatus.AVAILABLE
+        )
+
+    def mark_ability_used(self, version_str: Optional[str] = None) -> None:
+        if version_str is not None:
+            k = self._normalize_version_key(version_str)
+            if k == 1:
+                self.ability_v1_status = AbilityStatus.USED
+            elif k == 2:
+                self.ability_v2_status = AbilityStatus.USED
+            elif k == 3:
+                self.ability_v3_status = AbilityStatus.USED
+            else:
+                raise ValueError(f"Unknown version string: {version_str}")
+        else:
+            if self.ability_v1_status == AbilityStatus.AVAILABLE:
+                self.ability_v1_status = AbilityStatus.USED
+            elif self.ability_v2_status == AbilityStatus.AVAILABLE:
+                self.ability_v2_status = AbilityStatus.USED
+            elif self.ability_v3_status == AbilityStatus.AVAILABLE:
+                self.ability_v3_status = AbilityStatus.USED
+            else:
+                raise ValueError("No ability is currently available to mark as used")
+
+    def mark_ability_forfeited(self, version_str: str) -> None:
+        k = self._normalize_version_key(version_str)
+        if k == 1:
+            if self.ability_v1_status == AbilityStatus.AVAILABLE:
+                self.ability_v1_status = AbilityStatus.FORFEITED
+        elif k == 2:
+            if self.ability_v2_status == AbilityStatus.AVAILABLE:
+                self.ability_v2_status = AbilityStatus.FORFEITED
+        elif k == 3:
+            if self.ability_v3_status == AbilityStatus.AVAILABLE:
+                self.ability_v3_status = AbilityStatus.FORFEITED
+        else:
+            raise ValueError(f"Unknown version string: {version_str}")
+
+    def unlock_version_ability(self, version_str: str) -> None:
+        k = self._normalize_version_key(version_str)
+        if k == 1:
+            if self.ability_v1_status == AbilityStatus.LOCKED:
+                self.ability_v1_status = AbilityStatus.AVAILABLE
+        elif k == 2:
+            if self.ability_v2_status == AbilityStatus.LOCKED:
+                self.ability_v2_status = AbilityStatus.AVAILABLE
+        elif k == 3:
+            if self.ability_v3_status == AbilityStatus.LOCKED:
+                self.ability_v3_status = AbilityStatus.AVAILABLE
+        else:
+            raise ValueError(f"Unknown version string: {version_str}")
+
+    @property
+    def v1_used(self) -> bool:
+        return self.ability_v1_status == AbilityStatus.USED
+
+    @property
+    def v2_used(self) -> bool:
+        return self.ability_v2_status == AbilityStatus.USED
+
+    @property
+    def v3_used(self) -> bool:
+        return self.ability_v3_status == AbilityStatus.USED
 
 
 @dataclass
@@ -138,6 +239,7 @@ class GameEngine:
         seed: Optional[int] = None,
         variant_cards: Optional[Dict[DieColor, VariantCard]] = None,
         version_deck: Optional[List[VersionCard]] = None,
+        archetypes: Optional[List[ArchetypeCard]] = None,
     ) -> None:
         if len(bots) != config.num_players:
             raise ValueError(f"Bot count ({len(bots)}) must match config.num_players ({config.num_players})")
@@ -146,6 +248,10 @@ class GameEngine:
         self.config = config
         self.variant_cards = variant_cards or get_default_variant_cards()
         self.version_deck = version_deck or get_default_version_deck()
+        if archetypes is None:
+            self.archetypes = get_random_archetypes(config.num_players, self.rng)
+        else:
+            self.archetypes = list(archetypes)
 
         # Initialize players
         players: List[PlayerState] = []
@@ -158,6 +264,7 @@ class GameEngine:
                 ready_dice.append(create_gray_die(next_die_id))
                 next_die_id += 1
 
+            arch = self.archetypes[i] if i < len(self.archetypes) else None
             player = PlayerState(
                 player_id=i,
                 bot=bot,
@@ -165,6 +272,10 @@ class GameEngine:
                 secrets=self.config.get_starting_secrets(self.config.num_players),
                 patches=self.config.get_starting_patches(self.config.num_players),
                 ready_dice=ready_dice,
+                archetype=arch,
+                ability_v1_status=AbilityStatus.AVAILABLE,
+                ability_v2_status=AbilityStatus.LOCKED,
+                ability_v3_status=AbilityStatus.LOCKED,
             )
             players.append(player)
 
@@ -223,6 +334,7 @@ class GameEngine:
         stuck_copy = self.state.tower.get_stuck_copy()
 
         # 2. Temp Staffing (Contractor Hiring)
+        active_ver = self.state.active_version.version_str
         for player in self.state.players:
             if player.is_patient_zero:
                 continue
@@ -230,31 +342,80 @@ class GameEngine:
             player.contractor_dice = []
             player.hired_contractor_count = 0
 
-            max_hire = self.config.get_max_affordable_contractors(
-                money=player.money,
-                already_hired=player.hired_contractor_count,
-                supply=self.state.contractor_supply,
+            # Hook Phase 1 Step 2: The Operator (Redundant Crew)
+            is_operator = (
+                player.archetype is not None
+                and player.archetype.code == ArchetypeCode.OPERATOR
+                and player.is_ability_available(active_ver)
             )
-            desired_hire = player.bot.choose_contractor_hires(
-                player_state=player,
-                contractor_supply=self.state.contractor_supply,
-                staging_cubes=staging_copy,
-                stuck_cubes=stuck_copy,
-                rng=self.rng,
-            )
-            actual_hire = max(0, min(desired_hire, max_hire))
-            if actual_hire > 0:
-                cost = self.config.get_contractor_cost_for_hire(
-                    actual_hire, already_hired=player.hired_contractor_count
+            used_operator = False
+            if is_operator:
+                use_op = player.bot.choose_operator_ability(
+                    player_state=player,
+                    contractor_supply=self.state.contractor_supply,
+                    staging_cubes=staging_copy,
+                    stuck_cubes=stuck_copy,
+                    rng=self.rng,
+                    corruption_track=self.state.corruption_track,
                 )
-                player.money -= cost
-                self.state.contractor_supply -= actual_hire
-                player.hired_contractor_count += actual_hire
-                player.total_contractors_hired += actual_hire
-                for _ in range(actual_hire):
-                    c_die = create_white_die(self.state.next_die_id)
-                    self.state.next_die_id += 1
-                    player.contractor_dice.append(c_die)
+                if use_op and self.state.contractor_supply > 0:
+                    free_hire = min(2, self.state.contractor_supply)
+                    self.state.contractor_supply -= free_hire
+                    player.hired_contractor_count += free_hire
+                    player.total_contractors_hired += free_hire
+                    for _ in range(free_hire):
+                        c_die = create_white_die(self.state.next_die_id)
+                        self.state.next_die_id += 1
+                        player.contractor_dice.append(c_die)
+                    player.mark_ability_used(active_ver)
+                    used_operator = True
+
+                    # Option to buy 3rd die (progressive 3rd contractor cost, e.g. $3)
+                    cost = self.config.get_contractor_cost_for_hire(1, already_hired=free_hire)
+                    if self.state.contractor_supply > 0 and player.money >= cost:
+                        buy_3rd = player.bot.choose_operator_buy_third_die(
+                            player_state=player,
+                            contractor_supply=self.state.contractor_supply,
+                            staging_cubes=staging_copy,
+                            stuck_cubes=stuck_copy,
+                            rng=self.rng,
+                            corruption_track=self.state.corruption_track,
+                        )
+                        if buy_3rd:
+                            player.money -= cost
+                            self.state.contractor_supply -= 1
+                            player.hired_contractor_count += 1
+                            player.total_contractors_hired += 1
+                            c_die = create_white_die(self.state.next_die_id)
+                            self.state.next_die_id += 1
+                            player.contractor_dice.append(c_die)
+
+            if not used_operator:
+                max_hire = self.config.get_max_affordable_contractors(
+                    money=player.money,
+                    already_hired=player.hired_contractor_count,
+                    supply=self.state.contractor_supply,
+                )
+                desired_hire = player.bot.choose_contractor_hires(
+                    player_state=player,
+                    contractor_supply=self.state.contractor_supply,
+                    staging_cubes=staging_copy,
+                    stuck_cubes=stuck_copy,
+                    rng=self.rng,
+                )
+                actual_hire = max(0, min(desired_hire, max_hire))
+                if actual_hire > 0:
+                    cost = self.config.get_contractor_cost_for_hire(
+                        actual_hire, already_hired=player.hired_contractor_count
+                    )
+                    player.money -= cost
+                    self.state.contractor_supply -= actual_hire
+                    player.hired_contractor_count += actual_hire
+                    player.total_contractors_hired += actual_hire
+                    for _ in range(actual_hire):
+                        c_die = create_white_die(self.state.next_die_id)
+                        self.state.next_die_id += 1
+                        player.contractor_dice.append(c_die)
 
         # 3. Roll Active Pool, Yahtzee Rerolls, Outputs, Commit Defenses
         for player in self.state.players:
@@ -297,6 +458,27 @@ class GameEngine:
 
             _evaluate_locks(active_dice)
 
+            is_prodigy = (
+                player.archetype is not None
+                and player.archetype.code == ArchetypeCode.PRODIGY
+                and player.is_ability_available(active_ver)
+            )
+            prodigy_active = False
+            if is_prodigy:
+                use_prodigy = player.bot.choose_prodigy_ability(
+                    player_state=player,
+                    active_dice=active_dice,
+                    rerolls_remaining=max_free_rerolls,
+                    staging_cubes=staging_copy,
+                    stuck_cubes=stuck_copy,
+                    directive_code=active_directive,
+                    rng=self.rng,
+                    corruption_track=self.state.corruption_track,
+                )
+                if use_prodigy:
+                    prodigy_active = True
+                    player.mark_ability_used(active_ver)
+
             rerolls_remaining = max_free_rerolls
             while rerolls_remaining > 0:
                 # Debug action: spend 1 🔧 to unlock 1 locked die
@@ -316,7 +498,7 @@ class GameEngine:
                             active_dice[u_idx].is_locked = False
                             player.patches -= 1
 
-                # Choose rerolls among unlocked dice
+                # Choose rerolls among unlocked dice (or any dice if prodigy_active)
                 reroll_res = player.bot.choose_yahtzee_rerolls(
                     player_state=player,
                     active_dice=active_dice,
@@ -337,10 +519,16 @@ class GameEngine:
                 else:
                     reroll_indices = reroll_res or []
 
-                valid_rerolls = [
-                    idx for idx in reroll_indices
-                    if 0 <= idx < len(active_dice) and not active_dice[idx].is_locked
-                ]
+                if prodigy_active:
+                    valid_rerolls = [
+                        idx for idx in reroll_indices
+                        if 0 <= idx < len(active_dice)
+                    ]
+                else:
+                    valid_rerolls = [
+                        idx for idx in reroll_indices
+                        if 0 <= idx < len(active_dice) and not active_dice[idx].is_locked
+                    ]
                 if not valid_rerolls:
                     break
 
@@ -524,9 +712,14 @@ class GameEngine:
                     self.state.singularity_triggered = True
                     break
                 else:
-                    # Upgrade to next version
+                    # Upgrade to next version: forfeit unspent old ability, unlock new ability
+                    old_version_str = self.state.active_version.version_str
                     self.state.corruption_track = 0
                     self.state.current_version_index += 1
+                    new_version_str = self.state.active_version.version_str
+                    for p in self.state.players:
+                        p.mark_ability_forfeited(old_version_str)
+                        p.unlock_version_ability(new_version_str)
                     # Add new version upgrade payload to Staging Cup (drops starting next round)
                     new_version = self.state.active_version
                     for color, count in new_version.get_staging_payload(self.config.num_players).items():
@@ -758,12 +951,21 @@ class GameEngine:
                 if exited_cubes.get(CubeColor.BLUE, 0) >= 1 and unblocked_blue == 0:
                     player.money += 3
 
+        # Record unblocked attacks for Acoustic
+        acoustic_unblocked = {
+            CubeColor.RED: unblocked_red,
+            CubeColor.BLUE: unblocked_blue,
+            CubeColor.GREEN: unblocked_green,
+        }
+        active_ver = self.state.active_version.version_str
+
         # 3. Apply Unblocked Damage
         # Red (Ransomware): Lose $1 per unblocked Red cube.
         # Tier 1: Cash pays min(player.money, unblocked_red).
         # Tier 2: Emergency Patch Absorption - patches absorb min(player.patches, unpaid_ransom).
         # Tier 3: Unpaid Ransom Leak - remaining unpaid ransom leaks Secrets (1 Secret per unpaid $1).
         # Money and patches are strictly non-negative (>= 0).
+        unpaid_ransom = 0
         if unblocked_red > 0:
             cash_paid = min(player.money, unblocked_red)
             player.money -= cash_paid
@@ -774,15 +976,66 @@ class GameEngine:
                 player.patches -= patches_absorbed
                 unpaid_ransom -= patches_absorbed
 
-            if unpaid_ransom > 0:
-                player.secrets -= unpaid_ransom
+        # Hook Phase 2 Step 2B: The Spook (Slush Fund)
+        # Pay $1 per secret to absorb Blue secret loss or unpaid Red ransom before leak
+        potential_secret_loss = unpaid_ransom + unblocked_blue
+        if (
+            potential_secret_loss > 0
+            and player.money > 0
+            and player.archetype is not None
+            and player.archetype.code == ArchetypeCode.SPOOK
+            and player.is_ability_available(active_ver)
+        ):
+            spook_dollars = player.bot.choose_spook_ability(
+                player_state=player,
+                secrets_at_risk=potential_secret_loss,
+                active_version_str=active_ver,
+                rng=self.rng,
+                corruption_track=self.state.corruption_track,
+            )
+            actual_spook_dollars = max(0, min(spook_dollars, player.money, potential_secret_loss))
+            if actual_spook_dollars > 0:
+                player.money -= actual_spook_dollars
+                player.mark_ability_used(active_ver)
+                # First absorb from unpaid ransom, then unblocked blue
+                absorbed_from_ransom = min(unpaid_ransom, actual_spook_dollars)
+                unpaid_ransom -= absorbed_from_ransom
+                remaining_absorb = actual_spook_dollars - absorbed_from_ransom
+                unblocked_blue -= remaining_absorb
 
-            player.money = max(0, player.money)
-            player.patches = max(0, player.patches)
+        if unpaid_ransom > 0:
+            player.secrets -= unpaid_ransom
+
+        player.money = max(0, player.money)
+        player.patches = max(0, player.patches)
 
         # Blue (Spyware): Lose 1 Corporate Secret per unblocked Blue cube
         if unblocked_blue > 0:
             player.secrets -= unblocked_blue
+
+        # Hook Phase 2 Step 2B: The Acoustic (Baffle Echo)
+        # If suffering unblocked damage from any color, permanently remove 1 exited cube of that color
+        if (
+            player.archetype is not None
+            and player.archetype.code == ArchetypeCode.ACOUSTIC
+            and player.is_ability_available(active_ver)
+        ):
+            qualifying = [
+                c for c in [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN]
+                if acoustic_unblocked.get(c, 0) > 0 and exited_cubes.get(c, 0) > 0
+            ]
+            if qualifying:
+                chosen_color = player.bot.choose_acoustic_ability(
+                    player_state=player,
+                    qualifying_colors=qualifying,
+                    exited_cubes=exited_cubes,
+                    active_version_str=active_ver,
+                    rng=self.rng,
+                    corruption_track=self.state.corruption_track,
+                )
+                if chosen_color in qualifying and exited_cubes.get(chosen_color, 0) > 0:
+                    exited_cubes[chosen_color] -= 1
+                    player.mark_ability_used(active_ver)
 
         # Patient Zero Check: Strictly occurs upon Total Data Breach (Secrets <= 0)
         if player.secrets <= 0:
@@ -844,13 +1097,63 @@ class GameEngine:
                 continue
 
             plan = player.bot.take_phase3_actions(player, self.state, self.rng)
+            active_ver = self.state.active_version.version_str
+
+            # Hook Phase 3: The Phreaker (Magnetic Splice) - patch up to 2 worn dice for free
+            if (
+                plan.use_phreaker_ability
+                and player.archetype is not None
+                and player.archetype.code == ArchetypeCode.PHREAKER
+                and player.is_ability_available(active_ver)
+            ):
+                free_patches = min(2, len(player.unpatched_dice))
+                for _ in range(free_patches):
+                    patched_die = player.unpatched_dice.pop(0)
+                    player.ready_dice.append(patched_die)
+                if free_patches > 0:
+                    player.mark_ability_used(active_ver)
+
+            # Hook Phase 3: The Cipher (Algorithmic Arbitrage) - Mode 1: Discounted Colored Die from Market ($2 discount)
+            cipher_discount_applied = False
+            if (
+                plan.use_cipher_ability
+                and plan.cipher_mode in ("BUY_FREE_DIE", 1)
+                and plan.cipher_free_die_color is not None
+                and player.archetype is not None
+                and player.archetype.code == ArchetypeCode.CIPHER
+                and player.is_ability_available(active_ver)
+            ):
+                free_color = plan.cipher_free_die_color
+                normal_cost = 4 if free_color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5
+                discounted_cost = max(0, normal_cost - self.state.config.cipher_market_discount)
+                if self.state.market.get(free_color, 0) > 0 and player.money >= discounted_cost:
+                    player.money -= discounted_cost
+                    self.state.market[free_color] -= 1
+                    new_die = create_colored_die(
+                        color=free_color,
+                        die_id=self.state.next_die_id,
+                        variant_card=self.state.variant_cards.get(free_color),
+                    )
+                    self.state.next_die_id += 1
+                    player.ready_dice.append(new_die)
+                    player.mark_ability_used(active_ver)
+                    cipher_discount_applied = True
+
+            # Hook Phase 3: The Cipher (Algorithmic Arbitrage) - Mode 2: Dirty Income without Backlash
+            is_cipher_dirty_income = (
+                plan.use_cipher_ability
+                and plan.cipher_mode == "DIRTY_INCOME"
+                and player.archetype is not None
+                and player.archetype.code == ArchetypeCode.CIPHER
+                and player.is_ability_available(active_ver)
+            )
 
             # 1. Dirty Income ("Monetize the Rogue Agent" — Limit 1x per turn)
-            # Preconditions: secrets > dirty_income_secret_cost and at least 1 ready die for Backlash
+            # Preconditions: secrets > dirty_income_secret_cost and at least 1 ready die for Backlash (unless Cipher)
             if (
                 plan.take_dirty_income
                 and player.secrets > self.state.config.dirty_income_secret_cost
-                and len(player.ready_dice) >= 1
+                and (is_cipher_dirty_income or len(player.ready_dice) >= 1)
             ):
                 player.secrets -= self.state.config.dirty_income_secret_cost
                 player.money += self.state.config.dirty_income_cash
@@ -858,12 +1161,16 @@ class GameEngine:
                     self.state.staging_cup.get(CubeColor.BLACK, 0)
                     + self.state.config.dirty_income_black_cubes
                 )
-                # Technical Debt Backlash: demote 1 Ready die to Unpatched
-                backlash_idx = plan.dirty_income_backlash_die_index
-                if not (0 <= backlash_idx < len(player.ready_dice)):
-                    backlash_idx = 0
-                backlash_die = player.ready_dice.pop(backlash_idx)
-                player.unpatched_dice.append(backlash_die)
+                if is_cipher_dirty_income:
+                    # Skip Technical Debt Backlash demotion!
+                    player.mark_ability_used(active_ver)
+                else:
+                    # Technical Debt Backlash: demote 1 Ready die to Unpatched
+                    backlash_idx = plan.dirty_income_backlash_die_index
+                    if not (0 <= backlash_idx < len(player.ready_dice)):
+                        backlash_idx = 0
+                    backlash_die = player.ready_dice.pop(backlash_idx)
+                    player.unpatched_dice.append(backlash_die)
                 player.total_dirty_income_taken += 1
 
             # 2. Star Special Actions in Phase 3 (Guarded by Phase 1 eligibility)
@@ -926,7 +1233,7 @@ class GameEngine:
                         player.ready_dice.append(patched_die)
 
             # 4. Market Purchases (Limit 2 dice per turn)
-            purchased_count = 0
+            purchased_count = 1 if cipher_discount_applied else 0
             for color in plan.market_purchases:
                 if purchased_count >= self.state.config.max_market_purchases_per_turn:
                     break
@@ -1030,6 +1337,11 @@ class GameEngine:
                     "total_dirty_income": p.total_dirty_income_taken,
                     "total_contractors_hired": p.total_contractors_hired,
                     "total_rerolls_used": p.total_rerolls_used,
+                    "archetype_code": p.archetype.code.value if p.archetype else "NONE",
+                    "archetype_name": p.archetype.name if p.archetype else "None",
+                    "ability_v1_status": p.ability_v1_status.value,
+                    "ability_v2_status": p.ability_v2_status.value,
+                    "ability_v3_status": p.ability_v3_status.value,
                 }
             )
 

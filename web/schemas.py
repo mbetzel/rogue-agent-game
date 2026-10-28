@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, EndGameReason, ShieldColor
 from sim.engine import EndGameResult, GameState, PlayerState, RoundTelemetry
-from sim.entities import Die, Face, VariantCard, VersionCard
+from sim.entities import AbilityStatus, ArchetypeCard, Die, Face, VariantCard, VersionCard
 
 
 class GameStateSerializer:
@@ -77,6 +77,18 @@ class GameStateSerializer:
             "staging_payload_2p": {c.value: count for c, count in card.staging_payload_2p.items()}
             if card.staging_payload_2p is not None
             else None,
+        }
+
+    @staticmethod
+    def serialize_archetype_card(card: Optional[ArchetypeCard]) -> Optional[Dict[str, Any]]:
+        if card is None:
+            return None
+        return {
+            "code": card.code.value if hasattr(card.code, "value") else str(card.code),
+            "name": card.name,
+            "timing_window": card.timing_window,
+            "ability_name": card.ability_name,
+            "description": card.description,
         }
 
     @staticmethod
@@ -151,6 +163,25 @@ class GameStateSerializer:
             "name": name,
             "is_human": is_human,
             "bot_archetype": bot_archetype,
+            "archetype": cls.serialize_archetype_card(getattr(player, "archetype", None)),
+            "ability_v1_status": (
+                player.ability_v1_status.value
+                if hasattr(getattr(player, "ability_v1_status", None), "value")
+                else str(getattr(player, "ability_v1_status", "LOCKED"))
+            ),
+            "ability_v2_status": (
+                player.ability_v2_status.value
+                if hasattr(getattr(player, "ability_v2_status", None), "value")
+                else str(getattr(player, "ability_v2_status", "LOCKED"))
+            ),
+            "ability_v3_status": (
+                player.ability_v3_status.value
+                if hasattr(getattr(player, "ability_v3_status", None), "value")
+                else str(getattr(player, "ability_v3_status", "LOCKED"))
+            ),
+            "v1_used": getattr(player, "v1_used", False),
+            "v2_used": getattr(player, "v2_used", False),
+            "v3_used": getattr(player, "v3_used", False),
             "money": player.money,
             "secrets": player.secrets,
             "patches": player.patches,
