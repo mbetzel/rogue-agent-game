@@ -29,108 +29,135 @@ def execute_phase_2(
     for color in engine.state.staging_cup:
         engine.state.staging_cup[color] = 0
 
-    # Step 2A: Resolve Black (Corruption) Cubes & Version Upgrades
-    black_dropped = exited_cubes.get(CubeColor.BLACK, 0)
-    track_capacity = engine.state.config.corruption_track_capacity
+    total_exited = sum(exited_cubes.values())
+    buffer_overflow = total_exited == 0 and engine.state.config.enable_buffer_overflow
 
-    for _ in range(black_dropped):
-        engine.state.corruption_track += 1
-        if engine.state.corruption_track >= track_capacity:
-            if engine.state.current_version_index >= len(engine.state.version_deck) - 1:
-                # Singularity reached on v3.0!
-                engine.state.singularity_triggered = True
-                break
-            else:
-                # Upgrade to next version: forfeit unspent old ability, unlock new ability
-                old_version_str = engine.state.active_version.version_str
-                engine.state.corruption_track = 0
-                engine.state.current_version_index += 1
-                new_version_str = engine.state.active_version.version_str
-                for p in engine.state.players:
-                    p.mark_ability_forfeited(old_version_str)
-                    p.unlock_version_ability(new_version_str)
-                # Add new version upgrade payload to Staging Cup (drops starting next round)
-                new_version = engine.state.active_version
-                for color, count in new_version.get_staging_payload(engine.config.num_players).items():
-                    engine.state.staging_cup[color] = engine.state.staging_cup.get(color, 0) + count
+    if buffer_overflow:
+        engine.state.last_round_buffer_overflow = True
+        engine.state.total_buffer_overflows += 1
 
-    # Apply P2 (Chaos Profiteer) Star bonus: +$2 per exited black cube
-    if black_dropped > 0:
-        for player, rolled_dice, _ in player_commitments:
-            for die in rolled_dice:
-                if die.current_face and die.current_face.star_code == "P2":
-                    player.money += 2 * black_dropped
+        attack_strengths = {
+            CubeColor.RED: 0,
+            CubeColor.BLUE: 0,
+            CubeColor.GREEN: 0,
+        }
 
-    # Step 2B: Resolve Attack Cubes (Red, Blue, Green)
-    red_strength = exited_cubes.get(CubeColor.RED, 0)
-    blue_strength = exited_cubes.get(CubeColor.BLUE, 0)
-    green_strength = exited_cubes.get(CubeColor.GREEN, 0)
-
-    # Apply Active Version Directives to Attack Strength
-    active_directive = engine.state.active_directive_code
-    if active_directive == "CORRUPTED_KERNEL":
-        # Corrupted Kernel: If 2+ Black Cubes exit the tower this round, the Attack Color with the most exited cubes gains +2 Strength total.
-        if black_dropped >= engine.config.corrupted_kernel_black_threshold:
-            highest_color = max(
-                [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN],
-                key=lambda c: (
-                    exited_cubes.get(c, 0),
-                    c == CubeColor.RED,
-                    c == CubeColor.BLUE,
-                ),
+        # Inject buffer_overflow_cubes into staging_cup
+        for color, count in engine.state.config.buffer_overflow_cubes.items():
+            engine.state.staging_cup[color] = (
+                engine.state.staging_cup.get(color, 0) + count
             )
-            bonus = engine.config.corrupted_kernel_strength_bonus
-            if highest_color == CubeColor.RED:
-                red_strength += bonus
-            elif highest_color == CubeColor.BLUE:
-                blue_strength += bonus
-            elif highest_color == CubeColor.GREEN:
-                green_strength += bonus
 
-    attack_strengths = {
-        CubeColor.RED: red_strength,
-        CubeColor.BLUE: blue_strength,
-        CubeColor.GREEN: green_strength,
-    }
+        # Contractor Expiration: All remaining White Contractor dice across all players return to supply
+        for player in engine.state.players:
+            engine.state.contractor_supply += len(player.contractor_dice)
+            player.contractor_dice.clear()
+            player.hired_contractor_count = 0
+    else:
+        engine.state.last_round_buffer_overflow = False
 
-    # Resolve each player's committed shields against attacks
-    for player, rolled_dice, commitments in player_commitments:
-        resolve_player_defense_and_wear(
-            engine=engine,
-            player=player,
-            rolled_dice=rolled_dice,
-            commitments=commitments,
-            attack_strengths=attack_strengths,
-            exited_cubes=exited_cubes,
-            active_directive=active_directive,
-        )
+        # Step 2A: Resolve Black (Corruption) Cubes & Version Upgrades
+        black_dropped = exited_cubes.get(CubeColor.BLACK, 0)
+        track_capacity = engine.state.config.corruption_track_capacity
 
-    # Snowball Recycle: Exited Red, Blue, Green cubes return to Staging Cup
-    for color in [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN]:
-        engine.state.staging_cup[color] = (
-            engine.state.staging_cup.get(color, 0) + exited_cubes.get(color, 0)
-        )
+        for _ in range(black_dropped):
+            engine.state.corruption_track += 1
+            if engine.state.corruption_track >= track_capacity:
+                if engine.state.current_version_index >= len(engine.state.version_deck) - 1:
+                    # Singularity reached on v3.0!
+                    engine.state.singularity_triggered = True
+                    break
+                else:
+                    # Upgrade to next version: forfeit unspent old ability, unlock new ability
+                    old_version_str = engine.state.active_version.version_str
+                    engine.state.corruption_track = 0
+                    engine.state.current_version_index += 1
+                    new_version_str = engine.state.active_version.version_str
+                    for p in engine.state.players:
+                        p.mark_ability_forfeited(old_version_str)
+                        p.unlock_version_ability(new_version_str)
+                    # Add new version upgrade payload to Staging Cup (drops starting next round)
+                    new_version = engine.state.active_version
+                    for color, count in new_version.get_staging_payload(engine.config.num_players).items():
+                        engine.state.staging_cup[color] = engine.state.staging_cup.get(color, 0) + count
 
-    # Contractor Expiration: All remaining White Contractor dice across all players return to supply
-    for player in engine.state.players:
-        engine.state.contractor_supply += len(player.contractor_dice)
-        player.contractor_dice.clear()
-        player.hired_contractor_count = 0
+        # Apply P2 (Chaos Profiteer) Star bonus: +$2 per exited black cube
+        if black_dropped > 0:
+            for player, rolled_dice, _ in player_commitments:
+                for die in rolled_dice:
+                    if die.current_face and die.current_face.star_code == "P2":
+                        player.money += 2 * black_dropped
 
-    # Step 2C: Check End Game Triggers
-    any_patient_zero = any(p.is_patient_zero for p in engine.state.players)
-    all_patient_zero = all(p.is_patient_zero for p in engine.state.players)
+        # Step 2B: Resolve Attack Cubes (Red, Blue, Green)
+        red_strength = exited_cubes.get(CubeColor.RED, 0)
+        blue_strength = exited_cubes.get(CubeColor.BLUE, 0)
+        green_strength = exited_cubes.get(CubeColor.GREEN, 0)
 
-    if all_patient_zero:
-        engine.state.game_over = True
-        engine.state.is_final_round = False
-        engine.state.end_reason = EndGameReason.TOTAL_WIPEOUT
-    elif any_patient_zero:
-        engine.state.is_final_round = True
-        engine.state.end_reason = EndGameReason.PATIENT_ZERO
-    elif engine.state.singularity_triggered:
-        engine.state.is_final_round = True
-        engine.state.end_reason = EndGameReason.SINGULARITY
+        # Apply Active Version Directives to Attack Strength
+        active_directive = engine.state.active_directive_code
+        if active_directive == "CORRUPTED_KERNEL":
+            # Corrupted Kernel: If 2+ Black Cubes exit the tower this round, the Attack Color with the most exited cubes gains +2 Strength total.
+            if black_dropped >= engine.config.corrupted_kernel_black_threshold:
+                highest_color = max(
+                    [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN],
+                    key=lambda c: (
+                        exited_cubes.get(c, 0),
+                        c == CubeColor.RED,
+                        c == CubeColor.BLUE,
+                    ),
+                )
+                bonus = engine.config.corrupted_kernel_strength_bonus
+                if highest_color == CubeColor.RED:
+                    red_strength += bonus
+                elif highest_color == CubeColor.BLUE:
+                    blue_strength += bonus
+                elif highest_color == CubeColor.GREEN:
+                    green_strength += bonus
+
+        attack_strengths = {
+            CubeColor.RED: red_strength,
+            CubeColor.BLUE: blue_strength,
+            CubeColor.GREEN: green_strength,
+        }
+
+        # Resolve each player's committed shields against attacks
+        for player, rolled_dice, commitments in player_commitments:
+            resolve_player_defense_and_wear(
+                engine=engine,
+                player=player,
+                rolled_dice=rolled_dice,
+                commitments=commitments,
+                attack_strengths=attack_strengths,
+                exited_cubes=exited_cubes,
+                active_directive=active_directive,
+            )
+
+        # Snowball Recycle: Exited Red, Blue, Green cubes return to Staging Cup
+        for color in [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN]:
+            engine.state.staging_cup[color] = (
+                engine.state.staging_cup.get(color, 0) + exited_cubes.get(color, 0)
+            )
+
+        # Contractor Expiration: All remaining White Contractor dice across all players return to supply
+        for player in engine.state.players:
+            engine.state.contractor_supply += len(player.contractor_dice)
+            player.contractor_dice.clear()
+            player.hired_contractor_count = 0
+
+        # Step 2C: Check End Game Triggers
+        any_patient_zero = any(p.is_patient_zero for p in engine.state.players)
+        all_patient_zero = all(p.is_patient_zero for p in engine.state.players)
+
+        if all_patient_zero:
+            engine.state.game_over = True
+            engine.state.is_final_round = False
+            engine.state.end_reason = EndGameReason.TOTAL_WIPEOUT
+        elif any_patient_zero:
+            engine.state.is_final_round = True
+            engine.state.end_reason = EndGameReason.PATIENT_ZERO
+        elif engine.state.singularity_triggered:
+            engine.state.is_final_round = True
+            engine.state.end_reason = EndGameReason.SINGULARITY
 
     # Create Round Telemetry snapshot
     snapshots = [
@@ -158,6 +185,7 @@ def execute_phase_2(
         stuck_cubes_after=stuck_after,
         attack_strengths=attack_strengths,
         player_snapshots=snapshots,
+        buffer_overflow=buffer_overflow,
     )
     engine.telemetry_history.append(telemetry)
     return telemetry

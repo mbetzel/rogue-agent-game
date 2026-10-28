@@ -26,9 +26,16 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Evaluated archetype balance parity, diagnosed The Cipher's free-die anomaly, approved 5/6 archetypes, proposed $2 discount retune for The Cipher, and logged Section 12 in `FINDINGS.md`.
 - [x] **Phase 14: Codebase & Architecture Refactoring (Simulation Engine & Web Client)**
   - [x] *Bot Archetypes Package (`sim/bots/`):* Decomposed monolithic 1,825-line `sim/bots.py` into dedicated modules (`base.py`, `adaptive_balanced.py`, `secops_turtle.py`, `venture_greed.py`, `accelerationist.py`, `reckless_saboteur.py`, and `__init__.py`).
-  - [x] *Game Engine Package (`sim/engine/`):* Decomposed monolithic 1,389-line `sim/engine.py` into phase-based modules (`state.py`, `phase1_boot.py`, `phase2_threat.py`, `phase3_ops.py`, `end_game.py`, `core.py`, and `__init__.py`).
+  - [x] *Game Engine Package (`sim/engine/`):* Decomposed monolithic 1,389-line `sim/engine.py` into phase-based modules (`state.py`, `phase1_boot.py`, `phase2_threat.py`, `phase3_ops.py`, end_game.py, `core.py`, and `__init__.py`).
   - [x] *Web Client Componentization (`web/static/js/`):* Decomposed monolithic 1,351-line `web/static/app.js` into standard browser ES modules (`state.js`, `api.js`, `main.js`, and `components/{header, compiler, market, player_mats, action_dock, event_log, modals}.js`), preserving 100% backward compatibility for inline HTML handlers.
   - [x] *Automated Verification:* Verified all 209 unit tests pass cleanly via WSL (`python3 -m unittest discover -s tests -t .`).
+- [x] **Phase 15: Compiler Buffer Overflow & Tower Priming (`v0.9.1` Baseline)**
+  - [x] *Design Alignment:* Rules signed off by User: Setup Pre-Seed Drop (`1 Red, 1 Blue, 1 Green, 1 Black`; exited discarded, stuck cubes prime the baffles) + Empty Tray / Buffer Overflow rule (if 0 cubes of any color exit in Phase 2, seed `1 Red, 1 Blue, 1 Green` into Staging Cup for next compile).
+  - [x] *Technical Architecture Spec (`principal-engineer`):* Schema & contract updates in `sim/config.py`, `sim/engine/core.py`, and `sim/engine/phase2_threat.py`.
+  - [x] *Engine Implementation (`senior-engineer`):* Implement pre-seed in `GameEngine.__init__`, empty-tray buffer overflow in `execute_phase_2`, event log in web controller, and write unit tests.
+  - [x] *Code Review Gate (`staff-engineer`):* Verified rules fidelity and 100% test pass via WSL (225/225 tests passing).
+  - [x] *Print-and-Play & Player Aid Updates (`graphic-designer`):* Updated `pnp/generate_pnp.py` (Central Board, Market Board, and 4x Player Pocket Aids) and regenerated all 5 PDF packs.
+  - [x] *Telemetry & Balance Log (`product-owner` / `game-designer`):* Ran 3,000-match verification sweep and logged Section 4 in `FINDINGS.md`.
 
 ---
 
@@ -42,7 +49,7 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
 
 ## 2. Multi-Agent SDLC & Subagent Pipeline
 
-All simulation development and balance testing follows a structured **5-subagent SDLC**, coordinated by the primary session agent (**Orchestrator**). At the start of an implementation or testing session, the Orchestrator registers these subagent types (`define_subagent`) and routes artifacts across strict quality gates.
+All simulation development and balance testing follows a structured **6-subagent SDLC**, coordinated by the primary session agent (**Orchestrator**). At the start of an implementation or testing session, the Orchestrator registers these subagent types (`define_subagent`) and routes artifacts across strict quality gates.
 
 ### A. Subagent Roster & Separation of Duties
 
@@ -53,6 +60,7 @@ All simulation development and balance testing follows a structured **5-subagent
 | **`staff-engineer`** | Staff Engineer | Read + WSL Verify *(no file edits)* | Performs independent code & rules-fidelity review. Audits `sim/` line-by-line against [RULES.md](./RULES.md) edge cases, seed reproducibility, performance, and test coverage gaps without directly patching source files. | Explicit `APPROVED` sign-off, or `CHANGES_REQUESTED` with file/line citations back to `senior-engineer`. |
 | **`product-owner`** | Product Owner | Read + WSL Execute *(data output only)* | Designs scenario matrices around open design questions, runs Monte Carlo sweeps (`python3 -m sim.experiments`), enforces sample-size/seed hygiene, captures outlier game seeds, and compiles structured telemetry tables. | Reproducible quantitative dataset across all target parameter cells and bot pods. |
 | **`game-designer`** | Game Designer | Read-only | Reviews Product Owner telemetry against Core Design Pillars and "Healthy Game" targets, validates data points for anomalies or degenerate strategies, requests follow-up slices if needed, and proposes `[TUNE]` or mechanical changes. | Evidence-backed balance critique & concrete rule/`[TUNE]` change proposals for `FINDINGS.md` and User sign-off. |
+| **`graphic-designer`** | Graphic Designer & PnP Specialist | Read / Write / WSL | Maintains physical print-and-play PDF assets (`pnp/*.pdf`), visual reference aids, central boards, player mats, card layouts, typography, and sells sheets (`pnp/`, `SELL_SHEET.*`) in lockstep with rules changes. | Up-to-date, printable PnP PDF assets (`pnp/generate_pnp.py`), verified visual reference aids, and design system documentation. |
 
 ### B. Delivery & Iteration Flow
 
@@ -67,6 +75,8 @@ flowchart TD
     PO -- "Telemetry Package" --> GD["Game Designer: Validate Data & Propose Changes"]
     GD -- "Need Targeted Scenario Slice" --> PO
     GD -- "Balance Report & Rule Proposals" --> OUT["Log in FINDINGS.md + User Sign-Off for Next Cycle"]
+    STE -- "Approved" --> GDES["Graphic Designer: Update PnP Assets & Player Aids"]
+    GDES -- "Regenerate PDFs & Assets" --> OUT
 ```
 
 ### C. Operational Guardrails

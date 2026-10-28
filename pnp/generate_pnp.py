@@ -1,4 +1,4 @@
-"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.9.0).
+"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.9.1 Baseline / Phase 15).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
   - 01_Player_Boards.pdf (6 pages — 1 per Consultancy Archetype, matching Wireframe Page 1)
@@ -19,7 +19,7 @@ from pnp.pdf_engine import PALETTE, Color, PDFDocument, PDFPage, measure_text
 
 
 # =============================================================================
-# Canonical Game Data (Synchronized 1:1 with RULES.md v0.9.0 & sim/entities.py)
+# Canonical Game Data (Synchronized 1:1 with RULES.md v0.9.1 & sim/entities.py)
 # =============================================================================
 
 @dataclass(frozen=True)
@@ -846,6 +846,7 @@ def render_agent_board(page: PDFPage) -> None:
                 "**Drop** entire Staging Cup into Cube Tower.\n"
                 "**2A.** Resolve {BLACK} Black Cubes on Corruption Track.\n"
                 "**2B.** Resolve {RED} {BLUE} {GREEN} vs Shields; apply Wear & Damage; recycle exited {RED} {BLUE} {GREEN} -> Staging Cup.\n"
+                "**Empty Tray (Buffer Overflow):** If 0 cubes exit into tray, no corruption/attacks occur (shields stay Ready). Idle cycle injects **+1** {RED}, **+1** {BLUE}, **+1** {GREEN} from supply into Staging Cup for next round.\n"
                 "**2C. End Check:** **Singularity** OR any player **<= 0 Secrets** triggers **Final Round** *(Patient Zero skips P3; survivors take 1 final P3; skip P3 if ALL breach)*."
             ),
         ),
@@ -914,6 +915,7 @@ def render_market_board(page: PDFPage) -> None:
         "- **Siphon:** +1 {BLACK}",
         size=6.7, leading=9.8, color=PALETTE["ink_soft"],
     )
+    page.text(146.0, ty + 118.0, "Setup Priming: Drop 1 R/B/G/Black into tower; stuck prime R1.", font="italic", size=5.6, color=PALETTE["muted"], align="center")
 
     # 2. Phase 2 Exit Sorting Tray (x = 264, w = 212)
     ex_x = 264.0
@@ -1017,16 +1019,16 @@ def render_market_board(page: PDFPage) -> None:
     fy, fh = 508.0, 70.0
     fw = (712.0 - 14.0) / 2.0  # 349.0 pt each
 
-    # Left: Setup by Player Count
+    # Left: Setup by Player Count & Compiler Priming
     page.rect(40.0, fy, fw, fh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
     page.rect(40.0, fy, fw, 16.5, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.7)
-    page.text(48.0, fy + 11.8, "SETUP QUICK-REFERENCE BY PLAYER COUNT", font="bold", size=7.8, color=PALETTE["ink"])
+    page.text(48.0, fy + 11.8, "SETUP QUICK-REFERENCE & COMPILER PRIMING", font="bold", size=7.8, color=PALETTE["ink"])
     page.rich_paragraph(
-        48.0, fy + 29.0, fw - 16.0,
-        "- **2 Players:** $7  |  **8 Secrets**  |  **2** {WRENCH}  |  **4 Dice/color**  |  *v2.0 & v3.0 Payloads: -1 Attack Cube*\n"
-        "- **3 Players:** $7  |  **7 Secrets**  |  **1** {WRENCH}  |  **6 Dice/color**  |  *Standard Version Payloads*\n"
-        "- **4 Players:** $7  |  **7 Secrets**  |  **1** {WRENCH}  |  **8 Dice/color**  |  *Standard Version Payloads*",
-        size=6.9, leading=11.8, color=PALETTE["ink"],
+        48.0, fy + 26.5, fw - 16.0,
+        "- **2 Players:** $7  |  **8 Secrets**  |  **2** {WRENCH}  |  **4 Dice/col**  |  *v2.0 & v3.0 Payloads: -1 Attack Cube*\n"
+        "- **3P:** $7 | **7 Secrets** | **1** {WRENCH} | **6 Dice/col**  |  **4P:** $7 | **7 Secrets** | **1** {WRENCH} | **8 Dice/col**  *(Standard Payloads)*\n"
+        "- **Setup:** Drop 1 {RED} Red, 1 {BLUE} Blue, 1 {GREEN} Green, 1 {BLACK} Black into empty tower. Return exited cubes to supply; stuck cubes prime Round 1.",
+        size=6.5, leading=9.5, color=PALETTE["ink"],
     )
 
     # Right: Portfolio Scoring & End-Game Triggers
@@ -1233,11 +1235,11 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
             fh = y + ch - fy
             page.rect(x, fy, cw, fh, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.7)
             page.rich_paragraph(
-                x + 6.0, fy + 11.5, cw - 12.0,
+                x + 6.0, fy + 10.5, cw - 12.0,
                 "**P1:** +1{BLACK} -> Hire {WHITE} ($1/$2/$3) -> Roll -> 2 Free Rerolls *(1{WRENCH} unlocks {LOCK})* -> Shields & `/` -> Gain **$** & {WRENCH} *(max 3)*.\n"
-                "**P2:** {BLACK} Track (4=Upgr) -> Shields *(active -> Unpatched)* -> Dmg: {RED}-$1->{WRENCH}->Secret | {BLUE}-1 Secret | {GREEN}Wear Ready *({YELLOW}* 1st!)*.\n"
+                "**P2:** {BLACK} Track (4=Upgr) -> Shields *(hit->Unpatched)* -> Dmg: {RED}-$1->{WRENCH}->Secret | {BLUE}-1 Secret | {GREEN}Wear Ready *({YELLOW}* 1st!). *(0 cubes exit = Buffer Overflow: +1 R/B/G to Cup for next compile)*.\n"
                 "**P3:** **Buy <=2** | **Patch:** 1{WRENCH} or $2 | **Siphon (1x):** -1 Secret, +1{BLACK}, Wear 1 Ready => **+$3**.  **VP:** Secret=4, Die=3/4, $2=1.",
-                size=5.95, leading=8.8, color=PALETTE["ink"],
+                size=5.6, leading=8.1, color=PALETTE["ink"],
             )
 
 

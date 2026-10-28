@@ -61,12 +61,18 @@ def compile_drop(controller: GameController) -> Dict[str, Any]:
         "singularity_triggered": controller.state.singularity_triggered,
         "is_final_round": controller.state.is_final_round,
         "game_over": controller.state.game_over,
+        "buffer_overflow": getattr(telemetry, "buffer_overflow", False),
     }
 
-    exited = controller.last_compile_result["exited_cubes"]
-    controller.event_log.append(
-        f"Cube Tower Drop results: {exited['red']} Red, {exited['blue']} Blue, {exited['green']} Green, {exited['black']} Black."
-    )
+    if getattr(telemetry, "buffer_overflow", False):
+        controller.event_log.append(
+            "BUFFER OVERFLOW! 0 cubes exited the compiler. Idle cycle injects 1 Red, 1 Blue, 1 Green into Staging Cup."
+        )
+    else:
+        exited = controller.last_compile_result["exited_cubes"]
+        controller.event_log.append(
+            f"Cube Tower Drop results: {exited['red']} Red, {exited['blue']} Blue, {exited['green']} Green, {exited['black']} Black."
+        )
 
     # Check end game triggers from Step 2C
     if controller.state.game_over:

@@ -58,9 +58,10 @@ When the dust settles, any consultancy that suffers a **Total Data Breach** (`<=
 
 ## 3. Setup
 
-1. **SETEC Roadmap:** Deal **1 `v1.0` card**, **1 `v2.0` card**, and **1 `v3.0` card** face-up in a row next to the Cube Tower. Place the Version Marker on `v1.0`.
+1. **SETEC Roadmap & Compiler Priming:** Deal **1 `v1.0` card**, **1 `v2.0` card**, and **1 `v3.0` card** face-up in a row next to the Cube Tower. Place the Version Marker on `v1.0`.
    * Each Version card has a **Corruption Track** equal to **`4` spaces** (flat across all player counts) `[TUNE]` (12 total Black cubes to Singularity).
-   * Place the starting Attack Cubes listed on the `v1.0` card plus `1 Black Cube` into the **Staging Cup** (baseline: `1 Red, 1 Blue, 1 Green, 1 Black`). The Cube Tower starts empty.
+   * **Prime the Compiler (Pre-Seed Drop):** Before populating the Staging Cup, take **`1 Red, 1 Blue, 1 Green, and 1 Black Cube`** (4 cubes total) from the supply and drop them into the empty Cube Tower. Any cubes that exit into the tray are **returned to the general supply**. Any cubes that remain stuck on the internal baffles stay inside the tower to prime the compiler for Round 1.
+   * Place the starting Attack Cubes listed on the `v1.0` card plus `1 Black Cube` into the **Staging Cup** (baseline: `1 Red, 1 Blue, 1 Green, 1 Black`).
 2. **Software Market:** For each of the 5 Colored Dice (**Red, Blue, Green, Yellow, Purple**), shuffle its Variant Cards, place **1 Variant Card** face-up in the center, and stack **`2 × Players`** dice of that color on it.
 3. **Consultancy Setup (Each Player):**
    * Choose or randomly deal **1 Consultancy Archetype Card** to each player. Place it beside your terminal mat with all 3 Version slots (`v1.0`, `v2.0`, `v3.0`) toggled to **Ready**.
@@ -141,6 +142,9 @@ Calculate the total attack strength of **Red**, **Blue**, and **Green** (exited 
    * **Green (Malware / Logic Bombs):** For each unblocked Green cube, move **`1` Ready die** (that was not already worn down this round) to your **Unpatched Zone**. **Contractor Sacrifice:** You may choose to **discard `1` active White Contractor die** to the supply instead of demoting a permanent Ready die! *(**Commercial Exposure (Yellow Dice):** Commercial software attracts heavy scrutiny. Contractor Sacrifice cannot be used to prevent Green malware from demoting a Yellow die. When resolving unblocked Green malware, Ready Yellow dice must be demoted to Unpatched first before Contractor Sacrifice or non-Yellow dice can absorb malware).* If you have **no Ready dice or Contractor dice left**, you must instead **Destroy (return to box) `1` Unpatched die** of your choice! *(If you have 0 dice remaining anywhere, track unfulfilled destructions for wipeout scoring).*
    * **Patient Zero Check:** If your Corporate Secrets reach **`0` (or below)**, your consultancy suffers a **Total Data Breach** and you become **Patient Zero** *(track negative Secrets below 0 if needed for total-wipeout tiebreakers)*.
 3. **Snowball Recycle & Contractor Expiration:** Place **all exited Red, Blue, and Green cubes** from the tray back into the **Staging Cup** for next round. All White Contractor dice (whether they blocked, sacrificed, or remained unused) return to the general supply.
+4. **Empty Tray (Compile Buffer Overflow):** If **`0 cubes of any color`** exit the tower into the tray this phase:
+   * No corruption advances and no attacks occur this round (unused permanent Shield dice return to your Ready Zone as normal).
+   * The compiler's idle cycle triggers an overflow: take **`1 Red, 1 Blue, and 1 Green Cube`** from the supply and place them into the **Staging Cup** for next round's compile (in addition to the standard Phase 1 Black Cube).
 
 #### Step 2C: Check End Game Triggers
 The current round is declared the **Final Round** if **either**:

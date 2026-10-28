@@ -96,6 +96,7 @@ class TestEnginePhases(unittest.TestCase):
 
         # Force 100% exit probability
         engine.state.tower.calculate_exit_probability = lambda count: 1.0
+        engine.state.tower.reset()
 
         # Stage 4 Black cubes to fill v1.0 track (flat capacity = 4 in v0.4)
         engine.state.staging_cup = {CubeColor.BLACK: 4, CubeColor.RED: 0, CubeColor.BLUE: 0, CubeColor.GREEN: 0}
@@ -119,6 +120,7 @@ class TestEnginePhases(unittest.TestCase):
         bot1 = DummyControlledBot(1)
         engine = GameEngine(cfg, [bot0, bot1], seed=1)
         engine.state.tower.calculate_exit_probability = lambda count: 1.0
+        engine.state.tower.reset()
 
         # Set version to v3.0 (index 2)
         engine.state.current_version_index = 2

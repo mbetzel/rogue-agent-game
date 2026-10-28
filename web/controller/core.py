@@ -159,8 +159,10 @@ class GameController:
         )
 
         variant_summary = ", ".join(v.code for v in self.state.variant_cards.values())
+        priming_stuck_total = sum(self.state.priming_stuck_cubes.values())
         self.event_log = [
             f"Game initialized with {num_players} corporations (Seed: {seed if seed is not None else 'auto'}).",
+            f"Compiler Primed: {priming_stuck_total} cubes lodged on internal baffles.",
             f"Active Version: {self.state.active_version.name} ({self.state.active_version.version_str}).",
             f"Active Variants: {variant_summary}.",
             f"CISO badge awarded to {self.player_meta[self.state.first_player_index]['name']}.",

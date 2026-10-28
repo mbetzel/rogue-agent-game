@@ -40,6 +40,7 @@ def serialize_end_game_result(controller: GameController, res: EndGameResult) ->
         "is_total_wipeout": res.is_total_wipeout,
         "singularity_reached": res.singularity_reached,
         "rankings": res.rankings,
+        "total_buffer_overflows": getattr(res, "total_buffer_overflows", 0),
     }
 
 

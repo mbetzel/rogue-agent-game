@@ -105,4 +105,5 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
         singularity_reached=engine.state.singularity_triggered,
         rankings=final_rankings,
         telemetry_history=engine.telemetry_history,
+        total_buffer_overflows=engine.state.total_buffer_overflows,
     )

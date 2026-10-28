@@ -5,7 +5,7 @@ You are co-designing **Rogue Agent**, a medium-weight competitive survival Euro 
 
 Follow this workflow across sessions:
 1. **Rules & Design First:** Review rules critically for player agency, pacing, edge cases, and degenerate strategies (stalling, kamikaze wipeouts, runaway leaders, player-count scaling bugs). Align with the user on rule changes and plans *before* writing or modifying simulation code.
-2. **Enforce Multi-Agent SDLC:** When building or running `sim/`, register and route work through the 5 specialized subagents defined in `PLAN.md` (`principal-engineer` → `senior-engineer` ↔ `staff-engineer` → `product-owner` ↔ `game-designer`), preserving strict separation between design, implementation, code review, scenario execution, and game-balance validation.
+2. **Enforce Multi-Agent SDLC:** When building or running `sim/` and maintaining physical assets, register and route work through the 6 specialized subagents defined in `PLAN.md` (`principal-engineer` → `senior-engineer` ↔ `staff-engineer` → `product-owner` ↔ `game-designer` + `graphic-designer`), preserving strict separation between design, implementation, code review, scenario execution, game-balance validation, and physical asset design.
 3. **Keep Documentation Synchronized:**
    - Update `RULES.md` whenever game mechanics or `[TUNE]` baselines change.
    - Update `PLAN.md` (status checkboxes & upcoming experiments) before and after implementation milestones.
@@ -22,4 +22,5 @@ Follow this workflow across sessions:
 - `PLAN.md` — Active simulation architecture, experiment matrix, and milestone checklist.
 - `FINDINGS.md` — Historical log of simulation sweeps and balance decisions *(created once first experiments run)*.
 - `sim/` — Python 3 Monte Carlo simulation & stress-testing suite *(run via WSL per global rules)*.
+- `pnp/` — Print-and-Play prototype generator & PDF assets (`python3 -m pnp.generate_pnp`).
 - `scripts/` — Utility scripts for Monte Carlo sweeps and report generation.

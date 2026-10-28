@@ -119,7 +119,18 @@ class GameEngine:
             rng=self.rng,
         )
 
+        self._prime_compiler()
+
         self.telemetry_history: List[RoundTelemetry] = []
+
+    def _prime_compiler(self) -> None:
+        """Executes Setup compiler priming (Pre-Seed Drop) per RULES.md Section 3 Step 1."""
+        if not self.config.enable_compiler_priming:
+            return
+        priming_cubes = dict(self.config.compiler_priming_cubes)
+        exited = self.state.tower.drop(priming_cubes, self.rng)
+        self.state.priming_exited_cubes = exited
+        self.state.priming_stuck_cubes = self.state.tower.get_stuck_copy()
 
     def _execute_phase_1(self) -> List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]]:
         return phase1_boot.execute_phase_1(self)

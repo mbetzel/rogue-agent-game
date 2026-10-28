@@ -172,6 +172,7 @@ class RoundTelemetry:
     stuck_cubes_after: Dict[CubeColor, int]
     attack_strengths: Dict[CubeColor, int]
     player_snapshots: List[Dict]
+    buffer_overflow: bool = False
 
 
 @dataclass
@@ -185,6 +186,7 @@ class EndGameResult:
     singularity_reached: bool
     rankings: List[Dict]
     telemetry_history: List[RoundTelemetry]
+    total_buffer_overflows: int = 0
 
 
 @dataclass
@@ -207,6 +209,24 @@ class GameState:
         }
     )
     tower: CubeTower = field(init=False)
+    priming_exited_cubes: Dict[CubeColor, int] = field(
+        default_factory=lambda: {
+            CubeColor.RED: 0,
+            CubeColor.BLUE: 0,
+            CubeColor.GREEN: 0,
+            CubeColor.BLACK: 0,
+        }
+    )
+    priming_stuck_cubes: Dict[CubeColor, int] = field(
+        default_factory=lambda: {
+            CubeColor.RED: 0,
+            CubeColor.BLUE: 0,
+            CubeColor.GREEN: 0,
+            CubeColor.BLACK: 0,
+        }
+    )
+    last_round_buffer_overflow: bool = False
+    total_buffer_overflows: int = 0
     first_player_index: int = 0
     current_round: int = 1
     game_over: bool = False

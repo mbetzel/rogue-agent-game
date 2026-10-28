@@ -103,6 +103,25 @@ class GameConfig:
     tower_base_exit_prob: float = 0.60
     tower_avalanche_scale: float = 0.05  # Extra exit probability per cube above capacity
 
+    # Compiler Priming & Buffer Overflow (v0.9.1 Baseline)
+    enable_compiler_priming: bool = True
+    compiler_priming_cubes: Dict[CubeColor, int] = field(
+        default_factory=lambda: {
+            CubeColor.RED: 1,
+            CubeColor.BLUE: 1,
+            CubeColor.GREEN: 1,
+            CubeColor.BLACK: 1,
+        }
+    )
+    enable_buffer_overflow: bool = True
+    buffer_overflow_cubes: Dict[CubeColor, int] = field(
+        default_factory=lambda: {
+            CubeColor.RED: 1,
+            CubeColor.BLUE: 1,
+            CubeColor.GREEN: 1,
+        }
+    )
+
     # Scoring weights (Portfolio Value)
     vp_per_secret: int = 4
     vp_per_die: Dict[DieColor, int] = field(

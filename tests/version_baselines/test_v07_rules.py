@@ -213,6 +213,7 @@ class TestV07Rules(unittest.TestCase):
             seed=42,
         )
         engine_2p.state.tower.calculate_exit_probability = lambda count: 1.0
+        engine_2p.state.tower.reset()
         engine_2p.state.staging_cup = {CubeColor.BLACK: 4, CubeColor.RED: 0, CubeColor.BLUE: 0, CubeColor.GREEN: 0}
         engine_2p._execute_phase_2([(engine_2p.state.players[0], [], {}), (engine_2p.state.players[1], [], {})])
 
@@ -227,6 +228,7 @@ class TestV07Rules(unittest.TestCase):
             seed=42,
         )
         engine_4p.state.tower.calculate_exit_probability = lambda count: 1.0
+        engine_4p.state.tower.reset()
         engine_4p.state.staging_cup = {CubeColor.BLACK: 4, CubeColor.RED: 0, CubeColor.BLUE: 0, CubeColor.GREEN: 0}
         engine_4p._execute_phase_2([(p, [], {}) for p in engine_4p.state.players])
 
