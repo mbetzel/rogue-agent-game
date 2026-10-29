@@ -146,8 +146,56 @@ class BaseBot:
         directive_code: str,
         rng: random.Random,
     ) -> List[int]:
-        """Returns indices of locked dice to unlock by spending 1 🔧 token each."""
-        return []
+        """Returns indices of locked dice to unlock by spending 1 🔧 token each (prioritizing colored glitches)."""
+        if player_state.patches <= 0:
+            return []
+        colored_glitches = [
+            idx for idx, d in enumerate(active_dice)
+            if d.is_locked and d.current_face and d.current_face.is_glitch and d.color != DieColor.WHITE
+        ]
+        other_locked = [
+            idx for idx, d in enumerate(active_dice)
+            if d.is_locked and idx not in colored_glitches
+        ]
+        candidates = colored_glitches + other_locked
+        return candidates[:player_state.patches]
+
+    def choose_glitch_demotion(
+        self,
+        player_state: PlayerState,
+        glitch_die: Optional[Die] = None,
+        active_dice: Optional[List[Die]] = None,
+        validated_commitments: Optional[Dict[int, ShieldColor]] = None,
+        rng: Optional[random.Random] = None,
+    ) -> Optional[Die]:
+        """Chooses a die to sacrifice/demote for Glitch Backlash Routine.
+
+        Default heuristic per RULES.md (v0.12.0):
+        1. Sacrifice a White contractor die first (if available in player_state.contractor_dice).
+        2. Else demote lowest VP uncommitted die in player_state.ready_dice, Gray first.
+        """
+        if player_state.contractor_dice:
+            return player_state.contractor_dice[0]
+
+        if not player_state.ready_dice:
+            return None
+
+        commitments = validated_commitments or {}
+        dice_pool = active_dice or player_state.ready_dice
+
+        def get_demotion_key(d: Die) -> Tuple[int, int, int, int]:
+            is_committed = 0
+            if d in dice_pool:
+                try:
+                    idx = dice_pool.index(d)
+                    if idx in commitments:
+                        is_committed = 1
+                except ValueError:
+                    pass
+            is_gray = 0 if d.color == DieColor.GRAY else 1
+            return (is_committed, is_gray, getattr(d, "vp", 0), getattr(d, "cost", 0))
+
+        return min(player_state.ready_dice, key=get_demotion_key)
 
     def choose_operator_ability(
         self,

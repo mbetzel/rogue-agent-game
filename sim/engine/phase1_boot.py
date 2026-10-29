@@ -30,8 +30,9 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
         if player.is_patient_zero:
             continue
 
-        player.contractor_dice = []
-        player.hired_contractor_count = 0
+        if not player.contractor_dice:
+            player.contractor_dice = []
+            player.hired_contractor_count = 0
 
         # Hook Phase 1 Step 2: The Operator (Redundant Crew)
         is_operator = (
@@ -335,6 +336,61 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
                 elif face.star_code == "P3":
                     if idx in validated_commitments:
                         player.p3_available = validated_commitments[idx]
+
+        # Glitch Backlash Routine (RULES.md v0.12.0)
+        # For each unresolved glitch face across active dice:
+        unresolved_glitches = [
+            d for d in active_dice
+            if d.current_face and d.current_face.is_glitch
+        ]
+        for g_die in unresolved_glitches:
+            chosen = player.bot.choose_glitch_demotion(
+                player_state=player,
+                glitch_die=g_die,
+                active_dice=active_dice,
+                validated_commitments=validated_commitments,
+                rng=engine.rng,
+            )
+            if chosen and (chosen in player.contractor_dice or chosen.color == DieColor.WHITE):
+                if chosen in player.contractor_dice:
+                    player.contractor_dice.remove(chosen)
+                elif player.contractor_dice:
+                    player.contractor_dice.pop(0)
+                engine.state.contractor_supply += 1
+                if chosen in active_dice:
+                    c_idx = active_dice.index(chosen)
+                    if c_idx in validated_commitments:
+                        del validated_commitments[c_idx]
+            elif chosen and chosen in player.ready_dice:
+                player.ready_dice.remove(chosen)
+                player.unpatched_dice.append(chosen)
+                if chosen in active_dice:
+                    r_idx = active_dice.index(chosen)
+                    if r_idx in validated_commitments:
+                        del validated_commitments[r_idx]
+            elif player.contractor_dice:
+                c_die = player.contractor_dice.pop(0)
+                engine.state.contractor_supply += 1
+                if c_die in active_dice:
+                    c_idx = active_dice.index(c_die)
+                    if c_idx in validated_commitments:
+                        del validated_commitments[c_idx]
+            elif player.ready_dice:
+                uncommitted = [
+                    d for d in player.ready_dice
+                    if d in active_dice and active_dice.index(d) not in validated_commitments
+                ]
+                candidates = uncommitted if uncommitted else list(player.ready_dice)
+                target = min(
+                    candidates,
+                    key=lambda d: (0 if d.color == DieColor.GRAY else 1, getattr(d, "vp", 0), getattr(d, "cost", 0)),
+                )
+                player.ready_dice.remove(target)
+                player.unpatched_dice.append(target)
+                if target in active_dice:
+                    t_idx = active_dice.index(target)
+                    if t_idx in validated_commitments:
+                        del validated_commitments[t_idx]
 
         player.patches = min(player.patches, engine.config.max_patch_tokens)
 

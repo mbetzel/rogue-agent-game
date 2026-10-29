@@ -3,7 +3,7 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
-- [x] **Rules Draft `v0.11.0`** captured in [RULES.md](./RULES.md)
+- [x] **Rules Draft `v0.12.0`** captured in [RULES.md](./RULES.md)
 - [x] **Multi-Agent SDLC Pipeline** defined in Section 2 below
 - [x] **Phases 1–10 (Core Sim, v0.3–v0.8 Baselines, Choice Faces, Variants):** Archived in [docs/archive/ROADMAP_HISTORY.md](docs/archive/ROADMAP_HISTORY.md)
 - [x] **Phase 11: Web UX Polish — Setup Randomization Variety & Rogue Agent Versions Roadmap**
@@ -51,6 +51,14 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Run Monte Carlo sweeps across 2P, 3P, and 4P pods to measure score deltas, cash exhaustion, and win flip rates.
   - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Validate portfolio health, confirm eliminated cash bloat, log Section 6 in `FINDINGS.md`.
   - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Update scoring rules on Player Aids and Reference sheets in `pnp/generate_pnp.py` and regenerate all 5 PDFs.
+- [x] **Phase 18: Push-Your-Luck Hardware Glitches & Colored Dice Recalibration (`v0.12.0` Baseline)**
+  - [x] *Design Alignment:* Solved block saturation; reduced Red/Blue/Green basic block to Block 1; diversified Face 2 economy; introduced Face 5 Glitch with active die demotion and White Contractor sacrifice; kept Face 6 single Star jackpot; verified The Prodigy once-per-version parity.
+  - [x] *Technical Architecture Spec (`principal-engineer`):* Module contracts for `Face`, `create_colored_die`, Phase 1 Step 6 Glitch Backlash Routine, bot heuristics in `BaseBot`, web schemas, and 16-test suite spec.
+  - [x] *Implementation (`senior-engineer`):* Updated `sim/entities.py`, `sim/engine/phase1_boot.py`, `sim/engine/core.py`, `sim/bots/`, `web/`, and implemented 16 unit tests in `tests/test_v120_rules.py` (253/253 tests passing via WSL).
+  - [x] *Code Review Gate (`staff-engineer`):* Verified rules fidelity, lock evaluation, commitment cleanup, and 100% test pass via WSL (APPROVED).
+  - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Ran 3,000-match Monte Carlo sweep across 2P, 3P, and 4P pods (`phase18_telemetry.json`).
+  - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Verified ~7.2–8.7 round pacing, 21%–30% Singularity rate, safe 1.4% early death rate, and logged Section 7 in `FINDINGS.md` and `RULES.md` (OFFICIALLY APPROVED).
+  - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Update dice reference charts and market card descriptions in `pnp/generate_pnp.py` and regenerate all 5 PDF packs.
 
 ---
 

@@ -112,13 +112,16 @@ class VentureGreedBot(BaseBot):
     ) -> List[int]:
         if player_state.patches <= 0:
             return []
-        unlocks: List[int] = []
-        for idx, die in enumerate(active_dice):
-            if len(unlocks) >= player_state.patches:
-                break
-            if die.is_locked and die.current_face and die.current_face.is_glitch:
-                unlocks.append(idx)
-        return unlocks
+        colored_glitches = [
+            idx for idx, d in enumerate(active_dice)
+            if d.is_locked and d.current_face and d.current_face.is_glitch and d.color != DieColor.WHITE
+        ]
+        other_locked = [
+            idx for idx, d in enumerate(active_dice)
+            if d.is_locked and idx not in colored_glitches
+        ]
+        candidates = colored_glitches + other_locked
+        return candidates[:player_state.patches]
 
     def choose_yahtzee_rerolls(
         self,

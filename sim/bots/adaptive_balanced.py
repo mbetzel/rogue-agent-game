@@ -137,13 +137,16 @@ class AdaptiveBalancedBot(BaseBot):
     ) -> List[int]:
         if player_state.patches <= 0:
             return []
-        unlocks: List[int] = []
-        for idx, die in enumerate(active_dice):
-            if len(unlocks) >= player_state.patches:
-                break
-            if die.is_locked:
-                unlocks.append(idx)
-        return unlocks
+        colored_glitches = [
+            idx for idx, d in enumerate(active_dice)
+            if d.is_locked and d.current_face and d.current_face.is_glitch and d.color != DieColor.WHITE
+        ]
+        other_locked = [
+            idx for idx, d in enumerate(active_dice)
+            if d.is_locked and idx not in colored_glitches
+        ]
+        candidates = colored_glitches + other_locked
+        return candidates[:player_state.patches]
 
     def choose_yahtzee_rerolls(
         self,
@@ -178,8 +181,12 @@ class AdaptiveBalancedBot(BaseBot):
         )
 
         rerolls: List[int] = []
+        is_prodigy = (
+            player_state.archetype is not None
+            and player_state.archetype.code == ArchetypeCode.PRODIGY
+        )
         for idx, die in enumerate(active_dice):
-            if die.is_locked:
+            if die.is_locked and not is_prodigy:
                 continue
             face = die.current_face
             if not face:

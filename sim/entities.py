@@ -603,7 +603,7 @@ def create_colored_die(
     die_id: int,
     variant_card: Optional[VariantCard] = None,
 ) -> Die:
-    """Creates a colored die of the specified color, applying the active Variant Card to faces 5 & 6."""
+    """Creates a colored die of the specified color per RULES.md (v0.12.0 Baseline)."""
     if color == DieColor.GRAY:
         return create_gray_die(die_id)
     if color == DieColor.WHITE:
@@ -611,22 +611,23 @@ def create_colored_die(
 
     star_face = variant_card.star_face if variant_card else Face(name=f"{color.value} ★", is_star=True)
     var_code = variant_card.code if variant_card else None
+    glitch_face = Face(name="Glitch (Locked)", is_glitch=True)
 
     if color == DieColor.RED:
         faces = [
-            Face(name="Block 2 Red", block_amount=2, shield_color=ShieldColor.RED),
-            Face(name="Block 2 Red", block_amount=2, shield_color=ShieldColor.RED),
+            Face(name="Block 1 Red", block_amount=1, shield_color=ShieldColor.RED),
             Face(name="+$2", money=2),
             Face(name="+$2", money=2),
-            star_face,
+            Face(name="+$2", money=2),
+            glitch_face,
             star_face,
         ]
         return Die(die_id=die_id, color=color, cost=4, vp=3, faces=faces, variant_code=var_code)
 
     elif color == DieColor.BLUE:
         faces = [
-            Face(name="Block 2 Blue", block_amount=2, shield_color=ShieldColor.BLUE),
-            Face(name="Block 2 Blue", block_amount=2, shield_color=ShieldColor.BLUE),
+            Face(name="Block 1 Blue", block_amount=1, shield_color=ShieldColor.BLUE),
+            Face(name="+1 🔧", patches=1),
             Face(name="+$1", money=1),
             Face(
                 name="Block 1 Blue / +1 🔧",
@@ -636,15 +637,15 @@ def create_colored_die(
                     Face("+1 🔧", patches=1),
                 ),
             ),
-            star_face,
+            glitch_face,
             star_face,
         ]
         return Die(die_id=die_id, color=color, cost=5, vp=4, faces=faces, variant_code=var_code)
 
     elif color == DieColor.GREEN:
         faces = [
-            Face(name="Block 2 Green", block_amount=2, shield_color=ShieldColor.GREEN),
-            Face(name="Block 2 Green", block_amount=2, shield_color=ShieldColor.GREEN),
+            Face(name="Block 1 Green", block_amount=1, shield_color=ShieldColor.GREEN),
+            Face(name="+1 🔧", patches=1),
             Face(name="+2 🔧", patches=2),
             Face(
                 name="+1 🔧 / +$1",
@@ -654,7 +655,7 @@ def create_colored_die(
                     Face("+$1", money=1),
                 ),
             ),
-            star_face,
+            glitch_face,
             star_face,
         ]
         return Die(die_id=die_id, color=color, cost=4, vp=3, faces=faces, variant_code=var_code)

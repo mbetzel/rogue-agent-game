@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.11.0)
+# Too Many Secrets — Rules Draft (v0.12.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -98,7 +98,7 @@ Each player’s consultancy archetype provides a powerful, specialized capabilit
    * Each player may perform up to **`2` free rerolls** of any subset of their rolled dice (3 rolls total).
    * Between rerolls, players may set aside (keep) any dice, or pick previously kept dice back up for subsequent rerolls.
    * **Locked Dice:** Certain conditions cause dice to be **Locked**:
-     * A White Contractor Die that rolls a **`Glitch (Locked)`** face is locked immediately.
+     * A die (White Contractor or Colored Red/Blue/Green) that rolls a **`Glitch (Locked)`** face is locked immediately.
      * Active **SETEC Version Directives** may lock specific faces (e.g., Cash in `v2.0 RaaS`, or Shields in `v3.0 Zero-Day Override`).
      * Locked dice **cannot** be rerolled during your free rerolls.
    * **Debug Action (`🔧` Token Utility):** At any time during your reroll sequence, you may spend **`1 🔧` token** from your pool (or permanently set aside and lock a rolled die showing `+1 🔧`) to **Unlock `1` locked die**, allowing it to be rerolled in remaining rerolls. *(Archetype Timing: **The Prodigy** may trigger Brute-Force Bypass here).*
@@ -108,9 +108,12 @@ Each player’s consultancy archetype provides a powerful, specialized capabilit
      * If a choice face offers a Shield option (e.g. `Block 1 Blue / +1 🔧` on Blue), the player decides whether to assign it to its Shield slot, or leave it in the Active Pool to generate its alternative resource in Step 6.
      * If a choice face offers alternative resources (e.g. `+$1 / +1 🔧` on Gray or `+1 🔧 / +$1` on Green), the player declares which resource the die will produce.
    * **Generic (`Any`) Shields** (including rolled White Contractor shields) must be committed to a specific color (`Red`, `Blue`, or `Green`) *before* Phase 2 begins.
-6. **Gain Resource Outputs (Simultaneous):**
-   * For all dice remaining in your Active Pool (unassigned to defense), collect any **`$` Money tokens**, **Patch Tokens (`🔧`)**, and immediate `★` outputs from their final rolled faces into your personal supply.
-   * You may hold at most **`3 🔧`** tokens at once `[TUNE]`. Dice showing `Glitch (Locked)` produce 0 outputs.
+6. **Gain Resource Outputs & Resolve Glitch Backlash (Simultaneous):**
+   * **Hardware Glitch Backlash:** For each active die showing an unresolved **`Glitch (Locked)`** face at the conclusion of rerolls, local hardware burns out:
+     * You must move **`1 active die`** from your roll to your **Unpatched Zone** (if this die was committed to a shield in Step 5, its shield commitment is removed).
+     * **Contractor Sacrifice:** If you have an active White Contractor die in your roll, you may choose to **discard `1` White Contractor die** back to the central supply instead of demoting a permanent Ready die!
+   * For all dice remaining in your Active Pool (unassigned to defense and not demoted), collect any **`$` Money tokens**, **Patch Tokens (`🔧`)**, and immediate `★` outputs from their final rolled faces into your personal supply.
+   * You may hold at most **`3 🔧`** tokens at once `[TUNE]`. Dice showing `Glitch (Locked)` produce 0 resource outputs.
 
 ---
 
@@ -205,14 +208,15 @@ Calculate **Portfolio Value** `[TUNE weights]`:
 | :--- | :---: | :---: | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Gray (Legacy)** | Starter | `0` | `Block 1 Any` | `Block 1 Any` | `+$1` | `+$1` | `+$1 / +1 🔧` | `+1 🔧` |
 | **White (Contractor)** | Prog. `$1/$2/$3` | `0` | `Block 1 Any` | `Block 1 Any` | `Block 1 Any` | `+$1` | `Glitch (Locked)` | `Glitch (Locked)` |
-| **Red (FinSec)** | `$4` | `3` | `Block 2 Red` | `Block 2 Red` | `+$2` | `+$2` | `Red ★` | `Red ★` |
-| **Blue (Firewall)** | `$5` | `4` | `Block 2 Blue` | `Block 2 Blue` | `+$1` | `Block 1 Blue / +1 🔧` | `Blue ★` | `Blue ★` |
-| **Green (Antivirus)** | `$4` | `3` | `Block 2 Green` | `Block 2 Green` | `+2 🔧` | `+1 🔧 / +$1` | `Green ★` | `Green ★` |
+| **Red (FinSec)** | `$4` | `3` | `Block 1 Red` | `+$2` | `+$2` | `+$2` | `Glitch (Locked)` | `Red ★` |
+| **Blue (Firewall)** | `$5` | `4` | `Block 1 Blue` | `+1 🔧` | `+$1` | `Block 1 Blue / +1 🔧` | `Glitch (Locked)` | `Blue ★` |
+| **Green (Antivirus)** | `$4` | `3` | `Block 1 Green` | `+1 🔧` | `+2 🔧` | `+1 🔧 / +$1` | `Glitch (Locked)` | `Green ★` |
 | **Yellow (Commercial)**| `$5` | `4` | `+$3` | `+$2` | `+$2` | `+$1 & +1 🔧` | `Yellow ★` | `Yellow ★` |
 | **Purple (Black-Hat)** | `$4` | `3` | `Block 1 Any` | `Block 1 Any` | `+$2` | `+$1 & +1 🔧` | `Purple ★` | `Purple ★` |
 
 * **Choice Faces (`/`):** Faces with a slash (`/`) indicate a Choice Face. During Phase 1 Step 5, the player declares which of the two options the die fulfills for this round.
   * **Directive Interactions:** A choice face displaying a Cash option (e.g. `+$1 / +1 🔧` on Gray or `+1 🔧 / +$1` on Green) is treated as a Cash face and is immediately locked by `v2.0 RaaS` Encrypted Memory. A choice face displaying a Shield option (e.g. `Block 1 Blue / +1 🔧` on Blue) is treated as a Shield face and is immediately locked by `v3.0 Zero-Day Override` Kernel Lock. Locked dice can be unlocked using `1 🔧` (Debug Action).
+* **Hardware Glitch Faces (`Glitch (Locked)`):** Face 5 on Red, Blue, and Green represents a push-your-luck hardware glitch. When rolled, the die is locked immediately. In Step 6, each unresolved glitch face requires the player to move 1 active die to their Unpatched Zone (or sacrifice an active White Contractor die to the central supply). Glitch faces produce 0 shields and 0 resource outputs.
 
 ### B. Sample Module Variant Cards (`★` Effects)
 * **Red `★` Variants:**

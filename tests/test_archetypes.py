@@ -420,7 +420,7 @@ class TestOperatorAndProdigy(unittest.TestCase):
         initial_money = player.money
         engine._execute_phase_1()
 
-        self.assertEqual(len(player.contractor_dice), 3)
+        self.assertEqual(player.hired_contractor_count, 3)
         self.assertEqual(len(money_snapshots), 2)
         self.assertEqual(money_snapshots[0], initial_money)  # Free first 2 dice
         self.assertEqual(money_snapshots[1], initial_money - 3)  # Charged $3 for 3rd die

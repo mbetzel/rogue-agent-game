@@ -134,15 +134,17 @@ export function renderPlayerMats() {
       const chip = document.createElement("div");
       const isLocked = Boolean(d.is_locked);
       const isContractor = Boolean(d.is_contractor || d.color === "white");
+      const isGlitch = Boolean(d.current_face && d.current_face.is_glitch);
       const isSelectedReroll = selectedRerollIndices.has(idx);
 
-      chip.className = `die-chip ${d.color} ${isLocked ? "locked" : ""} ${isSelectedReroll ? "selected-reroll" : ""}`;
+      chip.className = `die-chip ${d.color} ${isLocked ? "locked" : ""} ${isGlitch ? "glitch" : ""} ${isSelectedReroll ? "selected-reroll" : ""}`;
       const faceName = d.current_face ? d.current_face.name : "Unrolled";
 
       const isChoice = Boolean(d.current_face && d.current_face.is_choice);
       let badgeHtml = "";
       if (isContractor) badgeHtml += `<span class="badge-contractor">CONTRACTOR</span> `;
       if (isLocked) badgeHtml += `<span class="badge-locked">🔒 LOCKED</span> `;
+      if (isGlitch) badgeHtml += `<span class="badge-glitch">⚠️ GLITCH</span> `;
       if (isChoice) badgeHtml += `<span class="badge-choice">CHOICE</span> `;
 
       let faceNameDisplay = faceName;

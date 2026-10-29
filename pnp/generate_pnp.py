@@ -145,8 +145,8 @@ DICE_SPECS: List[DieSpec] = [
         subtitle="FinSec",
         cost_str="$4",
         vp_str="3 VP",
-        faces=("Block 2 {RED}", "Block 2 {RED}", "+$2", "+$2", "{RED} {STAR}", "{RED} {STAR}"),
-        notes="Heavy Ransomware defense + steady revenue. Faces 5-6 use active Red {STAR} Market Card.",
+        faces=("Block 1 {RED}", "+$2", "+$2", "+$2", "{LOCK} Glitch", "{RED} {STAR}"),
+        notes="FinSec revenue & defense. Face 5 Glitch: wear 1 active die. Face 6 Red {STAR}.",
     ),
     DieSpec(
         color_key="blue",
@@ -154,8 +154,8 @@ DICE_SPECS: List[DieSpec] = [
         subtitle="Firewall",
         cost_str="$5",
         vp_str="4 VP",
-        faces=("Block 2 {BLUE}", "Block 2 {BLUE}", "+$1", "Block 1 {BLUE} / +1 {WRENCH}", "{BLUE} {STAR}", "{BLUE} {STAR}"),
-        notes="High-VP Spyware defense. Face 4 Choice (/): assign as Block 1 {BLUE} shield OR keep for +1 {WRENCH}.",
+        faces=("Block 1 {BLUE}", "+1 {WRENCH}", "+$1", "Block 1 {BLUE} / +1 {WRENCH}", "{LOCK} Glitch", "{BLUE} {STAR}"),
+        notes="High-VP Spyware defense & patch hybrid. Face 5 Glitch. Face 6 Blue {STAR}.",
     ),
     DieSpec(
         color_key="green",
@@ -163,8 +163,8 @@ DICE_SPECS: List[DieSpec] = [
         subtitle="Antivirus",
         cost_str="$4",
         vp_str="3 VP",
-        faces=("Block 2 {GREEN}", "Block 2 {GREEN}", "+2 {WRENCH}", "+1 {WRENCH} / +$1", "{GREEN} {STAR}", "{GREEN} {STAR}"),
-        notes="Malware defense & {WRENCH} repair engine. Face 4 Choice (/): declare +1 {WRENCH} or +$1.",
+        faces=("Block 1 {GREEN}", "+1 {WRENCH}", "+2 {WRENCH}", "+1 {WRENCH} / +$1", "{LOCK} Glitch", "{GREEN} {STAR}"),
+        notes="Malware defense & patch engine. Face 5 Glitch. Face 6 Green {STAR}.",
     ),
     DieSpec(
         color_key="yellow",
@@ -206,21 +206,21 @@ VARIANT_CARDS: List[VariantCardSpec] = [
     # RED (R1-R3)
     VariantCardSpec(
         "R1", "red", "RED // FINSEC", "$4", "3 VP",
-        "{PIP1}{PIP2} Block 2 {RED}", "{PIP3}{PIP4} +$2",
+        "{PIP1} 1{RED}  |  {PIP2}{PIP3}{PIP4} +$2", "{PIP5} {LOCK}Glitch  |  {PIP6} {STAR}",
         "Ransom Insurance", "P1 BOOT + P2 DEFENSE",
         "**Block 1 {RED} Red** in Phase 2 **AND** gain **+$2** in Phase 1 Boot.",
         "Locks in v2.0 RaaS & v3.0 Zero-Day.",
     ),
     VariantCardSpec(
         "R2", "red", "RED // FINSEC", "$4", "3 VP",
-        "{PIP1}{PIP2} Block 2 {RED}", "{PIP3}{PIP4} +$2",
+        "{PIP1} 1{RED}  |  {PIP2}{PIP3}{PIP4} +$2", "{PIP5} {LOCK}Glitch  |  {PIP6} {STAR}",
         "Threat Bounty", "P2 DEFENSE + BONUS",
         "**Block 2 {RED} Red**; if you take **0 unblocked Red** damage this round, gain **+$2**.",
         "Locks in v3.0 Zero-Day (Shield).",
     ),
     VariantCardSpec(
         "R3", "red", "RED // FINSEC", "$4", "3 VP",
-        "{PIP1}{PIP2} Block 2 {RED}", "{PIP3}{PIP4} +$2",
+        "{PIP1} 1{RED}  |  {PIP2}{PIP3}{PIP4} +$2", "{PIP5} {LOCK}Glitch  |  {PIP6} {STAR}",
         "Short Squeeze", "P1 BOOT + P2 SURGE",
         "Gain **+$3** in Phase 1 (or **+$4** total if **3+ {RED} Red** cubes exit the tower in Phase 2).",
         "Locks in v2.0 RaaS (Cash).",
@@ -228,21 +228,21 @@ VARIANT_CARDS: List[VariantCardSpec] = [
     # BLUE (B1-B3)
     VariantCardSpec(
         "B1", "blue", "BLUE // FIREWALL", "$5", "4 VP",
-        "{PIP1}{PIP2} Block 2 {BLUE}", "{PIP3} +$1  |  {PIP4} 1{BLUE} / +1{WRENCH}",
+        "{PIP1} 1{BLUE} | {PIP2} +1{WRENCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{WRENCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Honeypot Telemetry", "P2 DEFENSE + BONUS",
         "**Block 2 {BLUE} Blue**; if **1+ {BLUE} Blue** cubes exit and you take **0 Blue** damage, gain **+$3**.",
         "Locks in v3.0 Zero-Day (Shield).",
     ),
     VariantCardSpec(
         "B2", "blue", "BLUE // FIREWALL", "$5", "4 VP",
-        "{PIP1}{PIP2} Block 2 {BLUE}", "{PIP3} +$1  |  {PIP4} 1{BLUE} / +1{WRENCH}",
+        "{PIP1} 1{BLUE} | {PIP2} +1{WRENCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{WRENCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Deep R&D Vault", "P2 DEF -OR- P3 OPS",
         "**Block 1 {BLUE} Blue**, **OR** leave unassigned to pay **$4** in Phase 3 for **+1 Secret** (max 10).",
         "Locks in v3.0 Zero-Day (Shield).",
     ),
     VariantCardSpec(
         "B3", "blue", "BLUE // FIREWALL", "$5", "4 VP",
-        "{PIP1}{PIP2} Block 2 {BLUE}", "{PIP3} +$1  |  {PIP4} 1{BLUE} / +1{WRENCH}",
+        "{PIP1} 1{BLUE} | {PIP2} +1{WRENCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{WRENCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Air-Gapped Backup", "P2 DEFENSE (WEAR REDIRECT)",
         "**Block 1 {BLUE} Blue**; when blocking, you may move **1 other Ready die** to Unpatched instead of this die.",
         "If no other Ready die, this die wears.",
@@ -250,21 +250,21 @@ VARIANT_CARDS: List[VariantCardSpec] = [
     # GREEN (G1-G3)
     VariantCardSpec(
         "G1", "green", "GREEN // ANTIVIRUS", "$4", "3 VP",
-        "{PIP1}{PIP2} Block 2 {GREEN}", "{PIP3} +2{WRENCH}  |  {PIP4} 1{WRENCH} / +$1",
+        "{PIP1} 1{GREEN} | {PIP2} +1{WRENCH} | {PIP3} +2{WRENCH}", "{PIP4} 1{WRENCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Self-Healing Kernel", "P1 BOOT + P2 DEFENSE",
         "**Block 2 {GREEN} Green** in Phase 2 **AND** gain **+1 {WRENCH}** in Phase 1 Boot.",
         "Locks in v3.0 Zero-Day (Shield).",
     ),
     VariantCardSpec(
         "G2", "green", "GREEN // ANTIVIRUS", "$4", "3 VP",
-        "{PIP1}{PIP2} Block 2 {GREEN}", "{PIP3} +2{WRENCH}  |  {PIP4} 1{WRENCH} / +$1",
+        "{PIP1} 1{GREEN} | {PIP2} +1{WRENCH} | {PIP3} +2{WRENCH}", "{PIP4} 1{WRENCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Universal Sandbox", "P1 BOOT + P2 DEFENSE",
         "**Block 1 Any** color in Phase 2 **AND** gain **+1 {WRENCH}** in Phase 1 Boot.",
         "Commit color in Step 5. Locks in v3.0.",
     ),
     VariantCardSpec(
         "G3", "green", "GREEN // ANTIVIRUS", "$4", "3 VP",
-        "{PIP1}{PIP2} Block 2 {GREEN}", "{PIP3} +2{WRENCH}  |  {PIP4} 1{WRENCH} / +$1",
+        "{PIP1} 1{GREEN} | {PIP2} +1{WRENCH} | {PIP3} +2{WRENCH}", "{PIP4} 1{WRENCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Live Reboot", "P1 BOOT OUTPUT",
         "Gain **+2 {WRENCH}** and **+$1** immediately in Phase 1 Step 6 (max 3 {WRENCH} held).",
         "Locks in v2.0 RaaS (Cash).",
@@ -983,9 +983,9 @@ def render_market_board(page: PDFPage) -> None:
     mw = (712.0 - 4 * mgap) / 5.0  # 134.0 pt wide each!
 
     market_colors = [
-        ("red", "RED // FINSEC", "$4", "3 VP", "{PIP1}{PIP2} Block 2 {RED}", "{PIP3}{PIP4} +$2", ""),
-        ("blue", "BLUE // FIREWALL", "$5", "4 VP", "{PIP1}{PIP2} Block 2 {BLUE}", "{PIP3} +$1 | {PIP4} 1{BLUE}/1{WRENCH}", ""),
-        ("green", "GREEN // ANTIVIRUS", "$4", "3 VP", "{PIP1}{PIP2} Block 2 {GREEN}", "{PIP3} +2{WRENCH} | {PIP4} 1{WRENCH}/$1", ""),
+        ("red", "RED // FINSEC", "$4", "3 VP", "{PIP1} 1{RED} | {PIP2}-{PIP4} +$2", "{PIP5} {LOCK}Glitch | {PIP6} {STAR}", ""),
+        ("blue", "BLUE // FIREWALL", "$5", "4 VP", "{PIP1} 1{BLUE} | {PIP2} +1{WRENCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{WRENCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}", ""),
+        ("green", "GREEN // ANTIVIRUS", "$4", "3 VP", "{PIP1} 1{GREEN} | {PIP2} +1{WRENCH} | {PIP3} +2{WRENCH}", "{PIP4} 1{WRENCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}", ""),
         ("yellow", "YELLOW // COMM.", "$5", "4 VP", "{PIP1} +$3 | {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH}", "EXPOSURE: {GREEN} hits {YELLOW} 1st!"),
         ("purple", "PURPLE // BLK-HAT", "$4", "3 VP", "{PIP1}{PIP2} Block 1 Any", "{PIP3} +$2 | {PIP4} $1 & 1{WRENCH}", ""),
     ]
@@ -1197,9 +1197,9 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
     compact_rows = [
         ("gray", "GRAY", "Start / 0V", ("1 Any", "1 Any", "+$1", "+$1", "$1 / 1{WRENCH}", "+1{WRENCH}")),
         ("white", "WHITE", "$1-$3 / 0V", ("1 Any", "1 Any", "1 Any", "+$1", "{LOCK}Glitch", "{LOCK}Glitch")),
-        ("red", "RED", "$4 / 3 VP", ("2 {RED}", "2 {RED}", "+$2", "+$2", "{RED} {STAR}", "{RED} {STAR}")),
-        ("blue", "BLUE", "$5 / 4 VP", ("2 {BLUE}", "2 {BLUE}", "+$1", "1{BLUE} / 1{WRENCH}", "{BLUE} {STAR}", "{BLUE} {STAR}")),
-        ("green", "GREEN", "$4 / 3 VP", ("2 {GREEN}", "2 {GREEN}", "+2{WRENCH}", "1{WRENCH} / $1", "{GREEN} {STAR}", "{GREEN} {STAR}")),
+        ("red", "RED", "$4 / 3 VP", ("1 {RED}", "+$2", "+$2", "+$2", "{LOCK}Glitch", "{RED} {STAR}")),
+        ("blue", "BLUE", "$5 / 4 VP", ("1 {BLUE}", "+1{WRENCH}", "+$1", "1{BLUE}/1{WRENCH}", "{LOCK}Glitch", "{BLUE} {STAR}")),
+        ("green", "GREEN", "$4 / 3 VP", ("1 {GREEN}", "+1{WRENCH}", "+2{WRENCH}", "1{WRENCH}/$1", "{LOCK}Glitch", "{GREEN} {STAR}")),
         ("yellow", "YELLOW*", "$5 / 4 VP", ("+$3", "+$2", "+$2", "$1 & 1{WRENCH}", "{YELLOW} {STAR}", "{YELLOW} {STAR}")),
         ("purple", "PURPLE", "$4 / 3 VP", ("1 Any", "1 Any", "+$2", "$1 & 1{WRENCH}", "{PURPLE} {STAR}", "{PURPLE} {STAR}")),
     ]
@@ -1249,7 +1249,7 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
             page.rect(x, fy, cw, fh, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.7)
             page.rich_paragraph(
                 x + 6.0, fy + 10.5, cw - 12.0,
-                "**P1:** +1{BLACK} -> Hire {WHITE} ($1/$2/$3) -> Roll -> 2 Free Rerolls *(1{WRENCH} unlocks {LOCK})* -> Shields & `/` -> Gain **$** & {WRENCH} *(max 3)*.\n"
+                "**P1:** +1{BLACK} -> Hire {WHITE} ($1/$2/$3) -> Roll -> 2 Free Rerolls *(1{WRENCH} unlocks {LOCK})* -> Shields & `/` -> Glitch Backlash *(Wear 1 or sacrifice {WHITE})* -> Gain **$** & {WRENCH}.\n"
                 "**P2:** {BLACK} Track (4/5/6=Upgr) -> Shields *(hit->Unpatched)* -> Dmg: {RED}-$1->{WRENCH}->Secret | {BLUE}-1 Secret | {GREEN}Wear Ready *({YELLOW}* 1st!). *(0 cubes exit = Buffer Overflow: +1 R/B/G to Cup for next compile)*.\n"
                 "**P3:** **Buy <=2** | **Patch:** 1{WRENCH} or $2 | **Siphon (1x):** -1 Secret, +1{BLACK}, Wear 1 Ready => **+$3**.  **VP:** Secret=4, Ready Die=3/4 (Unpatched=0), $2=1.",
                 size=5.6, leading=8.1, color=PALETTE["ink"],

@@ -109,6 +109,16 @@ export function renderActionDock() {
     }
 
     if (caps.can_commit || caps.can_reroll || caps.can_debug_unlock) {
+      const unresolvedGlitches = (human.rolled_pool || []).filter(
+        (d) => d && d.current_face && d.current_face.is_glitch
+      ).length;
+      if (unresolvedGlitches > 0) {
+        const glitchWarn = document.createElement("div");
+        glitchWarn.className = "glitch-warning";
+        glitchWarn.innerHTML = `<span>⚠️ ${unresolvedGlitches} Unresolved Hardware Glitch${unresolvedGlitches > 1 ? "es" : ""}: Committing triggers Backlash (sacrifices Contractor or demotes Ready die to Unpatched).</span>`;
+        controls.appendChild(glitchWarn);
+      }
+
       const rerollsLeft = human.rerolls_remaining !== undefined ? human.rerolls_remaining : 0;
       const maxRerolls = human.max_rerolls !== undefined ? human.max_rerolls : 2;
 

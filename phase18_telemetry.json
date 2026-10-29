@@ -1,0 +1,259 @@
+{
+  "2P": {
+    "sample_size": 1000,
+    "mean_rounds": 7.63,
+    "std_rounds": 1.47,
+    "min_rounds": 4,
+    "max_rounds": 12,
+    "singularity_rate_pct": 29.8,
+    "patient_zero_rate_pct": 49.3,
+    "total_wipeout_rate_pct": 20.9,
+    "total_breach_endings_pct": 70.2,
+    "early_death_pct": 0.6,
+    "mean_winning_score_vp": 15.9,
+    "mean_survivor_score_vp": 20.6,
+    "mean_survivor_cash": 0.48,
+    "mean_survivor_secrets": 4.48,
+    "mean_unpatched_colored_dice": 0.62,
+    "mean_vp_lost_to_debt": 2.15,
+    "survivors_carrying_debt_pct": 40.6,
+    "bot_wins": {
+      "AdaptiveBalancedBot": 717,
+      "SecOpsTurtleBot": 283
+    },
+    "bot_win_rates_pct": {
+      "AdaptiveBalancedBot": 71.7,
+      "SecOpsTurtleBot": 28.3
+    },
+    "outliers": {
+      "short_games_le_3": [],
+      "long_games_ge_14": [],
+      "total_wipeouts_sample": [
+        {
+          "seed": 51,
+          "rounds": 6
+        },
+        {
+          "seed": 54,
+          "rounds": 10
+        },
+        {
+          "seed": 67,
+          "rounds": 10
+        },
+        {
+          "seed": 70,
+          "rounds": 7
+        },
+        {
+          "seed": 74,
+          "rounds": 5
+        }
+      ]
+    }
+  },
+  "3P": {
+    "sample_size": 1000,
+    "mean_rounds": 8.69,
+    "std_rounds": 2.37,
+    "min_rounds": 3,
+    "max_rounds": 14,
+    "singularity_rate_pct": 22.5,
+    "patient_zero_rate_pct": 74.0,
+    "total_wipeout_rate_pct": 3.5,
+    "total_breach_endings_pct": 77.5,
+    "early_death_pct": 3.8,
+    "mean_winning_score_vp": 37.8,
+    "mean_survivor_score_vp": 29.8,
+    "mean_survivor_cash": 2.05,
+    "mean_survivor_secrets": 4.68,
+    "mean_unpatched_colored_dice": 1.01,
+    "mean_vp_lost_to_debt": 3.86,
+    "survivors_carrying_debt_pct": 39.4,
+    "bot_wins": {
+      "AdaptiveBalancedBot": 335,
+      "VentureGreedBot": 572,
+      "SecOpsTurtleBot": 93
+    },
+    "bot_win_rates_pct": {
+      "VentureGreedBot": 57.2,
+      "AdaptiveBalancedBot": 33.5,
+      "SecOpsTurtleBot": 9.3
+    },
+    "outliers": {
+      "short_games_le_3": [
+        {
+          "seed": 151,
+          "rounds": 3,
+          "reason": "patient_zero"
+        },
+        {
+          "seed": 181,
+          "rounds": 3,
+          "reason": "patient_zero"
+        },
+        {
+          "seed": 453,
+          "rounds": 3,
+          "reason": "patient_zero"
+        },
+        {
+          "seed": 456,
+          "rounds": 3,
+          "reason": "patient_zero"
+        },
+        {
+          "seed": 593,
+          "rounds": 3,
+          "reason": "patient_zero"
+        },
+        {
+          "seed": 620,
+          "rounds": 3,
+          "reason": "patient_zero"
+        },
+        {
+          "seed": 870,
+          "rounds": 3,
+          "reason": "patient_zero"
+        },
+        {
+          "seed": 942,
+          "rounds": 3,
+          "reason": "patient_zero"
+        }
+      ],
+      "long_games_ge_14": [
+        {
+          "seed": 279,
+          "rounds": 14,
+          "reason": "patient_zero"
+        },
+        {
+          "seed": 345,
+          "rounds": 14,
+          "reason": "patient_zero"
+        },
+        {
+          "seed": 581,
+          "rounds": 14,
+          "reason": "patient_zero"
+        },
+        {
+          "seed": 601,
+          "rounds": 14,
+          "reason": "patient_zero"
+        },
+        {
+          "seed": 679,
+          "rounds": 14,
+          "reason": "patient_zero"
+        },
+        {
+          "seed": 899,
+          "rounds": 14,
+          "reason": "patient_zero"
+        },
+        {
+          "seed": 934,
+          "rounds": 14,
+          "reason": "singularity"
+        },
+        {
+          "seed": 939,
+          "rounds": 14,
+          "reason": "patient_zero"
+        },
+        {
+          "seed": 952,
+          "rounds": 14,
+          "reason": "singularity"
+        },
+        {
+          "seed": 1000,
+          "rounds": 14,
+          "reason": "total_wipeout"
+        }
+      ],
+      "total_wipeouts_sample": [
+        {
+          "seed": 88,
+          "rounds": 8
+        },
+        {
+          "seed": 116,
+          "rounds": 7
+        },
+        {
+          "seed": 127,
+          "rounds": 10
+        },
+        {
+          "seed": 134,
+          "rounds": 5
+        },
+        {
+          "seed": 139,
+          "rounds": 8
+        }
+      ]
+    }
+  },
+  "4P": {
+    "sample_size": 1000,
+    "mean_rounds": 7.23,
+    "std_rounds": 1.54,
+    "min_rounds": 4,
+    "max_rounds": 13,
+    "singularity_rate_pct": 21.4,
+    "patient_zero_rate_pct": 74.8,
+    "total_wipeout_rate_pct": 3.8,
+    "total_breach_endings_pct": 78.6,
+    "early_death_pct": 1.4,
+    "mean_winning_score_vp": 40.2,
+    "mean_survivor_score_vp": 29.4,
+    "mean_survivor_cash": 1.65,
+    "mean_survivor_secrets": 4.9,
+    "mean_unpatched_colored_dice": 1.17,
+    "mean_vp_lost_to_debt": 4.11,
+    "survivors_carrying_debt_pct": 42.9,
+    "bot_wins": {
+      "VentureGreedBot": 573,
+      "AccelerationistBot": 112,
+      "AdaptiveBalancedBot": 224,
+      "SecOpsTurtleBot": 91
+    },
+    "bot_win_rates_pct": {
+      "VentureGreedBot": 57.3,
+      "AdaptiveBalancedBot": 22.4,
+      "AccelerationistBot": 11.2,
+      "SecOpsTurtleBot": 9.1
+    },
+    "outliers": {
+      "short_games_le_3": [],
+      "long_games_ge_14": [],
+      "total_wipeouts_sample": [
+        {
+          "seed": 110,
+          "rounds": 5
+        },
+        {
+          "seed": 121,
+          "rounds": 6
+        },
+        {
+          "seed": 144,
+          "rounds": 7
+        },
+        {
+          "seed": 207,
+          "rounds": 7
+        },
+        {
+          "seed": 242,
+          "rounds": 6
+        }
+      ]
+    }
+  }
+}

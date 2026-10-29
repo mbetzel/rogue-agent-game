@@ -419,15 +419,6 @@ def commit_defenses(
                     chosen = 0
                 die.chosen_choice_index = chosen
 
-    meta["commitments"] = {idx: color.value for idx, color in validated_commitments.items()}
-    meta["has_committed"] = True
-
-    # Group shield slots
-    slots = {"red": [], "blue": [], "green": []}
-    for idx, color in validated_commitments.items():
-        slots[color.value].append(rolled[idx])
-    meta["shield_slots"] = slots
-
     # Collect resource outputs on effective faces (RULES.md v0.8 Phase 1 Step 6)
     for idx, die in enumerate(rolled):
         face = die.current_face
@@ -461,6 +452,81 @@ def commit_defenses(
     spent_from_kept = meta.get("spent_from_kept", 0)
     player.patches = max(0, player.patches - spent_from_kept)
     player.patches = min(player.patches, controller.state.config.max_patch_tokens)
+
+    # Glitch Backlash Routine (RULES.md v0.12.0)
+    unresolved_glitches = [
+        d for d in rolled
+        if d.current_face and d.current_face.is_glitch
+    ]
+    for g_die in unresolved_glitches:
+        chosen = player.bot.choose_glitch_demotion(
+            player_state=player,
+            glitch_die=g_die,
+            active_dice=rolled,
+            validated_commitments=validated_commitments,
+            rng=controller.engine.rng,
+        )
+        if chosen and (chosen in player.contractor_dice or chosen.color == DieColor.WHITE):
+            if chosen in player.contractor_dice:
+                player.contractor_dice.remove(chosen)
+            elif player.contractor_dice:
+                player.contractor_dice.pop(0)
+            controller.state.contractor_supply += 1
+            if chosen in rolled:
+                c_idx = rolled.index(chosen)
+                if c_idx in validated_commitments:
+                    del validated_commitments[c_idx]
+            controller.event_log.append(
+                f"{meta['name']} resolved Glitch Backlash: sacrificed 1 White Contractor die to supply."
+            )
+        elif chosen and chosen in player.ready_dice:
+            player.ready_dice.remove(chosen)
+            player.unpatched_dice.append(chosen)
+            if chosen in rolled:
+                r_idx = rolled.index(chosen)
+                if r_idx in validated_commitments:
+                    del validated_commitments[r_idx]
+            controller.event_log.append(
+                f"{meta['name']} resolved Glitch Backlash: demoted {chosen.color.value.capitalize()} die to Unpatched Zone."
+            )
+        elif player.contractor_dice:
+            c_die = player.contractor_dice.pop(0)
+            controller.state.contractor_supply += 1
+            if c_die in rolled:
+                c_idx = rolled.index(c_die)
+                if c_idx in validated_commitments:
+                    del validated_commitments[c_idx]
+            controller.event_log.append(
+                f"{meta['name']} resolved Glitch Backlash: sacrificed 1 White Contractor die to supply."
+            )
+        elif player.ready_dice:
+            uncommitted = [
+                d for d in player.ready_dice
+                if d in rolled and rolled.index(d) not in validated_commitments
+            ]
+            candidates = uncommitted if uncommitted else list(player.ready_dice)
+            target = min(
+                candidates,
+                key=lambda d: (0 if d.color == DieColor.GRAY else 1, getattr(d, "vp", 0), getattr(d, "cost", 0)),
+            )
+            player.ready_dice.remove(target)
+            player.unpatched_dice.append(target)
+            if target in rolled:
+                t_idx = rolled.index(target)
+                if t_idx in validated_commitments:
+                    del validated_commitments[t_idx]
+            controller.event_log.append(
+                f"{meta['name']} resolved Glitch Backlash: demoted {target.color.value.capitalize()} die to Unpatched Zone."
+            )
+
+    meta["commitments"] = {idx: color.value for idx, color in validated_commitments.items()}
+    meta["has_committed"] = True
+
+    # Group shield slots
+    slots = {"red": [], "blue": [], "green": []}
+    for idx, color in validated_commitments.items():
+        slots[color.value].append(rolled[idx])
+    meta["shield_slots"] = slots
 
     # Track star ability eligibility for Phase 3
     for idx, die in enumerate(rolled):
@@ -761,6 +827,72 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
                         player.patches += 1
 
         player.patches = min(player.patches, controller.state.config.max_patch_tokens)
+
+        # Glitch Backlash Routine (RULES.md v0.12.0)
+        unresolved_glitches = [
+            d for d in active_dice
+            if d.current_face and d.current_face.is_glitch
+        ]
+        for g_die in unresolved_glitches:
+            chosen = player.bot.choose_glitch_demotion(
+                player_state=player,
+                glitch_die=g_die,
+                active_dice=active_dice,
+                validated_commitments=validated,
+                rng=controller.engine.rng,
+            )
+            if chosen and (chosen in player.contractor_dice or chosen.color == DieColor.WHITE):
+                if chosen in player.contractor_dice:
+                    player.contractor_dice.remove(chosen)
+                elif player.contractor_dice:
+                    player.contractor_dice.pop(0)
+                controller.state.contractor_supply += 1
+                if chosen in active_dice:
+                    c_idx = active_dice.index(chosen)
+                    if c_idx in validated:
+                        del validated[c_idx]
+                controller.event_log.append(
+                    f"{meta['name']} resolved Glitch Backlash: sacrificed 1 White Contractor die to supply."
+                )
+            elif chosen and chosen in player.ready_dice:
+                player.ready_dice.remove(chosen)
+                player.unpatched_dice.append(chosen)
+                if chosen in active_dice:
+                    r_idx = active_dice.index(chosen)
+                    if r_idx in validated:
+                        del validated[r_idx]
+                controller.event_log.append(
+                    f"{meta['name']} resolved Glitch Backlash: demoted {chosen.color.value.capitalize()} die to Unpatched Zone."
+                )
+            elif player.contractor_dice:
+                c_die = player.contractor_dice.pop(0)
+                controller.state.contractor_supply += 1
+                if c_die in active_dice:
+                    c_idx = active_dice.index(c_die)
+                    if c_idx in validated:
+                        del validated[c_idx]
+                controller.event_log.append(
+                    f"{meta['name']} resolved Glitch Backlash: sacrificed 1 White Contractor die to supply."
+                )
+            elif player.ready_dice:
+                uncommitted = [
+                    d for d in player.ready_dice
+                    if d in active_dice and active_dice.index(d) not in validated
+                ]
+                candidates = uncommitted if uncommitted else list(player.ready_dice)
+                target = min(
+                    candidates,
+                    key=lambda d: (0 if d.color == DieColor.GRAY else 1, getattr(d, "vp", 0), getattr(d, "cost", 0)),
+                )
+                player.ready_dice.remove(target)
+                player.unpatched_dice.append(target)
+                if target in active_dice:
+                    t_idx = active_dice.index(target)
+                    if t_idx in validated:
+                        del validated[t_idx]
+                controller.event_log.append(
+                    f"{meta['name']} resolved Glitch Backlash: demoted {target.color.value.capitalize()} die to Unpatched Zone."
+                )
 
         meta["rolled_pool"] = list(active_dice)
         meta["commitments"] = {idx: color.value for idx, color in validated.items()}
