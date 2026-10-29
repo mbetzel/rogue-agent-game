@@ -109,10 +109,10 @@ export function renderVersionsModal() {
       statusBadgeHtml = `<span class="version-status-badge upcoming">Upcoming</span>`;
     }
 
-    // Payload: If 2P and staging_payload_2p exists, use it
-    const payload = (is2P && ver.staging_payload_2p) ? ver.staging_payload_2p : ver.staging_payload;
+    // Payload
+    const payload = ver.staging_payload;
     const isStarting = idx === 0;
-    const payloadLabel = isStarting ? "Starting Payload:" : (is2P && ver.staging_payload_2p ? "Upgrade Payload (2P Scaled):" : "Upgrade Payload:");
+    const payloadLabel = isStarting ? "Starting Payload:" : "Upgrade Payload:";
 
     let cubesHtml = "";
     const colorOrder = ["red", "blue", "green", "black"];
@@ -148,15 +148,17 @@ export function renderVersionsModal() {
         </div>
       `;
     } else if (isCompleted) {
+      const cap = state.corruption_capacity || 4;
       corruptionInfo = `
         <div class="version-corruption-progress">
-          <span style="color: var(--text-dim);">Corruption: 4 / 4 (Resolved)</span>
+          <span style="color: var(--text-dim);">Corruption: ${cap} / ${cap} (Resolved)</span>
         </div>
       `;
     } else {
+      const cap = state.corruption_capacity || 4;
       corruptionInfo = `
         <div class="version-corruption-progress">
-          <span style="color: var(--text-dim);">Corruption: 0 / 4 (Pending)</span>
+          <span style="color: var(--text-dim);">Corruption: 0 / ${cap} (Pending)</span>
         </div>
       `;
     }

@@ -104,22 +104,30 @@ class TestWebAPI(unittest.TestCase):
     # 2. New Game Custom Player Counts (2P Resilience Buffer)
     # -------------------------------------------------------------------------
     def test_new_game_custom_player_counts(self) -> None:
-        """2P initializes with 8 Secrets & 2 Patches; 3P with 7 Secrets & 1 Patch."""
+        """2P and 3P initialize with 8 Secrets & 2 Patches; 4P with 10 Secrets & 2 Patches (v0.10.0)."""
         # 2 Players
         res2p = self._post("/api/game/new", {"num_players": 2, "seed": 100})
         state2p = res2p["state"]
         self.assertEqual(len(state2p["players"]), 2)
         p0_2p = state2p["players"][0]
         self.assertEqual(p0_2p["secrets"], 8)
-        self.assertEqual(p0_2p["patches"], 2)  # 2P Resilience Buffer
+        self.assertEqual(p0_2p["patches"], 2)
 
         # 3 Players
         res3p = self._post("/api/game/new", {"num_players": 3, "seed": 200})
         state3p = res3p["state"]
         self.assertEqual(len(state3p["players"]), 3)
         p0_3p = state3p["players"][0]
-        self.assertEqual(p0_3p["secrets"], 7)
-        self.assertEqual(p0_3p["patches"], 1)
+        self.assertEqual(p0_3p["secrets"], 8)
+        self.assertEqual(p0_3p["patches"], 2)
+
+        # 4 Players
+        res4p = self._post("/api/game/new", {"num_players": 4, "seed": 300})
+        state4p = res4p["state"]
+        self.assertEqual(len(state4p["players"]), 4)
+        p0_4p = state4p["players"][0]
+        self.assertEqual(p0_4p["secrets"], 10)
+        self.assertEqual(p0_4p["patches"], 2)
 
     # -------------------------------------------------------------------------
     # 3. Get State Endpoint

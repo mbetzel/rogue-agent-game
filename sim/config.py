@@ -52,10 +52,10 @@ class GameConfig:
     num_players: int = 4
     starting_money: int = 7  # [TUNE: $6–$8]
     starting_secrets_by_player_count: Dict[int, int] = field(
-        default_factory=lambda: {2: 8, 3: 7, 4: 7}
+        default_factory=lambda: {2: 8, 3: 8, 4: 10}
     )
     starting_patches_by_player_count: Dict[int, int] = field(
-        default_factory=lambda: {2: 2, 3: 1, 4: 1}
+        default_factory=lambda: {2: 2, 3: 2, 4: 2}
     )
     starting_secrets: Optional[int] = None  # Optional scalar override for backwards compatibility
     starting_patches: Optional[int] = None  # Optional scalar override for backwards compatibility
@@ -64,7 +64,10 @@ class GameConfig:
     dice_per_color_multiplier: int = 2  # 2 * num_players dice per colored die type
 
     # Corruption track
-    corruption_track_flat_capacity: int = 4  # v0.4: Flat 4 spaces across all player counts
+    corruption_track_capacity_by_player_count: Dict[int, int] = field(
+        default_factory=lambda: {2: 4, 3: 5, 4: 6}
+    )
+    corruption_track_flat_capacity: Optional[int] = None  # Scalar override for backwards compatibility / tests
     corruption_spaces_per_player: int = 1  # Deprecated in v0.4
     corruption_spaces_base: int = 1  # Deprecated in v0.4
 
@@ -144,8 +147,10 @@ class GameConfig:
 
     @property
     def corruption_track_capacity(self) -> int:
-        """Returns the number of spaces on the corruption track: flat 4 spaces across all player counts in v0.4."""
-        return self.corruption_track_flat_capacity
+        """Returns the number of spaces on the corruption track: 4 (2P), 5 (3P), 6 (4P) in v0.10.0."""
+        if self.corruption_track_flat_capacity is not None:
+            return self.corruption_track_flat_capacity
+        return self.corruption_track_capacity_by_player_count.get(self.num_players, 4)
 
     def get_starting_secrets(self, num_players: Optional[int] = None) -> int:
         """Returns starting secrets for the specified player count (or self.num_players).
@@ -155,7 +160,8 @@ class GameConfig:
         if self.starting_secrets is not None:
             return self.starting_secrets
         n = num_players if num_players is not None else self.num_players
-        return self.starting_secrets_by_player_count.get(n, 7)
+        fallback = self.starting_secrets_by_player_count.get(4, 8)
+        return self.starting_secrets_by_player_count.get(n, fallback)
 
     def get_starting_patches(self, num_players: Optional[int] = None) -> int:
         """Returns starting patch tokens for the specified player count (or self.num_players).
@@ -165,7 +171,8 @@ class GameConfig:
         if self.starting_patches is not None:
             return self.starting_patches
         n = num_players if num_players is not None else self.num_players
-        return self.starting_patches_by_player_count.get(n, 1)
+        fallback = self.starting_patches_by_player_count.get(4, 2)
+        return self.starting_patches_by_player_count.get(n, fallback)
 
     def get_contractor_cost_for_hire(self, count: int, already_hired: int = 0) -> int:
         """Returns the total cost to hire `count` additional contractors given `already_hired` in the current round."""

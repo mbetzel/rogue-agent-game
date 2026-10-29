@@ -36,6 +36,13 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Code Review Gate (`staff-engineer`):* Verified rules fidelity and 100% test pass via WSL (225/225 tests passing).
   - [x] *Print-and-Play & Player Aid Updates (`graphic-designer`):* Updated `pnp/generate_pnp.py` (Central Board, Market Board, and 4x Player Pocket Aids) and regenerated all 5 PDF packs.
   - [x] *Telemetry & Balance Log (`product-owner` / `game-designer`):* Ran 3,000-match verification sweep and logged Section 4 in `FINDINGS.md`.
+- [x] **Phase 16: Player-Count Pacing Parity & Scaling (`v0.10.0` Baseline)**
+  - [x] *Design Alignment:* Target consistent ~8.0-round match pacing across all player counts (2P, 3P, 4P). Evaluated Corruption Track scaling options (Option C selected: 4 spaces 2P, 5 spaces 3P, 6 spaces 4P). Scaled starting Corporate Secrets to 8 (2P) / 8 (3P) / 10 (4P); standardized starting Patches to 2 flat; standardized upgrade payloads to 2 cubes across all counts.
+  - [x] *Technical Architecture Spec (`principal-engineer`):* Dynamic `corruption_track_capacity_by_player_count` mapping, starting secret/patch getters in `sim/config.py`, and standardized 2-cube payloads in `sim/entities.py`.
+  - [x] *Engine & Web Implementation (`senior-engineer`):* Config properties in `sim/config.py`, payloads in `sim/entities.py`, UI version badge and track capacity updates in `web/static/index.html` & `web/static/js/components/modals.js`. Created unit test suite `tests/test_v100_rules.py` and updated regression baselines.
+  - [x] *Code Review Gate (`staff-engineer`):* Code review, contract verification, and 100% test pass via WSL (232/232 tests passing).
+  - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Synchronized `pnp/generate_pnp.py` and `pnp/README.md` to `v0.10.0` (6-space track with 4/5/6 milestone markers, 8/8/10 Secrets, 2 flat Patches, standard 2-cube payloads), regenerating all 5 PnP PDFs.
+  - [x] *Simulation Telemetry & Pacing Validation (`product-owner` / `game-designer`):* Executed 46,000+ Monte Carlo iterations, diagnosed PZR variance driver, and logged Section 5 in `FINDINGS.md`.
 
 ---
 

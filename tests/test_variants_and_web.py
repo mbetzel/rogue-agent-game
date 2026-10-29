@@ -545,8 +545,8 @@ class TestGroupCVersionDirectives(unittest.TestCase):
         corrupted_kernel = all_versions[5]
         self.assertEqual(corrupted_kernel.directive_code, "CORRUPTED_KERNEL")
 
-        # Staging payload verification: 4P is {RED: 2, BLUE: 1}, 2P is {RED: 1, BLUE: 1}
-        self.assertEqual(corrupted_kernel.get_staging_payload(4), {CubeColor.RED: 2, CubeColor.BLUE: 1})
+        # Staging payload verification (v0.10.0 standardized 2 cubes): {RED: 1, BLUE: 1}
+        self.assertEqual(corrupted_kernel.get_staging_payload(4), {CubeColor.RED: 1, CubeColor.BLUE: 1})
         self.assertEqual(corrupted_kernel.get_staging_payload(2), {CubeColor.RED: 1, CubeColor.BLUE: 1})
 
         custom_deck = [all_versions[0], all_versions[2], corrupted_kernel]

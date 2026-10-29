@@ -408,7 +408,7 @@ def get_all_version_cards() -> List[VersionCard]:
         VersionCard(
             version_str="v2.0",
             name="Ransomware-as-a-Service",
-            staging_payload={CubeColor.RED: 2, CubeColor.GREEN: 1},
+            staging_payload={CubeColor.RED: 1, CubeColor.GREEN: 1},
             directive_description="Encrypted Memory: Any rolled die showing Cash (+$1 or +$2) is Locked immediately.",
             directive_code="RAAS",
             staging_payload_2p={CubeColor.RED: 1, CubeColor.GREEN: 1},
@@ -416,7 +416,7 @@ def get_all_version_cards() -> List[VersionCard]:
         VersionCard(
             version_str="v2.0",
             name="Polymorphic Worm",
-            staging_payload={CubeColor.GREEN: 1, CubeColor.BLUE: 1, CubeColor.BLACK: 1},
+            staging_payload={CubeColor.GREEN: 1, CubeColor.BLACK: 1},
             directive_description="Subroutine Throttling: Players receive only 1 free reroll in Phase 1 (instead of 2).",
             directive_code="POLYMORPHIC_WORM",
             staging_payload_2p={CubeColor.GREEN: 1, CubeColor.BLACK: 1},
@@ -424,7 +424,7 @@ def get_all_version_cards() -> List[VersionCard]:
         VersionCard(
             version_str="v3.0",
             name="Zero-Day Override",
-            staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.BLACK: 1},
+            staging_payload={CubeColor.RED: 1, CubeColor.BLACK: 1},
             directive_description="Kernel Lock: Any rolled die showing a Shield (Block 1 or Block 2) is Locked immediately.",
             directive_code="ZERO_DAY_OVERRIDE",
             staging_payload_2p={CubeColor.RED: 1, CubeColor.BLACK: 1},
@@ -432,7 +432,7 @@ def get_all_version_cards() -> List[VersionCard]:
         VersionCard(
             version_str="v3.0",
             name="Corrupted Kernel",
-            staging_payload={CubeColor.RED: 2, CubeColor.BLUE: 1},
+            staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 1},
             directive_description="If 2+ Black Cubes exit the tower this round, the Attack Color with the most exited cubes gains +2 Strength total.",
             directive_code="CORRUPTED_KERNEL",
             staging_payload_2p={CubeColor.RED: 1, CubeColor.BLUE: 1},

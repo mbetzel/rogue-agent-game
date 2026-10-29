@@ -41,7 +41,7 @@ class TestV04Rules(unittest.TestCase):
     def test_corruption_track_flat_capacity(self) -> None:
         """Corruption track capacity is flat 4 spaces across 2P, 3P, and 4P."""
         for num_players in [2, 3, 4]:
-            config = GameConfig(num_players=num_players)
+            config = GameConfig(num_players=num_players, corruption_track_flat_capacity=4)
             self.assertEqual(
                 config.corruption_track_capacity,
                 4,

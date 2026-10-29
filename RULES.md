@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.9.0)
+# Too Many Secrets — Rules Draft (v0.10.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -59,7 +59,7 @@ When the dust settles, any consultancy that suffers a **Total Data Breach** (`<=
 ## 3. Setup
 
 1. **SETEC Roadmap & Compiler Priming:** Deal **1 `v1.0` card**, **1 `v2.0` card**, and **1 `v3.0` card** face-up in a row next to the Cube Tower. Place the Version Marker on `v1.0`.
-   * Each Version card has a **Corruption Track** equal to **`4` spaces** (flat across all player counts) `[TUNE]` (12 total Black cubes to Singularity).
+   * Each Version card features a **Corruption Track** scaled by player count: **`4` spaces (2 Players)**, **`5` spaces (3 Players)**, or **`6` spaces (4 Players)** `[TUNE]` (12 / 15 / 18 total Black cubes to Singularity across `v1.0 → v2.0 → v3.0`).
    * **Prime the Compiler (Pre-Seed Drop):** Before populating the Staging Cup, take **`1 Red, 1 Blue, 1 Green, and 1 Black Cube`** (4 cubes total) from the supply and drop them into the empty Cube Tower. Any cubes that exit into the tray are **returned to the general supply**. Any cubes that remain stuck on the internal baffles stay inside the tower to prime the compiler for Round 1.
    * Place the starting Attack Cubes listed on the `v1.0` card plus `1 Black Cube` into the **Staging Cup** (baseline: `1 Red, 1 Blue, 1 Green, 1 Black`).
 2. **Software Market:** For each of the 5 Colored Dice (**Red, Blue, Green, Yellow, Purple**), shuffle its Variant Cards, place **1 Variant Card** face-up in the center, and stack **`2 × Players`** dice of that color on it.
@@ -68,9 +68,9 @@ When the dust settles, any consultancy that suffers a **Total Data Breach** (`<=
    * Place **4 Gray Legacy Dice** into your **Ready Zone**.
    * Take **`$7` Starting Money** `[TUNE: test $6–$8]`.
    * **Corporate Secrets & Starting Patch Tokens by Player Count:**
-     * **2 Players (Resilience Buffer):** Take **`8` Corporate Secrets** and **`2` Patch Tokens (`🔧`)**.
-     * **3 Players:** Take **`7` Corporate Secrets** and **`1` Patch Token (`🔧`)**.
-     * **4 Players:** Take **`7` Corporate Secrets** and **`1` Patch Token (`🔧`)**.
+     * **2 Players:** Take **`8` Corporate Secrets** and **`2` Patch Tokens (`🔧`)**.
+     * **3 Players:** Take **`8` Corporate Secrets** and **`2` Patch Tokens (`🔧`)**.
+     * **4 Players:** Take **`10` Corporate Secrets** and **`2` Patch Tokens (`🔧`)** `[TUNE: v0.10.0 buffer parity]`.
 4. Randomly assign the **First Player Marker** (used to resolve Market purchase order in Phase 3).
 
 ---
@@ -120,14 +120,14 @@ Take **all cubes** from the **Staging Cup** and drop them into the **Cube Tower*
 
 #### Step 2A: Resolve Black (Corruption) Cubes & Version Upgrades
 Move exited **Black Cubes** onto the active Version's **Corruption Track** one at a time:
-* **Upgrading (`v1.0 → v2.0` or `v2.0 → v3.0`):** When the 4th space fills:
+* **Upgrading (`v1.0 → v2.0` or `v2.0 → v3.0`):** When the track fills (4th space in 2P, 5th in 3P, 6th in 4P):
   1. Clear all Black Cubes from the track back to the supply.
   2. Move the Version Marker to the next Version card (`v2.0` or `v3.0`).
-  3. Add the new Version card's **Upgrade Payload** cubes to the **Staging Cup** *(they will drop starting next round; in 2-player games, `v2.0` and `v3.0` upgrade payloads are reduced by 1 attack cube each to prevent unscaled late-game cube avalanches: see Section 6C)* `[TUNE]`.
+  3. Add the new Version card's **Upgrade Payload** cubes to the **Staging Cup** *(they will drop starting next round: see Section 6C)* `[TUNE]`.
   4. The new Version's **Active Directive** takes effect immediately (including for Step 2B this round).
   5. **Archetype Ability Flip:** Any unused Archetype Ability from the previous version is **forfeited**. The newly activated Version's ability slot unlocks immediately, becoming available for use starting in Step 2B or Phase 3 of the current round.
   6. Place any remaining Black Cubes from this drop onto the new Version's track.
-* **Singularity (`v3.0` Track Fills):** If the 4th space of `v3.0` fills, **Singularity is triggered!** Step 2B resolves normally for this drop, and the game enters its final round wrap-up.
+* **Singularity (`v3.0` Track Fills):** If the final space of `v3.0` fills (4th in 2P, 5th in 3P, 6th in 4P), **Singularity is triggered!** Step 2B resolves normally for this drop, and the game enters its final round wrap-up.
 
 #### Step 2B: Resolve Attack Cubes (Red, Blue, Green)
 Calculate the total attack strength of **Red**, **Blue**, and **Green** (exited cubes + any active Version Directive modifiers). *(Archetype Timing: **The Acoustic** may trigger Baffle Echo after exited cubes are counted).* Each player simultaneously resolves all three colors against their committed Shields:
@@ -241,10 +241,10 @@ Calculate **Portfolio Value** `[TUNE weights]`:
 | :--- | :--- | :--- | :--- |
 | **`v1.0`** | *Script Kiddie* | `1 Red, 1 Blue, 1 Green, 1 Black` | None. |
 | **`v1.0`** | *Data Scraper* | `2 Blue, 1 Red, 1 Black` | Players start with `+$1` extra Money ($8 total). |
-| **`v2.0`** | *Ransomware-as-a-Service* | `+2 Red, +1 Green` *(2P: `+1 Red, +1 Green`)* | **Encrypted Memory:** Any rolled die showing Cash (`+$1` or `+$2`) is **Locked** immediately (cannot be rerolled unless unlocked with `1 🔧`). *(Kinetic profile: 0 Black).* |
-| **`v2.0`** | *Polymorphic Worm* | `+1 Green, +1 Blue, +1 Black` *(2P: `+1 Green, +1 Black`)* | **Subroutine Throttling:** Players receive only **`1` free reroll** in Phase 1 (instead of 2). *(Contagion profile: +1 Black).* |
-| **`v3.0`** | *Zero-Day Override* | `+1 Red, +1 Blue, +1 Black` *(2P: `+1 Red, +1 Black`)* | **Kernel Lock:** Any rolled die showing a Shield (`Block 1` or `Block 2`) is **Locked** immediately (cannot be rerolled unless unlocked with `1 🔧`). *(Singularity profile: +1 Black).* |
-| **`v3.0`** | *Corrupted Kernel* | `+2 Red, +1 Blue` *(2P: `+1 Red, +1 Blue`)* | If 2+ Black Cubes exit the tower this round, the Attack Color with the most exited cubes gains `+2 Strength` total. `[TUNE]` *(Kinetic profile: 0 Black).* |
+| **`v2.0`** | *Ransomware-as-a-Service* | `+1 Red, +1 Green` | **Encrypted Memory:** Any rolled die showing Cash (`+$1` or `+$2`) is **Locked** immediately (cannot be rerolled unless unlocked with `1 🔧`). *(Kinetic profile: 0 Black).* |
+| **`v2.0`** | *Polymorphic Worm* | `+1 Green, +1 Black` | **Subroutine Throttling:** Players receive only **`1` free reroll** in Phase 1 (instead of 2). *(Contagion profile: +1 Black).* |
+| **`v3.0`** | *Zero-Day Override* | `+1 Red, +1 Black` | **Kernel Lock:** Any rolled die showing a Shield (`Block 1` or `Block 2`) is **Locked** immediately (cannot be rerolled unless unlocked with `1 🔧`). *(Singularity profile: +1 Black).* |
+| **`v3.0`** | *Corrupted Kernel* | `+1 Red, +1 Blue` | If 2+ Black Cubes exit the tower this round, the Attack Color with the most exited cubes gains `+2 Strength` total. `[TUNE]` *(Kinetic profile: 0 Black).* |
 
 ---
 

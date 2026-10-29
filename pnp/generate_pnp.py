@@ -1,4 +1,4 @@
-"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.9.1 Baseline / Phase 15).
+"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.10.0 Baseline / Phase 16).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
   - 01_Player_Boards.pdf (6 pages — 1 per Consultancy Archetype, matching Wireframe Page 1)
@@ -19,7 +19,7 @@ from pnp.pdf_engine import PALETTE, Color, PDFDocument, PDFPage, measure_text
 
 
 # =============================================================================
-# Canonical Game Data (Synchronized 1:1 with RULES.md v0.9.1 & sim/entities.py)
+# Canonical Game Data (Synchronized 1:1 with RULES.md v0.10.0 & sim/entities.py)
 # =============================================================================
 
 @dataclass(frozen=True)
@@ -334,8 +334,8 @@ VERSION_TILES: List[VersionTileSpec] = [
         name="Zero-Day Override",
         profile="SINGULARITY",
         payload_label="UPGRADE",
-        payload_3p4p="+1 {RED}  +1 {BLUE}  +1 {BLACK}",
-        payload_2p="2P: +1 {RED}  +1 {BLACK}",
+        payload_3p4p="+1 {RED}  +1 {BLACK}",
+        payload_2p="All Counts",
         directive_title="Kernel Lock",
         directive_body=(
             "Any rolled die showing a **Shield** (Block 1/2, Shield `/` Choice, or Shield {STAR}) "
@@ -347,8 +347,8 @@ VERSION_TILES: List[VersionTileSpec] = [
         name="Corrupted Kernel",
         profile="KINETIC",
         payload_label="UPGRADE",
-        payload_3p4p="+2 {RED}  +1 {BLUE}",
-        payload_2p="2P: +1 {RED}  +1 {BLUE}",
+        payload_3p4p="+1 {RED}  +1 {BLUE}",
+        payload_2p="All Counts",
         directive_title="Overclocked Surge",
         directive_body=(
             "If **2+ {BLACK} Black Cubes** exit the tower in Phase 2, the Attack Color "
@@ -360,8 +360,8 @@ VERSION_TILES: List[VersionTileSpec] = [
         name="Ransomware-as-a-Service",
         profile="KINETIC",
         payload_label="UPGRADE",
-        payload_3p4p="+2 {RED}  +1 {GREEN}",
-        payload_2p="2P: +1 {RED}  +1 {GREEN}",
+        payload_3p4p="+1 {RED}  +1 {GREEN}",
+        payload_2p="All Counts",
         directive_title="Encrypted Memory",
         directive_body=(
             "Any rolled die showing **Cash** (+$1/+$2/+$3, Cash `/` Choice, or Cash {STAR}) "
@@ -373,8 +373,8 @@ VERSION_TILES: List[VersionTileSpec] = [
         name="Polymorphic Worm",
         profile="CONTAGION",
         payload_label="UPGRADE",
-        payload_3p4p="+1 {BLUE}  +1 {GREEN}  +1 {BLACK}",
-        payload_2p="2P: +1 {GREEN}  +1 {BLACK}",
+        payload_3p4p="+1 {GREEN}  +1 {BLACK}",
+        payload_2p="All Counts",
         directive_title="Subroutine Throttling",
         directive_body=(
             "Players receive only **1 free reroll** during Phase 1 Step 4 (instead of the normal 2 free rerolls)."
@@ -448,7 +448,7 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
     draw_board_outer_frame(
         page,
         left_tag=f"TOO MANY SECRETS // CONSULTANCY TERMINAL [{idx}/6]",
-        right_tag="PNP PROTOTYPE v0.9 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.10 // US LETTER",
     )
 
     # -------------------------------------------------------------------------
@@ -625,7 +625,7 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
         lbl = f"SLOT {p_i + 1}" if p_i < 2 else "MAX (3)"
         page.text(sx + ps_size / 2.0, ps_y + 13.0, lbl, font="mono", size=5.8, color=PALETTE["muted"], align="center")
         page.draw_wrench_icon(sx + ps_size / 2.0, ps_y + 31.0, 14.0, color=PALETTE["rule"])
-    page.rich_line(px + bw / 2.0, by + bh - 7.0, "Start: **1** [2P: **2**]  |  Unlock {LOCK} / Patch / Auto-Absorb $1 {RED}", size=6.5, color=PALETTE["muted"], align="center")
+    page.rich_line(px + bw / 2.0, by + bh - 7.0, "Start: **2** Tokens  |  Unlock {LOCK} / Patch / Auto-Absorb $1 {RED}", size=6.5, color=PALETTE["muted"], align="center")
 
     # 3. Secrets
     scx = px + bw + bgap
@@ -634,7 +634,7 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
     page.rich_line(scx + 8, by + 13.8, "{SECRET} **SECRETS**", size=9.2, color=PALETTE["blue"])
     page.text(scx + bw - 8, by + 13.8, "4 VP EACH", font="mono_bold", size=7.5, color=PALETTE["blue"], align="right")
     page.draw_secret_icon(scx + bw / 2.0, by + 56.0, 26.0, color=PALETTE["guide"])
-    page.text(scx + bw / 2.0, by + bh - 16.5, "Start: 7 Secrets  (2-Player Resilience: 8 Secrets)", font="regular", size=6.7, color=PALETTE["ink_soft"], align="center")
+    page.text(scx + bw / 2.0, by + bh - 16.5, "Start: 8 Secrets (2P/3P)  |  10 Secrets (4P)", font="regular", size=6.7, color=PALETTE["ink_soft"], align="center")
     page.text(scx + bw / 2.0, by + bh - 6.0, "<= 0 SECRETS = TOTAL DATA BREACH (PATIENT ZERO)", font="bold", size=6.5, color=PALETTE["red"], align="center")
 
 
@@ -646,7 +646,7 @@ def render_agent_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // CENTRAL ROGUE AGENT & COMPILER BOARD [1/2]",
-        right_tag="PNP PROTOTYPE v0.9 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.10 // US LETTER",
     )
 
     # Top Title Bar inside board
@@ -669,7 +669,7 @@ def render_agent_board(page: PDFPage) -> None:
     slot_gap = 15.0
 
     tiers = [
-        ("v3.0", "SINGULARITY TIER", "Deal 1 face-up v3.0 Tile here", "4th Black Cube triggers SINGULARITY!"),
+        ("v3.0", "SINGULARITY TIER", "Deal 1 face-up v3.0 Tile here", "Corruption Track fills = SINGULARITY!"),
         ("v2.0", "ESCALATION TIER", "Deal 1 face-up v2.0 Tile here", "On Upgrade: Add Payload -> Staging Cup"),
         ("v1.0", "INITIAL TIER (START)", "Deal 1 face-up v1.0 Tile here", "Setup: Add Start Payload -> Staging Cup"),
     ]
@@ -688,7 +688,7 @@ def render_agent_board(page: PDFPage) -> None:
             page.line(55.0, sy + 84.0, 55.0, sy + slot_h + slot_gap + 38.0, stroke=PALETTE["muted"], width=0.9, dash=(2, 2))
             # Upward arrow in slot gap
             gx_mid = slot_x + slot_w / 2.0
-            page.text(gx_mid, ay_mid + 3.0, "^  UPGRADE ON 4TH BLACK CUBE  ^", font="mono_bold", size=6.3, color=PALETTE["muted"], align="center")
+            page.text(gx_mid, ay_mid + 3.0, "^  UPGRADE WHEN TRACK FILLS  ^", font="mono_bold", size=6.3, color=PALETTE["muted"], align="center")
 
         # Card Placement Slot
         page.rect(slot_x, sy, slot_w, slot_h, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=1.1)
@@ -703,38 +703,50 @@ def render_agent_board(page: PDFPage) -> None:
     ct_h = col_bot - ct_y  # 109.0 pt
     page.rect(slot_x, ct_y, slot_w, ct_h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.2)
     page.rect(slot_x, ct_y, slot_w, 19.0, stroke=PALETTE["ink"], fill=PALETTE["ink"], line_width=0.8)
-    page.rich_line(slot_x + slot_w / 2.0, ct_y + 13.5, "**CORRUPTION TRACK**  (4 SPACES)", size=8.2, color=PALETTE["white"], align="center")
+    page.rich_line(slot_x + slot_w / 2.0, ct_y + 13.5, "**CORRUPTION TRACK**  (4 [2P] / 5 [3P] / 6 [4P] SPACES)", size=7.5, color=PALETTE["white"], align="center")
 
-    # 4 Cube Spaces inside Corruption Track
-    sq_s = 36.0
-    sq_gap = 12.0
-    sq_x0 = slot_x + (slot_w - (4 * sq_s + 3 * sq_gap)) / 2.0
-    sq_y = ct_y + 28.0
-    for c_i in range(4):
+    # 6 Cube Spaces inside Corruption Track
+    sq_s = 28.0
+    sq_gap = 7.0
+    sq_x0 = slot_x + (slot_w - (6 * sq_s + 5 * sq_gap)) / 2.0
+    sq_y = ct_y + 27.0
+    track_meta = [
+        ("1", "BLACK", False),
+        ("2", "BLACK", False),
+        ("3", "BLACK", False),
+        ("4!", "2P UP", True),
+        ("5!", "3P UP", True),
+        ("6!", "4P UP", True),
+    ]
+    for c_i, (lbl_num, sub_lbl, is_milestone) in enumerate(track_meta):
         cx_box = sq_x0 + c_i * (sq_s + sq_gap)
-        is_last = (c_i == 3)
         page.rounded_rect(
             cx_box, sq_y, sq_s, sq_s, r=3.0,
-            stroke=PALETTE["red"] if is_last else PALETTE["ink"],
-            fill=PALETTE["red_light"] if is_last else PALETTE["paper_tint"],
-            line_width=1.2 if is_last else 0.9,
+            stroke=PALETTE["red"] if is_milestone else PALETTE["ink"],
+            fill=PALETTE["red_light"] if is_milestone else PALETTE["paper_tint"],
+            line_width=1.1 if is_milestone else 0.8,
         )
         page.text(
-            cx_box + sq_s / 2.0, sq_y + 16.0,
-            f"{c_i + 1}" if not is_last else "4!",
-            font="bold", size=10.0,
-            color=PALETTE["red"] if is_last else PALETTE["ink"],
+            cx_box + sq_s / 2.0, sq_y + 14.5,
+            lbl_num,
+            font="bold", size=8.5,
+            color=PALETTE["red"] if is_milestone else PALETTE["ink"],
             align="center",
         )
-        sub_lbl = "BLACK" if not is_last else "UPGR"
-        page.text(cx_box + sq_s / 2.0, sq_y + 28.5, sub_lbl, font="mono", size=5.8, color=PALETTE["red"] if is_last else PALETTE["muted"], align="center")
-        if c_i < 3:
-            page.text(cx_box + sq_s + sq_gap / 2.0, sq_y + 21.0, "->", font="mono_bold", size=7.0, color=PALETTE["muted"], align="center")
+        page.text(
+            cx_box + sq_s / 2.0, sq_y + 24.5,
+            sub_lbl,
+            font="mono", size=5.0,
+            color=PALETTE["red"] if is_milestone else PALETTE["muted"],
+            align="center",
+        )
+        if c_i < 5:
+            page.text(cx_box + sq_s + sq_gap / 2.0, sq_y + 18.0, ">", font="mono_bold", size=6.0, color=PALETTE["muted"], align="center")
 
     page.rich_paragraph(
-        slot_x + 6.0, ct_y + 78.0, slot_w - 12.0,
-        "**Step 2A:** Place exited {BLACK} 1-by-1. On **4th**: clear track, advance Version, add Payload -> Staging Cup (**v3.0 4th = SINGULARITY**).",
-        size=6.4, leading=8.6, color=PALETTE["ink_soft"], align="center",
+        slot_x + 6.0, ct_y + 76.0, slot_w - 12.0,
+        "**Step 2A:** Place exited {BLACK} 1-by-1. Fills at **4 (2P) / 5 (3P) / 6 (4P)**: clear track, advance Version, add Payload -> Staging Cup (**v3.0 fill = SINGULARITY**).",
+        size=6.2, leading=8.3, color=PALETTE["ink_soft"], align="center",
     )
 
     # -------------------------------------------------------------------------
@@ -885,7 +897,7 @@ def render_market_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // SOFTWARE MODULE MARKET & CENTRAL SUPPLY [2/2]",
-        right_tag="PNP PROTOTYPE v0.9 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.10 // US LETTER",
     )
 
     # Top Title Bar
@@ -1025,10 +1037,11 @@ def render_market_board(page: PDFPage) -> None:
     page.text(48.0, fy + 11.8, "SETUP QUICK-REFERENCE & COMPILER PRIMING", font="bold", size=7.8, color=PALETTE["ink"])
     page.rich_paragraph(
         48.0, fy + 26.5, fw - 16.0,
-        "- **2 Players:** $7  |  **8 Secrets**  |  **2** {WRENCH}  |  **4 Dice/col**  |  *v2.0 & v3.0 Payloads: -1 Attack Cube*\n"
-        "- **3P:** $7 | **7 Secrets** | **1** {WRENCH} | **6 Dice/col**  |  **4P:** $7 | **7 Secrets** | **1** {WRENCH} | **8 Dice/col**  *(Standard Payloads)*\n"
-        "- **Setup:** Drop 1 {RED} Red, 1 {BLUE} Blue, 1 {GREEN} Green, 1 {BLACK} Black into empty tower. Return exited cubes to supply; stuck cubes prime Round 1.",
-        size=6.5, leading=9.5, color=PALETTE["ink"],
+        "- **2P:** $7 | **8 Secrets** | **2** {WRENCH} | **4 Dice/col** | *Track: 4 spaces*\n"
+        "- **3P:** $7 | **8 Secrets** | **2** {WRENCH} | **6 Dice/col** | *Track: 5 spaces*\n"
+        "- **4P:** $7 | **10 Secrets** | **2** {WRENCH} | **8 Dice/col** | *Track: 6 spaces*\n"
+        "- **Setup:** Standard 2-cube payloads (all counts). Prime compiler: drop 1 R/B/G/Black stuck into tower.",
+        size=6.2, leading=8.7, color=PALETTE["ink"],
     )
 
     # Right: Portfolio Scoring & End-Game Triggers
@@ -1237,7 +1250,7 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
             page.rich_paragraph(
                 x + 6.0, fy + 10.5, cw - 12.0,
                 "**P1:** +1{BLACK} -> Hire {WHITE} ($1/$2/$3) -> Roll -> 2 Free Rerolls *(1{WRENCH} unlocks {LOCK})* -> Shields & `/` -> Gain **$** & {WRENCH} *(max 3)*.\n"
-                "**P2:** {BLACK} Track (4=Upgr) -> Shields *(hit->Unpatched)* -> Dmg: {RED}-$1->{WRENCH}->Secret | {BLUE}-1 Secret | {GREEN}Wear Ready *({YELLOW}* 1st!). *(0 cubes exit = Buffer Overflow: +1 R/B/G to Cup for next compile)*.\n"
+                "**P2:** {BLACK} Track (4/5/6=Upgr) -> Shields *(hit->Unpatched)* -> Dmg: {RED}-$1->{WRENCH}->Secret | {BLUE}-1 Secret | {GREEN}Wear Ready *({YELLOW}* 1st!). *(0 cubes exit = Buffer Overflow: +1 R/B/G to Cup for next compile)*.\n"
                 "**P3:** **Buy <=2** | **Patch:** 1{WRENCH} or $2 | **Siphon (1x):** -1 Secret, +1{BLACK}, Wear 1 Ready => **+$3**.  **VP:** Secret=4, Die=3/4, $2=1.",
                 size=5.6, leading=8.1, color=PALETTE["ink"],
             )
@@ -1370,12 +1383,14 @@ def _draw_version_tile(page: PDFPage, x: float, y: float, w: float, h: float, ti
     # Payload Row (y + 22 .. y + 48)
     py_bar = y + 22.0
     page.rect(x, py_bar, w, 25.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.7)
-    page.text(x + 6.0, py_bar + 10.5, f"{tile.payload_label} (3P/4P):", font="mono_bold", size=5.9, color=PALETTE["muted"])
+    lbl_tag = "START CUP" if tile.version == "v1.0" else "UPGRADE"
+    page.text(x + 6.0, py_bar + 10.5, f"{lbl_tag} PAYLOAD (ALL COUNTS):", font="mono_bold", size=5.9, color=PALETTE["muted"])
     page.rich_line(x + 6.0, py_bar + 21.0, f"**{tile.payload_3p4p}**", size=7.6, color=PALETTE["ink"])
 
-    # 2P Scaled Payload Pill on right
+    # Standard 2-Cube / Setup Pill on right
     page.rounded_rect(x + w - 88.0, py_bar + 4.0, 82.0, 17.0, r=2.0, stroke=PALETTE["rule"], fill=PALETTE["white"], line_width=0.6)
-    page.rich_line(x + w - 47.0, py_bar + 15.2, tile.payload_2p, size=6.3, color=PALETTE["ink_soft"], align="center")
+    sub_tag = "Setup Priming" if tile.version == "v1.0" else "Standard 2-Cube"
+    page.rich_line(x + w - 47.0, py_bar + 15.2, sub_tag, size=6.3, color=PALETTE["ink_soft"], align="center")
 
     # Active Directive Body (y + 47 .. y + 112)
     dy = y + 60.0
@@ -1403,8 +1418,8 @@ def render_version_tiles_page(page: PDFPage) -> None:
 
     # Left Tier Legend labels
     tier_notes = [
-        ("v3.0 TILES", "Deal 1 face-up\nto top slot.\n4th Black Cube\n= SINGULARITY!"),
-        ("v2.0 TILES", "Deal 1 face-up\nto middle slot.\n2P: -1 Attack\nCube payload."),
+        ("v3.0 TILES", "Deal 1 face-up\nto top slot.\nTrack fill (4/5/6)\n= SINGULARITY!"),
+        ("v2.0 TILES", "Deal 1 face-up\nto middle slot.\nStandard 2-cube\nPayload to Cup."),
         ("v1.0 TILES", "Deal 1 face-up\nto bottom slot.\nLoad Start Cup\nat Setup."),
     ]
     for r_i, (t_head, t_desc) in enumerate(tier_notes):
@@ -1561,7 +1576,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated.append(path_versions)
 
     # 5. Combined Master Print-and-Play Pack (All 14 pages)
-    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.9)")
+    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.10.0)")
     for sub_doc in (doc_central, doc_players, doc_dice, doc_versions):
         for pg in sub_doc.pages:
             doc_master.pages.append(pg)

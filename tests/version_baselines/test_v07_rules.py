@@ -149,30 +149,54 @@ class TestV07Rules(unittest.TestCase):
     # 4. Version Cards 2P Payload Configuration
     # -------------------------------------------------------------------------
     def test_version_cards_2p_payloads(self) -> None:
-        """Version cards configure 2P payloads: RaaS, Polymorphic Worm, Zero-Day Override, Corrupted Kernel."""
-        cards = {c.directive_code: c for c in get_all_version_cards()}
-
-        # RaaS: 2P = 1 Red, 1 Green (vs 4P = 2 Red, 1 Green)
-        raas = cards["RAAS"]
+        """Version cards configure 2P payloads: RaaS, Polymorphic Worm, Zero-Day Override, Corrupted Kernel (v0.7 Baseline)."""
+        # Historical v0.7 version cards with 2P vs 4P payloads
+        raas = VersionCard(
+            version_str="v2.0",
+            name="Ransomware-as-a-Service",
+            staging_payload={CubeColor.RED: 2, CubeColor.GREEN: 1},
+            directive_description="Encrypted Memory",
+            directive_code="RAAS",
+            staging_payload_2p={CubeColor.RED: 1, CubeColor.GREEN: 1},
+        )
         self.assertEqual(raas.get_staging_payload(2), {CubeColor.RED: 1, CubeColor.GREEN: 1})
         self.assertEqual(raas.get_staging_payload(4), {CubeColor.RED: 2, CubeColor.GREEN: 1})
 
-        # Polymorphic Worm (v0.8.2): 2P = 1 Green, 1 Black (vs 4P = 1 Green, 1 Blue, 1 Black)
-        worm = cards["POLYMORPHIC_WORM"]
+        worm = VersionCard(
+            version_str="v2.0",
+            name="Polymorphic Worm",
+            staging_payload={CubeColor.GREEN: 1, CubeColor.BLUE: 1, CubeColor.BLACK: 1},
+            directive_description="Subroutine Throttling",
+            directive_code="POLYMORPHIC_WORM",
+            staging_payload_2p={CubeColor.GREEN: 1, CubeColor.BLACK: 1},
+        )
         self.assertEqual(worm.get_staging_payload(2), {CubeColor.GREEN: 1, CubeColor.BLACK: 1})
         self.assertEqual(worm.get_staging_payload(4), {CubeColor.GREEN: 1, CubeColor.BLUE: 1, CubeColor.BLACK: 1})
 
-        # Zero-Day Override (v0.8.2): 2P = 1 Red, 1 Black (vs 4P = 1 Red, 1 Blue, 1 Black)
-        zero_day = cards["ZERO_DAY_OVERRIDE"]
+        zero_day = VersionCard(
+            version_str="v3.0",
+            name="Zero-Day Override",
+            staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.BLACK: 1},
+            directive_description="Kernel Lock",
+            directive_code="ZERO_DAY_OVERRIDE",
+            staging_payload_2p={CubeColor.RED: 1, CubeColor.BLACK: 1},
+        )
         self.assertEqual(zero_day.get_staging_payload(2), {CubeColor.RED: 1, CubeColor.BLACK: 1})
         self.assertEqual(zero_day.get_staging_payload(4), {CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.BLACK: 1})
 
-        # Corrupted Kernel: 2P = 1 Red, 1 Blue (vs 4P = 2 Red, 1 Blue)
-        kernel = cards["CORRUPTED_KERNEL"]
+        kernel = VersionCard(
+            version_str="v3.0",
+            name="Corrupted Kernel",
+            staging_payload={CubeColor.RED: 2, CubeColor.BLUE: 1},
+            directive_description="Corrupted Kernel",
+            directive_code="CORRUPTED_KERNEL",
+            staging_payload_2p={CubeColor.RED: 1, CubeColor.BLUE: 1},
+        )
         self.assertEqual(kernel.get_staging_payload(2), {CubeColor.RED: 1, CubeColor.BLUE: 1})
         self.assertEqual(kernel.get_staging_payload(4), {CubeColor.RED: 2, CubeColor.BLUE: 1})
 
         # Script Kiddie (v1.0): flat across 2P and 4P
+        cards = {c.directive_code: c for c in get_all_version_cards()}
         kiddie = cards["SCRIPT_KIDDIE"]
         self.assertEqual(kiddie.get_staging_payload(2), kiddie.get_staging_payload(4))
 
@@ -222,10 +246,24 @@ class TestV07Rules(unittest.TestCase):
         self.assertEqual(engine_2p.state.staging_cup[CubeColor.GREEN], 1)  # 2P payload: 1 Green
 
         # 4-Player Match
+        v07_raas = VersionCard(
+            version_str="v2.0",
+            name="Ransomware-as-a-Service",
+            staging_payload={CubeColor.RED: 2, CubeColor.GREEN: 1},
+            directive_description="Encrypted Memory",
+            directive_code="RAAS",
+            staging_payload_2p={CubeColor.RED: 1, CubeColor.GREEN: 1},
+        )
+        custom_v07_deck = [
+            get_all_version_cards()[0],
+            v07_raas,
+            get_all_version_cards()[4],
+        ]
         engine_4p = GameEngine(
-            config=GameConfig(num_players=4),
+            config=GameConfig(num_players=4, corruption_track_flat_capacity=4),
             bots=[BaseBot(0), BaseBot(1), BaseBot(2), BaseBot(3)],
             seed=42,
+            version_deck=custom_v07_deck,
         )
         engine_4p.state.tower.calculate_exit_probability = lambda count: 1.0
         engine_4p.state.tower.reset()

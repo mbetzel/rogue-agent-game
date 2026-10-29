@@ -59,8 +59,8 @@ class TestV05Rules(unittest.TestCase):
     # 1. Starting Secrets by Player Count Config
     # -------------------------------------------------------------------------
     def test_config_starting_secrets_by_player_count(self) -> None:
-        """GameConfig defines starting secrets: 2P -> 8, 3P -> 7, 4P -> 7."""
-        cfg_default = GameConfig()
+        """GameConfig defines starting secrets: 2P -> 8, 3P -> 7, 4P -> 7 (v0.5 Baseline)."""
+        cfg_default = GameConfig(starting_secrets_by_player_count={2: 8, 3: 7, 4: 7})
         self.assertEqual(cfg_default.starting_secrets_by_player_count.get(2), 8)
         self.assertEqual(cfg_default.starting_secrets_by_player_count.get(3), 7)
         self.assertEqual(cfg_default.starting_secrets_by_player_count.get(4), 7)
@@ -72,19 +72,19 @@ class TestV05Rules(unittest.TestCase):
         self.assertEqual(cfg_default.get_starting_secrets(5), 7)  # Fallback
 
         # Test helper method using config.num_players
-        cfg_2p = GameConfig(num_players=2)
+        cfg_2p = GameConfig(num_players=2, starting_secrets_by_player_count={2: 8, 3: 7, 4: 7})
         self.assertEqual(cfg_2p.get_starting_secrets(), 8)
-        cfg_3p = GameConfig(num_players=3)
+        cfg_3p = GameConfig(num_players=3, starting_secrets_by_player_count={2: 8, 3: 7, 4: 7})
         self.assertEqual(cfg_3p.get_starting_secrets(), 7)
-        cfg_4p = GameConfig(num_players=4)
+        cfg_4p = GameConfig(num_players=4, starting_secrets_by_player_count={2: 8, 3: 7, 4: 7})
         self.assertEqual(cfg_4p.get_starting_secrets(), 7)
 
     # -------------------------------------------------------------------------
     # 2. Starting Patches by Player Count Config (2P Resilience Buffer)
     # -------------------------------------------------------------------------
     def test_config_starting_patches_by_player_count(self) -> None:
-        """GameConfig defines starting patches: 2P -> 2 (Resilience Buffer), 3P -> 1, 4P -> 1."""
-        cfg_default = GameConfig()
+        """GameConfig defines starting patches: 2P -> 2 (Resilience Buffer), 3P -> 1, 4P -> 1 (v0.5 Baseline)."""
+        cfg_default = GameConfig(starting_patches_by_player_count={2: 2, 3: 1, 4: 1})
         self.assertEqual(cfg_default.starting_patches_by_player_count.get(2), 2)
         self.assertEqual(cfg_default.starting_patches_by_player_count.get(3), 1)
         self.assertEqual(cfg_default.starting_patches_by_player_count.get(4), 1)
@@ -96,11 +96,11 @@ class TestV05Rules(unittest.TestCase):
         self.assertEqual(cfg_default.get_starting_patches(5), 1)  # Fallback
 
         # Test helper method using config.num_players
-        cfg_2p = GameConfig(num_players=2)
+        cfg_2p = GameConfig(num_players=2, starting_patches_by_player_count={2: 2, 3: 1, 4: 1})
         self.assertEqual(cfg_2p.get_starting_patches(), 2)
-        cfg_3p = GameConfig(num_players=3)
+        cfg_3p = GameConfig(num_players=3, starting_patches_by_player_count={2: 2, 3: 1, 4: 1})
         self.assertEqual(cfg_3p.get_starting_patches(), 1)
-        cfg_4p = GameConfig(num_players=4)
+        cfg_4p = GameConfig(num_players=4, starting_patches_by_player_count={2: 2, 3: 1, 4: 1})
         self.assertEqual(cfg_4p.get_starting_patches(), 1)
 
     # -------------------------------------------------------------------------
@@ -137,9 +137,13 @@ class TestV05Rules(unittest.TestCase):
     # 5. GameEngine Initialization Under 3P and 4P Baseline
     # -------------------------------------------------------------------------
     def test_game_engine_init_3p_4p_baseline(self) -> None:
-        """GameEngine initializes 3P and 4P players with 7 Secrets and 1 Patch Token."""
+        """GameEngine initializes 3P and 4P players with 7 Secrets and 1 Patch Token (v0.5 Baseline)."""
         # 3 Players
-        config_3p = GameConfig(num_players=3)
+        config_3p = GameConfig(
+            num_players=3,
+            starting_secrets_by_player_count={2: 8, 3: 7, 4: 7},
+            starting_patches_by_player_count={2: 2, 3: 1, 4: 1},
+        )
         bots_3p = [BaseBot(i) for i in range(3)]
         engine_3p = GameEngine(config=config_3p, bots=bots_3p, seed=42)
         for player in engine_3p.state.players:
@@ -147,7 +151,11 @@ class TestV05Rules(unittest.TestCase):
             self.assertEqual(player.patches, 1, "3P player must start with 1 Patch")
 
         # 4 Players
-        config_4p = GameConfig(num_players=4)
+        config_4p = GameConfig(
+            num_players=4,
+            starting_secrets_by_player_count={2: 8, 3: 7, 4: 7},
+            starting_patches_by_player_count={2: 2, 3: 1, 4: 1},
+        )
         bots_4p = [BaseBot(i) for i in range(4)]
         engine_4p = GameEngine(config=config_4p, bots=bots_4p, seed=42)
         for player in engine_4p.state.players:
