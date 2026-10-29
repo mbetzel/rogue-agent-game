@@ -7,6 +7,7 @@ import json
 import mimetypes
 import os
 import sys
+import threading
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Dict, Optional, Tuple
@@ -21,6 +22,7 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
     """HTTP request handler routing /api/game/* endpoints and serving static assets."""
 
     controller: GameController = GameController()
+    controller_lock: threading.RLock = threading.RLock()
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, directory=STATIC_DIR, **kwargs)
@@ -35,6 +37,8 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
         self.send_response(status_code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(data_bytes)))
+        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+        self.send_header("Pragma", "no-cache")
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
@@ -55,7 +59,8 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
 
         if clean_path == "/api/game/state":
             try:
-                state = self.controller.get_full_state()
+                with self.controller_lock:
+                    state = self.controller.get_full_state()
                 payload, code = success_response({"state": state})
                 self._send_json_response(payload, code)
             except Exception as exc:
@@ -84,176 +89,185 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
         assert data is not None
 
         try:
-            # Helper to resolve player_id if not explicitly provided in the request
-            def get_target_pid(default_to_human: bool = False) -> int:
-                if "player_id" in data:
-                    return int(data["player_id"])
-                if default_to_human:
-                    for pid, meta in self.controller.player_meta.items():
-                        if meta.get("is_human", False):
-                            return pid
-                return self.controller.active_player_index
+            with self.controller_lock:
+                # Helper to resolve player_id if not explicitly provided in the request
+                def get_target_pid(default_to_human: bool = False) -> int:
+                    if "player_id" in data:
+                        return int(data["player_id"])
+                    if default_to_human:
+                        for pid, meta in self.controller.player_meta.items():
+                            if meta.get("is_human", False):
+                                return pid
+                    return self.controller.active_player_index
 
-            if clean_path == "/api/game/new":
-                num_players = int(data.get("num_players", 4))
-                players_config = data.get("players")
-                seed = data.get("seed")
-                if seed is not None:
-                    seed = int(seed)
-                randomize_cards = bool(data.get("randomize_cards", False))
+                if clean_path == "/api/game/new":
+                    num_players = int(data.get("num_players", 4))
+                    players_config = data.get("players")
+                    seed = data.get("seed")
+                    if seed is not None:
+                        seed = int(seed)
+                    randomize_cards = bool(data.get("randomize_cards", False))
 
-                state = self.controller.new_game(
-                    num_players=num_players,
-                    players_config=players_config,
-                    seed=seed,
-                    randomize_cards=randomize_cards,
-                )
-                payload, code = success_response({"state": state})
-                self._send_json_response(payload, code)
-
-            elif clean_path == "/api/game/action/hire_contractors":
-                pid = get_target_pid(default_to_human=True)
-                count = int(data.get("count", 1))
-                use_op = bool(data.get("use_operator_ability", False))
-                buy_3rd = bool(data.get("buy_third_die", False))
-                state = self.controller.hire_contractors(
-                    pid, count, use_operator_ability=use_op, buy_third_die=buy_3rd
-                )
-                payload, code = success_response({"state": state})
-                self._send_json_response(payload, code)
-
-            elif clean_path == "/api/game/action/reroll":
-                pid = get_target_pid(default_to_human=True)
-                reroll_indices = data.get("reroll_indices", [])
-                use_prodigy = bool(data.get("use_prodigy_ability", False))
-                state = self.controller.perform_reroll(
-                    pid, reroll_indices, use_prodigy_ability=use_prodigy
-                )
-                payload, code = success_response({"state": state})
-                self._send_json_response(payload, code)
-
-            elif clean_path == "/api/game/action/debug_unlock":
-                pid = get_target_pid(default_to_human=True)
-                if "die_index" not in data:
-                    payload, code = error_response("Missing required field 'die_index'", 400)
+                    state = self.controller.new_game(
+                        num_players=num_players,
+                        players_config=players_config,
+                        seed=seed,
+                        randomize_cards=randomize_cards,
+                    )
+                    payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
-                    return
-                die_idx = int(data["die_index"])
-                state = self.controller.debug_unlock_die(pid, die_idx)
-                payload, code = success_response({"state": state})
-                self._send_json_response(payload, code)
 
-            elif clean_path == "/api/game/action/roll":
-                pid = get_target_pid(default_to_human=True)
-                state = self.controller.roll_pool(pid)
-                payload, code = success_response({"state": state})
-                self._send_json_response(payload, code)
-
-            elif clean_path == "/api/game/action/hotfix":
-                pid = get_target_pid(default_to_human=True)
-                if "die_index" not in data:
-                    payload, code = error_response("Missing required field 'die_index'", 400)
+                elif clean_path == "/api/game/action/hire_contractors":
+                    pid = get_target_pid(default_to_human=True)
+                    count = int(data.get("count", 1))
+                    use_op = bool(data.get("use_operator_ability", False))
+                    buy_3rd = bool(data.get("buy_third_die", False))
+                    state = self.controller.hire_contractors(
+                        pid, count, use_operator_ability=use_op, buy_third_die=buy_3rd
+                    )
+                    payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
-                    return
-                die_idx = int(data["die_index"])
-                state = self.controller.hotfix_reroll(pid, die_idx)
-                payload, code = success_response({"state": state})
-                self._send_json_response(payload, code)
 
-            elif clean_path == "/api/game/action/commit":
-                pid = get_target_pid(default_to_human=True)
-                commitments = data.get("commitments", {})
-                choice_declarations = data.get("choice_declarations", None)
-                state = self.controller.commit_defenses(pid, commitments, choice_declarations)
-                payload, code = success_response({"state": state})
-                self._send_json_response(payload, code)
-
-            elif clean_path == "/api/game/action/compile":
-                state = self.controller.compile_drop()
-                payload, code = success_response({"state": state})
-                self._send_json_response(payload, code)
-
-            elif clean_path == "/api/game/action/buy":
-                pid = get_target_pid(default_to_human=False)
-                if "color" not in data:
-                    payload, code = error_response("Missing required field 'color'", 400)
+                elif clean_path == "/api/game/action/reroll":
+                    pid = get_target_pid(default_to_human=True)
+                    reroll_indices = data.get("reroll_indices", [])
+                    use_prodigy = bool(data.get("use_prodigy_ability", False))
+                    state = self.controller.perform_reroll(
+                        pid, reroll_indices, use_prodigy_ability=use_prodigy
+                    )
+                    payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
-                    return
-                color_str = str(data["color"])
-                use_cipher = bool(data.get("use_cipher_ability", False))
-                state = self.controller.buy_die(pid, color_str, use_cipher_ability=use_cipher)
-                payload, code = success_response({"state": state})
-                self._send_json_response(payload, code)
 
-            elif clean_path == "/api/game/action/patch":
-                pid = get_target_pid(default_to_human=False)
-                if "die_index" not in data:
-                    payload, code = error_response("Missing required field 'die_index'", 400)
+                elif clean_path == "/api/game/action/debug_unlock":
+                    pid = get_target_pid(default_to_human=True)
+                    if "die_index" not in data:
+                        payload, code = error_response("Missing required field 'die_index'", 400)
+                        self._send_json_response(payload, code)
+                        return
+                    die_idx = int(data["die_index"])
+                    state = self.controller.debug_unlock_die(pid, die_idx)
+                    payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
-                    return
-                die_idx = int(data["die_index"])
-                use_cash = bool(data.get("use_cash", False))
-                state = self.controller.patch_die(pid, die_idx, use_cash)
-                payload, code = success_response({"state": state})
-                self._send_json_response(payload, code)
 
-            elif clean_path == "/api/game/action/dirty_income":
-                pid = get_target_pid(default_to_human=False)
-                backlash_raw = data.get("backlash_die_index")
-                backlash_idx = int(backlash_raw) if backlash_raw is not None else 0
-                use_cipher = bool(data.get("use_cipher_ability", False))
-                state = self.controller.take_dirty_income(
-                    pid, backlash_idx, use_cipher_ability=use_cipher
-                )
-                payload, code = success_response({"state": state})
-                self._send_json_response(payload, code)
-
-            elif clean_path == "/api/game/action/phreaker":
-                pid = get_target_pid(default_to_human=False)
-                count = int(data.get("count", 2))
-                state = self.controller.use_phreaker_ability(pid, count=count)
-                payload, code = success_response({"state": state})
-                self._send_json_response(payload, code)
-
-            elif clean_path == "/api/game/action/acoustic":
-                pid = get_target_pid(default_to_human=False)
-                if "color" not in data:
-                    payload, code = error_response("Missing required field 'color'", 400)
+                elif clean_path == "/api/game/action/roll":
+                    pid = get_target_pid(default_to_human=True)
+                    state = self.controller.roll_pool(pid)
+                    payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
-                    return
-                color_str = str(data["color"])
-                state = self.controller.use_acoustic_ability(pid, color_str)
-                payload, code = success_response({"state": state})
-                self._send_json_response(payload, code)
 
-            elif clean_path == "/api/game/action/spook":
-                pid = get_target_pid(default_to_human=False)
-                if "dollars" not in data:
-                    payload, code = error_response("Missing required field 'dollars'", 400)
+                elif clean_path == "/api/game/action/hotfix":
+                    pid = get_target_pid(default_to_human=True)
+                    if "die_index" not in data:
+                        payload, code = error_response("Missing required field 'die_index'", 400)
+                        self._send_json_response(payload, code)
+                        return
+                    die_idx = int(data["die_index"])
+                    state = self.controller.hotfix_reroll(pid, die_idx)
+                    payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
-                    return
-                dollars = int(data["dollars"])
-                state = self.controller.use_spook_ability(pid, dollars)
-                payload, code = success_response({"state": state})
-                self._send_json_response(payload, code)
 
-            elif clean_path == "/api/game/action/star":
-                pid = get_target_pid(default_to_human=False)
-                action_type = str(data.get("action_type", ""))
-                cube_color = data.get("cube_color")
-                state = self.controller.execute_star_action(pid, action_type, cube_color)
-                payload, code = success_response({"state": state})
-                self._send_json_response(payload, code)
+                elif clean_path == "/api/game/action/commit":
+                    pid = get_target_pid(default_to_human=True)
+                    commitments = data.get("commitments", {})
+                    choice_declarations = data.get("choice_declarations", None)
+                    state = self.controller.commit_defenses(pid, commitments, choice_declarations)
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
 
-            elif clean_path == "/api/game/action/end_turn":
-                pid = get_target_pid(default_to_human=False)
-                state = self.controller.end_turn(pid)
-                payload, code = success_response({"state": state})
-                self._send_json_response(payload, code)
+                elif clean_path == "/api/game/action/compile":
+                    state = self.controller.compile_drop()
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
 
-            else:
-                payload, code = error_response(f"Unknown endpoint: {clean_path}", 404)
-                self._send_json_response(payload, code)
+                elif clean_path == "/api/game/action/buy":
+                    pid = get_target_pid(default_to_human=False)
+                    if "color" not in data:
+                        payload, code = error_response("Missing required field 'color'", 400)
+                        self._send_json_response(payload, code)
+                        return
+                    color_str = str(data["color"])
+                    use_cipher = bool(data.get("use_cipher_ability", False))
+                    state = self.controller.buy_die(pid, color_str, use_cipher_ability=use_cipher)
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
+                elif clean_path == "/api/game/action/patch":
+                    pid = get_target_pid(default_to_human=False)
+                    if "die_index" not in data:
+                        payload, code = error_response("Missing required field 'die_index'", 400)
+                        self._send_json_response(payload, code)
+                        return
+                    die_idx = int(data["die_index"])
+                    use_cash = bool(data.get("use_cash", False))
+                    state = self.controller.patch_die(pid, die_idx, use_cash)
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
+                elif clean_path == "/api/game/action/dirty_income":
+                    pid = get_target_pid(default_to_human=False)
+                    backlash_raw = data.get("backlash_die_index")
+                    backlash_idx = int(backlash_raw) if backlash_raw is not None else 0
+                    backlash_id_raw = data.get("backlash_die_id")
+                    backlash_die_id = int(backlash_id_raw) if backlash_id_raw is not None else None
+                    use_cipher = bool(data.get("use_cipher_ability", False))
+                    state = self.controller.take_dirty_income(
+                        pid,
+                        backlash_idx,
+                        use_cipher_ability=use_cipher,
+                        backlash_die_id=backlash_die_id,
+                    )
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
+                elif clean_path == "/api/game/action/phreaker":
+                    pid = get_target_pid(default_to_human=False)
+                    count = int(data.get("count", 1))
+                    die_idx_raw = data.get("die_index")
+                    die_idx = int(die_idx_raw) if die_idx_raw is not None else 0
+                    die_id_raw = data.get("die_id")
+                    die_id = int(die_id_raw) if die_id_raw is not None else None
+                    state = self.controller.use_phreaker_ability(
+                        pid, count=count, die_index=die_idx, die_id=die_id
+                    )
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
+                elif clean_path == "/api/game/action/acoustic":
+                    pid = get_target_pid(default_to_human=False)
+                    if "color" not in data:
+                        payload, code = error_response("Missing required field 'color'", 400)
+                        self._send_json_response(payload, code)
+                        return
+                    color_str = str(data["color"])
+                    state = self.controller.use_acoustic_ability(pid, color_str)
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
+                elif clean_path == "/api/game/action/spook":
+                    pid = get_target_pid(default_to_human=False)
+                    dollars_raw = data.get("dollars", 0)
+                    dollars = int(dollars_raw) if dollars_raw is not None else 0
+                    state = self.controller.use_spook_ability(pid, dollars)
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
+                elif clean_path == "/api/game/action/star":
+                    pid = get_target_pid(default_to_human=False)
+                    action_type = str(data.get("action_type", ""))
+                    cube_color = data.get("cube_color")
+                    state = self.controller.execute_star_action(pid, action_type, cube_color)
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
+                elif clean_path == "/api/game/action/end_turn":
+                    pid = get_target_pid(default_to_human=False)
+                    state = self.controller.end_turn(pid)
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
+                else:
+                    payload, code = error_response(f"Unknown endpoint: {clean_path}", 404)
+                    self._send_json_response(payload, code)
 
         except ValueError as exc:
             payload, code = error_response(str(exc), 400)

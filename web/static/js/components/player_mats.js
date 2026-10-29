@@ -76,7 +76,7 @@ export function renderPlayerMats() {
       <div class="dice-zones-container">
         <!-- Ready Zone -->
         <div class="dice-zone">
-          <div class="zone-label">Ready Zone (${p.ready_dice.length})</div>
+          <div class="zone-label">Ready Zone (${p.ready_dice.length + (!p.has_rolled && p.contractor_dice ? p.contractor_dice.length : 0)})</div>
           <div class="dice-tray" id="ready_tray_${p.player_id}"></div>
         </div>
 
@@ -120,7 +120,7 @@ export function renderPlayerMats() {
       chip.innerHTML = `<span>${d.color.toUpperCase()}</span>`;
       readyTray.appendChild(chip);
     });
-    if (p.contractor_dice) {
+    if (!p.has_rolled && p.contractor_dice) {
       p.contractor_dice.forEach((d) => {
         const chip = document.createElement("div");
         chip.className = `die-chip ${d.color}`;
@@ -216,11 +216,14 @@ export function renderPlayerMats() {
     const unpatchedTray = document.getElementById(`unpatched_tray_${p.player_id}`);
     p.unpatched_dice.forEach((d, idx) => {
       const chip = document.createElement("div");
-      const canPatch = (p.is_human && isTurn && (state.action_capabilities.can_patch_cash || state.action_capabilities.can_patch_token));
+      const canPatchActiveMode = patchCashSelected
+        ? Boolean(state.action_capabilities && state.action_capabilities.can_patch_cash)
+        : Boolean(state.action_capabilities && state.action_capabilities.can_patch_token);
+      const canPatch = (p.is_human && isTurn && canPatchActiveMode);
       chip.className = `die-chip ${d.color} ${canPatch ? "clickable" : ""}`;
       chip.innerHTML = `<span>${d.color.toUpperCase()}</span>`;
       if (canPatch) {
-        chip.title = "Click to patch this die";
+        chip.title = patchCashSelected ? "Click to patch this die ($2 Cash)" : "Click to patch this die (1 🔧 Token)";
         chip.onclick = () => doPatch(idx, patchCashSelected);
       }
       unpatchedTray.appendChild(chip);

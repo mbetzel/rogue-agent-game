@@ -196,6 +196,7 @@ class GameStateSerializer:
             "rank": rank,
             # Dice zones
             "ready_dice": [cls.serialize_die(d) for d in visual_ready],
+            "all_ready_dice": [cls.serialize_die(d) for d in player.ready_dice],
             "unpatched_dice": [cls.serialize_die(d) for d in player.unpatched_dice],
             "rolled_pool": rolled_dice,
             "shield_slots": slots_serialized,

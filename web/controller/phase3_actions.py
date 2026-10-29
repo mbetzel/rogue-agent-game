@@ -71,13 +71,24 @@ def execute_bot_phase3(controller: GameController, player: PlayerState, meta: Di
         and player.is_ability_available()
         and player.unpatched_dice
     ):
-        repair_count = min(2, len(player.unpatched_dice))
+        repair_count = min(1, len(player.unpatched_dice))
         for _ in range(repair_count):
-            repaired = player.unpatched_dice.pop(0)
+            best_idx = max(
+                range(len(player.unpatched_dice)),
+                key=lambda i: (
+                    1 if player.unpatched_dice[i].color != DieColor.GRAY else 0,
+                    getattr(player.unpatched_dice[i], "vp", 0),
+                    getattr(player.unpatched_dice[i], "cost", 0),
+                ),
+            )
+            repaired = player.unpatched_dice.pop(best_idx)
             player.ready_dice.append(repaired)
+            meta["rolled_pool"] = [
+                d for d in meta.get("rolled_pool", []) if d.die_id != repaired.die_id
+            ]
         player.mark_ability_used()
         controller.event_log.append(
-            f"{meta['name']} (Bot) used Phreaker Magnetic Splice: repaired {repair_count} dice for free."
+            f"{meta['name']} (Bot) used Phreaker Magnetic Splice: repaired {repair_count} die for free."
         )
 
     # Archetype: The Cipher (Algorithmic Arbitrage)
@@ -141,6 +152,9 @@ def execute_bot_phase3(controller: GameController, player: PlayerState, meta: Di
             backlash_idx = 0
         demoted = player.ready_dice.pop(backlash_idx)
         player.unpatched_dice.append(demoted)
+        meta["rolled_pool"] = [
+            d for d in meta.get("rolled_pool", []) if d.die_id != demoted.die_id
+        ]
         player.total_dirty_income_taken += 1
         controller.event_log.append(f"{meta['name']} (Bot) took Dirty Income: +$3, -1 Secret, +1 Black Cube.")
 
@@ -304,6 +318,9 @@ def patch_die(controller: GameController, player_id: int, die_index: int, use_ca
 
     patched_die = player.unpatched_dice.pop(die_index)
     player.ready_dice.append(patched_die)
+    meta["rolled_pool"] = [
+        d for d in meta.get("rolled_pool", []) if d.die_id != patched_die.die_id
+    ]
 
     controller.event_log.append(
         f"{meta['name']} patched {patched_die.color.value.capitalize()} Die using {cost_desc}."
@@ -317,6 +334,7 @@ def take_dirty_income(
     player_id: int,
     backlash_die_index: int = 0,
     use_cipher_ability: bool = False,
+    backlash_die_id: Optional[int] = None,
 ) -> Dict[str, Any]:
     """Human action: corrupts the Rogue Agent ('Dirty Income') for quick cash (or backlash-free via Cipher)."""
     if controller.phase != 3:
@@ -347,6 +365,20 @@ def take_dirty_income(
     if not use_cipher_ability and len(player.ready_dice) < 1:
         raise ValueError("Cannot take Dirty Income: must have at least 1 Ready die for Technical Debt Backlash")
 
+    backlash_die: Optional[Die] = None
+    if not use_cipher_ability:
+        if backlash_die_id is not None:
+            for d in player.ready_dice:
+                if d.die_id == backlash_die_id:
+                    backlash_die = d
+                    break
+            if backlash_die is None:
+                raise ValueError(f"Die with die_id {backlash_die_id} is not in player's ready pool")
+        else:
+            if not (0 <= backlash_die_index < len(player.ready_dice)):
+                backlash_die_index = 0
+            backlash_die = player.ready_dice[backlash_die_index]
+
     # Execute Dirty Income
     player.secrets -= controller.state.config.dirty_income_secret_cost
     player.money += controller.state.config.dirty_income_cash
@@ -364,12 +396,13 @@ def take_dirty_income(
         )
         return controller.get_full_state()
 
-    if not (0 <= backlash_die_index < len(player.ready_dice)):
-        backlash_die_index = 0
-
     # Technical Debt Backlash: demote chosen ready die to unpatched
-    backlash_die = player.ready_dice.pop(backlash_die_index)
+    assert backlash_die is not None
+    player.ready_dice.remove(backlash_die)
     player.unpatched_dice.append(backlash_die)
+    meta["rolled_pool"] = [
+        d for d in meta.get("rolled_pool", []) if d.die_id != backlash_die.die_id
+    ]
 
     meta["dirty_income_taken_this_turn"] = True
     player.total_dirty_income_taken += 1
@@ -381,7 +414,13 @@ def take_dirty_income(
 
 
 
-def use_phreaker_ability(controller: GameController, player_id: int, count: int = 1) -> Dict[str, Any]:
+def use_phreaker_ability(
+    controller: GameController,
+    player_id: int,
+    count: int = 1,
+    die_index: int = 0,
+    die_id: Optional[int] = None,
+) -> Dict[str, Any]:
     """Human action: repairs 1 unpatched die for free using Phreaker Magnetic Splice (v0.13.0)."""
     if controller.phase != 3:
         raise ValueError(f"Cannot use Phreaker ability in phase {controller.phase}")
@@ -390,26 +429,41 @@ def use_phreaker_ability(controller: GameController, player_id: int, count: int 
 
     player = controller.state.players[player_id]
     meta = controller.player_meta[player_id]
+    active_ver = controller.state.active_version.version_str if (controller.state and controller.state.active_version) else None
 
     if player.is_patient_zero:
         raise ValueError("Eliminated players cannot perform operations")
     if not player.archetype or player.archetype.code != ArchetypeCode.PHREAKER:
         raise ValueError("Player does not have the Phreaker archetype")
-    if not player.is_ability_available():
+    if not player.is_ability_available(active_ver):
         raise ValueError("Phreaker ability is not available")
     if count < 1:
         raise ValueError("count must be at least 1")
     if not player.unpatched_dice:
         raise ValueError("No unpatched dice available to repair")
 
-    repaired_count = min(count, 1, len(player.unpatched_dice))
-    for _ in range(repaired_count):
-        repaired = player.unpatched_dice.pop(0)
-        player.ready_dice.append(repaired)
+    repaired: Optional[Die] = None
+    if die_id is not None:
+        for d in player.unpatched_dice:
+            if d.die_id == die_id:
+                repaired = d
+                break
+        if repaired is None:
+            raise ValueError(f"Die with die_id {die_id} is not in unpatched zone")
+        player.unpatched_dice.remove(repaired)
+    else:
+        if not (0 <= die_index < len(player.unpatched_dice)):
+            raise ValueError(f"Invalid die_index {die_index} in unpatched zone")
+        repaired = player.unpatched_dice.pop(die_index)
 
-    player.mark_ability_used()
+    player.ready_dice.append(repaired)
+    meta["rolled_pool"] = [
+        d for d in meta.get("rolled_pool", []) if d.die_id != repaired.die_id
+    ]
+
+    player.mark_ability_used(active_ver)
     controller.event_log.append(
-        f"{meta['name']} activated Phreaker Magnetic Splice: repaired {repaired_count} die/dice for free."
+        f"{meta['name']} activated Phreaker Magnetic Splice: repaired {repaired.color.value.capitalize()} Die for free."
     )
     return controller.get_full_state()
 
@@ -467,6 +521,8 @@ def use_spook_ability(controller: GameController, player_id: int, dollars: int =
         raise ValueError("Player does not have the Spook archetype")
     if not player.is_ability_available():
         raise ValueError("Spook ability is not available")
+    if dollars < 0:
+        raise ValueError("dollars must be non-negative")
 
     # In v0.13.0: Absorb up to 2 secrets free, plus optional extra for $1 each
     free_secrets = 2

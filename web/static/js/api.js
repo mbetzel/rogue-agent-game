@@ -8,6 +8,8 @@ import {
   selectedCommitments,
   resetCommitments,
   selectedBacklashIndex,
+  selectedBacklashDieId,
+  selectedPhreakerDieId,
   selectedRerollIndices,
   clearSelectedRerolls,
   selectedChoiceDeclarations,
@@ -16,6 +18,7 @@ import {
 } from "./state.js";
 
 let renderAppCallback = null;
+let isActionInFlight = false;
 
 export function setRenderAppCallback(fn) {
   renderAppCallback = fn;
@@ -28,8 +31,16 @@ function notifyRender() {
 }
 
 export async function apiCall(endpoint, method = "GET", body = null) {
+  if (method === "POST" && isActionInFlight) {
+    return null;
+  }
+  if (method === "POST") {
+    isActionInFlight = true;
+  }
+
   const options = {
     method: method,
+    cache: "no-store",
     headers: {
       "Content-Type": "application/json",
     },
@@ -44,6 +55,18 @@ export async function apiCall(endpoint, method = "GET", body = null) {
     if (!res.ok || !data.success) {
       const msg = data.error || `HTTP error ${res.status}`;
       alert(`Action Failed: ${msg}`);
+      if (method === "POST") {
+        try {
+          const syncRes = await fetch("/api/game/state", { cache: "no-store" });
+          const syncData = await syncRes.json();
+          if (syncRes.ok && syncData.success && syncData.state) {
+            setState(syncData.state);
+            notifyRender();
+          }
+        } catch (_syncErr) {
+          // ignore secondary sync failure
+        }
+      }
       return null;
     }
     return data.state;
@@ -51,6 +74,10 @@ export async function apiCall(endpoint, method = "GET", body = null) {
     console.error("API error:", err);
     alert(`Network Error: ${err.message}`);
     return null;
+  } finally {
+    if (method === "POST") {
+      isActionInFlight = false;
+    }
   }
 }
 
@@ -186,13 +213,13 @@ export async function doPatch(dieIndex, useCash) {
 
 export async function doDirtyIncome(useCipher = false) {
   const backlashSelect = document.getElementById("dirtyBacklashSelect");
-  const backlashIdx = backlashSelect && backlashSelect.value !== ""
+  const dieId = backlashSelect && backlashSelect.value !== ""
     ? parseInt(backlashSelect.value, 10)
-    : (selectedBacklashIndex ?? 0);
+    : selectedBacklashDieId;
 
   const newState = await apiCall("/api/game/action/dirty_income", "POST", {
     player_id: getHumanPlayerId(),
-    backlash_die_index: Number.isNaN(backlashIdx) ? 0 : backlashIdx,
+    backlash_die_id: Number.isNaN(dieId) ? null : dieId,
     use_cipher_ability: Boolean(useCipher),
   });
   if (newState) {
@@ -201,10 +228,16 @@ export async function doDirtyIncome(useCipher = false) {
   }
 }
 
-export async function doPhreaker(count = 2) {
+export async function doPhreaker(count = 1) {
+  const phreakerSelect = document.getElementById("phreakerDieSelect");
+  const dieId = phreakerSelect && phreakerSelect.value !== ""
+    ? parseInt(phreakerSelect.value, 10)
+    : selectedPhreakerDieId;
+
   const newState = await apiCall("/api/game/action/phreaker", "POST", {
     player_id: getHumanPlayerId(),
-    count: count,
+    count: 1,
+    die_id: Number.isNaN(dieId) ? null : dieId,
   });
   if (newState) {
     setState(newState);

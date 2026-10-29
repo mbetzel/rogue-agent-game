@@ -7,6 +7,11 @@ import {
   selectedCommitments,
   selectedBacklashIndex,
   setSelectedBacklashIndex,
+  selectedBacklashDieId,
+  setSelectedBacklashDieId,
+  selectedPhreakerDieId,
+  setSelectedPhreakerDieId,
+  getEligibleBacklashDice,
   patchCashSelected,
   setPatchCashSelected,
   cipherDiscountSelected,
@@ -30,6 +35,7 @@ import {
 } from "../api.js";
 import { openModal } from "./modals.js";
 import { renderMarket } from "./market.js";
+import { renderPlayerMats } from "./player_mats.js";
 
 export function renderActionDock() {
   if (!state) return;
@@ -346,7 +352,7 @@ export function renderActionDock() {
         qualifying.forEach((c) => {
           const opt = document.createElement("option");
           opt.value = c;
-          opt.innerText = `Remove 1 ${c.toUpperCase()} (${exited[c]} exited)`;
+          opt.innerText = `Ignore 1 ${c.toUpperCase()} (${exited[c]} exited)`;
           acSelect.appendChild(opt);
         });
 
@@ -363,7 +369,7 @@ export function renderActionDock() {
       }
     }
 
-    if (caps.can_spook && human.money > 0) {
+    if (caps.can_spook) {
       const spookWrap = document.createElement("div");
       spookWrap.style.display = "inline-flex";
       spookWrap.style.alignItems = "center";
@@ -371,9 +377,9 @@ export function renderActionDock() {
 
       const spookInput = document.createElement("input");
       spookInput.type = "number";
-      spookInput.min = "1";
-      spookInput.max = String(human.money);
-      spookInput.value = "1";
+      spookInput.min = "0";
+      spookInput.max = String(human.money || 0);
+      spookInput.value = "0";
       spookInput.style.width = "50px";
       spookInput.style.padding = "4px 8px";
       spookInput.style.background = "var(--bg-card)";
@@ -385,13 +391,13 @@ export function renderActionDock() {
       spookBtn.className = "action-btn";
       spookBtn.style.borderColor = "#f59e0b";
       spookBtn.style.color = "#f59e0b";
-      spookBtn.innerText = "⚡ Spook: Slush Fund";
+      spookBtn.innerText = "⚡ Spook: Slush Fund (2 Free + $1/extra)";
       spookBtn.onclick = () => {
         const amt = parseInt(spookInput.value, 10);
-        if (!isNaN(amt) && amt > 0) doSpook(amt);
+        doSpook(isNaN(amt) ? 0 : Math.max(0, amt));
       };
 
-      spookWrap.appendChild(document.createTextNode("Pay $"));
+      spookWrap.appendChild(document.createTextNode("Extra $:"));
       spookWrap.appendChild(spookInput);
       spookWrap.appendChild(spookBtn);
       controls.appendChild(spookWrap);
@@ -404,7 +410,8 @@ export function renderActionDock() {
       dirtyWrap.style.alignItems = "center";
       dirtyWrap.style.gap = "6px";
 
-      if (caps.can_dirty_income) {
+      const eligibleBacklash = getEligibleBacklashDice(human);
+      if (caps.can_dirty_income && eligibleBacklash.length > 0) {
         const backlashSelect = document.createElement("select");
         backlashSelect.id = "dirtyBacklashSelect";
         backlashSelect.style.padding = "4px 8px";
@@ -413,16 +420,20 @@ export function renderActionDock() {
         backlashSelect.style.border = "1px solid var(--border-color)";
         backlashSelect.style.borderRadius = "4px";
 
-        human.ready_dice.forEach((die, idx) => {
+        eligibleBacklash.forEach((die) => {
           const opt = document.createElement("option");
-          opt.value = idx;
-          opt.innerText = `Backlash: #${idx + 1} ${die.color.toUpperCase()}${die.vp ? ' (' + die.vp + 'VP)' : ''}`;
+          opt.value = String(die.die_id);
+          opt.innerText = `Backlash: ${die.color.toUpperCase()}${die.vp ? ' (' + die.vp + 'VP)' : ''} [${die.zone_label}]`;
           backlashSelect.appendChild(opt);
         });
 
-        backlashSelect.value = selectedBacklashIndex < human.ready_dice.length ? selectedBacklashIndex : 0;
+        const validTarget = eligibleBacklash.some((d) => d.die_id === selectedBacklashDieId)
+          ? selectedBacklashDieId
+          : eligibleBacklash[0].die_id;
+        backlashSelect.value = String(validTarget);
+        setSelectedBacklashDieId(validTarget);
         backlashSelect.onchange = (e) => {
-          setSelectedBacklashIndex(parseInt(e.target.value, 10));
+          setSelectedBacklashDieId(parseInt(e.target.value, 10));
         };
 
         const dirtyBtn = document.createElement("button");
@@ -431,7 +442,7 @@ export function renderActionDock() {
         dirtyBtn.style.color = "#ff3377";
         dirtyBtn.innerText = "Dirty Income (+$3, -1 Secret)";
         dirtyBtn.onclick = () => {
-          setSelectedBacklashIndex(parseInt(backlashSelect.value, 10));
+          setSelectedBacklashDieId(parseInt(backlashSelect.value, 10));
           doDirtyIncome(false);
         };
 
@@ -452,15 +463,50 @@ export function renderActionDock() {
       controls.appendChild(dirtyWrap);
     }
 
-    // Phreaker Ability: Free Repair
-    if (caps.can_phreaker) {
+    // Phreaker Ability: Free Repair with target selector
+    if (caps.can_phreaker && (human.unpatched_dice || []).length > 0) {
+      const phreakWrap = document.createElement("div");
+      phreakWrap.style.display = "inline-flex";
+      phreakWrap.style.alignItems = "center";
+      phreakWrap.style.gap = "6px";
+
+      const phreakSelect = document.createElement("select");
+      phreakSelect.id = "phreakerDieSelect";
+      phreakSelect.style.padding = "4px 8px";
+      phreakSelect.style.background = "var(--bg-card)";
+      phreakSelect.style.color = "#fff";
+      phreakSelect.style.border = "1px solid var(--border-color)";
+      phreakSelect.style.borderRadius = "4px";
+
+      human.unpatched_dice.forEach((die, idx) => {
+        const opt = document.createElement("option");
+        opt.value = String(die.die_id);
+        opt.innerText = `Repair: #${idx + 1} ${die.color.toUpperCase()}${die.vp ? ' (' + die.vp + 'VP)' : ''}`;
+        phreakSelect.appendChild(opt);
+      });
+
+      const validPhreakTarget = human.unpatched_dice.some((d) => d.die_id === selectedPhreakerDieId)
+        ? selectedPhreakerDieId
+        : human.unpatched_dice[0].die_id;
+      phreakSelect.value = String(validPhreakTarget);
+      setSelectedPhreakerDieId(validPhreakTarget);
+      phreakSelect.onchange = (e) => {
+        setSelectedPhreakerDieId(parseInt(e.target.value, 10));
+      };
+
       const phreakBtn = document.createElement("button");
       phreakBtn.className = "action-btn";
       phreakBtn.style.borderColor = "#4ade80";
       phreakBtn.style.color = "#4ade80";
-      phreakBtn.innerText = "⚡ Phreaker: Magnetic Splice (Repair 2 Dice Free)";
-      phreakBtn.onclick = () => doPhreaker(2);
-      controls.appendChild(phreakBtn);
+      phreakBtn.innerText = "⚡ Phreaker: Magnetic Splice (Repair 1 Die Free)";
+      phreakBtn.onclick = () => {
+        setSelectedPhreakerDieId(parseInt(phreakSelect.value, 10));
+        doPhreaker(1);
+      };
+
+      phreakWrap.appendChild(phreakSelect);
+      phreakWrap.appendChild(phreakBtn);
+      controls.appendChild(phreakWrap);
     }
 
     // Cipher Market Discount Toggle
@@ -511,7 +557,7 @@ export function renderActionDock() {
         qualifying.forEach((c) => {
           const opt = document.createElement("option");
           opt.value = c;
-          opt.innerText = `Remove 1 ${c.toUpperCase()} (${exited[c]} exited)`;
+          opt.innerText = `Ignore 1 ${c.toUpperCase()} (${exited[c]} exited)`;
           acSelect.appendChild(opt);
         });
 
@@ -528,6 +574,41 @@ export function renderActionDock() {
       }
     }
 
+    // Spook Slush Fund in Phase 3
+    if (caps.can_spook) {
+      const spookWrap = document.createElement("div");
+      spookWrap.style.display = "inline-flex";
+      spookWrap.style.alignItems = "center";
+      spookWrap.style.gap = "6px";
+
+      const spookInput = document.createElement("input");
+      spookInput.type = "number";
+      spookInput.min = "0";
+      spookInput.max = String(human.money || 0);
+      spookInput.value = "0";
+      spookInput.style.width = "50px";
+      spookInput.style.padding = "4px 8px";
+      spookInput.style.background = "var(--bg-card)";
+      spookInput.style.color = "#fff";
+      spookInput.style.border = "1px solid var(--border-color)";
+      spookInput.style.borderRadius = "4px";
+
+      const spookBtn = document.createElement("button");
+      spookBtn.className = "action-btn";
+      spookBtn.style.borderColor = "#f59e0b";
+      spookBtn.style.color = "#f59e0b";
+      spookBtn.innerText = "⚡ Spook: Slush Fund (2 Free + $1/extra)";
+      spookBtn.onclick = () => {
+        const amt = parseInt(spookInput.value, 10);
+        doSpook(isNaN(amt) ? 0 : Math.max(0, amt));
+      };
+
+      spookWrap.appendChild(document.createTextNode("Extra $:"));
+      spookWrap.appendChild(spookInput);
+      spookWrap.appendChild(spookBtn);
+      controls.appendChild(spookWrap);
+    }
+
     // Patch Toggle
     const patchToggle = document.createElement("label");
     patchToggle.style.fontSize = "0.8rem";
@@ -540,6 +621,7 @@ export function renderActionDock() {
     `;
     patchToggle.querySelector("input").onchange = (e) => {
       setPatchCashSelected(e.target.checked);
+      renderPlayerMats();
     };
     controls.appendChild(patchToggle);
 

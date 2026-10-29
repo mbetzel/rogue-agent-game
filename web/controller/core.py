@@ -298,11 +298,30 @@ class GameController:
         player_id: int,
         backlash_die_index: int = 0,
         use_cipher_ability: bool = False,
+        backlash_die_id: Optional[int] = None,
     ) -> Dict[str, Any]:
-        return phase3_actions.take_dirty_income(self, player_id, backlash_die_index, use_cipher_ability)
+        return phase3_actions.take_dirty_income(
+            self,
+            player_id,
+            backlash_die_index,
+            use_cipher_ability,
+            backlash_die_id=backlash_die_id,
+        )
 
-    def use_phreaker_ability(self, player_id: int, count: int = 1) -> Dict[str, Any]:
-        return phase3_actions.use_phreaker_ability(self, player_id, count)
+    def use_phreaker_ability(
+        self,
+        player_id: int,
+        count: int = 1,
+        die_index: int = 0,
+        die_id: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        return phase3_actions.use_phreaker_ability(
+            self,
+            player_id,
+            count=count,
+            die_index=die_index,
+            die_id=die_id,
+        )
 
     def use_acoustic_ability(self, player_id: int, chosen_color_str: str) -> Dict[str, Any]:
         return phase3_actions.use_acoustic_ability(self, player_id, chosen_color_str)

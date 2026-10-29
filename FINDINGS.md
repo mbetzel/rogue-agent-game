@@ -286,3 +286,30 @@ Following the introduction of v0.11 Active Infrastructure Valuation (0 VP for Un
 All 6 archetypes sit squarely in the target 20.0%–30.0% corridor, pacing remains rock-solid at 7.28 rounds, and the snowballing threat of the Cube Tower compiler is fully preserved.
 
 **Status: OFFICIALLY APPROVED (`v0.13.0` Baseline).**
+
+---
+
+## 9. Investigation: Patch Token Cap Sensitivity (`max_patch_tokens = 3` vs. `Unlimited`)
+
+### A. Research Question
+What is the empirical and strategic impact of removing the **`3 🔧` Patch Token maximum limit** per player (`GameConfig.max_patch_tokens = 3`) across 2P, 3P, and 4P pods?
+
+### B. Telemetry Matrix (9,000 Matches Total, Base Seed `42`, Randomized Setups)
+
+| Pod & Configuration | Avg Rounds | Singularity % | Patient Zero % | Total Wipeout % | Survivor Avg VP | Unpatched Colored Dice | Player-Rounds `> 3 🔧` | Max `🔧` Held |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **2P — Cap `3` (Baseline)** | **7.29** | 21.3% | 51.8% | 26.9% | 17.97 VP | 0.69 | 0.00% | 3 |
+| **2P — Uncapped (Std Bots)** | **7.27** | 21.7% | 52.8% | 25.5% | 18.46 VP | 0.69 | 4.83% | 11 |
+| **2P — Uncapped (Hoarding)** | **7.25** | 23.2% | 52.1% | 24.7% | 18.58 VP | 0.66 | 8.61% | 10 |
+| **3P — Cap `3` (Baseline)** | **7.69** | 6.0% | 86.7% | 7.3% | 24.74 VP | 1.06 | 0.00% | 3 |
+| **3P — Uncapped (Std Bots)** | **7.69** | 6.6% | 87.1% | 6.3% | 25.09 VP | 1.08 | 6.14% | 10 |
+| **3P — Uncapped (Hoarding)** | **7.69** | 7.6% | 85.7% | 6.7% | 25.15 VP | 1.06 | 8.91% | 12 |
+| **4P — Cap `3` (Baseline)** | **6.62** | 6.5% | 88.3% | 5.2% | 23.12 VP | 1.35 | 0.00% | 3 |
+| **4P — Uncapped (Std Bots)** | **6.62** | 7.1% | 88.8% | 4.1% | 23.44 VP | 1.35 | 4.49% | 12 |
+| **4P — Uncapped (Hoarding)** | **6.61** | 6.7% | 89.2% | 4.1% | 23.58 VP | 1.37 | 6.25% | 12 |
+
+### C. Key Findings & Decision Rationale
+1. **Macro-Pacing Stability:** Removing the cap changes average match duration by $\le 0.04$ rounds across all player counts because high natural patch velocity (Phase 1 Debug Unlocks, Phase 2 Emergency Red Ransom Absorption, and Phase 3 Repairs) consumes 1–3 patches per turn.
+2. **Future Tuning Lever:** Uncapping patches (or moving the cap strictly to End-of-Round cleanup in Phase 3) provides a clean `+4.5%` win-rate boost to generalist/defensive builds (`AdaptiveBalancedBot`: `22.0%` $\to$ `26.5%` in 4P) and trims Total Wipeout rates by ~`1.1%–2.2%`.
+3. **Physical Component & Ransom-Bunker Guardrail:** In ~4.5%–8.9% of player-rounds, uncapped players stockpile 4–12 `🔧` tokens, which can act as an ablative buffer against Red Ransomware at `$0` cash and inflate physical punchboard token requirements beyond 12 tokens.
+4. **Decision:** Retain **`max_patch_tokens = 3`** for the `v0.13.0` baseline to preserve physical component limits and maintenance tension, keeping end-of-round-only capping or higher caps (`4–5`) in reserve as a future tuning dial.

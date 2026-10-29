@@ -67,6 +67,10 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Run 1,000-match tournament sweep across 4P pods to compile official telemetry table.
   - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Evaluate parity, log Section 8 in `FINDINGS.md`.
   - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Update archetype reference cards in `pnp/generate_pnp.py` and regenerate PDF packs.
+- [x] **Phase 20: Web App State Synchronization & Player Selection Agency Fixes**
+  - [x] *Technical Architecture Spec (`principal-engineer`):* Root-cause audit and module contracts for Dirty Income `backlash_die_id` selection across Ready Zone & Active Pool, Phreaker single-die selection (`die_id`/`die_index`), and client/server state synchronization hardening.
+  - [x] *Implementation (`senior-engineer`):* Updated `web/schemas.py`, `web/controller/`, `web/server.py`, `sim/engine/phase3_ops.py`, `web/static/js/`, and added 8 verification tests in `tests/test_phase20_sync.py`.
+  - [x] *Code Review Gate (`staff-engineer`):* Line-by-line review and 100% test pass via WSL (269/269 passing, APPROVED).
 
 ---
 

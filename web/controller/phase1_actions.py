@@ -420,6 +420,7 @@ def commit_defenses(
                 die.chosen_choice_index = chosen
 
     # Collect resource outputs on effective faces (RULES.md v0.8 Phase 1 Step 6)
+    demoted_or_sacrificed_ids: set[int] = set()
     for idx, die in enumerate(rolled):
         face = die.current_face
         if not face or face.is_glitch:
@@ -441,6 +442,7 @@ def commit_defenses(
                         if die in player.ready_dice:
                             player.ready_dice.remove(die)
                             player.unpatched_dice.append(die)
+                            demoted_or_sacrificed_ids.add(die.die_id)
         else:
             # Assigned to defense: hybrid star boot outputs
             if face.is_star:
@@ -470,8 +472,11 @@ def commit_defenses(
             if chosen in player.contractor_dice:
                 player.contractor_dice.remove(chosen)
             elif player.contractor_dice:
-                player.contractor_dice.pop(0)
+                chosen = player.contractor_dice.pop(0)
             controller.state.contractor_supply += 1
+            player.hired_contractor_count = max(0, len(player.contractor_dice))
+            meta["hired_contractors"] = len(player.contractor_dice)
+            demoted_or_sacrificed_ids.add(chosen.die_id)
             if chosen in rolled:
                 c_idx = rolled.index(chosen)
                 if c_idx in validated_commitments:
@@ -482,6 +487,7 @@ def commit_defenses(
         elif chosen and chosen in player.ready_dice:
             player.ready_dice.remove(chosen)
             player.unpatched_dice.append(chosen)
+            demoted_or_sacrificed_ids.add(chosen.die_id)
             if chosen in rolled:
                 r_idx = rolled.index(chosen)
                 if r_idx in validated_commitments:
@@ -492,6 +498,9 @@ def commit_defenses(
         elif player.contractor_dice:
             c_die = player.contractor_dice.pop(0)
             controller.state.contractor_supply += 1
+            player.hired_contractor_count = max(0, len(player.contractor_dice))
+            meta["hired_contractors"] = len(player.contractor_dice)
+            demoted_or_sacrificed_ids.add(c_die.die_id)
             if c_die in rolled:
                 c_idx = rolled.index(c_die)
                 if c_idx in validated_commitments:
@@ -511,6 +520,7 @@ def commit_defenses(
             )
             player.ready_dice.remove(target)
             player.unpatched_dice.append(target)
+            demoted_or_sacrificed_ids.add(target.die_id)
             if target in rolled:
                 t_idx = rolled.index(target)
                 if t_idx in validated_commitments:
@@ -519,17 +529,10 @@ def commit_defenses(
                 f"{meta['name']} resolved Glitch Backlash: demoted {target.color.value.capitalize()} die to Unpatched Zone."
             )
 
-    meta["commitments"] = {idx: color.value for idx, color in validated_commitments.items()}
-    meta["has_committed"] = True
-
-    # Group shield slots
-    slots = {"red": [], "blue": [], "green": []}
-    for idx, color in validated_commitments.items():
-        slots[color.value].append(rolled[idx])
-    meta["shield_slots"] = slots
-
     # Track star ability eligibility for Phase 3
     for idx, die in enumerate(rolled):
+        if die.die_id in demoted_or_sacrificed_ids:
+            continue
         face = die.current_face
         if not face or not face.is_star:
             continue
@@ -543,6 +546,25 @@ def commit_defenses(
         elif face.star_code == "P3":
             if idx in validated_commitments:
                 player.p3_available = validated_commitments[idx]
+
+    # Filter out sacrificed contractor dice and demoted dice from rolled_pool and re-index commitments
+    new_rolled: List[Die] = []
+    new_commitments: Dict[int, str] = {}
+    slots: Dict[str, List[Die]] = {"red": [], "blue": [], "green": []}
+    for old_idx, die in enumerate(rolled):
+        if die.die_id in demoted_or_sacrificed_ids:
+            continue
+        new_idx = len(new_rolled)
+        new_rolled.append(die)
+        if old_idx in validated_commitments:
+            color = validated_commitments[old_idx]
+            new_commitments[new_idx] = color.value
+            slots[color.value].append(die)
+
+    meta["rolled_pool"] = new_rolled
+    meta["commitments"] = new_commitments
+    meta["has_committed"] = True
+    meta["shield_slots"] = slots
 
     shield_summary = [f"{len(slots[c])} {c.capitalize()}" for c in ["red", "blue", "green"] if slots[c]]
     controller.event_log.append(
@@ -798,6 +820,7 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
                     validated[idx] = ShieldColor.BLUE
 
         # 6. Gain Resource Outputs on Effective Faces (RULES.md v0.8)
+        demoted_or_sacrificed_ids: set[int] = set()
         for idx, die in enumerate(active_dice):
             face = die.current_face
             if not face or face.is_glitch:
@@ -819,6 +842,7 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
                             if die in player.ready_dice:
                                 player.ready_dice.remove(die)
                                 player.unpatched_dice.append(die)
+                                demoted_or_sacrificed_ids.add(die.die_id)
             else:
                 if face.is_star:
                     if face.star_code == "R1":
@@ -845,8 +869,11 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
                 if chosen in player.contractor_dice:
                     player.contractor_dice.remove(chosen)
                 elif player.contractor_dice:
-                    player.contractor_dice.pop(0)
+                    chosen = player.contractor_dice.pop(0)
                 controller.state.contractor_supply += 1
+                player.hired_contractor_count = max(0, len(player.contractor_dice))
+                meta["hired_contractors"] = len(player.contractor_dice)
+                demoted_or_sacrificed_ids.add(chosen.die_id)
                 if chosen in active_dice:
                     c_idx = active_dice.index(chosen)
                     if c_idx in validated:
@@ -857,6 +884,7 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
             elif chosen and chosen in player.ready_dice:
                 player.ready_dice.remove(chosen)
                 player.unpatched_dice.append(chosen)
+                demoted_or_sacrificed_ids.add(chosen.die_id)
                 if chosen in active_dice:
                     r_idx = active_dice.index(chosen)
                     if r_idx in validated:
@@ -867,6 +895,9 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
             elif player.contractor_dice:
                 c_die = player.contractor_dice.pop(0)
                 controller.state.contractor_supply += 1
+                player.hired_contractor_count = max(0, len(player.contractor_dice))
+                meta["hired_contractors"] = len(player.contractor_dice)
+                demoted_or_sacrificed_ids.add(c_die.die_id)
                 if c_die in active_dice:
                     c_idx = active_dice.index(c_die)
                     if c_idx in validated:
@@ -886,6 +917,7 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
                 )
                 player.ready_dice.remove(target)
                 player.unpatched_dice.append(target)
+                demoted_or_sacrificed_ids.add(target.die_id)
                 if target in active_dice:
                     t_idx = active_dice.index(target)
                     if t_idx in validated:
@@ -894,18 +926,10 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
                     f"{meta['name']} resolved Glitch Backlash: demoted {target.color.value.capitalize()} die to Unpatched Zone."
                 )
 
-        meta["rolled_pool"] = list(active_dice)
-        meta["commitments"] = {idx: color.value for idx, color in validated.items()}
-        meta["has_rolled"] = True
-        meta["has_committed"] = True
-
-        slots = {"red": [], "blue": [], "green": []}
-        for idx, color in validated.items():
-            slots[color.value].append(active_dice[idx])
-        meta["shield_slots"] = slots
-
-        # 6. Track Star availability
+        # Track Star availability
         for idx, die in enumerate(active_dice):
+            if die.die_id in demoted_or_sacrificed_ids:
+                continue
             face = die.current_face
             if not face or not face.is_star:
                 continue
@@ -919,6 +943,25 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
             elif face.star_code == "P3":
                 if idx in validated:
                     player.p3_available = validated[idx]
+
+        new_rolled: List[Die] = []
+        new_commitments: Dict[int, str] = {}
+        slots: Dict[str, List[Die]] = {"red": [], "blue": [], "green": []}
+        for old_idx, die in enumerate(active_dice):
+            if die.die_id in demoted_or_sacrificed_ids:
+                continue
+            new_idx = len(new_rolled)
+            new_rolled.append(die)
+            if old_idx in validated:
+                color = validated[old_idx]
+                new_commitments[new_idx] = color.value
+                slots[color.value].append(die)
+
+        meta["rolled_pool"] = new_rolled
+        meta["commitments"] = new_commitments
+        meta["has_rolled"] = True
+        meta["has_committed"] = True
+        meta["shield_slots"] = slots
 
 # =========================================================================
 # Phase 2: Rogue Agent Compile (The Cube Tower Drop)

@@ -133,7 +133,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         not is_eliminated
         and is_spook
         and ability_avail
-        and player.money > 0
+        and controller.last_compile_result is not None
     )
 
     rolled_pool = meta.get("rolled_pool", [])

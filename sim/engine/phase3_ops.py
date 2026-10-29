@@ -39,7 +39,15 @@ def execute_phase_3(engine: GameEngine) -> None:
         ):
             free_patches = min(1, len(player.unpatched_dice))
             for _ in range(free_patches):
-                patched_die = player.unpatched_dice.pop(0)
+                best_idx = max(
+                    range(len(player.unpatched_dice)),
+                    key=lambda i: (
+                        1 if player.unpatched_dice[i].color != DieColor.GRAY else 0,
+                        getattr(player.unpatched_dice[i], "vp", 0),
+                        getattr(player.unpatched_dice[i], "cost", 0),
+                    ),
+                )
+                patched_die = player.unpatched_dice.pop(best_idx)
                 player.ready_dice.append(patched_die)
             if free_patches > 0:
                 player.mark_ability_used(active_ver)
