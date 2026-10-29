@@ -1,4 +1,4 @@
-"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.11.0 Baseline / Phase 17).
+"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.13.0 Baseline / Phase 19).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
   - 01_Player_Boards.pdf (6 pages — 1 per Consultancy Archetype, matching Wireframe Page 1)
@@ -19,7 +19,7 @@ from pnp.pdf_engine import PALETTE, Color, PDFDocument, PDFPage, measure_text
 
 
 # =============================================================================
-# Canonical Game Data (Synchronized 1:1 with RULES.md v0.11.0 & sim/entities.py)
+# Canonical Game Data (Synchronized 1:1 with RULES.md v0.13.0 & sim/entities.py)
 # =============================================================================
 
 @dataclass(frozen=True)
@@ -39,11 +39,11 @@ CHARACTERS: List[CharacterSpec] = [
         name="The Acoustic",
         role="Pattern Genius // Mainframe Resonance",
         flavor='"Every mainframe hums before it strikes. Listen to the baffles -- you can hear which packet drops next."',
-        timing="P2: AFTER DROP",
+        timing="P2: STEP 2B DMG",
         ability_name="Baffle Echo",
         ability_desc=(
-            "If you take unblocked damage from any color during **Phase 2**, permanently "
-            "remove **1 cube** of that color in the exit tray from the game (return to box)."
+            "Ignore **1 Attack Cube** of your choice for yourself this round. "
+            "Exited cubes remain in tray and recycle as normal."
         ),
     ),
     CharacterSpec(
@@ -54,8 +54,7 @@ CHARACTERS: List[CharacterSpec] = [
         timing="P3: OPERATIONS",
         ability_name="Magnetic Splice",
         ability_desc=(
-            "During your **Phase 3** turn, move **up to 2 worn dice** from your Unpatched Zone "
-            "back to your Ready Zone for **free** (without spending {WRENCH} or **$**)."
+            "Move **1 worn die** from Unpatched to Ready for **free**."
         ),
     ),
     CharacterSpec(
@@ -66,8 +65,8 @@ CHARACTERS: List[CharacterSpec] = [
         timing="P1: REROLL STEP",
         ability_name="Brute-Force Bypass",
         ability_desc=(
-            "During your **Phase 1** rerolls, include **any number of {LOCK} Locked dice** "
-            "(including Glitch dice) in your free rerolls without spending {WRENCH} tokens."
+            "Include **Locked dice** in free rerolls without spending {WRENCH}. "
+            "Turn **1 rolled die** to any non-Star face of choice."
         ),
     ),
     CharacterSpec(
@@ -78,8 +77,8 @@ CHARACTERS: List[CharacterSpec] = [
         timing="P2: STEP 2B DMG",
         ability_name="Slush Fund",
         ability_desc=(
-            "When unblocked damage would cause **Secret** loss (from {BLUE} Blue or unpaid {RED} Red), "
-            "pay **$1 per Secret** from your supply to prevent that loss (up to your cash)."
+            "Absorb up to **2 Secret loss for free**. "
+            "(Additional loss absorbed at **$1/Secret**)."
         ),
     ),
     CharacterSpec(
@@ -448,7 +447,7 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
     draw_board_outer_frame(
         page,
         left_tag=f"TOO MANY SECRETS // CONSULTANCY TERMINAL [{idx}/6]",
-        right_tag="PNP PROTOTYPE v0.11 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.13 // US LETTER",
     )
 
     # -------------------------------------------------------------------------
@@ -646,7 +645,7 @@ def render_agent_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // CENTRAL ROGUE AGENT & COMPILER BOARD [1/2]",
-        right_tag="PNP PROTOTYPE v0.11 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.13 // US LETTER",
     )
 
     # Top Title Bar inside board
@@ -897,7 +896,7 @@ def render_market_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // SOFTWARE MODULE MARKET & CENTRAL SUPPLY [2/2]",
-        right_tag="PNP PROTOTYPE v0.11 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.13 // US LETTER",
     )
 
     # Top Title Bar
@@ -1576,7 +1575,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated.append(path_versions)
 
     # 5. Combined Master Print-and-Play Pack (All 14 pages)
-    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.10.0)")
+    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.13.0)")
     for sub_doc in (doc_central, doc_players, doc_dice, doc_versions):
         for pg in sub_doc.pages:
             doc_master.pages.append(pg)

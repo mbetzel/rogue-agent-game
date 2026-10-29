@@ -234,6 +234,23 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
             player.total_rerolls_used += 1
             rerolls_remaining -= 1
 
+        # Prodigy face override (RULES.md v0.13.0)
+        if prodigy_active:
+            override = player.bot.choose_prodigy_face_override(
+                player_state=player,
+                active_dice=active_dice,
+                staging_cubes=staging_copy,
+                stuck_cubes=stuck_copy,
+                directive_code=active_directive,
+                rng=engine.rng,
+            )
+            if override:
+                die_idx, target_face = override
+                if 0 <= die_idx < len(active_dice) and not target_face.is_star:
+                    active_dice[die_idx].current_face = target_face
+                    active_dice[die_idx].is_locked = False
+                    active_dice[die_idx].chosen_choice_index = None
+
         # Final lock evaluation pass
         _evaluate_locks(active_dice)
 

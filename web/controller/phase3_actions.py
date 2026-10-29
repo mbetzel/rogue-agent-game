@@ -381,8 +381,8 @@ def take_dirty_income(
 
 
 
-def use_phreaker_ability(controller: GameController, player_id: int, count: int = 2) -> Dict[str, Any]:
-    """Human action: repairs up to 2 unpatched dice for free using Phreaker Magnetic Splice."""
+def use_phreaker_ability(controller: GameController, player_id: int, count: int = 1) -> Dict[str, Any]:
+    """Human action: repairs 1 unpatched die for free using Phreaker Magnetic Splice (v0.13.0)."""
     if controller.phase != 3:
         raise ValueError(f"Cannot use Phreaker ability in phase {controller.phase}")
     if player_id != controller.active_player_index:
@@ -402,7 +402,7 @@ def use_phreaker_ability(controller: GameController, player_id: int, count: int 
     if not player.unpatched_dice:
         raise ValueError("No unpatched dice available to repair")
 
-    repaired_count = min(count, 2, len(player.unpatched_dice))
+    repaired_count = min(count, 1, len(player.unpatched_dice))
     for _ in range(repaired_count):
         repaired = player.unpatched_dice.pop(0)
         player.ready_dice.append(repaired)
@@ -438,18 +438,26 @@ def use_acoustic_ability(controller: GameController, player_id: int, chosen_colo
     if exited.get(chosen_color.value, 0) <= 0:
         raise ValueError(f"No {chosen_color.value} cubes exited in the last compile drop")
 
-    exited[chosen_color.value] -= 1
-    controller.state.staging_cup[chosen_color] = max(0, controller.state.staging_cup.get(chosen_color, 0) - 1)
+    # In v0.13.0: Exited cubes remain in tray and recycle as normal.
+    # Player ignores 1 cube of that color (mitigates damage for self)
+    if chosen_color == CubeColor.BLUE:
+        player.secrets = min(10, player.secrets + 1)
+    elif chosen_color == CubeColor.RED:
+        player.money += 1
+    elif chosen_color == CubeColor.GREEN and player.unpatched_dice:
+        restored = player.unpatched_dice.pop()
+        player.ready_dice.append(restored)
+
     player.mark_ability_used()
     controller.event_log.append(
-        f"{meta['name']} activated Acoustic Baffle Echo: permanently removed 1 {chosen_color.value} cube from exit tray."
+        f"{meta['name']} activated Acoustic Baffle Echo: ignored 1 {chosen_color.value} cube for self."
     )
     return controller.get_full_state()
 
 
 
-def use_spook_ability(controller: GameController, player_id: int, dollars: int) -> Dict[str, Any]:
-    """Human action: activates Spook Slush Fund to pay money to prevent secret loss."""
+def use_spook_ability(controller: GameController, player_id: int, dollars: int = 0) -> Dict[str, Any]:
+    """Human action: activates Spook Slush Fund (v0.13.0: absorbs up to 2 secrets free + optional cash)."""
     player = controller.state.players[player_id]
     meta = controller.player_meta[player_id]
 
@@ -459,15 +467,16 @@ def use_spook_ability(controller: GameController, player_id: int, dollars: int) 
         raise ValueError("Player does not have the Spook archetype")
     if not player.is_ability_available():
         raise ValueError("Spook ability is not available")
-    if dollars <= 0:
-        raise ValueError("Dollars must be positive")
-    if player.money < dollars:
-        raise ValueError(f"Insufficient funds: player has ${player.money}, attempted to pay ${dollars}")
 
-    player.money -= dollars
+    # In v0.13.0: Absorb up to 2 secrets free, plus optional extra for $1 each
+    free_secrets = 2
+    cash_spent = max(0, min(dollars, player.money))
+    player.money -= cash_spent
+    total_secrets_absorbed = free_secrets + cash_spent
+    player.secrets = min(10, player.secrets + total_secrets_absorbed)
     player.mark_ability_used()
     controller.event_log.append(
-        f"{meta['name']} activated Spook Slush Fund: paid ${dollars} to absorb damage."
+        f"{meta['name']} activated Spook Slush Fund: absorbed {total_secrets_absorbed} secrets ({free_secrets} free, ${cash_spent} cash)."
     )
     return controller.get_full_state()
 

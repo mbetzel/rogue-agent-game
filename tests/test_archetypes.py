@@ -460,8 +460,8 @@ class TestSpookAndAcoustic(unittest.TestCase):
             active_directive="SCRIPT_KIDDIE",
         )
 
-        # Spook absorbs 2 Blue damage for $2 cash
-        self.assertEqual(player.money, 3)  # $5 - $2 = $3
+        # Spook absorbs 2 Blue damage for FREE (v0.13.0)
+        self.assertEqual(player.money, 5)  # $0 spent from cash
         self.assertEqual(player.secrets, 6)  # 0 Secrets lost!
         self.assertEqual(player.ability_v1_status, AbilityStatus.USED)
 
@@ -494,12 +494,13 @@ class TestSpookAndAcoustic(unittest.TestCase):
             active_directive="SCRIPT_KIDDIE",
         )
 
-        self.assertEqual(player.money, 0)
+        # Absorbed 2 secrets for free; money remains 2
+        self.assertEqual(player.money, 2)
         self.assertEqual(player.secrets, 6)
         self.assertEqual(player.ability_v1_status, AbilityStatus.USED)
 
     def test_spook_slush_fund_insufficient_cash(self) -> None:
-        """14. Spook with partial cash absorbs up to available cash, leaking remainder."""
+        """14. Spook absorbs up to 2 secrets for free, and pays $1 cash for 3rd."""
         config = GameConfig(num_players=4)
         spook_card = get_archetype_by_code(ArchetypeCode.SPOOK)
         engine = GameEngine(
@@ -512,7 +513,7 @@ class TestSpookAndAcoustic(unittest.TestCase):
 
         player = engine.state.players[0]
         player.secrets = 6
-        player.money = 1  # Only $1 cash
+        player.money = 1  # $1 cash
         player.patches = 0
 
         attack_strengths = {CubeColor.RED: 0, CubeColor.BLUE: 3, CubeColor.GREEN: 0}
@@ -527,13 +528,13 @@ class TestSpookAndAcoustic(unittest.TestCase):
             active_directive="SCRIPT_KIDDIE",
         )
 
-        # Pays $1 to absorb 1 Secret loss, remaining 2 unblocked Blue cubes leak Secrets
+        # 2 absorbed for free + 1 paid with cash ($1) -> 0 secrets lost, $0 money remaining
         self.assertEqual(player.money, 0)
-        self.assertEqual(player.secrets, 4)  # 6 - 2 = 4
+        self.assertEqual(player.secrets, 6)
         self.assertEqual(player.ability_v1_status, AbilityStatus.USED)
 
     def test_acoustic_baffle_echo_removes_exited_cube(self) -> None:
-        """15. Acoustic Baffle Echo permanently removes 1 exited cube of damaged color."""
+        """15. Acoustic Baffle Echo ignores 1 attack cube for self without modifying exited cubes."""
         config = GameConfig(num_players=4)
         acoustic_card = get_archetype_by_code(ArchetypeCode.ACOUSTIC)
         engine = GameEngine(
@@ -561,12 +562,14 @@ class TestSpookAndAcoustic(unittest.TestCase):
             active_directive="SCRIPT_KIDDIE",
         )
 
-        # 1 Blue cube permanently removed from exited tray
-        self.assertEqual(exited_cubes[CubeColor.BLUE], 1)
+        # Acoustic ignores 1 Blue cube (suffering 1 Blue damage = 1 Secret lost, so 5 Secrets remain)
+        self.assertEqual(player.secrets, 5)
+        # Exited cubes in tray remain conserved (NOT decremented)
+        self.assertEqual(exited_cubes[CubeColor.BLUE], 2)
         self.assertEqual(player.ability_v1_status, AbilityStatus.USED)
 
     def test_acoustic_baffle_echo_controller_staging_cup(self) -> None:
-        """15b. Acoustic Baffle Echo in controller decrements both exited_cubes and staging_cup."""
+        """15b. Acoustic Baffle Echo in controller mitigates damage for self without decrementing staging cup."""
         controller = GameController()
         acoustic_card = get_archetype_by_code(ArchetypeCode.ACOUSTIC)
         controller.new_game(
@@ -580,11 +583,13 @@ class TestSpookAndAcoustic(unittest.TestCase):
             "exited_cubes": {"red": 1, "blue": 2, "green": 0, "black": 1}
         }
         controller.state.staging_cup[CubeColor.BLUE] = 3
+        controller.state.players[0].secrets = 5
 
         res = controller.use_acoustic_ability(player_id=0, chosen_color_str="blue")
         self.assertIn("players", res)
-        self.assertEqual(controller.last_compile_result["exited_cubes"]["blue"], 1)
-        self.assertEqual(controller.state.staging_cup[CubeColor.BLUE], 2)
+        # In v0.13.0: Exited cubes and staging cup are preserved; player gets +1 secret (damage mitigated)
+        self.assertEqual(controller.state.players[0].secrets, 6)
+        self.assertEqual(controller.state.staging_cup[CubeColor.BLUE], 3)
         self.assertEqual(controller.state.players[0].ability_v1_status, AbilityStatus.USED)
 
 
@@ -617,10 +622,10 @@ class TestPhreakerAndCipher(unittest.TestCase):
         player.patches = 0
         player.money = 0
 
-        res = controller.use_phreaker_ability(player_id=0, count=2)
+        res = controller.use_phreaker_ability(player_id=0, count=1)
         self.assertIn("players", res)
-        self.assertEqual(len(player.unpatched_dice), initial_unpatched - 2)
-        self.assertEqual(len(player.ready_dice), initial_ready + 2)
+        self.assertEqual(len(player.unpatched_dice), initial_unpatched - 1)
+        self.assertEqual(len(player.ready_dice), initial_ready + 1)
         self.assertEqual(player.patches, 0)
         self.assertEqual(player.money, 0)
         self.assertEqual(player.ability_v1_status, AbilityStatus.USED)

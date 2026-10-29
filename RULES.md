@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.12.0)
+# Too Many Secrets — Rules Draft (v0.13.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -101,7 +101,7 @@ Each player’s consultancy archetype provides a powerful, specialized capabilit
      * A die (White Contractor or Colored Red/Blue/Green) that rolls a **`Glitch (Locked)`** face is locked immediately.
      * Active **SETEC Version Directives** may lock specific faces (e.g., Cash in `v2.0 RaaS`, or Shields in `v3.0 Zero-Day Override`).
      * Locked dice **cannot** be rerolled during your free rerolls.
-   * **Debug Action (`🔧` Token Utility):** At any time during your reroll sequence, you may spend **`1 🔧` token** from your pool (or permanently set aside and lock a rolled die showing `+1 🔧`) to **Unlock `1` locked die**, allowing it to be rerolled in remaining rerolls. *(Archetype Timing: **The Prodigy** may trigger Brute-Force Bypass here).*
+   * **Debug Action (`🔧` Token Utility):** At any time during your reroll sequence, you may spend **`1 🔧` token** from your pool (or permanently set aside and lock a rolled die showing `+1 🔧`) to **Unlock `1` locked die**, allowing it to be rerolled in remaining rerolls. *(Archetype Timing: **The Prodigy** may trigger Brute-Force Bypass here to reroll locked dice freely and turn 1 rolled die to any non-Star face of choice).*
 5. **Assign Dice & Declare Choices (Simultaneous):**
    * Assign rolled Shield dice (and Shield `★` abilities) from your Active Pool to your **Red**, **Blue**, or **Green** Shield slots.
    * **Choice Faces:** Any die showing a **Choice Face** must have its role committed now:
@@ -133,7 +133,7 @@ Move exited **Black Cubes** onto the active Version's **Corruption Track** one a
 * **Singularity (`v3.0` Track Fills):** If the final space of `v3.0` fills (4th in 2P, 5th in 3P, 6th in 4P), **Singularity is triggered!** Step 2B resolves normally for this drop, and the game enters its final round wrap-up.
 
 #### Step 2B: Resolve Attack Cubes (Red, Blue, Green)
-Calculate the total attack strength of **Red**, **Blue**, and **Green** (exited cubes + any active Version Directive modifiers). *(Archetype Timing: **The Acoustic** may trigger Baffle Echo after exited cubes are counted).* Each player simultaneously resolves all three colors against their committed Shields:
+Calculate the total attack strength of **Red**, **Blue**, and **Green** (exited cubes + any active Version Directive modifiers). *(Archetype Timing: **The Acoustic** may trigger Baffle Echo here to ignore 1 Attack Cube of their choice for themselves this round).* Each player simultaneously resolves all three colors against their committed Shields:
 
 1. **Dice Wear (Software Adaptation):** Any permanent die assigned as a Shield that **actively blocks at least 1 cube** moves to your **Unpatched Zone**. *(White Contractor dice that block damage return to the general supply at round end; they never move to the Unpatched Zone).* If multiple dice were committed to a color and fewer cubes dropped than total shield strength, the defending player chooses which die absorbs the attack and wears down. *(If 0 cubes of that color dropped, or another die already absorbed all cubes of that color, unused permanent Shield dice remain Ready and return to your Ready Zone!)*
 2. **Unblocked Damage:**
@@ -141,7 +141,7 @@ Calculate the total attack strength of **Red**, **Blue**, and **Green** (exited 
      * **Emergency Patch Absorption:** If cash is insufficient to pay the full ransom, each available **`1 🔧` token** automatically absorbs **`$1`** of unpaid ransom before secrets leak.
      * **Unpaid Ransom Leak:** If any ransom remains unpaid after exhausting cash and patch tokens, proprietary source code leaks to the dark web: lose **`1 Corporate Secret` per unpaid `$1`**! Money is strictly non-negative and never drops below `$0`.
    * **Blue (Spyware / Data Exfiltration):** Lose **`1` Corporate Secret** per unblocked Blue cube.
-   * *(Archetype Timing: **The Spook** may trigger Slush Fund during damage calculation to absorb Secret loss with cash).*
+   * *(Archetype Timing: **The Spook** may trigger Slush Fund during damage calculation to absorb up to 2 Secret loss for free).*
    * **Green (Malware / Logic Bombs):** For each unblocked Green cube, move **`1` Ready die** (that was not already worn down this round) to your **Unpatched Zone**. **Contractor Sacrifice:** You may choose to **discard `1` active White Contractor die** to the supply instead of demoting a permanent Ready die! *(**Commercial Exposure (Yellow Dice):** Commercial software attracts heavy scrutiny. Contractor Sacrifice cannot be used to prevent Green malware from demoting a Yellow die. When resolving unblocked Green malware, Ready Yellow dice must be demoted to Unpatched first before Contractor Sacrifice or non-Yellow dice can absorb malware).* If you have **no Ready dice or Contractor dice left**, you must instead **Destroy (return to box) `1` Unpatched die** of your choice! *(If you have 0 dice remaining anywhere, track unfulfilled destructions for wipeout scoring).*
    * **Patient Zero Check:** If your Corporate Secrets reach **`0` (or below)**, your consultancy suffers a **Total Data Breach** and you become **Patient Zero** *(track negative Secrets below 0 if needed for total-wipeout tiebreakers)*.
 3. **Snowball Recycle & Contractor Expiration:** Place **all exited Red, Blue, and Green cubes** from the tray back into the **Staging Cup** for next round. All White Contractor dice (whether they blocked, sacrificed, or remained unused) return to the general supply.
@@ -167,7 +167,7 @@ Starting with the First Player and proceeding clockwise, each surviving player t
 1. **Purchase Software Module Dice (Limit `2` dice per turn `[TUNE]`):**
    * Pay the `$` cost of any available Colored Die in the Market and place it directly into your **Ready Zone**. *(Archetype Timing: **The Cipher** may trigger Algorithmic Arbitrage here to purchase 1 Colored Die at a **$2 discount**).*
 2. **Patch Worn-Out Modules (Unlimited):**
-   * Spend **`1 🔧` token** *or* pay **`$2`** `[TUNE: test $1–$3]` to move **1 die** from your **Unpatched Zone** back to your **Ready Zone**. *(Crucial for End Game: unpatched dice score `0 VP`; patching a colored die to Ready earns its full printed 3–4 VP!).* *(Archetype Timing: **The Phreaker** may trigger Magnetic Splice here to patch up to 2 dice for free).*
+   * Spend **`1 🔧` token** *or* pay **`$2`** `[TUNE: test $1–$3]` to move **1 die** from your **Unpatched Zone** back to your **Ready Zone**. *(Crucial for End Game: unpatched dice score `0 VP`; patching a colored die to Ready earns its full printed 3–4 VP!).* *(Archetype Timing: **The Phreaker** may trigger Magnetic Splice here to patch 1 die for free).*
 3. **Backdoor Siphon ("Dirty Income" — Limit `1×` per turn):**
    * Tap the rogue SETEC protocol under the table for an immediate cash injection, at the cost of leaking telemetry and corrupting local relays.
    * **Prerequisites:** You must have at least **`1` Ready die** to move to Unpatched and at least **`2` Corporate Secrets** (cannot be taken if you have $\le 1$ Secret or 0 Ready dice).
@@ -259,9 +259,9 @@ Each archetype features a unique special ability that may be activated **once pe
 
 | Archetype | Timing Window | Ability Name | Ability Effect |
 | :--- | :--- | :--- | :--- |
-| **The Acoustic** | **Phase 2:** After Tower Drop | *Baffle Echo* | If you take unblocked damage from any color, permanently remove **1 cube** of that color in the exit tray from the game (return to box). |
-| **The Phreaker** | **Phase 3:** Operations Turn | *Magnetic Splice* | Move **up to 2 worn dice** from your Unpatched Zone back to your Ready Zone for **free** (without spending `🔧` or `$`). |
-| **The Prodigy** | **Phase 1:** Reroll Step | *Brute-Force Bypass* | During your rerolls this phase, you may include **any number of Locked dice** (including Glitch dice) in your free rerolls without spending `🔧` tokens. |
-| **The Spook** | **Phase 2:** Step 2B Damage | *Slush Fund* | When suffering unblocked damage that would cause you to lose Corporate Secrets (from Blue Spyware or unpaid Red Ransom), pay **`$1` from your supply per Secret** to prevent that loss (up to your available cash). |
+| **The Acoustic** | **Phase 2:** Step 2B Damage | *Baffle Echo* | When resolving compiler damage, ignore **1 Attack Cube** (`Red`, `Blue`, or `Green`) of your choice for yourself this round. *(All exited cubes remain in the exit tray and recycle into the Staging Cup as normal).* |
+| **The Phreaker** | **Phase 3:** Operations Turn | *Magnetic Splice* | Move **1 worn die** from your Unpatched Zone back to your Ready Zone for **free** (without spending `🔧` or `$`). |
+| **The Prodigy** | **Phase 1:** Step 4 Rerolls | *Brute-Force Bypass* | During your rerolls this phase, you may include **any number of Locked dice** (including Glitch dice) in your free rerolls without spending `🔧` tokens. In addition, you may turn **1 of your rolled dice to any non-Star face of your choice**. |
+| **The Spook** | **Phase 2:** Step 2B Damage | *Slush Fund* | The Spook accesses emergency black budget reserves: **Absorb up to 2 Corporate Secret loss** (from Blue Spyware or unpaid Red Ransom) for free without paying cash. *(Any additional Secret loss may be absorbed by paying `$1` per Secret as normal).* |
 | **The Cipher** | **Phase 3:** Operations Turn | *Algorithmic Arbitrage* | Purchase **1 Colored Die** from the Market at a **`$2 discount`** (minimum cost `$0`), **OR** take the Backdoor Siphon (Dirty Income) action without demoting a Ready die to Unpatched. |
-| **The Operator** | **Phase 1:** Staffing Step | *Redundant Crew* | Hire up to **2 White Contractor Dice for free** this round (bypassing progressive contractor costs). |
+| **The Operator** | **Phase 1:** Step 2 Staffing | *Redundant Crew* | Hire up to **2 White Contractor Dice for free** this round (bypassing progressive contractor costs). |

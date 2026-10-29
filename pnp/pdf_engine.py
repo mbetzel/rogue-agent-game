@@ -573,6 +573,7 @@ class PDFPage:
     @staticmethod
     def _parse_rich_tokens(markup: str, base_font: str = "regular") -> List[RichSpan]:
         """Parse lightweight inline markup (`**bold**`, `*italic*`, `` `mono` ``, `{ICON}`) into word/icon spans."""
+        markup = markup.replace("🔧", "{WRENCH}").replace("★", "{STAR}")
         style_pat = re.compile(r"(\*\*[^*]+\*\*|`[^`]+`|\*[^*]+\*)")
         icon_pat = re.compile(r"(\{[A-Z0-9_]+\})")
         spans: List[RichSpan] = []

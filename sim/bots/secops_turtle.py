@@ -266,7 +266,7 @@ class SecOpsTurtleBot(BaseBot):
                 player_state, game_state, current_money, current_patches, patch_cash_cost, plan
             )
         else:
-            start_patch_idx = 2 if plan.use_phreaker_ability else 0
+            start_patch_idx = 1 if plan.use_phreaker_ability else 0
             for idx in range(start_patch_idx, len(player_state.unpatched_dice)):
                 if current_patches > 0:
                     plan.patch_actions.append({"die_index": idx, "use_cash": False})

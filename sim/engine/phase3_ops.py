@@ -30,14 +30,14 @@ def execute_phase_3(engine: GameEngine) -> None:
         plan = player.bot.take_phase3_actions(player, engine.state, engine.rng)
         active_ver = engine.state.active_version.version_str
 
-        # Hook Phase 3: The Phreaker (Magnetic Splice) - patch up to 2 worn dice for free
+        # Hook Phase 3: The Phreaker (Magnetic Splice) - patch 1 worn die for free
         if (
             plan.use_phreaker_ability
             and player.archetype is not None
             and player.archetype.code == ArchetypeCode.PHREAKER
             and player.is_ability_available(active_ver)
         ):
-            free_patches = min(2, len(player.unpatched_dice))
+            free_patches = min(1, len(player.unpatched_dice))
             for _ in range(free_patches):
                 patched_die = player.unpatched_dice.pop(0)
                 player.ready_dice.append(patched_die)

@@ -201,6 +201,7 @@ def resolve_player_defense_and_wear(
     exited_cubes: Dict[CubeColor, int],
     active_directive: str,
 ) -> None:
+    active_ver = engine.state.active_version.version_str
     # Calculate raw committed shields per color
     raw_shields: Dict[ShieldColor, int] = {
         ShieldColor.RED: 0,
@@ -226,15 +227,42 @@ def resolve_player_defense_and_wear(
         CubeColor.GREEN: raw_shields[ShieldColor.GREEN],
     }
 
+    # Hook Phase 2 Step 2B: The Acoustic (Baffle Echo - v0.13.0)
+    # When resolving compiler damage, ignore 1 Attack Cube of your choice for yourself this round.
+    # Exited cubes remain in the exit tray and recycle as normal.
+    player_attacks = dict(attack_strengths)
+    if (
+        player.archetype is not None
+        and player.archetype.code == ArchetypeCode.ACOUSTIC
+        and player.is_ability_available(active_ver)
+    ):
+        # Determine qualifying attack colors where threat exceeds shields (or causes unblocked damage)
+        qualifying = [
+            c for c in [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN]
+            if player_attacks.get(c, 0) > 0 and exited_cubes.get(c, 0) > 0
+        ]
+        if qualifying:
+            chosen_color = player.bot.choose_acoustic_ability(
+                player_state=player,
+                qualifying_colors=qualifying,
+                exited_cubes=exited_cubes,
+                active_version_str=active_ver,
+                rng=engine.rng,
+                corruption_track=engine.state.corruption_track,
+            )
+            if chosen_color in qualifying:
+                player_attacks[chosen_color] = max(0, player_attacks[chosen_color] - 1)
+                player.mark_ability_used(active_ver)
+
     # Calculate blocked and unblocked attacks
-    blocked_red = min(effective_shields[CubeColor.RED], attack_strengths[CubeColor.RED])
-    unblocked_red = attack_strengths[CubeColor.RED] - blocked_red
+    blocked_red = min(effective_shields[CubeColor.RED], player_attacks[CubeColor.RED])
+    unblocked_red = player_attacks[CubeColor.RED] - blocked_red
 
-    blocked_blue = min(effective_shields[CubeColor.BLUE], attack_strengths[CubeColor.BLUE])
-    unblocked_blue = attack_strengths[CubeColor.BLUE] - blocked_blue
+    blocked_blue = min(effective_shields[CubeColor.BLUE], player_attacks[CubeColor.BLUE])
+    unblocked_blue = player_attacks[CubeColor.BLUE] - blocked_blue
 
-    blocked_green = min(effective_shields[CubeColor.GREEN], attack_strengths[CubeColor.GREEN])
-    unblocked_green = attack_strengths[CubeColor.GREEN] - blocked_green
+    blocked_green = min(effective_shields[CubeColor.GREEN], player_attacks[CubeColor.GREEN])
+    unblocked_green = player_attacks[CubeColor.GREEN] - blocked_green
 
     # 1. Dice Wear: Any permanent die assigned as a shield that actively blocks at least 1 cube moves to Unpatched
     # White Contractor dice have wear immunity (return to supply at round end).
@@ -335,32 +363,42 @@ def resolve_player_defense_and_wear(
             player.patches -= patches_absorbed
             unpaid_ransom -= patches_absorbed
 
-    # Hook Phase 2 Step 2B: The Spook (Slush Fund)
-    # Pay $1 per secret to absorb Blue secret loss or unpaid Red ransom before leak
+    # Hook Phase 2 Step 2B: The Spook (Slush Fund - v0.13.0)
+    # The Spook accesses emergency black budget reserves:
+    # Absorb up to 2 Corporate Secret loss (from Blue Spyware or unpaid Red Ransom) for free without paying cash.
+    # (Any additional Secret loss may be absorbed by paying $1 per Secret as normal).
     potential_secret_loss = unpaid_ransom + unblocked_blue
     if (
         potential_secret_loss > 0
-        and player.money > 0
         and player.archetype is not None
         and player.archetype.code == ArchetypeCode.SPOOK
         and player.is_ability_available(active_ver)
     ):
-        spook_dollars = player.bot.choose_spook_ability(
-            player_state=player,
-            secrets_at_risk=potential_secret_loss,
-            active_version_str=active_ver,
-            rng=engine.rng,
-            corruption_track=engine.state.corruption_track,
-        )
-        actual_spook_dollars = max(0, min(spook_dollars, player.money, potential_secret_loss))
-        if actual_spook_dollars > 0:
-            player.money -= actual_spook_dollars
-            player.mark_ability_used(active_ver)
-            # First absorb from unpaid ransom, then unblocked blue
-            absorbed_from_ransom = min(unpaid_ransom, actual_spook_dollars)
-            unpaid_ransom -= absorbed_from_ransom
-            remaining_absorb = actual_spook_dollars - absorbed_from_ransom
-            unblocked_blue -= remaining_absorb
+        # 1. Absorb up to 2 Secrets for FREE from emergency slush reserves
+        free_absorb = min(2, potential_secret_loss)
+        absorbed_from_ransom = min(unpaid_ransom, free_absorb)
+        unpaid_ransom -= absorbed_from_ransom
+        remaining_free = free_absorb - absorbed_from_ransom
+        unblocked_blue -= remaining_free
+        potential_secret_loss -= free_absorb
+        player.mark_ability_used(active_ver)
+
+        # 2. If excess secret loss remains and player has cash, allow additional cash absorption at $1/Secret
+        if potential_secret_loss > 0 and player.money > 0:
+            spook_dollars = player.bot.choose_spook_ability(
+                player_state=player,
+                secrets_at_risk=potential_secret_loss,
+                active_version_str=active_ver,
+                rng=engine.rng,
+                corruption_track=engine.state.corruption_track,
+            )
+            actual_spook_dollars = max(0, min(spook_dollars, player.money, potential_secret_loss))
+            if actual_spook_dollars > 0:
+                player.money -= actual_spook_dollars
+                absorbed_paid_ransom = min(unpaid_ransom, actual_spook_dollars)
+                unpaid_ransom -= absorbed_paid_ransom
+                remaining_paid = actual_spook_dollars - absorbed_paid_ransom
+                unblocked_blue -= remaining_paid
 
     if unpaid_ransom > 0:
         player.secrets -= unpaid_ransom
@@ -371,30 +409,6 @@ def resolve_player_defense_and_wear(
     # Blue (Spyware): Lose 1 Corporate Secret per unblocked Blue cube
     if unblocked_blue > 0:
         player.secrets -= unblocked_blue
-
-    # Hook Phase 2 Step 2B: The Acoustic (Baffle Echo)
-    # If suffering unblocked damage from any color, permanently remove 1 exited cube of that color
-    if (
-        player.archetype is not None
-        and player.archetype.code == ArchetypeCode.ACOUSTIC
-        and player.is_ability_available(active_ver)
-    ):
-        qualifying = [
-            c for c in [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN]
-            if acoustic_unblocked.get(c, 0) > 0 and exited_cubes.get(c, 0) > 0
-        ]
-        if qualifying:
-            chosen_color = player.bot.choose_acoustic_ability(
-                player_state=player,
-                qualifying_colors=qualifying,
-                exited_cubes=exited_cubes,
-                active_version_str=active_ver,
-                rng=engine.rng,
-                corruption_track=engine.state.corruption_track,
-            )
-            if chosen_color in qualifying and exited_cubes.get(chosen_color, 0) > 0:
-                exited_cubes[chosen_color] -= 1
-                player.mark_ability_used(active_ver)
 
     # Patient Zero Check: Strictly occurs upon Total Data Breach (Secrets <= 0)
     if player.secrets <= 0:

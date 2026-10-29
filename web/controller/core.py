@@ -301,7 +301,7 @@ class GameController:
     ) -> Dict[str, Any]:
         return phase3_actions.take_dirty_income(self, player_id, backlash_die_index, use_cipher_ability)
 
-    def use_phreaker_ability(self, player_id: int, count: int = 2) -> Dict[str, Any]:
+    def use_phreaker_ability(self, player_id: int, count: int = 1) -> Dict[str, Any]:
         return phase3_actions.use_phreaker_ability(self, player_id, count)
 
     def use_acoustic_ability(self, player_id: int, chosen_color_str: str) -> Dict[str, Any]:

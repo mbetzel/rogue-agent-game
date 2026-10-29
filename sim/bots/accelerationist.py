@@ -285,7 +285,7 @@ class AccelerationistBot(BaseBot):
                     purchases += 1
 
         if not is_final_round:
-            start_patch_idx = 2 if plan.use_phreaker_ability else 0
+            start_patch_idx = 1 if plan.use_phreaker_ability else 0
             for idx in range(start_patch_idx, len(player_state.unpatched_dice)):
                 if current_patches > 0:
                     plan.patch_actions.append({"die_index": idx, "use_cash": False})

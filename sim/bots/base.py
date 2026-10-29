@@ -62,7 +62,7 @@ def plan_final_round_repairs(
     """Plans repairs for the final round prioritizing highest VP colored dice using patches then cash."""
     sim_unpatched = list(player_state.unpatched_dice)
     if plan.use_phreaker_ability:
-        for _ in range(min(2, len(sim_unpatched))):
+        for _ in range(min(1, len(sim_unpatched))):
             sim_unpatched.pop(0)
 
     cfg = game_state.config
@@ -234,6 +234,38 @@ class BaseBot:
     ) -> bool:
         """Returns True if the bot activates The Prodigy's Brute-Force Bypass ability."""
         return False
+
+    def choose_prodigy_face_override(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        staging_cubes: Dict[CubeColor, int],
+        stuck_cubes: Dict[CubeColor, int],
+        directive_code: str,
+        rng: random.Random,
+    ) -> Optional[Tuple[int, Face]]:
+        """Returns (die_index, target_face) to turn 1 rolled die to any legal non-Star face, or None."""
+        if not active_dice:
+            return None
+        candidates = [
+            (idx, d) for idx, d in enumerate(active_dice)
+            if d.is_locked or (d.current_face and d.current_face.is_glitch)
+        ]
+        if not candidates:
+            candidates = list(enumerate(active_dice))
+        if not candidates:
+            return None
+
+        best_choice = None
+        best_score = -1
+        for idx, d in candidates:
+            valid_faces = [f for f in d.faces if not f.is_star and not f.is_glitch]
+            for f in valid_faces:
+                score = f.block_amount * 3 + f.money * 2 + f.patches * 2
+                if score > best_score:
+                    best_score = score
+                    best_choice = (idx, f)
+        return best_choice
 
     def choose_acoustic_ability(
         self,

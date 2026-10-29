@@ -3,7 +3,7 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
-- [x] **Rules Draft `v0.12.0`** captured in [RULES.md](./RULES.md)
+- [x] **Rules Draft `v0.13.0`** captured in [RULES.md](./RULES.md)
 - [x] **Multi-Agent SDLC Pipeline** defined in Section 2 below
 - [x] **Phases 1–10 (Core Sim, v0.3–v0.8 Baselines, Choice Faces, Variants):** Archived in [docs/archive/ROADMAP_HISTORY.md](docs/archive/ROADMAP_HISTORY.md)
 - [x] **Phase 11: Web UX Polish — Setup Randomization Variety & Rogue Agent Versions Roadmap**
@@ -59,6 +59,14 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Ran 3,000-match Monte Carlo sweep across 2P, 3P, and 4P pods (`phase18_telemetry.json`).
   - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Verified ~7.2–8.7 round pacing, 21%–30% Singularity rate, safe 1.4% early death rate, and logged Section 7 in `FINDINGS.md` and `RULES.md` (OFFICIALLY APPROVED).
   - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Update dice reference charts and market card descriptions in `pnp/generate_pnp.py` and regenerate all 5 PDF packs.
+- [x] **Phase 19: Consultancy Archetype Recalibration & Parity (`v0.13.0` Baseline)**
+  - [x] *Design Alignment:* Rebalance archetype suite into the target 20%–30% win-rate corridor: Phreaker reduced to 1 free repair; Spook granted free 2-Secret absorption; Prodigy granted free locked rerolls + set 1 rolled die to non-Star face of choice; Acoustic shifted from table-wide cube removal to personal 1-cube ignore; Operator and Cipher verified at parity.
+  - [x] *Technical Architecture Spec (`principal-engineer`):* High-level software architecture, module contracts, state transitions, and test matrix.
+  - [x] *Implementation (`senior-engineer`):* Update `sim/entities.py`, `sim/engine/`, `sim/bots/`, and unit test suite.
+  - [x] *Code Review Gate (`staff-engineer`):* Review diffs line-by-line, audit edge cases, and verify 100% test pass via WSL.
+  - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Run 1,000-match tournament sweep across 4P pods to compile official telemetry table.
+  - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Evaluate parity, log Section 8 in `FINDINGS.md`.
+  - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Update archetype reference cards in `pnp/generate_pnp.py` and regenerate PDF packs.
 
 ---
 

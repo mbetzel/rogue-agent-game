@@ -451,6 +451,8 @@ class TestV03Rules(unittest.TestCase):
 
         p0 = engine.state.players[0]
         p1 = engine.state.players[1]
+        p0.archetype = None
+        p1.archetype = None
 
         # Both players in critical condition
         p0.secrets = 1
