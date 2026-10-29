@@ -3,7 +3,7 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
-- [x] **Rules Draft `v0.9.0`** captured in [RULES.md](./RULES.md)
+- [x] **Rules Draft `v0.11.0`** captured in [RULES.md](./RULES.md)
 - [x] **Multi-Agent SDLC Pipeline** defined in Section 2 below
 - [x] **Phases 1–10 (Core Sim, v0.3–v0.8 Baselines, Choice Faces, Variants):** Archived in [docs/archive/ROADMAP_HISTORY.md](docs/archive/ROADMAP_HISTORY.md)
 - [x] **Phase 11: Web UX Polish — Setup Randomization Variety & Rogue Agent Versions Roadmap**
@@ -43,6 +43,14 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Code Review Gate (`staff-engineer`):* Code review, contract verification, and 100% test pass via WSL (232/232 tests passing).
   - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Synchronized `pnp/generate_pnp.py` and `pnp/README.md` to `v0.10.0` (6-space track with 4/5/6 milestone markers, 8/8/10 Secrets, 2 flat Patches, standard 2-cube payloads), regenerating all 5 PnP PDFs.
   - [x] *Simulation Telemetry & Pacing Validation (`product-owner` / `game-designer`):* Executed 46,000+ Monte Carlo iterations, diagnosed PZR variance driver, and logged Section 5 in `FINDINGS.md`.
+- [x] **Phase 17: Active Infrastructure Valuation & Maintenance Scoring (`v0.11.0` Baseline)**
+  - [x] *Design Alignment:* User approved scoring VPs exclusively for active (Ready Zone) colored dice; unpatched dice score 0 VP, creating an immediate late-game cash/wrench sink (+2 VP net per $2 spent vs +1 VP cash hoard).
+  - [x] *Technical Architecture Spec (`principal-engineer`):* Module contracts for `end_game.py`, `web/schemas.py`, bot end-game patch prioritization in Phase 3, and test matrix.
+  - [x] *Implementation (`senior-engineer`):* Update `sim/engine/end_game.py`, `web/schemas.py`, bot patching heuristics in final round, and unit tests (`tests/test_scoring_and_wipeout.py`). All 237 tests passing via WSL.
+  - [x] *Code Review Gate (`staff-engineer`):* Line-by-line review, verify 100% test pass via WSL (237/237 tests passing, APPROVED).
+  - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Run Monte Carlo sweeps across 2P, 3P, and 4P pods to measure score deltas, cash exhaustion, and win flip rates.
+  - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Validate portfolio health, confirm eliminated cash bloat, log Section 6 in `FINDINGS.md`.
+  - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Update scoring rules on Player Aids and Reference sheets in `pnp/generate_pnp.py` and regenerate all 5 PDFs.
 
 ---
 

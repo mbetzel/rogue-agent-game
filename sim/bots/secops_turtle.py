@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
 from sim.entities import ArchetypeCode
-from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index
+from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index, plan_final_round_repairs
 
 if TYPE_CHECKING:
     from sim.engine import GameState, PlayerState
@@ -258,14 +258,19 @@ class SecOpsTurtleBot(BaseBot):
                     current_money -= cost
                     break
 
-        start_patch_idx = 2 if plan.use_phreaker_ability else 0
-        for idx in range(start_patch_idx, len(player_state.unpatched_dice)):
-            if current_patches > 0:
-                plan.patch_actions.append({"die_index": idx, "use_cash": False})
-                current_patches -= 1
-            elif current_money - patch_cash_cost >= cash_cushion:
-                plan.patch_actions.append({"die_index": idx, "use_cash": True})
-                current_money -= patch_cash_cost
+        if is_final_round:
+            current_money, current_patches = plan_final_round_repairs(
+                player_state, game_state, current_money, current_patches, patch_cash_cost, plan
+            )
+        else:
+            start_patch_idx = 2 if plan.use_phreaker_ability else 0
+            for idx in range(start_patch_idx, len(player_state.unpatched_dice)):
+                if current_patches > 0:
+                    plan.patch_actions.append({"die_index": idx, "use_cash": False})
+                    current_patches -= 1
+                elif current_money - patch_cash_cost >= cash_cushion:
+                    plan.patch_actions.append({"die_index": idx, "use_cash": True})
+                    current_money -= patch_cash_cost
 
         b2_cost = game_state.config.b2_secret_cost
         b2_cap = game_state.config.b2_secret_cap
@@ -295,7 +300,8 @@ class SecOpsTurtleBot(BaseBot):
                     current_money -= cost
 
         if (
-            current_money == 0
+            not is_final_round
+            and current_money == 0
             and player_state.secrets > game_state.config.dirty_income_secret_cost
             and len(player_state.ready_dice) >= 1
         ):

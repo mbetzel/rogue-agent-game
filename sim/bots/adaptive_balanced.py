@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
 from sim.entities import ArchetypeCode
-from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index
+from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index, plan_final_round_repairs
 
 if TYPE_CHECKING:
     from sim.engine import GameState, PlayerState
@@ -378,24 +378,30 @@ class AdaptiveBalancedBot(BaseBot):
                     if current_money - cost >= cash_cushion:
                         discounted_colors.append((c, cost))
 
-            if discounted_colors and (current_money >= 3 or player_state.secrets <= 1):
+            if discounted_colors and (current_money >= 3 or player_state.secrets <= 1 or is_final_round):
                 plan.use_cipher_ability = True
                 plan.cipher_mode = "BUY_FREE_DIE"
                 plan.cipher_free_die_color = discounted_colors[0][0]
                 current_money -= discounted_colors[0][1]
-            elif player_state.secrets > game_state.config.dirty_income_secret_cost:
+            elif not is_final_round and player_state.secrets > game_state.config.dirty_income_secret_cost:
                 plan.use_cipher_ability = True
                 plan.cipher_mode = "DIRTY_INCOME"
 
-        # 1. Dirty Income: take dirty income if broke, has ready dice, secrets > 1, and threat is manageable
+        # 1. Dirty Income: take dirty income if broke, has ready dice, secrets > 1, and threat is manageable (never in final round)
         wants_dirty_income = (
-            current_money < 3
-            and player_state.secrets > game_state.config.dirty_income_secret_cost
-            and (plan.cipher_mode == "DIRTY_INCOME" or len(player_state.ready_dice) >= 1)
-            and total_threat <= 6
-        ) or (plan.use_cipher_ability and plan.cipher_mode == "DIRTY_INCOME")
+            not is_final_round
+            and (
+                (
+                    current_money < 3
+                    and player_state.secrets > game_state.config.dirty_income_secret_cost
+                    and (plan.cipher_mode == "DIRTY_INCOME" or len(player_state.ready_dice) >= 1)
+                    and total_threat <= 6
+                )
+                or (plan.use_cipher_ability and plan.cipher_mode == "DIRTY_INCOME")
+            )
+        )
 
-        if wants_dirty_income and player_state.secrets > game_state.config.dirty_income_secret_cost:
+        if not is_final_round and wants_dirty_income and player_state.secrets > game_state.config.dirty_income_secret_cost:
             plan.take_dirty_income = True
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
             current_money += game_state.config.dirty_income_cash
@@ -407,14 +413,19 @@ class AdaptiveBalancedBot(BaseBot):
             else game_state.config.patch_cash_cost
         )
 
-        start_patch_idx = 2 if plan.use_phreaker_ability else 0
-        for idx in range(start_patch_idx, len(player_state.unpatched_dice)):
-            if current_patches > 0:
-                plan.patch_actions.append({"die_index": idx, "use_cash": False})
-                current_patches -= 1
-            elif current_money - patch_cash_cost >= cash_cushion:
-                plan.patch_actions.append({"die_index": idx, "use_cash": True})
-                current_money -= patch_cash_cost
+        if is_final_round:
+            current_money, current_patches = plan_final_round_repairs(
+                player_state, game_state, current_money, current_patches, patch_cash_cost, plan
+            )
+        else:
+            start_patch_idx = 2 if plan.use_phreaker_ability else 0
+            for idx in range(start_patch_idx, len(player_state.unpatched_dice)):
+                if current_patches > 0:
+                    plan.patch_actions.append({"die_index": idx, "use_cash": False})
+                    current_patches -= 1
+                elif current_money - patch_cash_cost >= cash_cushion:
+                    plan.patch_actions.append({"die_index": idx, "use_cash": True})
+                    current_money -= patch_cash_cost
 
         # 3. Market Purchases: buy counter dice matching high threats (respecting cushion)
         purchases = 0

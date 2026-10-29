@@ -19,12 +19,20 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
 
     for p in engine.state.players:
         # Portfolio Value:
-        # 4 VP per Secret + VP per owned colored die + 1 VP per $2 (rounded down)
+        # 4 VP per Secret + VP per active colored die in Ready Zone + 1 VP per $2 (rounded down)
         # 4 VP per Secret (raw VP cannot be negative; negative secrets penalize via overflow)
         secret_vp = max(0, p.secrets) * cfg.vp_per_secret
-        dice_vp = sum(cfg.vp_per_die.get(d.color, 0) for d in p.total_dice)
+        dice_vp = sum(cfg.vp_per_die.get(d.color, 0) for d in p.ready_dice)
         cash_vp = max(0, p.money) // cfg.vp_cash_divisor
         portfolio_value = secret_vp + dice_vp + cash_vp
+
+        # Telemetry: unpatched colored dice count and VP lost
+        unpatched_colored_dice_count = sum(
+            1 for d in p.unpatched_dice if cfg.vp_per_die.get(d.color, 0) > 0
+        )
+        unpatched_dice_vp_lost = sum(
+            cfg.vp_per_die.get(d.color, 0) for d in p.unpatched_dice
+        )
 
         # Overflow penalties (used if total wipeout: -4 VP per Secret below 0, -3 VP per unfulfilled destruction)
         overflow_penalties = 0
@@ -53,6 +61,8 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
                 "unfulfilled_destructions": p.unfulfilled_destructions,
                 "ready_dice_count": len(p.ready_dice),
                 "unpatched_dice_count": len(p.unpatched_dice),
+                "unpatched_colored_dice_count": unpatched_colored_dice_count,
+                "unpatched_dice_vp_lost": unpatched_dice_vp_lost,
                 "total_dirty_income": p.total_dirty_income_taken,
                 "total_contractors_hired": p.total_contractors_hired,
                 "total_rerolls_used": p.total_rerolls_used,

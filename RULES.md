@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.10.0)
+# Too Many Secrets — Rules Draft (v0.11.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -164,7 +164,7 @@ Starting with the First Player and proceeding clockwise, each surviving player t
 1. **Purchase Software Module Dice (Limit `2` dice per turn `[TUNE]`):**
    * Pay the `$` cost of any available Colored Die in the Market and place it directly into your **Ready Zone**. *(Archetype Timing: **The Cipher** may trigger Algorithmic Arbitrage here to purchase 1 Colored Die at a **$2 discount**).*
 2. **Patch Worn-Out Modules (Unlimited):**
-   * Spend **`1 🔧` token** *or* pay **`$2`** `[TUNE: test $1–$3]` to move **1 die** from your **Unpatched Zone** back to your **Ready Zone**. *(Archetype Timing: **The Phreaker** may trigger Magnetic Splice here to patch up to 2 dice for free).*
+   * Spend **`1 🔧` token** *or* pay **`$2`** `[TUNE: test $1–$3]` to move **1 die** from your **Unpatched Zone** back to your **Ready Zone**. *(Crucial for End Game: unpatched dice score `0 VP`; patching a colored die to Ready earns its full printed 3–4 VP!).* *(Archetype Timing: **The Phreaker** may trigger Magnetic Splice here to patch up to 2 dice for free).*
 3. **Backdoor Siphon ("Dirty Income" — Limit `1×` per turn):**
    * Tap the rogue SETEC protocol under the table for an immediate cash injection, at the cost of leaking telemetry and corrupting local relays.
    * **Prerequisites:** You must have at least **`1` Ready die** to move to Unpatched and at least **`2` Corporate Secrets** (cannot be taken if you have $\le 1$ Secret or 0 Ready dice).
@@ -186,9 +186,10 @@ After all players finish Phase 3:
 
 Calculate **Portfolio Value** `[TUNE weights]`:
 * **`4 VP`** per remaining **Corporate Secret**
-* **VP per owned Colored Module Die** as printed on its Market Card (Red: `3 VP`, Blue: `4 VP`, Green: `3 VP`, Yellow: `4 VP`, Purple: `3 VP`; Gray starter dice = `0 VP`, White contractor dice = `0 VP`)
+* **VP per ACTIVE Colored Module Die in your Ready Zone** as printed on its Market Card (Red: `3 VP`, Blue: `4 VP`, Green: `3 VP`, Yellow: `4 VP`, Purple: `3 VP`; Gray starter dice = `0 VP`, White contractor dice = `0 VP`).  
+  > **Technical Debt Penalty:** Worn modules remaining in your **Unpatched Zone** represent broken, offline infrastructure and score **`0 VP`**! To score a colored die, it must be restored to the Ready Zone before the game concludes.
 * **`1 VP`** per **`$2`** remaining *(rounded down)*
-* Unused **Patch Tokens (`🔧`)** are worth **`0 VP`**.
+* Unused **Patch Tokens (`🔧`)** are worth **`0 VP`** *(spend them during Phase 3 of the final round to restore worn dice to Ready for full VP!)*.
 
 ### Determining the Winner
 * **Standard Ending (1+ Corporations Survive):** Any player who became **Patient Zero** (`<= 0 Secrets`) is **eliminated**. The surviving player with the highest **Portfolio Value** wins! *(Tiebreakers: 1. Most Corporate Secrets, 2. Most Money.)*

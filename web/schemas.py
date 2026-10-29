@@ -94,7 +94,7 @@ class GameStateSerializer:
     @staticmethod
     def calculate_player_vp(player: PlayerState, config: Any) -> int:
         secret_vp = max(0, player.secrets) * config.vp_per_secret
-        dice_vp = sum(config.vp_per_die.get(d.color, 0) for d in player.total_dice)
+        dice_vp = sum(config.vp_per_die.get(d.color, 0) for d in player.ready_dice)
         cash_vp = max(0, player.money) // config.vp_cash_divisor
         return secret_vp + dice_vp + cash_vp
 

@@ -1,4 +1,4 @@
-"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.10.0 Baseline / Phase 16).
+"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.11.0 Baseline / Phase 17).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
   - 01_Player_Boards.pdf (6 pages — 1 per Consultancy Archetype, matching Wireframe Page 1)
@@ -19,7 +19,7 @@ from pnp.pdf_engine import PALETTE, Color, PDFDocument, PDFPage, measure_text
 
 
 # =============================================================================
-# Canonical Game Data (Synchronized 1:1 with RULES.md v0.10.0 & sim/entities.py)
+# Canonical Game Data (Synchronized 1:1 with RULES.md v0.11.0 & sim/entities.py)
 # =============================================================================
 
 @dataclass(frozen=True)
@@ -448,7 +448,7 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
     draw_board_outer_frame(
         page,
         left_tag=f"TOO MANY SECRETS // CONSULTANCY TERMINAL [{idx}/6]",
-        right_tag="PNP PROTOTYPE v0.10 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.11 // US LETTER",
     )
 
     # -------------------------------------------------------------------------
@@ -646,7 +646,7 @@ def render_agent_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // CENTRAL ROGUE AGENT & COMPILER BOARD [1/2]",
-        right_tag="PNP PROTOTYPE v0.10 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.11 // US LETTER",
     )
 
     # Top Title Bar inside board
@@ -875,7 +875,7 @@ def render_agent_board(page: PDFPage) -> None:
             "END-GAME PORTFOLIO SCORING",
             (
                 "**Surviving Firms Only** *(Patient Zero eliminated)*:\n"
-                "**4 VP** / Secret  |  **3-4 VP** / Colored Die  |  **1 VP** / **$2**  |  {WRENCH} = 0 VP.\n"
+                "**4 VP** / Secret  |  **3-4 VP** / Ready Die (Unpatched = 0)  |  **1 VP** / **$2**  |  {WRENCH} = 0 VP.\n"
                 "*Ties: 1. Secrets, 2. Cash. (Total Wipeout: -4 VP/Secret <0, -3 VP/unfulfilled destroy).*"
             ),
         ),
@@ -897,7 +897,7 @@ def render_market_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // SOFTWARE MODULE MARKET & CENTRAL SUPPLY [2/2]",
-        right_tag="PNP PROTOTYPE v0.10 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.11 // US LETTER",
     )
 
     # Top Title Bar
@@ -1052,7 +1052,7 @@ def render_market_board(page: PDFPage) -> None:
     page.rich_paragraph(
         rx_f + 8.0, fy + 29.0, fw - 16.0,
         "- **Secrets:** **4 VP** each   |   **Cash:** **1 VP** per **$2** *(rounded down)*   |   **Patches ({WRENCH}):** **0 VP**\n"
-        "- **Owned Colored Dice:** {BLUE} Blue / {YELLOW} Yellow = **4 VP**  |  {RED} Red / {GREEN} Green / {PURPLE} Purple = **3 VP**  |  {GRAY}/{WHITE} = **0 VP**\n"
+        "- **Ready Colored Dice:** {BLUE} Blue / {YELLOW} Yellow = **4 VP**  |  {RED} Red / {GREEN} Green / {PURPLE} Purple = **3 VP**  |  (Unpatched = **0 VP**! | {GRAY}/{WHITE} = **0 VP**)\n"
         "- *Patient Zero (<=0 Secrets) eliminated! Wipeout only: -4 VP per Secret <0, -3 VP per unfulfilled destroy.*",
         size=6.8, leading=11.8, color=PALETTE["ink"],
     )
@@ -1251,7 +1251,7 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
                 x + 6.0, fy + 10.5, cw - 12.0,
                 "**P1:** +1{BLACK} -> Hire {WHITE} ($1/$2/$3) -> Roll -> 2 Free Rerolls *(1{WRENCH} unlocks {LOCK})* -> Shields & `/` -> Gain **$** & {WRENCH} *(max 3)*.\n"
                 "**P2:** {BLACK} Track (4/5/6=Upgr) -> Shields *(hit->Unpatched)* -> Dmg: {RED}-$1->{WRENCH}->Secret | {BLUE}-1 Secret | {GREEN}Wear Ready *({YELLOW}* 1st!). *(0 cubes exit = Buffer Overflow: +1 R/B/G to Cup for next compile)*.\n"
-                "**P3:** **Buy <=2** | **Patch:** 1{WRENCH} or $2 | **Siphon (1x):** -1 Secret, +1{BLACK}, Wear 1 Ready => **+$3**.  **VP:** Secret=4, Die=3/4, $2=1.",
+                "**P3:** **Buy <=2** | **Patch:** 1{WRENCH} or $2 | **Siphon (1x):** -1 Secret, +1{BLACK}, Wear 1 Ready => **+$3**.  **VP:** Secret=4, Ready Die=3/4 (Unpatched=0), $2=1.",
                 size=5.6, leading=8.1, color=PALETTE["ink"],
             )
 

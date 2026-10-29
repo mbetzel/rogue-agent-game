@@ -9,16 +9,17 @@ This document tracks verified balance takeaways, bot meta equilibria, card tieri
 
 ---
 
-## 1. Executive Summary & Active Baseline (`v0.10.0`)
+## 1. Executive Summary & Active Baseline (`v0.11.0`)
 
 | Parameter | Current Baseline | Healthy Game Target | Balance Status |
 | :--- | :--- | :--- | :--- |
-| **Match Duration** | 7.3 – 9.0 rounds | ~8.0 rounds across all pods | **Pacing Parity** (2P: 7.8 rds, 3P: 9.0 rds, 4P: 7.3–7.9 rds; 0.0% stalls). |
+| **Match Duration** | 7.3 – 9.0 rounds | ~8.0 rounds across all pods | **Pacing Parity** (2P: 7.8 rds, 3P: 9.0 rds, 4P: 7.3 rds; 0.0% stalls). |
 | **Singularity Rate** | 23.6% – 35.1% | 10%–40% | **Healthy** (Acts as an authentic existential clock across all pods). |
 | **2P Total Wipeout** | 17.1% | $< 20\%$ | **Controlled** (High-intensity late-game duels). |
 | **4P Total Wipeout** | 2.2% | $< 5\%$ | **Safe** (Multi-player simultaneous wipeouts rare in 4P). |
 | **Zero-Total-Exit Rounds** | 0.32% – 0.40% | $< 1.0\%$ | **Breakthrough** (Tower Priming virtually eliminates empty drops). |
 | **Buffer Overflows / Game** | 0.01 – 0.02 | $\le 0.05$ | **Ideal Backstop** (Invisible emergency safety valve). |
+| **Active Infrastructure Valuation** | 0 VP for Unpatched | Technical debt penalty | **Resolved Stranded Cash** (Surviving cash drops to $0.92–$3.48 via +2 VP/$2 maintenance conversions). |
 | **Consultancy Parity** | 5 / 6 balanced | $16.7\% \pm 6\%$ win rate | **Balanced** (Cipher retuned with $2 discount ceiling; Operator, Prodigy, Phreaker, Acoustic, Spook within target). |
 
 ---
@@ -129,3 +130,63 @@ Telemetry reveals that the Patient Zero Rate is ~25% higher in 3P/4P (~70%–74%
    Because survival requires every player to individually withstand unblocked damage, the round of the first failure is the first order statistic:
    $$T_{\text{first breach}} = \min(T_1, T_2, \dots, T_N)$$
    Increasing the 4P starting Secrets from 8 to 10 successfully extends the lower tail of this distribution by ~2.5 rounds, bringing the median match duration to the ~8.0-round target without muting the tension of data breaches.
+
+---
+
+## 6. Phase 17: Active Infrastructure Valuation & Maintenance Scoring (`v0.11.0`)
+
+### A. Problem Statement & The "Stranded Capital" Defect
+In rules baselines prior to `v0.11.0`, all owned Colored Module Dice in a player's pool contributed to Portfolio Value regardless of whether they occupied the **Ready Zone** or the **Unpatched Zone**. This created a severe end-game economic distortion:
+1. **Zero Repair Incentive in the Final Round:** Because unpatched dice scored full printed VP, spending `$2` or `1 🔧` token in Phase 3 of the final round to patch a worn die provided zero marginal score increase.
+2. **Stranded Cash Hoarding:** Players were incentivized to hoard liquid currency for the weak `$2 \to 1\text{ VP}` conversion rate rather than maintaining their infrastructure.
+3. **Thematic Disconnect:** A consultancy carrying severely corrupted, offline software modules was valued identically to a firm with fully operational, air-gapped systems.
+
+### B. Approved Rule: Active Infrastructure & Technical Debt
+To resolve this defect and establish an intuitive late-game capital sink, the scoring rules in Section 5 of [RULES.md](./RULES.md) were updated:
+* **Active Infrastructure Valuation:** Only Colored Module Dice in a player's **Ready Zone** score their printed Portfolio Value (Red: `3 VP`, Blue: `4 VP`, Green: `3 VP`, Yellow: `4 VP`, Purple: `3 VP`).
+* **Technical Debt Penalty:** Worn modules remaining in the **Unpatched Zone** represent broken, offline systems and score **`0 VP`**.
+* **Maintenance Conversion Incentive:** Spending `$2` in Phase 3 to patch a die converts `$2` (worth 1 VP as cash) into a Ready die (+3 to +4 VP), netting **`+2 VP to +3 VP`** per repair. Spending an otherwise worthless Patch Token (`🔧`) yields a pure **`+3 to +4 VP`** gain.
+
+### C. Telemetry Matrix (3,000 Matches Total, Base Seed `42`, Randomized Setups)
+
+| Metric | 2-Player Pod (2P) | 3-Player Pod (3P) | 4-Player Pod (4P) | Target Benchmark | Balance Status |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Average Match Duration** | **7.78** (±1.45) rds | **8.99** (±2.36) rds | **7.29** (±1.53) rds | ~8.0 rounds target | **Optimal Parity** |
+| **Duration Range (Min / Max)** | 4 / 12 rds | 3 / 16 rds | 4 / 15 rds | Min $\ge 3$, Max $\le 16$ | **Consistent** |
+| **Singularity Rate (%)** | **35.1%** | **28.7%** | **23.6%** | 10%–40% | **Healthy Existential Clock** |
+| **Patient Zero Rate (%)** | **47.8%** | **69.5%** | **74.2%** | Primary win/loss vector | **Calibrated** |
+| **Total Wipeout Rate (%)** | **17.1%** | **1.8%** | **2.2%** | $< 20\%$ (2P), $< 5\%$ (4P) | **Safe Limits** |
+| **Early Deaths ($\le$ R4) (%)** | **0.2%** | **2.9%** | **1.6%** | $< 5.0\%$ | **Zero Opening Blowouts** |
+| **Winning Portfolio Score** | **22.4** VP | **46.3** VP | **44.5** VP | 20–55 VP target | **Sensible Depreciated Scale** |
+| **Survivor Portfolio Score** | **25.2** VP | **35.6** VP | **32.6** VP | — | **11.9 VP Winner Margin (4P)** |
+| **Ending Cash (Survivors)** | **$0.92** | **$3.48** | **$2.25** | $< $3.50 average | **Treasuries Drained** |
+| **Unpatched Colored Dice (Survivors)**| **0.45** dice | **0.80** dice | **1.08** dice | 0.40–1.20 dice | **Real Late-Game Scars** |
+| **VP Lost to Unpatched Debt** | **1.59** VP | **3.06** VP | **3.75** VP | 1.5–4.5 VP | **~1 Die / 1 Secret Swing** |
+| **Survivors with Unpatched Dice (%)** | **32.3%** | **33.1%** | **39.2%** | 25%–50% | **Healthy Maintenance Triage** |
+| **Round Limit Timeouts (30 rds)**| **0.0%** | **0.0%** | **0.0%** | 0.0% | **Zero Stalling** |
+
+*(Note: In 2P, Survivor Portfolio Score [25.2 VP] reflects the subset of matches with survivors; Winning Portfolio Score [22.4 VP] includes Total Wipeout matches where overflow penalties reduce net scores).*
+
+### D. Balance Analysis & Key Design Takeaways
+
+1. **Eradication of Stranded Capital:**
+   Survivors conclude matches with an average of just **$0.92** in 2P, **$3.48** in 3P, and **$2.25** in 4P. Because patching offers a 200%–300% ROI over cash retention, corporations aggressively exhaust liquid reserves during final-round Operations. Idle treasury hoarding has been completely replaced by operational maintenance.
+2. **Impactful Stakes Without Unintended Casualties:**
+   The average penalty incurred by surviving consultancies is **3.75 VP** in 4P (~1 unpatched colored die). This creates a critical 1st-versus-2nd place swing in tight matches without causing artificial wipeouts. Because maintenance is voluntary during Phase 3 Operations and unpatched dice do not trigger continuous damage, Early Deaths ($\le$ R4) remained minuscule at **0.2%–2.9%**, and Total Wipeout frequencies remained identical to Phase 16 baselines.
+3. **Authentic Maintenance Triage (32%–39% Debt Rate):**
+   Across all player counts, approximately one-third of surviving consultancies (**32.3% in 2P, 33.1% in 3P, and 39.2% in 4P**) finish the game with at least one unpatched colored die. This proves that end-game maintenance is neither a trivial given nor an impossible burden; rather, players face genuine tactical friction between expanding their software suites, holding emergency funds, and repairing existing modules.
+4. **4-Player Bot Metagame Distribution:**
+   Under randomized setups in 4P, bot archetypes settled into the following win distribution:
+   * **VentureGreedBot (54.0%):** Robust economic generation allows VentureGreed to amass premium Blue/Yellow modules and fully fund their late-game repairs, maximizing Ready Zone value.
+   * **AdaptiveBalancedBot (24.9%):** Strong generalist defense and consistent patching keep it firmly in contention as the primary counter-archetype.
+   * **AccelerationistBot (13.4%):** Rapid version flips and aggressive compilation force quick endings that can catch developing engines unprepared.
+   * **SecOpsTurtleBot (7.7%):** High survival consistency, but suffers in final Portfolio Value due to lower colored die acquisition.
+
+### E. Formal Design Sign-Off
+Phase 17 achieves all qualitative and quantitative design goals:
+* [x] Stranded end-game cash eliminated.
+* [x] Unpatched dice establish a thematic and mechanically rewarding maintenance loop.
+* [x] Match pacing (~8.0 rounds) and trigger parity preserved.
+* [x] Maintenance triage confirmed across 32%–39% of surviving players.
+
+**Status: OFFICIALLY APPROVED (`v0.11.0` Baseline).**

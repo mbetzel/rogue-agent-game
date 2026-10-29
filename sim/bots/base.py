@@ -51,6 +51,50 @@ def choose_backlash_die_index(ready_dice: List[Die]) -> int:
     return best_idx
 
 
+def plan_final_round_repairs(
+    player_state: PlayerState,
+    game_state: GameState,
+    current_money: int,
+    current_patches: int,
+    patch_cash_cost: int,
+    plan: Phase3ActionPlan,
+) -> Tuple[int, int]:
+    """Plans repairs for the final round prioritizing highest VP colored dice using patches then cash."""
+    sim_unpatched = list(player_state.unpatched_dice)
+    if plan.use_phreaker_ability:
+        for _ in range(min(2, len(sim_unpatched))):
+            sim_unpatched.pop(0)
+
+    cfg = game_state.config
+    while True:
+        candidates = [
+            (idx, d)
+            for idx, d in enumerate(sim_unpatched)
+            if cfg.vp_per_die.get(d.color, getattr(d, "vp", 0)) > 0
+        ]
+        if not candidates:
+            break
+
+        # Pick highest VP candidate (Blue/Yellow 4 VP first, then Red/Green/Purple 3 VP)
+        best_idx, _ = max(
+            candidates,
+            key=lambda item: cfg.vp_per_die.get(item[1].color, getattr(item[1], "vp", 0)),
+        )
+
+        if current_patches > 0:
+            plan.patch_actions.append({"die_index": best_idx, "use_cash": False})
+            current_patches -= 1
+            sim_unpatched.pop(best_idx)
+        elif current_money >= patch_cash_cost:
+            plan.patch_actions.append({"die_index": best_idx, "use_cash": True})
+            current_money -= patch_cash_cost
+            sim_unpatched.pop(best_idx)
+        else:
+            break
+
+    return current_money, current_patches
+
+
 class BaseBot:
     """Abstract base class for Rogue Agent bot archetypes."""
 

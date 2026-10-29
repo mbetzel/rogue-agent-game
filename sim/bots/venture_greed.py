@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
 from sim.entities import ArchetypeCode
-from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index
+from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index, plan_final_round_repairs
 
 if TYPE_CHECKING:
     from sim.engine import GameState, PlayerState
@@ -254,13 +254,26 @@ class VentureGreedBot(BaseBot):
                     break
 
         if (
-            current_money < 5
+            not is_final_round
+            and current_money < 5
             and player_state.secrets > game_state.config.dirty_income_secret_cost
             and len(player_state.ready_dice) >= 1
         ):
             plan.take_dirty_income = True
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
             current_money += game_state.config.dirty_income_cash
+
+        patch_cash_cost = (
+            3
+            if game_state.active_directive_code == "POLYMORPHIC_WORM"
+            else game_state.config.patch_cash_cost
+        )
+        current_patches = player_state.patches
+
+        if is_final_round:
+            current_money, current_patches = plan_final_round_repairs(
+                player_state, game_state, current_money, current_patches, patch_cash_cost, plan
+            )
 
         b2_cost = game_state.config.b2_secret_cost
         b2_cap = game_state.config.b2_secret_cap
@@ -293,13 +306,7 @@ class VentureGreedBot(BaseBot):
                     current_money -= cost
                     purchases += 1
 
-        if len(player_state.ready_dice) <= 2:
-            patch_cash_cost = (
-                3
-                if game_state.active_directive_code == "POLYMORPHIC_WORM"
-                else game_state.config.patch_cash_cost
-            )
-            current_patches = player_state.patches
+        if not is_final_round and len(player_state.ready_dice) <= 2:
             start_patch_idx = 2 if plan.use_phreaker_ability else 0
             for idx in range(start_patch_idx, len(player_state.unpatched_dice)):
                 if current_patches > 0:

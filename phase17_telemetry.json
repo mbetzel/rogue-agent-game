@@ -1,0 +1,272 @@
+{
+  "2": {
+    "player_count": 2,
+    "total_games": 1000,
+    "mean_rounds": 7.78,
+    "std_rounds": 1.4455759024311694,
+    "min_rounds": 4,
+    "max_rounds": 12,
+    "singularity_pct": 35.099999999999994,
+    "patient_zero_pct": 47.8,
+    "total_wipeout_pct": 17.1,
+    "round_limit_pct": 0.0,
+    "early_death_pct": 0.2,
+    "mean_winning_score": 22.432,
+    "mean_survivor_score": 25.192372881355933,
+    "mean_cash_all": 0.5825,
+    "mean_cash_survivors": 0.9203389830508475,
+    "mean_unpatched_colored_all": 0.4155,
+    "mean_unpatched_colored_survivors": 0.45084745762711864,
+    "mean_unpatched_vp_lost_all": 1.49,
+    "mean_unpatched_vp_lost_survivors": 1.5940677966101695,
+    "survivors_with_unpatched_colored_pct": 32.28813559322034,
+    "total_survivors": 1180,
+    "bot_win_rates": {
+      "AdaptiveBalancedBot": 74.9,
+      "SecOpsTurtleBot": 25.1
+    },
+    "outliers": [
+      {
+        "seed": 53,
+        "rounds": 9,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 54,
+        "rounds": 9,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 58,
+        "rounds": 6,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 83,
+        "rounds": 9,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 89,
+        "rounds": 8,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 91,
+        "rounds": 10,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 92,
+        "rounds": 6,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 94,
+        "rounds": 6,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 108,
+        "rounds": 10,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 110,
+        "rounds": 7,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      }
+    ]
+  },
+  "3": {
+    "player_count": 3,
+    "total_games": 1000,
+    "mean_rounds": 8.988,
+    "std_rounds": 2.363777367571541,
+    "min_rounds": 3,
+    "max_rounds": 16,
+    "singularity_pct": 28.7,
+    "patient_zero_pct": 69.5,
+    "total_wipeout_pct": 1.7999999999999998,
+    "round_limit_pct": 0.0,
+    "early_death_pct": 2.9000000000000004,
+    "mean_winning_score": 46.342,
+    "mean_survivor_score": 35.64595103578154,
+    "mean_cash_all": 3.219333333333333,
+    "mean_cash_survivors": 3.4783427495291903,
+    "mean_unpatched_colored_all": 0.852,
+    "mean_unpatched_colored_survivors": 0.7951977401129944,
+    "mean_unpatched_vp_lost_all": 3.304,
+    "mean_unpatched_vp_lost_survivors": 3.0649717514124295,
+    "survivors_with_unpatched_colored_pct": 33.05084745762712,
+    "total_survivors": 2124,
+    "bot_win_rates": {
+      "VentureGreedBot": 59.3,
+      "AdaptiveBalancedBot": 33.0,
+      "SecOpsTurtleBot": 7.7
+    },
+    "outliers": [
+      {
+        "seed": 129,
+        "rounds": 6,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 136,
+        "rounds": 9,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 181,
+        "rounds": 3,
+        "end_reason": "patient_zero",
+        "is_wipeout": false
+      },
+      {
+        "seed": 278,
+        "rounds": 7,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 324,
+        "rounds": 11,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 430,
+        "rounds": 9,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 439,
+        "rounds": 3,
+        "end_reason": "patient_zero",
+        "is_wipeout": false
+      },
+      {
+        "seed": 453,
+        "rounds": 3,
+        "end_reason": "patient_zero",
+        "is_wipeout": false
+      },
+      {
+        "seed": 456,
+        "rounds": 3,
+        "end_reason": "patient_zero",
+        "is_wipeout": false
+      },
+      {
+        "seed": 469,
+        "rounds": 6,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      }
+    ]
+  },
+  "4": {
+    "player_count": 4,
+    "total_games": 1000,
+    "mean_rounds": 7.295,
+    "std_rounds": 1.525221722013328,
+    "min_rounds": 4,
+    "max_rounds": 15,
+    "singularity_pct": 23.599999999999998,
+    "patient_zero_pct": 74.2,
+    "total_wipeout_pct": 2.1999999999999997,
+    "round_limit_pct": 0.0,
+    "early_death_pct": 1.6,
+    "mean_winning_score": 44.487,
+    "mean_survivor_score": 32.57463484146776,
+    "mean_cash_all": 2.313,
+    "mean_cash_survivors": 2.2536515853224084,
+    "mean_unpatched_colored_all": 1.45275,
+    "mean_unpatched_colored_survivors": 1.076950480940506,
+    "mean_unpatched_vp_lost_all": 5.05225,
+    "mean_unpatched_vp_lost_survivors": 3.7545422158888493,
+    "survivors_with_unpatched_colored_pct": 39.22337014606342,
+    "total_survivors": 2807,
+    "bot_win_rates": {
+      "VentureGreedBot": 54.0,
+      "AdaptiveBalancedBot": 24.9,
+      "AccelerationistBot": 13.4,
+      "SecOpsTurtleBot": 7.7
+    },
+    "outliers": [
+      {
+        "seed": 67,
+        "rounds": 8,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 168,
+        "rounds": 7,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 207,
+        "rounds": 7,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 254,
+        "rounds": 6,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 264,
+        "rounds": 7,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 328,
+        "rounds": 6,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 361,
+        "rounds": 5,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 379,
+        "rounds": 5,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 459,
+        "rounds": 7,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      },
+      {
+        "seed": 488,
+        "rounds": 6,
+        "end_reason": "total_wipeout",
+        "is_wipeout": true
+      }
+    ]
+  }
+}
