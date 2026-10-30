@@ -46,68 +46,50 @@
     </div>
   </header>
 
-  <!-- Main Dashboard Grid -->
-  <main class="dashboard-grid">
-    <!-- Left / Center: Compiler & Player Mats -->
-    <div style="display: flex; flex-direction: column; gap: 20px;">
-      
-      <!-- Central Compiler & Cube Tower -->
-      <section class="panel">
-        <div class="panel-header">
-          <div class="panel-title">
-            <span>Central Threat & Compiler (Cube Tower)</span>
-            <button class="info-icon-btn" onclick="openModal('cubeEffectsModal')" title="View Agent Cube Effects Reference">ℹ</button>
-            <button class="action-btn" style="font-size: 0.72rem; padding: 2px 8px; margin-left: 6px;" onclick="openModal('versionsModal')" title="View all Rogue Agent Versions for this match">Version Roadmap</button>
-          </div>
-        </div>
-
-        <div class="compiler-threat-grid">
-          <!-- Staging Cup Card -->
-          <div class="threat-card">
-            <h4>Staging Cup (Queued for Next Compile)</h4>
-            <div class="cube-tray" id="stagingCupTray"></div>
-          </div>
-
-          <!-- Cube Tower Stuck Card -->
-          <div class="threat-card">
-            <h4>Cube Tower (Internal Baffles)</h4>
-            <div class="cube-tray" id="towerStuckTray"></div>
-          </div>
-        </div>
-
-        <!-- Last Compile Results Readout -->
-        <div class="threat-card" style="background: rgba(0,0,0,0.25);" id="lastCompileResult"></div>
-      </section>
-
-      <!-- Player Mats Grid -->
-      <section class="panel">
-        <div class="panel-header">
-          <div class="panel-title">Corporate Headquarters (Player Mats)</div>
-        </div>
-        <div class="players-grid" id="playersContainer"></div>
-      </section>
-
+  <!-- Tabletop View Switcher -->
+  <nav class="tabletop-nav-bar">
+    <div class="tabletop-nav-left">
+      <span class="tabletop-nav-label">TABLETOP BOARDS:</span>
+      <button class="nav-view-btn active" id="viewBtnTabletop" onclick="setBoardView('tabletop')">🖥️ Complete Tabletop</button>
+      <button class="nav-view-btn" id="viewBtnTerminals" onclick="setBoardView('terminals')">📋 Consultancy Terminals</button>
+      <button class="nav-view-btn" id="viewBtnAgent" onclick="setBoardView('agent')">🤖 SETEC Agent Board</button>
+      <button class="nav-view-btn" id="viewBtnMarket" onclick="setBoardView('market')">🛒 Software Market</button>
     </div>
+    <div class="tabletop-nav-right">
+      <button class="action-btn" onclick="openModal('cubeEffectsModal')" style="font-size: 0.75rem; padding: 4px 10px;">ℹ Threat Reference</button>
+      <button class="action-btn" onclick="openModal('versionsModal')" style="font-size: 0.75rem; padding: 4px 10px;">📋 Version Roadmap</button>
+    </div>
+  </nav>
 
-    <!-- Right: Market Board & Live Event Log -->
-    <div style="display: flex; flex-direction: column; gap: 20px;">
-      
-      <!-- Market Board -->
-      <section class="panel">
-        <div class="panel-header">
-          <div class="panel-title">Software Module Market</div>
-        </div>
-        <div class="market-grid" id="marketContainer"></div>
+  <!-- Main Tabletop Workspace -->
+  <main class="tabletop-workspace" id="tabletopWorkspace" data-view="tabletop">
+    <!-- Row 1: Central SETEC Rogue Agent & Compiler Board -->
+    <section class="board-section agent-board-section" id="agentBoardSection">
+      <div id="centralAgentBoard"></div>
+    </section>
+
+    <!-- Row 2: Consultancy Terminals (Player Mats) -->
+    <section class="board-section terminals-board-section" id="terminalsBoardSection">
+      <div id="playersContainer"></div>
+    </section>
+
+    <!-- Row 3: Software Module Market Board & Network Log Split -->
+    <div class="market-and-log-row" id="marketAndLogRow">
+      <section class="board-section market-board-section" id="marketBoardSection">
+        <div id="marketContainer"></div>
       </section>
 
-      <!-- Event Log -->
-      <section class="panel" style="flex: 1;">
-        <div class="panel-header">
-          <div class="panel-title">Network Activity Log</div>
+      <section class="board-section log-board-section" id="logBoardSection">
+        <div class="event-log-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>NETWORK ACTIVITY LOG</span>
+              <span style="font-size: 0.7rem; color: var(--text-dim); text-transform: none; font-weight: normal;">Live System Telemetry</span>
+            </div>
+          </div>
+          <div class="event-log-container" id="eventLog"></div>
         </div>
-        <div class="event-log-container" id="eventLog"></div>
       </section>
-
     </div>
   </main>
 

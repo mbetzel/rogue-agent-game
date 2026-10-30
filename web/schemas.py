@@ -10,6 +10,34 @@ from sim.engine import EndGameResult, GameState, PlayerState, RoundTelemetry
 from sim.entities import AbilityStatus, ArchetypeCard, Die, Face, VariantCard, VersionCard
 
 
+ARCHETYPE_FLAVOR: Dict[str, Dict[str, str]] = {
+    "ACOUSTIC": {
+        "role": "Pattern Genius // Mainframe Resonance",
+        "flavor": '"Every mainframe hums before it strikes. Listen to the baffles -- you can hear which packet drops next."',
+    },
+    "PHREAKER": {
+        "role": "Hardware Tinkerer // Emergency Relays",
+        "flavor": '"A strip of Mylar splicing tape and a 2600-Hz whistle will fix what ten grand of silicon can\'t."',
+    },
+    "PRODIGY": {
+        "role": "Reckless Hacker // Lock Bypassing",
+        "flavor": '"Locked memory is just a polite suggestion from someone who left debug interrupts enabled."',
+    },
+    "SPOOK": {
+        "role": "Ex-Intelligence // OpSec & Slush Funds",
+        "flavor": '"Every breach has a price tag. That\'s what non-attributable slush accounts are for."',
+    },
+    "CIPHER": {
+        "role": "Mathematician // Algorithmic Arbitrage",
+        "flavor": '"Why pay retail for entropy when SETEC\'s own arbitrage equations subsidize the upgrade?"',
+    },
+    "OPERATOR": {
+        "role": "Master Strategist // Contractor Dispatch",
+        "flavor": '"Never burn internal hardware when three night-shift phreakers are waiting by a payphone."',
+    },
+}
+
+
 class GameStateSerializer:
     """Serializes GameState, PlayerState, Dice, and telemetry objects into JSON-compatible dictionaries."""
 
@@ -83,9 +111,16 @@ class GameStateSerializer:
     def serialize_archetype_card(card: Optional[ArchetypeCard]) -> Optional[Dict[str, Any]]:
         if card is None:
             return None
+        code_str = card.code.value if hasattr(card.code, "value") else str(card.code)
+        flavor_info = ARCHETYPE_FLAVOR.get(code_str.upper(), {
+            "role": "Consultancy Specialist",
+            "flavor": '"Information is the only true currency in the network."',
+        })
         return {
-            "code": card.code.value if hasattr(card.code, "value") else str(card.code),
+            "code": code_str,
             "name": card.name,
+            "role": flavor_info["role"],
+            "flavor": flavor_info["flavor"],
             "timing_window": card.timing_window,
             "ability_name": card.ability_name,
             "description": card.description,

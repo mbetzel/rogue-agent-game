@@ -11,6 +11,8 @@ export let patchCashSelected = false;
 export let cipherDiscountSelected = false;
 export let selectedRerollIndices = new Set();
 export let selectedChoiceDeclarations = {};
+export let activePlayerTab = "human"; // "human", player_id number, or "all"
+export let activeBoardView = "tabletop"; // "tabletop", "terminals", "agent", "market"
 
 export function getState() {
   return state;
@@ -125,4 +127,12 @@ export function getHumanPlayerId() {
   if (!state || !state.players) return 0;
   const human = state.players.find((p) => p.is_human);
   return human ? human.player_id : (state.active_player_index || 0);
+}
+
+export function setActivePlayerTab(tab) {
+  activePlayerTab = tab;
+}
+
+export function setActiveBoardView(view) {
+  activeBoardView = view;
 }

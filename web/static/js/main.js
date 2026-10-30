@@ -2,7 +2,7 @@
  * Rogue Agent — Main Client Entry Point & Application Coordinator
  */
 
-import { state } from "./state.js";
+import { state, activeBoardView, setActiveBoardView } from "./state.js";
 import {
   setRenderAppCallback,
   refreshState,
@@ -39,6 +39,19 @@ import {
 } from "./components/player_mats.js";
 import { renderActionDock } from "./components/action_dock.js";
 import { renderEventLog } from "./components/event_log.js";
+
+export function setBoardView(view) {
+  setActiveBoardView(view);
+  const workspace = document.getElementById("tabletopWorkspace");
+  if (workspace) {
+    workspace.dataset.view = view;
+  }
+  const buttons = document.querySelectorAll(".nav-view-btn");
+  buttons.forEach((b) => b.classList.remove("active"));
+  const viewId = `viewBtn${view.charAt(0).toUpperCase() + view.slice(1)}`;
+  const activeBtn = document.getElementById(viewId);
+  if (activeBtn) activeBtn.classList.add("active");
+}
 
 export function renderApp() {
   if (!state) return;
@@ -82,6 +95,7 @@ window.doAcoustic = doAcoustic;
 window.doSpook = doSpook;
 window.doStarAction = doStarAction;
 window.doEndTurn = doEndTurn;
+window.setBoardView = setBoardView;
 
 // Initial Boot
 if (document.readyState === "loading") {
