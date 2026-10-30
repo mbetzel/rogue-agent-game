@@ -18,6 +18,7 @@ import {
   doPatch,
   doDirtyIncome,
   doPhreaker,
+  doSystemReboot,
   doAcoustic,
   doSpook,
   doStarAction,
@@ -76,6 +77,7 @@ window.doBuy = doBuy;
 window.doPatch = doPatch;
 window.doDirtyIncome = doDirtyIncome;
 window.doPhreaker = doPhreaker;
+window.doSystemReboot = doSystemReboot;
 window.doAcoustic = doAcoustic;
 window.doSpook = doSpook;
 window.doStarAction = doStarAction;

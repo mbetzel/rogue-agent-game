@@ -63,6 +63,17 @@ def execute_bot_phase3(controller: GameController, player: PlayerState, meta: Di
     """Executes Phase 3 plan for a single bot player."""
     plan: Phase3ActionPlan = player.bot.take_phase3_actions(player, controller.state, controller.engine.rng)
 
+    # Emergency System Reboot (once per game when entering Phase 3 with 0 ready dice)
+    if plan.use_system_reboot and player.can_system_reboot:
+        restored = player.execute_system_reboot()
+        restored_ids = {d.die_id for d in restored}
+        meta["rolled_pool"] = [
+            d for d in meta.get("rolled_pool", []) if d.die_id not in restored_ids
+        ]
+        controller.event_log.append(
+            f"{meta['name']} (Bot) executed emergency System Reboot: restored {len(restored)} starter Gray dice."
+        )
+
     # Archetype: The Phreaker (Magnetic Splice)
     if (
         plan.use_phreaker_ability
@@ -607,6 +618,33 @@ def execute_star_action(
     else:
         raise ValueError(f"Unsupported star action type: {action_type}")
 
+    return controller.get_full_state()
+
+
+
+def system_reboot(controller: GameController, player_id: int) -> Dict[str, Any]:
+    """Human action: executes once-per-game emergency System Reboot during Phase 3."""
+    if controller.phase != 3:
+        raise ValueError(f"Cannot execute system reboot in phase {controller.phase}")
+    if player_id != controller.active_player_index:
+        raise ValueError(f"Not player {player_id}'s turn (current: {controller.active_player_index})")
+
+    player = controller.state.players[player_id]
+    meta = controller.player_meta[player_id]
+
+    if player.is_patient_zero:
+        raise ValueError("Eliminated players cannot perform operations")
+    if not player.can_system_reboot:
+        raise ValueError("System Reboot cannot be executed (already used or player has ready dice)")
+
+    restored = player.execute_system_reboot()
+    restored_ids = {d.die_id for d in restored}
+    meta["rolled_pool"] = [
+        d for d in meta.get("rolled_pool", []) if d.die_id not in restored_ids
+    ]
+    controller.event_log.append(
+        f"{meta['name']} executed emergency System Reboot: restored {len(restored)} starter Gray dice."
+    )
     return controller.get_full_state()
 
 

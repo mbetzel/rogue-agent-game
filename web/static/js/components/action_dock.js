@@ -30,6 +30,7 @@ import {
   doSpook,
   doDirtyIncome,
   doPhreaker,
+  doSystemReboot,
   doStarAction,
   doEndTurn,
 } from "../api.js";
@@ -680,6 +681,17 @@ export function renderActionDock() {
       p3Btn.innerText = `P3: Deflect ${p3Color.toUpperCase()} Cube to Staging ($1)`;
       p3Btn.onclick = () => doStarAction("P3", p3Color);
       controls.appendChild(p3Btn);
+    }
+
+    // Emergency System Reboot (Once per game when entering/reaching Phase 3 with 0 ready dice)
+    if (caps.can_system_reboot) {
+      const rebootBtn = document.createElement("button");
+      rebootBtn.className = "action-btn";
+      rebootBtn.style.borderColor = "#22c55e";
+      rebootBtn.style.color = "#4ade80";
+      rebootBtn.innerText = "⚡ Emergency: System Reboot (Restore Gray Dice)";
+      rebootBtn.onclick = () => doSystemReboot();
+      controls.appendChild(rebootBtn);
     }
 
     // End Turn

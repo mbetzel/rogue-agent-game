@@ -22,6 +22,7 @@ This document tracks verified balance takeaways, bot meta equilibria, card tieri
 | **Active Infrastructure Valuation** | 0 VP for Unpatched | Technical debt penalty | **Resolved Stranded Cash** (Maintenance conversion active across 39%–43% of survivors). |
 | **Push-Your-Luck Glitch Risk** | Face 5 Glitch on Red/Blue/Green | Broken block saturation | **Calibrated Risk** (Contractor sacrifice & Phase 1 Debug unlock utility). |
 | **Consultancy Parity** | 6 / 6 balanced (21.9%–29.7%) | $25.0\% \pm 5\%$ win rate | **Optimal Parity** (All 6 archetypes within 20%–30% target corridor). |
+| **Emergency System Reboot** | 1x / Game (Gray Starter Restore) | Prevent 0-action soft-locks | **Operational Recovery** (Eliminates 60%–68% of helpless deaths without endgame VP distortion). |
 
 ---
 

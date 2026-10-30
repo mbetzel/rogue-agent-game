@@ -340,6 +340,9 @@ class GameController:
     def end_turn(self, player_id: int) -> Dict[str, Any]:
         return phase3_actions.end_turn(self, player_id)
 
+    def system_reboot(self, player_id: int) -> Dict[str, Any]:
+        return phase3_actions.system_reboot(self, player_id)
+
     def _complete_round(self) -> None:
         serializer.complete_round(self)
 

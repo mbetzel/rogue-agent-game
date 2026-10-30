@@ -182,6 +182,8 @@ class GameStateSerializer:
             "v1_used": getattr(player, "v1_used", False),
             "v2_used": getattr(player, "v2_used", False),
             "v3_used": getattr(player, "v3_used", False),
+            "system_reboot_used": getattr(player, "system_reboot_used", False),
+            "can_system_reboot": getattr(player, "can_system_reboot", False),
             "money": player.money,
             "secrets": player.secrets,
             "patches": player.patches,

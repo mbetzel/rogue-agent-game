@@ -176,6 +176,8 @@ class RecklessSaboteurBot(BaseBot):
         rng: random.Random,
     ) -> Phase3ActionPlan:
         plan = Phase3ActionPlan()
+        if self.should_trigger_system_reboot(player_state, game_state):
+            plan.use_system_reboot = True
         current_money = player_state.money
         is_final_round = getattr(game_state, "is_final_round", False)
         cash_cushion = 0 if is_final_round else 2

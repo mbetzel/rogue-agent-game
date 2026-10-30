@@ -1,4 +1,4 @@
-"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.13.0 Baseline / Phase 19).
+"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.14.0 Baseline / Phase 21).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
   - 01_Player_Boards.pdf (6 pages — 1 per Consultancy Archetype, matching Wireframe Page 1)
@@ -19,7 +19,7 @@ from pnp.pdf_engine import PALETTE, Color, PDFDocument, PDFPage, measure_text
 
 
 # =============================================================================
-# Canonical Game Data (Synchronized 1:1 with RULES.md v0.13.0 & sim/entities.py)
+# Canonical Game Data (Synchronized 1:1 with RULES.md v0.14.0 & sim/entities.py)
 # =============================================================================
 
 @dataclass(frozen=True)
@@ -447,7 +447,7 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
     draw_board_outer_frame(
         page,
         left_tag=f"TOO MANY SECRETS // CONSULTANCY TERMINAL [{idx}/6]",
-        right_tag="PNP PROTOTYPE v0.13 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.14 // US LETTER",
     )
 
     # -------------------------------------------------------------------------
@@ -586,10 +586,29 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
         "Offline (Do Not Roll)  |  **Phase 3 Patch:** Pay **1** {WRENCH} or **$2** per die -> Ready Zone",
         size=7.0, color=PALETTE["ink_soft"], align="right",
     )
-    # Subtle hazard diagonal ticks along bottom strip
-    for hx in range(int(rx + 12), int(rx + rw - 16), 18):
-        page.line(hx, up_y + up_h - 8, hx + 6, up_y + up_h - 2, stroke=PALETTE["guide"], width=1.0)
-    page.text(rx + rw / 2.0, up_y + 56.0, "WORN & DEMOTED MODULES  //  IF 0 READY/CONTRACTOR DICE VS GREEN MALWARE: DESTROY 1 UNPATCHED DIE", font="mono", size=6.3, color=PALETTE["muted"], align="center")
+    # Worn dice area watermark note
+    page.text(rx + rw / 2.0, up_y + 37.0, "WORN & DEMOTED MODULES  //  IF 0 READY/CONTRACTOR DICE VS GREEN MALWARE: DESTROY 1 UNPATCHED DIE", font="mono", size=6.1, color=PALETTE["watermark"], align="center")
+
+    # Once-per-Game System Reboot slot on Terminal Mat (y = 428..450)
+    sb_w, sb_h = 226.0, 22.0
+    sb_x = rx + rw - sb_w - 8.0
+    sb_y = up_y + up_h - sb_h - 5.0
+    page.rounded_rect(sb_x, sb_y, sb_w, sb_h, r=3.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.85)
+    # Checkbox square on left of pill
+    page.rect(sb_x + 5.5, sb_y + 5.0, 12.0, 12.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.8)
+    page.rich_line(sb_x + 22.0, sb_y + 14.5, "**SYSTEM REBOOT**", size=7.2, color=PALETTE["ink"])
+    page.text(sb_x + 106.0, sb_y + 14.2, "(Ready / Used)", font="mono_bold", size=6.3, color=PALETTE["ink_soft"])
+    page.text(sb_x + sb_w - 6.0, sb_y + 14.2, "1x / GAME", font="mono_bold", size=5.8, color=PALETTE["muted"], align="right")
+
+    # Emergency Reboot trigger explanation to the left of the slot
+    page.rich_paragraph(
+        rx + 8.0, sb_y + 2.0, sb_x - rx - 14.0,
+        "**Phase 3 Emergency Reboot:** If you have **0 Ready dice**, return all **Gray Starter Dice** from Unpatched -> Ready.",
+        size=5.8, leading=8.0, color=PALETTE["ink_soft"],
+    )
+    # Subtle hazard diagonal ticks on bottom strip
+    for hx in range(int(rx + 10), int(sb_x - 12), 16):
+        page.line(hx, up_y + up_h - 4, hx + 5, up_y + up_h - 1, stroke=PALETTE["guide"], width=0.8)
 
     # -------------------------------------------------------------------------
     # BOTTOM ROW: Money | Patches | Secrets (x = 40..752, y = 468..578)
@@ -645,7 +664,7 @@ def render_agent_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // CENTRAL ROGUE AGENT & COMPILER BOARD [1/2]",
-        right_tag="PNP PROTOTYPE v0.13 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.14 // US LETTER",
     )
 
     # Top Title Bar inside board
@@ -864,10 +883,11 @@ def render_agent_board(page: PDFPage) -> None:
         (
             "PHASE 3: OPERATIONS (Clockwise Turns)",
             (
-                "- **Buy Dice (max 2/turn):** Pay $ -> place in **Ready Zone**.\n"
-                "- **Patch Dice (unlimited):** **1** {WRENCH} or **$2** each -> **Ready Zone**.\n"
-                "- **Backdoor Siphon (max 1/turn):** *(Need >=2 Secrets & >=1 Ready)* Pay **1 Secret** + demote **1 Ready -> Unpatched** + **1** {BLACK} -> Staging Cup => Gain **+$3**.\n"
-                "- **Cleanup:** Un-worn dice -> Ready; pass 1st Player clockwise."
+                "1. **Buy Dice (max 2/turn):** Pay $ -> place in **Ready Zone**.\n"
+                "2. **Patch Dice (unlimited):** **1** {WRENCH} or **$2** each -> **Ready Zone**.\n"
+                "3. **Backdoor Siphon (max 1/turn):** *(Need >=2 Secrets & >=1 Ready)* Pay **1 Secret** + demote **1 Ready -> Unpatched** + **1** {BLACK} -> Staging Cup => Gain **+$3**.\n"
+                "4. **System Reboot (1x/game):** If you have 0 Ready dice, return all Gray Starter Dice from Unpatched to Ready.\n"
+                "5. **Cleanup:** Un-worn dice -> Ready; pass 1st Player clockwise."
             ),
         ),
         (
@@ -896,7 +916,7 @@ def render_market_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // SOFTWARE MODULE MARKET & CENTRAL SUPPLY [2/2]",
-        right_tag="PNP PROTOTYPE v0.13 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.14 // US LETTER",
     )
 
     # Top Title Bar
@@ -1247,12 +1267,20 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
             fh = y + ch - fy
             page.rect(x, fy, cw, fh, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.7)
             page.rich_paragraph(
-                x + 6.0, fy + 10.5, cw - 12.0,
-                "**P1:** +1{BLACK} -> Hire {WHITE} ($1/$2/$3) -> Roll -> 2 Free Rerolls *(1{WRENCH} unlocks {LOCK})* -> Shields & `/` -> Glitch Backlash *(Wear 1 or sacrifice {WHITE})* -> Gain **$** & {WRENCH}.\n"
-                "**P2:** {BLACK} Track (4/5/6=Upgr) -> Shields *(hit->Unpatched)* -> Dmg: {RED}-$1->{WRENCH}->Secret | {BLUE}-1 Secret | {GREEN}Wear Ready *({YELLOW}* 1st!). *(0 cubes exit = Buffer Overflow: +1 R/B/G to Cup for next compile)*.\n"
-                "**P3:** **Buy <=2** | **Patch:** 1{WRENCH} or $2 | **Siphon (1x):** -1 Secret, +1{BLACK}, Wear 1 Ready => **+$3**.  **VP:** Secret=4, Ready Die=3/4 (Unpatched=0), $2=1.",
-                size=5.6, leading=8.1, color=PALETTE["ink"],
+                x + 6.0, fy + 7.5, cw - 12.0,
+                "**P1:** +1{BLACK} -> Hire {WHITE} ($1/$2/$3) -> Roll -> 2 Free Rerolls *(1{WRENCH} unlocks {LOCK})* -> Shields & `/` -> Glitch Backlash -> Gain **$** & {WRENCH}.\n"
+                "**P2:** {BLACK} Track (4/5/6=Upgr) -> Shields *(hit->Unpatched)* -> Dmg: {RED}-$1->{WRENCH}->Secret | {BLUE}-1 Secret | {GREEN}Wear Ready *({YELLOW}* 1st!). *(Buffer Overflow: +1 R/B/G).* \n"
+                "**P3:** **Buy <=2** | **Patch:** 1{WRENCH} or $2 | **Siphon (1x):** -1 Secret, +1{BLACK}, Wear 1 Ready => **+$3** | **Reboot (1x):** If 0 Ready, Gray Unpatched->Ready.\n"
+                "**VP:** Secret=4, Ready Die=3/4 (Unpatched=0), $2=1. Patient Zero eliminated.",
+                size=5.3, leading=7.5, color=PALETTE["ink"],
             )
+            # Once-per-Game System Reboot slot on Reference Card
+            rb_w = cw - 12.0
+            rb_y = fy + fh - 17.0
+            page.rounded_rect(x + 6.0, rb_y, rb_w, 13.0, r=2.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.6)
+            page.rect(x + 9.0, rb_y + 2.5, 8.0, 8.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.6)
+            page.text(x + 20.0, rb_y + 9.0, "SYSTEM REBOOT (Ready / Used)", font="mono_bold", size=5.7, color=PALETTE["ink"])
+            page.text(x + rb_w - 2.0, rb_y + 9.0, "1x/Game: If 0 Ready dice, Gray Starter Unpatched -> Ready", font="italic", size=5.0, color=PALETTE["muted"], align="right")
 
 
 def _draw_single_variant_card(page: PDFPage, x: float, y: float, w: float, h: float, card: VariantCardSpec) -> None:
@@ -1575,7 +1603,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated.append(path_versions)
 
     # 5. Combined Master Print-and-Play Pack (All 14 pages)
-    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.13.0)")
+    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.14.0)")
     for sub_doc in (doc_central, doc_players, doc_dice, doc_versions):
         for pg in sub_doc.pages:
             doc_master.pages.append(pg)

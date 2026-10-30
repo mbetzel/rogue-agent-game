@@ -35,6 +35,8 @@ class Phase3ActionPlan:
     use_cipher_ability: bool = False
     cipher_mode: Optional[str] = None  # "BUY_FREE_DIE" or "DIRTY_INCOME"
     cipher_free_die_color: Optional[DieColor] = None
+    # Emergency Phase 3 actions
+    use_system_reboot: bool = False
 
 
 def choose_backlash_die_index(ready_dice: List[Die]) -> int:
@@ -413,6 +415,14 @@ class BaseBot:
 
         return min(other_ready_dice, key=sacrifice_key)
 
+    def should_trigger_system_reboot(
+        self,
+        player_state: PlayerState,
+        game_state: Optional[GameState] = None,
+    ) -> bool:
+        """Returns True if the bot should trigger the emergency System Reboot in Phase 3."""
+        return player_state.can_system_reboot
+
     def take_phase3_actions(
         self,
         player_state: PlayerState,
@@ -420,6 +430,9 @@ class BaseBot:
         rng: random.Random,
     ) -> Phase3ActionPlan:
         """Returns the actions to execute during Phase 3: Corporate Operations."""
-        return Phase3ActionPlan()
+        plan = Phase3ActionPlan()
+        if self.should_trigger_system_reboot(player_state, game_state):
+            plan.use_system_reboot = True
+        return plan
 
 

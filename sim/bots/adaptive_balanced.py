@@ -351,6 +351,8 @@ class AdaptiveBalancedBot(BaseBot):
         rng: random.Random,
     ) -> Phase3ActionPlan:
         plan = Phase3ActionPlan()
+        if self.should_trigger_system_reboot(player_state, game_state):
+            plan.use_system_reboot = True
         current_money = player_state.money
         current_patches = player_state.patches
         threats = self._get_threat_levels(game_state.staging_cup, game_state.tower.stuck_cubes)

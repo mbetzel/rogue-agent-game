@@ -71,6 +71,19 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Technical Architecture Spec (`principal-engineer`):* Root-cause audit and module contracts for Dirty Income `backlash_die_id` selection across Ready Zone & Active Pool, Phreaker single-die selection (`die_id`/`die_index`), and client/server state synchronization hardening.
   - [x] *Implementation (`senior-engineer`):* Updated `web/schemas.py`, `web/controller/`, `web/server.py`, `sim/engine/phase3_ops.py`, `web/static/js/`, and added 8 verification tests in `tests/test_phase20_sync.py`.
   - [x] *Code Review Gate (`staff-engineer`):* Line-by-line review and 100% test pass via WSL (269/269 passing, APPROVED).
+- [x] **Phase 21: Once-per-Game "System Reboot" & Soft-Lock Recovery (`v0.14.0` Baseline)**
+  - [x] *Design Alignment:* Solved the 0-Ready-dice soft-lock edge case via Once-per-Game System Reboot (restores all Gray starter dice from Unpatched to Ready; colored dice remain unpatched).
+  - [x] *Technical Architecture Spec (`principal-engineer`):* Module contracts in `sim/engine/state.py` (`system_reboot_used`, `can_system_reboot`, `execute_system_reboot`), Phase 3 ops hook, bot heuristics, web schemas, and 10-test unit matrix.
+  - [x] *Implementation (`senior-engineer`):* Implemented feature across `sim/engine/`, `sim/bots/`, `web/`, and UI (`tests/test_system_reboot.py` passing 10/10; all 279 suite tests passing via WSL).
+  - [x] *Code Review Gate (`staff-engineer`):* Comprehensive line-by-line review of rules fidelity, state transitions, and 100% test pass (APPROVED).
+  - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Synchronized `pnp/generate_pnp.py` to `v0.14.0`, adding the System Reboot slot to Terminal Mats and Player Pocket Aids; regenerated all 5 PnP PDFs.
+- [ ] **Phase 21: Once-per-Game "System Reboot" (`v0.14.0` Baseline)**
+  - [x] *Rules Draft `v0.14.0`:* Emergency Firmware Restore: If entering or reaching Phase 3 with 0 Ready dice and reboot unused, restore all Gray Starter dice from Unpatched to Ready (Colored dice remain unpatched).
+  - [x] *Technical Architecture Spec (`principal-engineer`):* High-level software architecture, module contracts, state transitions, and test matrix.
+  - [x] *Implementation (`senior-engineer`):* Implemented across `sim/engine/`, `sim/bots/`, `web/`, and created 10 unit/integration tests in `tests/test_system_reboot.py`.
+  - [ ] *Code Review Gate (`staff-engineer`):* Review diffs line-by-line, audit edge cases, and verify 100% test pass via WSL.
+  - [ ] *Scenario Execution & Telemetry Compilation (`product-owner`):* Run verification sweep and compile telemetry table.
+  - [ ] *Balance Assessment & Final Sign-Off (`game-designer`):* Evaluate Singularity and wipeout parity, log Section 9 in `FINDINGS.md`.
 
 ---
 

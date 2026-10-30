@@ -39,6 +39,7 @@ export function renderPlayerMats() {
           ${p.name} ${p.is_human ? '<span style="font-size: 0.7rem; color: var(--text-highlight);">[HUMAN]</span>' : `<span style="font-size: 0.7rem; color: var(--text-dim);">[${p.bot_archetype || 'BOT'}]</span>`}
           ${p.archetype ? `<span class="archetype-tag">${p.archetype.name}</span>` : ''}
           ${isCISO ? '<span class="ciso-badge">CISO</span>' : ''}
+          <span class="reboot-badge ${p.system_reboot_used ? 'reboot-used' : 'reboot-ready'}">${p.system_reboot_used ? '[REBOOT USED]' : '[REBOOT READY]'}</span>
         </div>
         <div style="font-size: 0.85rem; font-weight: 700; color: var(--accent-gold);">
           ${p.portfolio_value} VP

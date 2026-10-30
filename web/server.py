@@ -259,6 +259,12 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
 
+                elif clean_path == "/api/game/action/system_reboot":
+                    pid = get_target_pid(default_to_human=False)
+                    state = self.controller.system_reboot(pid)
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
                 elif clean_path == "/api/game/action/end_turn":
                     pid = get_target_pid(default_to_human=False)
                     state = self.controller.end_turn(pid)

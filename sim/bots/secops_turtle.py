@@ -227,6 +227,8 @@ class SecOpsTurtleBot(BaseBot):
         rng: random.Random,
     ) -> Phase3ActionPlan:
         plan = Phase3ActionPlan()
+        if self.should_trigger_system_reboot(player_state, game_state):
+            plan.use_system_reboot = True
         current_money = player_state.money
         current_patches = player_state.patches
         is_final_round = getattr(game_state, "is_final_round", False)

@@ -58,6 +58,28 @@ class PlayerState:
     ability_v1_status: AbilityStatus = AbilityStatus.AVAILABLE
     ability_v2_status: AbilityStatus = AbilityStatus.LOCKED
     ability_v3_status: AbilityStatus = AbilityStatus.LOCKED
+    system_reboot_used: bool = False
+
+    @property
+    def can_system_reboot(self) -> bool:
+        return not self.system_reboot_used and len(self.ready_dice) == 0
+
+    def execute_system_reboot(self) -> List[Die]:
+        if not self.can_system_reboot:
+            raise ValueError("Cannot execute system reboot: player already used reboot or has ready dice")
+        self.system_reboot_used = True
+        restored: List[Die] = []
+        remaining_unpatched: List[Die] = []
+        for die in self.unpatched_dice:
+            if die.color == DieColor.GRAY:
+                die.is_locked = False
+                die.chosen_choice_index = None
+                self.ready_dice.append(die)
+                restored.append(die)
+            else:
+                remaining_unpatched.append(die)
+        self.unpatched_dice = remaining_unpatched
+        return restored
 
     @property
     def total_dice(self) -> List[Die]:

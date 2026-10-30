@@ -277,6 +277,16 @@ export async function doStarAction(actionType, cubeColor = null) {
   }
 }
 
+export async function doSystemReboot() {
+  const newState = await apiCall("/api/game/action/system_reboot", "POST", {
+    player_id: getHumanPlayerId(),
+  });
+  if (newState) {
+    setState(newState);
+    notifyRender();
+  }
+}
+
 export async function doEndTurn() {
   const newState = await apiCall("/api/game/action/end_turn", "POST", { player_id: getHumanPlayerId() });
   if (newState) {

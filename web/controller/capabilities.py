@@ -193,6 +193,12 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         and player.secrets > controller.state.config.dirty_income_secret_cost
         and len(player.ready_dice) >= 1
     )
+    can_system_reboot = bool(
+        controller.phase == 3
+        and is_active
+        and not is_eliminated
+        and player.can_system_reboot
+    )
     can_end_turn = (controller.phase == 3 and is_active and not is_eliminated)
 
     # Market purchase availability per color
@@ -240,6 +246,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         "can_patch_cash": can_patch_cash,
         "can_patch_token": can_patch_token,
         "can_dirty_income": can_dirty,
+        "can_system_reboot": can_system_reboot,
         "can_star": can_star,
         "can_end_turn": can_end_turn,
         # Archetype capabilities

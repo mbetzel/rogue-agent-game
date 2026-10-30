@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.13.0)
+# Too Many Secrets — Rules Draft (v0.14.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -36,6 +36,7 @@ When the dust settles, any consultancy that suffers a **Total Data Breach** (`<=
   * **Shield Assignment Slots** (`Red`, `Blue`, `Green`)
   * **Unpatched Zone** (worn-down modules and burnt relays offline until repaired)
   * **Version Ability Track (`v1.0`, `v2.0`, `v3.0`)**: 3 tracking slots for once-per-version archetype powers
+  * **System Reboot Track (`[ ] Ready / [X] Used`)**: Once-per-game emergency firmware restore slot
 * **6 Consultancy Archetype Cards:**
   * **The Acoustic** (*Pattern Genius / Mainframe Resonance*)
   * **The Phreaker** (*Hardware Tinkerer / Emergency Relays*)
@@ -175,6 +176,12 @@ Starting with the First Player and proceeding clockwise, each surviving player t
    * Gain **`+$3`** `[TUNE: test $2–$4]` from the bank.
    * Place **`1 Black Cube`** from the supply into the **Staging Cup**.
    * **Technical Debt Backlash:** Immediately move **`1 Ready die`** of your choice to your **Unpatched Zone**. *(Archetype Timing: **The Cipher** may use Algorithmic Arbitrage to skip this die demotion).*
+
+4. **Emergency Reboot: System Reboot (Once per Game):**
+   * If you enter or reach Phase 3 with **`0 Ready dice`** and have not yet used your once-per-game System Reboot, you may execute an emergency reboot:
+   * Move **all Gray Starter Dice** from your **Unpatched Zone** back to your **Ready Zone**.
+   * *(Any Colored Module dice in your Unpatched Zone represent damaged custom hardware and remain unpatched; they must still be repaired normally with `1 🔧` or `$2`).*
+   * Mark the **System Reboot** slot on your terminal mat as used.
 
 After all players finish Phase 3:
 * If the Final Round was triggered, proceed directly to **Section 5: End Game & Victory Scoring**.

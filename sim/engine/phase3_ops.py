@@ -30,6 +30,10 @@ def execute_phase_3(engine: GameEngine) -> None:
         plan = player.bot.take_phase3_actions(player, engine.state, engine.rng)
         active_ver = engine.state.active_version.version_str
 
+        # Emergency System Reboot (Once per Game): restore all Gray Starter Dice from Unpatched to Ready
+        if plan.use_system_reboot and player.can_system_reboot:
+            player.execute_system_reboot()
+
         # Hook Phase 3: The Phreaker (Magnetic Splice) - patch 1 worn die for free
         if (
             plan.use_phreaker_ability
