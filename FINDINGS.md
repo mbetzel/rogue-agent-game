@@ -369,3 +369,26 @@ Evaluated across:
 - **Physical Assets:** Version Cards and Central Boards updated to render the 4/5/6 track spaces and mechanical triggers directly on printable components.
 
 **Status: OFFICIALLY ADOPTED (`v0.15.0` Baseline).**
+
+---
+
+## 11. Phase 23: Dirty Income Deprecation & Escalating Threat Tuning (`v0.16.0` Baseline)
+
+### A. Context & Playtest Diagnosis
+In physical playtests of `v0.15.0`, players rarely used the **Backdoor Siphon ("Dirty Income")** action. With starting capital of `$7` and starter Gray dice producing reliable cash (EV $\sim \$2.20$/round), consultancies had plenty of cache. Trading **`1 Corporate Secret`** (worth **`4 VP`** and critical to surviving elimination) plus **demoting a Ready die** (costing `$2` or `1 🔧` to repair) to gain **`+$3`** proved mathematically irrational. Furthermore, having player actions inject Black cubes into the shared Cube Tower acted as a band-aid that obscured the true escalation curve of SETEC.
+
+### B. Approved Mechanical Revisions
+1. **Dirty Income Deprecation:** The Backdoor Siphon action is completely removed from Phase 3 Operations. Phase 3 consists exclusively of Market Purchases (limit 2), Patching Worn Modules, and Emergency System Reboot.
+2. **The Cipher Archetype Revision (*Algorithmic Arbitrage*):** In Phase 3, The Cipher may purchase **1 Colored Die at a `$2 discount`**, **OR gain an immediate `+$2` cash arbitrage payout** from the bank (clean capital, no Secret loss, no die demotion, no Black cubes).
+3. **Escalating Autonomous Protocol Pulse:** SETEC compiles intrusion subroutines faster as versions advance:
+   * **`v1.0`:** **`1 Black Cube`** / round
+   * **`v2.0`:** **`2 Black Cubes`** / round
+   * **`v3.0`:** **`2 Black Cubes`** / round
+4. **Setup Staging Cup Priming:** Initial cup seeded with **`2 Red, 2 Blue, 2 Green, 1 Black`** (pre-seed baffle drop remains 1 of each color).
+
+### C. Automated Verification & Pacing Analysis
+* **Test Suite:** 291/291 unit tests passing via WSL (`tests/test_v160_rules.py`).
+* **Cash Flow Health:** Consultancies maintain healthy liquidity without Dirty Income; player cash hoards convert naturally into late-game maintenance patching and colored die upgrades.
+* **Component Parity:** Central Boards, Player Pocket Aids, and Version Cards updated in `pnp/generate_pnp.py`; all 5 PnP PDFs regenerated cleanly.
+
+**Status: OFFICIALLY ADOPTED (`v0.16.0` Baseline).**

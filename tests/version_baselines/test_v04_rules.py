@@ -61,7 +61,7 @@ class TestV04Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_red_damage_paid_fully_by_cash(self) -> None:
         """When cash >= unblocked Red damage, cash pays fully; patches and secrets untouched."""
-        config = GameConfig(num_players=2)
+        config = GameConfig(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         player.money = 5
@@ -88,7 +88,7 @@ class TestV04Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_red_damage_partial_cash_partial_patches(self) -> None:
         """When cash is exhausted, Tier 2 patches absorb unpaid ransom; secrets untouched."""
-        config = GameConfig(num_players=2)
+        config = GameConfig(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         player.money = 2
@@ -115,7 +115,7 @@ class TestV04Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_red_damage_partial_cash_partial_patches_leak_secrets(self) -> None:
         """When cash and patches are both exhausted, remaining unpaid ransom leaks to Secrets."""
-        config = GameConfig(num_players=2)
+        config = GameConfig(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         player.money = 2
@@ -142,7 +142,7 @@ class TestV04Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_red_damage_no_cash_no_patches_full_secret_leak(self) -> None:
         """With $0 cash and 0 patches, unblocked Red damage directly leaks all damage to Secrets."""
-        config = GameConfig(num_players=2)
+        config = GameConfig(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         player.money = 0
@@ -169,7 +169,7 @@ class TestV04Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_red_damage_non_negative_invariants(self) -> None:
         """Massive Red damage leaves player.money >= 0 and player.patches >= 0."""
-        config = GameConfig(num_players=2)
+        config = GameConfig(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         player.money = 1
@@ -203,7 +203,7 @@ class TestV04Rules(unittest.TestCase):
             def take_phase3_actions(self, player_state, game_state, rng):
                 return Phase3ActionPlan(take_dirty_income=True)
 
-        config = GameConfig(num_players=2)
+        config = GameConfig(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[WillingDirtyBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         player.money = 5
@@ -230,7 +230,7 @@ class TestV04Rules(unittest.TestCase):
             def take_phase3_actions(self, player_state, game_state, rng):
                 return Phase3ActionPlan(take_dirty_income=True)
 
-        config = GameConfig(num_players=2)
+        config = GameConfig(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[SuicidalDirtyBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         player.money = 2
@@ -257,7 +257,7 @@ class TestV04Rules(unittest.TestCase):
             def take_phase3_actions(self, player_state, game_state, rng):
                 return Phase3ActionPlan(take_dirty_income=True)
 
-        config = GameConfig(num_players=2)
+        config = GameConfig(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[AggressiveDirtyBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         player.secrets = 6

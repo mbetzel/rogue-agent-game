@@ -138,7 +138,7 @@ class TestEnginePhases(unittest.TestCase):
         self.assertEqual(engine.state.end_reason, EndGameReason.SINGULARITY)
 
     def test_phase3_operations_and_turn_rotation(self) -> None:
-        cfg = GameConfig(num_players=2, starting_money=10, starting_patches=1)
+        cfg = GameConfig(num_players=2, starting_money=10, starting_patches=1, dirty_income_enabled=True)
         bot0 = DummyControlledBot(0)
         bot1 = DummyControlledBot(1)
 

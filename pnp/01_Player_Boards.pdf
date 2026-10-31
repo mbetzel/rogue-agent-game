@@ -8138,7 +8138,7 @@ endobj
 << /Type /Page /Parent 8 0 R /MediaBox [0 0 792.00 612.00] /Resources 7 0 R /Contents 15 0 R >>
 endobj
 17 0 obj
-<< /Length 45420 >>
+<< /Length 45050 >>
 stream
 q
 0.0588 0.0902 0.1647 RG
@@ -8660,7 +8660,7 @@ BT /F2 7.90 Tf 253.92 255.00 Td (OR) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 7.90 Tf 48.00 244.00 Td (take) Tj ET
+BT /F1 7.90 Tf 48.00 244.00 Td (gain) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
@@ -8668,83 +8668,63 @@ BT /F1 7.90 Tf 62.93 244.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 7.90 Tf 65.13 244.00 Td (Backdoor) Tj ET
+BT /F1 7.90 Tf 65.13 244.00 Td (an) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 7.90 Tf 98.50 244.00 Td ( ) Tj ET
+BT /F1 7.90 Tf 73.91 244.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 7.90 Tf 100.69 244.00 Td (Siphon) Tj ET
+BT /F1 7.90 Tf 76.11 244.00 Td (immediate) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 7.90 Tf 125.29 244.00 Td ( ) Tj ET
+BT /F1 7.90 Tf 112.54 244.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 7.90 Tf 127.48 244.00 Td (\(Dirty) Tj ET
+BT /F2 7.90 Tf 114.74 244.00 Td (+$2) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 7.90 Tf 146.35 244.00 Td ( ) Tj ET
+BT /F2 7.90 Tf 128.14 244.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 7.90 Tf 148.54 244.00 Td (Income\)) Tj ET
+BT /F2 7.90 Tf 130.33 244.00 Td (cash) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 7.90 Tf 177.08 244.00 Td ( ) Tj ET
+BT /F2 7.90 Tf 148.34 244.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 7.90 Tf 179.27 244.00 Td (without) Tj ET
+BT /F2 7.90 Tf 150.53 244.00 Td (payout) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 7.90 Tf 207.36 244.00 Td ( ) Tj ET
+BT /F1 7.90 Tf 176.43 244.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 7.90 Tf 209.56 244.00 Td (demoting) Tj ET
+BT /F1 7.90 Tf 178.63 244.00 Td (from) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 7.90 Tf 245.11 244.00 Td ( ) Tj ET
+BT /F1 7.90 Tf 194.43 244.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 7.90 Tf 247.30 244.00 Td (a) Tj ET
+BT /F1 7.90 Tf 196.62 244.00 Td (the) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 7.90 Tf 48.00 233.00 Td (Ready) Tj ET
+BT /F1 7.90 Tf 207.60 244.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 7.90 Tf 70.83 233.00 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 7.90 Tf 73.03 233.00 Td (die) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 7.90 Tf 83.57 233.00 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 7.90 Tf 85.76 233.00 Td (to) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 7.90 Tf 92.35 233.00 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 7.90 Tf 94.55 233.00 Td (Unpatched.) Tj ET
+BT /F1 7.90 Tf 209.80 244.00 Td (bank.) Tj ET
 Q
 q
 0.7961 0.8353 0.8824 RG
@@ -12448,12 +12428,12 @@ xref
 0000136655 00000 n 
 0000179745 00000 n 
 0000179857 00000 n 
-0000225330 00000 n 
-0000225442 00000 n 
-0000272748 00000 n 
-0000272860 00000 n 
+0000224960 00000 n 
+0000225072 00000 n 
+0000272378 00000 n 
+0000272490 00000 n 
 trailer
 << /Size 22 /Root 21 0 R /Info 1 0 R >>
 startxref
-272910
+272540
 %%EOF

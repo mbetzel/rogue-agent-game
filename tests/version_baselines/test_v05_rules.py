@@ -122,7 +122,7 @@ class TestV05Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_game_engine_init_2p_resilience(self) -> None:
         """GameEngine initializes 2P players with 8 Secrets and 2 Patch Tokens."""
-        config = GameConfig(num_players=2)
+        config = GameConfig(num_players=2, dirty_income_enabled=True)
         bots = [BaseBot(0), BaseBot(1)]
         engine = GameEngine(config=config, bots=bots, seed=42)
 
@@ -171,7 +171,7 @@ class TestV05Rules(unittest.TestCase):
             def take_phase3_actions(self, player_state, game_state, rng):
                 return Phase3ActionPlan(take_dirty_income=True)
 
-        config = GameConfig(num_players=2)
+        config = GameConfig(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[DirtyBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
 
@@ -209,7 +209,7 @@ class TestV05Rules(unittest.TestCase):
             def take_phase3_actions(self, player_state, game_state, rng):
                 return Phase3ActionPlan(take_dirty_income=True)
 
-        config = GameConfig(num_players=2)
+        config = GameConfig(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[DirtyBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
 
@@ -233,7 +233,7 @@ class TestV05Rules(unittest.TestCase):
     def test_phase3_skipped_when_game_over(self) -> None:
         """_execute_phase_3 returns immediately if state.game_over is True."""
         actions_called: List[int] = []
-        config = GameConfig(num_players=2)
+        config = GameConfig(num_players=2, dirty_income_enabled=True)
         bots = [TrackingBot(0, actions_called), TrackingBot(1, actions_called)]
         engine = GameEngine(config=config, bots=bots, seed=42)
 
@@ -248,7 +248,7 @@ class TestV05Rules(unittest.TestCase):
     def test_phase3_skipped_when_all_patient_zero(self) -> None:
         """_execute_phase_3 returns immediately if all players are Patient Zero."""
         actions_called: List[int] = []
-        config = GameConfig(num_players=2)
+        config = GameConfig(num_players=2, dirty_income_enabled=True)
         bots = [TrackingBot(0, actions_called), TrackingBot(1, actions_called)]
         engine = GameEngine(config=config, bots=bots, seed=42)
 
@@ -264,7 +264,7 @@ class TestV05Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_total_wipeout_step_2c_state(self) -> None:
         """When all players breach, Step 2C sets game_over=True, is_final_round=False, end_reason=TOTAL_WIPEOUT."""
-        config = GameConfig(num_players=2)
+        config = GameConfig(num_players=2, dirty_income_enabled=True)
         bots = [BaseBot(0), BaseBot(1)]
         engine = GameEngine(config=config, bots=bots, seed=42)
 
@@ -294,7 +294,7 @@ class TestV05Rules(unittest.TestCase):
     def test_total_wipeout_skips_phase3_in_run_round(self) -> None:
         """run_round skips Phase 3 completely when total wipeout occurs during Phase 2."""
         actions_called: List[int] = []
-        config = GameConfig(num_players=2)
+        config = GameConfig(num_players=2, dirty_income_enabled=True)
         bots = [TrackingBot(0, actions_called), TrackingBot(1, actions_called)]
         engine = GameEngine(config=config, bots=bots, seed=42)
 
@@ -326,7 +326,7 @@ class TestV05Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_shield_wear_order_partial_absorption(self) -> None:
         """When multiple dice are committed and partial damage is taken, ordered dice absorb and unneeded dice remain Ready."""
-        config = GameConfig(num_players=2)
+        config = GameConfig(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
 
@@ -372,7 +372,7 @@ class TestV05Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_shield_wear_order_b3_air_gapped_backup(self) -> None:
         """B3 Air-Gapped Backup absorbs damage first, sacrificing other Ready die to Unpatched while B3 stays Ready."""
-        config = GameConfig(num_players=2)
+        config = GameConfig(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
 

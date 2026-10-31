@@ -257,9 +257,14 @@ class VentureGreedBot(BaseBot):
                     plan.cipher_free_die_color = c
                     current_money -= cost
                     break
+            if not plan.use_cipher_ability and not is_final_round:
+                plan.use_cipher_ability = True
+                plan.cipher_mode = "CASH"
+                current_money += game_state.config.cipher_arbitrage_cash
 
         if (
-            not is_final_round
+            game_state.config.dirty_income_enabled
+            and not is_final_round
             and current_money < 5
             and player_state.secrets > game_state.config.dirty_income_secret_cost
             and len(player_state.ready_dice) >= 1

@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.15.0)
+# Too Many Secrets — Rules Draft (v0.16.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -9,7 +9,7 @@
 
 A mysterious autonomous cracking program—codenamed **Project: SETEC** (the "Rogue Agent")—has broken loose across telecommunications relays and university mainframes. Recompiling its malicious subroutines each round through an acoustic mainframe compiler, SETEC aggressively probes commercial networks to extort funds, corrupt system hardware, and exfiltrate proprietary client data.
 
-Each player directs an **independent boutique white-hat security consultancy** hired to defend client infrastructure. Consultancies assemble and upgrade customized hardware and software modules (represented by a custom dice pool), patch degraded relays, and adapt to the escalating cryptographic threat. Cash-strapped consultancies can secretly tap the rogue protocol via **Backdoor Siphons ("Dirty Income")** for immediate slush funds—feeding corrupted code into SETEC and hastening total cryptographic collapse, while incurring severe technical debt.
+Each player directs an **independent boutique white-hat security consultancy** hired to defend client infrastructure. Consultancies assemble and upgrade customized hardware and software modules (represented by a custom dice pool), patch degraded relays, and adapt to the escalating cryptographic threat. As SETEC’s autonomous compiler accelerates across versions, consultancies must balance expanding their revenue streams against patching critical relays before proprietary client data leaks.
 
 When the dust settles, any consultancy that suffers a **Total Data Breach** (`<= 0 Secrets`) has its reputation incinerated, is raided by federal marshals, becomes **Patient Zero**, and is eliminated from contention. Among the surviving firms, the consultancy with the highest **Portfolio Value** (client retainers, operational capital, and modular assets) wins.
 
@@ -62,7 +62,7 @@ When the dust settles, any consultancy that suffers a **Total Data Breach** (`<=
 1. **SETEC Roadmap & Compiler Priming:** Deal **1 `v1.0` card**, **1 `v2.0` card**, and **1 `v3.0` card** face-up in a row next to the Cube Tower. Place the Version Marker on `v1.0`.
    * **Per-Version Corruption Tracks (Consistent Across All Player Counts):** Each Version card features its own escalating **Corruption Track** where every space carries a mechanical effect: **`4` spaces on `v1.0`**, **`5` spaces on `v2.0`**, and **`6` spaces on `v3.0`** (`15` total Black Cubes to Singularity across `v1.0 → v2.0 → v3.0`) `[TUNE]`.
    * **Prime the Compiler (Pre-Seed Drop):** Before populating the Staging Cup, take **`1 Red, 1 Blue, 1 Green, and 1 Black Cube`** (4 cubes total) from the supply and drop them into the empty Cube Tower. Any cubes that exit into the tray are **returned to the general supply**. Any cubes that remain stuck on the internal baffles stay inside the tower to prime the compiler for Round 1.
-   * Place the starting cubes listed on the `v1.0` card into the **Staging Cup** (baseline: `1 Red, 1 Blue, 1 Green, 1 Black`). *(All subsequent cube injections from SETEC come directly from Corruption Track spaces).*
+   * Place the starting cubes listed on the `v1.0` card into the **Staging Cup** (baseline: `2 Red, 2 Blue, 2 Green, 1 Black`). *(All subsequent cube injections from SETEC come directly from Corruption Track spaces).*
 2. **Software Market:** For each of the 5 Colored Dice (**Red, Blue, Green, Yellow, Purple**), shuffle its Variant Cards, place **1 Variant Card** face-up in the center, and stack **`2 × Players`** dice of that color on it.
 3. **Consultancy Setup (Each Player):**
    * Choose or randomly deal **1 Consultancy Archetype Card** to each player. Place it beside your terminal mat with all 3 Version slots (`v1.0`, `v2.0`, `v3.0`) toggled to **Ready**.
@@ -92,7 +92,7 @@ Each player’s consultancy archetype provides a powerful, specialized capabilit
 
 ### Phase 1: Boot & Configure (Simultaneous)
 
-1. **Autonomous Protocol Pulse:** SETEC compiles new intrusion subroutines in the background. Take **`1 Black Cube`** from the general supply and place it into the **Staging Cup**.
+1. **Autonomous Protocol Pulse:** SETEC compiles new intrusion subroutines in the background. Take Black Cubes from the general supply based on the active Version card and place them into the **Staging Cup** (**`v1.0`:** `1 Black Cube`; **`v2.0`:** `2 Black Cubes`; **`v3.0`:** `2 Black Cubes`) `[TUNE]`.
 2. **Temp Staffing (Contractor Dice):** Before rolling, each player may hire temporary White Contractor Dice (freelance phreakers) for this round. Hiring uses **Progressive Contractor Pricing**: **`$1` for the 1st die, `$2` for the 2nd die, and `$3` for the 3rd die** (up to a maximum of **`3` White Dice** per round; hiring all 3 costs **`$6`** total `[TUNE]`). All hired White Contractor dice are added to your Active Pool for this round. *(Archetype Timing: **The Operator** may trigger Redundant Crew here).*
 3. **Roll Ready Pool:** Every player simultaneously rolls all dice in their **Ready Zone** plus any hired **White Contractor Dice** into their **Active Pool**. *(Dice in your **Unpatched Zone** are not rolled.)*
 4. **Yahtzee Rerolls & Lock Resolution (Simultaneous):**
@@ -177,15 +177,7 @@ Starting with the First Player and proceeding clockwise, each surviving player t
    * Pay the `$` cost of any available Colored Die in the Market and place it directly into your **Ready Zone**. *(Archetype Timing: **The Cipher** may trigger Algorithmic Arbitrage here to purchase 1 Colored Die at a **$2 discount**).*
 2. **Patch Worn-Out Modules (Unlimited):**
    * Spend **`1 🔧` token** *or* pay **`$2`** `[TUNE: test $1–$3]` to move **1 die** from your **Unpatched Zone** back to your **Ready Zone**. *(Crucial for End Game: unpatched dice score `0 VP`; patching a colored die to Ready earns its full printed 3–4 VP!).* *(Archetype Timing: **The Phreaker** may trigger Magnetic Splice here to patch 1 die for free).*
-3. **Backdoor Siphon ("Dirty Income" — Limit `1×` per turn):**
-   * Tap the rogue SETEC protocol under the table for an immediate cash injection, at the cost of leaking telemetry and corrupting local relays.
-   * **Prerequisites:** You must have at least **`1` Ready die** to move to Unpatched and at least **`2` Corporate Secrets** (cannot be taken if you have $\le 1$ Secret or 0 Ready dice).
-   * Pay **`1 Corporate Secret`**.
-   * Gain **`+$3`** `[TUNE: test $2–$4]` from the bank.
-   * Place **`1 Black Cube`** from the supply into the **Staging Cup**.
-   * **Technical Debt Backlash:** Immediately move **`1 Ready die`** of your choice to your **Unpatched Zone**. *(Archetype Timing: **The Cipher** may use Algorithmic Arbitrage to skip this die demotion).*
-
-4. **Emergency Reboot: System Reboot (Once per Game):**
+3. **Emergency Reboot: System Reboot (Once per Game):**
    * If you enter or reach Phase 3 with **`0 Ready dice`** and have not yet used your once-per-game System Reboot, you may execute an emergency reboot:
    * Move **all Gray Starter Dice** from your **Unpatched Zone** back to your **Ready Zone**.
    * *(Any Colored Module dice in your Unpatched Zone represent damaged custom hardware and remain unpatched; they must still be repaired normally with `1 🔧` or `$2`).*
@@ -263,8 +255,8 @@ Each Version Card defines its Corruption Track (`4` spaces on `v1.0`, `5` spaces
 
 | Version | Card Name | Initial Setup Cup | Space 1 | Space 2 | Space 3 | Space 4 | Space 5 | Space 6 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **`v1.0`** (4) | *Script Kiddie* | `1R, 1B, 1G, 1K` | Add `1R, 1G` | All lose `$2` | Add `1B` | **Upgrade:** Lose `1 🔧` + Add `1R, 1B` | — | — |
-| **`v1.0`** (4) | *Data Scraper* | `1R, 2B, 1K` (`+$1` start) | Lose `1 🔧` + Add `1B` | All demote `1` die | Add `1R, 1G` | **Upgrade:** Lose `$2` + Add `1B, 1G` | — | — |
+| **`v1.0`** (4) | *Script Kiddie* | `2R, 2B, 2G, 1K` | Add `1R, 1G` | All lose `$2` | Add `1B` | **Upgrade:** Lose `1 🔧` + Add `1R, 1B` | — | — |
+| **`v1.0`** (4) | *Data Scraper* | `2R, 3B, 2G, 1K` (`+$1` start) | Lose `1 🔧` + Add `1B` | All demote `1` die | Add `1R, 1G` | **Upgrade:** Lose `$2` + Add `1B, 1G` | — | — |
 | **`v2.0`** (5) | *RaaS* | — | All lose `$3` | Add `1R, 1G` | **Lock Cash (`$`)** next Phase 1 | Lose `$3` & `1 🔧` | **Upgrade:** Add `1R, 1B, 1K` | — |
 | **`v2.0`** (5) | *Polymorphic Worm* | — | Lose `2 🔧` + Add `1G` | All demote `1` die | Add `1B, 1G` | **Lock Patch (`🔧`)** next Phase 1 | **Upgrade:** Demote `1` die + Add `1R, 1G, 1K` | — |
 | **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 1B, 1G` | All lose `$4` | **Lock Shields** next Phase 1 | Return `1` Colored Die | Lose `1 Secret` & demote `1` die | **Singularity:** Add `1R, 1B, 1G` |
@@ -274,8 +266,8 @@ Each Version Card defines its Corruption Track (`4` spaces on `v1.0`, `5` spaces
 
 | Version | Card Name | Initial Setup Cup | Space 1 | Space 2 | Space 3 | Space 4 | Space 5 | Space 6 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **`v1.0`** (4) | *Script Kiddie* | `1R, 1B, 1G, 1K` | Add `1R, 1G` | All lose `$3` | Demote `1` die + Add `1B` | **Upgrade:** Lose `1 🔧` + Add `1R, 1B, 1G` | — | — |
-| **`v1.0`** (4) | *Data Scraper* | `1R, 2B, 1K` (`+$1` start) | Lose `2 🔧` + Add `1B` | All demote `1` die | Add `1R, 1B, 1G` | **Upgrade:** Lose `$3` + Add `1R, 1G` | — | — |
+| **`v1.0`** (4) | *Script Kiddie* | `2R, 2B, 2G, 1K` | Add `1R, 1G` | All lose `$3` | Demote `1` die + Add `1B` | **Upgrade:** Lose `1 🔧` + Add `1R, 1B, 1G` | — | — |
+| **`v1.0`** (4) | *Data Scraper* | `2R, 3B, 2G, 1K` (`+$1` start) | Lose `2 🔧` + Add `1B` | All demote `1` die | Add `1R, 1B, 1G` | **Upgrade:** Lose `$3` + Add `1R, 1G` | — | — |
 | **`v2.0`** (5) | *RaaS* | — | All lose `$4` | Add `2R, 1G` | **Lock Cash (`$`)** next Phase 1 | Lose `$5` & `1 🔧` | **Upgrade:** Demote `1` die + Add `1R, 1B, 1K` | — |
 | **`v2.0`** (5) | *Polymorphic Worm* | — | Lose `2 🔧` + Add `1B, 1G` | All demote `2` dice | Add `1R, 2G` | **Lock Patch (`🔧`)** next Phase 1 | **Upgrade:** Demote `1` die + Add `1B, 1G, 1K` | — |
 | **`v3.0`** (6) | *Zero-Day Override* | — | Add `2R, 1B, 1G` | Lose `$5` & `2 🔧` | **Lock Shields** next Phase 1 | Return `1` Colored Die & demote `1` die | All lose `2 Secrets` | **Singularity:** Add `2R, 2B, 2G` |
@@ -293,5 +285,5 @@ Each archetype features a unique special ability that may be activated **once pe
 | **The Phreaker** | **Phase 3:** Operations Turn | *Magnetic Splice* | Move **1 worn die** from your Unpatched Zone back to your Ready Zone for **free** (without spending `🔧` or `$`). |
 | **The Prodigy** | **Phase 1:** Step 4 Rerolls | *Brute-Force Bypass* | During your rerolls this phase, you may include **any number of Locked dice** (including Glitch dice) in your free rerolls without spending `🔧` tokens. In addition, you may turn **1 of your rolled dice to any non-Star face of your choice**. |
 | **The Spook** | **Phase 2:** Step 2B Damage | *Slush Fund* | The Spook accesses emergency black budget reserves: **Absorb up to 2 Corporate Secret loss** (from Blue Spyware or unpaid Red Ransom) for free without paying cash. *(Any additional Secret loss may be absorbed by paying `$1` per Secret as normal).* |
-| **The Cipher** | **Phase 3:** Operations Turn | *Algorithmic Arbitrage* | Purchase **1 Colored Die** from the Market at a **`$2 discount`** (minimum cost `$0`), **OR** take the Backdoor Siphon (Dirty Income) action without demoting a Ready die to Unpatched. |
+| **The Cipher** | **Phase 3:** Operations Turn | *Algorithmic Arbitrage* | Purchase **1 Colored Die** from the Market at a **`$2 discount`** (minimum cost `$0`), **OR** gain an immediate **`+$2` cash payout** from the bank. |
 | **The Operator** | **Phase 1:** Step 2 Staffing | *Redundant Crew* | Hire up to **2 White Contractor Dice for free** this round (bypassing progressive contractor costs). |

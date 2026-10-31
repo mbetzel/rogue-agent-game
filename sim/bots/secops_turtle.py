@@ -305,7 +305,8 @@ class SecOpsTurtleBot(BaseBot):
                     current_money -= cost
 
         if (
-            not is_final_round
+            game_state.config.dirty_income_enabled
+            and not is_final_round
             and current_money == 0
             and player_state.secrets > game_state.config.dirty_income_secret_cost
             and len(player_state.ready_dice) >= 1

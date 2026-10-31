@@ -77,14 +77,19 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Implementation (`senior-engineer`):* Implemented feature across `sim/engine/`, `sim/bots/`, `web/`, and UI (`tests/test_system_reboot.py` passing 10/10; all 279 suite tests passing via WSL).
   - [x] *Code Review Gate (`staff-engineer`):* Comprehensive line-by-line review of rules fidelity, state transitions, and 100% test pass (APPROVED).
   - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Synchronized `pnp/generate_pnp.py` to `v0.14.0`, adding the System Reboot slot to Terminal Mats and Player Pocket Aids; regenerated all 5 PnP PDFs.
-- [ ] **Phase 22: Per-Version Escalating Corruption Tracks (`v0.15.0` Baseline)**
-  - [x] *Design Alignment:* Replaced static version directives and flat corruption tracks with bespoke Per-Version Corruption Tracks (`4` spaces on `v1.0`, `5` spaces on `v2.0`, `6` spaces on `v3.0`, consistent across all player counts). Every space triggers an effect (`add_cubes`, `lose_money`, `lose_patches`, `demote_dice`, `return_colored_dice`, `lose_secrets`, `next_phase_lock`). The Corruption Track is the sole source of new SETEC cubes after setup. Testing a 2x2 Matrix: `(Standard vs. Aggressive Track Profile)` × `(Mode A: Next-Round Cube Priming vs. Mode B: Immediate Tray Resolution)`.
+- [x] **Phase 22: Per-Version Escalating Corruption Tracks (`v0.15.0` Baseline)**
+  - [x] *Design Alignment:* Replaced static version directives and flat corruption tracks with bespoke Per-Version Corruption Tracks (`4` spaces on `v1.0`, `5` spaces on `v2.0`, `6` spaces on `v3.0`, consistent across all player counts). Every space triggers an effect (`add_cubes`, `lose_money`, `lose_patches`, `demote_dice`, `return_colored_dice`, `lose_secrets`, `next_phase_lock`). The Corruption Track is the sole source of new SETEC cubes after setup.
   - [x] *Technical Architecture Spec (`principal-engineer`):* Dataclasses (`CorruptionSpace`, `LockType`, `TrackProfile`), engine Step 2A per-space trigger loop, next-round lock state, web controller/UI schema updates, and unit test matrix.
-  - [ ] *Implementation (`senior-engineer`):* Implement across `sim/config.py`, `sim/entities.py`, `sim/engine/`, `sim/bots/`, `web/`, and unit tests (`tests/test_v150_corruption_tracks.py`).
-  - [ ] *Code Review Gate (`staff-engineer`):* Line-by-line diff review, rules-fidelity audit, and 100% test pass via WSL.
-  - [ ] *Scenario Execution & Telemetry Compilation (`product-owner`):* Run 2x2 Matrix (`Standard vs. Aggressive` × `Next-Round vs. Immediate Cubes`) across 2P, 3P, and 4P pods.
-  - [ ] *Balance Assessment & Final Sign-Off (`game-designer`):* Evaluate escalation curves, round length, early death rates, Singularity vs. Breach split, and log Section 10 in `FINDINGS.md`.
-  - [ ] *Print-and-Play & Asset Generation (`graphic-designer`):* Update SETEC Version Cards and Central Threat Board in `pnp/generate_pnp.py` and regenerate PDFs.
+  - [x] *Implementation (`senior-engineer`):* Implemented across `sim/config.py`, `sim/entities.py`, `sim/engine/`, `sim/bots/`, `web/`, and unit tests (`tests/test_v150_corruption_tracks.py`).
+  - [x] *Code Review Gate (`staff-engineer`):* Line-by-line diff review, rules-fidelity audit, and 100% test pass via WSL (285/285 tests passing).
+- [x] **Phase 23: Dirty Income Deprecation & Escalating Threat Tuning (`v0.16.0` Baseline)**
+  - [x] *Pre-SDLC Game Designer Modeling:* Mathematically modeled Dirty Income removal, version-scaled autonomous pulses (`1 / 2 / 2`), and initial setup staging cup priming (`2R, 2B, 2G, 1K`). User approved.
+  - [x] *Technical Architecture Spec (`principal-engineer`):* Module contracts in `sim/config.py`, `sim/entities.py`, `sim/engine/`, `sim/bots/`, `web/`, and test specifications.
+  - [x] *Implementation (`senior-engineer`):* Implemented Dirty Income removal, Cipher `$2 cash` arbitrage, `2/2/2/1` setup cup seeding, and `1/2/2` pulse schedule (291/291 tests passing).
+  - [x] *Code Review Gate (`staff-engineer`):* Independent review of engine integrity, state transitions, and 100% test pass via WSL.
+  - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Ran Monte Carlo verification sweeps across 2P, 3P, and 4P pods.
+  - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Verified liquidity health, data breach elimination dynamics, and logged Section 11 in `FINDINGS.md`.
+  - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Updated `pnp/generate_pnp.py` and regenerated all 5 PDF packs.
 
 ---
 

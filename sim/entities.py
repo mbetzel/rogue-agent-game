@@ -427,7 +427,7 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
             VersionCard(
                 version_str="v1.0",
                 name="Script Kiddie",
-                staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1, CubeColor.BLACK: 1},
+                staging_payload={CubeColor.RED: 2, CubeColor.BLUE: 2, CubeColor.GREEN: 2, CubeColor.BLACK: 1},
                 directive_description="None.",
                 directive_code="SCRIPT_KIDDIE",
                 corruption_track=(
@@ -447,7 +447,7 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
             VersionCard(
                 version_str="v1.0",
                 name="Data Scraper",
-                staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 2, CubeColor.BLACK: 1},
+                staging_payload={CubeColor.RED: 2, CubeColor.BLUE: 3, CubeColor.GREEN: 2, CubeColor.BLACK: 1},
                 directive_description="Players start with +$1 extra Money.",
                 directive_code="DATA_SCRAPER",
                 starting_cash_bonus=1,
@@ -561,7 +561,7 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
         VersionCard(
             version_str="v1.0",
             name="Script Kiddie",
-            staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1, CubeColor.BLACK: 1},
+            staging_payload={CubeColor.RED: 2, CubeColor.BLUE: 2, CubeColor.GREEN: 2, CubeColor.BLACK: 1},
             directive_description="None.",
             directive_code="SCRIPT_KIDDIE",
             corruption_track=(
@@ -581,7 +581,7 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
         VersionCard(
             version_str="v1.0",
             name="Data Scraper",
-            staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 2, CubeColor.BLACK: 1},
+            staging_payload={CubeColor.RED: 2, CubeColor.BLUE: 3, CubeColor.GREEN: 2, CubeColor.BLACK: 1},
             directive_description="Players start with +$1 extra Money.",
             directive_code="DATA_SCRAPER",
             starting_cash_bonus=1,

@@ -686,8 +686,8 @@ class TestPhreakerAndCipher(unittest.TestCase):
         self.assertEqual(player.ready_dice[-1].color, DieColor.BLUE)
         self.assertEqual(player.ability_v1_status, AbilityStatus.USED)
 
-    def test_cipher_algorithmic_arbitrage_dirty_income_without_backlash(self) -> None:
-        """19. Cipher takes Dirty Income without Technical Debt Backlash (Mode 2)."""
+    def test_cipher_algorithmic_arbitrage_cash_payout(self) -> None:
+        """19. Cipher takes Algorithmic Arbitrage cash payout (+2$, no secret loss, no black cube)."""
         controller = GameController()
         cipher_card = get_archetype_by_code(ArchetypeCode.CIPHER)
         controller.new_game(
@@ -707,11 +707,11 @@ class TestPhreakerAndCipher(unittest.TestCase):
         initial_unpatched_count = len(player.unpatched_dice)
         initial_black_cubes = controller.state.staging_cup.get(CubeColor.BLACK, 0)
 
-        res = controller.take_dirty_income(player_id=0, use_cipher_ability=True)
+        res = controller.use_cipher_ability(player_id=0)
         self.assertIn("players", res)
-        self.assertEqual(player.money, 3)  # +$3
-        self.assertEqual(player.secrets, 5)  # -1 Secret
-        self.assertEqual(controller.state.staging_cup.get(CubeColor.BLACK, 0), initial_black_cubes + 1)
+        self.assertEqual(player.money, 2)  # +$2 cash arbitrage
+        self.assertEqual(player.secrets, 6)  # Secrets preserved (no loss)
+        self.assertEqual(controller.state.staging_cup.get(CubeColor.BLACK, 0), initial_black_cubes)
 
         # No Technical Debt Backlash!
         self.assertEqual(len(player.ready_dice), initial_ready_count)

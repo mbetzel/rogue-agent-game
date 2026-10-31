@@ -82,21 +82,25 @@ def execute_phase_3(engine: GameEngine) -> None:
                 player.mark_ability_used(active_ver)
                 cipher_discount_applied = True
 
-        # Hook Phase 3: The Cipher (Algorithmic Arbitrage) - Mode 2: Dirty Income without Backlash
-        is_cipher_dirty_income = (
+        # Hook Phase 3: The Cipher (Algorithmic Arbitrage) - Mode 2: Immediate +$2 cash arbitrage
+        is_cipher_cash = (
             plan.use_cipher_ability
-            and plan.cipher_mode == "DIRTY_INCOME"
+            and plan.cipher_mode in ("CASH", "ARBITRAGE_CASH", "DIRTY_INCOME")
             and player.archetype is not None
             and player.archetype.code == ArchetypeCode.CIPHER
             and player.is_ability_available(active_ver)
+            and not cipher_discount_applied
         )
+        if is_cipher_cash:
+            player.money += engine.state.config.cipher_arbitrage_cash
+            player.mark_ability_used(active_ver)
 
-        # 1. Dirty Income ("Monetize the Rogue Agent" — Limit 1x per turn)
-        # Preconditions: secrets > dirty_income_secret_cost and at least 1 ready die for Backlash (unless Cipher)
+        # 1. Dirty Income (Eliminated in v0.16.0; guarded by config.dirty_income_enabled)
         if (
-            plan.take_dirty_income
+            engine.state.config.dirty_income_enabled
+            and plan.take_dirty_income
             and player.secrets > engine.state.config.dirty_income_secret_cost
-            and (is_cipher_dirty_income or len(player.ready_dice) >= 1)
+            and len(player.ready_dice) >= 1
         ):
             player.secrets -= engine.state.config.dirty_income_secret_cost
             player.money += engine.state.config.dirty_income_cash
@@ -104,16 +108,11 @@ def execute_phase_3(engine: GameEngine) -> None:
                 engine.state.staging_cup.get(CubeColor.BLACK, 0)
                 + engine.state.config.dirty_income_black_cubes
             )
-            if is_cipher_dirty_income:
-                # Skip Technical Debt Backlash demotion!
-                player.mark_ability_used(active_ver)
-            else:
-                # Technical Debt Backlash: demote 1 Ready die to Unpatched
-                backlash_idx = plan.dirty_income_backlash_die_index
-                if not (0 <= backlash_idx < len(player.ready_dice)):
-                    backlash_idx = 0
-                backlash_die = player.ready_dice.pop(backlash_idx)
-                player.unpatched_dice.append(backlash_die)
+            backlash_idx = plan.dirty_income_backlash_die_index
+            if not (0 <= backlash_idx < len(player.ready_dice)):
+                backlash_idx = 0
+            backlash_die = player.ready_dice.pop(backlash_idx)
+            player.unpatched_dice.append(backlash_die)
             player.total_dirty_income_taken += 1
 
         # 2. Star Special Actions in Phase 3 (Guarded by Phase 1 eligibility)

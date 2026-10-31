@@ -456,7 +456,7 @@ export function renderActionDock() {
         cipherDirtyBtn.className = "action-btn";
         cipherDirtyBtn.style.borderColor = "#a855f7";
         cipherDirtyBtn.style.color = "#c084fc";
-        cipherDirtyBtn.innerText = "⚡ Cipher: Backdoor Siphon (No Backlash)";
+        cipherDirtyBtn.innerText = "⚡ Cipher: Arbitrage Payout (+$2 Cash)";
         cipherDirtyBtn.onclick = () => doDirtyIncome(true);
         dirtyWrap.appendChild(cipherDirtyBtn);
       }

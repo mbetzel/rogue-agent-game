@@ -89,8 +89,8 @@ CHARACTERS: List[CharacterSpec] = [
         timing="P3: OPERATIONS",
         ability_name="Algorithmic Arbitrage",
         ability_desc=(
-            "In **Phase 3**, buy **1 Colored Die** at a **$2 discount** (min $0), **OR** take "
-            "Backdoor Siphon (Dirty Income) **without demoting** a Ready die to Unpatched."
+            "In **Phase 3**, buy **1 Colored Die** at a **$2 discount** (min $0), **OR** gain "
+            "an immediate **+$2 cash payout** from the bank."
         ),
     ),
     CharacterSpec(
@@ -871,9 +871,8 @@ def render_agent_board(page: PDFPage) -> None:
             (
                 "1. **Buy Dice (max 2/turn):** Pay $ -> place in **Ready Zone**.\n"
                 "2. **Patch Dice (unlimited):** **1** {WRENCH} or **$2** each -> **Ready Zone**.\n"
-                "3. **Backdoor Siphon (max 1/turn):** *(Need >=2 Secrets & >=1 Ready)* Pay **1 Secret** + demote **1 Ready -> Unpatched** + **1** {BLACK} -> Staging Cup => Gain **+$3**.\n"
-                "4. **System Reboot (1x/game):** If you have 0 Ready dice, return all Gray Starter Dice from Unpatched to Ready.\n"
-                "5. **Cleanup:** Un-worn dice -> Ready; pass 1st Player clockwise."
+                "3. **System Reboot (1x/game):** If you have 0 Ready dice, return all Gray Starter Dice from Unpatched to Ready.\n"
+                "4. **Cleanup:** Un-worn dice -> Ready; pass 1st Player clockwise."
             ),
         ),
         (
@@ -926,10 +925,9 @@ def render_market_board(page: PDFPage) -> None:
     page.rich_paragraph(
         140.0, ty + 34.0, 106.0,
         "**Queued for Next Drop:**\n"
-        "- **P1 Start:** +1 {BLACK}\n"
+        "- **P1 Pulse:** Injected {BLACK}\n"
         "- **P2 End:** Recycled {RED}{BLUE}{GREEN}\n"
-        "- **Corruption:** Injected Cubes\n"
-        "- **Siphon:** +1 {BLACK}",
+        "- **Corruption:** Track Cubes",
         size=6.7, leading=9.8, color=PALETTE["ink_soft"],
     )
     page.text(146.0, ty + 118.0, "Setup Priming: Drop 1 R/B/G/Black into tower; stuck prime R1.", font="italic", size=5.6, color=PALETTE["muted"], align="center")
@@ -1256,7 +1254,7 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
                 x + 6.0, fy + 7.5, cw - 12.0,
                 "**P1:** +1{BLACK} -> Hire {WHITE} ($1/$2/$3) -> Roll -> 2 Free Rerolls *(1{WRENCH} unlocks {LOCK})* -> Shields & `/` -> Glitch Backlash -> Gain **$** & {WRENCH}.\n"
                 "**P2:** {BLACK} Track (4/5/6=Upgr) -> Shields *(hit->Unpatched)* -> Dmg: {RED}-$1->{WRENCH}->Secret | {BLUE}-1 Secret | {GREEN}Wear Ready *({YELLOW}* 1st!). *(Buffer Overflow: +1 R/B/G).* \n"
-                "**P3:** **Buy <=2** | **Patch:** 1{WRENCH} or $2 | **Siphon (1x):** -1 Secret, +1{BLACK}, Wear 1 Ready => **+$3** | **Reboot (1x):** If 0 Ready, Gray Unpatched->Ready.\n"
+                "**P3:** **Buy <=2** | **Patch:** 1{WRENCH} or $2 | **Reboot (1x):** If 0 Ready, Gray Unpatched->Ready.\n"
                 "**VP:** Secret=4, Ready Die=3/4 (Unpatched=0), $2=1. Patient Zero eliminated.",
                 size=5.3, leading=7.5, color=PALETTE["ink"],
             )

@@ -197,9 +197,6 @@ class RecklessSaboteurBot(BaseBot):
             and player_state.is_ability_available(active_ver)
         ):
             if not is_final_round and player_state.secrets > 1:
-                plan.use_cipher_ability = True
-                plan.cipher_mode = "DIRTY_INCOME"
-            else:
                 for c in [DieColor.PURPLE, DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]:
                     cost = (4 if c in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5) - game_state.config.cipher_market_discount
                     if game_state.market.get(c, 0) > 0 and current_money >= cost:
@@ -208,11 +205,16 @@ class RecklessSaboteurBot(BaseBot):
                         plan.cipher_free_die_color = c
                         current_money -= cost
                         break
+                if not plan.use_cipher_ability and not is_final_round:
+                    plan.use_cipher_ability = True
+                    plan.cipher_mode = "CASH"
+                    current_money += game_state.config.cipher_arbitrage_cash
 
         if (
-            not is_final_round
+            game_state.config.dirty_income_enabled
+            and not is_final_round
             and player_state.secrets > game_state.config.dirty_income_secret_cost
-            and (plan.cipher_mode == "DIRTY_INCOME" or len(player_state.ready_dice) >= 1)
+            and len(player_state.ready_dice) >= 1
         ):
             plan.take_dirty_income = True
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)

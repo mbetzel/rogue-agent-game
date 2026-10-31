@@ -94,10 +94,10 @@ class TestWebAPI(unittest.TestCase):
         self.assertFalse(state["players"][2]["is_human"])
         self.assertFalse(state["players"][3]["is_human"])
 
-        # Staging Cup: v1.0 Script Kiddie payload (1 Red, 1 Blue, 1 Green, 1 Black) + 1 Black Autonomous Pulse = 2 Black
-        self.assertEqual(state["staging_cup"]["red"], 1)
-        self.assertEqual(state["staging_cup"]["blue"], 1)
-        self.assertEqual(state["staging_cup"]["green"], 1)
+        # Staging Cup: v1.0 Script Kiddie payload (2 Red, 2 Blue, 2 Green, 1 Black) + 1 Black Autonomous Pulse = 2 Black
+        self.assertEqual(state["staging_cup"]["red"], 2)
+        self.assertEqual(state["staging_cup"]["blue"], 2)
+        self.assertEqual(state["staging_cup"]["green"], 2)
         self.assertEqual(state["staging_cup"]["black"], 2)
 
     # -------------------------------------------------------------------------
@@ -378,9 +378,10 @@ class TestWebAPI(unittest.TestCase):
     # 12. Phase 3: Dirty Income Success
     # -------------------------------------------------------------------------
     def test_phase3_dirty_income_success(self) -> None:
-        """Dirty Income grants +$3, pays 1 Secret, adds 1 Black Cube, and demotes ready die."""
+        """Dirty Income grants +$3, pays 1 Secret, adds 1 Black Cube, and demotes ready die when enabled."""
         ctrl = RogueAgentRequestHandler.controller
         ctrl.new_game(num_players=4, seed=42)
+        ctrl.state.config.dirty_income_enabled = True
         ctrl.phase = 3
         ctrl.active_player_index = 0
         p0 = ctrl.state.players[0]
@@ -399,12 +400,13 @@ class TestWebAPI(unittest.TestCase):
         self.assertEqual(state["staging_cup"]["black"], black_before + 1)
 
     # -------------------------------------------------------------------------
-    # 13. Phase 3: Dirty Income Precondition Blocks
+    # 13. Phase 3: Dirty Income Precondition Blocks & v0.16.0 Elimination
     # -------------------------------------------------------------------------
     def test_phase3_dirty_income_precondition_blocks(self) -> None:
-        """Dirty Income is rejected if player has <= 1 Secret or 0 Ready dice."""
+        """Dirty Income is rejected if player has <= 1 Secret, 0 Ready dice, or disabled (v0.16.0)."""
         ctrl = RogueAgentRequestHandler.controller
         ctrl.new_game(num_players=4, seed=42)
+        ctrl.state.config.dirty_income_enabled = True
         ctrl.phase = 3
         ctrl.active_player_index = 0
         p0 = ctrl.state.players[0]
@@ -427,6 +429,13 @@ class TestWebAPI(unittest.TestCase):
 
         # Reset for subsequent tests
         ctrl.player_meta[0]["dirty_income_taken_this_turn"] = False
+
+        # Block when disabled in v0.16.0 default
+        ctrl.state.config.dirty_income_enabled = False
+        with self.assertRaises(urllib.error.HTTPError) as ctx_disabled:
+            urllib.request.urlopen(req_none)
+        self.assertEqual(ctx_disabled.exception.code, 400)
+        ctrl.state.config.dirty_income_enabled = True
 
         # Block at 0 Ready dice
         p0.secrets = 5

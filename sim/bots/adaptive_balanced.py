@@ -392,28 +392,24 @@ class AdaptiveBalancedBot(BaseBot):
                 plan.cipher_mode = "BUY_FREE_DIE"
                 plan.cipher_free_die_color = discounted_colors[0][0]
                 current_money -= discounted_colors[0][1]
-            elif not is_final_round and player_state.secrets > game_state.config.dirty_income_secret_cost:
+            elif not is_final_round:
                 plan.use_cipher_ability = True
-                plan.cipher_mode = "DIRTY_INCOME"
+                plan.cipher_mode = "CASH"
+                current_money += game_state.config.cipher_arbitrage_cash
 
-        # 1. Dirty Income: take dirty income if broke, has ready dice, secrets > 1, and threat is manageable (never in final round)
-        wants_dirty_income = (
-            not is_final_round
-            and (
-                (
-                    current_money < 3
-                    and player_state.secrets > game_state.config.dirty_income_secret_cost
-                    and (plan.cipher_mode == "DIRTY_INCOME" or len(player_state.ready_dice) >= 1)
-                    and total_threat <= 6
-                )
-                or (plan.use_cipher_ability and plan.cipher_mode == "DIRTY_INCOME")
+        # 1. Dirty Income: (Guarded by config.dirty_income_enabled)
+        if game_state.config.dirty_income_enabled:
+            wants_dirty_income = (
+                not is_final_round
+                and current_money < 3
+                and player_state.secrets > game_state.config.dirty_income_secret_cost
+                and len(player_state.ready_dice) >= 1
+                and total_threat <= 6
             )
-        )
-
-        if not is_final_round and wants_dirty_income and player_state.secrets > game_state.config.dirty_income_secret_cost:
-            plan.take_dirty_income = True
-            plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
-            current_money += game_state.config.dirty_income_cash
+            if not is_final_round and wants_dirty_income and player_state.secrets > game_state.config.dirty_income_secret_cost:
+                plan.take_dirty_income = True
+                plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
+                current_money += game_state.config.dirty_income_cash
 
         # 2. Patching: patch worn dice using tokens first, then cash if preserving cushion
         patch_cash_cost = (

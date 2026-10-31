@@ -219,6 +219,12 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
 
+                elif clean_path == "/api/game/action/cipher":
+                    pid = get_target_pid(default_to_human=False)
+                    state = self.controller.use_cipher_ability(pid)
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
                 elif clean_path == "/api/game/action/phreaker":
                     pid = get_target_pid(default_to_human=False)
                     count = int(data.get("count", 1))

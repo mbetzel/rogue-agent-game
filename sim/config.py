@@ -76,11 +76,18 @@ class GameConfig:
     corruption_spaces_per_player: int = 1  # Deprecated in v0.4
     corruption_spaces_base: int = 1  # Deprecated in v0.4
 
+    # Autonomous AI Pulse by Version (v0.16.0 Baseline: 1 in v1.0, 2 in v2.0, 2 in v3.0)
+    autonomous_pulse_by_version: Dict[str, int] = field(
+        default_factory=lambda: {"v1.0": 1, "v2.0": 2, "v3.0": 2}
+    )
+
     # Operations & Economy
-    dirty_income_cash: int = 3  # [TUNE: $2–$4]
-    dirty_income_secret_cost: int = 1  # v0.4: Monetizing the Rogue Agent costs 1 Secret
-    dirty_income_attack_cubes: int = 0  # Obsolete in v0.3 (no attack cubes added)
-    dirty_income_black_cubes: int = 1
+    cipher_arbitrage_cash: int = 2  # [TUNE: v0.16.0] Cipher Phase 3 alternate cash arbitrage payout
+    dirty_income_enabled: bool = False  # Deprecated in v0.16.0 (Dirty income eliminated)
+    dirty_income_cash: int = 3  # Deprecated
+    dirty_income_secret_cost: int = 1  # Deprecated
+    dirty_income_attack_cubes: int = 0  # Deprecated
+    dirty_income_black_cubes: int = 1  # Deprecated
     patch_cash_cost: int = 2  # [TUNE: $1–$3]
     patch_token_cost: int = 1
     max_market_purchases_per_turn: int = 2  # [TUNE: 2]

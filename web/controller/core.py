@@ -312,6 +312,9 @@ class GameController:
             backlash_die_id=backlash_die_id,
         )
 
+    def use_cipher_ability(self, player_id: int) -> Dict[str, Any]:
+        return phase3_actions.take_cipher_arbitrage(self, player_id)
+
     def use_phreaker_ability(
         self,
         player_id: int,

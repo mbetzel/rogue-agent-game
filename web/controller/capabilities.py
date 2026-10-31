@@ -106,15 +106,14 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             and controller.state.market.get(color, 0) > 0
             and player.money >= disc_cost
         )
-    can_cipher_dirty = bool(
+    can_cipher_cash = bool(
         controller.phase == 3
         and is_active
         and not is_eliminated
         and is_cipher
         and ability_avail
-        and not meta["dirty_income_taken_this_turn"]
-        and player.secrets > controller.state.config.dirty_income_secret_cost
     )
+    can_cipher_dirty = can_cipher_cash
 
     is_acoustic = bool(player.archetype and player.archetype.code == ArchetypeCode.ACOUSTIC)
     can_acoustic = bool(
@@ -185,8 +184,9 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         and len(player.unpatched_dice) > 0
         and player.patches >= controller.state.config.patch_token_cost
     )
-    can_dirty = (
-        controller.phase == 3
+    can_dirty = bool(
+        controller.state.config.dirty_income_enabled
+        and controller.phase == 3
         and is_active
         and not is_eliminated
         and not meta["dirty_income_taken_this_turn"]

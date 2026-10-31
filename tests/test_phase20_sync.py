@@ -75,6 +75,7 @@ class TestPhase20Sync(unittest.TestCase):
         ctrl.active_player_index = 0
         p0 = ctrl.state.players[0]
         meta0 = ctrl.player_meta[0]
+        ctrl.state.config.dirty_income_enabled = True
         meta0["dirty_income_taken_this_turn"] = False
         p0.secrets = 6
         p0.money = 4
@@ -288,6 +289,7 @@ class TestPhase20Sync(unittest.TestCase):
 
         p0.money = 0
         p0.secrets = 5
+        p0.ability_v1_status = AbilityStatus.AVAILABLE
         state = ctrl.get_full_state()
         self.assertTrue(state["action_capabilities"]["can_spook"])
 

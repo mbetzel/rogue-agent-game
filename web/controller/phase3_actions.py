@@ -340,6 +340,34 @@ def patch_die(controller: GameController, player_id: int, die_index: int, use_ca
 
 
 
+def take_cipher_arbitrage(
+    controller: GameController,
+    player_id: int,
+) -> Dict[str, Any]:
+    """Executes Cipher Algorithmic Arbitrage mode 2: immediate cash arbitrage payout."""
+    if controller.phase != 3:
+        raise ValueError(f"Cannot use Cipher ability in phase {controller.phase}")
+    if player_id != controller.active_player_index:
+        raise ValueError(f"Not player {player_id}'s turn (current: {controller.active_player_index})")
+
+    player = controller.state.players[player_id]
+    meta = controller.player_meta[player_id]
+
+    if player.is_patient_zero:
+        raise ValueError("Eliminated players cannot perform operations")
+    if not player.archetype or player.archetype.code != ArchetypeCode.CIPHER:
+        raise ValueError("Player does not have the Cipher archetype")
+    if not player.is_ability_available():
+        raise ValueError("Cipher ability is not available")
+
+    player.money += controller.state.config.cipher_arbitrage_cash
+    player.mark_ability_used()
+    controller.event_log.append(
+        f"{meta['name']} used Cipher Algorithmic Arbitrage: gained +${controller.state.config.cipher_arbitrage_cash} cash arbitrage payout."
+    )
+    return controller.get_full_state()
+
+
 def take_dirty_income(
     controller: GameController,
     player_id: int,
@@ -348,6 +376,12 @@ def take_dirty_income(
     backlash_die_id: Optional[int] = None,
 ) -> Dict[str, Any]:
     """Human action: corrupts the Rogue Agent ('Dirty Income') for quick cash (or backlash-free via Cipher)."""
+    if use_cipher_ability:
+        return take_cipher_arbitrage(controller, player_id)
+
+    if not controller.state.config.dirty_income_enabled:
+        raise ValueError("Dirty Income has been eliminated in v0.16.0")
+
     if controller.phase != 3:
         raise ValueError(f"Cannot take dirty income in phase {controller.phase}")
     if player_id != controller.active_player_index:
@@ -361,34 +395,26 @@ def take_dirty_income(
     if meta["dirty_income_taken_this_turn"]:
         raise ValueError("Dirty Income has already been taken this turn (limit 1x per turn)")
 
-    if use_cipher_ability:
-        if not player.archetype or player.archetype.code != ArchetypeCode.CIPHER:
-            raise ValueError("Player does not have the Cipher archetype")
-        if not player.is_ability_available():
-            raise ValueError("Cipher ability is not available")
-
     # Precondition checks per RULES.md Section 4 Phase 3 Step 3:
-    # Must have strictly > 1 secret (cannot be taken at <= 1 secret)
     if player.secrets <= controller.state.config.dirty_income_secret_cost:
         raise ValueError(
             f"Cannot take Dirty Income with {player.secrets} Secret(s) (must have strictly > {controller.state.config.dirty_income_secret_cost})"
         )
-    if not use_cipher_ability and len(player.ready_dice) < 1:
+    if len(player.ready_dice) < 1:
         raise ValueError("Cannot take Dirty Income: must have at least 1 Ready die for Technical Debt Backlash")
 
     backlash_die: Optional[Die] = None
-    if not use_cipher_ability:
-        if backlash_die_id is not None:
-            for d in player.ready_dice:
-                if d.die_id == backlash_die_id:
-                    backlash_die = d
-                    break
-            if backlash_die is None:
-                raise ValueError(f"Die with die_id {backlash_die_id} is not in player's ready pool")
-        else:
-            if not (0 <= backlash_die_index < len(player.ready_dice)):
-                backlash_die_index = 0
-            backlash_die = player.ready_dice[backlash_die_index]
+    if backlash_die_id is not None:
+        for d in player.ready_dice:
+            if d.die_id == backlash_die_id:
+                backlash_die = d
+                break
+        if backlash_die is None:
+            raise ValueError(f"Die with die_id {backlash_die_id} is not in player's ready pool")
+    else:
+        if not (0 <= backlash_die_index < len(player.ready_dice)):
+            backlash_die_index = 0
+        backlash_die = player.ready_dice[backlash_die_index]
 
     # Execute Dirty Income
     player.secrets -= controller.state.config.dirty_income_secret_cost
@@ -397,15 +423,6 @@ def take_dirty_income(
         controller.state.staging_cup.get(CubeColor.BLACK, 0)
         + controller.state.config.dirty_income_black_cubes
     )
-
-    if use_cipher_ability:
-        player.mark_ability_used()
-        meta["dirty_income_taken_this_turn"] = True
-        player.total_dirty_income_taken += 1
-        controller.event_log.append(
-            f"{meta['name']} used Cipher Algorithmic Arbitrage: gained +${controller.state.config.dirty_income_cash}, paid 1 Secret, added 1 Black Cube to Staging Cup without Backlash."
-        )
-        return controller.get_full_state()
 
     # Technical Debt Backlash: demote chosen ready die to unpatched
     assert backlash_die is not None

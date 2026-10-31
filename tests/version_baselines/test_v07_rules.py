@@ -210,9 +210,9 @@ class TestV07Rules(unittest.TestCase):
             bots=[BaseBot(0), BaseBot(1)],
             seed=42,
         )
-        self.assertEqual(engine_2p.state.staging_cup[CubeColor.RED], 1)
-        self.assertEqual(engine_2p.state.staging_cup[CubeColor.BLUE], 1)
-        self.assertEqual(engine_2p.state.staging_cup[CubeColor.GREEN], 1)
+        self.assertEqual(engine_2p.state.staging_cup[CubeColor.RED], 2)
+        self.assertEqual(engine_2p.state.staging_cup[CubeColor.BLUE], 2)
+        self.assertEqual(engine_2p.state.staging_cup[CubeColor.GREEN], 2)
         self.assertEqual(engine_2p.state.staging_cup[CubeColor.BLACK], 1)
 
         engine_4p = GameEngine(
@@ -220,9 +220,9 @@ class TestV07Rules(unittest.TestCase):
             bots=[BaseBot(0), BaseBot(1), BaseBot(2), BaseBot(3)],
             seed=42,
         )
-        self.assertEqual(engine_4p.state.staging_cup[CubeColor.RED], 1)
-        self.assertEqual(engine_4p.state.staging_cup[CubeColor.BLUE], 1)
-        self.assertEqual(engine_4p.state.staging_cup[CubeColor.GREEN], 1)
+        self.assertEqual(engine_4p.state.staging_cup[CubeColor.RED], 2)
+        self.assertEqual(engine_4p.state.staging_cup[CubeColor.BLUE], 2)
+        self.assertEqual(engine_4p.state.staging_cup[CubeColor.GREEN], 2)
         self.assertEqual(engine_4p.state.staging_cup[CubeColor.BLACK], 1)
 
     # -------------------------------------------------------------------------

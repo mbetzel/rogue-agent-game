@@ -18,9 +18,11 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
     engine.state.active_phase1_locks = set(engine.state.pending_next_phase_locks)
     engine.state.pending_next_phase_locks.clear()
 
-    # 1. Autonomous AI Corruption Pulse
+    # 1. Autonomous AI Corruption Pulse (v0.16.0: 1 in v1.0, 2 in v2.0, 2 in v3.0)
+    active_ver = engine.state.active_version.version_str if engine.state.active_version else "v1.0"
+    pulse_count = engine.state.config.autonomous_pulse_by_version.get(active_ver, 1)
     engine.state.staging_cup[CubeColor.BLACK] = (
-        engine.state.staging_cup.get(CubeColor.BLACK, 0) + 1
+        engine.state.staging_cup.get(CubeColor.BLACK, 0) + pulse_count
     )
 
     player_commitments: List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]] = []
