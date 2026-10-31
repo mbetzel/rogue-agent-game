@@ -456,7 +456,6 @@ def commit_defenses(
 
     spent_from_kept = meta.get("spent_from_kept", 0)
     player.patches = max(0, player.patches - spent_from_kept)
-    player.patches = min(player.patches, controller.state.config.max_patch_tokens)
 
     # Cryptographic Hash Match (RULES.md v0.17.0 Baseline)
     hash_secrets = detect_hash_matches(rolled)
@@ -859,8 +858,6 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
                         player.money += 2
                     elif face.star_code in ("G1", "G2"):
                         player.patches += 1
-
-        player.patches = min(player.patches, controller.state.config.max_patch_tokens)
 
         # Cryptographic Hash Match (RULES.md v0.17.0 Baseline)
         hash_secrets = detect_hash_matches(active_dice)

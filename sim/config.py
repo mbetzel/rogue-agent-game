@@ -59,7 +59,7 @@ class GameConfig:
     )
     starting_secrets: Optional[int] = None  # Optional scalar override for backwards compatibility
     starting_patches: Optional[int] = None  # Optional scalar override for backwards compatibility
-    max_patch_tokens: int = 3  # [TUNE: 3]
+    max_patch_tokens: int = 3  # [TUNE: 3] Maximum unspent patch tokens retained across rounds during End-of-Round Cleanup (Model C)
     starting_gray_dice: int = 4
     dice_per_color_multiplier: int = 2  # 2 * num_players dice per colored die type
 

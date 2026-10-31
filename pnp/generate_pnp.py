@@ -1,4 +1,4 @@
-"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.14.0 Baseline / Phase 21).
+"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.18.0 Baseline).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
   - 01_Player_Boards.pdf (6 pages — 1 per Consultancy Archetype, matching Wireframe Page 1)
@@ -19,7 +19,7 @@ from pnp.pdf_engine import PALETTE, Color, PDFDocument, PDFPage, measure_text
 
 
 # =============================================================================
-# Canonical Game Data (Synchronized 1:1 with RULES.md v0.14.0 & sim/entities.py)
+# Canonical Game Data (Synchronized 1:1 with RULES.md v0.18.0 & sim/entities.py)
 # =============================================================================
 
 @dataclass(frozen=True)
@@ -265,7 +265,7 @@ VARIANT_CARDS: List[VariantCardSpec] = [
         "G3", "green", "GREEN // ANTIVIRUS", "$4", "3 VP",
         "{PIP1} 1{GREEN} | {PIP2} +1{WRENCH} | {PIP3} +2{WRENCH}", "{PIP4} 1{WRENCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Live Reboot", "P1 BOOT OUTPUT",
-        "Gain **+2 {WRENCH}** and **+$1** immediately in Phase 1 Step 6 (max 3 {WRENCH} held).",
+        "Gain **+2 {WRENCH}** and **+$1** immediately in Phase 1 Step 6.",
         "Locks in v2.0 RaaS (Cash).",
     ),
     # YELLOW (Y1-Y3)
@@ -455,7 +455,7 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
     draw_board_outer_frame(
         page,
         left_tag=f"TOO MANY SECRETS // CONSULTANCY TERMINAL [{idx}/6]",
-        right_tag="PNP PROTOTYPE v0.14 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.18 // US LETTER",
     )
 
     # -------------------------------------------------------------------------
@@ -635,12 +635,12 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
     page.text(mx + bw / 2.0, by + 66.0, "$", font="bold", size=28.0, color=PALETTE["guide"], align="center")
     page.text(mx + bw / 2.0, by + bh - 7.0, "Start: $7 (+$1 Data Scraper)  |  Never drops below $0", font="regular", size=6.7, color=PALETTE["muted"], align="center")
 
-    # 2. Patches (with 3 dedicated token slots enforcing Max 3 🔧!)
+    # 2. Patches (with 3 dedicated token slots enforcing Cleanup Cap: Max 3 🔧)
     px = mx + bw + bgap
     page.rect(px, by, bw, bh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
     page.rect(px, by, bw, 20.0, stroke=PALETTE["ink"], fill=PALETTE["green_light"], line_width=0.8)
     page.rich_line(px + 8, by + 13.8, "{WRENCH} **PATCHES**", size=9.2, color=PALETTE["green"])
-    page.text(px + bw - 8, by + 13.8, "MAX 3  |  0 VP", font="mono_bold", size=7.4, color=PALETTE["green"], align="right")
+    page.text(px + bw - 8, by + 13.8, "CLEANUP CAP: 3  |  0 VP", font="mono_bold", size=7.4, color=PALETTE["green"], align="right")
 
     ps_size = 50.0
     ps_gap = 12.0
@@ -649,10 +649,10 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
     for p_i in range(3):
         sx = ps_x0 + p_i * (ps_size + ps_gap)
         page.rounded_rect(sx, ps_y, ps_size, ps_size, r=6.0, stroke=PALETTE["muted"], fill=PALETTE["paper_tint"], line_width=0.75, dash=(3, 2))
-        lbl = f"SLOT {p_i + 1}" if p_i < 2 else "MAX (3)"
+        lbl = f"SLOT {p_i + 1}" if p_i < 2 else "CLEANUP (3)"
         page.text(sx + ps_size / 2.0, ps_y + 13.0, lbl, font="mono", size=5.8, color=PALETTE["muted"], align="center")
         page.draw_wrench_icon(sx + ps_size / 2.0, ps_y + 31.0, 14.0, color=PALETTE["rule"])
-    page.rich_line(px + bw / 2.0, by + bh - 7.0, "Start: **2** Tokens  |  Unlock {LOCK} / Patch / Auto-Absorb $1 {RED}", size=6.5, color=PALETTE["muted"], align="center")
+    page.rich_line(px + bw / 2.0, by + bh - 7.0, "Start: **2** Tokens  |  Unlock {LOCK} / Patch / -$1  |  Discard >3 at Cleanup", size=6.2, color=PALETTE["muted"], align="center")
 
     # 3. Secrets
     scx = px + bw + bgap
@@ -673,7 +673,7 @@ def render_agent_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // CENTRAL ROGUE AGENT & COMPILER BOARD [1/2]",
-        right_tag="PNP PROTOTYPE v0.14 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.18 // US LETTER",
     )
 
     # Top Title Bar inside board
@@ -730,7 +730,7 @@ def render_agent_board(page: PDFPage) -> None:
     ct_h = col_bot - ct_y  # 109.0 pt
     page.rect(slot_x, ct_y, slot_w, ct_h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.2)
     page.rect(slot_x, ct_y, slot_w, 19.0, stroke=PALETTE["ink"], fill=PALETTE["ink"], line_width=0.8)
-    page.rich_line(slot_x + slot_w / 2.0, ct_y + 13.5, "**ACTIVE VERSION CORRUPTION PROTOCOL** (v0.15.0)", size=7.5, color=PALETTE["white"], align="center")
+    page.rich_line(slot_x + slot_w / 2.0, ct_y + 13.5, "**ACTIVE VERSION CORRUPTION PROTOCOL** (v0.18.0)", size=7.5, color=PALETTE["white"], align="center")
 
     # 3 Version Track Capacity Milestones
     tiers_summary = [
@@ -854,7 +854,7 @@ def render_agent_board(page: PDFPage) -> None:
                 "**3. Roll Pool:** Roll Ready Zone + Contractors -> Active Zone.\n"
                 "**4. Rerolls & Debug:** Up to **2 free rerolls** of unlocked dice. Spend **1** {WRENCH} (or lock a rolled +1 {WRENCH} die) to **Unlock 1** {LOCK} die.\n"
                 "**5. Assign:** Commit Shields (`Any` -> {RED}/{BLUE}/{GREEN}) & `/` Choices.\n"
-                "**6. Outputs:** Unassigned dice yield **$**, {WRENCH} *(max 3)*, & Boot {STAR}. **Hash Match:** 3 matching faces = **+1 Secret** *(uncapped; no Glitches)*."
+                "**6. Outputs:** Unassigned dice yield **$**, {WRENCH}, & Boot {STAR}. **Hash Match:** 3 matching faces = **+1 Secret** *(uncapped; no Glitches)*."
             ),
         ),
         (
@@ -873,7 +873,7 @@ def render_agent_board(page: PDFPage) -> None:
                 "1. **Buy Dice (max 2/turn):** Pay $ -> place in **Ready Zone**.\n"
                 "2. **Patch Dice (unlimited):** **1** {WRENCH} or **$2** each -> **Ready Zone**.\n"
                 "3. **System Reboot (1x/game):** If you have 0 Ready dice, return all Gray Starter Dice from Unpatched to Ready.\n"
-                "4. **Cleanup:** Un-worn dice -> Ready; pass 1st Player clockwise."
+                "4. **Cleanup:** Un-worn dice -> Ready; discard unspent {WRENCH} >3; pass 1st Player."
             ),
         ),
         (
@@ -902,7 +902,7 @@ def render_market_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // SOFTWARE MODULE MARKET & CENTRAL SUPPLY [2/2]",
-        right_tag="PNP PROTOTYPE v0.14 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.18 // US LETTER",
     )
 
     # Top Title Bar
@@ -1255,7 +1255,7 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
                 x + 6.0, fy + 7.5, cw - 12.0,
                 "**P1:** +1{BLACK} -> Hire {WHITE} ($1/$2/$3) -> Roll -> 2 Free Rerolls *(1{WRENCH} unlocks {LOCK})* -> Shields & `/` -> Glitch Backlash -> Gain **$** & {WRENCH}.\n"
                 "**P2:** {BLACK} Track (4/5/6=Upgr) -> Shields *(hit->Unpatched)* -> Dmg: {RED}-$1->{WRENCH}->Secret | {BLUE}-1 Secret | {GREEN}Wear Ready *({YELLOW}* 1st!). *(Buffer Overflow: +1 R/B/G).* \n"
-                "**P3:** **Buy <=2** | **Patch:** 1{WRENCH} or $2 | **Reboot (1x):** If 0 Ready, Gray Unpatched->Ready.\n"
+                "**P3:** **Buy <=2** | **Patch:** 1{WRENCH} or $2 | **Reboot (1x):** 0 Ready -> Gray Ready | **Cleanup:** Discard unspent >3{WRENCH}.\n"
                 "**VP:** Secret=4, Ready Die=3/4 (Unpatched=0), $2=1. Patient Zero eliminated.",
                 size=5.3, leading=7.5, color=PALETTE["ink"],
             )
@@ -1529,7 +1529,7 @@ def render_pnp_tokens_page(page: PDFPage) -> None:
             page.text(bx + 26.0, by + 26.5, "4 VP  |  Client Data", font="regular", size=5.8, color=PALETTE["muted"])
 
     # Section 3 (y = 298..410): 16x Patch (🔧) Tokens (8 cols x 2 rows)
-    page.text(42.0, 300.0, "SPLICE / PATCH TOKENS (x16 — MAX 3 HELD PER PLAYER)", font="mono_bold", size=6.8, color=PALETTE["green"])
+    page.text(42.0, 300.0, "SPLICE / PATCH TOKENS (x16 — CLEANUP CAP: MAX 3 HELD)", font="mono_bold", size=6.8, color=PALETTE["green"])
     py0 = 305.0
     ph = 42.0
     for r in range(2):
@@ -1602,7 +1602,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated.append(path_versions)
 
     # 5. Combined Master Print-and-Play Pack (All 14 pages)
-    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.14.0)")
+    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.18.0)")
     for sub_doc in (doc_central, doc_players, doc_dice, doc_versions):
         for pg in sub_doc.pages:
             doc_master.pages.append(pg)

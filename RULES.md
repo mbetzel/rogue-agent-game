@@ -115,7 +115,7 @@ Each player’s consultancy archetype provides a powerful, specialized capabilit
      * You must move **`1 active die`** from your roll to your **Unpatched Zone** (if this die was committed to a shield in Step 5, its shield commitment is removed).
      * **Contractor Sacrifice:** If you have an active White Contractor die in your roll, you may choose to **discard `1` White Contractor die** back to the central supply instead of demoting a permanent Ready die!
    * For all dice remaining in your Active Pool (unassigned to defense and not demoted), collect any **`$` Money tokens**, **Patch Tokens (`🔧`)**, and immediate `★` outputs from their final rolled faces into your personal supply.
-   * You may hold at most **`3 🔧`** tokens at once `[TUNE]`. Dice showing `Glitch (Locked)` produce 0 resource outputs.
+   * Dice showing `Glitch (Locked)` produce 0 resource outputs. *(Note: Patch token collection is unclamped during the round; excess patches are only discarded at End-of-Round Cleanup).* [TUNE]
 
 ---
 
@@ -188,7 +188,7 @@ After all players finish Phase 3:
 * If the Final Round was triggered, proceed directly to **Section 5: End Game & Victory Scoring**.
 * Otherwise:
   * Return all non-worn dice from your Active Pool and un-worn Shield slots to your **Ready Zone**.
-  * Keep all Money, Secrets, and up to **`3 🔧`** tokens.
+  * Keep all Money and Secrets. Discard any unspent Patch Tokens in excess of **`3 🔧`** tokens back to the supply (End-of-Round Cleanup Cap [TUNE]).
   * Pass the **First Player Marker** clockwise and begin the next round.
 
 ---

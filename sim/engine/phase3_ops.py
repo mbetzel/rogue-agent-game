@@ -192,8 +192,10 @@ def execute_phase_3(engine: GameEngine) -> None:
                 engine.state.next_die_id += 1
                 player.ready_dice.append(new_die)
 
-        # Cap patch tokens
-        player.patches = min(player.patches, engine.state.config.max_patch_tokens)
+    # End-of-Round Cleanup: cap unspent patch tokens to max_patch_tokens (Model C)
+    for player in engine.state.players:
+        if not player.is_patient_zero:
+            player.patches = min(player.patches, engine.state.config.max_patch_tokens)
 
     # Advance First Player marker clockwise
     engine.state.first_player_index = (engine.state.first_player_index + 1) % num_players

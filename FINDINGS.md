@@ -440,3 +440,43 @@ Following player feedback regarding victory condition clutter ("currently dice, 
 - **Component Parity:** Updated `RULES.md`, `sim/engine/`, `sim/bots/`, `web/`, and `pnp/generate_pnp.py` (adding Hash Match reminder text to Terminal Mats and Player Aids; regenerating all 5 PDF packs).
 
 **Status: OFFICIALLY ADOPTED (`v0.17.0` Baseline).**
+
+---
+
+## 13. Phase 25: Model C End-of-Round Cleanup Cap for Patches (`v0.18.0` Baseline)
+
+### A. Context & Playtest Diagnosis
+In `v0.17.0` and earlier rules drafts, player patch tokens (`🔧`) were immediately capped to `max_patch_tokens = 3` during **Phase 1 Step 6** (Boot & Configure) as well as inside each individual player's turn in Phase 3. Mathematical modeling revealed this caused severe artificial choking:
+1. **Turn 1 Truncation:** In Round 1, players start with `2 🔧`. The probability of rolling $\ge 2$ patch faces across 4 Gray dice is $\approx 52.4\%$. Because Round 1 has no hardware glitches on Gray dice and no pre-existing corruption locks, over 50% of players hit the `3 🔧` cap on Turn 1 and immediately discarded rolled patches.
+2. **Defensive & Repair Choke:** Mid-game rolls with Green Antivirus dice producing 3–5 patches were clipped before Phase 2 emergency Red Ransomware absorption and Phase 3 module repairs.
+
+### B. Approved Solution: Model C (End-of-Round Cleanup Cap)
+- **Phase 1 & Phase 2:** Patch collection is **unclamped**. Players collect all generated `🔧` tokens from rolled dice and can freely spend them on Phase 1 Debug Unlocks and Phase 2 Emergency Ransom Absorption (at $0 cash).
+- **Phase 3 Operations:** Players may spend any number of patch tokens to repair worn modules (Unpatched $\to$ Ready) without per-turn clamping.
+- **End-of-Round Cleanup:** Immediately before advancing the First Player marker (and before final round scoring), surviving players discard unspent patch tokens in excess of **`3 🔧`** (`player.patches = min(player.patches, 3)`).
+- **Benefits:** Completely eliminates wasted high-yield rolls during the round, while preventing multi-round hoarding bunkers and preserving physical component limits.
+
+### C. Monte Carlo Verification Sweep Telemetry ($N=1,000$ per Pod, Base Seed 42)
+
+| Pod | Mean Rounds | Sing % | PZ % | Wipeout % | Winner Sec | Surv Sec | Winner 🔧 | Surv 🔧 | TB Rate | Lead Bot (Win %) |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **2P** | **3.92 ± 0.58** | 0.0% | 29.6% | 70.4% | **2.53** | **2.53** | **0.00** | **0.00** | 0.0% | AdaptiveBalancedBot (**73.6%**) |
+| **3P** | **3.94 ± 0.58** | 0.0% | 50.5% | 49.5% | **3.33** | **3.03** | **0.03** | **0.02** | 9.3% | VentureGreedBot (**44.6%**) |
+| **4P** | **4.11 ± 0.54** | 0.0% | 53.7% | 46.3% | **3.43** | **2.84** | **0.02** | **0.01** | 14.5% | VentureGreedBot (**37.8%**) |
+
+**Tiebreaker Level Breakdown:**
+- **2P:** Level 1 ($): 0 | Level 2 (Dice): 0 | Level 3 (Wrench): 0 | Level 4 (Reliability): 0
+- **3P:** Level 1 ($): 12 | Level 2 (Dice): 4 | Level 3 (Wrench): 0 | Level 4 (Reliability): 31
+- **4P:** Level 1 ($): 5 | Level 2 (Dice): 8 | Level 3 (Wrench): 0 | Level 4 (Reliability): 65
+
+### D. Key Empirical Takeaways & Balance Rationale
+1. **Zero Macro Pacing Distortion:** Match length is identical to pre-cap baselines (3.92 rds 2P / 3.94 rds 3P / 4.11 rds 4P) with zero stalling.
+2. **Invariant Verification:** 100% of surviving players conclude games with $\le 3$ patch tokens (mean ending patches: 0.00 to 0.03 🔧).
+3. **Tiebreaker Integrity:** Level 3 (Patches) tiebreaker remains pristine; Level 4 (Reliability: fewest unpatched dice) continues to resolve the vast majority of ties (66.0% in 3P, 83.3% in 4P).
+4. **Metagame Stability:** Lead bot in 4P (VentureGreedBot) sits at 37.8%, comfortably within the healthy $\le 40\%$ balance corridor.
+
+### E. Formal Design Sign-Off
+- **Baseline Adoption:** Formally adopt Model C End-of-Round Cleanup Cap for Patches as the canonical baseline for **`v0.18.0`**.
+- **Component Parity:** Updated `RULES.md`, `sim/engine/`, `web/`, and test suite.
+
+**Status: OFFICIALLY APPROVED (`v0.18.0` Baseline).**

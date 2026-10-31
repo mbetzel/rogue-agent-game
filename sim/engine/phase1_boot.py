@@ -457,8 +457,6 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
                     if t_idx in validated_commitments:
                         del validated_commitments[t_idx]
 
-        player.patches = min(player.patches, engine.config.max_patch_tokens)
-
         player_commitments.append((player, list(active_dice), validated_commitments))
 
     engine.state.active_phase1_locks.clear()

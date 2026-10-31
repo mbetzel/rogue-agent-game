@@ -1,4 +1,4 @@
-# Too Many Secrets — Print-and-Play Prototype Pack (`v0.13.0`)
+# Too Many Secrets — Print-and-Play Prototype Pack (`v0.18.0`)
 
 Minimalist, ink-saver US Letter (`11" × 8.5"` Landscape) Print-and-Play PDFs synchronized with [RULES.md](../RULES.md).
 

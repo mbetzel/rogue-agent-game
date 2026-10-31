@@ -90,6 +90,14 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Ran Monte Carlo verification sweeps across 2P, 3P, and 4P pods.
   - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Verified liquidity health, data breach elimination dynamics, and logged Section 11 in `FINDINGS.md`.
   - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Updated `pnp/generate_pnp.py` and regenerated all 5 PDF packs.
+- [x] **Phase 25: Model C End-of-Round Cleanup Cap for Patches (`v0.18.0` Baseline)**
+  - [x] *Pre-SDLC Game Designer Modeling:* Modeled patch yields across Gray/Green/Blue pools (EV ~1.87–4.37 🔧), identified Round 1 over-clamping (>50% hitting cap on T1), and designed Model C (unclamped during round, discard down to 3 at End-of-Round Cleanup). User approved.
+  - [x] *Technical Architecture Spec (`principal-engineer`):* Module contracts in `sim/engine/phase1_boot.py`, `sim/engine/phase3_ops.py`, `web/controller/`, `web/schemas.py`, and test specifications.
+  - [x] *Implementation (`senior-engineer`):* Implemented unclamped collection in Phase 1, End-of-Round Cleanup in Phase 3 / web serializer, exposed `max_patch_tokens` in schemas, and created 8-test unit suite in `tests/test_model_c_patches.py` (307/307 tests passing).
+  - [x] *Code Review Gate (`staff-engineer`):* Verified line-by-line diffs, parity between headless sim and web controller, and confirmed 100% test pass via WSL — `APPROVED`.
+  - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Ran 3,000-match Monte Carlo sweep across 2P, 3P, and 4P pods (`scripts/sweep_model_c_patches.py`).
+  - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Confirmed zero pacing distortion, verified $\le 3$ 🔧 holding invariant across all pods, and logged Section 13 in `FINDINGS.md`.
+  - [x] *Print-and-Play & Documentation (`graphic-designer`):* Updated `RULES.md` Phase 1 Step 6 and Phase 3 Cleanup rules text, regenerated PnP PDFs.
 - [x] **Phase 24: Cryptographic Hash Match & Secrets-Only Victory Scoring (`v0.17.0` Baseline)**
   - [x] *Pre-SDLC Game Designer Modeling:* Modeled Yahtzee pattern matching, uncapped triplets (0.67 EV early, 1.1–1.3 EV with contractors, +0.16 EV across full game), verified removal of 1-secret round limit, and designed Secrets-only scoring with hierarchical tiebreakers. Signed off by User.
   - [x] *Technical Architecture Spec (`principal-engineer`):* Module contracts in `sim/engine/phase1_boot.py`, `sim/config.py`, `sim/engine/end_game.py`, `sim/bots/base.py`, and `web/controller/`.

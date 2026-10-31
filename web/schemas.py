@@ -353,6 +353,7 @@ class GameStateSerializer:
             "contractor_cost_progression": list(getattr(state.config, "contractor_cost_progression", (1, 2, 3))),
             "contractor_max_hire": getattr(state.config, "contractor_max_hire", 3),
             "next_contractor_cost": controller_meta.get("action_capabilities", {}).get("next_contractor_cost"),
+            "max_patch_tokens": state.config.max_patch_tokens,
             # Compiler / Tower & Corruption
             "staging_cup": staged,
             "tower_stuck_cubes": stuck,

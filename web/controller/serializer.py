@@ -49,6 +49,15 @@ def complete_round(controller: GameController) -> None:
     """Executes round cleanup and either starts the next round or concludes the game."""
     num_players = len(controller.state.players)
 
+    # End-of-Round Cleanup: discard unspent patch tokens in excess of max_patch_tokens (Model C)
+    for p in controller.state.players:
+        if not p.is_patient_zero and p.patches > controller.state.config.max_patch_tokens:
+            discarded = p.patches - controller.state.config.max_patch_tokens
+            p.patches = controller.state.config.max_patch_tokens
+            controller.event_log.append(
+                f"{controller.player_meta[p.player_id]['name']} discarded {discarded} excess Patch token(s) at End-of-Round Cleanup (cap: {controller.state.config.max_patch_tokens})."
+            )
+
     # Check Final Round condition
     if controller.state.is_final_round:
         controller.state.game_over = True

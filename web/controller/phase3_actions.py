@@ -238,8 +238,6 @@ def execute_bot_phase3(controller: GameController, player: PlayerState, meta: Di
             player.ready_dice.append(new_die)
             controller.event_log.append(f"{meta['name']} (Bot) bought {color.value.capitalize()} Die.")
 
-    player.patches = min(player.patches, controller.state.config.max_patch_tokens)
-
 
 
 def buy_die(
