@@ -234,11 +234,7 @@ class SecOpsTurtleBot(BaseBot):
         is_final_round = getattr(game_state, "is_final_round", False)
         cash_cushion = 0 if is_final_round else 2
 
-        patch_cash_cost = (
-            3
-            if game_state.active_directive_code == "POLYMORPHIC_WORM"
-            else game_state.config.patch_cash_cost
-        )
+        patch_cash_cost = game_state.config.patch_cash_cost
 
         active_ver = game_state.active_version.version_str
         if (

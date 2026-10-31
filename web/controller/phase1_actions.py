@@ -700,11 +700,7 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
 
         # 3. Yahtzee Rerolls & Lock Resolution
         active_directive = controller.state.active_directive_code
-        max_free_rerolls = (
-            controller.state.config.throttled_free_rerolls
-            if active_directive == "POLYMORPHIC_WORM"
-            else controller.state.config.default_free_rerolls
-        )
+        max_free_rerolls = controller.state.config.default_free_rerolls
 
         is_prodigy = (
             player.archetype is not None
@@ -734,9 +730,11 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
                     continue
                 if face.is_glitch:
                     d.is_locked = True
-                elif active_directive == "RAAS" and face.has_cash_option:
+                elif "CASH" in controller.state.active_phase1_locks and face.has_cash_option:
                     d.is_locked = True
-                elif active_directive == "ZERO_DAY_OVERRIDE" and face.has_shield_option:
+                elif "PATCH" in controller.state.active_phase1_locks and face.has_patch_option:
+                    d.is_locked = True
+                elif "SHIELD" in controller.state.active_phase1_locks and face.has_shield_option:
                     d.is_locked = True
 
         _eval_locks(active_dice)

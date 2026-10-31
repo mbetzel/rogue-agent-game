@@ -112,26 +112,43 @@ export function renderVersionsModal() {
     // Payload
     const payload = ver.staging_payload;
     const isStarting = idx === 0;
-    const payloadLabel = isStarting ? "Starting Payload:" : "Upgrade Payload:";
 
-    let cubesHtml = "";
-    const colorOrder = ["red", "blue", "green", "black"];
-    for (const c of colorOrder) {
-      const count = (payload && payload[c]) ? payload[c] : 0;
-      if (count > 0) {
-        cubesHtml += `<span class="cube-badge ${c}" style="font-size: 0.72rem; padding: 2px 7px;">${isStarting ? "" : "+"}${count} ${c.toUpperCase()}</span>`;
+    let payloadHtml = "";
+    if (isStarting) {
+      let cubesHtml = "";
+      const colorOrder = ["red", "blue", "green", "black"];
+      for (const c of colorOrder) {
+        const count = (payload && payload[c]) ? payload[c] : 0;
+        if (count > 0) {
+          cubesHtml += `<span class="cube-badge ${c}" style="font-size: 0.72rem; padding: 2px 7px;">${count} ${c.toUpperCase()}</span>`;
+        }
       }
-    }
-    if (!cubesHtml) {
-      cubesHtml = `<span style="font-size: 0.75rem; color: var(--text-dim);">None</span>`;
+      if (!cubesHtml) {
+        cubesHtml = `<span style="font-size: 0.75rem; color: var(--text-dim);">None</span>`;
+      }
+      payloadHtml = `
+        <div class="version-payload-section">
+          <div class="version-payload-label">Initial Setup Cup:</div>
+          <div class="version-payload-cubes">${cubesHtml}</div>
+        </div>
+      `;
+    } else {
+      payloadHtml = `
+        <div class="version-payload-section">
+          <div class="version-payload-label">Cube Injections:</div>
+          <span style="font-size: 0.72rem; color: var(--text-dim); font-style: italic;">Injected via Corruption Track spaces</span>
+        </div>
+      `;
     }
 
-    // Directive description
-    const directiveHtml = `
-      <div class="version-directive-section">
-        <strong style="color: var(--text-highlight);">Directive:</strong> ${ver.directive_description || "None."}
-      </div>
-    `;
+    // Setup bonus if applicable (e.g. Data Scraper)
+    const setupBonusHtml = (ver.starting_cash_bonus && ver.starting_cash_bonus > 0)
+      ? `
+        <div class="version-setup-bonus-section" style="font-size: 0.75rem; color: var(--color-green); background: rgba(0,255,136,0.08); border-left: 3px solid var(--color-green); padding: 5px 8px; border-radius: var(--radius-xs); margin-bottom: 6px;">
+          <strong>Setup Bonus:</strong> +$${ver.starting_cash_bonus} Starting Money
+        </div>
+      `
+      : "";
 
     // Corruption progress
     let corruptionInfo = "";
@@ -180,11 +197,8 @@ export function renderVersionsModal() {
         ${statusBadgeHtml}
       </div>
       <div class="version-card-title">${ver.name}</div>
-      <div class="version-payload-section">
-        <div class="version-payload-label">${payloadLabel}</div>
-        <div class="version-payload-cubes">${cubesHtml}</div>
-      </div>
-      ${directiveHtml}
+      ${payloadHtml}
+      ${setupBonusHtml}
       ${trackListHtml}
       ${corruptionInfo}
     `;

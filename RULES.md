@@ -229,7 +229,7 @@ When the game ends (via Singularity when `v3.0` fills, or via Patient Zero check
 | **Purple (Black-Hat)** | `$4` | `3` | `Block 1 Any` | `Block 1 Any` | `+$2` | `+$1 & +1 🔧` | `Purple ★` | `Purple ★` |
 
 * **Choice Faces (`/`):** Faces with a slash (`/`) indicate a Choice Face. During Phase 1 Step 5, the player declares which of the two options the die fulfills for this round.
-  * **Directive Interactions:** A choice face displaying a Cash option (e.g. `+$1 / +1 🔧` on Gray or `+1 🔧 / +$1` on Green) is treated as a Cash face and is immediately locked by `v2.0 RaaS` Encrypted Memory. A choice face displaying a Shield option (e.g. `Block 1 Blue / +1 🔧` on Blue) is treated as a Shield face and is immediately locked by `v3.0 Zero-Day Override` Kernel Lock. Locked dice can be unlocked using `1 🔧` (Debug Action).
+  * **Phase 1 Lock Interactions:** A choice face displaying a Cash option (e.g. `+$1 / +1 🔧` on Gray or `+1 🔧 / +$1` on Green) is treated as a Cash face when Cash faces are locked by a Corruption Track effect (e.g. `v2.0 RaaS` Space 3). A choice face displaying a Shield option (e.g. `Block 1 Blue / +1 🔧` on Blue) is treated as a Shield face when Shield faces are locked by a Corruption Track effect (e.g. `v3.0 Zero-Day Override` Space 3). Locked dice can be unlocked using `1 🔧` (Debug Action).
 * **Hardware Glitch Faces (`Glitch (Locked)`):** Face 5 on Red, Blue, and Green represents a push-your-luck hardware glitch. When rolled, the die is locked immediately. In Step 6, each unresolved glitch face requires the player to move 1 active die to their Unpatched Zone (or sacrifice an active White Contractor die to the central supply). Glitch faces produce 0 shields and 0 resource outputs.
 
 ### B. Sample Module Variant Cards (`★` Effects)

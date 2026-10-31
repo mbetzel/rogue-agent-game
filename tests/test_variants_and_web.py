@@ -796,6 +796,16 @@ class TestGroupEWebAPIServer(unittest.TestCase):
         self.assertIn("current_version_index", state)
         self.assertEqual(state["current_version_index"], 0)
 
+    def test_versions_v2_v3_have_no_directives(self) -> None:
+        """Verify v2.0 and v3.0 version cards carry no persistent directives; only corruption track triggers."""
+        all_cards = get_all_version_cards()
+        for card in all_cards:
+            if card.version_str in ("v2.0", "v3.0"):
+                self.assertIn(card.directive_description, ("", "None."),
+                              f"{card.name} ({card.version_str}) should not have a directive listed")
+                self.assertTrue(len(card.corruption_track) >= 5,
+                                f"{card.name} ({card.version_str}) must define a corruption track")
+
 
 # =====================================================================
 # Group F: Experiments Telemetry & Batch Simulation

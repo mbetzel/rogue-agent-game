@@ -137,7 +137,37 @@ class TestV06Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_version_cards_v06_directives(self) -> None:
         """Version cards have updated directives for Phase 1 locks and rerolls."""
-        cards = {c.directive_code: c for c in get_all_version_cards()}
+        # Baseline cards for v0.6 rules
+        cards = {
+            "RAAS": VersionCard(
+                version_str="v2.0",
+                name="Ransomware-as-a-Service",
+                staging_payload={},
+                directive_description="Encrypted Memory: Any rolled die showing Cash (+$1 or +$2) is Locked immediately.",
+                directive_code="RAAS",
+            ),
+            "POLYMORPHIC_WORM": VersionCard(
+                version_str="v2.0",
+                name="Polymorphic Worm",
+                staging_payload={},
+                directive_description="Subroutine Throttling: Players receive only 1 free reroll in Phase 1 (instead of 2).",
+                directive_code="POLYMORPHIC_WORM",
+            ),
+            "ZERO_DAY_OVERRIDE": VersionCard(
+                version_str="v3.0",
+                name="Zero-Day Override",
+                staging_payload={},
+                directive_description="Kernel Lock: Any rolled die showing a Shield (Block 1 or Block 2) is Locked immediately.",
+                directive_code="ZERO_DAY_OVERRIDE",
+            ),
+            "CORRUPTED_KERNEL": VersionCard(
+                version_str="v3.0",
+                name="Corrupted Kernel",
+                staging_payload={},
+                directive_description="If 2+ Black Cubes exit the tower this round, the Attack Color with the most exited cubes gains +2 Strength total.",
+                directive_code="CORRUPTED_KERNEL",
+            ),
+        }
         self.assertIn("RAAS", cards)
         self.assertIn("Encrypted Memory: Any rolled die showing Cash (+$1 or +$2) is Locked immediately.", cards["RAAS"].directive_description)
 

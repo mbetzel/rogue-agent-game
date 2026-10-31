@@ -102,6 +102,7 @@ class GameStateSerializer:
             "staging_payload": {c.value: count for c, count in card.staging_payload.items()},
             "directive_description": card.directive_description,
             "directive_code": card.directive_code,
+            "starting_cash_bonus": getattr(card, "starting_cash_bonus", 0),
             "track_capacity": card.track_capacity,
             "corruption_track": [
                 {

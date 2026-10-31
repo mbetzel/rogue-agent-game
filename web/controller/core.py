@@ -199,7 +199,7 @@ class GameController:
         self.state.pending_next_phase_locks.clear()
         if self.state.active_phase1_locks:
             self.event_log.append(
-                f"Phase 1 Corruption Lock Directives active this round: {sorted(self.state.active_phase1_locks)}."
+                f"Phase 1 Corruption Locks active this round: {sorted(self.state.active_phase1_locks)}."
             )
 
         # Reset per-round metadata for all players

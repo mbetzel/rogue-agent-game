@@ -44,8 +44,11 @@ export function renderHeader() {
   const ver = state.active_version;
   const verEl = document.getElementById("versionCardDisplay");
   if (ver && verEl) {
+    const extra = (ver.version_str === "v1.0" && ver.starting_cash_bonus > 0)
+      ? ` — <em>+$${ver.starting_cash_bonus} Start</em>`
+      : "";
     verEl.innerHTML = `
-      <strong>${ver.name} (${ver.version_str})</strong> — <em>${ver.directive_description}</em>
+      <strong>${ver.name} (${ver.version_str})</strong>${extra}
     `;
   }
 

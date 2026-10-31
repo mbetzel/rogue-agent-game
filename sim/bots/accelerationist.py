@@ -250,11 +250,7 @@ class AccelerationistBot(BaseBot):
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
             current_money += game_state.config.dirty_income_cash
 
-        patch_cash_cost = (
-            3
-            if game_state.active_directive_code == "POLYMORPHIC_WORM"
-            else game_state.config.patch_cash_cost
-        )
+        patch_cash_cost = game_state.config.patch_cash_cost
         current_patches = player_state.patches
 
         if is_final_round:

@@ -24,9 +24,9 @@ export function renderCompiler() {
 
   const activeVerIdx = state.current_version_index !== undefined ? state.current_version_index : 0;
   const versionDeck = state.version_deck || [];
-  const v1 = versionDeck[0] || state.active_version || { name: "Script Kiddie", version_str: "v1.0", directive_description: "Standard initialization.", staging_payload: { red: 2, blue: 2, green: 2, black: 2 } };
-  const v2 = versionDeck[1] || { name: "Worm Protocol", version_str: "v2.0", directive_description: "Payload escalation across nodes.", staging_payload: { red: 1, blue: 1, green: 1, black: 1 } };
-  const v3 = versionDeck[2] || { name: "Autonomous Singularity", version_str: "v3.0", directive_description: "Autonomous self-directed threat synthesis.", staging_payload: { red: 1, blue: 1, green: 1, black: 1 } };
+  const v1 = versionDeck[0] || state.active_version || { name: "Script Kiddie", version_str: "v1.0", staging_payload: { red: 2, blue: 2, green: 2, black: 1 } };
+  const v2 = versionDeck[1] || { name: "Ransomware-as-a-Service", version_str: "v2.0", staging_payload: {} };
+  const v3 = versionDeck[2] || { name: "Zero-Day Override", version_str: "v3.0", staging_payload: {} };
 
   const playerCount = state.players ? state.players.length : 4;
   const capacity = state.corruption_capacity || (playerCount === 2 ? 4 : playerCount === 3 ? 5 : 6);
@@ -65,10 +65,8 @@ export function renderCompiler() {
               <span class="tier-name">${v3.name.toUpperCase()}</span>
               <span class="tier-level-tag">SINGULARITY</span>
             </div>
-            <div class="tier-directive">${v3.directive_description}</div>
-            <div class="tier-payload-strip">
-              <span class="payload-lbl">Payload:</span>
-              <span class="payload-val">${formatPayload(v3.staging_payload)}</span>
+            <div class="tier-track-info">
+              <span class="track-spaces-badge">${v3.corruption_track ? v3.corruption_track.length : 6} Corruption Spaces</span>
             </div>
             ${activeVerIdx === 2 ? '<div class="active-pulse-badge">● CURRENTLY ACTIVE</div>' : (activeVerIdx > 2 ? '<div class="completed-badge">✓ ARCHIVED</div>' : '<div class="upcoming-badge">UPCOMING</div>')}
           </div>
@@ -84,10 +82,8 @@ export function renderCompiler() {
               <span class="tier-name">${v2.name.toUpperCase()}</span>
               <span class="tier-level-tag">ESCALATION</span>
             </div>
-            <div class="tier-directive">${v2.directive_description}</div>
-            <div class="tier-payload-strip">
-              <span class="payload-lbl">Upgrade:</span>
-              <span class="payload-val">${formatPayload(v2.staging_payload)}</span>
+            <div class="tier-track-info">
+              <span class="track-spaces-badge">${v2.corruption_track ? v2.corruption_track.length : 5} Corruption Spaces</span>
             </div>
             ${activeVerIdx === 1 ? '<div class="active-pulse-badge">● CURRENTLY ACTIVE</div>' : (activeVerIdx > 1 ? '<div class="completed-badge">✓ ARCHIVED</div>' : '<div class="upcoming-badge">UPCOMING</div>')}
           </div>
@@ -103,10 +99,12 @@ export function renderCompiler() {
               <span class="tier-name">${v1.name.toUpperCase()}</span>
               <span class="tier-level-tag">INITIAL (START)</span>
             </div>
-            <div class="tier-directive">${v1.directive_description}</div>
             <div class="tier-payload-strip">
-              <span class="payload-lbl">Setup:</span>
+              <span class="payload-lbl">Setup Cup:</span>
               <span class="payload-val">${formatPayload(v1.staging_payload)}</span>
+            </div>
+            <div class="tier-track-info">
+              <span class="track-spaces-badge">${v1.corruption_track ? v1.corruption_track.length : 4} Corruption Spaces${v1.starting_cash_bonus ? ` (+$${v1.starting_cash_bonus} Start)` : ''}</span>
             </div>
             ${activeVerIdx === 0 ? '<div class="active-pulse-badge">● CURRENTLY ACTIVE</div>' : '<div class="completed-badge">✓ ARCHIVED</div>'}
           </div>
