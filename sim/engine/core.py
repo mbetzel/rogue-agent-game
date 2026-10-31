@@ -6,6 +6,7 @@ import random
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from sim.bots.base import BaseBot
+from sim.bots.adaptive_balanced import AdaptiveBalancedBot
 from sim.config import (
     CubeColor,
     DieColor,
@@ -39,19 +40,21 @@ class GameEngine:
     def __init__(
         self,
         config: GameConfig,
-        bots: List[BaseBot],
+        bots: Optional[List[BaseBot]] = None,
         seed: Optional[int] = None,
         variant_cards: Optional[Dict[DieColor, VariantCard]] = None,
         version_deck: Optional[List[VersionCard]] = None,
         archetypes: Optional[List[ArchetypeCard]] = None,
     ) -> None:
-        if len(bots) != config.num_players:
+        if bots is None:
+            bots = [AdaptiveBalancedBot(i) for i in range(config.num_players)]
+        elif len(bots) != config.num_players:
             raise ValueError(f"Bot count ({len(bots)}) must match config.num_players ({config.num_players})")
 
         self.rng = random.Random(seed)
         self.config = config
         self.variant_cards = variant_cards or get_default_variant_cards()
-        self.version_deck = version_deck or get_default_version_deck()
+        self.version_deck = version_deck or get_default_version_deck(profile=config.corruption_track_profile)
         if archetypes is None:
             self.archetypes = get_random_archetypes(config.num_players, self.rng)
         else:

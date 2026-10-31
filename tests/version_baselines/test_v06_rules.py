@@ -264,6 +264,7 @@ class TestV06Rules(unittest.TestCase):
         ctrl.new_game(num_players=2, seed=42)
         ctrl.state.version_deck = [c for c in get_all_version_cards() if c.directive_code == "RAAS"]
         ctrl.state.current_version_index = 0
+        ctrl.state.active_phase1_locks = {"CASH"}
         ctrl.state.players[0].ready_dice = [die_cash, die_shield]
 
         ctrl.roll_pool(player_id=0)
@@ -287,6 +288,7 @@ class TestV06Rules(unittest.TestCase):
         ctrl.new_game(num_players=2, seed=42)
         ctrl.state.version_deck = [c for c in get_all_version_cards() if c.directive_code == "ZERO_DAY_OVERRIDE"]
         ctrl.state.current_version_index = 0
+        ctrl.state.active_phase1_locks = {"SHIELD"}
         ctrl.state.players[0].ready_dice = [die_cash, die_shield]
 
         ctrl.roll_pool(player_id=0)
@@ -314,8 +316,9 @@ class TestV06Rules(unittest.TestCase):
         ctrl.state.version_deck = [c for c in get_all_version_cards() if c.directive_code == "POLYMORPHIC_WORM"]
         ctrl.state.current_version_index = 0
         ctrl._start_phase_1()
-        self.assertEqual(ctrl.player_meta[0]["rerolls_remaining"], 1)
-        self.assertEqual(ctrl.player_meta[0]["max_rerolls"], 1)
+        # In v0.15.0, default free rerolls is 2 (Space 4 locks patch faces)
+        self.assertEqual(ctrl.player_meta[0]["rerolls_remaining"], 2)
+        self.assertEqual(ctrl.player_meta[0]["max_rerolls"], 2)
 
     # -------------------------------------------------------------------------
     # 12. Yahtzee Rerolls Exclude Locked Dice
@@ -399,6 +402,7 @@ class TestV06Rules(unittest.TestCase):
         ctrl.state.players[0].ready_dice = [d_glitch, d_cash, d_shield]
         ctrl.state.players[0].money = 0
         ctrl.state.players[0].patches = 0
+        ctrl.state.active_phase1_locks = {"CASH"}
 
         ctrl.roll_pool(player_id=0)
 

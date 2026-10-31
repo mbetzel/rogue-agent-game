@@ -138,17 +138,18 @@ def roll_pool(controller: GameController, player_id: int) -> Dict[str, Any]:
     meta["has_rolled"] = True
     controller.subphase = "waiting_for_commit"
 
-    # Evaluate locks per RULES.md v0.6
-    active_directive = controller.state.active_directive_code
+    # Evaluate locks per RULES.md v0.15.0
     for die in active_dice:
         face = die.current_face
         if not face:
             continue
         if face.is_glitch:
             die.is_locked = True
-        elif active_directive == "RAAS" and face.has_cash_option:
+        elif "CASH" in controller.state.active_phase1_locks and face.has_cash_option:
             die.is_locked = True
-        elif active_directive == "ZERO_DAY_OVERRIDE" and face.has_shield_option:
+        elif "PATCH" in controller.state.active_phase1_locks and face.has_patch_option:
+            die.is_locked = True
+        elif "SHIELD" in controller.state.active_phase1_locks and face.has_shield_option:
             die.is_locked = True
 
     face_names = [
@@ -215,16 +216,17 @@ def perform_reroll(
         )
 
     # Re-evaluate locks on all dice in rolled_pool
-    active_directive = controller.state.active_directive_code
     for d in rolled:
         face = d.current_face
         if not face:
             continue
         if face.is_glitch:
             d.is_locked = True
-        elif active_directive == "RAAS" and face.has_cash_option:
+        elif "CASH" in controller.state.active_phase1_locks and face.has_cash_option:
             d.is_locked = True
-        elif active_directive == "ZERO_DAY_OVERRIDE" and face.has_shield_option:
+        elif "PATCH" in controller.state.active_phase1_locks and face.has_patch_option:
+            d.is_locked = True
+        elif "SHIELD" in controller.state.active_phase1_locks and face.has_shield_option:
             d.is_locked = True
 
     controller.event_log.append(

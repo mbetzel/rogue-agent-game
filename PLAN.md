@@ -3,7 +3,7 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
-- [x] **Rules Draft `v0.13.0`** captured in [RULES.md](./RULES.md)
+- [x] **Rules Draft `v0.15.0`** captured in [RULES.md](./RULES.md)
 - [x] **Multi-Agent SDLC Pipeline** defined in Section 2 below
 - [x] **Phases 1–10 (Core Sim, v0.3–v0.8 Baselines, Choice Faces, Variants):** Archived in [docs/archive/ROADMAP_HISTORY.md](docs/archive/ROADMAP_HISTORY.md)
 - [x] **Phase 11: Web UX Polish — Setup Randomization Variety & Rogue Agent Versions Roadmap**
@@ -77,13 +77,14 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Implementation (`senior-engineer`):* Implemented feature across `sim/engine/`, `sim/bots/`, `web/`, and UI (`tests/test_system_reboot.py` passing 10/10; all 279 suite tests passing via WSL).
   - [x] *Code Review Gate (`staff-engineer`):* Comprehensive line-by-line review of rules fidelity, state transitions, and 100% test pass (APPROVED).
   - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Synchronized `pnp/generate_pnp.py` to `v0.14.0`, adding the System Reboot slot to Terminal Mats and Player Pocket Aids; regenerated all 5 PnP PDFs.
-- [ ] **Phase 21: Once-per-Game "System Reboot" (`v0.14.0` Baseline)**
-  - [x] *Rules Draft `v0.14.0`:* Emergency Firmware Restore: If entering or reaching Phase 3 with 0 Ready dice and reboot unused, restore all Gray Starter dice from Unpatched to Ready (Colored dice remain unpatched).
-  - [x] *Technical Architecture Spec (`principal-engineer`):* High-level software architecture, module contracts, state transitions, and test matrix.
-  - [x] *Implementation (`senior-engineer`):* Implemented across `sim/engine/`, `sim/bots/`, `web/`, and created 10 unit/integration tests in `tests/test_system_reboot.py`.
-  - [ ] *Code Review Gate (`staff-engineer`):* Review diffs line-by-line, audit edge cases, and verify 100% test pass via WSL.
-  - [ ] *Scenario Execution & Telemetry Compilation (`product-owner`):* Run verification sweep and compile telemetry table.
-  - [ ] *Balance Assessment & Final Sign-Off (`game-designer`):* Evaluate Singularity and wipeout parity, log Section 9 in `FINDINGS.md`.
+- [ ] **Phase 22: Per-Version Escalating Corruption Tracks (`v0.15.0` Baseline)**
+  - [x] *Design Alignment:* Replaced static version directives and flat corruption tracks with bespoke Per-Version Corruption Tracks (`4` spaces on `v1.0`, `5` spaces on `v2.0`, `6` spaces on `v3.0`, consistent across all player counts). Every space triggers an effect (`add_cubes`, `lose_money`, `lose_patches`, `demote_dice`, `return_colored_dice`, `lose_secrets`, `next_phase_lock`). The Corruption Track is the sole source of new SETEC cubes after setup. Testing a 2x2 Matrix: `(Standard vs. Aggressive Track Profile)` × `(Mode A: Next-Round Cube Priming vs. Mode B: Immediate Tray Resolution)`.
+  - [x] *Technical Architecture Spec (`principal-engineer`):* Dataclasses (`CorruptionSpace`, `LockType`, `TrackProfile`), engine Step 2A per-space trigger loop, next-round lock state, web controller/UI schema updates, and unit test matrix.
+  - [ ] *Implementation (`senior-engineer`):* Implement across `sim/config.py`, `sim/entities.py`, `sim/engine/`, `sim/bots/`, `web/`, and unit tests (`tests/test_v150_corruption_tracks.py`).
+  - [ ] *Code Review Gate (`staff-engineer`):* Line-by-line diff review, rules-fidelity audit, and 100% test pass via WSL.
+  - [ ] *Scenario Execution & Telemetry Compilation (`product-owner`):* Run 2x2 Matrix (`Standard vs. Aggressive` × `Next-Round vs. Immediate Cubes`) across 2P, 3P, and 4P pods.
+  - [ ] *Balance Assessment & Final Sign-Off (`game-designer`):* Evaluate escalation curves, round length, early death rates, Singularity vs. Breach split, and log Section 10 in `FINDINGS.md`.
+  - [ ] *Print-and-Play & Asset Generation (`graphic-designer`):* Update SETEC Version Cards and Central Threat Board in `pnp/generate_pnp.py` and regenerate PDFs.
 
 ---
 
@@ -107,31 +108,34 @@ All simulation development and balance testing follows a structured **6-subagent
 | **`senior-engineer`** | Senior Engineer | Read / Write / WSL | Implements features, `sim/` modules, bot heuristics, CLI runners, and `unittest` suites per the Principal Engineer's spec. Resolves actionable defects from code review or scenario runs. | Clean pure-Python code in `sim/` with 100% passing unit tests via WSL. |
 | **`staff-engineer`** | Staff Engineer | Read + WSL Verify *(no file edits)* | Performs independent code & rules-fidelity review. Audits `sim/` line-by-line against [RULES.md](./RULES.md) edge cases, seed reproducibility, performance, and test coverage gaps without directly patching source files. | Explicit `APPROVED` sign-off, or `CHANGES_REQUESTED` with file/line citations back to `senior-engineer`. |
 | **`product-owner`** | Product Owner | Read + WSL Execute *(data output only)* | Designs scenario matrices around open design questions, runs Monte Carlo sweeps (`python3 -m sim.experiments`), enforces sample-size/seed hygiene, captures outlier game seeds, and compiles structured telemetry tables. | Reproducible quantitative dataset across all target parameter cells and bot pods. |
-| **`game-designer`** | Game Designer | Read-only | Reviews Product Owner telemetry against Core Design Pillars and "Healthy Game" targets, validates data points for anomalies or degenerate strategies, requests follow-up slices if needed, and proposes `[TUNE]` or mechanical changes. | Evidence-backed balance critique & concrete rule/`[TUNE]` change proposals for `FINDINGS.md` and User sign-off. |
+| **`game-designer`** | Game Designer & Systems Analyst | Read-only *(or Read + WSL for analytical math modeling)* | **Pre-SDLC Analysis & Modeling:** Prior to engineering kickoff, performs deep mathematical modeling, expected-value distributions, economy/threat curve projections, and edge-case impact analysis for any proposed rule changes; provides full statistical analysis and drafts an implementation plan for User sign-off.<br>**Post-Telemetry Balance Validation:** Reviews Product Owner telemetry against Core Design Pillars and "Healthy Game" targets, validates data points for anomalies or degenerate strategies, requests follow-up slices if needed, and delivers official balance sign-off. | Pre-SDLC: Full statistical analysis report & actionable implementation plan.<br>Post-SDLC: Evidence-backed balance critique & final sign-off for `FINDINGS.md`. |
 | **`graphic-designer`** | Graphic Designer & PnP Specialist | Read / Write / WSL | Maintains physical print-and-play PDF assets (`pnp/*.pdf`), visual reference aids, central boards, player mats, card layouts, typography, and sells sheets (`pnp/`, `SELL_SHEET.*`) in lockstep with rules changes. | Up-to-date, printable PnP PDF assets (`pnp/generate_pnp.py`), verified visual reference aids, and design system documentation. |
 
 ### B. Delivery & Iteration Flow
 
 ```mermaid
 flowchart TD
-    U["User + Orchestrator (Rules Baseline Sign-Off)"] --> PE["Principal Engineer: High-Level Software Design"]
+    U1["User / Orchestrator: Rule Change Proposal"] --> GD_PRE["Game Designer: Mathematical Modeling, Statistical Analysis & Implementation Plan"]
+    GD_PRE --> U2["User Review & Implementation Plan Sign-Off"]
+    U2 --> PE["Principal Engineer: High-Level Software Architecture & Spec"]
     PE --> SE["Senior Engineer: Implement Features & Unit Tests"]
     SE --> STE["Staff Engineer: Code & Rules-Fidelity Review"]
     STE -- "Changes Requested" --> SE
     STE -- "Approved" --> PO["Product Owner: Run Scenarios & Collect Data"]
     PO -- "Sim Bug / Missing Hook" --> SE
-    PO -- "Telemetry Package" --> GD["Game Designer: Validate Data & Propose Changes"]
-    GD -- "Need Targeted Scenario Slice" --> PO
-    GD -- "Balance Report & Rule Proposals" --> OUT["Log in FINDINGS.md + User Sign-Off for Next Cycle"]
+    PO -- "Telemetry Package" --> GD_POST["Game Designer: Validate Telemetry & Final Sign-Off"]
+    GD_POST -- "Need Targeted Scenario Slice" --> PO
+    GD_POST -- "Balance Report Approved" --> OUT["Log in FINDINGS.md & RULES.md Baseline Lock"]
     STE -- "Approved" --> GDES["Graphic Designer: Update PnP Assets & Player Aids"]
     GDES -- "Regenerate PDFs & Assets" --> OUT
 ```
 
 ### C. Operational Guardrails
-1. **Strict Author / Reviewer / Runner Separation:** `senior-engineer` never self-approves code; `staff-engineer` never silently edits `sim/` during review; `product-owner` never alters engine mechanics while collecting scenario data.
-2. **WSL Execution Mandate:** Every subagent with command privileges (`senior-engineer`, `staff-engineer`, `product-owner`) must execute commands exclusively via WSL (`wsl -e bash -lc "cd /home/mike/antigravity/rogue-agent && ..."`).
-3. **Deterministic Seed Replayability:** All sweeps run by `product-owner` must pass explicit base seeds and log seeds for extreme outlier games (e.g., Turn 2 wipeouts or `20+` round stalls) so `staff-engineer` and `game-designer` can inspect exact play-by-play traces.
-4. **Human-in-the-Loop Rule Authority:** `game-designer` proposes `[TUNE]` and rule modifications, but the Orchestrator always aligns with the User before modifying [RULES.md](./RULES.md) and kicking off the next engineering cycle.
+1. **Pre-SDLC Analysis & Implementation Plan Gate:** Never initiate full SDLC engineering (`principal-engineer` architectural spec or `senior-engineer` implementation) for rule changes without prior mathematical modeling, comprehensive statistical analysis, and an explicit implementation plan delivered by the `game-designer` and approved by the User.
+2. **Strict Author / Reviewer / Runner Separation:** `senior-engineer` never self-approves code; `staff-engineer` never silently edits `sim/` during review; `product-owner` never alters engine mechanics while collecting scenario data.
+3. **WSL Execution Mandate:** Every subagent with command privileges (`senior-engineer`, `staff-engineer`, `product-owner`) must execute commands exclusively via WSL (`wsl -e bash -lc "cd /home/mike/antigravity/rogue-agent && ..."`).
+4. **Deterministic Seed Replayability:** All sweeps run by `product-owner` must pass explicit base seeds and log seeds for extreme outlier games (e.g., Turn 2 wipeouts or `20+` round stalls) so `staff-engineer` and `game-designer` can inspect exact play-by-play traces.
+5. **Human-in-the-Loop Rule Authority:** `game-designer` proposes `[TUNE]` and rule modifications, but the Orchestrator always aligns with the User before modifying [RULES.md](./RULES.md) and kicking off the next engineering cycle.
 
 ---
 
@@ -200,4 +204,11 @@ Pure Python 3 standard library (`dataclasses`, `random`, `statistics`, `argparse
 6. **Phase 13 Consultancy Archetypes Gate (`all roles`):**
    - `principal-engineer`: High-level architecture specification for Consultancy Archetypes (Section 6D), version ability lifecycle (`AVAILABLE` -> `USED` / `FORFEITED` / `LOCKED`), bot urgency heuristics, and API/controller endpoints.
    - `senior-engineer`: Implement features across `sim/entities.py`, `sim/engine.py`, `sim/bots.py`, `web/schemas.py`, `web/game_controller.py`, `web/server.py`, `web/static/app.js`, `web/static/style.css`, and 22 unit tests in `tests/test_archetypes.py` (209/209 tests passing via WSL).
+7. **Phase 22 Per-Version Escalating Corruption Tracks Gate (`v0.15.0 Baseline`):**
+   - `principal-engineer`: Formalized spec for per-version escalating corruption tracks (4 on v1.0, 5 on v2.0, 6 on v3.0 = 15 total black cubes to Singularity), space trigger resolution, and Mode A (Next Round) vs Mode B (Immediate) cube injection.
+   - `senior-engineer`: Implemented track schemas, space definitions (`CorruptionSpace`), carryover logic across version transitions, Phase 1 dice locks (`CASH`, `PATCH`, `SHIELD`), web UI components, and unit tests (`tests/test_v150_corruption_tracks.py`).
+   - `staff-engineer`: Verified 100% test pass rate across the full regression test suite (285/285 passing via WSL) — `APPROVED`.
+   - `product-owner`: Executed Monte Carlo comparative sweep (6,000 matches across Standard vs Aggressive x Mode A vs Mode B across 2P, 3P, and 4P) via `scripts/sweep_v150_corruption_tracks.py`.
+   - `game-designer`: Analyzed telemetry, established that Mode B causes unreactable sudden death, and formally approved Mode A (Next Round Injection) with the Standard profile as the canonical `v0.15.0` baseline. Documented in `FINDINGS.md` Section 10 — `APPROVED`.
+   - `graphic-designer`: Updated `pnp/generate_pnp.py` to render physical 4/5/6 track spaces and trigger labels on Version Tiles and Central Board, regenerating all 5 PnP PDFs — `APPROVED`.
 

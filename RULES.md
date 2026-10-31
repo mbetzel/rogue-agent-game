@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.14.0)
+# Too Many Secrets — Rules Draft (v0.15.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -27,7 +27,7 @@ When the dust settles, any consultancy that suffers a **Total Data Breach** (`<=
   * **Blue Cubes (Spyware / Data Exfiltration):** Directly steals **Corporate Secrets**.
   * **Green Cubes (Malware / Logic Bombs):** Degrades Ready dice to **Unpatched** (or destroys dice if overwhelmed).
   * **Black Cubes (Corrupted Code / Master Key Search):** Advances the active **Version Corruption Track** toward cryptographic Singularity.
-* **SETEC Version Deck (`v1.0`, `v2.0`, `v3.0`):** Setup cards defining the threat's starting payload, upgrade payloads, and active directives.
+* **SETEC Version Deck (`v1.0`, `v2.0`, `v3.0`):** Setup cards defining the threat's starting payload (`v1.0`) and each version's bespoke **Corruption Track** (where every space triggers a game-wide hazard or injects new cubes into the compiler).
 
 ### Player & Market Components
 * **4 Consultancy Terminal Mats**, each featuring:
@@ -60,9 +60,9 @@ When the dust settles, any consultancy that suffers a **Total Data Breach** (`<=
 ## 3. Setup
 
 1. **SETEC Roadmap & Compiler Priming:** Deal **1 `v1.0` card**, **1 `v2.0` card**, and **1 `v3.0` card** face-up in a row next to the Cube Tower. Place the Version Marker on `v1.0`.
-   * Each Version card features a **Corruption Track** scaled by player count: **`4` spaces (2 Players)**, **`5` spaces (3 Players)**, or **`6` spaces (4 Players)** `[TUNE]` (12 / 15 / 18 total Black cubes to Singularity across `v1.0 → v2.0 → v3.0`).
+   * **Per-Version Corruption Tracks (Consistent Across All Player Counts):** Each Version card features its own escalating **Corruption Track** where every space carries a mechanical effect: **`4` spaces on `v1.0`**, **`5` spaces on `v2.0`**, and **`6` spaces on `v3.0`** (`15` total Black Cubes to Singularity across `v1.0 → v2.0 → v3.0`) `[TUNE]`.
    * **Prime the Compiler (Pre-Seed Drop):** Before populating the Staging Cup, take **`1 Red, 1 Blue, 1 Green, and 1 Black Cube`** (4 cubes total) from the supply and drop them into the empty Cube Tower. Any cubes that exit into the tray are **returned to the general supply**. Any cubes that remain stuck on the internal baffles stay inside the tower to prime the compiler for Round 1.
-   * Place the starting Attack Cubes listed on the `v1.0` card plus `1 Black Cube` into the **Staging Cup** (baseline: `1 Red, 1 Blue, 1 Green, 1 Black`).
+   * Place the starting cubes listed on the `v1.0` card into the **Staging Cup** (baseline: `1 Red, 1 Blue, 1 Green, 1 Black`). *(All subsequent cube injections from SETEC come directly from Corruption Track spaces).*
 2. **Software Market:** For each of the 5 Colored Dice (**Red, Blue, Green, Yellow, Purple**), shuffle its Variant Cards, place **1 Variant Card** face-up in the center, and stack **`2 × Players`** dice of that color on it.
 3. **Consultancy Setup (Each Player):**
    * Choose or randomly deal **1 Consultancy Archetype Card** to each player. Place it beside your terminal mat with all 3 Version slots (`v1.0`, `v2.0`, `v3.0`) toggled to **Ready**.
@@ -100,7 +100,7 @@ Each player’s consultancy archetype provides a powerful, specialized capabilit
    * Between rerolls, players may set aside (keep) any dice, or pick previously kept dice back up for subsequent rerolls.
    * **Locked Dice:** Certain conditions cause dice to be **Locked**:
      * A die (White Contractor or Colored Red/Blue/Green) that rolls a **`Glitch (Locked)`** face is locked immediately.
-     * Active **SETEC Version Directives** may lock specific faces (e.g., Cash in `v2.0 RaaS`, or Shields in `v3.0 Zero-Day Override`).
+     * If a **Corruption Track Lock Effect** was triggered during the previous round's Phase 2 (e.g., *Cash faces cannot be rerolled next Phase 1*, *Patch faces cannot be rerolled next Phase 1*, or *Shield faces cannot be rerolled next Phase 1*), any rolled die showing that face type is locked immediately for this Phase 1.
      * Locked dice **cannot** be rerolled during your free rerolls.
    * **Debug Action (`🔧` Token Utility):** At any time during your reroll sequence, you may spend **`1 🔧` token** from your pool (or permanently set aside and lock a rolled die showing `+1 🔧`) to **Unlock `1` locked die**, allowing it to be rerolled in remaining rerolls. *(Archetype Timing: **The Prodigy** may trigger Brute-Force Bypass here to reroll locked dice freely and turn 1 rolled die to any non-Star face of choice).*
 5. **Assign Dice & Declare Choices (Simultaneous):**
@@ -122,19 +122,27 @@ Each player’s consultancy archetype provides a powerful, specialized capabilit
 
 Take **all cubes** from the **Staging Cup** and drop them into the **Cube Tower** together. Cubes that remain stuck on the baffles stay inside the tower for future rounds. Group all cubes that exit into the tray by color and resolve in order:
 
-#### Step 2A: Resolve Black (Corruption) Cubes & Version Upgrades
-Move exited **Black Cubes** onto the active Version's **Corruption Track** one at a time:
-* **Upgrading (`v1.0 → v2.0` or `v2.0 → v3.0`):** When the track fills (4th space in 2P, 5th in 3P, 6th in 4P):
-  1. Clear all Black Cubes from the track back to the supply.
-  2. Move the Version Marker to the next Version card (`v2.0` or `v3.0`).
-  3. Add the new Version card's **Upgrade Payload** cubes to the **Staging Cup** *(they will drop starting next round: see Section 6C)* `[TUNE]`.
-  4. The new Version's **Active Directive** takes effect immediately (including for Step 2B this round).
-  5. **Archetype Ability Flip:** Any unused Archetype Ability from the previous version is **forfeited**. The newly activated Version's ability slot unlocks immediately, becoming available for use starting in Step 2B or Phase 3 of the current round.
-  6. Place any remaining Black Cubes from this drop onto the new Version's track.
-* **Singularity (`v3.0` Track Fills):** If the final space of `v3.0` fills (4th in 2P, 5th in 3P, 6th in 4P), **Singularity is triggered!** Step 2B resolves normally for this drop, and the game enters its final round wrap-up.
+#### Step 2A: Resolve Black (Corruption) Cubes, Track Spaces & Version Upgrades
+Move exited **Black Cubes** from the tray onto the next empty space(s) of the active Version's **Corruption Track** one at a time from left to right. **Every space covered by a Black Cube immediately triggers its printed effect** (see Section 6C):
+* **Corruption Space Effects:**
+  * **Add Cubes (`+X Red/Blue/Green/Black`):** Take the specified cubes from the general supply.
+    * *Mode A (Next-Round Priming — Baseline `[TUNE]`):* Place newly added cubes into the **Staging Cup** (or aside in the tray) so they do **not** apply to this round's Step 2B attack, and are primed to drop into the Cube Tower next round.
+    * *Mode B (Immediate Tray Resolution — Variant `[TUNE]`):* Place newly added Attack Cubes directly into the active **Tray** so they apply to this round's Step 2B attack and then recycle into the Staging Cup (any newly added Black Cubes go to the Staging Cup for next round).
+  * **All Players Lose `$X`:** Each player loses up to `$X` from their supply (minimum `$0`; unpaid cash loss from a corruption space does *not* drain patches or secrets).
+  * **All Players Lose `X 🔧`:** Each player loses up to `X` Patch Tokens from their supply (minimum `0`).
+  * **All Players Demote `X` Dice to Unpatched:** Each player must move `X` non-worn permanent dice of their choice from their Active Pool / Ready Zone to their **Unpatched Zone** (preferring unassigned dice; if a die committed to a Shield slot in Phase 1 must be demoted, its shield commitment is removed before Step 2B).
+  * **All Players Return `X` Colored Dice:** Each player who owns at least 1 Colored Module Die (across Unpatched, Active, or Ready zones) must return up to `X` Colored Module Dice of their choice to the Market supply. *(Gray starter dice cannot be returned).*
+  * **All Players Lose `X` Corporate Secrets:** Each player immediately loses `X` Corporate Secrets (checking for Patient Zero at `<= 0` Secrets).
+  * **Next-Phase Face Lock (`Cash`, `Patch`, or `Shield` Faces Locked Next Phase 1):** During the next round's Phase 1 Step 4 (Rerolls), any rolled die showing that face type (including Choice faces offering that option) is immediately **Locked** and cannot be rerolled unless unlocked with `1 🔧` (Debug Action). *(Each Version card has at most 1 Lock space on its track).*
+* **Upgrading (`v1.0 → v2.0` or `v2.0 → v3.0`):** When the final space of `v1.0` (`4th` space) or `v2.0` (`5th` space) is filled and resolved:
+  1. Clear all Black Cubes from the completed Version card back to the supply.
+  2. Move the Version Marker to the next Version card (`v2.0` or `v3.0`). *(No separate upgrade payload is added; the Corruption Track spaces themselves are the sole source of new cubes).*
+  3. **Archetype Ability Flip:** Any unused Archetype Ability from the previous version is **forfeited**. The newly activated Version's ability slot unlocks immediately, becoming available for use starting in Step 2B or Phase 3 of the current round.
+  4. Place any remaining exited Black Cubes from this drop one at a time onto the new Version's Corruption Track, triggering each space covered!
+* **Singularity (`v3.0` Track Fills):** When the final (`6th`) space of `v3.0` is filled and resolved, **Singularity is triggered!** Step 2B resolves normally for this drop, and the game enters its final round wrap-up.
 
 #### Step 2B: Resolve Attack Cubes (Red, Blue, Green)
-Calculate the total attack strength of **Red**, **Blue**, and **Green** (exited cubes + any active Version Directive modifiers). *(Archetype Timing: **The Acoustic** may trigger Baffle Echo here to ignore 1 Attack Cube of their choice for themselves this round).* Each player simultaneously resolves all three colors against their committed Shields:
+Calculate the total attack strength of **Red**, **Blue**, and **Green** from exited cubes in the tray. *(Archetype Timing: **The Acoustic** may trigger Baffle Echo here to ignore 1 Attack Cube of their choice for themselves this round).* Each player simultaneously resolves all three colors against their committed Shields:
 
 1. **Dice Wear (Software Adaptation):** Any permanent die assigned as a Shield that **actively blocks at least 1 cube** moves to your **Unpatched Zone**. *(White Contractor dice that block damage return to the general supply at round end; they never move to the Unpatched Zone).* If multiple dice were committed to a color and fewer cubes dropped than total shield strength, the defending player chooses which die absorbs the attack and wears down. *(If 0 cubes of that color dropped, or another die already absorbed all cubes of that color, unused permanent Shield dice remain Ready and return to your Ready Zone!)*
 2. **Unblocked Damage:**
@@ -247,16 +255,31 @@ Calculate **Portfolio Value** `[TUNE weights]`:
   * *P2 — Chaos Profiteer:* `[Phase 1 — Boot]` Gain `+$1` now, plus `[Phase 2 — Compile]` `+$2` per Black Cube that exits the tower in Phase 2.
   * *P3 — Packet Deflection:* `[Phase 2 — Defense]` `Block 2` of any single color; `[Phase 3 — Operations]` in Phase 3 you may pay `$1` to add `1` cube of that color from the supply to the Staging Cup `[TUNE]`.
 
-### C. Sample SETEC Version Cards
+### C. Sample SETEC Version Cards & Per-Version Corruption Tracks `[TUNE]`
 
-| Version | Card Name | Staging Cup Payload | Active Directive |
-| :--- | :--- | :--- | :--- |
-| **`v1.0`** | *Script Kiddie* | `1 Red, 1 Blue, 1 Green, 1 Black` | None. |
-| **`v1.0`** | *Data Scraper* | `2 Blue, 1 Red, 1 Black` | Players start with `+$1` extra Money ($8 total). |
-| **`v2.0`** | *Ransomware-as-a-Service* | `+1 Red, +1 Green` | **Encrypted Memory:** Any rolled die showing Cash (`+$1` or `+$2`) is **Locked** immediately (cannot be rerolled unless unlocked with `1 🔧`). *(Kinetic profile: 0 Black).* |
-| **`v2.0`** | *Polymorphic Worm* | `+1 Green, +1 Black` | **Subroutine Throttling:** Players receive only **`1` free reroll** in Phase 1 (instead of 2). *(Contagion profile: +1 Black).* |
-| **`v3.0`** | *Zero-Day Override* | `+1 Red, +1 Black` | **Kernel Lock:** Any rolled die showing a Shield (`Block 1` or `Block 2`) is **Locked** immediately (cannot be rerolled unless unlocked with `1 🔧`). *(Singularity profile: +1 Black).* |
-| **`v3.0`** | *Corrupted Kernel* | `+1 Red, +1 Blue` | If 2+ Black Cubes exit the tower this round, the Attack Color with the most exited cubes gains `+2 Strength` total. `[TUNE]` *(Kinetic profile: 0 Black).* |
+Each Version Card defines its Corruption Track (`4` spaces on `v1.0`, `5` spaces on `v2.0`, `6` spaces on `v3.0`, consistent across all player counts). The Corruption Track is the **sole source of new SETEC cubes** entering the economy after setup. Two intensity profiles (**Standard** and **Aggressive**) are defined below for simulation benchmarking:
+
+#### Profile 1: Standard Escalation Tracks (`4 / 5 / 6` Spaces)
+
+| Version | Card Name | Initial Setup Cup | Space 1 | Space 2 | Space 3 | Space 4 | Space 5 | Space 6 |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **`v1.0`** (4) | *Script Kiddie* | `1R, 1B, 1G, 1K` | Add `1R, 1G` | All lose `$2` | Add `1B` | **Upgrade:** Lose `1 🔧` + Add `1R, 1B` | — | — |
+| **`v1.0`** (4) | *Data Scraper* | `1R, 2B, 1K` (`+$1` start) | Lose `1 🔧` + Add `1B` | All demote `1` die | Add `1R, 1G` | **Upgrade:** Lose `$2` + Add `1B, 1G` | — | — |
+| **`v2.0`** (5) | *RaaS* | — | All lose `$3` | Add `1R, 1G` | **Lock Cash (`$`)** next Phase 1 | Lose `$3` & `1 🔧` | **Upgrade:** Add `1R, 1B, 1K` | — |
+| **`v2.0`** (5) | *Polymorphic Worm* | — | Lose `2 🔧` + Add `1G` | All demote `1` die | Add `1B, 1G` | **Lock Patch (`🔧`)** next Phase 1 | **Upgrade:** Demote `1` die + Add `1R, 1G, 1K` | — |
+| **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 1B, 1G` | All lose `$4` | **Lock Shields** next Phase 1 | Return `1` Colored Die | Lose `1 Secret` & demote `1` die | **Singularity:** Add `1R, 1B, 1G` |
+| **`v3.0`** (6) | *Corrupted Kernel* | — | Demote `1` die + Add `1R, 1B` | Lose `$4` & `1 🔧` | Add `1R, 1B, 1G` | **Lock Shields** next Phase 1 | Lose `1 Secret` & return `1` Colored Die | **Singularity:** Add `2R, 2B` |
+
+#### Profile 2: Aggressive Escalation Tracks (`4 / 5 / 6` Spaces — Heavy `v2.0` & `v3.0` Ramp)
+
+| Version | Card Name | Initial Setup Cup | Space 1 | Space 2 | Space 3 | Space 4 | Space 5 | Space 6 |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **`v1.0`** (4) | *Script Kiddie* | `1R, 1B, 1G, 1K` | Add `1R, 1G` | All lose `$3` | Demote `1` die + Add `1B` | **Upgrade:** Lose `1 🔧` + Add `1R, 1B, 1G` | — | — |
+| **`v1.0`** (4) | *Data Scraper* | `1R, 2B, 1K` (`+$1` start) | Lose `2 🔧` + Add `1B` | All demote `1` die | Add `1R, 1B, 1G` | **Upgrade:** Lose `$3` + Add `1R, 1G` | — | — |
+| **`v2.0`** (5) | *RaaS* | — | All lose `$4` | Add `2R, 1G` | **Lock Cash (`$`)** next Phase 1 | Lose `$5` & `1 🔧` | **Upgrade:** Demote `1` die + Add `1R, 1B, 1K` | — |
+| **`v2.0`** (5) | *Polymorphic Worm* | — | Lose `2 🔧` + Add `1B, 1G` | All demote `2` dice | Add `1R, 2G` | **Lock Patch (`🔧`)** next Phase 1 | **Upgrade:** Demote `1` die + Add `1B, 1G, 1K` | — |
+| **`v3.0`** (6) | *Zero-Day Override* | — | Add `2R, 1B, 1G` | Lose `$5` & `2 🔧` | **Lock Shields** next Phase 1 | Return `1` Colored Die & demote `1` die | All lose `2 Secrets` | **Singularity:** Add `2R, 2B, 2G` |
+| **`v3.0`** (6) | *Corrupted Kernel* | — | Demote `2` dice + Add `1R, 1B` | Lose `$5` & `2 🔧` | Add `2R, 2B, 1G` | **Lock Shields** next Phase 1 | Return `1` Colored Die & lose `1 Secret` | **Singularity:** Lose `1 Secret` + Add `2R, 2B, 1G` |
 
 ---
 

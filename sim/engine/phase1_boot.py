@@ -14,6 +14,10 @@ if TYPE_CHECKING:
 
 
 def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]]:
+    # Promote pending next-phase locks from previous Phase 2 to active locks for this Phase 1
+    engine.state.active_phase1_locks = set(engine.state.pending_next_phase_locks)
+    engine.state.pending_next_phase_locks.clear()
+
     # 1. Autonomous AI Corruption Pulse
     engine.state.staging_cup[CubeColor.BLACK] = (
         engine.state.staging_cup.get(CubeColor.BLACK, 0) + 1
@@ -130,11 +134,7 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
 
         # 4. Lock Evaluation & Yahtzee Rerolls Loop
         active_directive = engine.state.active_directive_code
-        max_free_rerolls = (
-            engine.config.throttled_free_rerolls
-            if active_directive == "POLYMORPHIC_WORM"
-            else engine.config.default_free_rerolls
-        )
+        max_free_rerolls = engine.config.default_free_rerolls
 
         def _evaluate_locks(dice_list: List[Die]) -> None:
             for d in dice_list:
@@ -143,9 +143,11 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
                     continue
                 if face.is_glitch:
                     d.is_locked = True
-                elif active_directive == "RAAS" and face.has_cash_option:
+                elif "CASH" in engine.state.active_phase1_locks and face.has_cash_option:
                     d.is_locked = True
-                elif active_directive == "ZERO_DAY_OVERRIDE" and face.has_shield_option:
+                elif "PATCH" in engine.state.active_phase1_locks and face.has_patch_option:
+                    d.is_locked = True
+                elif "SHIELD" in engine.state.active_phase1_locks and face.has_shield_option:
                     d.is_locked = True
 
         _evaluate_locks(active_dice)
@@ -413,6 +415,7 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
 
         player_commitments.append((player, list(active_dice), validated_commitments))
 
+    engine.state.active_phase1_locks.clear()
     return player_commitments
 
 

@@ -148,17 +148,28 @@ export function renderVersionsModal() {
         </div>
       `;
     } else if (isCompleted) {
-      const cap = state.corruption_capacity || 4;
+      const cap = ver.track_capacity || state.corruption_capacity || 4;
       corruptionInfo = `
         <div class="version-corruption-progress">
           <span style="color: var(--text-dim);">Corruption: ${cap} / ${cap} (Resolved)</span>
         </div>
       `;
     } else {
-      const cap = state.corruption_capacity || 4;
+      const cap = ver.track_capacity || state.corruption_capacity || 4;
       corruptionInfo = `
         <div class="version-corruption-progress">
           <span style="color: var(--text-dim);">Corruption: 0 / ${cap} (Pending)</span>
+        </div>
+      `;
+    }
+
+    let trackListHtml = "";
+    if (ver.corruption_track && ver.corruption_track.length > 0) {
+      const items = ver.corruption_track.map(s => `<li><strong>Space ${s.index}:</strong> ${s.label}</li>`).join("");
+      trackListHtml = `
+        <div class="version-track-spaces-section" style="margin-top: 8px; font-size: 0.75rem; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 4px;">
+          <div style="font-weight: bold; color: var(--color-cyan); margin-bottom: 4px;">Corruption Track Spaces:</div>
+          <ul style="margin: 0; padding-left: 16px; line-height: 1.35; color: var(--text-dim);">${items}</ul>
         </div>
       `;
     }
@@ -174,6 +185,7 @@ export function renderVersionsModal() {
         <div class="version-payload-cubes">${cubesHtml}</div>
       </div>
       ${directiveHtml}
+      ${trackListHtml}
       ${corruptionInfo}
     `;
 

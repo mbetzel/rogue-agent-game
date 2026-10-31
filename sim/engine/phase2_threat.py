@@ -6,7 +6,7 @@ import random
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, EndGameReason, ShieldColor
-from sim.entities import ArchetypeCode, Die
+from sim.entities import ArchetypeCode, CorruptionSpace, Die
 from sim.engine.state import RoundTelemetry
 
 if TYPE_CHECKING:
@@ -58,11 +58,21 @@ def execute_phase_2(
 
         # Step 2A: Resolve Black (Corruption) Cubes & Version Upgrades
         black_dropped = exited_cubes.get(CubeColor.BLACK, 0)
-        track_capacity = engine.state.config.corruption_track_capacity
 
         for _ in range(black_dropped):
             engine.state.corruption_track += 1
-            if engine.state.corruption_track >= track_capacity:
+            space_idx = engine.state.corruption_track
+            track = engine.state.active_version.corruption_track
+            if track and 1 <= space_idx <= len(track):
+                space = track[space_idx - 1]
+                resolve_corruption_space(
+                    engine=engine,
+                    space=space,
+                    player_commitments=player_commitments,
+                    exited_cubes=exited_cubes,
+                )
+
+            if engine.state.corruption_track >= engine.state.corruption_track_capacity:
                 if engine.state.current_version_index >= len(engine.state.version_deck) - 1:
                     # Singularity reached on v3.0!
                     engine.state.singularity_triggered = True
@@ -76,7 +86,7 @@ def execute_phase_2(
                     for p in engine.state.players:
                         p.mark_ability_forfeited(old_version_str)
                         p.unlock_version_ability(new_version_str)
-                    # Add new version upgrade payload to Staging Cup (drops starting next round)
+                    # Add new version upgrade payload to Staging Cup (drops starting next round, if any)
                     new_version = engine.state.active_version
                     for color, count in new_version.get_staging_payload(engine.config.num_players).items():
                         engine.state.staging_cup[color] = engine.state.staging_cup.get(color, 0) + count
@@ -95,8 +105,8 @@ def execute_phase_2(
 
         # Apply Active Version Directives to Attack Strength
         active_directive = engine.state.active_directive_code
-        if active_directive == "CORRUPTED_KERNEL":
-            # Corrupted Kernel: If 2+ Black Cubes exit the tower this round, the Attack Color with the most exited cubes gains +2 Strength total.
+        if active_directive == "CORRUPTED_KERNEL" and not engine.state.active_version.corruption_track:
+            # Legacy Corrupted Kernel directive without corruption track
             if black_dropped >= engine.config.corrupted_kernel_black_threshold:
                 highest_color = max(
                     [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN],
@@ -449,4 +459,131 @@ def resolve_player_defense_and_wear(
             else:
                 # Completely wiped out; record unfulfilled die destruction
                 player.unfulfilled_destructions += 1
+
+
+def demote_player_dice_step2a(
+    player: PlayerState,
+    rolled_dice: List[Die],
+    commitments: Dict[int, ShieldColor],
+    count: int,
+) -> None:
+    demoted = 0
+    committed_die_ids = {rolled_dice[idx].die_id for idx in commitments.keys() if idx < len(rolled_dice)}
+    uncommitted_ready = [d for d in player.ready_dice if d.die_id not in committed_die_ids]
+    uncommitted_ready.sort(key=lambda d: (d.color != DieColor.GRAY, d.cost))
+
+    while demoted < count and uncommitted_ready:
+        die = uncommitted_ready.pop(0)
+        player.ready_dice.remove(die)
+        player.unpatched_dice.append(die)
+        demoted += 1
+
+    if demoted < count:
+        committed_ready_indices = [
+            idx for idx in list(commitments.keys())
+            if idx < len(rolled_dice) and rolled_dice[idx] in player.ready_dice
+        ]
+        committed_ready_indices.sort(key=lambda idx: (rolled_dice[idx].color != DieColor.GRAY, rolled_dice[idx].cost))
+        for idx in committed_ready_indices:
+            if demoted >= count:
+                break
+            die = rolled_dice[idx]
+            if die in player.ready_dice:
+                player.ready_dice.remove(die)
+                player.unpatched_dice.append(die)
+            commitments.pop(idx, None)
+            demoted += 1
+
+
+def return_player_colored_dice_step2a(
+    engine: GameEngine,
+    player: PlayerState,
+    rolled_dice: List[Die],
+    commitments: Dict[int, ShieldColor],
+    count: int,
+) -> None:
+    returned = 0
+    unpatched_colored = [d for d in player.unpatched_dice if d.color != DieColor.GRAY and d.color != DieColor.WHITE]
+    while returned < count and unpatched_colored:
+        die = unpatched_colored.pop(0)
+        player.unpatched_dice.remove(die)
+        engine.state.market[die.color] = engine.state.market.get(die.color, 0) + 1
+        returned += 1
+
+    if returned < count:
+        committed_die_ids = {rolled_dice[idx].die_id for idx in commitments.keys() if idx < len(rolled_dice)}
+        uncommitted_ready_colored = [
+            d for d in player.ready_dice
+            if d.color != DieColor.GRAY and d.color != DieColor.WHITE and d.die_id not in committed_die_ids
+        ]
+        while returned < count and uncommitted_ready_colored:
+            die = uncommitted_ready_colored.pop(0)
+            player.ready_dice.remove(die)
+            engine.state.market[die.color] = engine.state.market.get(die.color, 0) + 1
+            returned += 1
+
+    if returned < count:
+        committed_ready_colored_indices = [
+            idx for idx in list(commitments.keys())
+            if idx < len(rolled_dice) and rolled_dice[idx] in player.ready_dice
+            and rolled_dice[idx].color != DieColor.GRAY and rolled_dice[idx].color != DieColor.WHITE
+        ]
+        for idx in committed_ready_colored_indices:
+            if returned >= count:
+                break
+            die = rolled_dice[idx]
+            if die in player.ready_dice:
+                player.ready_dice.remove(die)
+            commitments.pop(idx, None)
+            engine.state.market[die.color] = engine.state.market.get(die.color, 0) + 1
+            returned += 1
+
+
+def resolve_corruption_space(
+    engine: GameEngine,
+    space: CorruptionSpace,
+    player_commitments: List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]],
+    exited_cubes: Dict[CubeColor, int],
+) -> None:
+    # 1. Add Cubes
+    if space.add_cubes:
+        for color, count in space.add_cubes.items():
+            if engine.config.corruption_cubes_resolve_immediately:
+                if color == CubeColor.BLACK:
+                    engine.state.staging_cup[color] = engine.state.staging_cup.get(color, 0) + count
+                else:
+                    exited_cubes[color] = exited_cubes.get(color, 0) + count
+            else:
+                engine.state.staging_cup[color] = engine.state.staging_cup.get(color, 0) + count
+
+    # 2. Lose Money
+    if space.lose_money > 0:
+        for player in engine.state.players:
+            player.money = max(0, player.money - space.lose_money)
+
+    # 3. Lose Patches
+    if space.lose_patches > 0:
+        for player in engine.state.players:
+            player.patches = max(0, player.patches - space.lose_patches)
+
+    # 4. Demote Dice
+    if space.demote_dice > 0:
+        for player, rolled_dice, commitments in player_commitments:
+            demote_player_dice_step2a(player, rolled_dice, commitments, space.demote_dice)
+
+    # 5. Return Colored Dice
+    if space.return_colored_dice > 0:
+        for player, rolled_dice, commitments in player_commitments:
+            return_player_colored_dice_step2a(engine, player, rolled_dice, commitments, space.return_colored_dice)
+
+    # 6. Lose Secrets
+    if space.lose_secrets > 0:
+        for player in engine.state.players:
+            player.secrets -= space.lose_secrets
+            if player.secrets <= 0:
+                player.is_patient_zero = True
+
+    # 7. Next Phase Lock
+    if space.next_phase_lock:
+        engine.state.pending_next_phase_locks.add(space.next_phase_lock)
 

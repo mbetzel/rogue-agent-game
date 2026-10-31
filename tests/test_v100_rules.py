@@ -49,30 +49,24 @@ class TestV100Rules(unittest.TestCase):
         self.assertEqual(cfg_4p.get_starting_patches(4), 2)
 
     def test_version_cards_upgrade_payloads_standardized(self):
-        """v2.0 and v3.0 cards should inject exactly 2 cubes on upgrade across all versions."""
+        """In v0.15.0, v2.0 and v3.0 staging_payload is empty (corruption track is sole source of new cubes) and track capacities are 4/5/6."""
         cards = {c.directive_code: c for c in get_all_version_cards()}
 
-        # v2.0 cards
-        raas_payload = cards["RAAS"].get_staging_payload(4)
-        self.assertEqual(sum(raas_payload.values()), 2)
-        self.assertEqual(raas_payload[CubeColor.RED], 1)
-        self.assertEqual(raas_payload[CubeColor.GREEN], 1)
+        # v1.0 cards
+        self.assertEqual(cards["SCRIPT_KIDDIE"].track_capacity, 4)
+        self.assertEqual(cards["DATA_SCRAPER"].track_capacity, 4)
 
-        worm_payload = cards["POLYMORPHIC_WORM"].get_staging_payload(4)
-        self.assertEqual(sum(worm_payload.values()), 2)
-        self.assertEqual(worm_payload[CubeColor.GREEN], 1)
-        self.assertEqual(worm_payload[CubeColor.BLACK], 1)
+        # v2.0 cards: staging payload is empty; track capacity is 5
+        self.assertEqual(cards["RAAS"].get_staging_payload(4), {})
+        self.assertEqual(cards["RAAS"].track_capacity, 5)
+        self.assertEqual(cards["POLYMORPHIC_WORM"].get_staging_payload(4), {})
+        self.assertEqual(cards["POLYMORPHIC_WORM"].track_capacity, 5)
 
-        # v3.0 cards
-        zero_day_payload = cards["ZERO_DAY_OVERRIDE"].get_staging_payload(4)
-        self.assertEqual(sum(zero_day_payload.values()), 2)
-        self.assertEqual(zero_day_payload[CubeColor.RED], 1)
-        self.assertEqual(zero_day_payload[CubeColor.BLACK], 1)
-
-        corrupted_payload = cards["CORRUPTED_KERNEL"].get_staging_payload(4)
-        self.assertEqual(sum(corrupted_payload.values()), 2)
-        self.assertEqual(corrupted_payload[CubeColor.RED], 1)
-        self.assertEqual(corrupted_payload[CubeColor.BLUE], 1)
+        # v3.0 cards: staging payload is empty; track capacity is 6
+        self.assertEqual(cards["ZERO_DAY_OVERRIDE"].get_staging_payload(4), {})
+        self.assertEqual(cards["ZERO_DAY_OVERRIDE"].track_capacity, 6)
+        self.assertEqual(cards["CORRUPTED_KERNEL"].get_staging_payload(4), {})
+        self.assertEqual(cards["CORRUPTED_KERNEL"].track_capacity, 6)
 
     def test_game_engine_initializes_with_v100_defaults(self):
         """GameEngine initializes players with correct v0.10.0 resources per player count."""
@@ -107,13 +101,13 @@ class TestV100Rules(unittest.TestCase):
             self.assertEqual(player.patches, 2)
 
     def test_web_serializer_reports_player_count_capacity(self):
-        """Web state serializer correctly exposes corruption_capacity matching player count."""
+        """Web state serializer exposes corruption_capacity matching the active version track capacity."""
         cfg_4p = GameConfig(num_players=4)
         bots_4p = [AdaptiveBalancedBot(i) for i in range(4)]
         eng_4p = GameEngine(cfg_4p, bots_4p, seed=42)
 
         serialized = GameStateSerializer.serialize_game_state(eng_4p.state, {"players": {}})
-        self.assertEqual(serialized["corruption_capacity"], 6)
+        self.assertEqual(serialized["corruption_capacity"], 4)  # v1.0 track has 4 spaces
 
         cfg_2p = GameConfig(num_players=2)
         bots_2p = [AdaptiveBalancedBot(i) for i in range(2)]

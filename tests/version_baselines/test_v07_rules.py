@@ -242,8 +242,8 @@ class TestV07Rules(unittest.TestCase):
         engine_2p._execute_phase_2([(engine_2p.state.players[0], [], {}), (engine_2p.state.players[1], [], {})])
 
         self.assertEqual(engine_2p.state.current_version_index, 1)  # v2.0 RaaS
-        self.assertEqual(engine_2p.state.staging_cup[CubeColor.RED], 1)  # 2P payload: 1 Red
-        self.assertEqual(engine_2p.state.staging_cup[CubeColor.GREEN], 1)  # 2P payload: 1 Green
+        self.assertEqual(engine_2p.state.staging_cup[CubeColor.RED], 3)  # v0.15.0 Script Kiddie spaces 1 & 4 (2) + RaaS 2p payload (1) = 3 Red
+        self.assertEqual(engine_2p.state.staging_cup[CubeColor.GREEN], 2)  # v0.15.0 Script Kiddie space 1 (1) + RaaS 2p payload (1) = 2 Green
 
         # 4-Player Match
         v07_raas = VersionCard(
@@ -271,8 +271,8 @@ class TestV07Rules(unittest.TestCase):
         engine_4p._execute_phase_2([(p, [], {}) for p in engine_4p.state.players])
 
         self.assertEqual(engine_4p.state.current_version_index, 1)  # v2.0 RaaS
-        self.assertEqual(engine_4p.state.staging_cup[CubeColor.RED], 2)  # 4P payload: 2 Red
-        self.assertEqual(engine_4p.state.staging_cup[CubeColor.GREEN], 1)  # 4P payload: 1 Green
+        self.assertEqual(engine_4p.state.staging_cup[CubeColor.RED], 4)  # v0.15.0 Script Kiddie spaces 1 & 4 (2) + 4P payload (2) = 4 Red
+        self.assertEqual(engine_4p.state.staging_cup[CubeColor.GREEN], 2)  # v0.15.0 Script Kiddie space 1 (1) + 4P payload (1) = 2 Green
 
     # -------------------------------------------------------------------------
     # 7. Contractor Progressive Cost Calculation

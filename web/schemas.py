@@ -102,6 +102,22 @@ class GameStateSerializer:
             "staging_payload": {c.value: count for c, count in card.staging_payload.items()},
             "directive_description": card.directive_description,
             "directive_code": card.directive_code,
+            "track_capacity": card.track_capacity,
+            "corruption_track": [
+                {
+                    "index": s.index,
+                    "label": s.label,
+                    "lose_money": s.lose_money,
+                    "lose_patches": s.lose_patches,
+                    "demote_dice": s.demote_dice,
+                    "return_colored_dice": s.return_colored_dice,
+                    "lose_secrets": s.lose_secrets,
+                    "next_phase_lock": s.next_phase_lock,
+                    "is_upgrade": s.is_upgrade,
+                    "is_singularity": s.is_singularity,
+                }
+                for s in card.corruption_track
+            ],
             "staging_payload_2p": {c.value: count for c, count in card.staging_payload_2p.items()}
             if card.staging_payload_2p is not None
             else None,
@@ -345,7 +361,9 @@ class GameStateSerializer:
             "last_round_buffer_overflow": getattr(state, "last_round_buffer_overflow", False),
             "total_buffer_overflows": getattr(state, "total_buffer_overflows", 0),
             "corruption_track": state.corruption_track,
-            "corruption_capacity": state.config.corruption_track_capacity,
+            "corruption_capacity": state.corruption_track_capacity,
+            "active_phase1_locks": sorted(list(getattr(state, "active_phase1_locks", []))),
+            "pending_next_phase_locks": sorted(list(getattr(state, "pending_next_phase_locks", []))),
             "current_version_index": state.current_version_index,
             "active_version": active_version,
             "version_deck": version_deck_serialized,

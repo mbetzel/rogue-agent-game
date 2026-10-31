@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
 from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
 from sim.entities import (
@@ -257,6 +257,8 @@ class GameState:
     singularity_triggered: bool = False
     contractor_supply: int = 12
     next_die_id: int = 1
+    pending_next_phase_locks: Set[str] = field(default_factory=set)
+    active_phase1_locks: Set[str] = field(default_factory=set)
     rng: random.Random = field(default_factory=random.Random)
 
     def __post_init__(self) -> None:
@@ -269,5 +271,11 @@ class GameState:
     @property
     def active_directive_code(self) -> str:
         return self.active_version.directive_code
+
+    @property
+    def corruption_track_capacity(self) -> int:
+        if self.config.corruption_track_flat_capacity is not None:
+            return self.config.corruption_track_flat_capacity
+        return self.active_version.track_capacity
 
 

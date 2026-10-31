@@ -31,11 +31,12 @@ class TestCardsAndDirectives(unittest.TestCase):
         self.assertEqual(engine.state.players[1].money, 6)
 
     def test_directive_raas_red_strength_boost(self) -> None:
-        """v0.6 RAAS Encrypted Memory: Any rolled die showing cash is locked immediately."""
+        """v0.15.0 RAAS Encrypted Memory: Any rolled die showing cash is locked when CASH lock is active."""
         cfg = GameConfig(num_players=2)
         deck = [self.all_versions["SCRIPT_KIDDIE"], self.all_versions["RAAS"], self.all_versions["ZERO_DAY_OVERRIDE"]]
         engine = GameEngine(cfg, [self.bot, AdaptiveBalancedBot(1)], version_deck=deck, seed=42)
         engine.state.current_version_index = 1  # Active: RAAS
+        engine.state.pending_next_phase_locks.add("CASH")
 
         player = engine.state.players[0]
         cash_face = Face("+$1", money=1)
@@ -44,14 +45,15 @@ class TestCardsAndDirectives(unittest.TestCase):
         player.ready_dice = [gray_die]
 
         engine._execute_phase_1()
-        self.assertTrue(gray_die.is_locked, "Under RAAS, rolled cash die must be locked")
+        self.assertTrue(gray_die.is_locked, "Under RAAS with CASH lock active, rolled cash die must be locked")
 
     def test_directive_zero_day_override_reduces_shields(self) -> None:
-        """v0.6 ZERO_DAY_OVERRIDE Kernel Lock: Any rolled die showing a shield is locked immediately."""
+        """v0.15.0 ZERO_DAY_OVERRIDE Kernel Lock: Any rolled die showing a shield is locked when SHIELD lock is active."""
         cfg = GameConfig(num_players=2)
         deck = [self.all_versions["SCRIPT_KIDDIE"], self.all_versions["RAAS"], self.all_versions["ZERO_DAY_OVERRIDE"]]
         engine = GameEngine(cfg, [self.bot, AdaptiveBalancedBot(1)], version_deck=deck, seed=42)
         engine.state.current_version_index = 2  # Active: ZERO_DAY_OVERRIDE
+        engine.state.pending_next_phase_locks.add("SHIELD")
 
         player = engine.state.players[0]
         shield_face = Face("Block 1 Blue", block_amount=1, shield_color=ShieldColor.BLUE)
@@ -60,7 +62,7 @@ class TestCardsAndDirectives(unittest.TestCase):
         player.ready_dice = [gray_die]
 
         engine._execute_phase_1()
-        self.assertTrue(gray_die.is_locked, "Under ZERO_DAY_OVERRIDE, rolled shield die must be locked")
+        self.assertTrue(gray_die.is_locked, "Under ZERO_DAY_OVERRIDE with SHIELD lock active, rolled shield die must be locked")
 
     def test_variant_r2_threat_bounty(self) -> None:
         """R2 gives +$2 if player takes 0 unblocked Red damage."""

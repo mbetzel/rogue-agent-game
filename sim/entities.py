@@ -126,6 +126,23 @@ class VariantCard:
 
 
 @dataclass(frozen=True)
+class CorruptionSpace:
+    """Represents a single space on a Version Corruption Track (RULES.md Section 6C)."""
+
+    index: int  # 1-indexed space number on this version card (1..4, 1..5, or 1..6)
+    label: str  # Human-readable summary
+    add_cubes: Dict[CubeColor, int] = field(default_factory=dict)
+    lose_money: int = 0
+    lose_patches: int = 0
+    demote_dice: int = 0
+    return_colored_dice: int = 0
+    lose_secrets: int = 0
+    next_phase_lock: Optional[str] = None  # "CASH", "PATCH", "SHIELD", or None
+    is_upgrade: bool = False
+    is_singularity: bool = False
+
+
+@dataclass(frozen=True)
 class VersionCard:
     """Represents a Rogue Agent roadmap version card (v1.0, v2.0, or v3.0)."""
 
@@ -135,6 +152,14 @@ class VersionCard:
     directive_description: str
     directive_code: str  # SCRIPT_KIDDIE, DATA_SCRAPER, RAAS, POLYMORPHIC_WORM, ZERO_DAY_OVERRIDE, CORRUPTED_KERNEL
     staging_payload_2p: Optional[Dict[CubeColor, int]] = None
+    corruption_track: Tuple[CorruptionSpace, ...] = ()
+    starting_cash_bonus: int = 0
+
+    @property
+    def track_capacity(self) -> int:
+        return len(self.corruption_track) if self.corruption_track else (
+            4 if self.version_str == "v1.0" else (5 if self.version_str == "v2.0" else 6)
+        )
 
     def get_staging_payload(self, num_players: int = 4) -> Dict[CubeColor, int]:
         """Returns the version's staging payload cubes scaled for player count (2P vs 3P/4P)."""
@@ -388,65 +413,288 @@ def get_random_variant_cards(rng: random.Random) -> Dict[DieColor, VariantCard]:
     return chosen
 
 
-def get_all_version_cards() -> List[VersionCard]:
-    """Returns all 6 sample Version cards from RULES.md."""
+def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
+    """Returns all 6 sample Version cards with per-version Corruption Tracks per RULES.md Section 6C.
+
+    Supported profiles: "STANDARD" (Profile 1) and "AGGRESSIVE" (Profile 2).
+    """
+    is_aggressive = profile.upper() == "AGGRESSIVE"
+
+    if is_aggressive:
+        # Profile 2: Aggressive Escalation Tracks
+        return [
+            # v1.0 Script Kiddie (4 spaces)
+            VersionCard(
+                version_str="v1.0",
+                name="Script Kiddie",
+                staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1, CubeColor.BLACK: 1},
+                directive_description="None.",
+                directive_code="SCRIPT_KIDDIE",
+                corruption_track=(
+                    CorruptionSpace(index=1, label="Add 1R, 1G", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1}),
+                    CorruptionSpace(index=2, label="All lose $3", lose_money=3),
+                    CorruptionSpace(index=3, label="Demote 1 die + Add 1B", demote_dice=1, add_cubes={CubeColor.BLUE: 1}),
+                    CorruptionSpace(
+                        index=4,
+                        label="Upgrade: Lose 1 🔧 + Add 1R, 1B, 1G",
+                        lose_patches=1,
+                        add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1},
+                        is_upgrade=True,
+                    ),
+                ),
+            ),
+            # v1.0 Data Scraper (4 spaces)
+            VersionCard(
+                version_str="v1.0",
+                name="Data Scraper",
+                staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 2, CubeColor.BLACK: 1},
+                directive_description="Players start with +$1 extra Money.",
+                directive_code="DATA_SCRAPER",
+                starting_cash_bonus=1,
+                corruption_track=(
+                    CorruptionSpace(index=1, label="Lose 2 🔧 + Add 1B", lose_patches=2, add_cubes={CubeColor.BLUE: 1}),
+                    CorruptionSpace(index=2, label="All demote 1 die", demote_dice=1),
+                    CorruptionSpace(index=3, label="Add 1R, 1B, 1G", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1}),
+                    CorruptionSpace(
+                        index=4,
+                        label="Upgrade: Lose $3 + Add 1R, 1G",
+                        lose_money=3,
+                        add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1},
+                        is_upgrade=True,
+                    ),
+                ),
+            ),
+            # v2.0 RaaS (5 spaces)
+            VersionCard(
+                version_str="v2.0",
+                name="Ransomware-as-a-Service",
+                staging_payload={},
+                directive_description="Encrypted Memory: Any rolled die showing Cash (+$1 or +$2) is Locked immediately. (Space 3).",
+                directive_code="RAAS",
+                staging_payload_2p={CubeColor.RED: 1, CubeColor.GREEN: 1},
+                corruption_track=(
+                    CorruptionSpace(index=1, label="All lose $4", lose_money=4),
+                    CorruptionSpace(index=2, label="Add 2R, 1G", add_cubes={CubeColor.RED: 2, CubeColor.GREEN: 1}),
+                    CorruptionSpace(index=3, label="Lock Cash ($) next Phase 1", next_phase_lock="CASH"),
+                    CorruptionSpace(index=4, label="Lose $5 & 1 🔧", lose_money=5, lose_patches=1),
+                    CorruptionSpace(
+                        index=5,
+                        label="Upgrade: Demote 1 die + Add 1R, 1B, 1K",
+                        demote_dice=1,
+                        add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.BLACK: 1},
+                        is_upgrade=True,
+                    ),
+                ),
+            ),
+            # v2.0 Polymorphic Worm (5 spaces)
+            VersionCard(
+                version_str="v2.0",
+                name="Polymorphic Worm",
+                staging_payload={},
+                directive_description="Subroutine Throttling: Players receive only 1 free reroll in Phase 1 (instead of 2). (Space 4: Patch faces locked next Phase 1).",
+                directive_code="POLYMORPHIC_WORM",
+                staging_payload_2p={CubeColor.GREEN: 1, CubeColor.BLACK: 1},
+                corruption_track=(
+                    CorruptionSpace(index=1, label="Lose 2 🔧 + Add 1B, 1G", lose_patches=2, add_cubes={CubeColor.BLUE: 1, CubeColor.GREEN: 1}),
+                    CorruptionSpace(index=2, label="All demote 2 dice", demote_dice=2),
+                    CorruptionSpace(index=3, label="Add 1R, 2G", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 2}),
+                    CorruptionSpace(index=4, label="Lock Patch (🔧) next Phase 1", next_phase_lock="PATCH"),
+                    CorruptionSpace(
+                        index=5,
+                        label="Upgrade: Demote 1 die + Add 1B, 1G, 1K",
+                        demote_dice=1,
+                        add_cubes={CubeColor.BLUE: 1, CubeColor.GREEN: 1, CubeColor.BLACK: 1},
+                        is_upgrade=True,
+                    ),
+                ),
+            ),
+            # v3.0 Zero-Day Override (6 spaces)
+            VersionCard(
+                version_str="v3.0",
+                name="Zero-Day Override",
+                staging_payload={},
+                directive_description="Kernel Lock: Any rolled die showing a Shield (Block 1 or Block 2) is Locked immediately. (Space 3).",
+                directive_code="ZERO_DAY_OVERRIDE",
+                staging_payload_2p={CubeColor.RED: 1, CubeColor.BLACK: 1},
+                corruption_track=(
+                    CorruptionSpace(index=1, label="Add 2R, 1B, 1G", add_cubes={CubeColor.RED: 2, CubeColor.BLUE: 1, CubeColor.GREEN: 1}),
+                    CorruptionSpace(index=2, label="Lose $5 & 2 🔧", lose_money=5, lose_patches=2),
+                    CorruptionSpace(index=3, label="Lock Shields next Phase 1", next_phase_lock="SHIELD"),
+                    CorruptionSpace(index=4, label="Return 1 Colored Die & demote 1 die", return_colored_dice=1, demote_dice=1),
+                    CorruptionSpace(index=5, label="All lose 2 Secrets", lose_secrets=2),
+                    CorruptionSpace(
+                        index=6,
+                        label="Singularity: Add 2R, 2B, 2G",
+                        add_cubes={CubeColor.RED: 2, CubeColor.BLUE: 2, CubeColor.GREEN: 2},
+                        is_singularity=True,
+                    ),
+                ),
+            ),
+            # v3.0 Corrupted Kernel (6 spaces)
+            VersionCard(
+                version_str="v3.0",
+                name="Corrupted Kernel",
+                staging_payload={},
+                directive_description="If 2+ Black Cubes exit the tower this round, the Attack Color with the most exited cubes gains +2 Strength total.",
+                directive_code="CORRUPTED_KERNEL",
+                staging_payload_2p={CubeColor.RED: 1, CubeColor.BLUE: 1},
+                corruption_track=(
+                    CorruptionSpace(index=1, label="Demote 2 dice + Add 1R, 1B", demote_dice=2, add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}),
+                    CorruptionSpace(index=2, label="Lose $5 & 2 🔧", lose_money=5, lose_patches=2),
+                    CorruptionSpace(index=3, label="Add 2R, 2B, 1G", add_cubes={CubeColor.RED: 2, CubeColor.BLUE: 2, CubeColor.GREEN: 1}),
+                    CorruptionSpace(index=4, label="Lock Shields next Phase 1", next_phase_lock="SHIELD"),
+                    CorruptionSpace(index=5, label="Return 1 Colored Die & lose 1 Secret", return_colored_dice=1, lose_secrets=1),
+                    CorruptionSpace(
+                        index=6,
+                        label="Singularity: Lose 1 Secret + Add 2R, 2B, 1G",
+                        lose_secrets=1,
+                        add_cubes={CubeColor.RED: 2, CubeColor.BLUE: 2, CubeColor.GREEN: 1},
+                        is_singularity=True,
+                    ),
+                ),
+            ),
+        ]
+
+    # Profile 1: Standard Escalation Tracks
     return [
+        # v1.0 Script Kiddie (4 spaces)
         VersionCard(
             version_str="v1.0",
             name="Script Kiddie",
             staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1, CubeColor.BLACK: 1},
             directive_description="None.",
             directive_code="SCRIPT_KIDDIE",
+            corruption_track=(
+                CorruptionSpace(index=1, label="Add 1R, 1G", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1}),
+                CorruptionSpace(index=2, label="All lose $2", lose_money=2),
+                CorruptionSpace(index=3, label="Add 1B", add_cubes={CubeColor.BLUE: 1}),
+                CorruptionSpace(
+                    index=4,
+                    label="Upgrade: Lose 1 🔧 + Add 1R, 1B",
+                    lose_patches=1,
+                    add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1},
+                    is_upgrade=True,
+                ),
+            ),
         ),
+        # v1.0 Data Scraper (4 spaces)
         VersionCard(
             version_str="v1.0",
             name="Data Scraper",
             staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 2, CubeColor.BLACK: 1},
             directive_description="Players start with +$1 extra Money.",
             directive_code="DATA_SCRAPER",
+            starting_cash_bonus=1,
+            corruption_track=(
+                CorruptionSpace(index=1, label="Lose 1 🔧 + Add 1B", lose_patches=1, add_cubes={CubeColor.BLUE: 1}),
+                CorruptionSpace(index=2, label="All demote 1 die", demote_dice=1),
+                CorruptionSpace(index=3, label="Add 1R, 1G", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1}),
+                CorruptionSpace(
+                    index=4,
+                    label="Upgrade: Lose $2 + Add 1B, 1G",
+                    lose_money=2,
+                    add_cubes={CubeColor.BLUE: 1, CubeColor.GREEN: 1},
+                    is_upgrade=True,
+                ),
+            ),
         ),
+        # v2.0 RaaS (5 spaces)
         VersionCard(
             version_str="v2.0",
             name="Ransomware-as-a-Service",
-            staging_payload={CubeColor.RED: 1, CubeColor.GREEN: 1},
-            directive_description="Encrypted Memory: Any rolled die showing Cash (+$1 or +$2) is Locked immediately.",
+            staging_payload={},
+            directive_description="Encrypted Memory: Any rolled die showing Cash (+$1 or +$2) is Locked immediately. (Space 3).",
             directive_code="RAAS",
             staging_payload_2p={CubeColor.RED: 1, CubeColor.GREEN: 1},
+            corruption_track=(
+                CorruptionSpace(index=1, label="All lose $3", lose_money=3),
+                CorruptionSpace(index=2, label="Add 1R, 1G", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1}),
+                CorruptionSpace(index=3, label="Lock Cash ($) next Phase 1", next_phase_lock="CASH"),
+                CorruptionSpace(index=4, label="Lose $3 & 1 🔧", lose_money=3, lose_patches=1),
+                CorruptionSpace(
+                    index=5,
+                    label="Upgrade: Add 1R, 1B, 1K",
+                    add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.BLACK: 1},
+                    is_upgrade=True,
+                ),
+            ),
         ),
+        # v2.0 Polymorphic Worm (5 spaces)
         VersionCard(
             version_str="v2.0",
             name="Polymorphic Worm",
-            staging_payload={CubeColor.GREEN: 1, CubeColor.BLACK: 1},
-            directive_description="Subroutine Throttling: Players receive only 1 free reroll in Phase 1 (instead of 2).",
+            staging_payload={},
+            directive_description="Subroutine Throttling: Players receive only 1 free reroll in Phase 1 (instead of 2). (Space 4: Patch faces locked next Phase 1).",
             directive_code="POLYMORPHIC_WORM",
             staging_payload_2p={CubeColor.GREEN: 1, CubeColor.BLACK: 1},
+            corruption_track=(
+                CorruptionSpace(index=1, label="Lose 2 🔧 + Add 1G", lose_patches=2, add_cubes={CubeColor.GREEN: 1}),
+                CorruptionSpace(index=2, label="All demote 1 die", demote_dice=1),
+                CorruptionSpace(index=3, label="Add 1B, 1G", add_cubes={CubeColor.BLUE: 1, CubeColor.GREEN: 1}),
+                CorruptionSpace(index=4, label="Lock Patch (🔧) next Phase 1", next_phase_lock="PATCH"),
+                CorruptionSpace(
+                    index=5,
+                    label="Upgrade: Demote 1 die + Add 1R, 1G, 1K",
+                    demote_dice=1,
+                    add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1, CubeColor.BLACK: 1},
+                    is_upgrade=True,
+                ),
+            ),
         ),
+        # v3.0 Zero-Day Override (6 spaces)
         VersionCard(
             version_str="v3.0",
             name="Zero-Day Override",
-            staging_payload={CubeColor.RED: 1, CubeColor.BLACK: 1},
-            directive_description="Kernel Lock: Any rolled die showing a Shield (Block 1 or Block 2) is Locked immediately.",
+            staging_payload={},
+            directive_description="Kernel Lock: Any rolled die showing a Shield (Block 1 or Block 2) is Locked immediately. (Space 3).",
             directive_code="ZERO_DAY_OVERRIDE",
             staging_payload_2p={CubeColor.RED: 1, CubeColor.BLACK: 1},
+            corruption_track=(
+                CorruptionSpace(index=1, label="Add 1R, 1B, 1G", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1}),
+                CorruptionSpace(index=2, label="All lose $4", lose_money=4),
+                CorruptionSpace(index=3, label="Lock Shields next Phase 1", next_phase_lock="SHIELD"),
+                CorruptionSpace(index=4, label="Return 1 Colored Die", return_colored_dice=1),
+                CorruptionSpace(index=5, label="Lose 1 Secret & demote 1 die", lose_secrets=1, demote_dice=1),
+                CorruptionSpace(
+                    index=6,
+                    label="Singularity: Add 1R, 1B, 1G",
+                    add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1},
+                    is_singularity=True,
+                ),
+            ),
         ),
+        # v3.0 Corrupted Kernel (6 spaces)
         VersionCard(
             version_str="v3.0",
             name="Corrupted Kernel",
-            staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 1},
+            staging_payload={},
             directive_description="If 2+ Black Cubes exit the tower this round, the Attack Color with the most exited cubes gains +2 Strength total.",
             directive_code="CORRUPTED_KERNEL",
             staging_payload_2p={CubeColor.RED: 1, CubeColor.BLUE: 1},
+            corruption_track=(
+                CorruptionSpace(index=1, label="Demote 1 die + Add 1R, 1B", demote_dice=1, add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}),
+                CorruptionSpace(index=2, label="Lose $4 & 1 🔧", lose_money=4, lose_patches=1),
+                CorruptionSpace(index=3, label="Add 1R, 1B, 1G", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1}),
+                CorruptionSpace(index=4, label="Lock Shields next Phase 1", next_phase_lock="SHIELD"),
+                CorruptionSpace(index=5, label="Lose 1 Secret & return 1 Colored Die", lose_secrets=1, return_colored_dice=1),
+                CorruptionSpace(
+                    index=6,
+                    label="Singularity: Add 2R, 2B",
+                    add_cubes={CubeColor.RED: 2, CubeColor.BLUE: 2},
+                    is_singularity=True,
+                ),
+            ),
         ),
     ]
 
 
-def get_default_version_deck() -> List[VersionCard]:
+def get_default_version_deck(profile: str = "STANDARD") -> List[VersionCard]:
     """Returns the default baseline version cards: Script Kiddie (v1.0), RaaS (v2.0), Zero-Day Override (v3.0)."""
-    cards = get_all_version_cards()
+    cards = get_all_version_cards(profile=profile)
     return [cards[0], cards[2], cards[4]]
 
 
-def get_roadmap_deck(path_id: int) -> List[VersionCard]:
+def get_roadmap_deck(path_id: int, profile: str = "STANDARD") -> List[VersionCard]:
     """Returns a deterministic 3-card roadmap deck for a designated path ID (1-4).
 
     Path 1 (Kinetic): Script Kiddie (v1.0), RaaS (v2.0), Corrupted Kernel (v3.0)
@@ -454,7 +702,7 @@ def get_roadmap_deck(path_id: int) -> List[VersionCard]:
     Path 3 (Mixed A): Script Kiddie (v1.0), RaaS (v2.0), Zero-Day Override (v3.0)
     Path 4 (Mixed B): Script Kiddie (v1.0), Polymorphic Worm (v2.0), Corrupted Kernel (v3.0)
     """
-    cards = {c.directive_code: c for c in get_all_version_cards()}
+    cards = {c.directive_code: c for c in get_all_version_cards(profile=profile)}
     if path_id == 1:
         return [cards["SCRIPT_KIDDIE"], cards["RAAS"], cards["CORRUPTED_KERNEL"]]
     elif path_id == 2:
@@ -467,9 +715,9 @@ def get_roadmap_deck(path_id: int) -> List[VersionCard]:
         raise ValueError(f"Unknown roadmap path_id: {path_id}. Must be 1, 2, 3, or 4.")
 
 
-def get_random_version_deck(rng: random.Random) -> List[VersionCard]:
+def get_random_version_deck(rng: random.Random, profile: str = "STANDARD") -> List[VersionCard]:
     """Randomly selects 1 v1.0 card, 1 v2.0 card, and 1 v3.0 card for the Rogue Agent roadmap."""
-    all_versions = get_all_version_cards()
+    all_versions = get_all_version_cards(profile=profile)
     v1_pool = [v for v in all_versions if v.version_str == "v1.0"]
     v2_pool = [v for v in all_versions if v.version_str == "v2.0"]
     v3_pool = [v for v in all_versions if v.version_str == "v3.0"]
@@ -482,9 +730,10 @@ def get_random_version_deck(rng: random.Random) -> List[VersionCard]:
 
 def get_random_setup(
     rng: random.Random,
+    profile: str = "STANDARD",
 ) -> Tuple[Dict[DieColor, VariantCard], List[VersionCard]]:
     """Returns randomized variant cards and version deck for game setup."""
-    return get_random_variant_cards(rng), get_random_version_deck(rng)
+    return get_random_variant_cards(rng), get_random_version_deck(rng, profile=profile)
 
 
 # =====================================================================

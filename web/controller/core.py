@@ -194,12 +194,16 @@ class GameController:
             f"Round {self.state.current_round} Phase 1: Autonomous AI Pulse added 1 Black Cube to Staging Cup."
         )
 
+        # Promote pending next phase locks
+        self.state.active_phase1_locks = set(self.state.pending_next_phase_locks)
+        self.state.pending_next_phase_locks.clear()
+        if self.state.active_phase1_locks:
+            self.event_log.append(
+                f"Phase 1 Corruption Lock Directives active this round: {sorted(self.state.active_phase1_locks)}."
+            )
+
         # Reset per-round metadata for all players
-        max_rerolls = (
-            self.state.config.throttled_free_rerolls
-            if self.state.active_directive_code == "POLYMORPHIC_WORM"
-            else self.state.config.default_free_rerolls
-        )
+        max_rerolls = self.state.config.default_free_rerolls
 
         for i, p in enumerate(self.state.players):
             meta = self.player_meta[i]

@@ -121,22 +121,18 @@ export function renderCompiler() {
 
           <div class="agent-track-cells-row">
             ${(() => {
+              const activeCard = versionDeck[activeVerIdx] || state.active_version || v1;
+              const spaces = activeCard.corruption_track || [];
               const cells = [];
-              const trackMeta = [
-                { num: "1", sub: "BLACK", isMilestone: false },
-                { num: "2", sub: "BLACK", isMilestone: false },
-                { num: "3", sub: "BLACK", isMilestone: false },
-                { num: "4!", sub: "2P UP", isMilestone: (playerCount === 2) },
-                { num: "5!", sub: "3P UP", isMilestone: (playerCount === 3) },
-                { num: "6!", sub: "4P UP", isMilestone: (playerCount >= 4) },
-              ];
               for (let i = 0; i < capacity; i++) {
                 const isFilled = i < currentTrack;
-                const meta = trackMeta[i] || { num: `${i + 1}`, sub: "UP", isMilestone: false };
+                const space = spaces[i] || {};
+                const label = space.label || `Space ${i + 1}`;
+                const isMilestone = (i === capacity - 1);
                 cells.push(`
-                  <div class="agent-corruption-cell ${isFilled ? 'filled' : ''} ${meta.isMilestone ? 'milestone-cell' : ''}">
-                    <span class="cell-num">${meta.num}</span>
-                    <span class="cell-sub">${meta.sub}</span>
+                  <div class="agent-corruption-cell ${isFilled ? 'filled' : ''} ${isMilestone ? 'milestone-cell' : ''}" title="Space ${i + 1}: ${label}">
+                    <span class="cell-num">${i + 1}</span>
+                    <span class="cell-sub" style="font-size: 0.55rem; max-width: 50px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${label}</span>
                     ${isFilled ? '<span class="cell-cube">■</span>' : ''}
                   </div>
                 `);
@@ -146,7 +142,9 @@ export function renderCompiler() {
           </div>
 
           <div class="agent-track-footnote">
-            <strong>Step 2A:</strong> Place exited ■ Black 1-by-1. Fills at <strong>${capacity} (${playerCount}P)</strong>: clear track, advance Version, add Upgrade Payload → Staging Cup. (v3.0 fill = <strong>SINGULARITY</strong>).
+            <strong>Step 2A:</strong> Each exited ■ Black advances track 1 space and triggers its printed effect. Fills at <strong>${capacity} spaces</strong>: advance Version (v3.0 fill = <strong>SINGULARITY</strong>).
+            ${state.active_phase1_locks && state.active_phase1_locks.length > 0 ? `<div style="color: #ff3366; font-weight: bold; margin-top: 3px;">⚠️ Phase 1 Locks Active: ${state.active_phase1_locks.join(', ')}</div>` : ''}
+            ${state.pending_next_phase_locks && state.pending_next_phase_locks.length > 0 ? `<div style="color: #ffaa00; font-weight: bold; margin-top: 3px;">⏳ Queued Next Phase 1 Locks: ${state.pending_next_phase_locks.join(', ')}</div>` : ''}
           </div>
         </div>
       </div>

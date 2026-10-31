@@ -110,9 +110,9 @@ class TestEnginePhases(unittest.TestCase):
         # Version should advance to v2.0 (index 1)
         self.assertEqual(engine.state.current_version_index, 1)
         self.assertEqual(engine.state.corruption_track, 0)
-        # In 2P, RaaS upgrade payload is +1 Red, +1 Green (scaled in v0.7)
-        self.assertEqual(engine.state.staging_cup[CubeColor.RED], 1)
-        self.assertEqual(engine.state.staging_cup[CubeColor.GREEN], 1)
+        # In v0.15.0, setup (1) + v1.0 spaces 1 and 4 (2) = 3 Red in Staging Cup
+        self.assertEqual(engine.state.staging_cup[CubeColor.RED], 3)
+        self.assertEqual(engine.state.staging_cup[CubeColor.GREEN], 2)
 
     def test_phase2_singularity_trigger_on_v3(self) -> None:
         cfg = GameConfig(num_players=2)
@@ -124,7 +124,7 @@ class TestEnginePhases(unittest.TestCase):
 
         # Set version to v3.0 (index 2)
         engine.state.current_version_index = 2
-        engine.state.corruption_track = cfg.corruption_track_capacity - 1  # 1 space away from full (cap = 4)
+        engine.state.corruption_track = engine.state.corruption_track_capacity - 1  # 1 space away from full (cap = 6)
 
         engine.state.staging_cup = {CubeColor.BLACK: 1, CubeColor.RED: 0, CubeColor.BLUE: 0, CubeColor.GREEN: 0}
         commitments = [(engine.state.players[0], engine.state.players[0].ready_dice, {}),

@@ -265,7 +265,7 @@ class TestGroupCEngineAndTowerMechanics(unittest.TestCase):
         self.assertEqual(engine_4p.state.staging_cup[CubeColor.BLACK], 1)
 
         # 2P Test
-        cfg_2p = GameConfig(num_players=2, tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=1.0)
+        cfg_2p = GameConfig(num_players=2, tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=1.0, corruption_track_flat_capacity=4)
         bots_2p = [AdaptiveBalancedBot(i) for i in range(2)]
         engine_2p = GameEngine(config=cfg_2p, bots=bots_2p, seed=42, version_deck=deck_contagion)
 
@@ -308,7 +308,7 @@ class TestGroupCEngineAndTowerMechanics(unittest.TestCase):
         self.assertEqual(engine_4p.state.staging_cup[CubeColor.BLACK], 1)
 
         # 2P Test
-        cfg_2p = GameConfig(num_players=2, tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=1.0)
+        cfg_2p = GameConfig(num_players=2, tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=1.0, corruption_track_flat_capacity=4)
         bots_2p = [AdaptiveBalancedBot(i) for i in range(2)]
         engine_2p = GameEngine(config=cfg_2p, bots=bots_2p, seed=42, version_deck=deck_contagion)
 

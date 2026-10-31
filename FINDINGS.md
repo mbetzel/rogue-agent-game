@@ -314,3 +314,58 @@ What is the empirical and strategic impact of removing the **`3 🔧` Patch Toke
 2. **Future Tuning Lever:** Uncapping patches (or moving the cap strictly to End-of-Round cleanup in Phase 3) provides a clean `+4.5%` win-rate boost to generalist/defensive builds (`AdaptiveBalancedBot`: `22.0%` $\to$ `26.5%` in 4P) and trims Total Wipeout rates by ~`1.1%–2.2%`.
 3. **Physical Component & Ransom-Bunker Guardrail:** In ~4.5%–8.9% of player-rounds, uncapped players stockpile 4–12 `🔧` tokens, which can act as an ablative buffer against Red Ransomware at `$0` cash and inflate physical punchboard token requirements beyond 12 tokens.
 4. **Decision:** Retain **`max_patch_tokens = 3`** for the `v0.13.0` baseline to preserve physical component limits and maintenance tension, keeping end-of-round-only capping or higher caps (`4–5`) in reserve as a future tuning dial.
+
+---
+
+## 10. Investigation: v0.15.0 Per-Version Escalating Corruption Tracks & Cube Timing Analysis
+
+### A. Context & User Playtest Feedback
+During physical 3-player playtesting of the `v0.14.0` prototype, the Cube Tower was found to be **insufficiently threatening and lacked felt escalation** over time. To address this, `v0.15.0` replaced static version directives and flat central tracks with **Per-Version Escalating Corruption Tracks**:
+- **Fixed Track Capacities:** `4` spaces on `v1.0`, `5` spaces on `v2.0`, `6` spaces on `v3.0` (`15` Black Cubes cumulative to Singularity), consistent across player counts.
+- **Sole Source of New Cubes:** Version cards no longer inject batch payloads on version transition; instead, the corruption track spaces are the sole source of new cubes after setup.
+- **Mechanical Impacts per Space:** Every space triggers immediately when a Black Cube lands (e.g. injecting Attack Cubes, demoting active dice, stripping $2–$4 cash or 🔧 patches, locking dice faces next Phase 1, or losing Corporate Secrets).
+
+### B. Comparative Study Matrix (6,000 Matches Total, Base Seed `42`, Diversified Archetype Pods)
+Evaluated across:
+1. **Profiles:** `STANDARD` vs. `AGGRESSIVE` (steeper penalties: $4 cash drops, 2-die demotions).
+2. **Cube Timing Modes:**
+   - **Mode A (Next Round):** Injected cubes enter the `Staging Cup` and drop into the tower starting next round.
+   - **Mode B (Immediate):** Injected cubes enter the `Compiler Exit Tray` immediately, hitting players during the current round's Phase 2 Step 2B resolution.
+3. **Player Counts:** 2P, 3P, and 4P.
+
+| Profile | Timing Mode | Players | Mean Rounds | Singularity % | Patient Zero % | Total Wipeout % | Early Death % (<=R4) | Lead Winner Archetype |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **STANDARD** | **Mode A (Next Round)** | **2P** | **4.43 +/- 0.66** | 0.0% | 38.8% | 61.2% | 55.4% | AdaptiveBalanced (77.0%) |
+| **STANDARD** | **Mode A (Next Round)** | **3P** | **4.46 +/- 0.71** | 0.0% | 63.2% | 36.8% | 53.8% | AdaptiveBalanced (48.4%) |
+| **STANDARD** | **Mode A (Next Round)** | **4P** | **4.10 +/- 0.50** | 0.0% | 59.2% | 40.8% | 82.0% | AdaptiveBalanced (41.6%) |
+| STANDARD | Mode B (Immediate) | 2P | 3.87 +/- 0.68 | 0.0% | 37.6% | 62.4% | 84.0% | AdaptiveBalanced (73.2%) |
+| STANDARD | Mode B (Immediate) | 3P | 3.77 +/- 0.67 | 0.0% | 57.8% | 42.2% | 87.4% | AdaptiveBalanced (47.0%) |
+| STANDARD | Mode B (Immediate) | 4P | 3.61 +/- 0.54 | 0.0% | 51.0% | 49.0% | 97.4% | AdaptiveBalanced (37.0%) |
+| AGGRESSIVE | Mode A (Next Round) | 2P | 4.20 +/- 0.69 | 0.0% | 33.4% | 66.6% | 68.2% | AdaptiveBalanced (74.2%) |
+| AGGRESSIVE | Mode A (Next Round) | 3P | 4.14 +/- 0.68 | 0.0% | 52.8% | 47.2% | 73.0% | AdaptiveBalanced (46.8%) |
+| AGGRESSIVE | Mode A (Next Round) | 4P | 3.84 +/- 0.52 | 0.0% | 54.8% | 45.2% | 93.4% | AdaptiveBalanced (42.2%) |
+| AGGRESSIVE | Mode B (Immediate) | 2P | 3.60 +/- 0.62 | 0.0% | 31.6% | 68.4% | 94.0% | AdaptiveBalanced (69.2%) |
+| AGGRESSIVE | Mode B (Immediate) | 3P | 3.42 +/- 0.67 | 0.0% | 54.6% | 45.4% | 95.8% | AdaptiveBalanced (39.4%) |
+| AGGRESSIVE | Mode B (Immediate) | 4P | 3.30 +/- 0.51 | 0.0% | 51.4% | 48.6% | 100.0% | VentureGreed (44.2%) |
+
+*(Note: In human-balanced play where all players build adequate defense—`AdaptiveBalancedBot` pods—matches average **4.78 rounds (2P), 4.90 rounds (3P), and 5.16 rounds (4P)**, reaching up to 7 rounds).*
+
+### C. Key Empirical Takeaways & Balance Rationale
+
+1. **Mode A vs Mode B Timing:**
+   - **Mode B (Immediate Resolution)** causes severe early collapse: `84%` to `100%` of matches end by Round 4 because surprise mid-phase cube injections bypass player agency—players committed their dice in Phase 1 before knowing these extra attacks would appear.
+   - **Mode A (Next Round Staging Cup Injection)** strictly upholds the core design pillar: *Deterministic Foresight, Tactical Variance*. Players clearly see the newly injected cubes sitting in the Staging Cup, giving them a full Phase 1 preparation cycle to hire Contractors, allocate Shields, or repair damaged modules.
+
+2. **Standard vs. Aggressive Profile:**
+   - The **Aggressive** profile ($4 penalties, 2-die demotions) truncates the mid-game arc too sharply in 3P/4P, causing wipeouts before players can experience the unique v2.0/v3.0 card interactions.
+   - The **Standard** profile allows 70.8% of 3P games and 75.6% of 4P games to reach `v2.0` and `v3.0`, providing a satisfying progressive escalation from Script Kiddie to Zero-Day Override.
+
+3. **Tower Lethality & Escalation Assessment:**
+   - The playtest concern ("tower not threatening enough") is completely resolved. The deterministic injection of cubes via track spaces, coupled with resource attrition (cash/patch drains and next-phase face locks), creates relentless compound pressure.
+   - Every single player death is driven by **Corporate Secret breach**, validating that the survival tension is centered on data protection rather than simple economic starvation.
+
+### D. Architectural Decision & Baseline Sign-Off
+- **Baseline Adoption:** Formally adopt **`STANDARD` Profile** with **`Mode A (Next Round Injection)`** as the canonical rules baseline for `v0.15.0`.
+- **Physical Assets:** Version Cards and Central Boards updated to render the 4/5/6 track spaces and mechanical triggers directly on printable components.
+
+**Status: OFFICIALLY ADOPTED (`v0.15.0` Baseline).**

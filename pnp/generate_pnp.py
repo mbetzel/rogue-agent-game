@@ -316,91 +316,99 @@ VARIANT_CARDS: List[VariantCardSpec] = [
 
 
 @dataclass(frozen=True)
+class VersionTrackSpaceSpec:
+    num: int
+    label: str
+    is_milestone: bool = False
+    is_singularity: bool = False
+
+
+@dataclass(frozen=True)
 class VersionTileSpec:
     version: str
     name: str
     profile: str
-    payload_label: str
-    payload_3p4p: str
-    payload_2p: str
-    directive_title: str
-    directive_body: str
+    banner_text: str
+    spaces: Tuple[VersionTrackSpaceSpec, ...]
 
 
 VERSION_TILES: List[VersionTileSpec] = [
     VersionTileSpec(
         version="v3.0",
         name="Zero-Day Override",
-        profile="SINGULARITY",
-        payload_label="UPGRADE",
-        payload_3p4p="+1 {RED}  +1 {BLACK}",
-        payload_2p="All Counts",
-        directive_title="Kernel Lock",
-        directive_body=(
-            "Any rolled die showing a **Shield** (Block 1/2, Shield `/` Choice, or Shield {STAR}) "
-            "is **{LOCK} Locked** immediately (spend 1 {WRENCH} to unlock)."
+        profile="6 SPACES // SINGULARITY TIER",
+        banner_text="**Kernel Lock:** Space 3 locks Shields next Phase 1. Final space triggers Singularity!",
+        spaces=(
+            VersionTrackSpaceSpec(1, "+1 {RED} 1 {BLUE} 1 {GREEN}"),
+            VersionTrackSpaceSpec(2, "All Lose $4"),
+            VersionTrackSpaceSpec(3, "Lock {SHIELD}\nNext P1"),
+            VersionTrackSpaceSpec(4, "Return 1\nColored Die"),
+            VersionTrackSpaceSpec(5, "Lose 1 Secret\n& Demote 1 Die"),
+            VersionTrackSpaceSpec(6, "SINGULARITY!\n+1 {RED} 1 {BLUE} 1 {GREEN}", is_singularity=True),
         ),
     ),
     VersionTileSpec(
         version="v3.0",
         name="Corrupted Kernel",
-        profile="KINETIC",
-        payload_label="UPGRADE",
-        payload_3p4p="+1 {RED}  +1 {BLUE}",
-        payload_2p="All Counts",
-        directive_title="Overclocked Surge",
-        directive_body=(
-            "If **2+ {BLACK} Black Cubes** exit the tower in Phase 2, the Attack Color "
-            "({RED}/{BLUE}/{GREEN}) with the **most exited cubes** gains **+2 Strength** (tie: {RED}>{BLUE}>{GREEN})."
+        profile="6 SPACES // SINGULARITY TIER",
+        banner_text="**Overclocked Surge:** 2+ Black: Lead Attack +2. Space 4 locks Shields next Phase 1.",
+        spaces=(
+            VersionTrackSpaceSpec(1, "Demote 1 Die\n+1 {RED} 1 {BLUE}"),
+            VersionTrackSpaceSpec(2, "Lose $4\n& 1 {WRENCH}"),
+            VersionTrackSpaceSpec(3, "+1 {RED} 1 {BLUE} 1 {GREEN}"),
+            VersionTrackSpaceSpec(4, "Lock {SHIELD}\nNext P1"),
+            VersionTrackSpaceSpec(5, "Lose 1 Secret\n& Return 1 Die"),
+            VersionTrackSpaceSpec(6, "SINGULARITY!\n+2 {RED} +2 {BLUE}", is_singularity=True),
         ),
     ),
     VersionTileSpec(
         version="v2.0",
         name="Ransomware-as-a-Service",
-        profile="KINETIC",
-        payload_label="UPGRADE",
-        payload_3p4p="+1 {RED}  +1 {GREEN}",
-        payload_2p="All Counts",
-        directive_title="Encrypted Memory",
-        directive_body=(
-            "Any rolled die showing **Cash** (+$1/+$2/+$3, Cash `/` Choice, or Cash {STAR}) "
-            "is **{LOCK} Locked** immediately (spend 1 {WRENCH} to unlock)."
+        profile="5 SPACES // ESCALATION TIER",
+        banner_text="**Encrypted Memory:** Space 3 locks Cash next Phase 1. Final space upgrades to v3.0.",
+        spaces=(
+            VersionTrackSpaceSpec(1, "All Lose $3"),
+            VersionTrackSpaceSpec(2, "+1 {RED} +1 {GREEN}"),
+            VersionTrackSpaceSpec(3, "Lock Cash ($)\nNext P1"),
+            VersionTrackSpaceSpec(4, "Lose $3\n& 1 {WRENCH}"),
+            VersionTrackSpaceSpec(5, "UPGRADE v3.0\n+1 {RED} 1 {BLUE} 1 {BLACK}", is_milestone=True),
         ),
     ),
     VersionTileSpec(
         version="v2.0",
         name="Polymorphic Worm",
-        profile="CONTAGION",
-        payload_label="UPGRADE",
-        payload_3p4p="+1 {GREEN}  +1 {BLACK}",
-        payload_2p="All Counts",
-        directive_title="Subroutine Throttling",
-        directive_body=(
-            "Players receive only **1 free reroll** during Phase 1 Step 4 (instead of the normal 2 free rerolls)."
+        profile="5 SPACES // ESCALATION TIER",
+        banner_text="**Subroutine Throttling:** 1 Free Reroll. Space 4 locks Patches next Phase 1.",
+        spaces=(
+            VersionTrackSpaceSpec(1, "Lose 2 {WRENCH}\n+ Add 1 {GREEN}"),
+            VersionTrackSpaceSpec(2, "All Demote\n1 Die"),
+            VersionTrackSpaceSpec(3, "+1 {BLUE} +1 {GREEN}"),
+            VersionTrackSpaceSpec(4, "Lock {WRENCH}\nNext P1"),
+            VersionTrackSpaceSpec(5, "UPGRADE v3.0\nDemote +1R 1G 1K", is_milestone=True),
         ),
     ),
     VersionTileSpec(
         version="v1.0",
         name="Script Kiddie",
-        profile="BASELINE",
-        payload_label="START CUP",
-        payload_3p4p="1 {RED}  1 {BLUE}  1 {GREEN}  1 {BLACK}",
-        payload_2p="All Counts",
-        directive_title="No Active Directive",
-        directive_body=(
-            "Standard initial compile protocol. Place Starting Payload into the Staging Cup during game setup."
+        profile="4 SPACES // INITIAL TIER",
+        banner_text="**Setup Priming:** Add 1 {RED} 1 {BLUE} 1 {GREEN} 1 {BLACK} to Staging Cup. Upgrade at space 4.",
+        spaces=(
+            VersionTrackSpaceSpec(1, "+1 {RED} +1 {GREEN}"),
+            VersionTrackSpaceSpec(2, "All Lose $2"),
+            VersionTrackSpaceSpec(3, "+1 {BLUE}"),
+            VersionTrackSpaceSpec(4, "UPGRADE v2.0\nLose 1 {WRENCH} +1R 1B", is_milestone=True),
         ),
     ),
     VersionTileSpec(
         version="v1.0",
         name="Data Scraper",
-        profile="BREACH PROBE",
-        payload_label="START CUP",
-        payload_3p4p="1 {RED}  2 {BLUE}  1 {BLACK}",
-        payload_2p="All Counts",
-        directive_title="Seed Capital Leak",
-        directive_body=(
-            "**Setup:** All players start with **+$1 extra Money** ($8 total instead of $7). No ongoing Phase 1-3 restriction."
+        profile="4 SPACES // INITIAL TIER",
+        banner_text="**Setup Priming:** Add 1 {RED} 2 {BLUE} 1 {BLACK} to Cup. All players start with +$1.",
+        spaces=(
+            VersionTrackSpaceSpec(1, "Lose 1 {WRENCH}\n+ Add 1 {BLUE}"),
+            VersionTrackSpaceSpec(2, "All Demote\n1 Die"),
+            VersionTrackSpaceSpec(3, "+1 {RED} +1 {GREEN}"),
+            VersionTrackSpaceSpec(4, "UPGRADE v2.0\nLose $2 +1B 1G", is_milestone=True),
         ),
     ),
 ]
@@ -721,50 +729,28 @@ def render_agent_board(page: PDFPage) -> None:
     ct_h = col_bot - ct_y  # 109.0 pt
     page.rect(slot_x, ct_y, slot_w, ct_h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.2)
     page.rect(slot_x, ct_y, slot_w, 19.0, stroke=PALETTE["ink"], fill=PALETTE["ink"], line_width=0.8)
-    page.rich_line(slot_x + slot_w / 2.0, ct_y + 13.5, "**CORRUPTION TRACK**  (4 [2P] / 5 [3P] / 6 [4P] SPACES)", size=7.5, color=PALETTE["white"], align="center")
+    page.rich_line(slot_x + slot_w / 2.0, ct_y + 13.5, "**ACTIVE VERSION CORRUPTION PROTOCOL** (v0.15.0)", size=7.5, color=PALETTE["white"], align="center")
 
-    # 6 Cube Spaces inside Corruption Track
-    sq_s = 28.0
-    sq_gap = 7.0
-    sq_x0 = slot_x + (slot_w - (6 * sq_s + 5 * sq_gap)) / 2.0
-    sq_y = ct_y + 27.0
-    track_meta = [
-        ("1", "BLACK", False),
-        ("2", "BLACK", False),
-        ("3", "BLACK", False),
-        ("4!", "2P UP", True),
-        ("5!", "3P UP", True),
-        ("6!", "4P UP", True),
+    # 3 Version Track Capacity Milestones
+    tiers_summary = [
+        ("v1.0 (4 Spaces)", "Start Priming -> Up v2.0"),
+        ("v2.0 (5 Spaces)", "Escalation -> Up v3.0"),
+        ("v3.0 (6 Spaces)", "Singularity -> GAME OVER"),
     ]
-    for c_i, (lbl_num, sub_lbl, is_milestone) in enumerate(track_meta):
-        cx_box = sq_x0 + c_i * (sq_s + sq_gap)
-        page.rounded_rect(
-            cx_box, sq_y, sq_s, sq_s, r=3.0,
-            stroke=PALETTE["red"] if is_milestone else PALETTE["ink"],
-            fill=PALETTE["red_light"] if is_milestone else PALETTE["paper_tint"],
-            line_width=1.1 if is_milestone else 0.8,
-        )
-        page.text(
-            cx_box + sq_s / 2.0, sq_y + 14.5,
-            lbl_num,
-            font="bold", size=8.5,
-            color=PALETTE["red"] if is_milestone else PALETTE["ink"],
-            align="center",
-        )
-        page.text(
-            cx_box + sq_s / 2.0, sq_y + 24.5,
-            sub_lbl,
-            font="mono", size=5.0,
-            color=PALETTE["red"] if is_milestone else PALETTE["muted"],
-            align="center",
-        )
-        if c_i < 5:
-            page.text(cx_box + sq_s + sq_gap / 2.0, sq_y + 18.0, ">", font="mono_bold", size=6.0, color=PALETTE["muted"], align="center")
+    sw_t = (slot_w - 20.0) / 3.0
+    for t_i, (t_hdr, t_sub) in enumerate(tiers_summary):
+        tx_b = slot_x + 6.0 + t_i * (sw_t + 4.0)
+        page.rounded_rect(tx_b, ct_y + 24.0, sw_t, 30.0, r=2.5, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.7)
+        page.text(tx_b + sw_t / 2.0, ct_y + 36.0, t_hdr, font="bold", size=6.5, color=PALETTE["ink"], align="center")
+        page.text(tx_b + sw_t / 2.0, ct_y + 46.5, t_sub, font="mono", size=4.8, color=PALETTE["muted"], align="center")
 
     page.rich_paragraph(
-        slot_x + 6.0, ct_y + 76.0, slot_w - 12.0,
-        "**Step 2A:** Place exited {BLACK} 1-by-1. Fills at **4 (2P) / 5 (3P) / 6 (4P)**: clear track, advance Version, add Payload -> Staging Cup (**v3.0 fill = SINGULARITY**).",
-        size=6.2, leading=8.3, color=PALETTE["ink_soft"], align="center",
+        slot_x + 6.0, ct_y + 60.0, slot_w - 12.0,
+        "**Step 2A Protocol:** Place exited {BLACK} 1-by-1 onto the active Version Tile's track. "
+        "Each space immediately triggers its mechanical impact for all players. "
+        "When track fills (**4** on v1.0, **5** on v2.0, **6** on v3.0), advance Version (**v3.0 Space 6 = SINGULARITY!**). "
+        "Newly injected cubes from track spaces go to the Staging Cup for the next compile cycle.",
+        size=5.8, leading=7.8, color=PALETTE["ink_soft"], align="center",
     )
 
     # -------------------------------------------------------------------------
@@ -788,9 +774,9 @@ def render_agent_board(page: PDFPage) -> None:
             "{BLACK} BLACK // CORRUPTION",
             "STEP 2A (FIRST)",
             (
-                "Advance **Corruption Track** 1 space per exited {BLACK}.\n"
-                "**4th Space:** Clear track, move to next Version, add Upgrade Payload to Staging Cup, "
-                "apply new Directive **immediately**, & flip Archetype ability slots. **(v3.0 4th = SINGULARITY!)**"
+                "Advance active **Version Corruption Track** 1 space per exited {BLACK}.\n"
+                "**Space Effects:** Each filled space immediately triggers its effect for all players.\n"
+                "**Track End:** Advance to next Version (**4** on v1.0, **5** on v2.0, **6** on v3.0 = **SINGULARITY!**)."
             ),
             88.0,
         ),
@@ -942,7 +928,7 @@ def render_market_board(page: PDFPage) -> None:
         "**Queued for Next Drop:**\n"
         "- **P1 Start:** +1 {BLACK}\n"
         "- **P2 End:** Recycled {RED}{BLUE}{GREEN}\n"
-        "- **Upgrade:** Version Payload\n"
+        "- **Corruption:** Injected Cubes\n"
         "- **Siphon:** +1 {BLACK}",
         size=6.7, leading=9.8, color=PALETTE["ink_soft"],
     )
@@ -1395,34 +1381,48 @@ def _draw_version_tile(page: PDFPage, x: float, y: float, w: float, h: float, ti
     # Top Header Bar
     ver_bg = PALETTE["ink"] if tile.version == "v3.0" else (PALETTE["ink_soft"] if tile.version == "v2.0" else PALETTE["panel_tint"])
     ver_fg = PALETTE["white"] if tile.version in ("v3.0", "v2.0") else PALETTE["ink"]
-    page.rect(x, y, w, 22.0, stroke=PALETTE["ink"], fill=ver_bg, line_width=0.9)
+    page.rect(x, y, w, 20.0, stroke=PALETTE["ink"], fill=ver_bg, line_width=0.9)
 
     # Version pill on left
-    page.rounded_rect(x + 5.0, y + 4.0, 28.0, 14.0, r=2.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.7)
-    page.text(x + 19.0, y + 13.8, tile.version, font="mono_bold", size=7.8, color=PALETTE["ink"], align="center")
+    page.rounded_rect(x + 5.0, y + 3.0, 28.0, 14.0, r=2.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.7)
+    page.text(x + 19.0, y + 12.8, tile.version, font="mono_bold", size=7.8, color=PALETTE["ink"], align="center")
 
     # Card Name
-    page.text(x + 38.0, y + 14.8, tile.name.upper(), font="bold", size=8.0, color=ver_fg)
+    page.text(x + 38.0, y + 13.8, tile.name.upper(), font="bold", size=8.0, color=ver_fg)
 
     # Profile badge on right
-    page.text(x + w - 6.0, y + 14.2, tile.profile, font="mono", size=5.8, color=PALETTE["rule"] if tile.version in ("v3.0", "v2.0") else PALETTE["muted"], align="right")
+    page.text(x + w - 6.0, y + 13.2, tile.profile, font="mono", size=5.8, color=PALETTE["rule"] if tile.version in ("v3.0", "v2.0") else PALETTE["muted"], align="right")
 
-    # Payload Row (y + 22 .. y + 48)
-    py_bar = y + 22.0
-    page.rect(x, py_bar, w, 25.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.7)
-    lbl_tag = "START CUP" if tile.version == "v1.0" else "UPGRADE"
-    page.text(x + 6.0, py_bar + 10.5, f"{lbl_tag} PAYLOAD (ALL COUNTS):", font="mono_bold", size=5.9, color=PALETTE["muted"])
-    page.rich_line(x + 6.0, py_bar + 21.0, f"**{tile.payload_3p4p}**", size=7.6, color=PALETTE["ink"])
+    # Banner Row (y + 20 .. y + 35)
+    py_bar = y + 20.0
+    page.rect(x, py_bar, w, 15.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.6)
+    page.rich_line(x + 6.0, py_bar + 10.5, tile.banner_text, size=5.8, color=PALETTE["ink"])
 
-    # Standard 2-Cube / Setup Pill on right
-    page.rounded_rect(x + w - 88.0, py_bar + 4.0, 82.0, 17.0, r=2.0, stroke=PALETTE["rule"], fill=PALETTE["white"], line_width=0.6)
-    sub_tag = "Setup Priming" if tile.version == "v1.0" else "Standard 2-Cube"
-    page.rich_line(x + w - 47.0, py_bar + 15.2, sub_tag, size=6.3, color=PALETTE["ink_soft"], align="center")
+    # Corruption Track Spaces (y + 35 .. y + 109)
+    y_track = py_bar + 17.0
+    sh = 70.0
+    n_spaces = len(tile.spaces)
+    gap = 3.0
+    sw = (w - 10.0 - (n_spaces - 1) * gap) / n_spaces
 
-    # Active Directive Body (y + 47 .. y + 112)
-    dy = y + 60.0
-    page.text(x + 8.0, dy, f"ACTIVE DIRECTIVE // {tile.directive_title.upper()}", font="bold", size=7.2, color=PALETTE["red"] if tile.version != "v1.0" else PALETTE["ink_soft"])
-    page.rich_paragraph(x + 8.0, dy + 12.5, w - 16.0, tile.directive_body, size=6.85, leading=9.5, color=PALETTE["ink"])
+    for i, sp in enumerate(tile.spaces):
+        sx = x + 5.0 + i * (sw + gap)
+        bg = PALETTE["red_light"] if sp.is_singularity else (PALETTE["panel_tint"] if sp.is_milestone else PALETTE["white"])
+        border = PALETTE["red"] if sp.is_singularity else (PALETTE["ink"] if sp.is_milestone else PALETTE["rule"])
+        lw = 1.1 if (sp.is_singularity or sp.is_milestone) else 0.6
+        page.rounded_rect(sx, y_track, sw, sh, r=2.5, stroke=border, fill=bg, line_width=lw)
+
+        # Space Number Pill
+        badge_w = min(16.0, sw - 4.0)
+        page.rounded_rect(sx + (sw - badge_w) / 2.0, y_track + 2.5, badge_w, 8.5, r=1.5, stroke=border, fill=PALETTE["white"], line_width=0.5)
+        page.text(sx + sw / 2.0, y_track + 8.5, str(sp.num), font="mono_bold", size=5.8, color=border, align="center")
+
+        # Cube placement outline
+        page.rect(sx + (sw - 14.0) / 2.0, y_track + 13.0, 14.0, 14.0, stroke=PALETTE["muted"], fill=PALETTE["paper_tint"], line_width=0.5, dash=(2, 2))
+        page.rich_line(sx + sw / 2.0, y_track + 22.5, "{BLACK}", size=5.5, color=PALETTE["muted"], align="center")
+
+        # Space effect text below
+        page.rich_paragraph(sx + 1.0, y_track + 33.0, sw - 2.0, sp.label, size=4.9, leading=6.5, color=PALETTE["ink"], align="center")
 
 
 def render_version_tiles_page(page: PDFPage) -> None:
@@ -1445,9 +1445,9 @@ def render_version_tiles_page(page: PDFPage) -> None:
 
     # Left Tier Legend labels
     tier_notes = [
-        ("v3.0 TILES", "Deal 1 face-up\nto top slot.\nTrack fill (4/5/6)\n= SINGULARITY!"),
-        ("v2.0 TILES", "Deal 1 face-up\nto middle slot.\nStandard 2-cube\nPayload to Cup."),
-        ("v1.0 TILES", "Deal 1 face-up\nto bottom slot.\nLoad Start Cup\nat Setup."),
+        ("v3.0 TILES", "Deal 1 face-up\nto top slot.\n6-space Track:\nSpace 6 = SINGULARITY!"),
+        ("v2.0 TILES", "Deal 1 face-up\nto middle slot.\n5-space Track:\nSpace 5 = Upgrade."),
+        ("v1.0 TILES", "Deal 1 face-up\nto bottom slot.\n4-space Track:\nSpace 4 = Upgrade."),
     ]
     for r_i, (t_head, t_desc) in enumerate(tier_notes):
         ry = gy0 + r_i * (th + gap_y)

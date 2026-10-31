@@ -63,7 +63,12 @@ class GameConfig:
     starting_gray_dice: int = 4
     dice_per_color_multiplier: int = 2  # 2 * num_players dice per colored die type
 
-    # Corruption track
+    # Corruption track (v0.15.0 Per-Version Escalating Tracks)
+    corruption_track_profile: str = "STANDARD"  # "STANDARD" (Profile 1) or "AGGRESSIVE" (Profile 2)
+    corruption_cubes_resolve_immediately: bool = False  # Mode A (False): Staging Cup; Mode B (True): immediate tray attack for R/B/G
+    corruption_track_lengths: Dict[str, int] = field(
+        default_factory=lambda: {"v1.0": 4, "v2.0": 5, "v3.0": 6}
+    )
     corruption_track_capacity_by_player_count: Dict[int, int] = field(
         default_factory=lambda: {2: 4, 3: 5, 4: 6}
     )
@@ -147,10 +152,18 @@ class GameConfig:
 
     @property
     def corruption_track_capacity(self) -> int:
-        """Returns the number of spaces on the corruption track: 4 (2P), 5 (3P), 6 (4P) in v0.10.0."""
+        """Returns corruption track capacity from player-count mapping or flat capacity override."""
         if self.corruption_track_flat_capacity is not None:
             return self.corruption_track_flat_capacity
         return self.corruption_track_capacity_by_player_count.get(self.num_players, 4)
+
+    @property
+    def corruption_cube_resolve_immediate(self) -> bool:
+        return self.corruption_cubes_resolve_immediately
+
+    @corruption_cube_resolve_immediate.setter
+    def corruption_cube_resolve_immediate(self, val: bool) -> None:
+        self.corruption_cubes_resolve_immediately = val
 
     def get_starting_secrets(self, num_players: Optional[int] = None) -> int:
         """Returns starting secrets for the specified player count (or self.num_players).

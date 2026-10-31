@@ -406,7 +406,7 @@ class TestV03Rules(unittest.TestCase):
 
         # Set game to v3.0 with track at capacity - 1
         engine.state.current_version_index = len(engine.state.version_deck) - 1
-        engine.state.corruption_track = config.corruption_track_capacity - 1
+        engine.state.corruption_track = engine.state.corruption_track_capacity - 1
 
         commitments = engine._execute_phase_1()
 
