@@ -14,6 +14,7 @@ from sim.bots import (
 )
 from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
+from sim.engine.phase1_boot import detect_hash_matches
 from sim.entities import (
     AbilityStatus,
     ArchetypeCard,
@@ -457,6 +458,15 @@ def commit_defenses(
     player.patches = max(0, player.patches - spent_from_kept)
     player.patches = min(player.patches, controller.state.config.max_patch_tokens)
 
+    # Cryptographic Hash Match (RULES.md v0.17.0 Baseline)
+    hash_secrets = detect_hash_matches(rolled)
+    if hash_secrets > 0:
+        player.secrets += hash_secrets
+        player.hash_matches_secrets = getattr(player, "hash_matches_secrets", 0) + hash_secrets
+        controller.event_log.append(
+            f"{meta['name']} triggered Cryptographic Hash Match (+{hash_secrets} Corporate Secret{'s' if hash_secrets > 1 else ''})!"
+        )
+
     # Glitch Backlash Routine (RULES.md v0.12.0)
     unresolved_glitches = [
         d for d in rolled
@@ -853,6 +863,15 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
                         player.patches += 1
 
         player.patches = min(player.patches, controller.state.config.max_patch_tokens)
+
+        # Cryptographic Hash Match (RULES.md v0.17.0 Baseline)
+        hash_secrets = detect_hash_matches(active_dice)
+        if hash_secrets > 0:
+            player.secrets += hash_secrets
+            player.hash_matches_secrets = getattr(player, "hash_matches_secrets", 0) + hash_secrets
+            controller.event_log.append(
+                f"{meta['name']} triggered Cryptographic Hash Match (+{hash_secrets} Corporate Secret{'s' if hash_secrets > 1 else ''})!"
+            )
 
         # Glitch Backlash Routine (RULES.md v0.12.0)
         unresolved_glitches = [

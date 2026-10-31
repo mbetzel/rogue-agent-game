@@ -478,7 +478,8 @@ class TestGroupBVariantCardBehaviors(unittest.TestCase):
             gc.execute_star_action(player_id=0, action_type="B2")
         self.assertIn("B2 requires $4 cash", str(ctx.exception))
 
-        # Case C: Rejection when at secrets cap (10)
+        # Case C: Rejection when at secrets cap if configured
+        gc.state.config.b2_secret_cap = 10
         p0.money = 10
         p0.secrets = 10
         p0.b2_available = True

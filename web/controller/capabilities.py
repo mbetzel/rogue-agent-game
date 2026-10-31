@@ -221,9 +221,12 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             and is_active
             and player.b2_available
             and player.money >= controller.state.config.b2_secret_cost
-            and player.secrets < controller.state.config.b2_secret_cap
+            and (
+                controller.state.config.b2_secret_cap is None
+                or player.secrets < controller.state.config.b2_secret_cap
+            )
         ),
-        "Y1": bool(controller.phase == 3 and is_active and player.y1_available and player.money >= 6 and player.secrets < 10),
+        "Y1": bool(controller.phase == 3 and is_active and player.y1_available and player.money >= 6),
         "P1": bool(controller.phase == 3 and is_active and player.p1_available),
         "P3": bool(
             controller.phase == 3

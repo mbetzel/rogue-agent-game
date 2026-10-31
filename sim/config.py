@@ -105,7 +105,7 @@ class GameConfig:
     y2_base_payout: int = 2
     y2_max_payout: int = 5
     b2_secret_cost: int = 4
-    b2_secret_cap: int = 10
+    b2_secret_cap: Optional[int] = None
     p3_cube_cash_cost: int = 1
     corrupted_kernel_black_threshold: int = 2
     corrupted_kernel_strength_bonus: int = 2

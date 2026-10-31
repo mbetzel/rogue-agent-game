@@ -236,7 +236,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             code="B2",
             name="Deep R&D Vault",
             die_color=DieColor.BLUE,
-            description="Block 1 Blue, OR pay $4 during Phase 3 to gain +1 Corporate Secret (max 10).",
+            description="Block 1 Blue, OR pay $4 during Phase 3 to gain +1 Corporate Secret.",
             star_face=Face(
                 name="B2: Deep R&D Vault",
                 block_amount=1,

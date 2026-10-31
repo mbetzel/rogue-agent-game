@@ -173,16 +173,16 @@ def execute_bot_phase3(controller: GameController, player: PlayerState, meta: Di
     if plan.use_b2_secret and player.b2_available:
         cost = controller.state.config.b2_secret_cost
         cap = controller.state.config.b2_secret_cap
-        if player.money >= cost and player.secrets < cap:
+        if player.money >= cost and (cap is None or player.secrets < cap):
             player.money -= cost
-            player.secrets = min(cap, player.secrets + 1)
+            player.secrets += 1
             player.b2_available = False
             controller.event_log.append(f"{meta['name']} (Bot) used B2 Deep R&D: +1 Secret for ${cost}.")
 
     if plan.use_y1_secret and player.y1_available:
-        if player.money >= 6 and player.secrets < 10:
+        if player.money >= 6:
             player.money -= 6
-            player.secrets = min(10, player.secrets + 1)
+            player.secrets += 1
             player.y1_available = False
             controller.event_log.append(f"{meta['name']} (Bot) used Y1 Algorithmic Trading: +1 Secret for $6.")
 
@@ -588,7 +588,7 @@ def execute_star_action(
         cap = controller.state.config.b2_secret_cap
         if player.money < cost:
             raise ValueError(f"B2 requires ${cost} cash")
-        if player.secrets >= cap:
+        if cap is not None and player.secrets >= cap:
             raise ValueError(f"Secrets already at maximum capacity ({cap})")
         player.money -= cost
         player.secrets += 1
@@ -600,8 +600,6 @@ def execute_star_action(
             raise ValueError("Y1 Algorithmic Trading ability is not available this turn")
         if player.money < 6:
             raise ValueError("Y1 requires $6 cash ($4 roll refund + $2 secret fee)")
-        if player.secrets >= 10:
-            raise ValueError("Secrets already at maximum capacity (10)")
         player.money -= 6
         player.secrets += 1
         player.y1_available = False

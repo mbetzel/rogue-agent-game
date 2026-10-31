@@ -287,11 +287,11 @@ class VentureGreedBot(BaseBot):
 
         b2_cost = game_state.config.b2_secret_cost
         b2_cap = game_state.config.b2_secret_cap
-        if player_state.b2_available and (current_money - b2_cost >= cash_cushion) and player_state.secrets < b2_cap:
+        if player_state.b2_available and (current_money - b2_cost >= cash_cushion) and (b2_cap is None or player_state.secrets < b2_cap):
             plan.use_b2_secret = True
             current_money -= b2_cost
 
-        if player_state.y1_available and (current_money - 6 >= cash_cushion) and player_state.secrets < 10:
+        if player_state.y1_available and (current_money - 6 >= cash_cushion):
             plan.use_y1_secret = True
             current_money -= 6
 

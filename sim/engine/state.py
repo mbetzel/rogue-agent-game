@@ -50,6 +50,7 @@ class PlayerState:
     total_dirty_income_taken: int = 0
     total_contractors_hired: int = 0
     total_rerolls_used: int = 0
+    hash_matches_secrets: int = 0
     b2_available: bool = False
     y1_available: bool = False
     p1_available: bool = False

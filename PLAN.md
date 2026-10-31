@@ -3,7 +3,7 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
-- [x] **Rules Draft `v0.15.0`** captured in [RULES.md](./RULES.md)
+- [x] **Rules Draft `v0.17.0`** captured in [RULES.md](./RULES.md)
 - [x] **Multi-Agent SDLC Pipeline** defined in Section 2 below
 - [x] **Phases 1–10 (Core Sim, v0.3–v0.8 Baselines, Choice Faces, Variants):** Archived in [docs/archive/ROADMAP_HISTORY.md](docs/archive/ROADMAP_HISTORY.md)
 - [x] **Phase 11: Web UX Polish — Setup Randomization Variety & Rogue Agent Versions Roadmap**
@@ -90,6 +90,14 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Ran Monte Carlo verification sweeps across 2P, 3P, and 4P pods.
   - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Verified liquidity health, data breach elimination dynamics, and logged Section 11 in `FINDINGS.md`.
   - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Updated `pnp/generate_pnp.py` and regenerated all 5 PDF packs.
+- [x] **Phase 24: Cryptographic Hash Match & Secrets-Only Victory Scoring (`v0.17.0` Baseline)**
+  - [x] *Pre-SDLC Game Designer Modeling:* Modeled Yahtzee pattern matching, uncapped triplets (0.67 EV early, 1.1–1.3 EV with contractors, +0.16 EV across full game), verified removal of 1-secret round limit, and designed Secrets-only scoring with hierarchical tiebreakers. Signed off by User.
+  - [x] *Technical Architecture Spec (`principal-engineer`):* Module contracts in `sim/engine/phase1_boot.py`, `sim/config.py`, `sim/engine/end_game.py`, `sim/bots/base.py`, and `web/controller/`.
+  - [x] *Implementation (`senior-engineer`):* Implement Hash Match in Phase 1 Step 6, remove 10-secret caps, update victory scoring in `sim/engine/end_game.py`, update bot rerolls, and write unit tests in `tests/test_v170_hash_matches.py` (298/298 tests passing).
+  - [x] *Code Review Gate (`staff-engineer`):* Independent review of engine integrity, state transitions, and 100% test pass via WSL.
+  - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Run Monte Carlo verification sweeps across 2P, 3P, and 4P pods (`scripts/sweep_v170_hash_matches.py`).
+  - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Validate pacing, secret distributions, tiebreaker resolution rates, and log Section 12 in `FINDINGS.md`.
+  - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Update `RULES.md`, add Hash Match reminder icon to Terminal Mats and Player Aids in `pnp/generate_pnp.py`, and regenerate all 5 PDF packs.
 
 ---
 

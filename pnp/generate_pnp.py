@@ -236,7 +236,7 @@ VARIANT_CARDS: List[VariantCardSpec] = [
         "B2", "blue", "BLUE // FIREWALL", "$5", "4 VP",
         "{PIP1} 1{BLUE} | {PIP2} +1{WRENCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{WRENCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Deep R&D Vault", "P2 DEF -OR- P3 OPS",
-        "**Block 1 {BLUE} Blue**, **OR** leave unassigned to pay **$4** in Phase 3 for **+1 Secret** (max 10).",
+        "**Block 1 {BLUE} Blue**, **OR** leave unassigned to pay **$4** in Phase 3 for **+1 Secret**.",
         "Locks in v3.0 Zero-Day (Shield).",
     ),
     VariantCardSpec(
@@ -273,7 +273,7 @@ VARIANT_CARDS: List[VariantCardSpec] = [
         "Y1", "yellow", "YELLOW // COMM. AI", "$5", "4 VP",
         "{PIP1} +$3   {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH}",
         "Algorithmic Trading", "P1 BOOT + P3 OPTION",
-        "Gain **+$4** in Phase 1; in Phase 3 you may also pay **$2** to gain **+1 Secret** (max 10).",
+        "Gain **+$4** in Phase 1; in Phase 3 you may also pay **$2** to gain **+1 Secret**.",
         "Commercial Exposure. Locks in v2.0 RaaS.",
     ),
     VariantCardSpec(
@@ -550,7 +550,8 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
         "Max **2 Free Rerolls**  |  Spend **1** {WRENCH} to Unlock **1** {LOCK} Die  |  Unassigned yield **$** & {WRENCH}",
         size=6.9, color=PALETTE["ink_soft"], align="right",
     )
-    page.text(rx + rw / 2.0, act_y + 54.0, "ROLLED POOL  //  DECLARE ( / ) CHOICES & ASSIGN SHIELDS BEFORE COLLECTING OUTPUTS", font="mono", size=6.4, color=PALETTE["watermark"], align="center")
+    page.text(rx + rw / 2.0, act_y + 46.0, "ROLLED POOL  //  DECLARE ( / ) CHOICES & ASSIGN SHIELDS BEFORE COLLECTING OUTPUTS", font="mono", size=6.1, color=PALETTE["watermark"], align="center")
+    page.rich_line(rx + rw / 2.0, act_y + 64.0, "**HASH MATCH:** 3 matching faces in roll = **+1 Corporate Secret** *(uncapped; no Glitches)*", size=6.6, color=PALETTE["blue"], align="center")
 
     # 3. Shield Row (Red Shields | Blue Shields | Green Shields)
     sh_y, sh_h = 236.0, 114.0
@@ -853,7 +854,7 @@ def render_agent_board(page: PDFPage) -> None:
                 "**3. Roll Pool:** Roll Ready Zone + Contractors -> Active Zone.\n"
                 "**4. Rerolls & Debug:** Up to **2 free rerolls** of unlocked dice. Spend **1** {WRENCH} (or lock a rolled +1 {WRENCH} die) to **Unlock 1** {LOCK} die.\n"
                 "**5. Assign:** Commit Shields (`Any` -> {RED}/{BLUE}/{GREEN}) & `/` Choices.\n"
-                "**6. Outputs:** Unassigned dice yield **$**, {WRENCH} *(max 3)*, & Boot {STAR}."
+                "**6. Outputs:** Unassigned dice yield **$**, {WRENCH} *(max 3)*, & Boot {STAR}. **Hash Match:** 3 matching faces = **+1 Secret** *(uncapped; no Glitches)*."
             ),
         ),
         (
@@ -876,11 +877,11 @@ def render_agent_board(page: PDFPage) -> None:
             ),
         ),
         (
-            "END-GAME PORTFOLIO SCORING",
+            "SECRETS VICTORY & TIEBREAKERS",
             (
-                "**Surviving Firms Only** *(Patient Zero eliminated)*:\n"
-                "**4 VP** / Secret  |  **3-4 VP** / Ready Die (Unpatched = 0)  |  **1 VP** / **$2**  |  {WRENCH} = 0 VP.\n"
-                "*Ties: 1. Secrets, 2. Cash. (Total Wipeout: -4 VP/Secret <0, -3 VP/unfulfilled destroy).*"
+                "**Surviving Firms Only** *(Patient Zero eliminated at <=0 Secrets)*:\n"
+                "**Most Corporate Secrets Wins!** (Uncapped).\n"
+                "*Tiebreakers: 1. Most Cash ($)  2. Ready Colored Dice  3. Patches ({WRENCH})  4. Fewest Unpatched.*"
             ),
         ),
     ]
@@ -1051,12 +1052,12 @@ def render_market_board(page: PDFPage) -> None:
     rx_f = 40.0 + fw + 14.0
     page.rect(rx_f, fy, fw, fh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
     page.rect(rx_f, fy, fw, 16.5, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.7)
-    page.text(rx_f + 8.0, fy + 11.8, "PORTFOLIO VALUE SCORING  (SURVIVING CONSULTANCIES)", font="bold", size=7.8, color=PALETTE["ink"])
+    page.text(rx_f + 8.0, fy + 11.8, "SECRETS VICTORY & TIEBREAKERS  (SURVIVING CONSULTANCIES)", font="bold", size=7.8, color=PALETTE["ink"])
     page.rich_paragraph(
-        rx_f + 8.0, fy + 29.0, fw - 16.0,
-        "- **Secrets:** **4 VP** each   |   **Cash:** **1 VP** per **$2** *(rounded down)*   |   **Patches ({WRENCH}):** **0 VP**\n"
-        "- **Ready Colored Dice:** {BLUE} Blue / {YELLOW} Yellow = **4 VP**  |  {RED} Red / {GREEN} Green / {PURPLE} Purple = **3 VP**  |  (Unpatched = **0 VP**! | {GRAY}/{WHITE} = **0 VP**)\n"
-        "- *Patient Zero (<=0 Secrets) eliminated! Wipeout only: -4 VP per Secret <0, -3 VP per unfulfilled destroy.*",
+        rx_f + 8.0, fy + 27.5, fw - 16.0,
+        "- **Primary Victory Condition:** Most remaining **Corporate Secrets** wins! (Uncapped).\n"
+        "- **Tiebreakers:** 1. Most Cash ($)  |  2. Most Ready Colored Dice  |  3. Most Patches ({WRENCH})  |  4. Fewest Unpatched.\n"
+        "- *Patient Zero (<=0 Secrets) eliminated! Total wipeout: rank by net breach depth & unfulfilled destructions.*",
         size=6.8, leading=11.8, color=PALETTE["ink"],
     )
 

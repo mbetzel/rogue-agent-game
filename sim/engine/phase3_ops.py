@@ -119,17 +119,17 @@ def execute_phase_3(engine: GameEngine) -> None:
         if plan.use_b2_secret and player.b2_available:
             if (
                 player.money >= engine.config.b2_secret_cost
-                and player.secrets < engine.config.b2_secret_cap
+                and (engine.config.b2_secret_cap is None or player.secrets < engine.config.b2_secret_cap)
             ):
                 player.money -= engine.config.b2_secret_cost
-                player.secrets = min(engine.config.b2_secret_cap, player.secrets + 1)
+                player.secrets += 1
                 player.b2_available = False
 
         if plan.use_y1_secret and player.y1_available:
             # Reverses +$4 from P1 and pays $2 for +1 Secret (net -$2)
-            if player.money >= 6 and player.secrets < 10:
+            if player.money >= 6:
                 player.money -= 6
-                player.secrets = min(10, player.secrets + 1)
+                player.secrets += 1
                 player.y1_available = False
 
         if (

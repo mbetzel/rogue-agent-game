@@ -185,6 +185,19 @@ class AdaptiveBalancedBot(BaseBot):
             player_state.archetype is not None
             and player_state.archetype.code == ArchetypeCode.PRODIGY
         )
+        threats_covered = (
+            threats[CubeColor.BLUE] <= blue_shields
+            and threats[CubeColor.RED] <= red_shields
+            and threats[CubeColor.GREEN] <= green_shields
+        )
+        from sim.engine.phase1_boot import get_face_signature
+        sig_counts: Dict[Tuple, int] = {}
+        for d in active_dice:
+            eff = d.effective_face
+            sig = get_face_signature(eff)
+            if sig is not None:
+                sig_counts[sig] = sig_counts.get(sig, 0) + 1
+
         for idx, die in enumerate(active_dice):
             if die.is_locked and not is_prodigy:
                 continue
@@ -193,11 +206,15 @@ class AdaptiveBalancedBot(BaseBot):
                 continue
             if face.is_glitch:
                 rerolls.append(idx)
-            elif not face.is_shield and not face.has_shield_option and (
-                threats[CubeColor.BLUE] > blue_shields
-                or threats[CubeColor.RED] > red_shields
-                or threats[CubeColor.GREEN] > green_shields
-            ):
+                continue
+
+            eff = die.effective_face
+            sig = get_face_signature(eff)
+            # If incoming threat is satisfied, protect pairs or triplets to preserve Hash Matches
+            if threats_covered and sig is not None and sig_counts.get(sig, 0) >= 2:
+                continue
+
+            if not face.is_shield and not face.has_shield_option and not threats_covered:
                 rerolls.append(idx)
             elif not face.is_shield and not face.has_shield_option and not face.has_cash_option and face.money <= 1 and face.patches == 0:
                 rerolls.append(idx)

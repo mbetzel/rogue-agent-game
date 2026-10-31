@@ -454,13 +454,12 @@ class TestV03Rules(unittest.TestCase):
         p0.archetype = None
         p1.archetype = None
 
-        # Both players in critical condition
+        engine._execute_phase_1()
+        # Set exact secrets before damage to test overflow calculation
         p0.secrets = 1
         p0.money = 0
         p1.secrets = 2
         p1.money = 0
-
-        engine._execute_phase_1()
         # Commit zero shields to ensure all damage is unblocked
         commitments = [(p0, p0.ready_dice, {}), (p1, p1.ready_dice, {})]
 

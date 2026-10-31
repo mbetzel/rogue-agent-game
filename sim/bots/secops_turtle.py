@@ -282,7 +282,7 @@ class SecOpsTurtleBot(BaseBot):
         if (
             player_state.b2_available
             and (current_money - b2_cost >= cash_cushion)
-            and player_state.secrets < b2_cap
+            and (b2_cap is None or player_state.secrets < b2_cap)
         ):
             plan.use_b2_secret = True
             current_money -= b2_cost

@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.16.0)
+# Too Many Secrets — Rules Draft (v0.17.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -11,7 +11,7 @@ A mysterious autonomous cracking program—codenamed **Project: SETEC** (the "Ro
 
 Each player directs an **independent boutique white-hat security consultancy** hired to defend client infrastructure. Consultancies assemble and upgrade customized hardware and software modules (represented by a custom dice pool), patch degraded relays, and adapt to the escalating cryptographic threat. As SETEC’s autonomous compiler accelerates across versions, consultancies must balance expanding their revenue streams against patching critical relays before proprietary client data leaks.
 
-When the dust settles, any consultancy that suffers a **Total Data Breach** (`<= 0 Secrets`) has its reputation incinerated, is raided by federal marshals, becomes **Patient Zero**, and is eliminated from contention. Among the surviving firms, the consultancy with the highest **Portfolio Value** (client retainers, operational capital, and modular assets) wins.
+When the dust settles, any consultancy that suffers a **Total Data Breach** (`<= 0 Secrets`) has its reputation incinerated, is raided by federal marshals, becomes **Patient Zero**, and is eliminated from contention. Among the surviving firms, the consultancy with the most **Corporate Secrets** wins (with operational capital, ready modules, and patches serving as tiebreakers).
 
 > **Note on `[TUNE]` Tags:** Numbers marked `[TUNE]` are prototype baselines verified via Monte Carlo simulation sweeps.
 
@@ -109,7 +109,8 @@ Each player’s consultancy archetype provides a powerful, specialized capabilit
      * If a choice face offers a Shield option (e.g. `Block 1 Blue / +1 🔧` on Blue), the player decides whether to assign it to its Shield slot, or leave it in the Active Pool to generate its alternative resource in Step 6.
      * If a choice face offers alternative resources (e.g. `+$1 / +1 🔧` on Gray or `+1 🔧 / +$1` on Green), the player declares which resource the die will produce.
    * **Generic (`Any`) Shields** (including rolled White Contractor shields) must be committed to a specific color (`Red`, `Blue`, or `Green`) *before* Phase 2 begins.
-6. **Gain Resource Outputs & Resolve Glitch Backlash (Simultaneous):**
+6. **Gain Resource Outputs, Cryptographic Hash Matches & Glitch Backlash (Simultaneous):**
+   * **Cryptographic Hash Match:** Inspect all your active dice (`Ready + Contractor`) after resolving rerolls and declaring choice options. For every set of 3 dice displaying the exact same printed output signature (e.g. 3 of a kind = +1 Secret; 6 of a kind or two distinct triplets = +2 Secrets), gain **`+1 Corporate Secret`** (uncapped). *Note: Glitch faces (`Glitch (Locked)`) are corrupted anomalies and can never form Hash Matches. Choice faces match their declared option.*
    * **Hardware Glitch Backlash:** For each active die showing an unresolved **`Glitch (Locked)`** face at the conclusion of rerolls, local hardware burns out:
      * You must move **`1 active die`** from your roll to your **Unpatched Zone** (if this die was committed to a shield in Step 5, its shield commitment is removed).
      * **Contractor Sacrifice:** If you have an active White Contractor die in your roll, you may choose to **discard `1` White Contractor die** back to the central supply instead of demoting a permanent Ready die!
@@ -194,16 +195,22 @@ After all players finish Phase 3:
 
 ## 5. End Game & Victory Scoring
 
-Calculate **Portfolio Value** `[TUNE weights]`:
-* **`4 VP`** per remaining **Corporate Secret**
-* **VP per ACTIVE Colored Module Die in your Ready Zone** as printed on its Market Card (Red: `3 VP`, Blue: `4 VP`, Green: `3 VP`, Yellow: `4 VP`, Purple: `3 VP`; Gray starter dice = `0 VP`, White contractor dice = `0 VP`).  
-  > **Technical Debt Penalty:** Worn modules remaining in your **Unpatched Zone** represent broken, offline infrastructure and score **`0 VP`**! To score a colored die, it must be restored to the Ready Zone before the game concludes.
-* **`1 VP`** per **`$2`** remaining *(rounded down)*
-* Unused **Patch Tokens (`🔧`)** are worth **`0 VP`** *(spend them during Phase 3 of the final round to restore worn dice to Ready for full VP!)*.
-
 ### Determining the Winner
-* **Standard Ending (1+ Corporations Survive):** Any player who became **Patient Zero** (`<= 0 Secrets`) is **eliminated**. The surviving player with the highest **Portfolio Value** wins! *(Tiebreakers: 1. Most Corporate Secrets, 2. Most Money.)*
-* **Total Wipeout Ending (All Players Breach):** Narrative victory belongs to the Rogue Agent! To rank the human players, subtract **Overflow Penalties** incurred on the final compile (`-4 VP` per Secret below 0, `-3 VP` per unfulfilled die destruction) from each player's Portfolio Value; highest net score takes top honors.
+When the game ends (via Singularity when `v3.0` fills, or via Patient Zero check):
+
+* **Standard Ending (1+ Consultancies Survive):**
+  * Any player who suffered a **Total Data Breach** (`<= 0 Secrets`) is **eliminated** as Patient Zero and cannot win.
+  * Surviving consultancies compare their **Corporate Secrets**. The surviving consultancy with the **most Corporate Secrets wins!**
+  * **Hierarchical Tiebreakers:** If surviving consultancies are tied for Corporate Secrets, break ties using the following hierarchy:
+    1. **Operational Capital:** Most remaining **Money (`$`)**.
+    2. **Active Infrastructure:** Most **Active Colored Module Dice** in your **Ready Zone** (Gray starter dice and White contractor dice do not count).
+    3. **Hardware Readiness:** Most remaining **Patch Tokens (`🔧`)**.
+    4. **Reliability:** Fewest **Unpatched Dice** (least worn hardware).
+    5. If still tied, victory is shared.
+
+* **Total Wipeout Ending (All Consultancies Breach):**
+  * Narrative victory belongs to the Rogue Agent!
+  * To rank the human consultancies, calculate **Net Breach Score**: subtract **Overflow Penalties** incurred on the final compile (`-4 VP` per Secret below 0, `-3 VP` per unfulfilled die destruction) from nominal portfolio value; highest net score takes top honors.
 
 ---
 
@@ -232,7 +239,7 @@ Calculate **Portfolio Value** `[TUNE weights]`:
   * *R3 — Short Squeeze:* `[Phase 2 — Compile]` Gain `+$3` (or `+$4` if 3+ Red cubes exit the tower this round).
 * **Blue `★` Variants:**
   * *B1 — Honeypot Telemetry:* `[Phase 2 — Defense]` `Block 2 Blue`; if 1+ Blue cubes exit the tower and you take `0` Blue damage, `[Phase 2 — Damage]` gain `+$3`.
-  * *B2 — Deep R&D Vault:* `[Phase 2 — Defense]` `Block 1 Blue`, **OR** `[Phase 3 — Operations]` pay `$4` during Phase 3 to gain `+1 Corporate Secret` (max 10) `[TUNE]`.
+  * *B2 — Deep R&D Vault:* `[Phase 2 — Defense]` `Block 1 Blue`, **OR** `[Phase 3 — Operations]` pay `$4` during Phase 3 to gain `+1 Corporate Secret` `[TUNE]`.
   * *B3 — Air-Gapped Backup:* `[Phase 2 — Defense]` `Block 1 Blue`; when this die actively blocks, you may move `1` other Ready die of your choice to **Unpatched** instead of this die (if you have no other Ready dice, this die moves to Unpatched) `[TUNE]`.
 * **Green `★` Variants:**
   * *G1 — Self-Healing Kernel:* `[Phase 2 — Defense]` `Block 2 Green` + `[Phase 1 — Boot]` gain `+1 🔧`.

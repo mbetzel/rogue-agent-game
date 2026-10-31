@@ -56,10 +56,12 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
                 "elimination_reason": p.elimination_reason,
                 "secrets": p.secrets,
                 "money": p.money,
+                "patches": p.patches,
                 "debt": p.debt,
                 "breach_depth": p.breach_depth,
                 "unfulfilled_destructions": p.unfulfilled_destructions,
                 "ready_dice_count": len(p.ready_dice),
+                "ready_colored_dice_count": sum(1 for d in p.ready_dice if d.color != DieColor.GRAY),
                 "unpatched_dice_count": len(p.unpatched_dice),
                 "unpatched_colored_dice_count": unpatched_colored_dice_count,
                 "unpatched_dice_vp_lost": unpatched_dice_vp_lost,
@@ -75,16 +77,29 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
         )
 
     if not all_patient_zero:
-        # Standard Ending: Survivors ranked by Portfolio Value, Secrets, Money. Patient Zeros eliminated.
+        # Standard Ending: Survivors ranked strictly by Corporate Secrets, with hierarchical tiebreakers:
+        # 1. Money, 2. Ready Colored Dice, 3. Patches, 4. Fewest Unpatched Dice. Patient Zeros eliminated.
         survivors = [r for r in rankings if not r["is_patient_zero"]]
         eliminated = [r for r in rankings if r["is_patient_zero"]]
 
         survivors.sort(
-            key=lambda r: (r["portfolio_value"], r["secrets"], r["money"]),
+            key=lambda r: (
+                r["secrets"],
+                r["money"],
+                r["ready_colored_dice_count"],
+                r["patches"],
+                -r["unpatched_dice_count"],
+            ),
             reverse=True,
         )
         eliminated.sort(
-            key=lambda r: (r["portfolio_value"], r["secrets"], r["money"]),
+            key=lambda r: (
+                r["secrets"],
+                r["money"],
+                r["ready_colored_dice_count"],
+                r["patches"],
+                -r["unpatched_dice_count"],
+            ),
             reverse=True,
         )
 

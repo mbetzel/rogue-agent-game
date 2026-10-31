@@ -392,3 +392,51 @@ In physical playtests of `v0.15.0`, players rarely used the **Backdoor Siphon ("
 * **Component Parity:** Central Boards, Player Pocket Aids, and Version Cards updated in `pnp/generate_pnp.py`; all 5 PnP PDFs regenerated cleanly.
 
 **Status: OFFICIALLY ADOPTED (`v0.16.0` Baseline).**
+
+---
+
+## 12. Phase 24: Cryptographic Hash Match & Secrets-Only Victory Scoring (`v0.17.0` Baseline)
+
+### A. Context & Playtest Diagnosis
+Following player feedback regarding victory condition clutter ("currently dice, money, patches, and secrets all provide points"), the scoring system was simplified to elevate **Corporate Secrets** as the sole primary victory metric for surviving consultancies. To support this single-currency victory paradigm, a Yahtzee-style **Cryptographic Hash Match** mechanism was introduced to Phase 1 Step 6, enabling consultancies to synthesize proprietary client data through coherent rolling patterns.
+
+### B. Approved Mechanical Revisions
+1. **Cryptographic Hash Match (Phase 1 Step 6):**
+   - Active dice (`Ready Zone + Contractor Dice`) are evaluated after all rerolls, unlock debug actions, and choice declarations are finalized.
+   - For every 3 dice showing the exact same printed output signature, the consultancy gains **`+1 Corporate Secret`** (uncapped).
+   - Glitch faces (`Glitch (Locked)`) are corrupted anomalies and can never form Hash Matches.
+   - Choice faces match according to their declared option.
+2. **Uncapped Secret Acquisition:**
+   - The artificial 10-Secret cap on B2 (*Deep R&D Vault*) and Y1 (*Algorithmic Trading*) is removed (`b2_secret_cap = None`). Consultancies may invest capital into proprietary R&D uncapped.
+3. **Secrets-Only Victory Scoring & Hierarchical Tiebreakers:**
+   - For surviving consultancies, standings are determined strictly by **Corporate Secrets**. The consultancy with the most Corporate Secrets wins.
+   - Tied surviving consultancies resolve their finish order through a clear 4-level hierarchy:
+     1. **Operational Capital:** Most remaining **Money (`$`)**.
+     2. **Active Infrastructure:** Most **Active Colored Module Dice** in your **Ready Zone** (Gray and White dice excluded).
+     3. **Hardware Readiness:** Most remaining **Patch Tokens (`🔧`)**.
+     4. **Reliability:** Fewest **Unpatched Dice** (least degraded hardware).
+   - Patient Zero check (`<= 0 Secrets`) remains lethal and immediate; Patient Zeros are eliminated from standard contention.
+   - Total Wipeout ordering remains governed by net breach depth.
+
+### C. Monte Carlo Verification Sweep Telemetry ($N=1,000$ per Pod, Seed 42)
+
+| Pod | Mean Rounds | Singularity % | Patient Zero % | Total Wipeout % | Winner Secrets | Surv Secrets | Hash Sec/Player | Tiebreaker Rate | Tiebreaker Breakdown | Lead Bot Win Rate |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :--- |
+| **2P** | 3.92 +/- 0.58 | 0.0% | 29.5% | 70.5% | 2.49 | 2.49 | 2.16 | 0.0% | L1($):0 L2(Dice):0 L3(Wrench):0 L4(Rel):0 | AdaptiveBalancedBot (75.3%) |
+| **3P** | 3.94 +/- 0.57 | 0.0% | 50.6% | 49.4% | 3.32 | 3.01 | 2.25 | 8.1% | L1($):10 L2(Dice):4 L3(Wrench):0 L4(Rel):27 | VentureGreedBot (45.3%) |
+| **4P** | 4.11 +/- 0.54 | 0.0% | 53.1% | 46.9% | 3.43 | 2.85 | 2.07 | 13.7% | L1($):4 L2(Dice):6 L3(Wrench):0 L4(Rel):63 | VentureGreedBot (38.2%) |
+
+### D. Key Empirical Takeaways & Balance Rationale
+1. **Hash Match EV & Secret Injection:**
+   - Players reliably synthesize **`2.07`–`2.25` Secrets** per game via Cryptographic Hash Matches, providing organic defense against aggressive Spyware (Blue cubes) without inflating the economy.
+2. **Scoring Clarity & Tension:**
+   - Concentrating victory on Corporate Secrets eliminates complex VP math at table while preserving strategic depth: Money and Colored Dice remain highly desirable as survival engines and decisive tiebreakers (utilized in 8.1% of 3P and 13.7% of 4P games).
+   - In 4P pods, the tiebreaker breakdown demonstrates meaningful engagement across Level 1 (Cash), Level 2 (Ready Modules), and Level 4 (Reliability).
+3. **Bot Ecosystem Corridor:**
+   - VentureGreedBot achieves 38.2% in 4P pods (well within the healthy $\le 40\%$ corridor), while AdaptiveBalancedBot remains dominant in 2P where defensive resilience is paramount.
+
+### E. Architectural Decision & Baseline Sign-Off
+- **Baseline Adoption:** Formally adopt Cryptographic Hash Match and Secrets-Only Victory Scoring as the canonical rules baseline for **`v0.17.0`**.
+- **Component Parity:** Updated `RULES.md`, `sim/engine/`, `sim/bots/`, `web/`, and `pnp/generate_pnp.py` (adding Hash Match reminder text to Terminal Mats and Player Aids; regenerating all 5 PDF packs).
+
+**Status: OFFICIALLY ADOPTED (`v0.17.0` Baseline).**

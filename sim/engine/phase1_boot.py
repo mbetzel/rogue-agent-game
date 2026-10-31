@@ -13,6 +13,44 @@ if TYPE_CHECKING:
     from sim.engine.state import PlayerState
 
 
+def get_face_signature(face: Optional[Face]) -> Optional[Tuple]:
+    """Returns a hashable signature representing the printed output of a face.
+
+    Glitches return None and can never form Hash Matches.
+    """
+    if face is None or face.is_glitch:
+        return None
+    return (
+        face.name,
+        face.block_amount,
+        face.shield_color,
+        face.money,
+        face.patches,
+        face.secrets,
+        face.is_star,
+        face.star_code,
+    )
+
+
+def detect_hash_matches(dice: List[Die]) -> int:
+    """Calculates Corporate Secrets gained from Cryptographic Hash Matches (triplets).
+
+    For every set of 3 dice showing the exact same printed output (excluding Glitches),
+    the player gains +1 Corporate Secret (uncapped). Choice faces match their declared option.
+    """
+    counts: Dict[Tuple, int] = {}
+    for d in dice:
+        eff = d.effective_face
+        sig = get_face_signature(eff)
+        if sig is not None:
+            counts[sig] = counts.get(sig, 0) + 1
+
+    secrets_gained = 0
+    for count in counts.values():
+        secrets_gained += count // 3
+    return secrets_gained
+
+
 def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]]:
     # Promote pending next-phase locks from previous Phase 2 to active locks for this Phase 1
     engine.state.active_phase1_locks = set(engine.state.pending_next_phase_locks)
@@ -357,6 +395,12 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
                 elif face.star_code == "P3":
                     if idx in validated_commitments:
                         player.p3_available = validated_commitments[idx]
+
+        # Cryptographic Hash Match (RULES.md v0.17.0 Baseline)
+        hash_secrets = detect_hash_matches(active_dice)
+        if hash_secrets > 0:
+            player.secrets += hash_secrets
+            player.hash_matches_secrets += hash_secrets
 
         # Glitch Backlash Routine (RULES.md v0.12.0)
         # For each unresolved glitch face across active dice:
