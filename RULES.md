@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.17.0)
+# Too Many Secrets — Rules Draft (v0.19.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -177,7 +177,7 @@ Starting with the First Player and proceeding clockwise, each surviving player t
 1. **Purchase Software Module Dice (Limit `2` dice per turn `[TUNE]`):**
    * Pay the `$` cost of any available Colored Die in the Market and place it directly into your **Ready Zone**. *(Archetype Timing: **The Cipher** may trigger Algorithmic Arbitrage here to purchase 1 Colored Die at a **$2 discount**).*
 2. **Patch Worn-Out Modules (Unlimited):**
-   * Spend **`1 🔧` token** *or* pay **`$2`** `[TUNE: test $1–$3]` to move **1 die** from your **Unpatched Zone** back to your **Ready Zone**. *(Crucial for End Game: unpatched dice score `0 VP`; patching a colored die to Ready earns its full printed 3–4 VP!).* *(Archetype Timing: **The Phreaker** may trigger Magnetic Splice here to patch 1 die for free).*
+   * Spend **`1 🔧` token** *or* pay **`$2`** `[TUNE: test $1–$3]` to move **1 die** from your **Unpatched Zone** back to your **Ready Zone**. *(Crucial for End Game: spending available Patch Tokens to move unpatched colored dice to Ready promotes them to Tiebreaker #2, whereas spending cash in the final round degrades Tiebreaker #1 Money).* *(Archetype Timing: **The Phreaker** may trigger Magnetic Splice here to patch 1 die for free).*
 3. **Emergency Reboot: System Reboot (Once per Game):**
    * If you enter or reach Phase 3 with **`0 Ready dice`** and have not yet used your once-per-game System Reboot, you may execute an emergency reboot:
    * Move **all Gray Starter Dice** from your **Unpatched Zone** back to your **Ready Zone**.
@@ -200,7 +200,7 @@ When the game ends (via Singularity when `v3.0` fills, or via Patient Zero check
 
 * **Standard Ending (1+ Consultancies Survive):**
   * Any player who suffered a **Total Data Breach** (`<= 0 Secrets`) is **eliminated** as Patient Zero and cannot win.
-  * Surviving consultancies compare their **Corporate Secrets**. The surviving consultancy with the **most Corporate Secrets wins!**
+  * Surviving consultancies compare their **Corporate Secrets**. **Corporate Secrets are the sole source of victory points (`1 Secret = 1 Point`)**; Money, Patches, and Software Module dice score `0 VP`. The surviving consultancy with the **most Corporate Secrets wins!**
   * **Hierarchical Tiebreakers:** If surviving consultancies are tied for Corporate Secrets, break ties using the following hierarchy:
     1. **Operational Capital:** Most remaining **Money (`$`)**.
     2. **Active Infrastructure:** Most **Active Colored Module Dice** in your **Ready Zone** (Gray starter dice and White contractor dice do not count).
@@ -209,8 +209,9 @@ When the game ends (via Singularity when `v3.0` fills, or via Patient Zero check
     5. If still tied, victory is shared.
 
 * **Total Wipeout Ending (All Consultancies Breach):**
-  * Narrative victory belongs to the Rogue Agent!
-  * To rank the human consultancies, calculate **Net Breach Score**: subtract **Overflow Penalties** incurred on the final compile (`-4 VP` per Secret below 0, `-3 VP` per unfulfilled die destruction) from nominal portfolio value; highest net score takes top honors.
+  * Narrative victory belongs unconditionally to Project: SETEC (The Rogue Agent)!
+  * To rank the human consultancies, calculate **Net Wipeout Score**: evaluate **Overflow Penalties** incurred on the fatal compile (`-1` per Secret below 0 [breach depth], `-1` per unfulfilled die destruction); highest net score takes top honors. Zero positive dice or cash bonuses are added.
+  * Tied wipeout scores are resolved using the standard operational hierarchy (Secrets / breach depth > Unfulfilled Destructions > Money > Ready Colored Modules > Patches > Fewest Unpatched Dice).
 
 ---
 
@@ -218,15 +219,15 @@ When the game ends (via Singularity when `v3.0` fills, or via Patient Zero check
 
 ### A. Software Dice Faces (`d6`) `[TUNE]`
 
-| Die Type | Cost | VP | Face 1 | Face 2 | Face 3 | Face 4 | Face 5 | Face 6 |
-| :--- | :---: | :---: | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Gray (Legacy)** | Starter | `0` | `Block 1 Any` | `Block 1 Any` | `+$1` | `+$1` | `+$1 / +1 🔧` | `+1 🔧` |
-| **White (Contractor)** | Prog. `$1/$2/$3` | `0` | `Block 1 Any` | `Block 1 Any` | `Block 1 Any` | `+$1` | `Glitch (Locked)` | `Glitch (Locked)` |
-| **Red (FinSec)** | `$4` | `3` | `Block 1 Red` | `+$2` | `+$2` | `+$2` | `Glitch (Locked)` | `Red ★` |
-| **Blue (Firewall)** | `$5` | `4` | `Block 1 Blue` | `+1 🔧` | `+$1` | `Block 1 Blue / +1 🔧` | `Glitch (Locked)` | `Blue ★` |
-| **Green (Antivirus)** | `$4` | `3` | `Block 1 Green` | `+1 🔧` | `+2 🔧` | `+1 🔧 / +$1` | `Glitch (Locked)` | `Green ★` |
-| **Yellow (Commercial)**| `$5` | `4` | `+$3` | `+$2` | `+$2` | `+$1 & +1 🔧` | `Yellow ★` | `Yellow ★` |
-| **Purple (Black-Hat)** | `$4` | `3` | `Block 1 Any` | `Block 1 Any` | `+$2` | `+$1 & +1 🔧` | `Purple ★` | `Purple ★` |
+| Die Type | Cost | Face 1 | Face 2 | Face 3 | Face 4 | Face 5 | Face 6 |
+| :--- | :---: | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Gray (Legacy)** | Starter | `Block 1 Any` | `Block 1 Any` | `+$1` | `+$1` | `+$1 / +1 🔧` | `+1 🔧` |
+| **White (Contractor)** | Prog. `$1/$2/$3` | `Block 1 Any` | `Block 1 Any` | `Block 1 Any` | `+$1` | `Glitch (Locked)` | `Glitch (Locked)` |
+| **Red (FinSec)** | `$4` | `Block 1 Red` | `+$2` | `+$2` | `+$2` | `Glitch (Locked)` | `Red ★` |
+| **Blue (Firewall)** | `$5` | `Block 1 Blue` | `+1 🔧` | `+$1` | `Block 1 Blue / +1 🔧` | `Glitch (Locked)` | `Blue ★` |
+| **Green (Antivirus)** | `$4` | `Block 1 Green` | `+1 🔧` | `+2 🔧` | `+1 🔧 / +$1` | `Glitch (Locked)` | `Green ★` |
+| **Yellow (Commercial)**| `$5` | `+$3` | `+$2` | `+$2` | `+$1 & +1 🔧` | `Yellow ★` | `Yellow ★` |
+| **Purple (Black-Hat)** | `$4` | `Block 1 Any` | `Block 1 Any` | `+$2` | `+$1 & +1 🔧` | `Purple ★` | `Purple ★` |
 
 * **Choice Faces (`/`):** Faces with a slash (`/`) indicate a Choice Face. During Phase 1 Step 5, the player declares which of the two options the die fulfills for this round.
   * **Phase 1 Lock Interactions:** A choice face displaying a Cash option (e.g. `+$1 / +1 🔧` on Gray or `+1 🔧 / +$1` on Green) is treated as a Cash face when Cash faces are locked by a Corruption Track effect (e.g. `v2.0 RaaS` Space 3). A choice face displaying a Shield option (e.g. `Block 1 Blue / +1 🔧` on Blue) is treated as a Shield face when Shield faces are locked by a Corruption Track effect (e.g. `v3.0 Zero-Day Override` Space 3). Locked dice can be unlocked using `1 🔧` (Debug Action).

@@ -56,11 +56,11 @@ class TestV07Rules(unittest.TestCase):
     # 1. GameConfig Parameters & Helpers (v0.7)
     # -------------------------------------------------------------------------
     def test_config_parameters_v07(self) -> None:
-        """GameConfig defines progressive contractor pricing (1, 2, 3), cost helper methods, and Yellow VP=4."""
+        """GameConfig defines progressive contractor pricing (1, 2, 3), cost helper methods, and Yellow VP=0 in v0.19.0."""
         cfg = GameConfig()
         self.assertEqual(cfg.contractor_cost_progression, (1, 2, 3))
         self.assertEqual(cfg.contractor_max_hire, 3)
-        self.assertEqual(cfg.vp_per_die[DieColor.YELLOW], 4)
+        self.assertEqual(cfg.vp_per_die[DieColor.YELLOW], 0)
 
         # get_contractor_cost_for_hire helper
         self.assertEqual(cfg.get_contractor_cost_for_hire(0, 0), 0)
@@ -123,9 +123,9 @@ class TestV07Rules(unittest.TestCase):
     # 3. Yellow Die Faces & VP (v0.7)
     # -------------------------------------------------------------------------
     def test_yellow_die_faces_and_vp_v07(self) -> None:
-        """Yellow die face 2 is +$2 and VP is 4 in v0.7."""
+        """Yellow die face 2 is +$2 and VP is 0 in v0.19.0."""
         yellow_die = create_colored_die(DieColor.YELLOW, 201)
-        self.assertEqual(yellow_die.vp, 4)
+        self.assertEqual(yellow_die.vp, 0)
         self.assertEqual(yellow_die.cost, 5)
         self.assertEqual(len(yellow_die.faces), 6)
 
@@ -593,8 +593,8 @@ class TestV07Rules(unittest.TestCase):
         self.assertIn("next_contractor_cost", state_dict)
         self.assertEqual(state_dict["next_contractor_cost"], 1)
 
-        # Yellow die VP in market is 4
-        self.assertEqual(state_dict["market"]["yellow"]["vp"], 4)
+        # Yellow die VP in market is 0 in v0.19.0
+        self.assertEqual(state_dict["market"]["yellow"]["vp"], 0)
 
         # Player serialization includes next_contractor_cost
         p0 = state_dict["players"][0]

@@ -250,14 +250,19 @@ class SecOpsTurtleBot(BaseBot):
             and player_state.archetype.code == ArchetypeCode.CIPHER
             and player_state.is_ability_available(active_ver)
         ):
-            for c in [DieColor.BLUE, DieColor.GREEN, DieColor.RED, DieColor.YELLOW, DieColor.PURPLE]:
-                cost = (4 if c in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5) - game_state.config.cipher_market_discount
-                if game_state.market.get(c, 0) > 0 and current_money - cost >= cash_cushion:
-                    plan.use_cipher_ability = True
-                    plan.cipher_mode = "BUY_FREE_DIE"
-                    plan.cipher_free_die_color = c
-                    current_money -= cost
-                    break
+            if not is_final_round:
+                for c in [DieColor.BLUE, DieColor.GREEN, DieColor.RED, DieColor.YELLOW, DieColor.PURPLE]:
+                    cost = (4 if c in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5) - game_state.config.cipher_market_discount
+                    if game_state.market.get(c, 0) > 0 and current_money - cost >= cash_cushion:
+                        plan.use_cipher_ability = True
+                        plan.cipher_mode = "BUY_FREE_DIE"
+                        plan.cipher_free_die_color = c
+                        current_money -= cost
+                        break
+            if not plan.use_cipher_ability:
+                plan.use_cipher_ability = True
+                plan.cipher_mode = "CASH"
+                current_money += game_state.config.cipher_arbitrage_cash
 
         if is_final_round:
             current_money, current_patches = plan_final_round_repairs(
@@ -277,26 +282,22 @@ class SecOpsTurtleBot(BaseBot):
         b2_cap = game_state.config.b2_secret_cap
         if (
             player_state.b2_available
-            and (current_money - b2_cost >= cash_cushion)
+            and (current_money >= b2_cost if is_final_round else (current_money - b2_cost >= cash_cushion))
             and (b2_cap is None or player_state.secrets < b2_cap)
         ):
             plan.use_b2_secret = True
             current_money -= b2_cost
 
-        for color in [DieColor.BLUE, DieColor.GREEN, DieColor.RED]:
-            if len(plan.market_purchases) >= game_state.config.max_market_purchases_per_turn:
-                break
-            cost = 4 if color in (DieColor.RED, DieColor.GREEN) else 5
-            if game_state.market.get(color, 0) > 0 and (current_money - cost >= cash_cushion):
-                plan.market_purchases.append(color)
-                current_money -= cost
+        if player_state.y1_available and (current_money >= 6 if is_final_round else (current_money - 6 >= cash_cushion)):
+            plan.use_y1_secret = True
+            current_money -= 6
 
-        if is_final_round and len(plan.market_purchases) < game_state.config.max_market_purchases_per_turn:
-            for color in [DieColor.BLUE, DieColor.GREEN, DieColor.RED, DieColor.YELLOW, DieColor.PURPLE]:
+        if not is_final_round:
+            for color in [DieColor.BLUE, DieColor.GREEN, DieColor.RED]:
                 if len(plan.market_purchases) >= game_state.config.max_market_purchases_per_turn:
                     break
-                cost = 4 if color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5
-                if game_state.market.get(color, 0) > 0 and current_money >= cost:
+                cost = 4 if color in (DieColor.RED, DieColor.GREEN) else 5
+                if game_state.market.get(color, 0) > 0 and (current_money - cost >= cash_cushion):
                     plan.market_purchases.append(color)
                     current_money -= cost
 

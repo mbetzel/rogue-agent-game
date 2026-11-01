@@ -87,8 +87,8 @@ class Die:
     die_id: int
     color: DieColor
     cost: int
-    vp: int
-    faces: List[Face]
+    vp: int = 0  # Deprecated in v0.19.0: Software modules have 0 VP (Corporate Secrets determine victory)
+    faces: List[Face] = field(default_factory=list)
     current_face: Optional[Face] = None
     variant_code: Optional[str] = None
     is_locked: bool = False
@@ -871,7 +871,7 @@ def create_colored_die(
             glitch_face,
             star_face,
         ]
-        return Die(die_id=die_id, color=color, cost=4, vp=3, faces=faces, variant_code=var_code)
+        return Die(die_id=die_id, color=color, cost=4, vp=0, faces=faces, variant_code=var_code)
 
     elif color == DieColor.BLUE:
         faces = [
@@ -889,7 +889,7 @@ def create_colored_die(
             glitch_face,
             star_face,
         ]
-        return Die(die_id=die_id, color=color, cost=5, vp=4, faces=faces, variant_code=var_code)
+        return Die(die_id=die_id, color=color, cost=5, vp=0, faces=faces, variant_code=var_code)
 
     elif color == DieColor.GREEN:
         faces = [
@@ -907,7 +907,7 @@ def create_colored_die(
             glitch_face,
             star_face,
         ]
-        return Die(die_id=die_id, color=color, cost=4, vp=3, faces=faces, variant_code=var_code)
+        return Die(die_id=die_id, color=color, cost=4, vp=0, faces=faces, variant_code=var_code)
 
     elif color == DieColor.YELLOW:
         faces = [
@@ -918,7 +918,7 @@ def create_colored_die(
             star_face,
             star_face,
         ]
-        return Die(die_id=die_id, color=color, cost=5, vp=4, faces=faces, variant_code=var_code)
+        return Die(die_id=die_id, color=color, cost=5, vp=0, faces=faces, variant_code=var_code)
 
     elif color == DieColor.PURPLE:
         faces = [
@@ -929,6 +929,6 @@ def create_colored_die(
             star_face,
             star_face,
         ]
-        return Die(die_id=die_id, color=color, cost=4, vp=3, faces=faces, variant_code=var_code)
+        return Die(die_id=die_id, color=color, cost=4, vp=0, faces=faces, variant_code=var_code)
 
     raise ValueError(f"Unsupported die color: {color}")

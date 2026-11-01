@@ -226,7 +226,7 @@ class AccelerationistBot(BaseBot):
             if not is_final_round and player_state.secrets > 1:
                 plan.use_cipher_ability = True
                 plan.cipher_mode = "DIRTY_INCOME"
-            else:
+            elif not is_final_round:
                 for c in [DieColor.PURPLE, DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]:
                     cost = (4 if c in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5) - game_state.config.cipher_market_discount
                     if game_state.market.get(c, 0) > 0 and current_money >= cost:
@@ -235,10 +235,10 @@ class AccelerationistBot(BaseBot):
                         plan.cipher_free_die_color = c
                         current_money -= cost
                         break
-                if not plan.use_cipher_ability and not is_final_round:
-                    plan.use_cipher_ability = True
-                    plan.cipher_mode = "CASH"
-                    current_money += game_state.config.cipher_arbitrage_cash
+            if not plan.use_cipher_ability:
+                plan.use_cipher_ability = True
+                plan.cipher_mode = "CASH"
+                current_money += game_state.config.cipher_arbitrage_cash
 
         if (
             game_state.config.dirty_income_enabled
@@ -258,6 +258,20 @@ class AccelerationistBot(BaseBot):
                 player_state, game_state, current_money, current_patches, patch_cash_cost, plan
             )
 
+        b2_cost = game_state.config.b2_secret_cost
+        b2_cap = game_state.config.b2_secret_cap
+        if (
+            player_state.b2_available
+            and (current_money >= b2_cost if is_final_round else (current_money - b2_cost >= cash_cushion))
+            and (b2_cap is None or player_state.secrets < b2_cap)
+        ):
+            plan.use_b2_secret = True
+            current_money -= b2_cost
+
+        if player_state.y1_available and (current_money >= 6 if is_final_round else (current_money - 6 >= cash_cushion)):
+            plan.use_y1_secret = True
+            current_money -= 6
+
         if player_state.p1_available:
             plan.p1_cube_choice = CubeColor.RED
         if (
@@ -267,22 +281,13 @@ class AccelerationistBot(BaseBot):
             plan.p3_cube_choice = CubeColor(player_state.p3_available.value)
             current_money -= game_state.config.p3_cube_cash_cost
 
-        purchases = 0
-        for color in [DieColor.PURPLE, DieColor.BLUE]:
-            if purchases >= game_state.config.max_market_purchases_per_turn:
-                break
-            cost = 4 if color == DieColor.PURPLE else 5
-            if game_state.market.get(color, 0) > 0 and (current_money - cost >= cash_cushion):
-                plan.market_purchases.append(color)
-                current_money -= cost
-                purchases += 1
-
-        if is_final_round and purchases < game_state.config.max_market_purchases_per_turn:
-            for color in [DieColor.PURPLE, DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]:
+        if not is_final_round:
+            purchases = 0
+            for color in [DieColor.PURPLE, DieColor.BLUE]:
                 if purchases >= game_state.config.max_market_purchases_per_turn:
                     break
-                cost = 4 if color in (DieColor.PURPLE, DieColor.RED, DieColor.GREEN) else 5
-                if game_state.market.get(color, 0) > 0 and current_money >= cost:
+                cost = 4 if color == DieColor.PURPLE else 5
+                if game_state.market.get(color, 0) > 0 and (current_money - cost >= cash_cushion):
                     plan.market_purchases.append(color)
                     current_money -= cost
                     purchases += 1

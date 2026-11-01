@@ -11,7 +11,6 @@ const MARKET_BASE_SPECS = {
     title: "RED // FINSEC",
     symbol: "◆",
     baseCost: 4,
-    baseVp: "3 VP",
     row1: "⚀ 1 Red Shield | ⚁-⚃ +$2",
     row2: "⚄ 🔒 Glitch | ⚅ ★ Variant",
     warning: null,
@@ -20,7 +19,6 @@ const MARKET_BASE_SPECS = {
     title: "BLUE // FIREWALL",
     symbol: "●",
     baseCost: 5,
-    baseVp: "4 VP",
     row1: "⚀ 1 Blue Shield | ⚁ +1 🔧 | ⚂ +$1",
     row2: "⚃ 1 Blue / 1 🔧 | ⚄ 🔒 Glitch | ⚅ ★ Variant",
     warning: null,
@@ -29,7 +27,6 @@ const MARKET_BASE_SPECS = {
     title: "GREEN // ANTIVIRUS",
     symbol: "▲",
     baseCost: 4,
-    baseVp: "3 VP",
     row1: "⚀ 1 Green Shield | ⚁ +1 🔧 | ⚂ +2 🔧",
     row2: "⚃ 1 🔧 / +$1 | ⚄ 🔒 Glitch | ⚅ ★ Variant",
     warning: null,
@@ -38,7 +35,6 @@ const MARKET_BASE_SPECS = {
     title: "YELLOW // COMM.",
     symbol: "⬡",
     baseCost: 5,
-    baseVp: "4 VP",
     row1: "⚀ +$3 | ⚁-⚂ +$2",
     row2: "⚃ +$1 & +1 🔧 | ⚄ 🔒 Glitch | ⚅ ★ Variant",
     warning: "EXPOSURE: Green hits Yellow 1st!",
@@ -47,7 +43,6 @@ const MARKET_BASE_SPECS = {
     title: "PURPLE // BLK-HAT",
     symbol: "▼",
     baseCost: 4,
-    baseVp: "3 VP",
     row1: "⚀-⚁ Block 1 Any | ⚂ +$2",
     row2: "⚃ +$1 & +1 🔧 | ⚄ 🔒 Glitch | ⚅ ★ Variant",
     warning: null,
@@ -140,10 +135,9 @@ export function renderMarket() {
         <div class="module-stock-tag">${item.stock} IN STOCK</div>
       </div>
 
-      <!-- Cost / VP Strip -->
+      <!-- Cost / Market Strip -->
       <div class="module-cost-vp-row">
         <span class="module-cost-lbl">COST: <strong>$${effectiveCost}</strong> ${cipherDiscountSelected ? '<span class="cipher-discount-tag">(-$2 ARB)</span>' : ''}</span>
-        <span class="module-vp-lbl">${spec.baseVp}</span>
       </div>
 
       <!-- Base Faces Summary -->

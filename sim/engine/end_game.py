@@ -18,23 +18,17 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
     rankings: List[Dict] = []
 
     for p in engine.state.players:
-        # Portfolio Value:
-        # 4 VP per Secret + VP per active colored die in Ready Zone + 1 VP per $2 (rounded down)
-        # 4 VP per Secret (raw VP cannot be negative; negative secrets penalize via overflow)
-        secret_vp = max(0, p.secrets) * cfg.vp_per_secret
-        dice_vp = sum(cfg.vp_per_die.get(d.color, 0) for d in p.ready_dice)
-        cash_vp = max(0, p.money) // cfg.vp_cash_divisor
-        portfolio_value = secret_vp + dice_vp + cash_vp
+        # Portfolio Value (v0.19.0: Pure Corporate Secrets Victory Scoring):
+        # 1 VP per Secret. Software modules and cash have 0 direct VP.
+        portfolio_value = max(0, p.secrets) * cfg.vp_per_secret
 
         # Telemetry: unpatched colored dice count and VP lost
         unpatched_colored_dice_count = sum(
-            1 for d in p.unpatched_dice if cfg.vp_per_die.get(d.color, 0) > 0
+            1 for d in p.unpatched_dice if d.color != DieColor.GRAY
         )
-        unpatched_dice_vp_lost = sum(
-            cfg.vp_per_die.get(d.color, 0) for d in p.unpatched_dice
-        )
+        unpatched_dice_vp_lost = 0
 
-        # Overflow penalties (used if total wipeout: -4 VP per Secret below 0, -3 VP per unfulfilled destruction)
+        # Overflow penalties (used if total wipeout: -1 per Secret below 0, -1 per unfulfilled destruction)
         overflow_penalties = 0
         if all_patient_zero:
             secret_penalty = p.breach_depth * cfg.overflow_penalty_per_secret_debt
@@ -42,8 +36,9 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
                 p.unfulfilled_destructions * cfg.overflow_penalty_per_unfulfilled_destroyed_die
             )
             overflow_penalties = secret_penalty + destruction_penalty
-
-        net_score = portfolio_value + overflow_penalties
+            net_score = overflow_penalties
+        else:
+            net_score = portfolio_value
 
         rankings.append(
             {
@@ -110,9 +105,17 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
         winner_id = sorted_rankings[0]["player_id"] if sorted_rankings else None
         final_rankings = sorted_rankings
     else:
-        # Total Wipeout: Ranked by Net Score, Secrets (higher/less negative), Money (higher/less debt)
+        # Total Wipeout: Ranked by Net Score, Secrets, fewest unfulfilled destructions, Money, Ready Colored Dice, Patches, fewest unpatched dice
         rankings.sort(
-            key=lambda r: (r["net_score"], r["secrets"], r["money"]),
+            key=lambda r: (
+                r["net_score"],
+                r["secrets"],
+                -r["unfulfilled_destructions"],
+                r["money"],
+                r["ready_colored_dice_count"],
+                r["patches"],
+                -r["unpatched_dice_count"],
+            ),
             reverse=True,
         )
         for rank_idx, r in enumerate(rankings):

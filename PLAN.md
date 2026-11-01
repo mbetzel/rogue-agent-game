@@ -3,7 +3,7 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
-- [x] **Rules Draft `v0.17.0`** captured in [RULES.md](./RULES.md)
+- [x] **Rules Draft `v0.19.0`** captured in [RULES.md](./RULES.md)
 - [x] **Multi-Agent SDLC Pipeline** defined in Section 2 below
 - [x] **Phases 1–10 (Core Sim, v0.3–v0.8 Baselines, Choice Faces, Variants):** Archived in [docs/archive/ROADMAP_HISTORY.md](docs/archive/ROADMAP_HISTORY.md)
 - [x] **Phase 11: Web UX Polish — Setup Randomization Variety & Rogue Agent Versions Roadmap**
@@ -90,6 +90,14 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Ran Monte Carlo verification sweeps across 2P, 3P, and 4P pods.
   - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Verified liquidity health, data breach elimination dynamics, and logged Section 11 in `FINDINGS.md`.
   - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Updated `pnp/generate_pnp.py` and regenerated all 5 PDF packs.
+- [x] **Phase 26: Pure Corporate Secrets Victory Scoring & Elimination of Fictitious Wipeout Bonuses (`v0.19.0` Baseline)**
+  - [x] *Pre-SDLC Game Designer Modeling:* Mathematically modeled elimination of VP from money, patches, and dice; confirmed functional utility of modules without arbitrary VP; designed pure Secrets scoring (1 Secret = 1 Point) and eliminated positive wipeout bonuses. Signed off by User.
+  - [x] *Technical Architecture Spec (`principal-engineer`):* Module contracts in `sim/config.py`, `sim/entities.py`, `sim/engine/end_game.py`, `sim/bots/base.py`, `web/schemas.py`, and test specifications.
+  - [x] *Implementation (`senior-engineer`):* Zeroed out legacy VP on dice/cash, updated `end_game.py` portfolio value and total wipeout net score, updated bot final-round cash preservation heuristics, updated web UI/schemas, and created 4 unit tests in `tests/test_scoring_and_wipeout.py` (311/311 tests passing).
+  - [x] *Code Review Gate (`staff-engineer`):* Independent review of engine integrity, state transitions, determinism, and 100% test pass via WSL — `APPROVED`.
+  - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Ran 3,000-match Monte Carlo verification sweep across 2P, 3P, and 4P pods (`scripts/sweep_v170_hash_matches.py`).
+  - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Verified ~4.0 round pacing invariance, calibrated 2.46–3.39 secret corridor, robust tiebreaker ladder, and logged Section 14 in `FINDINGS.md` and `RULES.md`.
+  - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Updated `pnp/generate_pnp.py` (Market Cards, Central Market Board, Terminal Mats, Pocket Aids, and Cut-Out Tokens) and regenerated all 5 PDF packs.
 - [x] **Phase 25: Model C End-of-Round Cleanup Cap for Patches (`v0.18.0` Baseline)**
   - [x] *Pre-SDLC Game Designer Modeling:* Modeled patch yields across Gray/Green/Blue pools (EV ~1.87–4.37 🔧), identified Round 1 over-clamping (>50% hitting cap on T1), and designed Model C (unclamped during round, discard down to 3 at End-of-Round Cleanup). User approved.
   - [x] *Technical Architecture Spec (`principal-engineer`):* Module contracts in `sim/engine/phase1_boot.py`, `sim/engine/phase3_ops.py`, `web/controller/`, `web/schemas.py`, and test specifications.

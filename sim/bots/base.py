@@ -40,13 +40,13 @@ class Phase3ActionPlan:
 
 
 def choose_backlash_die_index(ready_dice: List[Die]) -> int:
-    """Selects the best die to demote for Technical Debt Backlash (lowest VP, Gray preferred)."""
+    """Selects the best die to demote for Technical Debt Backlash (Gray starter dice first, then lowest cost)."""
     if not ready_dice:
         return 0
     best_idx = 0
-    best_score = (ready_dice[0].vp, 0 if ready_dice[0].color == DieColor.GRAY else 1)
+    best_score = (0 if ready_dice[0].color == DieColor.GRAY else 1, ready_dice[0].cost)
     for idx, d in enumerate(ready_dice):
-        score = (d.vp, 0 if d.color == DieColor.GRAY else 1)
+        score = (0 if d.color == DieColor.GRAY else 1, d.cost)
         if score < best_score:
             best_score = score
             best_idx = idx
@@ -61,38 +61,27 @@ def plan_final_round_repairs(
     patch_cash_cost: int,
     plan: Phase3ActionPlan,
 ) -> Tuple[int, int]:
-    """Plans repairs for the final round prioritizing highest VP colored dice using patches then cash."""
+    """Plans repairs for the final round using patch tokens only (preserving cash for Tiebreaker #1).
+
+    Prioritizes colored dice first (Tiebreaker #2 Ready Colored Dice), then gray dice (Tiebreaker #4).
+    """
     sim_unpatched = list(player_state.unpatched_dice)
     if plan.use_phreaker_ability:
         for _ in range(min(1, len(sim_unpatched))):
             sim_unpatched.pop(0)
 
-    cfg = game_state.config
-    while True:
-        candidates = [
-            (idx, d)
-            for idx, d in enumerate(sim_unpatched)
-            if cfg.vp_per_die.get(d.color, getattr(d, "vp", 0)) > 0
+    while current_patches > 0 and sim_unpatched:
+        colored_indices = [
+            idx for idx, d in enumerate(sim_unpatched) if d.color != DieColor.GRAY
         ]
-        if not candidates:
-            break
-
-        # Pick highest VP candidate (Blue/Yellow 4 VP first, then Red/Green/Purple 3 VP)
-        best_idx, _ = max(
-            candidates,
-            key=lambda item: cfg.vp_per_die.get(item[1].color, getattr(item[1], "vp", 0)),
-        )
-
-        if current_patches > 0:
-            plan.patch_actions.append({"die_index": best_idx, "use_cash": False})
-            current_patches -= 1
-            sim_unpatched.pop(best_idx)
-        elif current_money >= patch_cash_cost:
-            plan.patch_actions.append({"die_index": best_idx, "use_cash": True})
-            current_money -= patch_cash_cost
-            sim_unpatched.pop(best_idx)
+        if colored_indices:
+            target_idx = colored_indices[0]
         else:
-            break
+            target_idx = 0
+
+        plan.patch_actions.append({"die_index": target_idx, "use_cash": False})
+        current_patches -= 1
+        sim_unpatched.pop(target_idx)
 
     return current_money, current_patches
 
@@ -172,9 +161,9 @@ class BaseBot:
     ) -> Optional[Die]:
         """Chooses a die to sacrifice/demote for Glitch Backlash Routine.
 
-        Default heuristic per RULES.md (v0.12.0):
+        Default heuristic per RULES.md (v0.19.0):
         1. Sacrifice a White contractor die first (if available in player_state.contractor_dice).
-        2. Else demote lowest VP uncommitted die in player_state.ready_dice, Gray first.
+        2. Else demote lowest cost uncommitted die in player_state.ready_dice, Gray first.
         """
         if player_state.contractor_dice:
             return player_state.contractor_dice[0]
@@ -185,7 +174,7 @@ class BaseBot:
         commitments = validated_commitments or {}
         dice_pool = active_dice or player_state.ready_dice
 
-        def get_demotion_key(d: Die) -> Tuple[int, int, int, int]:
+        def get_demotion_key(d: Die) -> Tuple[int, int, int]:
             is_committed = 0
             if d in dice_pool:
                 try:
@@ -195,7 +184,7 @@ class BaseBot:
                 except ValueError:
                     pass
             is_gray = 0 if d.color == DieColor.GRAY else 1
-            return (is_committed, is_gray, getattr(d, "vp", 0), getattr(d, "cost", 0))
+            return (is_committed, is_gray, getattr(d, "cost", 0))
 
         return min(player_state.ready_dice, key=get_demotion_key)
 

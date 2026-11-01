@@ -145,10 +145,8 @@ class GameStateSerializer:
 
     @staticmethod
     def calculate_player_vp(player: PlayerState, config: Any) -> int:
-        secret_vp = max(0, player.secrets) * config.vp_per_secret
-        dice_vp = sum(config.vp_per_die.get(d.color, 0) for d in player.ready_dice)
-        cash_vp = max(0, player.money) // config.vp_cash_divisor
-        return secret_vp + dice_vp + cash_vp
+        """Returns player Corporate Secrets for v0.19.0 Pure Secrets Victory Scoring."""
+        return player.secrets
 
     @classmethod
     def serialize_player(
@@ -289,7 +287,7 @@ class GameStateSerializer:
             color.value: {
                 "stock": state.market.get(color, 0),
                 "cost": 4 if color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5,
-                "vp": state.config.vp_per_die.get(color, 0),
+                "vp": 0,
                 "variant": cls.serialize_variant_card(state.variant_cards[color])
                 if color in state.variant_cards
                 else None,

@@ -137,25 +137,25 @@ class GameConfig:
         }
     )
 
-    # Scoring weights (Portfolio Value)
-    vp_per_secret: int = 4
+    # Scoring weights (Portfolio Value - v0.19.0 Pure Corporate Secrets Victory Scoring)
+    vp_per_secret: int = 1
     vp_per_die: Dict[DieColor, int] = field(
         default_factory=lambda: {
             DieColor.GRAY: 0,
             DieColor.WHITE: 0,
-            DieColor.RED: 3,
-            DieColor.BLUE: 4,
-            DieColor.GREEN: 3,
-            DieColor.YELLOW: 4,
-            DieColor.PURPLE: 3,
+            DieColor.RED: 0,
+            DieColor.BLUE: 0,
+            DieColor.GREEN: 0,
+            DieColor.YELLOW: 0,
+            DieColor.PURPLE: 0,
         }
     )
-    vp_cash_divisor: int = 2  # 1 VP per $2 remaining
+    vp_cash_divisor: int = 0  # Deprecated in v0.19.0 (Cash is Tiebreaker #1, not direct VP)
 
-    # Total Wipeout Overflow Penalties
-    overflow_penalty_per_secret_debt: int = -4  # -4 VP per Secret below 0
+    # Total Wipeout Overflow Penalties (v0.19.0: Elimination of Fictitious Wipeout Bonuses)
+    overflow_penalty_per_secret_debt: int = -1  # -1 VP per Secret breach depth below 0
     overflow_penalty_per_cash_debt: int = 0  # Obsolete in v0.3 (cash >= 0)
-    overflow_penalty_per_unfulfilled_destroyed_die: int = -3  # -3 VP per unfulfilled die destruction
+    overflow_penalty_per_unfulfilled_destroyed_die: int = -1  # -1 VP per unfulfilled die destruction
 
     @property
     def corruption_track_capacity(self) -> int:

@@ -404,12 +404,12 @@ class AdaptiveBalancedBot(BaseBot):
                     if current_money - cost >= cash_cushion:
                         discounted_colors.append((c, cost))
 
-            if discounted_colors and (current_money >= 3 or player_state.secrets <= 1 or is_final_round):
+            if not is_final_round and discounted_colors and (current_money >= 3 or player_state.secrets <= 1):
                 plan.use_cipher_ability = True
                 plan.cipher_mode = "BUY_FREE_DIE"
                 plan.cipher_free_die_color = discounted_colors[0][0]
                 current_money -= discounted_colors[0][1]
-            elif not is_final_round:
+            else:
                 plan.use_cipher_ability = True
                 plan.cipher_mode = "CASH"
                 current_money += game_state.config.cipher_arbitrage_cash
@@ -445,28 +445,33 @@ class AdaptiveBalancedBot(BaseBot):
                     plan.patch_actions.append({"die_index": idx, "use_cash": True})
                     current_money -= patch_cash_cost
 
-        # 3. Market Purchases: buy counter dice matching high threats (respecting cushion)
-        purchases = 0
-        preferred_colors = [DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]
-        if threats[CubeColor.RED] > threats[CubeColor.BLUE]:
-            preferred_colors = [DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW]
+        # 3. Secret Conversion Abilities (B2, Y1) - prioritized especially in final round
+        b2_cost = game_state.config.b2_secret_cost
+        b2_cap = game_state.config.b2_secret_cap
+        if (
+            player_state.b2_available
+            and (current_money >= b2_cost if is_final_round else (current_money - b2_cost >= cash_cushion))
+            and (b2_cap is None or player_state.secrets < b2_cap)
+        ):
+            plan.use_b2_secret = True
+            current_money -= b2_cost
 
-        for color in preferred_colors:
-            if purchases >= game_state.config.max_market_purchases_per_turn:
-                break
-            cost = 4 if color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5
-            if game_state.market.get(color, 0) > 0 and (current_money - cost >= cash_cushion):
-                plan.market_purchases.append(color)
-                current_money -= cost
-                purchases += 1
+        if player_state.y1_available and (current_money >= 6 if is_final_round else (current_money - 6 >= cash_cushion)):
+            plan.use_y1_secret = True
+            current_money -= 6
 
-        # 4. In Final Round: spend remaining cash on any available market dice
-        if is_final_round and purchases < game_state.config.max_market_purchases_per_turn:
-            for color in [DieColor.YELLOW, DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.PURPLE]:
+        # 4. Market Purchases: buy counter dice matching high threats (never in final round to preserve cash for Tiebreaker #1)
+        if not is_final_round:
+            purchases = 0
+            preferred_colors = [DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]
+            if threats[CubeColor.RED] > threats[CubeColor.BLUE]:
+                preferred_colors = [DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW]
+
+            for color in preferred_colors:
                 if purchases >= game_state.config.max_market_purchases_per_turn:
                     break
                 cost = 4 if color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5
-                if game_state.market.get(color, 0) > 0 and current_money >= cost:
+                if game_state.market.get(color, 0) > 0 and (current_money - cost >= cash_cushion):
                     plan.market_purchases.append(color)
                     current_money -= cost
                     purchases += 1

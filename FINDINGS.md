@@ -480,3 +480,49 @@ In `v0.17.0` and earlier rules drafts, player patch tokens (`🔧`) were immedia
 - **Component Parity:** Updated `RULES.md`, `sim/engine/`, `web/`, and test suite.
 
 **Status: OFFICIALLY APPROVED (`v0.18.0` Baseline).**
+
+---
+
+## 14. Phase 26: Pure Corporate Secrets Victory Scoring & Elimination of Fictitious Wipeout Bonuses (`v0.19.0` Baseline)
+
+### A. Context & Playtest Diagnosis
+In playtests and telemetry audits preceding `v0.19.0`, two scoring discrepancies were identified following the transition toward Secrets-focused victory:
+1. **Residual Portfolio Clutter:** Remnant scoring pathways, market cards, terminal mats, and web serializers retained vestigial point valuations for owned colored dice (`3 VP` / `4 VP`) and cash (`1 VP per $2`), creating confusion with the primary design objective where surviving consultancies compete purely on exfiltrated/protected Corporate Secrets.
+2. **Fictitious Wipeout Bonuses:** During a Total Wipeout (where all consultancies breach simultaneously), the scoring engine previously combined nominal portfolio points with overflow penalties. Thematically and mechanically, an incinerated consultancy suffering a catastrophic breach cannot claim commercial market capitalization; fallen firms must be evaluated strictly on containment resilience (breach depth and unfulfilled destruction debt).
+
+### B. Approved Mechanical Revisions
+1. **Pure Corporate Secrets Victory Scoring:**
+   - For all surviving consultancies, standings are determined strictly by **Corporate Secrets** (`1 VP per Secret`). Software module dice, cash, and patches contribute **0 direct VP**.
+   - Tied surviving consultancies break deadlocks through the 4-level hierarchical ladder:
+     1. **Operational Capital:** Most remaining **Money (`$`)**.
+     2. **Active Infrastructure:** Most **Active Colored Module Dice** in your **Ready Zone** (Gray and White dice excluded).
+     3. **Hardware Readiness:** Most remaining **Patch Tokens (`🔧`)**.
+     4. **Reliability:** Fewest **Unpatched Dice** (least degraded hardware).
+2. **Elimination of Fictitious Wipeout Bonuses:**
+   - In a Total Wipeout ending, narrative victory belongs unconditionally to Project: SETEC (The Rogue Agent).
+   - Human consultancies are ranked exclusively by **Net Score**, which strictly equals **Overflow Penalties** incurred on the fatal compile (`-1 per Secret below 0`, `-1 per unfulfilled die destruction`). Zero positive dice, cash, or secret bonuses are added.
+   - Tied wipeout scores are resolved using the same operational hierarchy (Secrets/breach depth > Unfulfilled Destructions > Money > Ready Colored Modules > Patches > Fewest Unpatched Dice).
+3. **Bot Heuristics Hardening:**
+   - Bots suppress cash repairs and market purchases in the final round to preserve Tiebreaker #1 (Cash).
+   - Bots prioritize available Patch Tokens (`🔧`) for repairing colored dice (securing Tiebreaker #2) and prioritize B2/Y1 secret conversions for direct victory points.
+
+### C. Monte Carlo Verification Sweep Telemetry ($N=1,000$ per Pod, Base Seed 42)
+
+| Pod | Mean Rounds | Singularity % | Patient Zero % | Total Wipeout % | Winner Secrets | Surv Secrets | Hash Sec/Player | Tiebreaker Rate | Tiebreaker Breakdown | Lead Bot Win Rate |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :--- |
+| **2P** | **3.92 ± 0.58** | 0.0% | 29.6% | 70.4% | **2.46** | **2.46** | **2.16** | 0.0% | L1($):0 L2(Dice):0 L3(Wrench):0 L4(Rel):0 | AdaptiveBalancedBot (**68.2%**) |
+| **3P** | **3.94 ± 0.58** | 0.0% | 50.5% | 49.5% | **3.32** | **3.02** | **2.28** | 9.1% | L1($):12 L2(Dice):4 L3(Wrench):0 L4(Rel):29 | VentureGreedBot (**43.8%**) |
+| **4P** | **4.11 ± 0.54** | 0.0% | 53.7% | 46.3% | **3.39** | **2.81** | **2.10** | 14.1% | L1($):5 L2(Dice):8 L3(Wrench):0 L4(Rel):63 | VentureGreedBot (**36.8%**) |
+
+### D. Key Empirical Takeaways & Balance Rationale
+1. **Pacing Parity Preserved:** Match duration is invariant at ~4.0 rounds across 2P, 3P, and 4P pods with 0.0% stalling.
+2. **Organic Secret Distribution:** Hash matches consistently yield 2.10–2.28 secrets per player, keeping winner secrets in the razor-thin 2.46–3.39 target corridor.
+3. **Decisive Multi-Level Tiebreaking:** In 4P matches requiring tiebreakers (14.1%), Level 1 (Cash) and Level 2 (Ready Modules) resolve initial splits, while Level 4 (Reliability) decisively handles 70%+ of deep ties.
+4. **Total Wipeout Narrative Clarity:** Fallen consultancies are scored cleanly on containment resilience without artificial VP inflation.
+5. **Healthy Bot Meta:** VentureGreedBot in 4P lands at 36.8% (comfortably inside the $\le 40\%$ corridor), while AdaptiveBalancedBot dominates 2P (68.2%) where single-target defense is supreme.
+
+### E. Formal Design Sign-Off
+- **Baseline Adoption:** Formally adopt Pure Corporate Secrets Victory Scoring & Elimination of Fictitious Wipeout Bonuses as the canonical rules baseline for **`v0.19.0`**.
+- **Component & Rules Parity:** Synchronized across `RULES.md`, `sim/engine/end_game.py`, `tests/test_scoring_and_wipeout.py`, `web/schemas.py`, and `pnp/generate_pnp.py` (regenerating all 5 PDF packs).
+
+**Status: OFFICIALLY APPROVED (`v0.19.0` Baseline).**

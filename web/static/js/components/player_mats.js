@@ -240,7 +240,7 @@ export function renderPlayerMats() {
       <span class="tab-player-icon">${isHuman ? "👤" : "🤖"}</span>
       <span class="tab-player-name">${p.name}</span>
       ${isCISO ? '<span class="tab-ciso-tag">CISO</span>' : ''}
-      <span class="tab-vp-badge">${p.portfolio_value} VP</span>
+      <span class="tab-vp-badge">${p.secrets} Secrets</span>
     `;
     tabBtn.onclick = () => {
       setActivePlayerTab(p.player_id);
@@ -305,7 +305,7 @@ export function renderPlayerMats() {
             ${p.system_reboot_used ? 'REBOOT: USED' : 'REBOOT: READY (1x/GAME)'}
           </span>
           ${p.is_patient_zero ? '<span class="breach-pill">TOTAL DATA BREACH</span>' : ''}
-          <span class="vp-pill">${p.portfolio_value} VP</span>
+          <span class="vp-pill">${p.secrets} Secrets</span>
         </div>
       </div>
 
@@ -480,7 +480,7 @@ export function renderPlayerMats() {
         <div class="reserve-card money-reserve-card">
           <div class="reserve-card-header">
             <span class="reserve-card-title">MONEY ($)</span>
-            <span class="reserve-rate-pill">1 VP per $2</span>
+            <span class="reserve-rate-pill">TIEBREAKER #1</span>
           </div>
           <div class="reserve-card-main">
             <span class="reserve-currency-symbol">$</span>
@@ -520,7 +520,7 @@ export function renderPlayerMats() {
         <div class="reserve-card secrets-reserve-card">
           <div class="reserve-card-header">
             <span class="reserve-card-title">🔒 SECRETS</span>
-            <span class="reserve-rate-pill">4 VP EACH</span>
+            <span class="reserve-rate-pill">VICTORY GOAL</span>
           </div>
           <div class="reserve-card-main">
             <span class="reserve-secrets-symbol">🔒</span>

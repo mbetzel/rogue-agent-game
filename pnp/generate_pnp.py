@@ -1,4 +1,4 @@
-"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.18.0 Baseline).
+"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.19.0 Baseline).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
   - 01_Player_Boards.pdf (6 pages — 1 per Consultancy Archetype, matching Wireframe Page 1)
@@ -19,7 +19,7 @@ from pnp.pdf_engine import PALETTE, Color, PDFDocument, PDFPage, measure_text
 
 
 # =============================================================================
-# Canonical Game Data (Synchronized 1:1 with RULES.md v0.18.0 & sim/entities.py)
+# Canonical Game Data (Synchronized 1:1 with RULES.md v0.19.0 & sim/entities.py)
 # =============================================================================
 
 @dataclass(frozen=True)
@@ -114,7 +114,6 @@ class DieSpec:
     title: str
     subtitle: str
     cost_str: str
-    vp_str: str
     faces: Tuple[str, str, str, str, str, str]
     notes: str
 
@@ -125,7 +124,6 @@ DICE_SPECS: List[DieSpec] = [
         title="GRAY",
         subtitle="Legacy Code",
         cost_str="Starter (x4)",
-        vp_str="0 VP",
         faces=("Block 1 Any", "Block 1 Any", "+$1", "+$1", "+$1 / +1 {WRENCH}", "+1 {WRENCH}"),
         notes="Starter pool (4 per player). Face 5 is a Choice (/): declare +$1 or +1 {WRENCH} in Step 5.",
     ),
@@ -134,7 +132,6 @@ DICE_SPECS: List[DieSpec] = [
         title="WHITE",
         subtitle="Contractor",
         cost_str="$1 / $2 / $3",
-        vp_str="0 VP",
         faces=("Block 1 Any", "Block 1 Any", "Block 1 Any", "+$1", "{LOCK} Glitch", "{LOCK} Glitch"),
         notes="Temp hire (max 3/rd). Never wears to Unpatched; returns to supply after Phase 2. Can sacrifice vs {GREEN} (except {YELLOW}).",
     ),
@@ -143,7 +140,6 @@ DICE_SPECS: List[DieSpec] = [
         title="RED",
         subtitle="FinSec",
         cost_str="$4",
-        vp_str="3 VP",
         faces=("Block 1 {RED}", "+$2", "+$2", "+$2", "{LOCK} Glitch", "{RED} {STAR}"),
         notes="FinSec revenue & defense. Face 5 Glitch: wear 1 active die. Face 6 Red {STAR}.",
     ),
@@ -152,16 +148,14 @@ DICE_SPECS: List[DieSpec] = [
         title="BLUE",
         subtitle="Firewall",
         cost_str="$5",
-        vp_str="4 VP",
         faces=("Block 1 {BLUE}", "+1 {WRENCH}", "+$1", "Block 1 {BLUE} / +1 {WRENCH}", "{LOCK} Glitch", "{BLUE} {STAR}"),
-        notes="High-VP Spyware defense & patch hybrid. Face 5 Glitch. Face 6 Blue {STAR}.",
+        notes="Spyware defense & patch hybrid. Face 5 Glitch. Face 6 Blue {STAR}.",
     ),
     DieSpec(
         color_key="green",
         title="GREEN",
         subtitle="Antivirus",
         cost_str="$4",
-        vp_str="3 VP",
         faces=("Block 1 {GREEN}", "+1 {WRENCH}", "+2 {WRENCH}", "+1 {WRENCH} / +$1", "{LOCK} Glitch", "{GREEN} {STAR}"),
         notes="Malware defense & patch engine. Face 5 Glitch. Face 6 Green {STAR}.",
     ),
@@ -170,7 +164,6 @@ DICE_SPECS: List[DieSpec] = [
         title="YELLOW",
         subtitle="Commercial AI",
         cost_str="$5",
-        vp_str="4 VP",
         faces=("+$3", "+$2", "+$2", "+$1 & +1 {WRENCH}", "{YELLOW} {STAR}", "{YELLOW} {STAR}"),
         notes="COMMERCIAL EXPOSURE: Unblocked {GREEN} Malware MUST demote Ready {YELLOW} dice first (no Contractor Sacrifice!).",
     ),
@@ -179,7 +172,6 @@ DICE_SPECS: List[DieSpec] = [
         title="PURPLE",
         subtitle="Black-Hat AI",
         cost_str="$4",
-        vp_str="3 VP",
         faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {WRENCH}", "{PURPLE} {STAR}", "{PURPLE} {STAR}"),
         notes="Flexible Any-color shields, hybrid output, and sabotage/profiteering {STAR} variants.",
     ),
@@ -192,7 +184,6 @@ class VariantCardSpec:
     color_key: str
     die_label: str
     cost_str: str
-    vp_str: str
     base_summary_1: str
     base_summary_2: str
     name: str
@@ -204,21 +195,21 @@ class VariantCardSpec:
 VARIANT_CARDS: List[VariantCardSpec] = [
     # RED (R1-R3)
     VariantCardSpec(
-        "R1", "red", "RED // FINSEC", "$4", "3 VP",
+        "R1", "red", "RED // FINSEC", "$4",
         "{PIP1} 1{RED}  |  {PIP2}{PIP3}{PIP4} +$2", "{PIP5} {LOCK}Glitch  |  {PIP6} {STAR}",
         "Ransom Insurance", "P1 BOOT + P2 DEFENSE",
         "**Block 1 {RED} Red** in Phase 2 **AND** gain **+$2** in Phase 1 Boot.",
         "Locks in v2.0 RaaS & v3.0 Zero-Day.",
     ),
     VariantCardSpec(
-        "R2", "red", "RED // FINSEC", "$4", "3 VP",
+        "R2", "red", "RED // FINSEC", "$4",
         "{PIP1} 1{RED}  |  {PIP2}{PIP3}{PIP4} +$2", "{PIP5} {LOCK}Glitch  |  {PIP6} {STAR}",
         "Threat Bounty", "P2 DEFENSE + BONUS",
         "**Block 2 {RED} Red**; if you take **0 unblocked Red** damage this round, gain **+$2**.",
         "Locks in v3.0 Zero-Day (Shield).",
     ),
     VariantCardSpec(
-        "R3", "red", "RED // FINSEC", "$4", "3 VP",
+        "R3", "red", "RED // FINSEC", "$4",
         "{PIP1} 1{RED}  |  {PIP2}{PIP3}{PIP4} +$2", "{PIP5} {LOCK}Glitch  |  {PIP6} {STAR}",
         "Short Squeeze", "P1 BOOT + P2 SURGE",
         "Gain **+$3** in Phase 1 (or **+$4** total if **3+ {RED} Red** cubes exit the tower in Phase 2).",
@@ -226,21 +217,21 @@ VARIANT_CARDS: List[VariantCardSpec] = [
     ),
     # BLUE (B1-B3)
     VariantCardSpec(
-        "B1", "blue", "BLUE // FIREWALL", "$5", "4 VP",
+        "B1", "blue", "BLUE // FIREWALL", "$5",
         "{PIP1} 1{BLUE} | {PIP2} +1{WRENCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{WRENCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Honeypot Telemetry", "P2 DEFENSE + BONUS",
         "**Block 2 {BLUE} Blue**; if **1+ {BLUE} Blue** cubes exit and you take **0 Blue** damage, gain **+$3**.",
         "Locks in v3.0 Zero-Day (Shield).",
     ),
     VariantCardSpec(
-        "B2", "blue", "BLUE // FIREWALL", "$5", "4 VP",
+        "B2", "blue", "BLUE // FIREWALL", "$5",
         "{PIP1} 1{BLUE} | {PIP2} +1{WRENCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{WRENCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Deep R&D Vault", "P2 DEF -OR- P3 OPS",
         "**Block 1 {BLUE} Blue**, **OR** leave unassigned to pay **$4** in Phase 3 for **+1 Secret**.",
         "Locks in v3.0 Zero-Day (Shield).",
     ),
     VariantCardSpec(
-        "B3", "blue", "BLUE // FIREWALL", "$5", "4 VP",
+        "B3", "blue", "BLUE // FIREWALL", "$5",
         "{PIP1} 1{BLUE} | {PIP2} +1{WRENCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{WRENCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Air-Gapped Backup", "P2 DEFENSE (WEAR REDIRECT)",
         "**Block 1 {BLUE} Blue**; when blocking, you may move **1 other Ready die** to Unpatched instead of this die.",
@@ -248,21 +239,21 @@ VARIANT_CARDS: List[VariantCardSpec] = [
     ),
     # GREEN (G1-G3)
     VariantCardSpec(
-        "G1", "green", "GREEN // ANTIVIRUS", "$4", "3 VP",
+        "G1", "green", "GREEN // ANTIVIRUS", "$4",
         "{PIP1} 1{GREEN} | {PIP2} +1{WRENCH} | {PIP3} +2{WRENCH}", "{PIP4} 1{WRENCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Self-Healing Kernel", "P1 BOOT + P2 DEFENSE",
         "**Block 2 {GREEN} Green** in Phase 2 **AND** gain **+1 {WRENCH}** in Phase 1 Boot.",
         "Locks in v3.0 Zero-Day (Shield).",
     ),
     VariantCardSpec(
-        "G2", "green", "GREEN // ANTIVIRUS", "$4", "3 VP",
+        "G2", "green", "GREEN // ANTIVIRUS", "$4",
         "{PIP1} 1{GREEN} | {PIP2} +1{WRENCH} | {PIP3} +2{WRENCH}", "{PIP4} 1{WRENCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Universal Sandbox", "P1 BOOT + P2 DEFENSE",
         "**Block 1 Any** color in Phase 2 **AND** gain **+1 {WRENCH}** in Phase 1 Boot.",
         "Commit color in Step 5. Locks in v3.0.",
     ),
     VariantCardSpec(
-        "G3", "green", "GREEN // ANTIVIRUS", "$4", "3 VP",
+        "G3", "green", "GREEN // ANTIVIRUS", "$4",
         "{PIP1} 1{GREEN} | {PIP2} +1{WRENCH} | {PIP3} +2{WRENCH}", "{PIP4} 1{WRENCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Live Reboot", "P1 BOOT OUTPUT",
         "Gain **+2 {WRENCH}** and **+$1** immediately in Phase 1 Step 6.",
@@ -270,21 +261,21 @@ VARIANT_CARDS: List[VariantCardSpec] = [
     ),
     # YELLOW (Y1-Y3)
     VariantCardSpec(
-        "Y1", "yellow", "YELLOW // COMM. AI", "$5", "4 VP",
+        "Y1", "yellow", "YELLOW // COMM. AI", "$5",
         "{PIP1} +$3   {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH}",
         "Algorithmic Trading", "P1 BOOT + P3 OPTION",
         "Gain **+$4** in Phase 1; in Phase 3 you may also pay **$2** to gain **+1 Secret**.",
         "Commercial Exposure. Locks in v2.0 RaaS.",
     ),
     VariantCardSpec(
-        "Y2", "yellow", "YELLOW // COMM. AI", "$5", "4 VP",
+        "Y2", "yellow", "YELLOW // COMM. AI", "$5",
         "{PIP1} +$3   {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH}",
         "Cloud Monopoly", "P1 SCALING REVENUE",
         "Gain **+$2**, plus **+$1 per different colored** module die you own (**max +$5** total).",
         "Counts R/B/G/Y/P owned. Locks in v2.0.",
     ),
     VariantCardSpec(
-        "Y3", "yellow", "YELLOW // COMM. AI", "$5", "4 VP",
+        "Y3", "yellow", "YELLOW // COMM. AI", "$5",
         "{PIP1} +$3   {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH}",
         "Proprietary Training", "P1 SECRET + SELF-WEAR",
         "Gain **+1 Corporate Secret** in Phase 1 Step 6, then immediately move **this die to Unpatched**.",
@@ -292,21 +283,21 @@ VARIANT_CARDS: List[VariantCardSpec] = [
     ),
     # PURPLE (P1-P3)
     VariantCardSpec(
-        "P1", "purple", "PURPLE // BLK-HAT", "$4", "3 VP",
+        "P1", "purple", "PURPLE // BLK-HAT", "$4",
         "{PIP1}{PIP2} Block 1 Any", "{PIP3} +$2  |  {PIP4} +$1 & 1{WRENCH}",
         "Zero-Day Injection", "P1 BOOT + P3 SABOTAGE",
         "Gain **+$2** in Phase 1; in Phase 3 you may add **1 Attack Cube** ({RED}/{BLUE}/{GREEN}) to Staging Cup.",
         "No Black cube added. Locks in v2.0 RaaS.",
     ),
     VariantCardSpec(
-        "P2", "purple", "PURPLE // BLK-HAT", "$4", "3 VP",
+        "P2", "purple", "PURPLE // BLK-HAT", "$4",
         "{PIP1}{PIP2} Block 1 Any", "{PIP3} +$2  |  {PIP4} +$1 & 1{WRENCH}",
         "Chaos Profiteer", "P1 BOOT + P2 PAYOUT",
         "Gain **+$1** in Phase 1, plus **+$2 per {BLACK} Black Cube** that exits the tower in Phase 2.",
         "Locks in v2.0 RaaS (Cash).",
     ),
     VariantCardSpec(
-        "P3", "purple", "PURPLE // BLK-HAT", "$4", "3 VP",
+        "P3", "purple", "PURPLE // BLK-HAT", "$4",
         "{PIP1}{PIP2} Block 1 Any", "{PIP3} +$2  |  {PIP4} +$1 & 1{WRENCH}",
         "Packet Deflection", "P2 DEF + P3 SABOTAGE",
         "**Block 2** of any 1 color; in Phase 3 you may pay **$1** to add **1 cube of that color** to Staging Cup.",
@@ -631,7 +622,6 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
     page.rect(mx, by, bw, bh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
     page.rect(mx, by, bw, 20.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
     page.text(mx + 8, by + 13.8, "MONEY ($)", font="bold", size=9.5, color=PALETTE["ink"])
-    page.text(mx + bw - 8, by + 13.8, "1 VP per $2", font="mono_bold", size=7.5, color=PALETTE["ink_soft"], align="right")
     page.text(mx + bw / 2.0, by + 66.0, "$", font="bold", size=28.0, color=PALETTE["guide"], align="center")
     page.text(mx + bw / 2.0, by + bh - 7.0, "Start: $7 (+$1 Data Scraper)  |  Never drops below $0", font="regular", size=6.7, color=PALETTE["muted"], align="center")
 
@@ -640,7 +630,7 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
     page.rect(px, by, bw, bh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
     page.rect(px, by, bw, 20.0, stroke=PALETTE["ink"], fill=PALETTE["green_light"], line_width=0.8)
     page.rich_line(px + 8, by + 13.8, "{WRENCH} **PATCHES**", size=9.2, color=PALETTE["green"])
-    page.text(px + bw - 8, by + 13.8, "CLEANUP CAP: 3  |  0 VP", font="mono_bold", size=7.4, color=PALETTE["green"], align="right")
+    page.text(px + bw - 8, by + 13.8, "CLEANUP CAP: 3", font="mono_bold", size=7.4, color=PALETTE["green"], align="right")
 
     ps_size = 50.0
     ps_gap = 12.0
@@ -659,7 +649,7 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
     page.rect(scx, by, bw, bh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
     page.rect(scx, by, bw, 20.0, stroke=PALETTE["ink"], fill=PALETTE["blue_light"], line_width=0.8)
     page.rich_line(scx + 8, by + 13.8, "{SECRET} **SECRETS**", size=9.2, color=PALETTE["blue"])
-    page.text(scx + bw - 8, by + 13.8, "4 VP EACH", font="mono_bold", size=7.5, color=PALETTE["blue"], align="right")
+    page.text(scx + bw - 8, by + 13.8, "PRIMARY OBJECTIVE", font="mono_bold", size=7.5, color=PALETTE["blue"], align="right")
     page.draw_secret_icon(scx + bw / 2.0, by + 56.0, 26.0, color=PALETTE["guide"])
     page.text(scx + bw / 2.0, by + bh - 16.5, "Start: 8 Secrets (2P/3P)  |  10 Secrets (4P)", font="regular", size=6.7, color=PALETTE["ink_soft"], align="center")
     page.text(scx + bw / 2.0, by + bh - 6.0, "<= 0 SECRETS = TOTAL DATA BREACH (PATIENT ZERO)", font="bold", size=6.5, color=PALETTE["red"], align="center")
@@ -673,7 +663,7 @@ def render_agent_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // CENTRAL ROGUE AGENT & COMPILER BOARD [1/2]",
-        right_tag="PNP PROTOTYPE v0.18 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.19 // US LETTER",
     )
 
     # Top Title Bar inside board
@@ -902,7 +892,7 @@ def render_market_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // SOFTWARE MODULE MARKET & CENTRAL SUPPLY [2/2]",
-        right_tag="PNP PROTOTYPE v0.18 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.19 // US LETTER",
     )
 
     # Top Title Bar
@@ -987,14 +977,14 @@ def render_market_board(page: PDFPage) -> None:
     mw = (712.0 - 4 * mgap) / 5.0  # 134.0 pt wide each!
 
     market_colors = [
-        ("red", "RED // FINSEC", "$4", "3 VP", "{PIP1} 1{RED} | {PIP2}-{PIP4} +$2", "{PIP5} {LOCK}Glitch | {PIP6} {STAR}", ""),
-        ("blue", "BLUE // FIREWALL", "$5", "4 VP", "{PIP1} 1{BLUE} | {PIP2} +1{WRENCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{WRENCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}", ""),
-        ("green", "GREEN // ANTIVIRUS", "$4", "3 VP", "{PIP1} 1{GREEN} | {PIP2} +1{WRENCH} | {PIP3} +2{WRENCH}", "{PIP4} 1{WRENCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}", ""),
-        ("yellow", "YELLOW // COMM.", "$5", "4 VP", "{PIP1} +$3 | {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH}", "EXPOSURE: {GREEN} hits {YELLOW} 1st!"),
-        ("purple", "PURPLE // BLK-HAT", "$4", "3 VP", "{PIP1}{PIP2} Block 1 Any", "{PIP3} +$2 | {PIP4} $1 & 1{WRENCH}", ""),
+        ("red", "RED // FINSEC", "$4", "{PIP1} 1{RED} | {PIP2}-{PIP4} +$2", "{PIP5} {LOCK}Glitch | {PIP6} {STAR}", ""),
+        ("blue", "BLUE // FIREWALL", "$5", "{PIP1} 1{BLUE} | {PIP2} +1{WRENCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{WRENCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}", ""),
+        ("green", "GREEN // ANTIVIRUS", "$4", "{PIP1} 1{GREEN} | {PIP2} +1{WRENCH} | {PIP3} +2{WRENCH}", "{PIP4} 1{WRENCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}", ""),
+        ("yellow", "YELLOW // COMM.", "$5", "{PIP1} +$3 | {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH}", "EXPOSURE: {GREEN} hits {YELLOW} 1st!"),
+        ("purple", "PURPLE // BLK-HAT", "$4", "{PIP1}{PIP2} Block 1 Any", "{PIP3} +$2 | {PIP4} $1 & 1{WRENCH}", ""),
     ]
 
-    for idx, (ckey, mtitle, mcost, mvp, f_row1, f_row2, passive_warn) in enumerate(market_colors):
+    for idx, (ckey, mtitle, mcost, f_row1, f_row2, passive_warn) in enumerate(market_colors):
         sx = 40.0 + idx * (mw + mgap)
         fg, bg = _color_pair(ckey)
         page.rect(sx, my, mw, mh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
@@ -1004,10 +994,10 @@ def render_market_board(page: PDFPage) -> None:
         page.draw_color_badge(sx + 11.0, my + 12.5, 9.0, ckey)
         page.text(sx + 20.0, my + 15.2, mtitle, font="bold", size=7.6, color=fg)
 
-        # Cost / VP / Stock strip
+        # Market Cost & Stock strip
         page.rect(sx, my + 22.0, mw, 17.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.6)
-        page.text(sx + 7.0, my + 33.5, f"COST: {mcost}", font="bold", size=7.8, color=PALETTE["ink"])
-        page.text(sx + mw - 7.0, my + 33.5, f"{mvp}  (2xP)", font="mono_bold", size=7.0, color=PALETTE["ink_soft"], align="right")
+        page.text(sx + 7.0, my + 33.5, f"MARKET COST: {mcost}", font="bold", size=7.5, color=PALETTE["ink"])
+        page.text(sx + mw - 7.0, my + 33.5, "STOCK: 2xP", font="mono_bold", size=7.0, color=PALETTE["ink_soft"], align="right")
 
         # Base Faces 1-4 summary above card slot
         page.rich_line(sx + mw / 2.0, my + 52.0, f_row1, size=6.8, color=PALETTE["ink"], align="center")
@@ -1089,7 +1079,7 @@ def render_master_dice_reference(page: PDFPage) -> None:
     page.rect(tx, ty, tw, hh, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=1.0)
     page.text(tx + 8.0, ty + 18.0, "DIE TYPE", font="bold", size=8.2, color=PALETTE["ink"])
     page.line(tx + col_die, ty, tx + col_die, ty + hh, stroke=PALETTE["ink"], width=0.8)
-    page.text(tx + col_die + col_meta / 2.0, ty + 18.0, "COST / VP", font="bold", size=7.6, color=PALETTE["ink"], align="center")
+    page.text(tx + col_die + col_meta / 2.0, ty + 18.0, "MARKET COST", font="bold", size=7.6, color=PALETTE["ink"], align="center")
 
     for p_i in range(6):
         fx = tx + col_die + col_meta + p_i * col_face
@@ -1115,11 +1105,10 @@ def render_master_dice_reference(page: PDFPage) -> None:
         elif dspec.color_key == "white":
             page.text(tx + 12.0, ry + 46.5, "NO WEAR / TEMP", font="mono_bold", size=6.0, color=PALETTE["muted"])
 
-        # Cost / VP cell
+        # Cost cell
         mx = tx + col_die
         page.line(mx, ry, mx, ry + row_h, stroke=PALETTE["rule"], width=0.7)
-        page.text(mx + col_meta / 2.0, ry + 23.0, dspec.cost_str, font="bold", size=8.0, color=PALETTE["ink"], align="center")
-        page.text(mx + col_meta / 2.0, ry + 38.0, dspec.vp_str, font="mono_bold", size=7.6, color=PALETTE["blue"] if "4" in dspec.vp_str else PALETTE["muted"], align="center")
+        page.text(mx + col_meta / 2.0, ry + 32.0, dspec.cost_str, font="bold", size=8.5, color=PALETTE["ink"], align="center")
 
         # 6 Face cells
         for f_idx, f_mk in enumerate(dspec.faces):
@@ -1171,7 +1160,7 @@ def render_master_dice_reference(page: PDFPage) -> None:
         (
             "COMMERCIAL EXPOSURE ({YELLOW} YELLOW)",
             (
-                "- {YELLOW} **Yellow Commercial** dice provide top revenue & 4 VP, but have **0 Shields** and attract malware.\n"
+                "- {YELLOW} **Yellow Commercial** dice provide top revenue, but have **0 Shields** and attract malware.\n"
                 "- When taking unblocked {GREEN} **Green Malware**, **Ready {YELLOW} Yellow dice MUST be demoted to Unpatched first** *(Contractor Sacrifice cannot save {YELLOW})*!"
             ),
         ),
@@ -1199,13 +1188,13 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
     page.line(20.0, mid_y, 772.0, mid_y, stroke=PALETTE["muted"], width=0.5, dash=(4, 3))
 
     compact_rows = [
-        ("gray", "GRAY", "Start / 0V", ("1 Any", "1 Any", "+$1", "+$1", "$1 / 1{WRENCH}", "+1{WRENCH}")),
-        ("white", "WHITE", "$1-$3 / 0V", ("1 Any", "1 Any", "1 Any", "+$1", "{LOCK}Glitch", "{LOCK}Glitch")),
-        ("red", "RED", "$4 / 3 VP", ("1 {RED}", "+$2", "+$2", "+$2", "{LOCK}Glitch", "{RED} {STAR}")),
-        ("blue", "BLUE", "$5 / 4 VP", ("1 {BLUE}", "+1{WRENCH}", "+$1", "1{BLUE}/1{WRENCH}", "{LOCK}Glitch", "{BLUE} {STAR}")),
-        ("green", "GREEN", "$4 / 3 VP", ("1 {GREEN}", "+1{WRENCH}", "+2{WRENCH}", "1{WRENCH}/$1", "{LOCK}Glitch", "{GREEN} {STAR}")),
-        ("yellow", "YELLOW*", "$5 / 4 VP", ("+$3", "+$2", "+$2", "$1 & 1{WRENCH}", "{YELLOW} {STAR}", "{YELLOW} {STAR}")),
-        ("purple", "PURPLE", "$4 / 3 VP", ("1 Any", "1 Any", "+$2", "$1 & 1{WRENCH}", "{PURPLE} {STAR}", "{PURPLE} {STAR}")),
+        ("gray", "GRAY", "Starter", ("1 Any", "1 Any", "+$1", "+$1", "$1 / 1{WRENCH}", "+1{WRENCH}")),
+        ("white", "WHITE", "$1-$3", ("1 Any", "1 Any", "1 Any", "+$1", "{LOCK}Glitch", "{LOCK}Glitch")),
+        ("red", "RED", "Cost: $4", ("1 {RED}", "+$2", "+$2", "+$2", "{LOCK}Glitch", "{RED} {STAR}")),
+        ("blue", "BLUE", "Cost: $5", ("1 {BLUE}", "+1{WRENCH}", "+$1", "1{BLUE}/1{WRENCH}", "{LOCK}Glitch", "{BLUE} {STAR}")),
+        ("green", "GREEN", "Cost: $4", ("1 {GREEN}", "+1{WRENCH}", "+2{WRENCH}", "1{WRENCH}/$1", "{LOCK}Glitch", "{GREEN} {STAR}")),
+        ("yellow", "YELLOW*", "Cost: $5", ("+$3", "+$2", "+$2", "$1 & 1{WRENCH}", "{YELLOW} {STAR}", "{YELLOW} {STAR}")),
+        ("purple", "PURPLE", "Cost: $4", ("1 Any", "1 Any", "+$2", "$1 & 1{WRENCH}", "{PURPLE} {STAR}", "{PURPLE} {STAR}")),
     ]
 
     for r in range(2):
@@ -1226,7 +1215,7 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
             c_f = (cw - c_name - c_cost) / 6.0  # 43.3 pt
             page.rect(x, ty, cw, 18.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.6)
             page.text(x + 5.0, ty + 12.2, "DIE", font="bold", size=6.5, color=PALETTE["ink"])
-            page.text(x + c_name + c_cost / 2.0, ty + 12.2, "$/VP", font="bold", size=6.5, color=PALETTE["ink"], align="center")
+            page.text(x + c_name + c_cost / 2.0, ty + 12.2, "COST", font="bold", size=6.5, color=PALETTE["ink"], align="center")
             for p_i in range(6):
                 fx = x + c_name + c_cost + p_i * c_f
                 page.line(fx, ty, fx, ty + 18.0, stroke=PALETTE["rule"], width=0.5)
@@ -1256,7 +1245,7 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
                 "**P1:** +1{BLACK} -> Hire {WHITE} ($1/$2/$3) -> Roll -> 2 Free Rerolls *(1{WRENCH} unlocks {LOCK})* -> Shields & `/` -> Glitch Backlash -> Gain **$** & {WRENCH}.\n"
                 "**P2:** {BLACK} Track (4/5/6=Upgr) -> Shields *(hit->Unpatched)* -> Dmg: {RED}-$1->{WRENCH}->Secret | {BLUE}-1 Secret | {GREEN}Wear Ready *({YELLOW}* 1st!). *(Buffer Overflow: +1 R/B/G).* \n"
                 "**P3:** **Buy <=2** | **Patch:** 1{WRENCH} or $2 | **Reboot (1x):** 0 Ready -> Gray Ready | **Cleanup:** Discard unspent >3{WRENCH}.\n"
-                "**VP:** Secret=4, Ready Die=3/4 (Unpatched=0), $2=1. Patient Zero eliminated.",
+                "**VICTORY:** Most Corporate Secrets among survivors. Patient Zero (0 Secrets) eliminated. Ties: $ > Ready Modules > {WRENCH} > Fewest Unpatched.",
                 size=5.3, leading=7.5, color=PALETTE["ink"],
             )
             # Once-per-Game System Reboot slot on Reference Card
@@ -1283,10 +1272,9 @@ def _draw_single_variant_card(page: PDFPage, x: float, y: float, w: float, h: fl
     page.rounded_rect(x + w - 24.0, y + 5.5, 19.0, 12.0, r=2.0, stroke=fg, fill=PALETTE["white"], line_width=0.7)
     page.text(x + w - 14.5, y + 13.8, card.code, font="mono_bold", size=6.8, color=fg, align="center")
 
-    # Cost & VP Sub-bar
+    # Cost Sub-bar
     page.rect(x, y + 22.0, w, 14.5, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.6)
-    page.text(x + 6.0, y + 31.8, f"COST: {card.cost_str}", font="bold", size=6.9, color=PALETTE["ink"])
-    page.text(x + w - 6.0, y + 31.8, f"VALUE: {card.vp_str}", font="mono_bold", size=6.6, color=PALETTE["ink_soft"], align="right")
+    page.text(x + w / 2.0, y + 31.8, f"Cost: {card.cost_str}", font="bold", size=7.2, color=PALETTE["ink"], align="center")
 
     # Base Faces 1-4 Mini Reference
     page.rich_line(x + w / 2.0, y + 48.0, card.base_summary_1, size=6.1, color=PALETTE["ink_soft"], align="center")
@@ -1320,7 +1308,7 @@ def _draw_color_divider_card(page: PDFPage, x: float, y: float, w: float, h: flo
     page.rounded_rect(x, y, w, h, r=4.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=1.0)
     page.rect(x, y, w, 22.0, stroke=PALETTE["ink"], fill=fg, line_width=0.8)
     page.text(x + w / 2.0, y + 14.5, f"{dspec.title} // ALL VARIANTS", font="bold", size=7.2, color=PALETTE["white"], align="center")
-    page.text(x + w / 2.0, y + 33.0, f"Cost: {dspec.cost_str}  |  {dspec.vp_str}  |  Summary", font="regular", size=6.2, color=PALETTE["ink_soft"], align="center")
+    page.text(x + w / 2.0, y + 33.0, f"Cost: {dspec.cost_str}  |  Market Summary", font="regular", size=6.2, color=PALETTE["ink_soft"], align="center")
 
     cy = y + 46.0
     for v in variants:
@@ -1515,7 +1503,7 @@ def render_pnp_tokens_page(page: PDFPage) -> None:
         page.text(bx + aw / 2.0, by + 20.5, "Archetype Slot", font="regular", size=5.5, color=PALETTE["muted"], align="center")
 
     # Section 2 (y = 128..292): 32x Corporate Secret Chits (8 cols x 4 rows)
-    page.text(42.0, 136.0, "CORPORATE SECRET TOKENS (x32 — 4 VP EACH)", font="mono_bold", size=6.8, color=PALETTE["blue"])
+    page.text(42.0, 136.0, "CORPORATE SECRET TOKENS (x32 — PRIMARY OBJECTIVE / 1 PT EACH)", font="mono_bold", size=6.8, color=PALETTE["blue"])
     sw = (710.0) / 8.0  # 88.75 pt
     sh = 36.0
     sy0 = 141.0
@@ -1526,7 +1514,7 @@ def render_pnp_tokens_page(page: PDFPage) -> None:
             page.rect(bx, by, sw, sh, stroke=PALETTE["blue"], fill=PALETTE["white"], line_width=0.6, dash=(3, 1.5))
             page.draw_secret_icon(bx + 15.0, by + 18.0, 12.0, color=PALETTE["blue"])
             page.text(bx + 26.0, by + 16.0, "SECRET", font="bold", size=7.6, color=PALETTE["blue"])
-            page.text(bx + 26.0, by + 26.5, "4 VP  |  Client Data", font="regular", size=5.8, color=PALETTE["muted"])
+            page.text(bx + 26.0, by + 26.5, "1 Pt  |  Client Data", font="regular", size=5.8, color=PALETTE["muted"])
 
     # Section 3 (y = 298..410): 16x Patch (🔧) Tokens (8 cols x 2 rows)
     page.text(42.0, 300.0, "SPLICE / PATCH TOKENS (x16 — CLEANUP CAP: MAX 3 HELD)", font="mono_bold", size=6.8, color=PALETTE["green"])
@@ -1556,7 +1544,7 @@ def render_pnp_tokens_page(page: PDFPage) -> None:
             page.rect(bx, by, sw, ch_h, stroke=PALETTE["ink_soft"], fill=fill_c, line_width=0.55, dash=(3, 1.5))
             page.text(bx + 18.0, by + 21.0, val, font="bold", size=11.0, color=PALETTE["ink"], align="center")
             page.text(bx + 34.0, by + 16.5, sub, font="mono_bold", size=5.8, color=PALETTE["ink_soft"])
-            page.text(bx + 34.0, by + 25.5, "1 VP per $2", font="regular", size=5.4, color=PALETTE["muted"])
+            page.text(bx + 34.0, by + 25.5, "Tiebreak Asset", font="regular", size=5.4, color=PALETTE["muted"])
 
 
 # =============================================================================

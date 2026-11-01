@@ -29,9 +29,9 @@ export function renderGameOverModal() {
     <tr style="border-bottom: 1px solid var(--border-color); text-align: left;">
       <td style="padding: 6px;">#${r.rank}</td>
       <td style="padding: 6px;">${r.bot_name}</td>
-      <td style="padding: 6px;">${r.portfolio_value} VP</td>
-      <td style="padding: 6px;">${r.overflow_penalties} VP</td>
-      <td style="padding: 6px; font-weight: 700; color: var(--accent-gold);">${r.net_score} VP</td>
+      <td style="padding: 6px;">${r.secrets} Secrets</td>
+      <td style="padding: 6px;">${r.overflow_penalties}</td>
+      <td style="padding: 6px; font-weight: 700; color: var(--accent-gold);">${r.net_score}</td>
       <td style="padding: 6px;">${r.is_patient_zero ? '<span style="color: #ff0055;">Breached</span>' : '<span style="color: #00ff88;">Survived</span>'}</td>
     </tr>
   `).join("");
@@ -49,7 +49,7 @@ export function renderGameOverModal() {
         <tr style="color: var(--text-dim); border-bottom: 1px solid var(--border-color); text-align: left;">
           <th style="padding: 6px;">Rank</th>
           <th style="padding: 6px;">Corporation</th>
-          <th style="padding: 6px;">Raw VP</th>
+          <th style="padding: 6px;">Secrets</th>
           <th style="padding: 6px;">Overflow</th>
           <th style="padding: 6px;">Net Score</th>
           <th style="padding: 6px;">Status</th>

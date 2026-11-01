@@ -44,7 +44,7 @@ class TestV120Rules(unittest.TestCase):
         """1. Red die: Cost $4, 3 VP; Face 1 Block 1 Red, Faces 2-4 +$2, Face 5 Glitch, Face 6 Star."""
         red = create_colored_die(DieColor.RED, 1, self.variants[DieColor.RED])
         self.assertEqual(red.cost, 4)
-        self.assertEqual(red.vp, 3)
+        self.assertEqual(red.vp, 0)
         self.assertEqual(len(red.faces), 6)
 
         # Face 1 (idx 0): Block 1 Red
@@ -81,7 +81,7 @@ class TestV120Rules(unittest.TestCase):
         """2. Blue die: Cost $5, 4 VP; Face 1 Block 1 Blue, Face 2 +1 🔧, Face 3 +$1, Face 4 Choice, Face 5 Glitch, Face 6 Star."""
         blue = create_colored_die(DieColor.BLUE, 2, self.variants[DieColor.BLUE])
         self.assertEqual(blue.cost, 5)
-        self.assertEqual(blue.vp, 4)
+        self.assertEqual(blue.vp, 0)
         self.assertEqual(len(blue.faces), 6)
 
         # Face 1 (idx 0): Block 1 Blue
@@ -117,10 +117,10 @@ class TestV120Rules(unittest.TestCase):
     # Test 3: Green Die Recalibration
     # -------------------------------------------------------------------------
     def test_03_green_die_recalibration(self) -> None:
-        """3. Green die: Cost $4, 3 VP; Face 1 Block 1 Green, Face 2 +1 🔧, Face 3 +2 🔧, Face 4 Choice, Face 5 Glitch, Face 6 Star."""
+        """3. Green die: Cost $4, 0 VP; Face 1 Block 1 Green, Face 2 +1 🔧, Face 3 +2 🔧, Face 4 Choice, Face 5 Glitch, Face 6 Star."""
         green = create_colored_die(DieColor.GREEN, 3, self.variants[DieColor.GREEN])
         self.assertEqual(green.cost, 4)
-        self.assertEqual(green.vp, 3)
+        self.assertEqual(green.vp, 0)
         self.assertEqual(len(green.faces), 6)
 
         # Face 1 (idx 0): Block 1 Green
@@ -158,14 +158,14 @@ class TestV120Rules(unittest.TestCase):
         """4. Yellow, Purple, Gray, and White dice maintain their standard configurations."""
         yellow = create_colored_die(DieColor.YELLOW, 4, self.variants[DieColor.YELLOW])
         self.assertEqual(yellow.cost, 5)
-        self.assertEqual(yellow.vp, 4)
+        self.assertEqual(yellow.vp, 0)
         self.assertTrue(yellow.faces[4].is_star)
         self.assertTrue(yellow.faces[5].is_star)
         self.assertFalse(any(f.is_glitch for f in yellow.faces))
 
         purple = create_colored_die(DieColor.PURPLE, 5, self.variants[DieColor.PURPLE])
         self.assertEqual(purple.cost, 4)
-        self.assertEqual(purple.vp, 3)
+        self.assertEqual(purple.vp, 0)
         self.assertEqual(purple.faces[0].name, "Block 1 Any")
         self.assertEqual(purple.faces[1].name, "Block 1 Any")
         self.assertTrue(purple.faces[4].is_star)
