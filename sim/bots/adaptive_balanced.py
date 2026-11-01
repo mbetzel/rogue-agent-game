@@ -135,18 +135,10 @@ class AdaptiveBalancedBot(BaseBot):
         directive_code: str,
         rng: random.Random,
     ) -> List[int]:
-        if player_state.patches <= 0:
-            return []
-        colored_glitches = [
-            idx for idx, d in enumerate(active_dice)
-            if d.is_locked and d.current_face and d.current_face.is_glitch and d.color != DieColor.WHITE
-        ]
-        other_locked = [
-            idx for idx, d in enumerate(active_dice)
-            if d.is_locked and idx not in colored_glitches
-        ]
-        candidates = colored_glitches + other_locked
-        return candidates[:player_state.patches]
+        """DEPRECATED in v0.23.0. Delegated to BaseBot (always returns [])."""
+        return super().choose_debug_unlocks(
+            player_state, active_dice, staging_cubes, stuck_cubes, directive_code, rng
+        )
 
     def choose_yahtzee_rerolls(
         self,

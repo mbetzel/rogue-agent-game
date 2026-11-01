@@ -1,4 +1,4 @@
-"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.22.0 Baseline).
+"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.23.0 Baseline).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
   - 01_Player_Boards.pdf (6 pages — 1 per Consultancy Archetype, matching Wireframe Page 1)
@@ -19,7 +19,7 @@ from pnp.pdf_engine import PALETTE, Color, PDFDocument, PDFPage, measure_text
 
 
 # =============================================================================
-# Canonical Game Data (Synchronized 1:1 with RULES.md v0.22.0 & sim/entities.py)
+# Canonical Game Data (Synchronized 1:1 with RULES.md v0.23.0 & sim/entities.py)
 # =============================================================================
 
 @dataclass(frozen=True)
@@ -66,7 +66,7 @@ CHARACTERS: List[CharacterSpec] = [
         timing="P1: REROLL STEP",
         ability_name="Brute-Force Bypass",
         ability_desc=(
-            "Include **Locked dice** in free rerolls without spending {WRENCH}. "
+            "Bypass absolute locks: include **Locked dice** in free rerolls. "
             "Turn **1 rolled die** to any non-Star face of choice."
         ),
     ),
@@ -447,7 +447,7 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
     draw_board_outer_frame(
         page,
         left_tag=f"TOO MANY SECRETS // CONSULTANCY TERMINAL [{idx}/6]",
-        right_tag="PNP PROTOTYPE v0.22 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.23.0 // US LETTER",
     )
 
     # -------------------------------------------------------------------------
@@ -536,7 +536,7 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
 
     page.rich_line(
         rx + rw / 2.0, r1_y + 64.0,
-        "Phase 1: Roll all Ready + hired Contractors. Yahtzee rerolls (max 2), Debug unlock (1 {WRENCH}).",
+        "Phase 1: Roll Ready + Contractors. Pure Yahtzee rerolls (max 2); Glitches lock (no P1 debug).",
         size=6.4, color=PALETTE["ink_soft"], align="center",
     )
     page.rich_line(
@@ -744,7 +744,7 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
         lbl = f"SLOT {p_i + 1}" if p_i < 2 else "CLEANUP (3)"
         page.text(sx + ps_size / 2.0, ps_y + 13.0, lbl, font="mono", size=5.8, color=PALETTE["muted"], align="center")
         page.draw_wrench_icon(sx + ps_size / 2.0, ps_y + 31.0, 14.0, color=PALETTE["rule"])
-    page.rich_line(px + bw / 2.0, by + bh - 7.0, "Start: **2** Tokens  |  Unlock {LOCK} / Fast-Patch / -$1  |  Discard >3 at Cleanup", size=6.2, color=PALETTE["muted"], align="center")
+    page.rich_line(px + bw / 2.0, by + bh - 7.0, "Start: **2** Tokens  |  Fast-Patch (1 {WRENCH}: Glitched -> Scanned)  |  Discard >3 at Cleanup", size=5.8, color=PALETTE["muted"], align="center")
 
     # 3. Secrets
     scx = px + bw + bgap
@@ -765,7 +765,7 @@ def render_agent_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // CENTRAL ROGUE AGENT & COMPILER BOARD [1/2]",
-        right_tag="PNP PROTOTYPE v0.22 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.23.0 // US LETTER",
     )
 
     # Top Title Bar inside board
@@ -822,7 +822,7 @@ def render_agent_board(page: PDFPage) -> None:
     ct_h = col_bot - ct_y  # 109.0 pt
     page.rect(slot_x, ct_y, slot_w, ct_h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.2)
     page.rect(slot_x, ct_y, slot_w, 19.0, stroke=PALETTE["ink"], fill=PALETTE["ink"], line_width=0.8)
-    page.rich_line(slot_x + slot_w / 2.0, ct_y + 13.5, "**ACTIVE VERSION CORRUPTION PROTOCOL** (v0.22.0)", size=7.5, color=PALETTE["white"], align="center")
+    page.rich_line(slot_x + slot_w / 2.0, ct_y + 13.5, "**ACTIVE VERSION CORRUPTION PROTOCOL** (v0.23.0)", size=7.5, color=PALETTE["white"], align="center")
 
     # 3 Version Track Capacity Milestones
     tiers_summary = [
@@ -944,7 +944,7 @@ def render_agent_board(page: PDFPage) -> None:
                 "**1. Pulse:** Add **+1** {BLACK} Black Cube -> Staging Cup.\n"
                 "**2. Temp Staffing:** Hire {WHITE} Contractors (**$1** / **$2** / **$3**, max 3).\n"
                 "**3. Roll Pool:** Roll Ready Zone + hired Contractors.\n"
-                "**4. Rerolls & Debug:** Up to **2 free rerolls** of unlocked dice. Spend **1** {WRENCH} to **Unlock 1** {LOCK} die.\n"
+                "**4. Pure Rerolls:** Up to **2 free rerolls** of unlocked dice. Glitches & locked faces cannot be unlocked.\n"
                 "**5. Assign:** Commit Shields ({RED}/{BLUE}/{GREEN}) & Income. Unresolved Glitches -> **Glitched Box**.\n"
                 "**6. Hash Match:** 3 matching faces in roll = **+1 Secret** *(uncapped; no Glitches)*."
             ),
@@ -994,7 +994,7 @@ def render_market_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // SOFTWARE MODULE MARKET & CENTRAL SUPPLY [2/2]",
-        right_tag="PNP PROTOTYPE v0.22 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.23.0 // US LETTER",
     )
 
     # Top Title Bar
@@ -1249,12 +1249,12 @@ def render_master_dice_reference(page: PDFPage) -> None:
             ),
         ),
         (
-            "LOCKED DICE ({LOCK}) & DEBUG ({WRENCH})",
+            "LOCKED DICE ({LOCK}) & ABSOLUTE LOCKS",
             (
-                "- **{LOCK} Glitch:** Face 5 on colored dice is locked; cannot reroll without debug.\n"
-                "- **v2.0 RaaS:** Locks any face with a **Cash** option *(incl. `/` & {STAR})*.\n"
-                "- **v3.0 Zero-Day:** Locks any face with a **Shield** option *(incl. `/` & {STAR})*.\n"
-                "- **Debug Action:** Spend **1** {WRENCH} token to Unlock 1 locked die."
+                "- **{LOCK} Glitch:** Face 5 on colored dice is locked; cannot be rerolled.\n"
+                "- **Track Locks:** Corruption spaces lock Cash, Patch, or Shield faces.\n"
+                "- **Absolute Locks:** Locked dice CANNOT be unlocked in Phase 1 (no patch spending).\n"
+                "- **Fast-Patching:** Consolidated in Phase 3 Part 3B (1 {WRENCH}: Glitched -> Scanned)."
             ),
         ),
         (
@@ -1343,7 +1343,7 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
             page.rect(x, fy, cw, fh, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.7)
             page.rich_paragraph(
                 x + 6.0, fy + 6.0, cw - 12.0,
-                "**P1 Roll & Deploy:** +1{BLACK} -> Hire {WHITE} ($1/$2/$3, max 3) -> Roll Ready + Contractors -> Up to 2 Free Rerolls (1{WRENCH} debugs {LOCK}) -> Unresolved Glitches -> Glitched Box -> Commit Shields & Income -> Hash Match (3-of-a-kind = +1 Secret).\n"
+                "**P1 Roll & Deploy:** +1{BLACK} -> Hire {WHITE} ($1/$2/$3, max 3) -> Roll Ready + Contractors -> Up to 2 Pure Rerolls (Glitches lock immediately; no P1 patch unlocks) -> Unresolved Glitches -> Glitched Box -> Commit Shields & Income -> Hash Match (3-of-a-kind = +1 Secret).\n"
                 "**P2 SETEC Compile:** Drop Staging Cup -> 2A: {BLACK} advances track (4/5/6=Upgr/Singularity) -> 2B: Resolve vs Shields (Zero Wear!) -> Dmg: {RED} -$1 (Unpaid: -1 Secret) | {BLUE} -1 Secret | {GREEN} Glitch 1 die (Income 1st, then Shield; empty: destroy Under Dev) -> Recycle {RED}{BLUE}{GREEN} -> 2C: End Check (Singularity or <=0 Secrets).\n"
                 "**P3 Operations & Pipeline:** Collect Income ($/🔧/★) -> Buy <=2 dice -> Fast-Patch (1{WRENCH}: Glitched -> Scanned) -> Scanned -> Ready -> In Production -> Ready -> Glitched -> Scanned -> Cap held 🔧 at 3 -> Pass 1st Player.\n"
                 "**VICTORY:** Most Corporate Secrets among survivors. Patient Zero (<=0 Secrets) eliminated. Ties: 1. $ Capital  2. Ready Modules  3. Patches  4. Fewest Under Dev.",
@@ -1624,7 +1624,7 @@ def render_pnp_tokens_page(page: PDFPage) -> None:
             page.rect(bx, by, sw, ph, stroke=PALETTE["green"], fill=PALETTE["green_light"], line_width=0.6, dash=(3, 1.5))
             page.draw_wrench_icon(bx + 15.0, by + 21.0, 13.0, color=PALETTE["green"])
             page.text(bx + 26.0, by + 18.5, "1 PATCH", font="bold", size=7.6, color=PALETTE["green"])
-            page.text(bx + 26.0, by + 29.5, "Unlock / Patch / -$1", font="regular", size=5.6, color=PALETTE["ink_soft"])
+            page.text(bx + 26.0, by + 29.5, "Fast-Patch (1/die)", font="regular", size=5.6, color=PALETTE["ink_soft"])
 
     # Section 4 (y = 404..574): Currency Chits ($1 x 24 + $5 x 16)
     page.text(42.0, 404.0, "CONSULTANCY CREDITS ($1 x 24  &  $5 x 16)", font="mono_bold", size=6.8, color=PALETTE["ink_soft"])
@@ -1687,7 +1687,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated.append(path_versions)
 
     # 5. Combined Master Print-and-Play Pack (All 14 pages)
-    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.22.0)")
+    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.23.0)")
     for sub_doc in (doc_central, doc_players, doc_dice, doc_versions):
         for pg in sub_doc.pages:
             doc_master.pages.append(pg)

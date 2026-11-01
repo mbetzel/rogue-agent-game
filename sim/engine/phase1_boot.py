@@ -214,25 +214,9 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
                 prodigy_active = True
                 player.mark_ability_used(active_ver)
 
+        # Pure Rerolls: ZERO debug actions, ZERO patch deductions
         rerolls_remaining = max_free_rerolls
         while rerolls_remaining > 0:
-            # Debug action: spend 1 🔧 to unlock 1 locked die
-            if player.patches > 0:
-                unlock_indices = player.bot.choose_debug_unlocks(
-                    player_state=player,
-                    active_dice=active_dice,
-                    staging_cubes=staging_copy,
-                    stuck_cubes=stuck_copy,
-                    directive_code=active_directive,
-                    rng=engine.rng,
-                )
-                for u_idx in unlock_indices:
-                    if player.patches <= 0:
-                        break
-                    if 0 <= u_idx < len(active_dice) and active_dice[u_idx].is_locked:
-                        active_dice[u_idx].is_locked = False
-                        player.patches -= 1
-
             # Choose rerolls among unlocked dice (or any dice if prodigy_active)
             reroll_res = player.bot.choose_yahtzee_rerolls(
                 player_state=player,
@@ -244,16 +228,11 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
                 rng=engine.rng,
             )
             if isinstance(reroll_res, tuple) and len(reroll_res) == 2:
-                extra_unlocks, reroll_indices = reroll_res
-                for u_idx in extra_unlocks:
-                    if player.patches <= 0:
-                        break
-                    if 0 <= u_idx < len(active_dice) and active_dice[u_idx].is_locked:
-                        active_dice[u_idx].is_locked = False
-                        player.patches -= 1
+                _, reroll_indices = reroll_res
             else:
                 reroll_indices = reroll_res or []
 
+            # Filter reroll indices: Prodigy may reroll locked dice; standard players cannot
             if prodigy_active:
                 valid_rerolls = [
                     idx for idx in reroll_indices

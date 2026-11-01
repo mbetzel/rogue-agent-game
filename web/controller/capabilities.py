@@ -157,14 +157,6 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             or (is_prodigy and (meta.get("prodigy_active", False) or ability_avail) and len(rolled_pool) > 0)
         )
     )
-    can_debug_unlock = (
-        controller.phase == 1
-        and meta["has_rolled"]
-        and not meta["has_committed"]
-        and not is_eliminated
-        and player.patches > 0
-        and any(getattr(d, "is_locked", False) for d in rolled_pool)
-    )
     can_hotfix = (controller.phase == 1 and meta["has_rolled"] and not meta["has_committed"] and avail_patches > 0 and not is_eliminated)
     can_commit = (controller.phase == 1 and meta["has_rolled"] and not meta["has_committed"] and not is_eliminated)
     can_compile = (controller.phase == 2 and controller.subphase == "ready_for_compile")
@@ -235,7 +227,6 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         "can_hire_contractors": can_hire_contractors,
         "next_contractor_cost": next_contractor_cost,
         "can_reroll": can_reroll,
-        "can_debug_unlock": can_debug_unlock,
         "can_hotfix": can_hotfix,
         "can_commit": can_commit,
         "can_compile": can_compile,

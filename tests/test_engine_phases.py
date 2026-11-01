@@ -85,8 +85,8 @@ class TestEnginePhases(unittest.TestCase):
         p0.patches = 2
         engine._execute_phase_1()
 
-        # Started with 2 patches, spent 1 on debug unlock -> exactly 1 left
-        self.assertEqual(p0.patches, 1)
+        # In v0.23.0, Phase 1 debug unlocks are removed; patches never decrease in Phase 1
+        self.assertEqual(p0.patches, 2)
 
     def test_phase2_black_cubes_and_version_upgrade(self) -> None:
         cfg = GameConfig(num_players=2)  # corruption track = 2 + 1 = 3 spaces

@@ -137,19 +137,12 @@ class BaseBot:
         directive_code: str,
         rng: random.Random,
     ) -> List[int]:
-        """Returns indices of locked dice to unlock by spending 1 🔧 token each (prioritizing colored glitches)."""
-        if player_state.patches <= 0:
-            return []
-        colored_glitches = [
-            idx for idx, d in enumerate(active_dice)
-            if d.is_locked and d.current_face and d.current_face.is_glitch and d.color != DieColor.WHITE
-        ]
-        other_locked = [
-            idx for idx, d in enumerate(active_dice)
-            if d.is_locked and idx not in colored_glitches
-        ]
-        candidates = colored_glitches + other_locked
-        return candidates[:player_state.patches]
+        """DEPRECATED in v0.23.0. Phase 1 debug unlocks have been removed.
+
+        Always returns an empty list. All wrench spending decisions are consolidated
+        into choose_fast_patches() in Phase 3 Part 3B.
+        """
+        return []
 
     def choose_glitch_demotion(
         self,

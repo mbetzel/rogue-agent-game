@@ -185,8 +185,8 @@ class TestV220Rules(unittest.TestCase):
         p0.bot = UnlockBot(0)
         # Execute Phase 1
         execute_phase_1(engine)
-        # Player spent 1 patch on debug unlock
-        self.assertEqual(p0.patches, 1)
+        # In v0.23.0, debug unlocks in Phase 1 are deprecated; patches never decrease in Phase 1
+        self.assertEqual(p0.patches, 2)
 
     def test_phase1_unresolved_glitch_moves_to_glitched_box(self) -> None:
         """Verify permanent dice with unresolved glitches move to glitched_dice."""

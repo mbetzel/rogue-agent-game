@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.22.0)
+# Too Many Secrets — Rules Draft (v0.23.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -97,13 +97,13 @@ Each player’s consultancy archetype provides a powerful, specialized capabilit
 1. **Autonomous Protocol Pulse:** SETEC compiles new intrusion subroutines in the background. Take **`1 Black Cube`** from the general supply across all versions (`v1.0`, `v2.0`, `v3.0`) and place it into the **Staging Cup** `[TUNE: v0.21.0 9-round pacing clock]`.
 2. **Temp Staffing (Contractor Dice):** Before rolling, each player may hire temporary White Contractor Dice (freelance phreakers) for this round. Hiring uses **Progressive Contractor Pricing**: **`$1` for the 1st die, `$2` for the 2nd die, and `$3` for the 3rd die** (up to a maximum of **`3` White Dice** per round; hiring all 3 costs **`$6`** total `[TUNE]`). All hired White Contractor dice are added to your rolling pool for this round. *(Archetype Timing: **The Operator** may trigger Redundant Crew here).*
 3. **Roll Ready Pool:** Every player simultaneously rolls all dice in their **Ready for Release Zone** plus any hired **White Contractor Dice**. *(Dice in your **Under Development** zone are offline and are not rolled.)*
-4. **Yahtzee Rerolls & Debug Actions (Simultaneous):**
+4. **Yahtzee Rerolls (Simultaneous Pure Rerolls):**
    * Each player may perform up to **`2` free rerolls** of any subset of their rolled dice (3 rolls total).
    * Between rerolls, players may set aside (keep) any dice, or pick previously kept dice back up for subsequent rerolls.
-   * **Glitch Faces & Locking:**
+   * **Glitch Faces & Absolute Locks:**
      * Any die that rolls a **`Glitch (Locked)`** face is locked immediately and cannot be rerolled during your free rerolls.
      * If a **Corruption Track Lock Effect** was triggered during the previous round's Phase 2 (e.g., *Cash faces cannot be rerolled next Phase 1*, *Patch faces cannot be rerolled*, or *Shield faces cannot be rerolled*), any rolled die showing that face type is also locked immediately.
-   * **Debug Action (`🔧` Token Utility):** At any time during your reroll sequence, you may spend **`1 🔧` token** from your supply to **Unlock `1` locked die** (including a Glitch face), allowing it to be rerolled in your remaining rerolls. *(Archetype Timing: **The Prodigy** may trigger Brute-Force Bypass here to reroll locked dice freely and turn 1 rolled die to any non-Star face of choice).*
+     * **Absolute Locks (Zero Wrench Spending in Phase 1):** Locked dice **cannot be unlocked using Patch Tokens**. All patch token spending is strictly consolidated in Phase 3 Part 3B Fast-Patching. *(Archetype Timing: **The Prodigy** is the sole exception, capable of triggering Brute-Force Bypass here to freely reroll locked/glitched dice without spending patches and turn 1 rolled die to any legal non-Star face of choice).*
 5. **Assign Dice to In Production (Simultaneous):**
    * After all rerolls are finished, resolve all remaining dice:
      * **Unresolved Glitches:** Any die still showing an unresolved **`Glitch (Locked)`** face moves **immediately** to the **Glitched Box** in your **Under Development** pipeline. *(A glitch only glitches the specific rolled die that failed; it produces 0 outputs).* **Contractor Sacrifice:** If a White Contractor die rolls an unresolved Glitch, it is immediately discarded to the general supply instead of entering Under Development.
@@ -129,7 +129,7 @@ Move exited **Black Cubes** from the tray onto the next empty space(s) of the ac
   * **All Players Glitch `X` Dice:** Each player must move `X` dice of their choice from **In Production** to the **Glitched Box** in **Under Development** (prioritizing Income dice; if a Shield die is moved, its shield commitment is removed).
   * **All Players Return `X` Colored Dice:** Each player who owns at least 1 Colored Module Die (across Under Development, In Production, or Ready for Release) must return up to `X` Colored Module Dice of their choice to the Market supply. *(Gray starter dice cannot be returned).*
   * **All Players Lose `X` Corporate Secrets:** Each player immediately loses `X` Corporate Secrets (checking for Patient Zero at `<= 0` Secrets).
-  * **Next-Phase Face Lock (`Cash`, `Patch`, or `Shield` Faces Locked Next Phase 1):** During the next round's Phase 1 Step 4 (Rerolls), any rolled die showing that face type (including Choice faces offering that option) is immediately **Locked** and cannot be rerolled unless unlocked with `1 🔧` (Debug Action). *(Each Version card has at most 1 Lock space on its track).*
+  * **Next-Phase Face Lock (`Cash`, `Patch`, or `Shield` Faces Locked Next Phase 1):** During the next round's Phase 1 Step 4 (Rerolls), any rolled die showing that face type (including Choice faces offering that option) is immediately **Locked** and cannot be rerolled (absolute lock; only The Prodigy may bypass). *(Each Version card has at most 1 Lock space on its track).*
 * **Upgrading (`v1.0 → v2.0` or `v2.0 → v3.0`):** When the final space of `v1.0` (`4th` space) or `v2.0` (`5th` space) is filled and resolved:
   1. Clear all Black Cubes from the completed Version card back to the supply.
   2. Move the Version Marker to the next Version card (`v2.0` or `v3.0`). *(No separate upgrade payload is added; the Corruption Track spaces themselves are the sole source of new cubes).*
@@ -290,7 +290,7 @@ Each archetype features a unique special ability that may be activated **once pe
 | :--- | :--- | :--- | :--- |
 | **The Acoustic** | **Phase 2:** Step 2B Damage | *Baffle Echo* | When resolving compiler damage, ignore **1 Attack Cube** (`Red`, `Blue`, or `Green`) of your choice for yourself this round. *(All exited cubes remain in the exit tray and recycle into the Staging Cup as normal).* |
 | **The Phreaker** | **Phase 3:** Pipeline Prep | *Magnetic Splice* | Move **1 die** from your **Glitched Box** directly to your **Ready for Release Zone** for **free** (bypassing Scanned and saving `1 🔧`). |
-| **The Prodigy** | **Phase 1:** Step 4 Rerolls | *Brute-Force Bypass* | During your rerolls this phase, you may include **any number of Locked dice** (including Glitch dice) in your free rerolls without spending `🔧` tokens. In addition, you may turn **1 of your rolled dice to any non-Star face of your choice**. |
+| **The Prodigy** | **Phase 1:** Step 4 Rerolls | *Brute-Force Bypass* | Bypass absolute locks: during your rerolls this phase, you may include **any number of Locked dice** (including Glitch dice) in your free rerolls. In addition, you may turn **1 of your rolled dice to any legal non-Star face of your choice**. |
 | **The Spook** | **Phase 2:** Step 2B Damage | *Slush Fund* | The Spook accesses emergency black budget reserves: **Absorb up to 2 Corporate Secret loss** (from Blue Spyware or unpaid Red Ransom) for free without paying cash. *(Any additional Secret loss may be absorbed by paying `$1` per Secret as normal).* |
 | **The Cipher** | **Phase 3:** Operations Turn | *Algorithmic Arbitrage* | Purchase **1 Colored Die** from the Market at a **`$2 discount`** (minimum cost `$0`), **OR** gain an immediate **`+$2` cash payout** from the bank. |
 | **The Operator** | **Phase 1:** Step 2 Staffing | *Redundant Crew* | Hire up to **2 White Contractor Dice for free** this round (bypassing progressive contractor costs). |

@@ -10,7 +10,7 @@ import {
   activePlayerTab,
   setActivePlayerTab,
 } from "../state.js";
-import { doDebugUnlock, doFastPatch } from "../api.js";
+import { doFastPatch } from "../api.js";
 import { renderVersionSlotBadge } from "./header.js";
 
 let renderAppCallback = null;
@@ -380,12 +380,12 @@ export function renderPlayerMats() {
               </div>
               <div class="zone-subtext">
                 ${p.is_human && state.phase === 1 && !p.has_committed 
-                  ? `Free Rerolls: <strong>${p.rerolls_remaining || 0}</strong>/2 | Spend 1 🔧 to Unlock 🔒 | Glitches → Glitched Box` 
-                  : `Max 2 Free Rerolls | Spend 1 🔧 to Unlock 🔒 | Glitches move to Glitched Box`}
+                  ? `Free Rerolls: <strong>${p.rerolls_remaining || 0}</strong>/2 | Glitches lock immediately → Glitched Box` 
+                  : `Max 2 Free Rerolls | Glitches lock immediately → Glitched Box`}
               </div>
             </div>
             <div class="zone-watermark-note">
-              ROLLED POOL // YAHTZEE REROLLS & DEBUG UNLOCK // DEPLOY TO IN PRODUCTION
+              ROLLED POOL // YAHTZEE REROLLS // DEPLOY TO IN PRODUCTION
             </div>
             <div class="dice-tray active-tray" id="rolled_tray_${p.player_id}"></div>
           </div>
@@ -548,7 +548,7 @@ export function renderPlayerMats() {
             </div>
           </div>
           <div class="reserve-card-footer">
-            Start: 2 Tokens | Unlock 🔒 / Patch / Auto-Absorb $1 Red
+            Start: 2 Tokens | Fast-Patch (Phase 3) / Auto-Absorb $1 Red
           </div>
         </div>
 
@@ -656,10 +656,6 @@ export function renderPlayerMats() {
               }
               requestRender();
             };
-          } else if (isLocked && p.patches > 0) {
-            chip.classList.add("clickable");
-            chip.title = "Click to spend 1 🔧 and Debug Unlock this die";
-            chip.onclick = () => doDebugUnlock(idx);
           }
         }
         rolledTray.appendChild(chip);

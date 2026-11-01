@@ -397,20 +397,10 @@ class TestV06Rules(unittest.TestCase):
         ctrl.player_meta[0]["rolled_pool"][0].is_locked = True
         self.assertTrue(ctrl.player_meta[0]["rolled_pool"][0].is_locked)
 
-        # Debug unlock
-        ctrl.debug_unlock_die(player_id=0, die_index=0)
-        self.assertFalse(ctrl.player_meta[0]["rolled_pool"][0].is_locked)
-        self.assertEqual(ctrl.state.players[0].patches, 1)
-
-        # Debug unlock on already unlocked die raises ValueError
-        with self.assertRaises(ValueError):
+        # Debug unlock is deprecated in v0.23.0
+        with self.assertRaises(ValueError) as ctx:
             ctrl.debug_unlock_die(player_id=0, die_index=0)
-
-        # Debug unlock with 0 patches raises ValueError
-        ctrl.state.players[0].patches = 0
-        ctrl.player_meta[0]["rolled_pool"][0].is_locked = True
-        with self.assertRaises(ValueError):
-            ctrl.debug_unlock_die(player_id=0, die_index=0)
+        self.assertIn("deprecated in v0.23.0", str(ctx.exception))
 
     # -------------------------------------------------------------------------
     # 14. Immediate Outputs Collection

@@ -133,14 +133,7 @@ export async function doReroll(useProdigy = false) {
 }
 
 export async function doDebugUnlock(dieIndex) {
-  const newState = await apiCall("/api/game/action/debug_unlock", "POST", {
-    player_id: getHumanPlayerId(),
-    die_index: dieIndex,
-  });
-  if (newState) {
-    setState(newState);
-    notifyRender();
-  }
+  console.warn("Debug unlocks deprecated in v0.23.0. Use Phase 3 Fast-Patching.");
 }
 
 export async function doRoll() {

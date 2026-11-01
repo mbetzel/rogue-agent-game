@@ -621,22 +621,19 @@ class TestWebAPI(unittest.TestCase):
         self.assertEqual(p0["rerolls_remaining"], 1)
 
     # -------------------------------------------------------------------------
-    # 20. Phase 1: Debug Unlock API
+    # 20. Phase 1: Debug Unlock API (Deprecated in v0.23.0)
     # -------------------------------------------------------------------------
     def test_phase1_debug_unlock_api(self) -> None:
-        """POST /api/game/action/debug_unlock spends 1 patch to unlock die."""
+        """POST /api/game/action/debug_unlock returns 400 deprecation error in v0.23.0."""
         self._post("/api/game/new", {"num_players": 4, "seed": 42})
         self._post("/api/game/action/roll", {"player_id": 0})
 
-        ctrl = RogueAgentRequestHandler.controller
-        ctrl.state.players[0].patches = 2
-        ctrl.player_meta[0]["rolled_pool"][0].is_locked = True
-
-        res = self._post("/api/game/action/debug_unlock", {"player_id": 0, "die_index": 0})
-        self.assertTrue(res["success"])
-        p0 = res["state"]["players"][0]
-        self.assertEqual(p0["patches"], 1)
-        self.assertFalse(p0["rolled_pool"][0]["is_locked"])
+        url = f"{self.base_url}/api/game/action/debug_unlock"
+        body = json.dumps({"player_id": 0, "die_index": 0}).encode("utf-8")
+        req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"}, method="POST")
+        with self.assertRaises(urllib.error.HTTPError) as ctx:
+            urllib.request.urlopen(req)
+        self.assertEqual(ctx.exception.code, 400)
 
 
 if __name__ == "__main__":

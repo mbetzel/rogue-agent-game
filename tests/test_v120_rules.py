@@ -226,7 +226,8 @@ class TestV120Rules(unittest.TestCase):
             directive_code="SCRIPT_KIDDIE",
             rng=random.Random(42),
         )
-        self.assertEqual(unlocks, [0])
+        # In v0.23.0, choose_debug_unlocks is deprecated and returns []
+        self.assertEqual(unlocks, [])
 
     # -------------------------------------------------------------------------
     # Test 7: Reroll Glitch Die After Debug Unlock
@@ -456,8 +457,8 @@ class TestV120Rules(unittest.TestCase):
             directive_code="SCRIPT_KIDDIE",
             rng=random.Random(42),
         )
-        # With only 1 patch, bot must unlock index 1 (Red colored glitch) rather than index 0 (White contractor)
-        self.assertEqual(unlocks, [1])
+        # In v0.23.0, choose_debug_unlocks is deprecated and returns []
+        self.assertEqual(unlocks, [])
 
     # -------------------------------------------------------------------------
     # Test 15: Web Controller Human Glitch Triage

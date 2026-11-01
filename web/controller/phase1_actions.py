@@ -239,40 +239,8 @@ def perform_reroll(
 
 
 def debug_unlock_die(controller: GameController, player_id: int, die_index: int) -> Dict[str, Any]:
-    """Spends 1 🔧 token to unlock a locked die, allowing it to be rerolled in remaining rerolls."""
-    if controller.phase != 1:
-        raise ValueError(f"Cannot debug unlock in phase {controller.phase}")
-    if player_id not in controller.player_meta:
-        raise ValueError(f"Invalid player_id {player_id}")
-
-    meta = controller.player_meta[player_id]
-    player = controller.state.players[player_id]
-
-    if player.is_patient_zero:
-        raise ValueError(f"Player {player_id} is eliminated")
-    if not meta["has_rolled"]:
-        raise ValueError("Must roll pool before debug unlocking")
-    if meta["has_committed"]:
-        raise ValueError("Cannot debug unlock after committing defenses")
-
-    rolled = meta["rolled_pool"]
-    if not (0 <= die_index < len(rolled)):
-        raise ValueError(f"Invalid die_index {die_index}. Rolled pool size: {len(rolled)}")
-
-    die = rolled[die_index]
-    if not die.is_locked:
-        raise ValueError(f"Die #{die_index + 1} is not locked")
-
-    if player.patches < 1:
-        raise ValueError("Not enough patch tokens (🔧) to debug unlock")
-
-    player.patches -= 1
-    die.is_locked = False
-
-    controller.event_log.append(
-        f"{meta['name']} spent 1 🔧 to debug unlock die #{die_index + 1} ({die.color.value})."
-    )
-    return controller.get_full_state()
+    """DEPRECATED in v0.23.0. Debug unlocks have been removed."""
+    raise ValueError("Debug unlocks deprecated in v0.23.0. Use Phase 3 Fast-Patching.")
 
 
 
@@ -670,23 +638,7 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
 
         rerolls_remaining = max_free_rerolls
         while rerolls_remaining > 0:
-            if player.patches > 0:
-                unlock_indices = player.bot.choose_debug_unlocks(
-                    player_state=player,
-                    active_dice=active_dice,
-                    staging_cubes=staging_copy,
-                    stuck_cubes=stuck_copy,
-                    directive_code=active_directive,
-                    rng=controller.engine.rng,
-                )
-                for u_idx in unlock_indices:
-                    if player.patches <= 0:
-                        break
-                    if 0 <= u_idx < len(active_dice) and active_dice[u_idx].is_locked:
-                        active_dice[u_idx].is_locked = False
-                        player.patches -= 1
-
-            reroll_indices = player.bot.choose_yahtzee_rerolls(
+            reroll_res = player.bot.choose_yahtzee_rerolls(
                 player_state=player,
                 active_dice=active_dice,
                 rerolls_remaining=rerolls_remaining,
@@ -695,6 +647,11 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
                 directive_code=active_directive,
                 rng=controller.engine.rng,
             )
+            if isinstance(reroll_res, tuple) and len(reroll_res) == 2:
+                _, reroll_indices = reroll_res
+            else:
+                reroll_indices = reroll_res or []
+
             valid_rerolls = [
                 idx for idx in reroll_indices
                 if 0 <= idx < len(active_dice) and (prodigy_active or not active_dice[idx].is_locked)

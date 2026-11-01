@@ -139,14 +139,10 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     self._send_json_response(payload, code)
 
                 elif clean_path == "/api/game/action/debug_unlock":
-                    pid = get_target_pid(default_to_human=True)
-                    if "die_index" not in data:
-                        payload, code = error_response("Missing required field 'die_index'", 400)
-                        self._send_json_response(payload, code)
-                        return
-                    die_idx = int(data["die_index"])
-                    state = self.controller.debug_unlock_die(pid, die_idx)
-                    payload, code = success_response({"state": state})
+                    payload, code = error_response(
+                        "Debug unlocks deprecated in v0.23.0. Use Phase 3 Fast-Patching.",
+                        400,
+                    )
                     self._send_json_response(payload, code)
 
                 elif clean_path == "/api/game/action/roll":

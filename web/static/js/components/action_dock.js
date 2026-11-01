@@ -115,7 +115,7 @@ export function renderActionDock() {
       }
     }
 
-    if (caps.can_commit || caps.can_reroll || caps.can_debug_unlock) {
+    if (caps.can_commit || caps.can_reroll) {
       const unresolvedGlitches = (human.rolled_pool || []).filter(
         (d) => d && d.current_face && d.current_face.is_glitch
       ).length;
@@ -133,7 +133,7 @@ export function renderActionDock() {
       rerollInfo.style.fontSize = "0.8rem";
       rerollInfo.style.color = "#38bdf8";
       rerollInfo.style.fontWeight = "600";
-      rerollInfo.innerText = `Rerolls: ${rerollsLeft}/${maxRerolls} left (click dice to select)`;
+      rerollInfo.innerText = `Rerolls: ${rerollsLeft}/${maxRerolls} left | Click unlocked dice to reroll | Glitches lock immediately`;
       controls.appendChild(rerollInfo);
 
       if (caps.can_reroll && selectedRerollIndices.size > 0) {
