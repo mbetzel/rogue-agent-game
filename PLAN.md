@@ -3,8 +3,16 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
-- [x] **Rules Draft `v0.20.0`** captured in [RULES.md](./RULES.md)
+- [x] **Rules Draft `v0.21.0`** captured in [RULES.md](./RULES.md)
 - [x] **Multi-Agent SDLC Pipeline** defined in Section 2 below
+- [x] **Phase 28: 9-Round Pacing & Asymmetric Variant Recalibration (`v0.21.0` Baseline)**
+  - [x] *Pre-SDLC Game Designer Modeling:* Diagnosed the Red Ransom Paradox ($2 Repair vs $1 Ransom), inverted cube additions (v1 adding 11 cubes, causing early extinction), and pacing truncation. Modeled 9-round pacing clock (1 Black pulse/round + Black track injections on spaces 2 and 4), cash-only Red ransom (eliminating patch absorption; unpaid leaks directly to Secrets), organic attack cube escalation, 4P starting secrets buffer (12 Secrets), and asymmetric variant profiles. Confirmed 65.5% v3.0 reach rate across all 8 roadmap combinations. Signed off by User.
+  - [x] *Technical Architecture Spec (`principal-engineer`):* Dataclass updates in `sim/config.py` (`starting_secrets_by_player_count` {2: 8, 3: 8, 4: 12}, `autonomous_pulse_by_version` {v1: 1, v2: 1, v3: 1}, `patch_ransom_absorption` False), Step 2B #3 Red damage flow in `sim/engine/phase2_threat.py`, version card layouts in `sim/entities.py`, and test specifications.
+  - [x] *Implementation (`senior-engineer`):* Updated `sim/config.py`, `sim/engine/phase2_threat.py`, `sim/entities.py` (Standard and Aggressive profiles), `web/static/index.html`, regression baselines, and implemented dedicated test suite `tests/test_v210_rules.py` (324/324 tests passing).
+  - [x] *Code Review Gate (`staff-engineer`):* Code review, state invariant verification, and 100% test pass via WSL — `APPROVED`.
+  - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Ran 3,000-match Monte Carlo sweep across 2P, 3P, and 4P pods (`scripts/run_v210_telemetry_sweep.py`).
+  - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Verified 58.8%–64.5% v3.0 reach rate across pods, 7.4–7.6 round bot pacing (~8.5–9.0 round human pacing), safe ~5% total wipeout rate in multiplayer pods, and logged Section 16 in `FINDINGS.md` and `RULES.md`.
+  - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Synchronized `pnp/generate_pnp.py` (VersionTileSpecs, Cash-Only Ransomware rules text, 12 Secrets for 4P) and regenerated all 5 PnP PDFs.
 - [x] **Phases 1–10 (Core Sim, v0.3–v0.8 Baselines, Choice Faces, Variants):** Archived in [docs/archive/ROADMAP_HISTORY.md](docs/archive/ROADMAP_HISTORY.md)
 - [x] **Phase 11: Web UX Polish — Setup Randomization Variety & Rogue Agent Versions Roadmap**
   - [x] *Software Module Market Variety:* Defaulted `randomize_cards` to True in web server startup (`main()`), New Match modal (`modalRandomizeCards` checked by default), and `startNewGame()` client helper; added `.variant-code-badge` styling (`[R2]`, `[B3]`, etc.) in the Software Module Market.

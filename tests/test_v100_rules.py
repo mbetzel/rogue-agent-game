@@ -29,14 +29,14 @@ class TestV100Rules(unittest.TestCase):
         self.assertEqual(cfg.corruption_track_capacity, 4)
 
     def test_starting_secrets_scaling(self):
-        """Starting Secrets should be 8 for 2P, 8 for 3P, and 10 for 4P."""
+        """Starting Secrets should be 8 for 2P, 8 for 3P, and 12 for 4P (v0.21.0)."""
         cfg_2p = GameConfig(num_players=2)
         cfg_3p = GameConfig(num_players=3)
         cfg_4p = GameConfig(num_players=4)
 
         self.assertEqual(cfg_2p.get_starting_secrets(2), 8)
         self.assertEqual(cfg_3p.get_starting_secrets(3), 8)
-        self.assertEqual(cfg_4p.get_starting_secrets(4), 10)
+        self.assertEqual(cfg_4p.get_starting_secrets(4), 12)
 
     def test_starting_patches_flat(self):
         """Starting Patch Tokens should be 2 across all player counts."""
@@ -77,7 +77,7 @@ class TestV100Rules(unittest.TestCase):
 
         self.assertEqual(eng_4p.config.corruption_track_capacity, 6)
         for player in eng_4p.state.players:
-            self.assertEqual(player.secrets, 10)
+            self.assertEqual(player.secrets, 12)
             self.assertEqual(player.patches, 2)
 
         # 3-player game

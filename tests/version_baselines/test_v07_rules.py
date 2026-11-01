@@ -210,9 +210,9 @@ class TestV07Rules(unittest.TestCase):
             bots=[BaseBot(0), BaseBot(1)],
             seed=42,
         )
-        self.assertEqual(engine_2p.state.staging_cup[CubeColor.RED], 2)
-        self.assertEqual(engine_2p.state.staging_cup[CubeColor.BLUE], 2)
-        self.assertEqual(engine_2p.state.staging_cup[CubeColor.GREEN], 2)
+        self.assertEqual(engine_2p.state.staging_cup[CubeColor.RED], 1)
+        self.assertEqual(engine_2p.state.staging_cup[CubeColor.BLUE], 1)
+        self.assertEqual(engine_2p.state.staging_cup[CubeColor.GREEN], 1)
         self.assertEqual(engine_2p.state.staging_cup[CubeColor.BLACK], 0)
 
         engine_4p = GameEngine(
@@ -220,9 +220,9 @@ class TestV07Rules(unittest.TestCase):
             bots=[BaseBot(0), BaseBot(1), BaseBot(2), BaseBot(3)],
             seed=42,
         )
-        self.assertEqual(engine_4p.state.staging_cup[CubeColor.RED], 2)
-        self.assertEqual(engine_4p.state.staging_cup[CubeColor.BLUE], 2)
-        self.assertEqual(engine_4p.state.staging_cup[CubeColor.GREEN], 2)
+        self.assertEqual(engine_4p.state.staging_cup[CubeColor.RED], 1)
+        self.assertEqual(engine_4p.state.staging_cup[CubeColor.BLUE], 1)
+        self.assertEqual(engine_4p.state.staging_cup[CubeColor.GREEN], 1)
         self.assertEqual(engine_4p.state.staging_cup[CubeColor.BLACK], 0)
 
     # -------------------------------------------------------------------------
@@ -242,8 +242,8 @@ class TestV07Rules(unittest.TestCase):
         engine_2p._execute_phase_2([(engine_2p.state.players[0], [], {}), (engine_2p.state.players[1], [], {})])
 
         self.assertEqual(engine_2p.state.current_version_index, 1)  # v2.0 RaaS
-        self.assertEqual(engine_2p.state.staging_cup[CubeColor.RED], 3)  # v0.15.0 Script Kiddie spaces 1 & 4 (2) + RaaS 2p payload (1) = 3 Red
-        self.assertEqual(engine_2p.state.staging_cup[CubeColor.GREEN], 2)  # v0.15.0 Script Kiddie space 1 (1) + RaaS 2p payload (1) = 2 Green
+        self.assertEqual(engine_2p.state.staging_cup[CubeColor.RED], 1)  # v0.21.0 Script Kiddie space 1 adds 1 Red
+        self.assertEqual(engine_2p.state.staging_cup[CubeColor.GREEN], 0)
 
         # 4-Player Match
         v07_raas = VersionCard(
@@ -271,8 +271,8 @@ class TestV07Rules(unittest.TestCase):
         engine_4p._execute_phase_2([(p, [], {}) for p in engine_4p.state.players])
 
         self.assertEqual(engine_4p.state.current_version_index, 1)  # v2.0 RaaS
-        self.assertEqual(engine_4p.state.staging_cup[CubeColor.RED], 4)  # v0.15.0 Script Kiddie spaces 1 & 4 (2) + 4P payload (2) = 4 Red
-        self.assertEqual(engine_4p.state.staging_cup[CubeColor.GREEN], 2)  # v0.15.0 Script Kiddie space 1 (1) + 4P payload (1) = 2 Green
+        self.assertEqual(engine_4p.state.staging_cup[CubeColor.RED], 3)  # Script Kiddie space 1 (1) + 4P payload (2) = 3 Red
+        self.assertEqual(engine_4p.state.staging_cup[CubeColor.GREEN], 1)  # 4P payload (1) = 1 Green
 
     # -------------------------------------------------------------------------
     # 7. Contractor Progressive Cost Calculation
@@ -605,7 +605,7 @@ class TestV07Rules(unittest.TestCase):
         for v in state_dict["version_deck"]:
             self.assertIn("staging_payload_2p", v)
             if v["directive_code"] == "RAAS":
-                self.assertEqual(v["staging_payload_2p"], {"red": 1, "green": 1})
+                self.assertEqual(v["staging_payload_2p"], {})
 
     # -------------------------------------------------------------------------
     # 18. Action Capabilities Dynamic Next Contractor Cost

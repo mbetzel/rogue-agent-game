@@ -94,10 +94,10 @@ class TestWebAPI(unittest.TestCase):
         self.assertFalse(state["players"][2]["is_human"])
         self.assertFalse(state["players"][3]["is_human"])
 
-        # Staging Cup: v1.0 Script Kiddie payload (2 Red, 2 Blue, 2 Green, 0 Black) + 1 Black Autonomous Pulse = 1 Black
-        self.assertEqual(state["staging_cup"]["red"], 2)
-        self.assertEqual(state["staging_cup"]["blue"], 2)
-        self.assertEqual(state["staging_cup"]["green"], 2)
+        # Staging Cup: v1.0 Script Kiddie payload (1 Red, 1 Blue, 1 Green, 0 Black) + 1 Black Autonomous Pulse = 1 Black
+        self.assertEqual(state["staging_cup"]["red"], 1)
+        self.assertEqual(state["staging_cup"]["blue"], 1)
+        self.assertEqual(state["staging_cup"]["green"], 1)
         self.assertEqual(state["staging_cup"]["black"], 1)
 
     # -------------------------------------------------------------------------
@@ -126,7 +126,7 @@ class TestWebAPI(unittest.TestCase):
         state4p = res4p["state"]
         self.assertEqual(len(state4p["players"]), 4)
         p0_4p = state4p["players"][0]
-        self.assertEqual(p0_4p["secrets"], 10)
+        self.assertEqual(p0_4p["secrets"], 12)
         self.assertEqual(p0_4p["patches"], 2)
 
     # -------------------------------------------------------------------------

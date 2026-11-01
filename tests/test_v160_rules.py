@@ -30,21 +30,21 @@ class TestV160Rules(unittest.TestCase):
     """Test suite verifying v0.16.0 rules draft mechanics."""
 
     def test_setup_staging_cup_priming(self) -> None:
-        """Setup staging cup starts with 2 Red, 2 Blue, 2 Green, 0 Black (v1.0 Script Kiddie)."""
+        """Setup staging cup starts with 1 Red, 1 Blue, 1 Green, 0 Black (v1.0 Script Kiddie)."""
         engine = GameEngine(
             config=GameConfig(num_players=4),
             bots=[BaseBot(i) for i in range(4)],
             seed=42,
         )
-        self.assertEqual(engine.state.staging_cup[CubeColor.RED], 2)
-        self.assertEqual(engine.state.staging_cup[CubeColor.BLUE], 2)
-        self.assertEqual(engine.state.staging_cup[CubeColor.GREEN], 2)
+        self.assertEqual(engine.state.staging_cup[CubeColor.RED], 1)
+        self.assertEqual(engine.state.staging_cup[CubeColor.BLUE], 1)
+        self.assertEqual(engine.state.staging_cup[CubeColor.GREEN], 1)
         self.assertEqual(engine.state.staging_cup[CubeColor.BLACK], 0)
 
     def test_autonomous_pulse_by_version(self) -> None:
-        """Autonomous pulse adds 1 Black in v1.0, 2 Black in v2.0, and 2 Black in v3.0."""
+        """Autonomous pulse can be configured per version (tested here with v0.16.0 mapping: 1 in v1, 2 in v2, 2 in v3)."""
         engine = GameEngine(
-            config=GameConfig(num_players=4),
+            config=GameConfig(num_players=4, autonomous_pulse_by_version={"v1.0": 1, "v2.0": 2, "v3.0": 2}),
             bots=[BaseBot(i) for i in range(4)],
             seed=42,
         )

@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.20.0)
+# Too Many Secrets — Rules Draft (v0.21.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -23,7 +23,7 @@ When the dust settles, any consultancy that suffers a **Total Data Breach** (`<=
 * **1 Cube Tower** (the Mainframe Decryption Compiler)
 * **1 Staging Cup** (the Relay Queue showing code packets waiting for the next compilation cycle)
 * **Compiler Cubes (4 Colors):**
-  * **Red Cubes (Ransomware / Financial Wiretaps):** Extorts firm **Money**; unpaid ransom can be absorbed by **Splice/Patch Tokens (`🔧`)** or leaks **Corporate Secrets**.
+  * **Red Cubes (Ransomware / Financial Wiretaps):** Extorts firm **Money** ($1 per unblocked cube); strictly cash-only ransom (unpaid ransom leaks directly to **Corporate Secrets**).
   * **Blue Cubes (Spyware / Data Exfiltration):** Directly steals **Corporate Secrets**.
   * **Green Cubes (Malware / Logic Bombs):** Degrades Ready dice to **Unpatched** (or destroys dice if overwhelmed).
   * **Black Cubes (Corrupted Code / Master Key Search):** Advances the active **Version Corruption Track** toward cryptographic Singularity.
@@ -62,7 +62,7 @@ When the dust settles, any consultancy that suffers a **Total Data Breach** (`<=
 1. **SETEC Roadmap & Compiler Priming:** Deal **1 `v1.0` card**, **1 `v2.0` card**, and **1 `v3.0` card** face-up in a row next to the Cube Tower. Place the Version Marker on `v1.0`.
    * **Per-Version Corruption Tracks (Consistent Across All Player Counts):** Each Version card features its own escalating **Corruption Track** where every space carries a mechanical effect: **`4` spaces on `v1.0`**, **`5` spaces on `v2.0`**, and **`6` spaces on `v3.0`** (`15` total Black Cubes to Singularity across `v1.0 → v2.0 → v3.0`) `[TUNE]`.
    * **Prime the Compiler (Pre-Seed Drop):** Before populating the Staging Cup, take **`1 Red, 1 Blue, 1 Green, and 1 Black Cube`** (4 cubes total) from the supply and drop them into the empty Cube Tower. Any cubes that exit into the tray are **returned to the general supply**. Any cubes that remain stuck on the internal baffles stay inside the tower to prime the compiler for Round 1.
-   * Place the starting cubes listed on the `v1.0` card into the **Staging Cup** (baseline: `2 Red, 2 Blue, 2 Green, 0 Black`). *(The first Black Cube enters the Staging Cup during Round 1 Phase 1's Autonomous Protocol Pulse; all subsequent cube injections from SETEC come directly from Corruption Track spaces).*
+   * Place the starting cubes listed on the `v1.0` card into the **Staging Cup** (baseline: `1 Red, 1 Blue, 1 Green, 0 Black`). *(The first Black Cube enters the Staging Cup during Round 1 Phase 1's Autonomous Protocol Pulse; all subsequent cube injections from SETEC come directly from Corruption Track spaces).*
 2. **Software Market:** For each of the 5 Colored Dice (**Red, Blue, Green, Yellow, Purple**), shuffle its Variant Cards, place **1 Variant Card** face-up in the center, and stack **`2 × Players`** dice of that color on it.
 3. **Consultancy Setup (Each Player):**
    * Choose or randomly deal **1 Consultancy Archetype Card** to each player. Place it beside your terminal mat with all 3 Version slots (`v1.0`, `v2.0`, `v3.0`) toggled to **Ready**.
@@ -71,7 +71,7 @@ When the dust settles, any consultancy that suffers a **Total Data Breach** (`<=
    * **Corporate Secrets & Starting Patch Tokens by Player Count:**
      * **2 Players:** Take **`8` Corporate Secrets** and **`2` Patch Tokens (`🔧`)**.
      * **3 Players:** Take **`8` Corporate Secrets** and **`2` Patch Tokens (`🔧`)**.
-     * **4 Players:** Take **`10` Corporate Secrets** and **`2` Patch Tokens (`🔧`)** `[TUNE: v0.10.0 buffer parity]`.
+     * **4 Players:** Take **`12` Corporate Secrets** and **`2` Patch Tokens (`🔧`)** `[TUNE: v0.21.0 9-round buffer parity]`.
 4. Randomly assign the **First Player Marker** (used to resolve Market purchase order in Phase 3).
 
 ---
@@ -92,7 +92,7 @@ Each player’s consultancy archetype provides a powerful, specialized capabilit
 
 ### Phase 1: Boot & Configure (Simultaneous)
 
-1. **Autonomous Protocol Pulse:** SETEC compiles new intrusion subroutines in the background. Take Black Cubes from the general supply based on the active Version card and place them into the **Staging Cup** (**`v1.0`:** `1 Black Cube`; **`v2.0`:** `2 Black Cubes`; **`v3.0`:** `2 Black Cubes`) `[TUNE]`.
+1. **Autonomous Protocol Pulse:** SETEC compiles new intrusion subroutines in the background. Take **`1 Black Cube`** from the general supply across all versions (`v1.0`, `v2.0`, `v3.0`) and place it into the **Staging Cup** `[TUNE: v0.21.0 9-round pacing clock]`.
 2. **Temp Staffing (Contractor Dice):** Before rolling, each player may hire temporary White Contractor Dice (freelance phreakers) for this round. Hiring uses **Progressive Contractor Pricing**: **`$1` for the 1st die, `$2` for the 2nd die, and `$3` for the 3rd die** (up to a maximum of **`3` White Dice** per round; hiring all 3 costs **`$6`** total `[TUNE]`). All hired White Contractor dice are added to your Active Pool for this round. *(Archetype Timing: **The Operator** may trigger Redundant Crew here).*
 3. **Roll Ready Pool:** Every player simultaneously rolls all dice in their **Ready Zone** plus any hired **White Contractor Dice** into their **Active Pool**. *(Dice in your **Unpatched Zone** are not rolled.)*
 4. **Yahtzee Rerolls & Lock Resolution (Simultaneous):**
@@ -148,8 +148,8 @@ Calculate the total attack strength of **Red**, **Blue**, and **Green** from exi
 1. **Dice Wear (Software Adaptation):** Any permanent die assigned as a Shield that **actively blocks at least 1 cube** moves to your **Unpatched Zone**. *(White Contractor dice that block damage return to the general supply at round end; they never move to the Unpatched Zone).* If multiple dice were committed to a color and fewer cubes dropped than total shield strength, the defending player chooses which die absorbs the attack and wears down. *(If 0 cubes of that color dropped, or another die already absorbed all cubes of that color, unused permanent Shield dice remain Ready and return to your Ready Zone!)*
 2. **Unblocked Damage:**
    * **Red (Ransomware / Financial Wiretaps):** Lose **`$1`** per unblocked Red cube.
-     * **Emergency Patch Absorption:** If cash is insufficient to pay the full ransom, each available **`1 🔧` token** automatically absorbs **`$1`** of unpaid ransom before secrets leak.
-     * **Unpaid Ransom Leak:** If any ransom remains unpaid after exhausting cash and patch tokens, proprietary source code leaks to the dark web: lose **`1 Corporate Secret` per unpaid `$1`**! Money is strictly non-negative and never drops below `$0`.
+     * **Cash-Only Ransom:** Ransom must be paid directly with cash. Held Patch Tokens (`🔧`) **cannot** absorb unpaid ransom!
+     * **Unpaid Ransom Leak:** Any unpaid ransom leaks proprietary source code directly to the dark web: lose **`1 Corporate Secret` per unpaid `$1`**! Money is strictly non-negative and never drops below `$0`.
    * **Blue (Spyware / Data Exfiltration):** Lose **`1` Corporate Secret** per unblocked Blue cube.
    * *(Archetype Timing: **The Spook** may trigger Slush Fund during damage calculation to absorb up to 2 Secret loss for free).*
    * **Green (Malware / Logic Bombs):** For each unblocked Green cube, move **`1` Ready die** (that was not already worn down this round) to your **Unpatched Zone**. **Contractor Sacrifice:** You may choose to **discard `1` active White Contractor die** to the supply instead of demoting a permanent Ready die! *(**Commercial Exposure (Yellow Dice):** Commercial software attracts heavy scrutiny. Contractor Sacrifice cannot be used to prevent Green malware from demoting a Yellow die. When resolving unblocked Green malware, Ready Yellow dice must be demoted to Unpatched first before Contractor Sacrifice or non-Yellow dice can absorb malware).* If you have **no Ready dice or Contractor dice left**, you must instead **Destroy (return to box) `1` Unpatched die** of your choice! *(If you have 0 dice remaining anywhere, track unfulfilled destructions for wipeout scoring).*
@@ -263,23 +263,23 @@ Each Version Card defines its Corruption Track (`4` spaces on `v1.0`, `5` spaces
 
 | Version | Card Name | Initial Setup Cup | Space 1 | Space 2 | Space 3 | Space 4 | Space 5 | Space 6 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **`v1.0`** (4) | *Script Kiddie* | `2R, 2B, 2G` | Add `1R, 1G` | All lose `$2` | Add `1B` | **Upgrade:** Lose `1 🔧` + Add `1R, 1B` | — | — |
-| **`v1.0`** (4) | *Data Scraper* | `2R, 3B, 2G` (`+$1` start) | Lose `1 🔧` + Add `1B` | All demote `1` die | Add `1R, 1G` | **Upgrade:** Lose `$2` + Add `1B, 1G` | — | — |
-| **`v2.0`** (5) | *RaaS* | — | All lose `$3` | Add `1R, 1G` | **Lock Cash (`$`)** next Phase 1 | Lose `$3` & `1 🔧` | **Upgrade:** Add `1R, 1B, 1K` | — |
-| **`v2.0`** (5) | *Polymorphic Worm* | — | Lose `2 🔧` + Add `1G` | All demote `1` die | Add `1B, 1G` | **Lock Patch (`🔧`)** next Phase 1 | **Upgrade:** Demote `1` die + Add `1R, 1G, 1K` | — |
-| **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 1B, 1G` | All lose `$4` | **Lock Shields** next Phase 1 | Return `1` Colored Die | Lose `1 Secret` & demote `1` die | **Singularity:** Add `1R, 1B, 1G` |
-| **`v3.0`** (6) | *Corrupted Kernel* | — | Demote `1` die + Add `1R, 1B` | Lose `$4` & `1 🔧` | Add `1R, 1B, 1G` | **Lock Shields** next Phase 1 | Lose `1 Secret` & return `1` Colored Die | **Singularity:** Add `2R, 2B` |
+| **`v1.0`** (4) | *Script Kiddie* | `1R, 1B, 1G` | Add `1R` | All lose `$2` + Add `1K` | Lose `1 🔧` | **Upgrade:** Lose `1 🔧` | — | — |
+| **`v1.0`** (4) | *Data Scraper* | `1R, 2B` (`+$1` start) | Lose `1 🔧` | Lose `$1` + Add `1K` | Add `1G` | **Upgrade:** Demote `1` die | — | — |
+| **`v2.0`** (5) | *RaaS* | — | All lose `$1` | Add `1R, 1G` + Add `1K` | **Lock Cash (`$`)** next Phase 1 | Lose `$2` & `1 🔧` + Add `1K` | **Upgrade:** Add `1R` | — |
+| **`v2.0`** (5) | *Polymorphic Worm* | — | Lose `2 🔧` | Add `2G` + Add `1K` | **Lock Patch (`🔧`)** next Phase 1 | Demote `1` die + Add `1K` | **Upgrade:** Add `1R` | — |
+| **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 1B, 1G` | All lose `$2` + Add `1K` | Add `1R, 1B` | **Lock Shields** next Phase 1 + Add `1K` | Return `1` Colored Die | **Singularity:** Add `2R, 2B, 2G` |
+| **`v3.0`** (6) | *Corrupted Kernel* | — | Demote `1` die + Add `1R, 1B` | Lose `$2` & `1 🔧` + Add `1K` | Add `1R, 1G` | Lose `1 Secret` + Add `1K` | Return `1` Colored Die | **Singularity:** Lose `1 Secret` + Add `2R, 2B, 1G` |
 
-#### Profile 2: Aggressive Escalation Tracks (`4 / 5 / 6` Spaces — Heavy `v2.0` & `v3.0` Ramp)
+#### Profile 2: Aggressive Escalation Tracks (`4 / 5 / 6` Spaces — Heightened Economic Friction)
 
 | Version | Card Name | Initial Setup Cup | Space 1 | Space 2 | Space 3 | Space 4 | Space 5 | Space 6 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **`v1.0`** (4) | *Script Kiddie* | `2R, 2B, 2G` | Add `1R, 1G` | All lose `$3` | Demote `1` die + Add `1B` | **Upgrade:** Lose `1 🔧` + Add `1R, 1B, 1G` | — | — |
-| **`v1.0`** (4) | *Data Scraper* | `2R, 3B, 2G` (`+$1` start) | Lose `2 🔧` + Add `1B` | All demote `1` die | Add `1R, 1B, 1G` | **Upgrade:** Lose `$3` + Add `1R, 1G` | — | — |
-| **`v2.0`** (5) | *RaaS* | — | All lose `$4` | Add `2R, 1G` | **Lock Cash (`$`)** next Phase 1 | Lose `$5` & `1 🔧` | **Upgrade:** Demote `1` die + Add `1R, 1B, 1K` | — |
-| **`v2.0`** (5) | *Polymorphic Worm* | — | Lose `2 🔧` + Add `1B, 1G` | All demote `2` dice | Add `1R, 2G` | **Lock Patch (`🔧`)** next Phase 1 | **Upgrade:** Demote `1` die + Add `1B, 1G, 1K` | — |
-| **`v3.0`** (6) | *Zero-Day Override* | — | Add `2R, 1B, 1G` | Lose `$5` & `2 🔧` | **Lock Shields** next Phase 1 | Return `1` Colored Die & demote `1` die | All lose `2 Secrets` | **Singularity:** Add `2R, 2B, 2G` |
-| **`v3.0`** (6) | *Corrupted Kernel* | — | Demote `2` dice + Add `1R, 1B` | Lose `$5` & `2 🔧` | Add `2R, 2B, 1G` | **Lock Shields** next Phase 1 | Return `1` Colored Die & lose `1 Secret` | **Singularity:** Lose `1 Secret` + Add `2R, 2B, 1G` |
+| **`v1.0`** (4) | *Script Kiddie* | `1R, 1B, 1G` | Add `1R` | All lose `$3` + Add `1K` | Demote `1` die | **Upgrade:** Lose `1 🔧` | — | — |
+| **`v1.0`** (4) | *Data Scraper* | `1R, 2B` (`+$1` start) | Lose `2 🔧` | Lose `$2` + Add `1K` | Add `1G` | **Upgrade:** Demote `2` dice | — | — |
+| **`v2.0`** (5) | *RaaS* | — | All lose `$2` | Add `1R, 1G` + Add `1K` | **Lock Cash (`$`)** next Phase 1 | Lose `$3` & `1 🔧` + Add `1K` | **Upgrade:** Add `1R` | — |
+| **`v2.0`** (5) | *Polymorphic Worm* | — | Lose `2 🔧` | Add `2G` + Add `1K` | **Lock Patch (`🔧`)** next Phase 1 | Demote `2` dice + Add `1K` | **Upgrade:** Add `1R` | — |
+| **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 1B, 1G` | Lose `$3` & `1 🔧` + Add `1K` | Add `1R, 1B` | **Lock Shields** next Phase 1 + Add `1K` | Return `1` Colored Die & demote `1` die | **Singularity:** Add `2R, 2B, 2G` |
+| **`v3.0`** (6) | *Corrupted Kernel* | — | Demote `2` dice + Add `1R, 1B` | Lose `$3` & `1 🔧` + Add `1K` | Add `1R, 1G` | Lose `2 Secrets` + Add `1K` | Return `1` Colored Die & demote `1` die | **Singularity:** Lose `1 Secret` + Add `2R, 2B, 1G` |
 
 ---
 

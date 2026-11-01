@@ -40,9 +40,9 @@ class TestV200Rules(unittest.TestCase):
             seed=42,
         )
         # Right after setup (before Phase 1)
-        self.assertEqual(engine.state.staging_cup[CubeColor.RED], 2)
-        self.assertEqual(engine.state.staging_cup[CubeColor.BLUE], 2)
-        self.assertEqual(engine.state.staging_cup[CubeColor.GREEN], 2)
+        self.assertEqual(engine.state.staging_cup[CubeColor.RED], 1)
+        self.assertEqual(engine.state.staging_cup[CubeColor.BLUE], 1)
+        self.assertEqual(engine.state.staging_cup[CubeColor.GREEN], 1)
         self.assertEqual(engine.state.staging_cup[CubeColor.BLACK], 0)
 
         # Execute Phase 1 (Autonomous Pulse: +1 Black for v1.0)

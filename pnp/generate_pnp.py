@@ -328,78 +328,78 @@ VERSION_TILES: List[VersionTileSpec] = [
         version="v3.0",
         name="Zero-Day Override",
         profile="6 SPACES // SINGULARITY TIER",
-        banner_text="**Kernel Lock:** Space 3 locks Shields next Phase 1. Final space triggers Singularity!",
+        banner_text="**Kernel Lock:** Space 4 locks Shields next Phase 1. Final space triggers Singularity!",
         spaces=(
             VersionTrackSpaceSpec(1, "+1 {RED} 1 {BLUE} 1 {GREEN}"),
-            VersionTrackSpaceSpec(2, "All Lose $4"),
-            VersionTrackSpaceSpec(3, "Lock {SHIELD}\nNext P1"),
-            VersionTrackSpaceSpec(4, "Return 1\nColored Die"),
-            VersionTrackSpaceSpec(5, "Lose 1 Secret\n& Demote 1 Die"),
-            VersionTrackSpaceSpec(6, "SINGULARITY!\n+1 {RED} 1 {BLUE} 1 {GREEN}", is_singularity=True),
+            VersionTrackSpaceSpec(2, "All Lose $2\n+1 {BLACK}"),
+            VersionTrackSpaceSpec(3, "+1 {RED} +1 {BLUE}"),
+            VersionTrackSpaceSpec(4, "Lock {SHIELD}\nNext P1 +1 {BLACK}"),
+            VersionTrackSpaceSpec(5, "Return 1\nColored Die"),
+            VersionTrackSpaceSpec(6, "SINGULARITY!\n+2 {RED} 2 {BLUE} 2 {GREEN}", is_singularity=True),
         ),
     ),
     VersionTileSpec(
         version="v3.0",
         name="Corrupted Kernel",
         profile="6 SPACES // SINGULARITY TIER",
-        banner_text="**Overclocked Surge:** 2+ Black: Lead Attack +2. Space 4 locks Shields next Phase 1.",
+        banner_text="**Overclocked Surge:** 2+ Black: Lead Attack +2. Space 4 leaks 1 Secret.",
         spaces=(
             VersionTrackSpaceSpec(1, "Demote 1 Die\n+1 {RED} 1 {BLUE}"),
-            VersionTrackSpaceSpec(2, "Lose $4\n& 1 {WRENCH}"),
-            VersionTrackSpaceSpec(3, "+1 {RED} 1 {BLUE} 1 {GREEN}"),
-            VersionTrackSpaceSpec(4, "Lock {SHIELD}\nNext P1"),
-            VersionTrackSpaceSpec(5, "Lose 1 Secret\n& Return 1 Die"),
-            VersionTrackSpaceSpec(6, "SINGULARITY!\n+2 {RED} +2 {BLUE}", is_singularity=True),
+            VersionTrackSpaceSpec(2, "Lose $2 & 1 {WRENCH}\n+1 {BLACK}"),
+            VersionTrackSpaceSpec(3, "+1 {RED} +1 {GREEN}"),
+            VersionTrackSpaceSpec(4, "Lose 1 Secret\n+1 {BLACK}"),
+            VersionTrackSpaceSpec(5, "Return 1\nColored Die"),
+            VersionTrackSpaceSpec(6, "SINGULARITY!\nLose 1 Sec +2R 2B 1G", is_singularity=True),
         ),
     ),
     VersionTileSpec(
         version="v2.0",
         name="Ransomware-as-a-Service",
         profile="5 SPACES // ESCALATION TIER",
-        banner_text="**Encrypted Memory:** Space 3 locks Cash next Phase 1. Final space upgrades to v3.0.",
+        banner_text="**Encrypted Memory:** Space 3 locks Cash next Phase 1. Space 5 upgrades to v3.0.",
         spaces=(
-            VersionTrackSpaceSpec(1, "All Lose $3"),
-            VersionTrackSpaceSpec(2, "+1 {RED} +1 {GREEN}"),
+            VersionTrackSpaceSpec(1, "All Lose $1"),
+            VersionTrackSpaceSpec(2, "+1 {RED} +1 {GREEN}\n+1 {BLACK}"),
             VersionTrackSpaceSpec(3, "Lock Cash ($)\nNext P1"),
-            VersionTrackSpaceSpec(4, "Lose $3\n& 1 {WRENCH}"),
-            VersionTrackSpaceSpec(5, "UPGRADE v3.0\n+1 {RED} 1 {BLUE} 1 {BLACK}", is_milestone=True),
+            VersionTrackSpaceSpec(4, "Lose $2 & 1 {WRENCH}\n+1 {BLACK}"),
+            VersionTrackSpaceSpec(5, "UPGRADE v3.0\n+1 {RED}", is_milestone=True),
         ),
     ),
     VersionTileSpec(
         version="v2.0",
         name="Polymorphic Worm",
         profile="5 SPACES // ESCALATION TIER",
-        banner_text="**Subroutine Throttling:** 1 Free Reroll. Space 4 locks Patches next Phase 1.",
+        banner_text="**Subroutine Throttling:** 1 Free Reroll. Space 3 locks Patches next Phase 1.",
         spaces=(
-            VersionTrackSpaceSpec(1, "Lose 2 {WRENCH}\n+ Add 1 {GREEN}"),
-            VersionTrackSpaceSpec(2, "All Demote\n1 Die"),
-            VersionTrackSpaceSpec(3, "+1 {BLUE} +1 {GREEN}"),
-            VersionTrackSpaceSpec(4, "Lock {WRENCH}\nNext P1"),
-            VersionTrackSpaceSpec(5, "UPGRADE v3.0\nDemote +1R 1G 1K", is_milestone=True),
+            VersionTrackSpaceSpec(1, "Lose 2 {WRENCH}"),
+            VersionTrackSpaceSpec(2, "+2 {GREEN}\n+1 {BLACK}"),
+            VersionTrackSpaceSpec(3, "Lock {WRENCH}\nNext P1"),
+            VersionTrackSpaceSpec(4, "Demote 1 Die\n+1 {BLACK}"),
+            VersionTrackSpaceSpec(5, "UPGRADE v3.0\n+1 {RED}", is_milestone=True),
         ),
     ),
     VersionTileSpec(
         version="v1.0",
         name="Script Kiddie",
         profile="4 SPACES // INITIAL TIER",
-        banner_text="**Setup Staging Payload:** Add 2 {RED} 2 {BLUE} 2 {GREEN} to Staging Cup. Upgrade at space 4.",
+        banner_text="**Setup Staging Payload:** Add 1 {RED} 1 {BLUE} 1 {GREEN} to Staging Cup. Upgrade at space 4.",
         spaces=(
-            VersionTrackSpaceSpec(1, "+1 {RED} +1 {GREEN}"),
-            VersionTrackSpaceSpec(2, "All Lose $2"),
-            VersionTrackSpaceSpec(3, "+1 {BLUE}"),
-            VersionTrackSpaceSpec(4, "UPGRADE v2.0\nLose 1 {WRENCH} +1R 1B", is_milestone=True),
+            VersionTrackSpaceSpec(1, "+1 {RED}"),
+            VersionTrackSpaceSpec(2, "All Lose $2\n+1 {BLACK}"),
+            VersionTrackSpaceSpec(3, "Lose 1 {WRENCH}"),
+            VersionTrackSpaceSpec(4, "UPGRADE v2.0\nLose 1 {WRENCH}", is_milestone=True),
         ),
     ),
     VersionTileSpec(
         version="v1.0",
         name="Data Scraper",
         profile="4 SPACES // INITIAL TIER",
-        banner_text="**Setup Staging Payload:** Add 2 {RED} 3 {BLUE} 2 {GREEN} to Staging Cup. All players start with +$1.",
+        banner_text="**Setup Staging Payload:** Add 1 {RED} 2 {BLUE} to Staging Cup. All players start with +$1.",
         spaces=(
-            VersionTrackSpaceSpec(1, "Lose 1 {WRENCH}\n+ Add 1 {BLUE}"),
-            VersionTrackSpaceSpec(2, "All Demote\n1 Die"),
-            VersionTrackSpaceSpec(3, "+1 {RED} +1 {GREEN}"),
-            VersionTrackSpaceSpec(4, "UPGRADE v2.0\nLose $2 +1B 1G", is_milestone=True),
+            VersionTrackSpaceSpec(1, "Lose 1 {WRENCH}"),
+            VersionTrackSpaceSpec(2, "Lose $1\n+1 {BLACK}"),
+            VersionTrackSpaceSpec(3, "+1 {GREEN}"),
+            VersionTrackSpaceSpec(4, "UPGRADE v2.0\nDemote 1 Die", is_milestone=True),
         ),
     ),
 ]
@@ -549,7 +549,7 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
     sh_gap = 11.0
     sh_w = (rw - 2 * sh_gap) / 3.0
     shield_defs = [
-        ("red", "{RED} RED SHIELDS", "Blocks Ransomware", "Unblocked: -$1 -> {WRENCH} -> -1 Secret"),
+        ("red", "{RED} RED SHIELDS", "Blocks Ransomware", "Unblocked: -$1 Cash (Unpaid: -1 Secret)"),
         ("blue", "{BLUE} BLUE SHIELDS", "Blocks Spyware", "Unblocked: -1 Corporate Secret"),
         ("green", "{GREEN} GREEN SHIELDS", "Blocks Malware", "Unblocked: Wear 1 Ready ({YELLOW} 1st!)"),
     ]
@@ -651,7 +651,7 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
     page.rich_line(scx + 8, by + 13.8, "{SECRET} **SECRETS**", size=9.2, color=PALETTE["blue"])
     page.text(scx + bw - 8, by + 13.8, "PRIMARY OBJECTIVE", font="mono_bold", size=7.5, color=PALETTE["blue"], align="right")
     page.draw_secret_icon(scx + bw / 2.0, by + 56.0, 26.0, color=PALETTE["guide"])
-    page.text(scx + bw / 2.0, by + bh - 16.5, "Start: 8 Secrets (2P/3P)  |  10 Secrets (4P)", font="regular", size=6.7, color=PALETTE["ink_soft"], align="center")
+    page.text(scx + bw / 2.0, by + bh - 16.5, "Start: 8 Secrets (2P/3P)  |  12 Secrets (4P)", font="regular", size=6.7, color=PALETTE["ink_soft"], align="center")
     page.text(scx + bw / 2.0, by + bh - 6.0, "<= 0 SECRETS = TOTAL DATA BREACH (PATIENT ZERO)", font="bold", size=6.5, color=PALETTE["red"], align="center")
 
 
@@ -777,8 +777,8 @@ def render_agent_board(page: PDFPage) -> None:
             "BLOCKS: {RED} SHIELD",
             (
                 "Lose **$1** per unblocked {RED} cube.\n"
-                "**Patch Absorption:** At **$0**, each held {WRENCH} token auto-absorbs **$1** unpaid ransom.\n"
-                "**Ransom Leak:** Any remaining unpaid $1 loses **1 Secret** each! *(Cash min $0).*"
+                "**Cash-Only Ransom:** Must pay with cash. Held {WRENCH} tokens cannot absorb ransom!\n"
+                "**Ransom Leak:** Any unpaid ransom loses **1 Secret** per $1 unpaid! *(Cash min $0).*"
             ),
             88.0,
         ),
@@ -1033,7 +1033,7 @@ def render_market_board(page: PDFPage) -> None:
         48.0, fy + 26.5, fw - 16.0,
         "- **2P:** $7 | **8 Secrets** | **2** {WRENCH} | **4 Dice/col** | *Track: 4 spaces*\n"
         "- **3P:** $7 | **8 Secrets** | **2** {WRENCH} | **6 Dice/col** | *Track: 5 spaces*\n"
-        "- **4P:** $7 | **10 Secrets** | **2** {WRENCH} | **8 Dice/col** | *Track: 6 spaces*\n"
+        "- **4P:** $7 | **12 Secrets** | **2** {WRENCH} | **8 Dice/col** | *Track: 6 spaces*\n"
         "- **Setup:** Standard 2-cube payloads (all counts). Prime compiler: drop 1 R/B/G/Black stuck into tower.",
         size=6.2, leading=8.7, color=PALETTE["ink"],
     )

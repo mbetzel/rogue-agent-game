@@ -358,9 +358,8 @@ def resolve_player_defense_and_wear(
 
     # 3. Apply Unblocked Damage
     # Red (Ransomware): Lose $1 per unblocked Red cube.
-    # Tier 1: Cash pays min(player.money, unblocked_red).
-    # Tier 2: Emergency Patch Absorption - patches absorb min(player.patches, unpaid_ransom).
-    # Tier 3: Unpaid Ransom Leak - remaining unpaid ransom leaks Secrets (1 Secret per unpaid $1).
+    # v0.21.0 Baseline: Cash-Only Ransom. Unpaid ransom leaks directly to Secrets (1 Secret per unpaid $1).
+    # Emergency patch absorption is deprecated and disabled by default (config.patch_ransom_absorption=False).
     # Money and patches are strictly non-negative (>= 0).
     unpaid_ransom = 0
     if unblocked_red > 0:
@@ -368,7 +367,7 @@ def resolve_player_defense_and_wear(
         player.money -= cash_paid
         unpaid_ransom = unblocked_red - cash_paid
 
-        if unpaid_ransom > 0 and player.patches > 0:
+        if unpaid_ransom > 0 and getattr(engine.state.config, "patch_ransom_absorption", False) and player.patches > 0:
             patches_absorbed = min(player.patches, unpaid_ransom)
             player.patches -= patches_absorbed
             unpaid_ransom -= patches_absorbed

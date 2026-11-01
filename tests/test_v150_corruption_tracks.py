@@ -97,10 +97,10 @@ class TestV150CorruptionTracks(unittest.TestCase):
         # Check upgrade occurred: active version is now v2.0
         self.assertEqual(engine.state.active_version.version_str, "v2.0")
 
-        # Check carryover: 2nd Black Cube advanced v2.0 to Space 1 (All lose $3: 10 -> $7)
+        # Check carryover: 2nd Black Cube advanced v2.0 to Space 1 (All lose $1: 10 -> $9)
         self.assertEqual(engine.state.corruption_track, 1)
-        self.assertEqual(p0.money, 7)
-        self.assertEqual(p1.money, 7)
+        self.assertEqual(p0.money, 9)
+        self.assertEqual(p1.money, 9)
 
     def test_corruption_space_penalties(self) -> None:
         """Test lose_money, lose_patches, lose_secrets, demote_dice, and return_colored_dice."""
@@ -193,7 +193,7 @@ class TestV150CorruptionTracks(unittest.TestCase):
         bots_a = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         engine_a = GameEngine(config=cfg_a, bots=bots_a, seed=42)
 
-        # Space 1 of Script Kiddie adds 1R, 1G
+        # Space 1 of Script Kiddie adds 1R
         engine_a.state.tower.drop = lambda cup, rng: {CubeColor.BLACK: 1, CubeColor.RED: 0, CubeColor.BLUE: 0, CubeColor.GREEN: 0}
         commitments_a = [(p, list(p.ready_dice), {}) for p in engine_a.state.players]
         telemetry_a = engine_a._execute_phase_2(commitments_a)
@@ -201,23 +201,23 @@ class TestV150CorruptionTracks(unittest.TestCase):
         # Mode A: Step 2B attack strength was 0 Red, 0 Green
         self.assertEqual(telemetry_a.attack_strengths[CubeColor.RED], 0)
         self.assertEqual(telemetry_a.attack_strengths[CubeColor.GREEN], 0)
-        # But staging cup received 1 Red and 1 Green for next round
+        # But staging cup received 1 Red for next round
         self.assertEqual(engine_a.state.staging_cup[CubeColor.RED], 1)
-        self.assertEqual(engine_a.state.staging_cup[CubeColor.GREEN], 1)
+        self.assertEqual(engine_a.state.staging_cup[CubeColor.GREEN], 0)
 
         # --- Mode B (corruption_cubes_resolve_immediately = True) ---
         cfg_b = GameConfig(num_players=2, corruption_cubes_resolve_immediately=True)
         bots_b = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         engine_b = GameEngine(config=cfg_b, bots=bots_b, seed=42)
 
-        # Space 1 of Script Kiddie adds 1R, 1G
+        # Space 1 of Script Kiddie adds 1R
         engine_b.state.tower.drop = lambda cup, rng: {CubeColor.BLACK: 1, CubeColor.RED: 0, CubeColor.BLUE: 0, CubeColor.GREEN: 0}
         commitments_b = [(p, list(p.ready_dice), {}) for p in engine_b.state.players]
         telemetry_b = engine_b._execute_phase_2(commitments_b)
 
-        # Mode B: Newly added 1R and 1G immediately joined this round's attack!
+        # Mode B: Newly added 1R immediately joined this round's attack!
         self.assertEqual(telemetry_b.attack_strengths[CubeColor.RED], 1)
-        self.assertEqual(telemetry_b.attack_strengths[CubeColor.GREEN], 1)
+        self.assertEqual(telemetry_b.attack_strengths[CubeColor.GREEN], 0)
 
     def test_v3_singularity_space_6_resolution(self) -> None:
         """Filling Space 6 of v3.0 triggers Singularity and final round."""

@@ -52,7 +52,7 @@ class GameConfig:
     num_players: int = 4
     starting_money: int = 7  # [TUNE: $6–$8]
     starting_secrets_by_player_count: Dict[int, int] = field(
-        default_factory=lambda: {2: 8, 3: 8, 4: 10}
+        default_factory=lambda: {2: 8, 3: 8, 4: 12}
     )
     starting_patches_by_player_count: Dict[int, int] = field(
         default_factory=lambda: {2: 2, 3: 2, 4: 2}
@@ -76,13 +76,14 @@ class GameConfig:
     corruption_spaces_per_player: int = 1  # Deprecated in v0.4
     corruption_spaces_base: int = 1  # Deprecated in v0.4
 
-    # Autonomous AI Pulse by Version (v0.16.0 Baseline: 1 in v1.0, 2 in v2.0, 2 in v3.0)
+    # Autonomous AI Pulse by Version (v0.21.0 Baseline: 1 Black cube/round across all versions)
     autonomous_pulse_by_version: Dict[str, int] = field(
-        default_factory=lambda: {"v1.0": 1, "v2.0": 2, "v3.0": 2}
+        default_factory=lambda: {"v1.0": 1, "v2.0": 1, "v3.0": 1}
     )
 
     # Operations & Economy
     cipher_arbitrage_cash: int = 2  # [TUNE: v0.16.0] Cipher Phase 3 alternate cash arbitrage payout
+    patch_ransom_absorption: bool = False  # Deprecated in v0.21.0 (Emergency patch absorption eliminated; Red ransom is strictly cash-only)
     dirty_income_enabled: bool = False  # Deprecated in v0.16.0 (Dirty income eliminated)
     dirty_income_cash: int = 3  # Deprecated
     dirty_income_secret_cost: int = 1  # Deprecated

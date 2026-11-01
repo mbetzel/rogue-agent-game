@@ -110,9 +110,9 @@ class TestEnginePhases(unittest.TestCase):
         # Version should advance to v2.0 (index 1)
         self.assertEqual(engine.state.current_version_index, 1)
         self.assertEqual(engine.state.corruption_track, 0)
-        # In v0.15.0, setup (1) + v1.0 spaces 1 and 4 (2) = 3 Red in Staging Cup
-        self.assertEqual(engine.state.staging_cup[CubeColor.RED], 3)
-        self.assertEqual(engine.state.staging_cup[CubeColor.GREEN], 2)
+        # In v0.21.0, Space 1 adds 1 Red; Space 2 adds 1 Black
+        self.assertEqual(engine.state.staging_cup[CubeColor.RED], 1)
+        self.assertEqual(engine.state.staging_cup[CubeColor.BLACK], 1)
 
     def test_phase2_singularity_trigger_on_v3(self) -> None:
         cfg = GameConfig(num_players=2)

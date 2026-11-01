@@ -88,7 +88,7 @@ class TestV04Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_red_damage_partial_cash_partial_patches(self) -> None:
         """When cash is exhausted, Tier 2 patches absorb unpaid ransom; secrets untouched."""
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig(num_players=2, dirty_income_enabled=True, patch_ransom_absorption=True)
         engine = GameEngine(config=config, bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         player.money = 2
@@ -115,7 +115,7 @@ class TestV04Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_red_damage_partial_cash_partial_patches_leak_secrets(self) -> None:
         """When cash and patches are both exhausted, remaining unpaid ransom leaks to Secrets."""
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig(num_players=2, dirty_income_enabled=True, patch_ransom_absorption=True)
         engine = GameEngine(config=config, bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         player.money = 2
@@ -169,7 +169,7 @@ class TestV04Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_red_damage_non_negative_invariants(self) -> None:
         """Massive Red damage leaves player.money >= 0 and player.patches >= 0."""
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig(num_players=2, dirty_income_enabled=True, patch_ransom_absorption=True)
         engine = GameEngine(config=config, bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         player.money = 1
