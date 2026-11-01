@@ -24,7 +24,7 @@ export function renderCompiler() {
 
   const activeVerIdx = state.current_version_index !== undefined ? state.current_version_index : 0;
   const versionDeck = state.version_deck || [];
-  const v1 = versionDeck[0] || state.active_version || { name: "Script Kiddie", version_str: "v1.0", staging_payload: { red: 2, blue: 2, green: 2, black: 1 } };
+  const v1 = versionDeck[0] || state.active_version || { name: "Script Kiddie", version_str: "v1.0", staging_payload: { red: 2, blue: 2, green: 2 } };
   const v2 = versionDeck[1] || { name: "Ransomware-as-a-Service", version_str: "v2.0", staging_payload: {} };
   const v3 = versionDeck[2] || { name: "Zero-Day Override", version_str: "v3.0", staging_payload: {} };
 

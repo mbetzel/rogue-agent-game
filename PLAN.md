@@ -3,7 +3,7 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
-- [x] **Rules Draft `v0.19.0`** captured in [RULES.md](./RULES.md)
+- [x] **Rules Draft `v0.20.0`** captured in [RULES.md](./RULES.md)
 - [x] **Multi-Agent SDLC Pipeline** defined in Section 2 below
 - [x] **Phases 1–10 (Core Sim, v0.3–v0.8 Baselines, Choice Faces, Variants):** Archived in [docs/archive/ROADMAP_HISTORY.md](docs/archive/ROADMAP_HISTORY.md)
 - [x] **Phase 11: Web UX Polish — Setup Randomization Variety & Rogue Agent Versions Roadmap**
@@ -98,6 +98,14 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Ran 3,000-match Monte Carlo verification sweep across 2P, 3P, and 4P pods (`scripts/sweep_v170_hash_matches.py`).
   - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Verified ~4.0 round pacing invariance, calibrated 2.46–3.39 secret corridor, robust tiebreaker ladder, and logged Section 14 in `FINDINGS.md` and `RULES.md`.
   - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Updated `pnp/generate_pnp.py` (Market Cards, Central Market Board, Terminal Mats, Pocket Aids, and Cut-Out Tokens) and regenerated all 5 PDF packs.
+- [x] **Phase 27: Initial Staging Cup Black Cube Zeroing (`v0.20.0` Baseline)**
+  - [x] *Pre-SDLC Game Designer Modeling:* Diagnosed high Round 1 Black cube exit rates on web playtests (27.7% rate of 3 Black cubes, 80.3% rate of 2+ Black cubes). Modeled Option 3 (zeroing Black cubes in `v1.0` starting staging payload; relying on Round 1 Phase 1 pulse for first Black cube). Verified 3 Black cubes strictly eliminated (0.00%), Round 1 Black EV reduced from 2.06 to 1.14 cubes, and `v1.0` mean duration extended from 2.88 to 3.88 rounds (+1.0 round shift, preventing premature Round 2 upgrades). Signed off by User.
+  - [x] *Technical Architecture Spec (`principal-engineer`):* Updated module contracts in `sim/entities.py` (`Script Kiddie` and `Data Scraper` staging payloads), invariant definitions, and test matrix.
+  - [x] *Implementation (`senior-engineer`):* Updated `sim/entities.py` (Standard and Aggressive profiles), web frontend fallback in `web/static/js/components/compiler.js`, updated regression tests in `tests/test_v160_rules.py`, `tests/test_web_api.py`, `tests/version_baselines/test_v03_rules.py`, `tests/version_baselines/test_v07_rules.py`, and authored dedicated suite `tests/test_v200_rules.py` (316/316 tests passing).
+  - [x] *Code Review Gate (`staff-engineer`):* Verified rules fidelity, mathematical ceilings, and 100% test pass via WSL — `APPROVED`.
+  - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Ran Monte Carlo verification sweeps across 200,000 drops and 50,000 version progressions.
+  - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Verified elimination of 3 Black drops, healthier early-game onboarding, protected archetype window, and logged Section 15 in `FINDINGS.md` and `RULES.md`.
+  - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Updated `pnp/generate_pnp.py` banner specs and regenerated all 5 PnP PDFs.
 - [x] **Phase 25: Model C End-of-Round Cleanup Cap for Patches (`v0.18.0` Baseline)**
   - [x] *Pre-SDLC Game Designer Modeling:* Modeled patch yields across Gray/Green/Blue pools (EV ~1.87–4.37 🔧), identified Round 1 over-clamping (>50% hitting cap on T1), and designed Model C (unclamped during round, discard down to 3 at End-of-Round Cleanup). User approved.
   - [x] *Technical Architecture Spec (`principal-engineer`):* Module contracts in `sim/engine/phase1_boot.py`, `sim/engine/phase3_ops.py`, `web/controller/`, `web/schemas.py`, and test specifications.

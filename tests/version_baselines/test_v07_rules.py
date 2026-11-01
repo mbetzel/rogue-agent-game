@@ -213,7 +213,7 @@ class TestV07Rules(unittest.TestCase):
         self.assertEqual(engine_2p.state.staging_cup[CubeColor.RED], 2)
         self.assertEqual(engine_2p.state.staging_cup[CubeColor.BLUE], 2)
         self.assertEqual(engine_2p.state.staging_cup[CubeColor.GREEN], 2)
-        self.assertEqual(engine_2p.state.staging_cup[CubeColor.BLACK], 1)
+        self.assertEqual(engine_2p.state.staging_cup[CubeColor.BLACK], 0)
 
         engine_4p = GameEngine(
             config=GameConfig(num_players=4),
@@ -223,7 +223,7 @@ class TestV07Rules(unittest.TestCase):
         self.assertEqual(engine_4p.state.staging_cup[CubeColor.RED], 2)
         self.assertEqual(engine_4p.state.staging_cup[CubeColor.BLUE], 2)
         self.assertEqual(engine_4p.state.staging_cup[CubeColor.GREEN], 2)
-        self.assertEqual(engine_4p.state.staging_cup[CubeColor.BLACK], 1)
+        self.assertEqual(engine_4p.state.staging_cup[CubeColor.BLACK], 0)
 
     # -------------------------------------------------------------------------
     # 6. Step 2A Version Upgrade Payload 2P vs 4P

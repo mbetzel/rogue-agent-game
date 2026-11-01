@@ -526,3 +526,57 @@ In playtests and telemetry audits preceding `v0.19.0`, two scoring discrepancies
 - **Component & Rules Parity:** Synchronized across `RULES.md`, `sim/engine/end_game.py`, `tests/test_scoring_and_wipeout.py`, `web/schemas.py`, and `pnp/generate_pnp.py` (regenerating all 5 PDF packs).
 
 **Status: OFFICIALLY APPROVED (`v0.19.0` Baseline).**
+
+---
+
+## 15. Phase 27: Initial Staging Cup Black Cube Zeroing (`v0.20.0` Baseline)
+
+### A. Context & Playtest Diagnosis
+During web playtesting on `v0.19.0`, an investigation was triggered by players reporting an unusually frequent occurrence of 3 Black cubes exiting on the very first compiler drop.
+Mathematical analysis revealed the root cause:
+1. **Pre-Seed Setup Priming:** 4 cubes (`1R, 1B, 1G, 1K`) are dropped into an empty tower. With exit probability $p=0.60$, there is a **40% probability** that the priming Black cube remains lodged on internal baffles.
+2. **Setup Staging Payload + Pulse:** `v1.0` cards seeded 1 Black cube into the Staging Cup at setup, and Round 1 Phase 1 added a second Black cube via the Autonomous AI Pulse.
+3. **Avalanche Amplification:** Dropping 8–12 cubes into the tower boosted per-cube exit probability to 75%–95% (mean ~85%). Whenever the priming Black cube stuck (40%), the chance that all 3 Black cubes exited was $0.85^3 \approx 64\%–75\%$.
+4. **Distortion:** Across all matches, **27.7% of games yielded 3 Black cubes on Round 1**, immediately filling 75% of the 4-space `v1.0` Corruption Track on Turn 1. Consequently, **28.9% of matches advanced to `v2.0` on Round 2**, prematurely truncating the `v1.0` onboarding ramp and forfeiting unused "once-per-version" archetype abilities.
+
+### B. Approved Mechanical Revision (Option 3)
+1. **Zero Black Cubes in `v1.0` Setup Payload:**
+   - `v1.0` cards (`Script Kiddie` and `Data Scraper`) now define starting staging payloads with **0 Black cubes** (e.g. `2 Red, 2 Blue, 2 Green` for Script Kiddie; `2 Red, 3 Blue, 2 Green` for Data Scraper).
+   - The first Black cube enters the Staging Cup during Round 1 Phase 1's standard **Autonomous Protocol Pulse** (+1 Black).
+2. **Ceiling Invariant:**
+   - Across Drop 1, the total universe of Black cubes is strictly limited to 1 (if priming Black exited) or 2 (if priming Black stuck).
+   - It is mathematically impossible for 3 Black cubes to exit on Round 1.
+
+### C. Monte Carlo Verification Sweep ($N=200,000$ Round 1 Drops; $N=50,000$ Version Progressions)
+
+#### 1. Round 1 Black Cube Exit Distribution
+
+| Exited Black Cubes | Baseline (`1 Black` in Setup) | Option 3 (`0 Black` in Setup) | Net Delta |
+| :---: | :---: | :---: | :---: |
+| **0 Black Cubes** | 1.8% | **14.1%** | +12.3% |
+| **1 Black Cube** | 17.9% | **58.0%** | +40.1% |
+| **2 Black Cubes** | 52.5% | **27.9%** | -24.6% |
+| **3 Black Cubes** | **27.7%** | **0.00%** | **-27.7% (ELIMINATED)** |
+| **Round 1 Black EV** | **2.06 cubes** | **1.14 cubes** | **-0.92 cubes** |
+
+#### 2. `v1.0` Version Track Clearance Rounds
+
+| Completion Round | Baseline (`1 Black` in Setup) | Option 3 (`0 Black` in Setup) |
+| :---: | :---: | :---: |
+| **Round 2** | **28.9%** | **0.00%** *(Mathematically Impossible)* |
+| **Round 3** | **54.5%** | **29.3%** |
+| **Round 4** | 16.0% | **54.1%** |
+| **Round 5+** | 0.7% | **16.5%** |
+| **Mean Rounds in `v1.0`** | **2.88 rounds** | **3.88 rounds** *(+1.0 full round)* |
+
+### D. Key Empirical Takeaways & Balance Rationale
+1. **Pacing Ramp Restored:** Mean `v1.0` duration shifts from 2.88 rounds to **3.88 rounds**. Round 2 upgrades are completely eradicated, providing a consistent 3-to-4 round onboarding window.
+2. **Archetype Usability Window Protected:** Consultancies are guaranteed at least 3 rounds to tactically trigger their `v1.0` archetype capability before the mid-game upgrade forfeiture.
+3. **Turn 1 Threat Distribution:** Instead of triggering deep demotions and extra attacks before players can buy modules, Turn 1 now reliably triggers Space 1 (58.0%) or Space 2 (27.9%), with 14.1% of games experiencing a quiet opening drop.
+4. **Engine Integrity:** Full match simulations confirm overall match length slightly expands from 4.16 to 4.67 rounds without any risk of infinite stalling.
+
+### E. Formal Design Sign-Off
+- **Baseline Adoption:** Formally adopt Initial Staging Cup Black Cube Zeroing as the canonical baseline for **`v0.20.0`**.
+- **Component & Rules Parity:** Synchronized across `RULES.md`, `sim/entities.py`, `tests/test_v200_rules.py`, `web/static/js/components/compiler.js`, and `pnp/generate_pnp.py` (regenerating all 5 PDF packs).
+
+**Status: OFFICIALLY APPROVED (`v0.20.0` Baseline).**

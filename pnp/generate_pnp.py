@@ -382,7 +382,7 @@ VERSION_TILES: List[VersionTileSpec] = [
         version="v1.0",
         name="Script Kiddie",
         profile="4 SPACES // INITIAL TIER",
-        banner_text="**Setup Priming:** Add 1 {RED} 1 {BLUE} 1 {GREEN} 1 {BLACK} to Staging Cup. Upgrade at space 4.",
+        banner_text="**Setup Staging Payload:** Add 2 {RED} 2 {BLUE} 2 {GREEN} to Staging Cup. Upgrade at space 4.",
         spaces=(
             VersionTrackSpaceSpec(1, "+1 {RED} +1 {GREEN}"),
             VersionTrackSpaceSpec(2, "All Lose $2"),
@@ -394,7 +394,7 @@ VERSION_TILES: List[VersionTileSpec] = [
         version="v1.0",
         name="Data Scraper",
         profile="4 SPACES // INITIAL TIER",
-        banner_text="**Setup Priming:** Add 1 {RED} 2 {BLUE} 1 {BLACK} to Cup. All players start with +$1.",
+        banner_text="**Setup Staging Payload:** Add 2 {RED} 3 {BLUE} 2 {GREEN} to Staging Cup. All players start with +$1.",
         spaces=(
             VersionTrackSpaceSpec(1, "Lose 1 {WRENCH}\n+ Add 1 {BLUE}"),
             VersionTrackSpaceSpec(2, "All Demote\n1 Die"),

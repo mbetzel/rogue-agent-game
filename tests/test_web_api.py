@@ -94,11 +94,11 @@ class TestWebAPI(unittest.TestCase):
         self.assertFalse(state["players"][2]["is_human"])
         self.assertFalse(state["players"][3]["is_human"])
 
-        # Staging Cup: v1.0 Script Kiddie payload (2 Red, 2 Blue, 2 Green, 1 Black) + 1 Black Autonomous Pulse = 2 Black
+        # Staging Cup: v1.0 Script Kiddie payload (2 Red, 2 Blue, 2 Green, 0 Black) + 1 Black Autonomous Pulse = 1 Black
         self.assertEqual(state["staging_cup"]["red"], 2)
         self.assertEqual(state["staging_cup"]["blue"], 2)
         self.assertEqual(state["staging_cup"]["green"], 2)
-        self.assertEqual(state["staging_cup"]["black"], 2)
+        self.assertEqual(state["staging_cup"]["black"], 1)
 
     # -------------------------------------------------------------------------
     # 2. New Game Custom Player Counts (2P Resilience Buffer)

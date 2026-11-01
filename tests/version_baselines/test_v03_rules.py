@@ -47,7 +47,7 @@ class TestV03Rules(unittest.TestCase):
         engine = GameEngine(config=config, bots=bots, seed=42)
 
         initial_black = engine.state.staging_cup.get(CubeColor.BLACK, 0)
-        self.assertEqual(initial_black, 1)  # From v1.0 Script Kiddie starting payload
+        self.assertEqual(initial_black, 0)  # From v1.0 Script Kiddie starting payload (v0.20.0: 0 Black)
 
         # Execute Phase 1
         engine._execute_phase_1()
@@ -57,14 +57,13 @@ class TestV03Rules(unittest.TestCase):
     # 2. Version v1.0 Cards Staging Payload Has Black Cube
     # -------------------------------------------------------------------------
     def test_v1_cards_staging_payload_has_black(self) -> None:
-        """Both v1.0 cards (Script Kiddie and Data Scraper) must include CubeColor.BLACK: 1."""
+        """Both v1.0 cards (Script Kiddie and Data Scraper) must have 0 Black cubes in staging payload (v0.20.0)."""
         cards = get_all_version_cards()
         v1_cards = [c for c in cards if c.version_str == "v1.0"]
         self.assertEqual(len(v1_cards), 2)
 
         for card in v1_cards:
-            self.assertIn(CubeColor.BLACK, card.staging_payload)
-            self.assertEqual(card.staging_payload[CubeColor.BLACK], 1)
+            self.assertEqual(card.staging_payload.get(CubeColor.BLACK, 0), 0)
 
     # -------------------------------------------------------------------------
     # 3. Gray Starter Die Faces
