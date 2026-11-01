@@ -14,7 +14,7 @@ class TestWearAndDamage(unittest.TestCase):
         self.bot = AdaptiveBalancedBot(0)
 
     def test_unused_shields_do_not_wear(self) -> None:
-        """Shield dice must remain Ready if 0 cubes dropped or if earlier dice absorbed all cubes."""
+        """Under v0.22.0 Zero Dice Wear, shield dice remain in production/ready and do not wear."""
         player = PlayerState(
             player_id=0,
             bot=self.bot,
@@ -27,7 +27,8 @@ class TestWearAndDamage(unittest.TestCase):
         die2 = create_gray_die(2)
         die2.current_face = Face("Block 1 Any", block_amount=1, shield_color=ShieldColor.RED)
 
-        player.ready_dice = [die1, die2]
+        player.in_production_dice = [die1, die2]
+        player.ready_dice = []
 
         engine = GameEngine(self.config, [self.bot, AdaptiveBalancedBot(1)], seed=42)
 
@@ -42,27 +43,27 @@ class TestWearAndDamage(unittest.TestCase):
             active_directive="NONE",
         )
 
-        # die1 actively blocked -> worn
-        # die2 was unused -> remained Ready
-        self.assertIn(die1, player.unpatched_dice)
-        self.assertIn(die2, player.ready_dice)
-        self.assertEqual(len(player.ready_dice), 1)
-        self.assertEqual(len(player.unpatched_dice), 1)
+        # Zero Dice Wear: both dice remain safely in in_production_dice
+        self.assertIn(die1, player.in_production_dice)
+        self.assertIn(die2, player.in_production_dice)
+        self.assertEqual(len(player.in_production_dice), 2)
+        self.assertEqual(len(player.unpatched_dice), 0)
 
     def test_air_gapped_backup_b3_does_not_wear(self) -> None:
-        """Variant B3 (Air-Gapped Backup) blocks 1 Blue and sacrifices another Ready die instead of wearing."""
+        """Variant B3 (Air-Gapped Backup) blocks 1 Blue and under v0.22.0 Zero Dice Wear, neither wears."""
         player = PlayerState(player_id=0, bot=self.bot, money=5, secrets=6, patches=0)
         b3_card = VariantCard(
             code="B3",
             name="Air-Gapped Backup",
             die_color=DieColor.BLUE,
-            description="Block 1 Blue; when this die actively blocks, you may move 1 other Ready die of your choice to Unpatched instead of this die (if you have no other Ready dice, this die moves to Unpatched).",
+            description="Block 1 Blue; zero dice wear in v0.22.0.",
             star_face=Face("B3: Air-Gapped", block_amount=1, shield_color=ShieldColor.BLUE, is_star=True, star_code="B3"),
         )
         die = create_colored_die(DieColor.BLUE, 1, b3_card)
         die.current_face = b3_card.star_face
         gray_die = create_gray_die(2)
-        player.ready_dice = [die, gray_die]
+        player.in_production_dice = [die, gray_die]
+        player.ready_dice = []
 
         engine = GameEngine(self.config, [self.bot, AdaptiveBalancedBot(1)], seed=42)
         commitments = {0: ShieldColor.BLUE}
@@ -76,24 +77,8 @@ class TestWearAndDamage(unittest.TestCase):
             active_directive="NONE",
         )
 
-        # B3 actively blocked 1 Blue cube, sacrifices gray_die to Unpatched while B3 stays in Ready
-        self.assertIn(die, player.ready_dice)
-        self.assertIn(gray_die, player.unpatched_dice)
-        self.assertEqual(len(player.unpatched_dice), 1)
-
-        # Solo fallback: if no other Ready die exists, B3 moves to Unpatched
-        player.ready_dice = [die]
-        player.unpatched_dice = []
-        engine._resolve_player_defense_and_wear(
-            player=player,
-            rolled_dice=[die],
-            commitments=commitments,
-            attack_strengths={CubeColor.RED: 0, CubeColor.BLUE: 1, CubeColor.GREEN: 0},
-            exited_cubes={CubeColor.RED: 0, CubeColor.BLUE: 1, CubeColor.GREEN: 0},
-            active_directive="NONE",
-        )
-        self.assertNotIn(die, player.ready_dice)
-        self.assertIn(die, player.unpatched_dice)
+        self.assertIn(die, player.in_production_dice)
+        self.assertEqual(len(player.unpatched_dice), 0)
 
     def test_red_damage_and_insolvency(self) -> None:
         """Under v0.3, unblocked Red drains cash to $0, then unpaid ransom leaks to Secrets."""
@@ -156,12 +141,12 @@ class TestWearAndDamage(unittest.TestCase):
             money=5,
             secrets=6,
             patches=0,
-            ready_dice=[die_ready1, die_ready2],
+            in_production_dice=[die_ready1, die_ready2],
             unpatched_dice=[],
         )
         engine = GameEngine(self.config, [self.bot, AdaptiveBalancedBot(1)], seed=42)
 
-        # 1 unblocked Green cube -> moves 1 Ready die to Unpatched
+        # 1 unblocked Green cube -> moves 1 active die from in_production to glitched (unpatched)
         engine._resolve_player_defense_and_wear(
             player=player,
             rolled_dice=[],
@@ -170,12 +155,12 @@ class TestWearAndDamage(unittest.TestCase):
             exited_cubes={CubeColor.RED: 0, CubeColor.BLUE: 0, CubeColor.GREEN: 1},
             active_directive="NONE",
         )
-        self.assertEqual(len(player.ready_dice), 1)
+        self.assertEqual(len(player.in_production_dice), 1)
         self.assertEqual(len(player.unpatched_dice), 1)
 
         # 2 more unblocked Green cubes:
-        # First moves the remaining ready die to unpatched.
-        # Second has NO ready dice left -> destroys 1 unpatched die!
+        # First moves the remaining in_production die to glitched (unpatched).
+        # Second has NO active dice left -> destroys 1 unpatched die from Under Development!
         engine._resolve_player_defense_and_wear(
             player=player,
             rolled_dice=[],
@@ -184,7 +169,7 @@ class TestWearAndDamage(unittest.TestCase):
             exited_cubes={CubeColor.RED: 0, CubeColor.BLUE: 0, CubeColor.GREEN: 2},
             active_directive="NONE",
         )
-        self.assertEqual(len(player.ready_dice), 0)
+        self.assertEqual(len(player.in_production_dice), 0)
         self.assertEqual(len(player.unpatched_dice), 1)  # 2 were unpatched, 1 destroyed
 
 

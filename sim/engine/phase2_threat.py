@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, EndGameReason, ShieldColor
 from sim.entities import ArchetypeCode, CorruptionSpace, Die
-from sim.engine.state import RoundTelemetry
+from sim.engine.state import ProductionRole, RoundTelemetry
 
 if TYPE_CHECKING:
     from sim.engine.core import GameEngine
@@ -53,6 +53,10 @@ def execute_phase_2(
             engine.state.contractor_supply += len(player.contractor_dice)
             player.contractor_dice.clear()
             player.hired_contractor_count = 0
+            white_in_prod = [d for d in player.in_production_dice if d.color == DieColor.WHITE]
+            for wd in white_in_prod:
+                player.in_production_dice.remove(wd)
+                engine.state.contractor_supply += 1
     else:
         engine.state.last_round_buffer_overflow = False
 
@@ -153,6 +157,10 @@ def execute_phase_2(
             engine.state.contractor_supply += len(player.contractor_dice)
             player.contractor_dice.clear()
             player.hired_contractor_count = 0
+            white_in_prod = [d for d in player.in_production_dice if d.color == DieColor.WHITE]
+            for wd in white_in_prod:
+                player.in_production_dice.remove(wd)
+                engine.state.contractor_supply += 1
 
         # Step 2C: Check End Game Triggers
         any_patient_zero = any(p.is_patient_zero for p in engine.state.players)
@@ -177,8 +185,11 @@ def execute_phase_2(
             "money": p.money,
             "secrets": p.secrets,
             "patches": p.patches,
-            "ready_dice_count": len(p.ready_dice),
-            "unpatched_dice_count": len(p.unpatched_dice),
+            "ready_dice_count": len(p.ready_for_release_dice),
+            "in_production_dice_count": len(p.in_production_dice),
+            "glitched_dice_count": len(p.glitched_dice),
+            "scanned_dice_count": len(p.scanned_dice),
+            "unpatched_dice_count": len(p.glitched_dice) + len(p.scanned_dice),
             "contractor_dice_count": len(p.contractor_dice),
             "is_patient_zero": p.is_patient_zero,
         }
@@ -274,61 +285,9 @@ def resolve_player_defense_and_wear(
     blocked_green = min(effective_shields[CubeColor.GREEN], player_attacks[CubeColor.GREEN])
     unblocked_green = player_attacks[CubeColor.GREEN] - blocked_green
 
-    # 1. Dice Wear: Any permanent die assigned as a shield that actively blocks at least 1 cube moves to Unpatched
-    # White Contractor dice have wear immunity (return to supply at round end).
-    # Dice that block 0 cubes remain Ready
-    worn_dice_set: set[int] = set()
-
-    for s_color, attack_blocked in [
-        (ShieldColor.RED, blocked_red),
-        (ShieldColor.BLUE, blocked_blue),
-        (ShieldColor.GREEN, blocked_green),
-    ]:
-        assigned_dice = [die for _, die in color_dice_map[s_color]]
-        ordered_dice = player.bot.choose_shield_wear_order(
-            player_state=player,
-            color=s_color,
-            assigned_dice=assigned_dice,
-            cubes_to_absorb=attack_blocked,
-        )
-        cubes_remaining_to_absorb = attack_blocked
-        for die in ordered_dice:
-            if cubes_remaining_to_absorb <= 0:
-                break  # Unused shields remain Ready!
-
-            face = die.effective_face or die.current_face
-            amt = face.block_amount if face else 0
-            cubes_remaining_to_absorb -= amt
-
-            # White contractor dice wear immunity!
-            if die.color == DieColor.WHITE:
-                continue
-
-            # B3 — Air-Gapped Backup: when actively blocking, move 1 other Ready die of your choice to Unpatched instead of this die (if no other Ready die, this die moves to Unpatched)
-            if face and face.star_code == "B3":
-                other_ready = [d for d in player.ready_dice if d.die_id != die.die_id]
-                if other_ready:
-                    sacrificial_die = player.bot.choose_b3_sacrificial_die(
-                        player_state=player, other_ready_dice=other_ready
-                    )
-                    if sacrificial_die not in other_ready:
-                        sacrificial_die = other_ready[0]
-                    if sacrificial_die in player.ready_dice:
-                        player.ready_dice.remove(sacrificial_die)
-                        player.unpatched_dice.append(sacrificial_die)
-                        worn_dice_set.add(sacrificial_die.die_id)
-                    continue
-                else:
-                    if die in player.ready_dice:
-                        player.ready_dice.remove(die)
-                        player.unpatched_dice.append(die)
-                        worn_dice_set.add(die.die_id)
-                    continue
-
-            if die in player.ready_dice:
-                player.ready_dice.remove(die)
-                player.unpatched_dice.append(die)
-                worn_dice_set.add(die.die_id)
+    # 1. Zero Dice Wear (v0.22.0 Canonical):
+    # Modules assigned to shields DO NOT wear down or move to Under Development when blocking!
+    # They absorb the attack cleanly and remain safely deployed in in_production_dice.
 
     # 2. Star ability damage-dependent bonuses
     for die in rolled_dice:
@@ -426,38 +385,46 @@ def resolve_player_defense_and_wear(
         player.elimination_reason = "Total Breach (<= 0 Secrets)"
         player.breach_depth = max(0, -player.secrets)
 
-    # Green (Malware): Move 1 Ready die to Unpatched per cube.
-    # Commercial Exposure: Ready Yellow dice must be demoted first before Contractor Sacrifice or other ready dice can absorb malware.
-    # Contractor Sacrifice: You may discard 1 active White Contractor die instead (if no ready yellow dice)!
+    # Green (Malware / Logic Bombs): Move 1 active die from in_production_dice to glitched_dice per cube
     for _ in range(unblocked_green):
-        ready_yellow_idx = next(
-            (idx for idx, d in enumerate(player.ready_dice) if d.color == DieColor.YELLOW),
-            None,
+        sacrifice = player.bot.choose_malware_sacrifice(
+            player_state=player,
+            unblocked_green=unblocked_green,
+            rng=engine.rng,
         )
-        if ready_yellow_idx is not None:
-            # Commercial Exposure: demote ready Yellow die first
-            demoted_yellow = player.ready_dice.pop(ready_yellow_idx)
-            player.unpatched_dice.append(demoted_yellow)
-        else:
-            sacrifice = player.bot.choose_malware_sacrifice(
-                player_state=player,
-                unblocked_green=unblocked_green,
-                rng=engine.rng,
-            )
-            if sacrifice and len(player.contractor_dice) > 0:
-                sacrificed_die = player.contractor_dice.pop(0)
-                engine.state.contractor_supply += 1
-            elif len(player.ready_dice) > 0:
-                # Move first ready die to unpatched
-                demoted = player.ready_dice.pop(0)
-                player.unpatched_dice.append(demoted)
-            elif len(player.unpatched_dice) > 0:
-                # Destroy 1 Unpatched die of player's choice (destroy lowest VP die first)
-                player.unpatched_dice.sort(key=lambda d: d.vp)
-                player.unpatched_dice.pop(0)
+        if sacrifice and len(player.contractor_dice) > 0:
+            sacrificed_die = player.contractor_dice.pop(0)
+            engine.state.contractor_supply += 1
+        elif len(player.in_production_dice) > 0:
+            # Defensive Shield Sacrifice / Triage:
+            # Defending consultancy prioritizes glitching a Shield die first (which already blocked) to protect Income dice
+            def glitch_sort_key(d: Die) -> Tuple[int, int, int]:
+                role = getattr(d, "production_role", None)
+                is_shield = 0 if role in (
+                    ProductionRole.RED_SHIELD,
+                    ProductionRole.BLUE_SHIELD,
+                    ProductionRole.GREEN_SHIELD,
+                ) else 1
+                is_gray = 0 if d.color == DieColor.GRAY else 1
+                return (is_shield, is_gray, getattr(d, "cost", 0))
+
+            target_die = min(player.in_production_dice, key=glitch_sort_key)
+            player.in_production_dice.remove(target_die)
+            player.glitched_dice.append(target_die)
+        elif len(player.glitched_dice) > 0 or len(player.scanned_dice) > 0:
+            # Destruction Fallback: Destroy (return to box) 1 die from Under Development
+            if player.glitched_dice:
+                player.glitched_dice.sort(key=lambda d: (0 if d.color == DieColor.GRAY else 1, getattr(d, "cost", 0)))
+                player.glitched_dice.pop(0)
             else:
-                # Completely wiped out; record unfulfilled die destruction
-                player.unfulfilled_destructions += 1
+                player.scanned_dice.sort(key=lambda d: (0 if d.color == DieColor.GRAY else 1, getattr(d, "cost", 0)))
+                player.scanned_dice.pop(0)
+        elif len(player.ready_for_release_dice) > 0:
+            player.ready_for_release_dice.sort(key=lambda d: (0 if d.color == DieColor.GRAY else 1, getattr(d, "cost", 0)))
+            player.ready_for_release_dice.pop(0)
+        else:
+            # Completely wiped out; record unfulfilled die destruction
+            player.unfulfilled_destructions += 1
 
 
 def demote_player_dice_step2a(
@@ -467,31 +434,46 @@ def demote_player_dice_step2a(
     count: int,
 ) -> None:
     demoted = 0
-    committed_die_ids = {rolled_dice[idx].die_id for idx in commitments.keys() if idx < len(rolled_dice)}
-    uncommitted_ready = [d for d in player.ready_dice if d.die_id not in committed_die_ids]
-    uncommitted_ready.sort(key=lambda d: (d.color != DieColor.GRAY, d.cost))
-
-    while demoted < count and uncommitted_ready:
-        die = uncommitted_ready.pop(0)
-        player.ready_dice.remove(die)
-        player.unpatched_dice.append(die)
-        demoted += 1
-
-    if demoted < count:
-        committed_ready_indices = [
-            idx for idx in list(commitments.keys())
-            if idx < len(rolled_dice) and rolled_dice[idx] in player.ready_dice
-        ]
-        committed_ready_indices.sort(key=lambda idx: (rolled_dice[idx].color != DieColor.GRAY, rolled_dice[idx].cost))
-        for idx in committed_ready_indices:
-            if demoted >= count:
-                break
-            die = rolled_dice[idx]
-            if die in player.ready_dice:
-                player.ready_dice.remove(die)
-                player.unpatched_dice.append(die)
-            commitments.pop(idx, None)
+    # Prioritize Income dice in in_production_dice
+    income_dice = [
+        d for d in list(player.in_production_dice)
+        if getattr(d, "production_role", None) == ProductionRole.INCOME
+    ]
+    income_dice.sort(key=lambda d: (0 if d.color == DieColor.GRAY else 1, getattr(d, "cost", 0)))
+    while demoted < count and income_dice:
+        die = income_dice.pop(0)
+        if die in player.in_production_dice:
+            player.in_production_dice.remove(die)
+            player.glitched_dice.append(die)
             demoted += 1
+
+    # If still need to demote, move Shield dice and revoke their defensive shield commitment
+    if demoted < count:
+        shield_dice = [
+            d for d in list(player.in_production_dice)
+            if getattr(d, "production_role", None) != ProductionRole.INCOME
+        ]
+        shield_dice.sort(key=lambda d: (0 if d.color == DieColor.GRAY else 1, getattr(d, "cost", 0)))
+        while demoted < count and shield_dice:
+            die = shield_dice.pop(0)
+            if die in player.in_production_dice:
+                player.in_production_dice.remove(die)
+                player.glitched_dice.append(die)
+                demoted += 1
+                if die in rolled_dice:
+                    idx = rolled_dice.index(die)
+                    commitments.pop(idx, None)
+
+    # Fallback to ready_for_release_dice if in_production_dice was empty
+    if demoted < count and player.ready_for_release_dice:
+        ready_pool = list(player.ready_for_release_dice)
+        ready_pool.sort(key=lambda d: (0 if d.color == DieColor.GRAY else 1, getattr(d, "cost", 0)))
+        while demoted < count and ready_pool:
+            die = ready_pool.pop(0)
+            if die in player.ready_for_release_dice:
+                player.ready_for_release_dice.remove(die)
+                player.glitched_dice.append(die)
+                demoted += 1
 
 
 def return_player_colored_dice_step2a(
@@ -502,38 +484,45 @@ def return_player_colored_dice_step2a(
     count: int,
 ) -> None:
     returned = 0
-    unpatched_colored = [d for d in player.unpatched_dice if d.color != DieColor.GRAY and d.color != DieColor.WHITE]
-    while returned < count and unpatched_colored:
-        die = unpatched_colored.pop(0)
-        player.unpatched_dice.remove(die)
-        engine.state.market[die.color] = engine.state.market.get(die.color, 0) + 1
-        returned += 1
-
-    if returned < count:
-        committed_die_ids = {rolled_dice[idx].die_id for idx in commitments.keys() if idx < len(rolled_dice)}
-        uncommitted_ready_colored = [
-            d for d in player.ready_dice
-            if d.color != DieColor.GRAY and d.color != DieColor.WHITE and d.die_id not in committed_die_ids
-        ]
-        while returned < count and uncommitted_ready_colored:
-            die = uncommitted_ready_colored.pop(0)
-            player.ready_dice.remove(die)
+    # 1. Under Development (Glitched + Scanned)
+    for zone in (player.glitched_dice, player.scanned_dice):
+        colored = [d for d in list(zone) if d.color != DieColor.GRAY and d.color != DieColor.WHITE]
+        for die in colored:
+            if returned >= count:
+                break
+            zone.remove(die)
             engine.state.market[die.color] = engine.state.market.get(die.color, 0) + 1
             returned += 1
 
+    # 2. In Production (Income dice first, then Shield dice)
     if returned < count:
-        committed_ready_colored_indices = [
-            idx for idx in list(commitments.keys())
-            if idx < len(rolled_dice) and rolled_dice[idx] in player.ready_dice
-            and rolled_dice[idx].color != DieColor.GRAY and rolled_dice[idx].color != DieColor.WHITE
+        prod_colored = [
+            d for d in list(player.in_production_dice)
+            if d.color != DieColor.GRAY and d.color != DieColor.WHITE
         ]
-        for idx in committed_ready_colored_indices:
+        prod_colored.sort(key=lambda d: 1 if getattr(d, "production_role", None) in (
+            ProductionRole.RED_SHIELD, ProductionRole.BLUE_SHIELD, ProductionRole.GREEN_SHIELD
+        ) else 0)
+        for die in prod_colored:
             if returned >= count:
                 break
-            die = rolled_dice[idx]
-            if die in player.ready_dice:
-                player.ready_dice.remove(die)
-            commitments.pop(idx, None)
+            player.in_production_dice.remove(die)
+            engine.state.market[die.color] = engine.state.market.get(die.color, 0) + 1
+            if die in rolled_dice:
+                idx = rolled_dice.index(die)
+                commitments.pop(idx, None)
+            returned += 1
+
+    # 3. Ready for Release
+    if returned < count:
+        ready_colored = [
+            d for d in list(player.ready_for_release_dice)
+            if d.color != DieColor.GRAY and d.color != DieColor.WHITE
+        ]
+        for die in ready_colored:
+            if returned >= count:
+                break
+            player.ready_for_release_dice.remove(die)
             engine.state.market[die.color] = engine.state.market.get(die.color, 0) + 1
             returned += 1
 

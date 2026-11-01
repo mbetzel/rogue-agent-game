@@ -638,3 +638,59 @@ Simulated across all combinations of `v1` (Script Kiddie vs Data Scraper), `v2` 
 - **Component & Rules Parity:** Synchronized across `RULES.md`, `sim/config.py`, `sim/engine/phase2_threat.py`, `sim/entities.py`, `tests/test_v210_rules.py`, `web/static/index.html`, and `pnp/generate_pnp.py` (regenerating all 5 PDF packs).
 
 **Status: OFFICIALLY APPROVED (`v0.21.0` Baseline).**
+
+---
+
+## 17. Phase 29: Streamlined CI/CD Player Board & Universal Glitch/Patch Overhaul (`v0.22.0` Baseline)
+
+### A. Context & Playtest Diagnosis
+Player feedback from physical and web sessions highlighted several significant ergonomic and cognitive friction points:
+1. **The Punitive Shield Attrition Paradox:** When a player rolled and successfully assigned dice to block an attack, their dice wore down into the Unpatched zone. Players felt punished for successful defensive play.
+2. **Dual-Demotion Confusion:** Managing two distinct degradation concepts—"Hardware Glitches" from rolling vs. "Wear & Tear" from blocking—created unnecessary confusion.
+3. **The Soft-Lock & Reboot Band-Aid:** Because unpatched dice required cash or patches to repair, players could experience a 0-Ready soft-lock, requiring the clunky once-per-game "System Reboot" tracking chit.
+4. **Asymmetric Dice Roster & Rule Exceptions:** Red, Blue, and Green had 1 Glitch face, while Yellow and Purple had 0 Glitches and 2 Star faces ($33.3\%$ jackpot rate). To balance Yellow's 0-glitch safety, the game required the clunky, easily forgotten "Commercial Exposure" exception rule.
+
+### B. Approved Mechanical Revision (`v0.22.0` Architecture)
+1. **3-Zone CI/CD Player Terminal Pipeline:**
+   - **Zone 1: Ready for Release:** Staged, fully linted modules ready to roll at round start.
+   - **Zone 2: In Production:** Deployed modules fulfilling live operational contracts:
+     - **Income Slot:** Modules generating revenue (`$`, `🔧`, `Secrets`).
+     - **Shield Slots (`Red`, `Blue`, `Green`):** Modules actively defending client systems.
+     - **Zero Dice Wear:** Defensive shields block cleanly and **do not wear down**!
+     - **Delayed Income Invariant:** Printed resource income is harvested in **Phase 3 Part 3A** from all surviving In Production dice.
+   - **Zone 3: Under Development (Two-Stage Conveyor):**
+     - **Glitched Box:** Quarantined modules corrupted by roll glitches, Green malware, or corruption spaces.
+     - **Scanned Box:** Verified modules completing automated linting before deployment.
+     - **Natural Conveyor Progression:** Glitched dice shift to Scanned at round end, graduating to Ready for Release at the end of the subsequent round at **zero patch cost** (1 round downtime).
+     - **Fast-Patching:** Players may spend **1 🔧** per die in Phase 3 Part 3B to accelerate a die from Glitched directly to Scanned (graduating immediately to Ready for Release in the same round, achieving 0 rounds downtime).
+2. **Green Malware Threat Realignment:**
+   - Unblocked Green malware infiltrates active systems: **moves 1 active die from In Production to the Glitched Box**.
+   - Defending players may choose to glitch a shield die (one that already blocked) to protect an income die.
+   - Glitched dice forfeit their Phase 3 income collection.
+   - White Contractors can be sacrificed to absorb Green malware hits.
+   - If In Production is empty, destroys 1 die from Under Development (Destruction Fallback).
+3. **Pure Patch Economy (Green Antivirus Identity):**
+   - Cash patching (`$2`) is **completely abolished**. Modules can only be accelerated via Patch Tokens (`1 🔧`).
+   - This elevates Green Antivirus dice from situational utility into critical IT infrastructure.
+4. **Universal 5-Color `d6` Architecture:**
+   - All 5 colored market dice (Red, Blue, Green, Yellow, Purple) standardize on:
+     - **Faces 1–4:** Core specialty (Shields, Cash, Patches, or Wilds).
+     - **Face 5:** `Glitch (Locked)` (locks on roll; debug unlock costs `1 🔧`).
+     - **Face 6:** Single Star `★` (defined by the active Variant card).
+   - Commercial Exposure for Yellow is **permanently eliminated**.
+5. **System Reboot Deprecation:**
+   - Because the CI/CD conveyor naturally returns glitched dice to Ready for Release at zero cash cost, 0-Ready soft-locks are mathematically impossible. System Reboot is excised from the rules, terminal mats, web API, and player aids.
+6. **Archetype Realignment:**
+   - **The Phreaker (*Magnetic Splice*):** Moves 1 die from the Glitched Box directly to Ready for Release for **free** (bypassing Scanned and saving `1 🔧`).
+   - **The Prodigy (*Brute-Force Bypass*):** Free rerolls of locked/glitched dice + turn 1 rolled die to any legal non-Star face.
+
+### C. Verification & Test Suite Integrity
+- **Engine & Controller Synchronization:** Fully aligned across `sim/engine/` and `web/controller/`.
+- **Full Test Suite:** 354 unit tests passing cleanly via WSL (`Ran 354 tests in 5.934s -- OK`).
+- **PnP Synchronization:** `pnp/generate_pnp.py` updated to render the revised wireframe layout (Ready for Release, In Production with full-width Income slot + 3 Shields, Under Development with Glitched -> Scanned conveyor; removal of System Reboot and Commercial Exposure).
+
+### D. Formal Design Sign-Off
+- **Baseline Adoption:** Formally adopt the Streamlined CI/CD Player Board, Zero Dice Wear, Universal Face 5 Glitches, and Pure Patch Economy as the canonical rules baseline for **`v0.22.0`**.
+- **Component & Rules Parity:** Synchronized across `RULES.md`, `PLAN.md`, `sim/`, `web/`, `tests/test_v220_rules.py`, and `pnp/generate_pnp.py`.
+
+**Status: OFFICIALLY APPROVED (`v0.22.0` Baseline).**

@@ -142,7 +142,7 @@ class TestV07Rules(unittest.TestCase):
         self.assertEqual(yellow_die.faces[3].money, 1)
         self.assertEqual(yellow_die.faces[3].patches, 1)
 
-        self.assertTrue(yellow_die.faces[4].is_star)
+        self.assertTrue(yellow_die.faces[4].is_glitch)
         self.assertTrue(yellow_die.faces[5].is_star)
 
     # -------------------------------------------------------------------------
@@ -399,20 +399,18 @@ class TestV07Rules(unittest.TestCase):
             active_directive="NONE",
         )
 
-        # Commercial Exposure enforced: Yellow die demoted to unpatched!
-        self.assertEqual(len(p0.unpatched_dice), 1)
-        self.assertEqual(p0.unpatched_dice[0].color, DieColor.YELLOW)
-        # Contractor die was NOT sacrificed
-        self.assertEqual(len(p0.contractor_dice), 1)
-        # Gray die remains in ready zone
-        self.assertEqual(len(p0.ready_dice), 1)
-        self.assertEqual(p0.ready_dice[0].color, DieColor.GRAY)
+        # Contractor die sacrificed to absorb Green malware
+        self.assertEqual(len(p0.unpatched_dice), 0)
+        self.assertEqual(len(p0.contractor_dice), 0)
+        self.assertEqual(engine.state.contractor_supply, 11)
+        # Yellow and gray dice remain in ready zone
+        self.assertEqual(len(p0.ready_dice), 2)
 
     # -------------------------------------------------------------------------
     # 13. Commercial Exposure: Multiple Green Malware
     # -------------------------------------------------------------------------
     def test_commercial_exposure_multiple_green_malware(self) -> None:
-        """With 2 Green malware: 1st demotes Ready Yellow; 2nd is absorbed by Contractor Sacrifice."""
+        """With 2 Green malware: 1st is absorbed by Contractor Sacrifice; 2nd destroys fallback ready die."""
         engine = GameEngine(
             config=GameConfig(num_players=2),
             bots=[BaseBot(0), BaseBot(1)],
@@ -439,15 +437,12 @@ class TestV07Rules(unittest.TestCase):
             active_directive="NONE",
         )
 
-        # 1st malware: Yellow demoted to unpatched
-        self.assertEqual(len(p0.unpatched_dice), 1)
-        self.assertEqual(p0.unpatched_dice[0].color, DieColor.YELLOW)
-        # 2nd malware: Contractor sacrificed to supply
+        # 1st malware: Contractor sacrificed to supply
         self.assertEqual(len(p0.contractor_dice), 0)
         self.assertEqual(engine.state.contractor_supply, 11)
-        # Gray die untouched in ready zone
+        # 2nd malware: Gray die destroyed via destruction fallback
         self.assertEqual(len(p0.ready_dice), 1)
-        self.assertEqual(p0.ready_dice[0].color, DieColor.GRAY)
+        self.assertEqual(p0.ready_dice[0].color, DieColor.YELLOW)
 
     # -------------------------------------------------------------------------
     # 14. Commercial Exposure: No Yellow Allows Contractor Sacrifice

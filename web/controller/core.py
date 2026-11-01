@@ -347,6 +347,14 @@ class GameController:
     def end_turn(self, player_id: int) -> Dict[str, Any]:
         return phase3_actions.end_turn(self, player_id)
 
+    def fast_patch(
+        self,
+        player_id: int,
+        die_ids: Optional[List[int]] = None,
+        die_indices: Optional[List[int]] = None,
+    ) -> Dict[str, Any]:
+        return phase3_actions.fast_patch(self, player_id, die_ids=die_ids, die_indices=die_indices)
+
     def system_reboot(self, player_id: int) -> Dict[str, Any]:
         return phase3_actions.system_reboot(self, player_id)
 

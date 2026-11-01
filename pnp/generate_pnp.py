@@ -1,4 +1,4 @@
-"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.19.0 Baseline).
+"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.22.0 Baseline).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
   - 01_Player_Boards.pdf (6 pages — 1 per Consultancy Archetype, matching Wireframe Page 1)
@@ -19,7 +19,7 @@ from pnp.pdf_engine import PALETTE, Color, PDFDocument, PDFPage, measure_text
 
 
 # =============================================================================
-# Canonical Game Data (Synchronized 1:1 with RULES.md v0.19.0 & sim/entities.py)
+# Canonical Game Data (Synchronized 1:1 with RULES.md v0.22.0 & sim/entities.py)
 # =============================================================================
 
 @dataclass(frozen=True)
@@ -51,10 +51,11 @@ CHARACTERS: List[CharacterSpec] = [
         name="The Phreaker",
         role="Hardware Tinkerer // Emergency Relays",
         flavor='"A strip of Mylar splicing tape and a 2600-Hz whistle will fix what ten grand of silicon can\'t."',
-        timing="P3: OPERATIONS",
+        timing="P3: PIPELINE PREP",
         ability_name="Magnetic Splice",
         ability_desc=(
-            "Move **1 worn die** from Unpatched to Ready for **free**."
+            "Move **1 die** from Glitched directly to Ready for Release for **free** "
+            "(bypassing Scanned and saving {WRENCH})."
         ),
     ),
     CharacterSpec(
@@ -133,7 +134,7 @@ DICE_SPECS: List[DieSpec] = [
         subtitle="Contractor",
         cost_str="$1 / $2 / $3",
         faces=("Block 1 Any", "Block 1 Any", "Block 1 Any", "+$1", "{LOCK} Glitch", "{LOCK} Glitch"),
-        notes="Temp hire (max 3/rd). Never wears to Unpatched; returns to supply after Phase 2. Can sacrifice vs {GREEN} (except {YELLOW}).",
+        notes="Temp hire (max 3/rd). Never wears; returns to supply after Phase 2. Can sacrifice vs {GREEN} Malware.",
     ),
     DieSpec(
         color_key="red",
@@ -141,7 +142,7 @@ DICE_SPECS: List[DieSpec] = [
         subtitle="FinSec",
         cost_str="$4",
         faces=("Block 1 {RED}", "+$2", "+$2", "+$2", "{LOCK} Glitch", "{RED} {STAR}"),
-        notes="FinSec revenue & defense. Face 5 Glitch: wear 1 active die. Face 6 Red {STAR}.",
+        notes="FinSec revenue & defense. Face 5 Glitch (Locked), Face 6 Red {STAR}.",
     ),
     DieSpec(
         color_key="blue",
@@ -149,7 +150,7 @@ DICE_SPECS: List[DieSpec] = [
         subtitle="Firewall",
         cost_str="$5",
         faces=("Block 1 {BLUE}", "+1 {WRENCH}", "+$1", "Block 1 {BLUE} / +1 {WRENCH}", "{LOCK} Glitch", "{BLUE} {STAR}"),
-        notes="Spyware defense & patch hybrid. Face 5 Glitch. Face 6 Blue {STAR}.",
+        notes="Spyware defense & patch hybrid. Face 5 Glitch (Locked), Face 6 Blue {STAR}.",
     ),
     DieSpec(
         color_key="green",
@@ -157,23 +158,23 @@ DICE_SPECS: List[DieSpec] = [
         subtitle="Antivirus",
         cost_str="$4",
         faces=("Block 1 {GREEN}", "+1 {WRENCH}", "+2 {WRENCH}", "+1 {WRENCH} / +$1", "{LOCK} Glitch", "{GREEN} {STAR}"),
-        notes="Malware defense & patch engine. Face 5 Glitch. Face 6 Green {STAR}.",
+        notes="Malware defense & patch engine. Face 5 Glitch (Locked), Face 6 Green {STAR}.",
     ),
     DieSpec(
         color_key="yellow",
         title="YELLOW",
         subtitle="Commercial AI",
         cost_str="$5",
-        faces=("+$3", "+$2", "+$2", "+$1 & +1 {WRENCH}", "{YELLOW} {STAR}", "{YELLOW} {STAR}"),
-        notes="COMMERCIAL EXPOSURE: Unblocked {GREEN} Malware MUST demote Ready {YELLOW} dice first (no Contractor Sacrifice!).",
+        faces=("+$3", "+$2", "+$2", "+$1 & +1 {WRENCH}", "{LOCK} Glitch", "{YELLOW} {STAR}"),
+        notes="Commercial AI revenue. Face 5 Glitch (Locked), Face 6 Yellow {STAR}.",
     ),
     DieSpec(
         color_key="purple",
         title="PURPLE",
         subtitle="Black-Hat AI",
         cost_str="$4",
-        faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {WRENCH}", "{PURPLE} {STAR}", "{PURPLE} {STAR}"),
-        notes="Flexible Any-color shields, hybrid output, and sabotage/profiteering {STAR} variants.",
+        faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {WRENCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
+        notes="Flexible Any-color shields, hybrid output, and exploit {STAR} variants. Face 5 Glitch (Locked), Face 6 Purple {STAR}.",
     ),
 ]
 
@@ -233,9 +234,9 @@ VARIANT_CARDS: List[VariantCardSpec] = [
     VariantCardSpec(
         "B3", "blue", "BLUE // FIREWALL", "$5",
         "{PIP1} 1{BLUE} | {PIP2} +1{WRENCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{WRENCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
-        "Air-Gapped Backup", "P2 DEFENSE (WEAR REDIRECT)",
-        "**Block 1 {BLUE} Blue**; when blocking, you may move **1 other Ready die** to Unpatched instead of this die.",
-        "If no other Ready die, this die wears.",
+        "Air-Gapped Backup", "P2 DEFENSE (REDIRECT)",
+        "**Block 1 {BLUE} Blue**; when taking unblocked **Green Malware**, sacrifice **1 other Ready die** to Under Development instead of In Production.",
+        "Locks in v3.0 Zero-Day (Shield).",
     ),
     # GREEN (G1-G3)
     VariantCardSpec(
@@ -262,43 +263,43 @@ VARIANT_CARDS: List[VariantCardSpec] = [
     # YELLOW (Y1-Y3)
     VariantCardSpec(
         "Y1", "yellow", "YELLOW // COMM. AI", "$5",
-        "{PIP1} +$3   {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH}",
-        "Algorithmic Trading", "P1 BOOT + P3 OPTION",
-        "Gain **+$4** in Phase 1; in Phase 3 you may also pay **$2** to gain **+1 Secret**.",
-        "Commercial Exposure. Locks in v2.0 RaaS.",
+        "{PIP1} +$3   {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH} | {PIP5} {LOCK}Glitch",
+        "Algorithmic Trading", "P1 INCOME + P3 OPTION",
+        "Gain **+$4** in Phase 3; in Phase 3 you may also pay **$2** to gain **+1 Corporate Secret**.",
+        "Locks in v2.0 RaaS (Cash).",
     ),
     VariantCardSpec(
         "Y2", "yellow", "YELLOW // COMM. AI", "$5",
-        "{PIP1} +$3   {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH}",
+        "{PIP1} +$3   {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH} | {PIP5} {LOCK}Glitch",
         "Cloud Monopoly", "P1 SCALING REVENUE",
         "Gain **+$2**, plus **+$1 per different colored** module die you own (**max +$5** total).",
-        "Counts R/B/G/Y/P owned. Locks in v2.0.",
+        "Counts R/B/G/Y/P owned. Locks in v2.0 RaaS.",
     ),
     VariantCardSpec(
         "Y3", "yellow", "YELLOW // COMM. AI", "$5",
-        "{PIP1} +$3   {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH}",
-        "Proprietary Training", "P1 SECRET + SELF-WEAR",
-        "Gain **+1 Corporate Secret** in Phase 1 Step 6, then immediately move **this die to Unpatched**.",
-        "Commercial Exposure applies while Ready.",
+        "{PIP1} +$3   {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH} | {PIP5} {LOCK}Glitch",
+        "Proprietary Training", "P1 SECRET + GLITCH",
+        "Gain **+1 Corporate Secret** in Phase 1 Step 5, then immediately move **this die to Under Development (Glitched)**.",
+        "Locks in v2.0 RaaS (Cash).",
     ),
     # PURPLE (P1-P3)
     VariantCardSpec(
         "P1", "purple", "PURPLE // BLK-HAT", "$4",
-        "{PIP1}{PIP2} Block 1 Any", "{PIP3} +$2  |  {PIP4} +$1 & 1{WRENCH}",
-        "Zero-Day Injection", "P1 BOOT + P3 SABOTAGE",
-        "Gain **+$2** in Phase 1; in Phase 3 you may add **1 Attack Cube** ({RED}/{BLUE}/{GREEN}) to Staging Cup.",
+        "{PIP1}{PIP2} Block 1 Any", "{PIP3} +$2  |  {PIP4} +$1 & 1{WRENCH} | {PIP5} {LOCK}Glitch",
+        "Zero-Day Injection", "P1 INCOME + P3 SABOTAGE",
+        "Gain **+$2** in Phase 3; in Phase 3 you may add **1 Attack Cube** ({RED}/{BLUE}/{GREEN}) to Staging Cup.",
         "No Black cube added. Locks in v2.0 RaaS.",
     ),
     VariantCardSpec(
         "P2", "purple", "PURPLE // BLK-HAT", "$4",
-        "{PIP1}{PIP2} Block 1 Any", "{PIP3} +$2  |  {PIP4} +$1 & 1{WRENCH}",
-        "Chaos Profiteer", "P1 BOOT + P2 PAYOUT",
-        "Gain **+$1** in Phase 1, plus **+$2 per {BLACK} Black Cube** that exits the tower in Phase 2.",
+        "{PIP1}{PIP2} Block 1 Any", "{PIP3} +$2  |  {PIP4} +$1 & 1{WRENCH} | {PIP5} {LOCK}Glitch",
+        "Chaos Profiteer", "P1 INCOME + P2 PAYOUT",
+        "Gain **+$1** in Phase 3, plus **+$2 per {BLACK} Black Cube** that exits the tower in Phase 2.",
         "Locks in v2.0 RaaS (Cash).",
     ),
     VariantCardSpec(
         "P3", "purple", "PURPLE // BLK-HAT", "$4",
-        "{PIP1}{PIP2} Block 1 Any", "{PIP3} +$2  |  {PIP4} +$1 & 1{WRENCH}",
+        "{PIP1}{PIP2} Block 1 Any", "{PIP3} +$2  |  {PIP4} +$1 & 1{WRENCH} | {PIP5} {LOCK}Glitch",
         "Packet Deflection", "P2 DEF + P3 SABOTAGE",
         "**Block 2** of any 1 color; in Phase 3 you may pay **$1** to add **1 cube of that color** to Staging Cup.",
         "Commit color in Step 5. Locks in v3.0.",
@@ -344,7 +345,7 @@ VERSION_TILES: List[VersionTileSpec] = [
         profile="6 SPACES // SINGULARITY TIER",
         banner_text="**Overclocked Surge:** 2+ Black: Lead Attack +2. Space 4 leaks 1 Secret.",
         spaces=(
-            VersionTrackSpaceSpec(1, "Demote 1 Die\n+1 {RED} 1 {BLUE}"),
+            VersionTrackSpaceSpec(1, "Glitch 1 Die\n+1 {RED} 1 {BLUE}"),
             VersionTrackSpaceSpec(2, "Lose $2 & 1 {WRENCH}\n+1 {BLACK}"),
             VersionTrackSpaceSpec(3, "+1 {RED} +1 {GREEN}"),
             VersionTrackSpaceSpec(4, "Lose 1 Secret\n+1 {BLACK}"),
@@ -374,7 +375,7 @@ VERSION_TILES: List[VersionTileSpec] = [
             VersionTrackSpaceSpec(1, "Lose 2 {WRENCH}"),
             VersionTrackSpaceSpec(2, "+2 {GREEN}\n+1 {BLACK}"),
             VersionTrackSpaceSpec(3, "Lock {WRENCH}\nNext P1"),
-            VersionTrackSpaceSpec(4, "Demote 1 Die\n+1 {BLACK}"),
+            VersionTrackSpaceSpec(4, "Glitch 1 Die\n+1 {BLACK}"),
             VersionTrackSpaceSpec(5, "UPGRADE v3.0\n+1 {RED}", is_milestone=True),
         ),
     ),
@@ -399,7 +400,7 @@ VERSION_TILES: List[VersionTileSpec] = [
             VersionTrackSpaceSpec(1, "Lose 1 {WRENCH}"),
             VersionTrackSpaceSpec(2, "Lose $1\n+1 {BLACK}"),
             VersionTrackSpaceSpec(3, "+1 {GREEN}"),
-            VersionTrackSpaceSpec(4, "UPGRADE v2.0\nDemote 1 Die", is_milestone=True),
+            VersionTrackSpaceSpec(4, "UPGRADE v2.0\nGlitch 1 Die", is_milestone=True),
         ),
     ),
 ]
@@ -446,7 +447,7 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
     draw_board_outer_frame(
         page,
         left_tag=f"TOO MANY SECRETS // CONSULTANCY TERMINAL [{idx}/6]",
-        right_tag="PNP PROTOTYPE v0.18 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.22 // US LETTER",
     )
 
     # -------------------------------------------------------------------------
@@ -505,110 +506,211 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
     page.text(lcx, ay + ah - 4.5, "Unused charge forfeits when SETEC upgrades; new version unlocks immediately.", font="italic", size=6.1, color=PALETTE["muted"], align="center")
 
     # -------------------------------------------------------------------------
-    # RIGHT COLUMN (x = 292..752, w = 460)
+    # RIGHT COLUMN (x = 292..752, w = 460) — Revised Player Terminal Layout
     # -------------------------------------------------------------------------
     rx, rw = 292.0, 460.0
 
-    # 1. Ready Zone
-    ry, rh = 36.0, 98.0
-    page.rect(rx, ry, rw, rh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
-    page.rect(rx, ry, rw, 19.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
-    page.text(rx + 8, ry + 13.0, "READY ZONE", font="bold", size=9.2, color=PALETTE["ink"])
+    # =========================================================================
+    # ZONE 1: READY FOR RELEASE (Top Box: y = 36..118, h = 82)
+    # =========================================================================
+    r1_y, r1_h = 36.0, 82.0
+    page.rect(rx, r1_y, rw, r1_h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
+    page.rect(rx, r1_y, rw, 18.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
+    page.text(rx + 8, r1_y + 12.5, "ZONE 1: READY FOR RELEASE", font="bold", size=8.8, color=PALETTE["ink"])
     page.rich_line(
-        rx + rw - 8, ry + 13.0,
-        "Start: **4** {GRAY} Gray Dice  |  Phase 1: Roll all Ready + hired {WHITE} Contractors",
-        size=7.0, color=PALETTE["ink_soft"], align="right",
+        rx + rw - 8, r1_y + 12.5,
+        "Start: **4** {GRAY} Gray Starter Dice  |  Roll Ready + hired {WHITE} Contractors",
+        size=6.8, color=PALETTE["ink_soft"], align="right",
     )
-    # Subtle 16mm die placement guides (8 faint slots across top-center of Ready Zone)
-    slot_s = 44.0
-    gap_s = 10.0
+    # Subtle 16mm die placement guides (8 faint slots centered in Ready Zone)
+    slot_s = 32.0
+    gap_s = 8.0
     row_w = 8 * slot_s + 7 * gap_s
     gx0 = rx + (rw - row_w) / 2.0
-    gy0 = ry + 32.0
+    gy0 = r1_y + 23.0
     for i in range(8):
         gx = gx0 + i * (slot_s + gap_s)
-        page.rounded_rect(gx, gy0, slot_s, slot_s, r=4.0, stroke=PALETTE["rule"], fill=None, line_width=0.65, dash=(2.5, 2.0))
+        page.rounded_rect(gx, gy0, slot_s, slot_s, r=3.5, stroke=PALETTE["rule"], fill=None, line_width=0.6, dash=(2.0, 2.0))
         if i < 4:
-            page.text(gx + slot_s / 2.0, gy0 + slot_s / 2.0 + 2.5, "START", font="mono", size=6.0, color=PALETTE["watermark"], align="center")
+            page.text(gx + slot_s / 2.0, gy0 + slot_s / 2.0 + 2.5, "START", font="mono", size=5.5, color=PALETTE["watermark"], align="center")
 
-    # 2. Active Zone
-    act_y, act_h = 144.0, 82.0
-    page.rect(rx, act_y, rw, act_h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
-    page.rect(rx, act_y, rw, 19.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
-    page.text(rx + 8, act_y + 13.0, "ACTIVE ZONE", font="bold", size=9.2, color=PALETTE["ink"])
     page.rich_line(
-        rx + rw - 8, act_y + 13.0,
-        "Max **2 Free Rerolls**  |  Spend **1** {WRENCH} to Unlock **1** {LOCK} Die  |  Unassigned yield **$** & {WRENCH}",
-        size=6.9, color=PALETTE["ink_soft"], align="right",
+        rx + rw / 2.0, r1_y + 64.0,
+        "Phase 1: Roll all Ready + hired Contractors. Yahtzee rerolls (max 2), Debug unlock (1 {WRENCH}).",
+        size=6.4, color=PALETTE["ink_soft"], align="center",
     )
-    page.text(rx + rw / 2.0, act_y + 46.0, "ROLLED POOL  //  DECLARE ( / ) CHOICES & ASSIGN SHIELDS BEFORE COLLECTING OUTPUTS", font="mono", size=6.1, color=PALETTE["watermark"], align="center")
-    page.rich_line(rx + rw / 2.0, act_y + 64.0, "**HASH MATCH:** 3 matching faces in roll = **+1 Corporate Secret** *(uncapped; no Glitches)*", size=6.6, color=PALETTE["blue"], align="center")
-
-    # 3. Shield Row (Red Shields | Blue Shields | Green Shields)
-    sh_y, sh_h = 236.0, 114.0
-    sh_gap = 11.0
-    sh_w = (rw - 2 * sh_gap) / 3.0
-    shield_defs = [
-        ("red", "{RED} RED SHIELDS", "Blocks Ransomware", "Unblocked: -$1 Cash (Unpaid: -1 Secret)"),
-        ("blue", "{BLUE} BLUE SHIELDS", "Blocks Spyware", "Unblocked: -1 Corporate Secret"),
-        ("green", "{GREEN} GREEN SHIELDS", "Blocks Malware", "Unblocked: Wear 1 Ready ({YELLOW} 1st!)"),
-    ]
-    for i, (ckey, title_mk, sub1, sub2) in enumerate(shield_defs):
-        sx = rx + i * (sh_w + sh_gap)
-        fg, bg = _color_pair(ckey)
-        page.rect(sx, sh_y, sh_w, sh_h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
-        # Top colored accent bar + header
-        page.rect(sx, sh_y, sh_w, 21.0, stroke=PALETTE["ink"], fill=bg, line_width=0.8)
-        page.rect(sx, sh_y, sh_w, 3.2, stroke=None, fill=fg)
-        page.rich_line(sx + sh_w / 2.0, sh_y + 15.2, f"**{title_mk}**", size=8.4, color=fg, align="center")
-        # 2 subtle die guides inside each shield box
-        ds = 42.0
-        dx0 = sx + (sh_w - (2 * ds + 10.0)) / 2.0
-        for d_i in range(2):
-            page.rounded_rect(dx0 + d_i * (ds + 10.0), sh_y + 34.0, ds, ds, r=4.0, stroke=PALETTE["rule"], fill=None, line_width=0.65, dash=(2.5, 2.0))
-        page.text(sx + sh_w / 2.0, sh_y + 93.0, sub1, font="bold", size=6.8, color=PALETTE["ink_soft"], align="center")
-        page.rich_line(sx + sh_w / 2.0, sh_y + 105.0, sub2, size=6.3, color=PALETTE["muted"], align="center")
-
-    # Wear transition caption between Shields and Unpatched Zone
-    page.text(
-        rx + rw / 2.0, 360.5,
-        "DICE WEAR: Permanent Shields blocking >= 1 cube move to Unpatched Zone  |  0 cubes blocked = stay Ready  |  Contractors -> Supply",
-        font="italic", size=6.5, color=PALETTE["ink_soft"], align="center",
-    )
-
-    # 4. Unpatched Zone (bottom-aligned with Special Ability Description at y = 456!)
-    up_y, up_h = 366.0, 90.0
-    page.rect(rx, up_y, rw, up_h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
-    page.rect(rx, up_y, rw, 19.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
-    page.text(rx + 8, up_y + 13.0, "UNPATCHED ZONE", font="bold", size=9.2, color=PALETTE["ink"])
     page.rich_line(
-        rx + rw - 8, up_y + 13.0,
-        "Offline (Do Not Roll)  |  **Phase 3 Patch:** Pay **1** {WRENCH} or **$2** per die -> Ready Zone",
-        size=7.0, color=PALETTE["ink_soft"], align="right",
+        rx + rw / 2.0, r1_y + 75.0,
+        "**HASH MATCH:** 3 matching faces in roll = **+1 Corporate Secret** *(uncapped; no Glitches)*",
+        size=6.5, color=PALETTE["blue"], align="center",
     )
-    # Worn dice area watermark note
-    page.text(rx + rw / 2.0, up_y + 37.0, "WORN & DEMOTED MODULES  //  IF 0 READY/CONTRACTOR DICE VS GREEN MALWARE: DESTROY 1 UNPATCHED DIE", font="mono", size=6.1, color=PALETTE["watermark"], align="center")
 
-    # Once-per-Game System Reboot slot on Terminal Mat (y = 428..450)
-    sb_w, sb_h = 226.0, 22.0
-    sb_x = rx + rw - sb_w - 8.0
-    sb_y = up_y + up_h - sb_h - 5.0
-    page.rounded_rect(sb_x, sb_y, sb_w, sb_h, r=3.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.85)
-    # Checkbox square on left of pill
-    page.rect(sb_x + 5.5, sb_y + 5.0, 12.0, 12.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.8)
-    page.rich_line(sb_x + 22.0, sb_y + 14.5, "**SYSTEM REBOOT**", size=7.2, color=PALETTE["ink"])
-    page.text(sb_x + 106.0, sb_y + 14.2, "(Ready / Used)", font="mono_bold", size=6.3, color=PALETTE["ink_soft"])
-    page.text(sb_x + sb_w - 6.0, sb_y + 14.2, "1x / GAME", font="mono_bold", size=5.8, color=PALETTE["muted"], align="right")
+    # =========================================================================
+    # ZONE 2: IN PRODUCTION (Middle Box: y = 125..313, h = 188)
+    # =========================================================================
+    r2_y, r2_h = 125.0, 188.0
+    page.rect(rx, r2_y, rw, r2_h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
+    page.rect(rx, r2_y, rw, 18.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
+    page.rich_line(
+        rx + 8, r2_y + 12.5,
+        "**ZONE 2: IN PRODUCTION** (Zero Dice Wear — Shields never wear down!)",
+        size=8.2, color=PALETTE["ink"],
+    )
+    page.text(rx + rw - 8, r2_y + 12.5, "DEPLOYED MODULES", font="mono_bold", size=6.5, color=PALETTE["ink_soft"], align="right")
 
-    # Emergency Reboot trigger explanation to the left of the slot
+    # Sub-box 1: Income (wide rectangle spanning the width)
+    ix = rx + 7.0
+    iy = r2_y + 22.0
+    iw = rw - 14.0  # 446.0 pt
+    ih = 48.0
+    page.rect(ix, iy, iw, ih, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.8)
+    page.rect(ix, iy, iw, 15.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.6)
+    page.rich_line(ix + 6.0, iy + 10.5, "**INCOME SLOT** (Cash, Patches & Non-Shield Star Outputs)", size=7.2, color=PALETTE["ink"])
+    page.text(ix + iw - 6.0, iy + 10.5, "COLLECTED IN PHASE 3", font="mono_bold", size=5.8, color=PALETTE["muted"], align="right")
+
     page.rich_paragraph(
-        rx + 8.0, sb_y + 2.0, sb_x - rx - 14.0,
-        "**Phase 3 Emergency Reboot:** If you have **0 Ready dice**, return all **Gray Starter Dice** from Unpatched -> Ready.",
-        size=5.8, leading=8.0, color=PALETTE["ink_soft"],
+        ix + 8.0, iy + 25.0, 280.0,
+        "Modules producing cash, patches, and non-shield star abilities.\n"
+        "**Delayed Income:** Surviving dice collect cash & patches in Phase 3.",
+        size=6.2, leading=8.4, color=PALETTE["ink_soft"],
     )
-    # Subtle hazard diagonal ticks on bottom strip
-    for hx in range(int(rx + 10), int(sb_x - 12), 16):
-        page.line(hx, up_y + up_h - 4, hx + 5, up_y + up_h - 1, stroke=PALETTE["guide"], width=0.8)
+    # 5 faint die guide slots on right of Income box
+    ds_inc = 25.0
+    ds_gap = 4.0
+    inc_x0 = ix + iw - (5 * ds_inc + 4 * ds_gap) - 6.0
+    inc_y0 = iy + 18.0
+    inc_lbls = ["+$", "+$", "+{WRENCH}", "+{WRENCH}", "{STAR}"]
+    for i, lbl in enumerate(inc_lbls):
+        gx = inc_x0 + i * (ds_inc + ds_gap)
+        page.rounded_rect(gx, inc_y0, ds_inc, ds_inc, r=3.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.6, dash=(2.0, 2.0))
+        page.rich_line(gx + ds_inc / 2.0, inc_y0 + 15.0, lbl, size=5.5, color=PALETTE["muted"], align="center")
+
+    # Sub-boxes 2, 3, 4: Red Shields | Blue Shields | Green Shields (under Income)
+    sy = iy + ih + 6.0  # 147 + 48 + 6 = 201.0
+    sh = r2_y + r2_h - sy - 7.0  # 313 - 201 - 7 = 105.0 pt
+    sgap = 8.0
+    sw = (iw - 2 * sgap) / 3.0  # 143.33 pt each
+
+    shield_boxes = [
+        ("red", "{RED} RED SHIELDS", "Blocks Ransomware", "-$1 Cash per unblocked", "*(Unpaid: -1 Secret)*"),
+        ("blue", "{BLUE} BLUE SHIELDS", "Blocks Spyware", "**-1 Corporate Secret**", "per unblocked cube"),
+        ("green", "{GREEN} GREEN SHIELDS", "Blocks Malware", "Unblocked: **Glitch 1 Die**", "*(Income 1st -> Glitched)*"),
+    ]
+    for i, (ckey, title_mk, sub1, sub2, sub3) in enumerate(shield_boxes):
+        bx = ix + i * (sw + sgap)
+        fg, bg = _color_pair(ckey)
+        page.rect(bx, sy, sw, sh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.9)
+        # Header strip with color accent
+        page.rect(bx, sy, sw, 18.0, stroke=PALETTE["ink"], fill=bg, line_width=0.7)
+        page.rect(bx, sy, sw, 2.8, stroke=None, fill=fg)
+        page.rich_line(bx + sw / 2.0, sy + 13.0, f"**{title_mk}**", size=7.8, color=fg, align="center")
+
+        # 2 die guide slots inside each shield box
+        ds = 36.0
+        dx0 = bx + (sw - (2 * ds + 8.0)) / 2.0
+        dy0 = sy + 24.0
+        for d_i in range(2):
+            page.rounded_rect(dx0 + d_i * (ds + 8.0), dy0, ds, ds, r=3.5, stroke=PALETTE["rule"], fill=None, line_width=0.6, dash=(2.0, 2.0))
+
+        page.text(bx + sw / 2.0, sy + 73.0, sub1, font="bold", size=6.5, color=PALETTE["ink"], align="center")
+        page.rich_line(bx + sw / 2.0, sy + 84.0, sub2, size=6.0, color=fg, align="center")
+        page.rich_line(bx + sw / 2.0, sy + 94.5, sub3, size=5.6, color=PALETTE["muted"], align="center")
+
+    # =========================================================================
+    # ZONE 3: UNDER DEVELOPMENT (Bottom Box: y = 320..456, h = 136)
+    # =========================================================================
+    r3_y, r3_h = 320.0, 136.0
+    page.rect(rx, r3_y, rw, r3_h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
+    page.rect(rx, r3_y, rw, 18.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
+    page.rich_line(
+        rx + 8, r3_y + 12.5,
+        "**ZONE 3: UNDER DEVELOPMENT** (CI/CD Triage Conveyor)",
+        size=8.2, color=PALETTE["ink"],
+    )
+    page.text(rx + rw - 8, r3_y + 12.5, "OFFLINE MODULES (DO NOT ROLL)", font="mono_bold", size=6.4, color=PALETTE["muted"], align="right")
+
+    # Sub-box 1: Glitched Box
+    gx = rx + 7.0
+    gy = r3_y + 22.0
+    gw = 180.0
+    gh = 80.0
+    page.rect(gx, gy, gw, gh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.85)
+    page.rect(gx, gy, gw, 16.0, stroke=PALETTE["ink"], fill=PALETTE["red_light"], line_width=0.6)
+    page.rich_line(gx + 6.0, gy + 11.0, "**GLITCHED BOX** (Quarantine)", size=7.2, color=PALETTE["red"])
+
+    page.rich_paragraph(
+        gx + 6.0, gy + 22.0, gw - 12.0,
+        "Modules quarantined for repair (from roll glitches or green malware/corruption).",
+        size=5.7, leading=7.5, color=PALETTE["ink_soft"],
+    )
+    # 3 die slots on left of Glitched Box
+    ds_g = 25.0
+    dy_g = gy + 48.0
+    for d_i in range(3):
+        page.rounded_rect(gx + 7.0 + d_i * (ds_g + 4.0), dy_g, ds_g, ds_g, r=3.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.6, dash=(2.0, 2.0))
+        page.rich_line(gx + 7.0 + d_i * (ds_g + 4.0) + ds_g / 2.0, dy_g + 15.0, "{LOCK}", size=5.5, color=PALETTE["muted"], align="center")
+
+    # Fast-Patch option on right of Glitched Box
+    fp_x = gx + 98.0
+    fp_w = gw - 104.0
+    page.rounded_rect(fp_x, dy_g, fp_w, ds_g, r=2.5, stroke=PALETTE["green"], fill=PALETTE["green_light"], line_width=0.7)
+    page.rich_line(fp_x + fp_w / 2.0, dy_g + 10.0, "**FAST-PATCH**", size=5.6, color=PALETTE["green"], align="center")
+    page.rich_line(fp_x + fp_w / 2.0, dy_g + 19.5, "Pay **1** {WRENCH} -> Scanned", size=5.0, color=PALETTE["ink"], align="center")
+
+    # Conveyor Arrow connecting Glitched to Scanned
+    c_x1 = gx + gw + 4.0
+    c_x2 = rx + rw - 7.0 - 180.0 - 4.0
+    c_cx = (c_x1 + c_x2) / 2.0
+    page.rich_line(c_cx, gy + 16.0, "**Fast-Patch**", size=6.3, color=PALETTE["green"], align="center")
+    page.rich_line(c_cx, gy + 25.5, "(Pay 1 {WRENCH})", size=5.6, color=PALETTE["ink_soft"], align="center")
+
+    # Arrow line and head
+    page.line(c_x1 + 4.0, gy + 42.0, c_x2 - 4.0, gy + 42.0, stroke=PALETTE["ink"], width=1.4)
+    page.line(c_x2 - 4.0, gy + 42.0, c_x2 - 11.0, gy + 37.0, stroke=PALETTE["ink"], width=1.4)
+    page.line(c_x2 - 4.0, gy + 42.0, c_x2 - 11.0, gy + 47.0, stroke=PALETTE["ink"], width=1.4)
+
+    page.text(c_cx, gy + 58.0, "OR", font="mono_bold", size=5.5, color=PALETTE["muted"], align="center")
+    page.text(c_cx, gy + 67.0, "NATURAL SHIFT", font="mono_bold", size=5.8, color=PALETTE["ink_soft"], align="center")
+    page.text(c_cx, gy + 75.5, "at Round End (Free)", font="italic", size=5.1, color=PALETTE["muted"], align="center")
+
+    # Sub-box 2: Scanned Box
+    sx = rx + rw - 7.0 - 180.0
+    sy = gy
+    sw_sc = 180.0
+    sh_sc = 80.0
+    page.rect(sx, sy, sw_sc, sh_sc, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.85)
+    page.rect(sx, sy, sw_sc, 16.0, stroke=PALETTE["ink"], fill=PALETTE["blue_light"], line_width=0.6)
+    page.rich_line(sx + 6.0, sy + 11.0, "**SCANNED BOX** (Verified)", size=7.2, color=PALETTE["blue"])
+
+    page.rich_paragraph(
+        sx + 6.0, sy + 22.0, sw_sc - 12.0,
+        "Remediated modules completing automated linting & verification.",
+        size=5.7, leading=7.5, color=PALETTE["ink_soft"],
+    )
+    # 3 die slots on left of Scanned Box
+    for d_i in range(3):
+        page.rounded_rect(sx + 7.0 + d_i * (ds_g + 4.0), dy_g, ds_g, ds_g, r=3.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.6, dash=(2.0, 2.0))
+        page.rich_line(sx + 7.0 + d_i * (ds_g + 4.0) + ds_g / 2.0, dy_g + 15.0, "{BLUE}", size=5.5, color=PALETTE["muted"], align="center")
+
+    # Graduation status pill on right of Scanned Box
+    grad_x = sx + 98.0
+    grad_w = sw_sc - 104.0
+    page.rounded_rect(grad_x, dy_g, grad_w, ds_g, r=2.5, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.7)
+    page.text(grad_x + grad_w / 2.0, dy_g + 10.0, "GRADUATION", font="mono_bold", size=5.6, color=PALETTE["ink"], align="center")
+    page.rich_line(grad_x + grad_w / 2.0, dy_g + 19.5, "-> **Ready** at EOR", size=5.2, color=PALETTE["ink_soft"], align="center")
+
+    # Bottom caption across Zone 3
+    page.line(rx + 8.0, r3_y + 107.0, rx + rw - 8.0, r3_y + 107.0, stroke=PALETTE["rule"], width=0.5, dash=(2.0, 2.0))
+    page.rich_paragraph(
+        rx + 8.0, r3_y + 116.0, rw - 16.0,
+        "**PIPELINE TRANSITION:** At round end, Scanned dice graduate to Ready for Release; remaining Glitched dice shift naturally to Scanned *(or Fast-Patch for 1 {WRENCH})*. Surviving In Production dice return to Ready.",
+        size=5.7, leading=7.7, color=PALETTE["ink_soft"], align="center",
+    )
+    page.text(
+        rx + rw / 2.0, r3_y + 130.5,
+        "DESTRUCTION FALLBACK: If In Production is empty vs Green Malware, destroy 1 die from Under Development!",
+        font="italic", size=5.3, color=PALETTE["muted"], align="center",
+    )
 
     # -------------------------------------------------------------------------
     # BOTTOM ROW: Money | Patches | Secrets (x = 40..752, y = 468..578)
@@ -642,7 +744,7 @@ def render_player_board(page: PDFPage, char: CharacterSpec, idx: int) -> None:
         lbl = f"SLOT {p_i + 1}" if p_i < 2 else "CLEANUP (3)"
         page.text(sx + ps_size / 2.0, ps_y + 13.0, lbl, font="mono", size=5.8, color=PALETTE["muted"], align="center")
         page.draw_wrench_icon(sx + ps_size / 2.0, ps_y + 31.0, 14.0, color=PALETTE["rule"])
-    page.rich_line(px + bw / 2.0, by + bh - 7.0, "Start: **2** Tokens  |  Unlock {LOCK} / Patch / -$1  |  Discard >3 at Cleanup", size=6.2, color=PALETTE["muted"], align="center")
+    page.rich_line(px + bw / 2.0, by + bh - 7.0, "Start: **2** Tokens  |  Unlock {LOCK} / Fast-Patch / -$1  |  Discard >3 at Cleanup", size=6.2, color=PALETTE["muted"], align="center")
 
     # 3. Secrets
     scx = px + bw + bgap
@@ -663,7 +765,7 @@ def render_agent_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // CENTRAL ROGUE AGENT & COMPILER BOARD [1/2]",
-        right_tag="PNP PROTOTYPE v0.19 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.22 // US LETTER",
     )
 
     # Top Title Bar inside board
@@ -720,7 +822,7 @@ def render_agent_board(page: PDFPage) -> None:
     ct_h = col_bot - ct_y  # 109.0 pt
     page.rect(slot_x, ct_y, slot_w, ct_h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.2)
     page.rect(slot_x, ct_y, slot_w, 19.0, stroke=PALETTE["ink"], fill=PALETTE["ink"], line_width=0.8)
-    page.rich_line(slot_x + slot_w / 2.0, ct_y + 13.5, "**ACTIVE VERSION CORRUPTION PROTOCOL** (v0.18.0)", size=7.5, color=PALETTE["white"], align="center")
+    page.rich_line(slot_x + slot_w / 2.0, ct_y + 13.5, "**ACTIVE VERSION CORRUPTION PROTOCOL** (v0.22.0)", size=7.5, color=PALETTE["white"], align="center")
 
     # 3 Version Track Capacity Milestones
     tiers_summary = [
@@ -797,10 +899,10 @@ def render_agent_board(page: PDFPage) -> None:
             "{GREEN} GREEN // MALWARE",
             "BLOCKS: {GREEN} SHIELD",
             (
-                "Move **1 Ready die -> Unpatched** per unblocked {GREEN}.\n"
-                "**Commercial Exposure:** Ready {YELLOW} **Yellow** dice MUST be demoted first!\n"
-                "**Sacrifice:** Discard 1 {WHITE} Contractor instead of non-Yellow Ready die.\n"
-                "**Overwhelmed:** If 0 Ready/Contractor left, **Destroy 1 Unpatched die**!"
+                "Unblocked: Glitch **1 die from In Production** (Income 1st, then Shields) to Glitched Box.\n"
+                "**Income Forfeiture:** Glitched income dice produce $0 this round.\n"
+                "**Sacrifice:** Discard 1 {WHITE} Contractor instead of module die.\n"
+                "**Destruction Fallback:** If In Production empty, **Destroy 1 die from Under Development**!"
             ),
             104.0,
         ),
@@ -821,7 +923,7 @@ def render_agent_board(page: PDFPage) -> None:
     page.rounded_rect(m_x + 7.0, cy_box, m_w - 14.0, rem_h, r=3.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.8)
     page.rich_paragraph(
         m_x + 11.0, cy_box + 12.5, m_w - 22.0,
-        "**WEAR:** Permanent Shields blocking >=1 cube -> **Unpatched** *(0 blocked = stay Ready)*.\n"
+        "**ZERO DICE WEAR:** Shields NEVER wear down when blocking; stay in In Production.\n"
         "**RECYCLE:** Return all exited {RED} {BLUE} {GREEN} cubes -> **Staging Cup**. All {WHITE} Contractors -> Supply.",
         size=6.6, leading=9.0, color=PALETTE["ink"],
     )
@@ -837,14 +939,14 @@ def render_agent_board(page: PDFPage) -> None:
     gy = col_top + 34.0
     sections = [
         (
-            "PHASE 1: BOOT & CONFIGURE (Simultaneous)",
+            "PHASE 1: ROLL & DEPLOY (Simultaneous)",
             (
                 "**1. Pulse:** Add **+1** {BLACK} Black Cube -> Staging Cup.\n"
                 "**2. Temp Staffing:** Hire {WHITE} Contractors (**$1** / **$2** / **$3**, max 3).\n"
-                "**3. Roll Pool:** Roll Ready Zone + Contractors -> Active Zone.\n"
-                "**4. Rerolls & Debug:** Up to **2 free rerolls** of unlocked dice. Spend **1** {WRENCH} (or lock a rolled +1 {WRENCH} die) to **Unlock 1** {LOCK} die.\n"
-                "**5. Assign:** Commit Shields (`Any` -> {RED}/{BLUE}/{GREEN}) & `/` Choices.\n"
-                "**6. Outputs:** Unassigned dice yield **$**, {WRENCH}, & Boot {STAR}. **Hash Match:** 3 matching faces = **+1 Secret** *(uncapped; no Glitches)*."
+                "**3. Roll Pool:** Roll Ready Zone + hired Contractors.\n"
+                "**4. Rerolls & Debug:** Up to **2 free rerolls** of unlocked dice. Spend **1** {WRENCH} to **Unlock 1** {LOCK} die.\n"
+                "**5. Assign:** Commit Shields ({RED}/{BLUE}/{GREEN}) & Income. Unresolved Glitches -> **Glitched Box**.\n"
+                "**6. Hash Match:** 3 matching faces in roll = **+1 Secret** *(uncapped; no Glitches)*."
             ),
         ),
         (
@@ -852,18 +954,18 @@ def render_agent_board(page: PDFPage) -> None:
             (
                 "**Drop** entire Staging Cup into Cube Tower.\n"
                 "**2A.** Resolve {BLACK} Black Cubes on Corruption Track.\n"
-                "**2B.** Resolve {RED} {BLUE} {GREEN} vs Shields; apply Wear & Damage; recycle exited {RED} {BLUE} {GREEN} -> Staging Cup.\n"
-                "**Empty Tray (Buffer Overflow):** If 0 cubes exit into tray, no corruption/attacks occur (shields stay Ready). Idle cycle injects **+1** {RED}, **+1** {BLUE}, **+1** {GREEN} from supply into Staging Cup for next round.\n"
-                "**2C. End Check:** **Singularity** OR any player **<= 0 Secrets** triggers **Final Round** *(Patient Zero skips P3; survivors take 1 final P3; skip P3 if ALL breach)*."
+                "**2B.** Resolve {RED} {BLUE} {GREEN} vs Shields (**Zero Dice Wear**); apply damage; recycle exited {RED} {BLUE} {GREEN} -> Staging Cup.\n"
+                "**Empty Tray (Buffer Overflow):** If 0 cubes exit into tray, idle cycle injects **+1** {RED}, **+1** {BLUE}, **+1** {GREEN} from supply into Staging Cup.\n"
+                "**2C. End Check:** **Singularity** OR any player **<= 0 Secrets** triggers **Final Round** *(Patient Zero eliminated; survivors take 1 final P3)*."
             ),
         ),
         (
-            "PHASE 3: OPERATIONS (Clockwise Turns)",
+            "PHASE 3: OPERATIONS & PIPELINE PREP",
             (
-                "1. **Buy Dice (max 2/turn):** Pay $ -> place in **Ready Zone**.\n"
-                "2. **Patch Dice (unlimited):** **1** {WRENCH} or **$2** each -> **Ready Zone**.\n"
-                "3. **System Reboot (1x/game):** If you have 0 Ready dice, return all Gray Starter Dice from Unpatched to Ready.\n"
-                "4. **Cleanup:** Un-worn dice -> Ready; discard unspent {WRENCH} >3; pass 1st Player."
+                "1. **Collect Income:** All cash, patches, & non-shield {STAR} from dice in In Production.\n"
+                "2. **Buy Dice (max 2/turn):** Pay $ -> place in **Ready Zone**.\n"
+                "3. **Pipeline Prep:** Fast-Patch (**1** {WRENCH}: Glitched -> Scanned); Scanned -> Ready; In Production -> Ready; Glitched -> Scanned.\n"
+                "4. **Cleanup:** Discard unspent {WRENCH} >3; pass 1st Player."
             ),
         ),
         (
@@ -871,7 +973,7 @@ def render_agent_board(page: PDFPage) -> None:
             (
                 "**Surviving Firms Only** *(Patient Zero eliminated at <=0 Secrets)*:\n"
                 "**Most Corporate Secrets Wins!** (Uncapped).\n"
-                "*Tiebreakers: 1. Most Cash ($)  2. Ready Colored Dice  3. Patches ({WRENCH})  4. Fewest Unpatched.*"
+                "*Tiebreakers: 1. Most Cash ($)  2. Ready Colored Dice  3. Patches ({WRENCH})  4. Fewest Under Dev.*"
             ),
         ),
     ]
@@ -892,7 +994,7 @@ def render_market_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // SOFTWARE MODULE MARKET & CENTRAL SUPPLY [2/2]",
-        right_tag="PNP PROTOTYPE v0.19 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.22 // US LETTER",
     )
 
     # Top Title Bar
@@ -964,7 +1066,7 @@ def render_market_board(page: PDFPage) -> None:
     )
     page.rich_paragraph(
         wx + 8.0, ty + 94.0, ww - 16.0,
-        "Hire in **Phase 1 Step 2** (max 3/round = $6). Never wears to Unpatched; returns to supply after Phase 2. May sacrifice vs {GREEN} *(except {YELLOW} Yellow)*.",
+        "Hire in **Phase 1 Step 2** (max 3/round = $6). Never wears; returns to supply after Phase 2. May sacrifice vs {GREEN} Malware.",
         size=6.4, leading=8.8, color=PALETTE["ink_soft"], align="center",
     )
 
@@ -980,8 +1082,8 @@ def render_market_board(page: PDFPage) -> None:
         ("red", "RED // FINSEC", "$4", "{PIP1} 1{RED} | {PIP2}-{PIP4} +$2", "{PIP5} {LOCK}Glitch | {PIP6} {STAR}", ""),
         ("blue", "BLUE // FIREWALL", "$5", "{PIP1} 1{BLUE} | {PIP2} +1{WRENCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{WRENCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}", ""),
         ("green", "GREEN // ANTIVIRUS", "$4", "{PIP1} 1{GREEN} | {PIP2} +1{WRENCH} | {PIP3} +2{WRENCH}", "{PIP4} 1{WRENCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}", ""),
-        ("yellow", "YELLOW // COMM.", "$5", "{PIP1} +$3 | {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH}", "EXPOSURE: {GREEN} hits {YELLOW} 1st!"),
-        ("purple", "PURPLE // BLK-HAT", "$4", "{PIP1}{PIP2} Block 1 Any", "{PIP3} +$2 | {PIP4} $1 & 1{WRENCH}", ""),
+        ("yellow", "YELLOW // COMM.", "$5", "{PIP1} +$3 | {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH} | {PIP5} {LOCK}Glitch", ""),
+        ("purple", "PURPLE // BLK-HAT", "$4", "{PIP1}{PIP2} Block 1 Any", "{PIP3} +$2 | {PIP4} $1 & 1{WRENCH} | {PIP5} {LOCK}Glitch", ""),
     ]
 
     for idx, (ckey, mtitle, mcost, f_row1, f_row2, passive_warn) in enumerate(market_colors):
@@ -1005,7 +1107,7 @@ def render_market_board(page: PDFPage) -> None:
         if passive_warn:
             page.rich_line(sx + mw / 2.0, my + 77.5, passive_warn, size=6.0, color=PALETTE["red"], align="center")
         else:
-            page.rich_line(sx + mw / 2.0, my + 77.5, "{PIP5}{PIP6} = Active {STAR} Card Below", size=6.1, color=PALETTE["muted"], align="center")
+            page.rich_line(sx + mw / 2.0, my + 77.5, "{PIP6} = Active {STAR} Card Below", size=6.1, color=PALETTE["muted"], align="center")
 
         # Card Slot (124 x 190 pt -> holds 120 x 182 pt Variant ★ Card with 2-4 pt margin!)
         cs_w, cs_h = 124.0, 190.0
@@ -1046,7 +1148,7 @@ def render_market_board(page: PDFPage) -> None:
     page.rich_paragraph(
         rx_f + 8.0, fy + 27.5, fw - 16.0,
         "- **Primary Victory Condition:** Most remaining **Corporate Secrets** wins! (Uncapped).\n"
-        "- **Tiebreakers:** 1. Most Cash ($)  |  2. Most Ready Colored Dice  |  3. Most Patches ({WRENCH})  |  4. Fewest Unpatched.\n"
+        "- **Tiebreakers:** 1. Most Cash ($)  |  2. Most Ready Colored Dice  |  3. Most Patches ({WRENCH})  |  4. Fewest Under Dev.\n"
         "- *Patient Zero (<=0 Secrets) eliminated! Total wipeout: rank by net breach depth & unfulfilled destructions.*",
         size=6.8, leading=11.8, color=PALETTE["ink"],
     )
@@ -1100,9 +1202,7 @@ def render_master_dice_reference(page: PDFPage) -> None:
         page.draw_color_badge(tx + 17.0, ry + 18.0, 11.0, dspec.color_key)
         page.text(tx + 28.0, ry + 21.5, dspec.title, font="bold", size=9.2, color=fg if dspec.color_key != "white" else PALETTE["ink"])
         page.text(tx + 12.0, ry + 34.5, dspec.subtitle, font="regular", size=7.4, color=PALETTE["ink_soft"])
-        if dspec.color_key == "yellow":
-            page.text(tx + 12.0, ry + 46.5, "EXPOSURE PASSIVE!", font="mono_bold", size=6.0, color=PALETTE["red"])
-        elif dspec.color_key == "white":
+        if dspec.color_key == "white":
             page.text(tx + 12.0, ry + 46.5, "NO WEAR / TEMP", font="mono_bold", size=6.0, color=PALETTE["muted"])
 
         # Cost cell
@@ -1144,24 +1244,25 @@ def render_master_dice_reference(page: PDFPage) -> None:
             "CHOICE FACES ( / ) & HYBRID ( & )",
             (
                 "- **Slash ( / ):** Choose **1** option in Phase 1 Step 5 *(e.g. Blue Face 4: assign as Block 1 {BLUE} Shield OR keep for +1 {WRENCH})*.\n"
-                "- **Ampersand ( & ):** Gain **both** outputs in Step 6 *(+$1 & +1 {WRENCH})*.\n"
+                "- **Ampersand ( & ):** Gain **both** outputs in Phase 3 *(+$1 & +1 {WRENCH})*.\n"
                 "- **Any Shield:** Must commit to {RED}, {BLUE}, or {GREEN} before Phase 2."
             ),
         ),
         (
             "LOCKED DICE ({LOCK}) & DEBUG ({WRENCH})",
             (
-                "- **{LOCK} Locked** dice cannot be rerolled during free rerolls.\n"
-                "- **v2.0 RaaS** locks any face with a **Cash** option *(incl. `/` & {STAR})*.\n"
-                "- **v3.0 Zero-Day** locks any face with a **Shield** option *(incl. `/` & {STAR})*.\n"
-                "- **Debug:** Spend **1** {WRENCH} *(or lock a rolled +1 {WRENCH} die)* to Unlock 1 die."
+                "- **{LOCK} Glitch:** Face 5 on colored dice is locked; cannot reroll without debug.\n"
+                "- **v2.0 RaaS:** Locks any face with a **Cash** option *(incl. `/` & {STAR})*.\n"
+                "- **v3.0 Zero-Day:** Locks any face with a **Shield** option *(incl. `/` & {STAR})*.\n"
+                "- **Debug Action:** Spend **1** {WRENCH} token to Unlock 1 locked die."
             ),
         ),
         (
-            "COMMERCIAL EXPOSURE ({YELLOW} YELLOW)",
+            "ZERO DICE WEAR & PIPELINE TRIAGE",
             (
-                "- {YELLOW} **Yellow Commercial** dice provide top revenue, but have **0 Shields** and attract malware.\n"
-                "- When taking unblocked {GREEN} **Green Malware**, **Ready {YELLOW} Yellow dice MUST be demoted to Unpatched first** *(Contractor Sacrifice cannot save {YELLOW})*!"
+                "- **Zero Dice Wear:** Shields **never wear down** when blocking. Shields stay in In Production.\n"
+                "- **Glitched Box:** Unresolved Glitch faces or Green Malware move to Under Development.\n"
+                "- **Triage Conveyor:** Fast-Patch (**1** {WRENCH}) moves Glitched -> Scanned immediately. At round end, Scanned -> Ready and Glitched -> Scanned."
             ),
         ),
     ]
@@ -1193,8 +1294,8 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
         ("red", "RED", "Cost: $4", ("1 {RED}", "+$2", "+$2", "+$2", "{LOCK}Glitch", "{RED} {STAR}")),
         ("blue", "BLUE", "Cost: $5", ("1 {BLUE}", "+1{WRENCH}", "+$1", "1{BLUE}/1{WRENCH}", "{LOCK}Glitch", "{BLUE} {STAR}")),
         ("green", "GREEN", "Cost: $4", ("1 {GREEN}", "+1{WRENCH}", "+2{WRENCH}", "1{WRENCH}/$1", "{LOCK}Glitch", "{GREEN} {STAR}")),
-        ("yellow", "YELLOW*", "Cost: $5", ("+$3", "+$2", "+$2", "$1 & 1{WRENCH}", "{YELLOW} {STAR}", "{YELLOW} {STAR}")),
-        ("purple", "PURPLE", "Cost: $4", ("1 Any", "1 Any", "+$2", "$1 & 1{WRENCH}", "{PURPLE} {STAR}", "{PURPLE} {STAR}")),
+        ("yellow", "YELLOW", "Cost: $5", ("+$3", "+$2", "+$2", "$1 & 1{WRENCH}", "{LOCK}Glitch", "{YELLOW} {STAR}")),
+        ("purple", "PURPLE", "Cost: $4", ("1 Any", "1 Any", "+$2", "$1 & 1{WRENCH}", "{LOCK}Glitch", "{PURPLE} {STAR}")),
     ]
 
     for r in range(2):
@@ -1241,20 +1342,17 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
             fh = y + ch - fy
             page.rect(x, fy, cw, fh, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.7)
             page.rich_paragraph(
-                x + 6.0, fy + 7.5, cw - 12.0,
-                "**P1:** +1{BLACK} -> Hire {WHITE} ($1/$2/$3) -> Roll -> 2 Free Rerolls *(1{WRENCH} unlocks {LOCK})* -> Shields & `/` -> Glitch Backlash -> Gain **$** & {WRENCH}.\n"
-                "**P2:** {BLACK} Track (4/5/6=Upgr) -> Shields *(hit->Unpatched)* -> Dmg: {RED}-$1->{WRENCH}->Secret | {BLUE}-1 Secret | {GREEN}Wear Ready *({YELLOW}* 1st!). *(Buffer Overflow: +1 R/B/G).* \n"
-                "**P3:** **Buy <=2** | **Patch:** 1{WRENCH} or $2 | **Reboot (1x):** 0 Ready -> Gray Ready | **Cleanup:** Discard unspent >3{WRENCH}.\n"
-                "**VICTORY:** Most Corporate Secrets among survivors. Patient Zero (0 Secrets) eliminated. Ties: $ > Ready Modules > {WRENCH} > Fewest Unpatched.",
-                size=5.3, leading=7.5, color=PALETTE["ink"],
+                x + 6.0, fy + 6.0, cw - 12.0,
+                "**P1 Roll & Deploy:** +1{BLACK} -> Hire {WHITE} ($1/$2/$3, max 3) -> Roll Ready + Contractors -> Up to 2 Free Rerolls (1{WRENCH} debugs {LOCK}) -> Unresolved Glitches -> Glitched Box -> Commit Shields & Income -> Hash Match (3-of-a-kind = +1 Secret).\n"
+                "**P2 SETEC Compile:** Drop Staging Cup -> 2A: {BLACK} advances track (4/5/6=Upgr/Singularity) -> 2B: Resolve vs Shields (Zero Wear!) -> Dmg: {RED} -$1 (Unpaid: -1 Secret) | {BLUE} -1 Secret | {GREEN} Glitch 1 die (Income 1st, then Shield; empty: destroy Under Dev) -> Recycle {RED}{BLUE}{GREEN} -> 2C: End Check (Singularity or <=0 Secrets).\n"
+                "**P3 Operations & Pipeline:** Collect Income ($/🔧/★) -> Buy <=2 dice -> Fast-Patch (1{WRENCH}: Glitched -> Scanned) -> Scanned -> Ready -> In Production -> Ready -> Glitched -> Scanned -> Cap held 🔧 at 3 -> Pass 1st Player.\n"
+                "**VICTORY:** Most Corporate Secrets among survivors. Patient Zero (<=0 Secrets) eliminated. Ties: 1. $ Capital  2. Ready Modules  3. Patches  4. Fewest Under Dev.",
+                size=5.4, leading=7.7, color=PALETTE["ink"],
             )
-            # Once-per-Game System Reboot slot on Reference Card
-            rb_w = cw - 12.0
-            rb_y = fy + fh - 17.0
-            page.rounded_rect(x + 6.0, rb_y, rb_w, 13.0, r=2.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.6)
-            page.rect(x + 9.0, rb_y + 2.5, 8.0, 8.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.6)
-            page.text(x + 20.0, rb_y + 9.0, "SYSTEM REBOOT (Ready / Used)", font="mono_bold", size=5.7, color=PALETTE["ink"])
-            page.text(x + rb_w - 2.0, rb_y + 9.0, "1x/Game: If 0 Ready dice, Gray Starter Unpatched -> Ready", font="italic", size=5.0, color=PALETTE["muted"], align="right")
+            # Mini CI/CD Conveyor summary bar at bottom
+            cb_y = y + ch - 13.0
+            page.rect(x + 5.0, cb_y, cw - 10.0, 11.0, stroke=PALETTE["rule"], fill=PALETTE["white"], line_width=0.5)
+            page.rich_line(x + cw / 2.0, cb_y + 8.2, "**CI/CD CONVEYOR:** Glitched  --(1 {WRENCH} Fast-Patch)-->  Scanned  ---->  Ready for Release (Round End)", size=5.2, color=PALETTE["ink_soft"], align="center")
 
 
 def _draw_single_variant_card(page: PDFPage, x: float, y: float, w: float, h: float, card: VariantCardSpec) -> None:
@@ -1280,14 +1378,13 @@ def _draw_single_variant_card(page: PDFPage, x: float, y: float, w: float, h: fl
     page.rich_line(x + w / 2.0, y + 48.0, card.base_summary_1, size=6.1, color=PALETTE["ink_soft"], align="center")
     page.rich_line(x + w / 2.0, y + 59.5, card.base_summary_2, size=5.9, color=PALETTE["ink_soft"], align="center")
 
-    # Prominent Faces 5 & 6 (★) Variant Box
+    # Prominent Face 6 (★) Variant Box
     sy = y + 66.0
     sh = h - 66.0 - 18.0  # 98 pt tall
     page.rect(x + 5.0, sy, w - 10.0, sh, stroke=fg, fill=PALETTE["white"], line_width=0.9)
     page.rect(x + 5.0, sy, w - 10.0, 17.5, stroke=fg, fill=bg, line_width=0.6)
-    page.draw_pip_die(x + 14.5, sy + 8.8, 10.5, 5)
-    page.draw_pip_die(x + 27.0, sy + 8.8, 10.5, 6)
-    page.rich_line(x + w - 9.0, sy + 11.8, "{STAR} **SPECIAL**", size=6.8, color=fg, align="right")
+    page.draw_pip_die(x + 16.0, sy + 8.8, 11.0, 6)
+    page.rich_line(x + w - 9.0, sy + 11.8, "{STAR} **FACE 6 VARIANT**", size=6.8, color=fg, align="right")
 
     # Variant Title & Timing
     page.text(x + w / 2.0, sy + 30.5, card.name.upper(), font="bold", size=7.5, color=PALETTE["ink"], align="center")
@@ -1590,7 +1687,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated.append(path_versions)
 
     # 5. Combined Master Print-and-Play Pack (All 14 pages)
-    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.18.0)")
+    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.22.0)")
     for sub_doc in (doc_central, doc_players, doc_dice, doc_versions):
         for pg in sub_doc.pages:
             doc_master.pages.append(pg)

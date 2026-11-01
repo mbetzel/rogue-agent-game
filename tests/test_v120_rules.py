@@ -155,22 +155,20 @@ class TestV120Rules(unittest.TestCase):
     # Test 4: Unchanged Dice Faces (Yellow, Purple, Gray, White)
     # -------------------------------------------------------------------------
     def test_04_yellow_purple_gray_white_unchanged(self) -> None:
-        """4. Yellow, Purple, Gray, and White dice maintain their standard configurations."""
+        """4. Yellow, Purple, Gray, and White dice maintain their standard configurations (with v0.22.0 Face 5 Glitch standardization)."""
         yellow = create_colored_die(DieColor.YELLOW, 4, self.variants[DieColor.YELLOW])
         self.assertEqual(yellow.cost, 5)
         self.assertEqual(yellow.vp, 0)
-        self.assertTrue(yellow.faces[4].is_star)
+        self.assertTrue(yellow.faces[4].is_glitch)
         self.assertTrue(yellow.faces[5].is_star)
-        self.assertFalse(any(f.is_glitch for f in yellow.faces))
 
         purple = create_colored_die(DieColor.PURPLE, 5, self.variants[DieColor.PURPLE])
         self.assertEqual(purple.cost, 4)
         self.assertEqual(purple.vp, 0)
         self.assertEqual(purple.faces[0].name, "Block 1 Any")
         self.assertEqual(purple.faces[1].name, "Block 1 Any")
-        self.assertTrue(purple.faces[4].is_star)
+        self.assertTrue(purple.faces[4].is_glitch)
         self.assertTrue(purple.faces[5].is_star)
-        self.assertFalse(any(f.is_glitch for f in purple.faces))
 
         gray = create_gray_die(6)
         self.assertEqual(gray.cost, 0)
@@ -204,9 +202,10 @@ class TestV120Rules(unittest.TestCase):
 
         commitments = engine._execute_phase_1()
         active_dice = commitments[0][1]
-        self.assertEqual(len(active_dice), 1)
-        self.assertTrue(active_dice[0].current_face.is_glitch)
-        self.assertTrue(active_dice[0].is_locked)
+        self.assertEqual(len(active_dice), 0)
+        self.assertIn(red_die, player.glitched_dice)
+        self.assertTrue(red_die.current_face.is_glitch)
+        self.assertTrue(red_die.is_locked)
 
     # -------------------------------------------------------------------------
     # Test 6: Debug Unlock Glitch Die with Patch Token
@@ -319,11 +318,13 @@ class TestV120Rules(unittest.TestCase):
         player = engine.state.players[0]
         player.patches = 0
         red_die = create_colored_die(DieColor.RED, 10)
-        red_die.faces = [red_die.faces[4]] * 6  # Glitch face
+        # Red die has no glitch, contractor has glitch
+        red_die = create_colored_die(DieColor.RED, 10)
+        red_die.faces = [red_die.faces[0]] * 6  # Block 1 Red
         player.ready_dice = [red_die]
 
         c_die = create_white_die(100)
-        c_die.faces = [Face("Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY)] * 6
+        c_die.faces = [Face("Glitch (Locked)", is_glitch=True)] * 6
         player.contractor_dice = [c_die]
         initial_supply = engine.state.contractor_supply
 
@@ -332,15 +333,15 @@ class TestV120Rules(unittest.TestCase):
         # Contractor die sacrificed to supply
         self.assertEqual(len(player.contractor_dice), 0)
         self.assertEqual(engine.state.contractor_supply, initial_supply + 1)
-        # Red die remained in ready_dice!
-        self.assertIn(red_die, player.ready_dice)
-        self.assertEqual(len(player.unpatched_dice), 0)
+        # Red die deployed to in_production_dice
+        self.assertIn(red_die, player.in_production_dice)
+        self.assertEqual(len(player.glitched_dice), 0)
 
     # -------------------------------------------------------------------------
     # Test 11: Glitch Backlash Permanent Demotion Lowest VP
     # -------------------------------------------------------------------------
     def test_11_glitch_backlash_permanent_demotion_lowest_vp(self) -> None:
-        """11. Glitch backlash demotes lowest VP uncommitted ready die (Gray 0 VP preferred over Red 3 VP)."""
+        """11. Unresolved glitch face on a permanent die moves directly to glitched_dice (v0.22.0 Canonical)."""
         bot0 = BaseBot(0)  # Hires 0 contractors
         bot1 = BaseBot(1)
         engine = GameEngine(self.config, [bot0, bot1], seed=42)
@@ -356,17 +357,18 @@ class TestV120Rules(unittest.TestCase):
 
         commitments = engine._execute_phase_1()
 
-        # Gray die (0 VP) should be demoted, preserving Red die (3 VP) in ready_dice
-        self.assertIn(red_die, player.ready_dice)
-        self.assertIn(gray_die, player.unpatched_dice)
-        self.assertEqual(len(player.ready_dice), 1)
-        self.assertEqual(len(player.unpatched_dice), 1)
+        # Red die rolled glitch -> enters glitched_dice
+        self.assertIn(red_die, player.glitched_dice)
+        # Gray die rolled income -> enters in_production_dice
+        self.assertIn(gray_die, player.in_production_dice)
+        self.assertEqual(len(player.glitched_dice), 1)
+        self.assertEqual(len(player.in_production_dice), 1)
 
     # -------------------------------------------------------------------------
     # Test 12: Glitch Backlash Removes Shield Commitment if Demoted
     # -------------------------------------------------------------------------
     def test_12_glitch_backlash_removes_shield_commitment_if_demoted(self) -> None:
-        """12. If a committed shield die is demoted to unpatched, its commitment is removed."""
+        """12. A die rolling a glitch moves to glitched_dice and does not enter shield commitments (v0.22.0)."""
         bot0 = BaseBot(0)
         bot1 = BaseBot(1)
         engine = GameEngine(self.config, [bot0, bot1], seed=42)
@@ -382,23 +384,19 @@ class TestV120Rules(unittest.TestCase):
         blue_die.faces = [blue_die.faces[0]] * 6  # Block 1 Blue
         player.ready_dice = [red_die, blue_die]
 
-        # Explicitly instruct bot to choose the committed blue die for demotion
-        bot0.choose_glitch_demotion = lambda *args, **kwargs: blue_die
-
         commitments = engine._execute_phase_1()
         p0_commitments = commitments[0][2]
 
-        # Blue die demoted to unpatched
-        self.assertIn(blue_die, player.unpatched_dice)
-        # Blue die commitment at index 1 must be cleanly removed from validated_commitments!
-        self.assertNotIn(1, p0_commitments)
-        self.assertEqual(len(p0_commitments), 0)
+        self.assertIn(red_die, player.glitched_dice)
+        self.assertIn(blue_die, player.in_production_dice)
+        self.assertEqual(len(p0_commitments), 1)
+        self.assertEqual(p0_commitments[0], ShieldColor.BLUE)
 
     # -------------------------------------------------------------------------
     # Test 13: Multiple Glitches Sequential Resolution
     # -------------------------------------------------------------------------
     def test_13_glitch_backlash_multiple_glitches_sequential_resolution(self) -> None:
-        """13. Multiple unresolved glitch faces resolve sequentially across contractor and ready pools."""
+        """13. Multiple unresolved glitch faces resolve: contractor to supply, permanent to glitched_dice (v0.22.0)."""
         bot0 = BaseBot(0)
         bot1 = BaseBot(1)
         engine = GameEngine(self.config, [bot0, bot1], seed=42)
@@ -416,20 +414,20 @@ class TestV120Rules(unittest.TestCase):
         gray1.faces = [Face("+$1", money=1)] * 6
 
         c_die = create_white_die(100)
-        c_die.faces = [Face("Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY)] * 6
+        c_die.faces = [Face("Glitch (Locked)", is_glitch=True)] * 6
 
         player.ready_dice = [red1, red2, gray1]
         player.contractor_dice = [c_die]
 
         commitments = engine._execute_phase_1()
 
-        # Glitch 1: sacrificed contractor die
+        # Contractor with glitch discarded to supply
         self.assertEqual(len(player.contractor_dice), 0)
-        # Glitch 2: demoted Gray die (0 VP)
-        self.assertIn(gray1, player.unpatched_dice)
-        # Red dice preserved in ready
-        self.assertIn(red1, player.ready_dice)
-        self.assertIn(red2, player.ready_dice)
+        # Glitches on permanent red dice -> moved to glitched_dice
+        self.assertIn(red1, player.glitched_dice)
+        self.assertIn(red2, player.glitched_dice)
+        # Non-glitched gray die -> in_production_dice
+        self.assertIn(gray1, player.in_production_dice)
 
     # -------------------------------------------------------------------------
     # Test 14: Bot Debug Unlock Prioritizes Colored Glitches
@@ -462,10 +460,10 @@ class TestV120Rules(unittest.TestCase):
         self.assertEqual(unlocks, [1])
 
     # -------------------------------------------------------------------------
-    # Test 15: Web Controller Human Glitch Backlash
+    # Test 15: Web Controller Human Glitch Triage
     # -------------------------------------------------------------------------
     def test_15_web_controller_human_glitch_backlash(self) -> None:
-        """15. Web controller handles glitch backlash in commit_defenses for human player."""
+        """15. Web controller handles glitch triage in commit_defenses for human player."""
         controller = GameController()
         controller.new_game(num_players=2, seed=42)
 
@@ -474,24 +472,23 @@ class TestV120Rules(unittest.TestCase):
         human = controller.state.players[0]
         meta = controller.player_meta[0]
 
-        # Force a glitch face on a rolled die
+        # Force a glitch face on the hired contractor die
         roll_pool(controller, 0)
-        rolled = meta["rolled_pool"]
-        rolled[0].current_face = Face("Glitch (Locked)", is_glitch=True)
+        contractor = human.contractor_dice[0]
+        contractor.current_face = Face("Glitch (Locked)", is_glitch=True)
 
         initial_contractors = len(human.contractor_dice)
         commit_defenses(controller, 0, commitments={})
 
-        # Glitch backlash sacrificed 1 contractor die
+        # Glitched contractor discarded to supply
         self.assertEqual(len(human.contractor_dice), initial_contractors - 1)
-        # Verified backlash logged in event log
-        self.assertTrue(any("Glitch Backlash: sacrificed" in event for event in controller.event_log))
+        self.assertTrue(any("White Contractor glitched: discarded to supply" in event for event in controller.event_log))
 
     # -------------------------------------------------------------------------
-    # Test 16: Web Controller Bot Glitch Backlash
+    # Test 16: Web Controller Bot Glitch Triage
     # -------------------------------------------------------------------------
     def test_16_web_controller_bot_glitch_backlash(self) -> None:
-        """16. Web controller handles glitch backlash in auto_execute_bots_phase_1."""
+        """16. Web controller handles glitch triage in auto_execute_bots_phase_1."""
         controller = GameController()
         controller.new_game(num_players=2, seed=42)
 
@@ -507,9 +504,10 @@ class TestV120Rules(unittest.TestCase):
 
         auto_execute_bots_phase_1(controller)
 
-        # Bot resolved glitch backlash: Gray die demoted to unpatched
-        self.assertIn(gray_die, bot_player.unpatched_dice)
-        self.assertTrue(any("Glitch Backlash: demoted" in event for event in controller.event_log))
+        # Bot resolved glitch triage: permanent die with glitch moved to glitched_dice, gray_die to in_production_dice
+        self.assertIn(glitch_red, bot_player.glitched_dice)
+        self.assertIn(gray_die, bot_player.in_production_dice)
+        self.assertTrue(any("Die glitched: moved directly to Glitched Box" in event for event in controller.event_log))
 
 
 if __name__ == "__main__":

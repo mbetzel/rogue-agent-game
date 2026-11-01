@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
 from sim.entities import ArchetypeCode, Die, Face, create_white_die
+from sim.engine.state import ProductionRole
 
 if TYPE_CHECKING:
     from sim.engine.core import GameEngine
@@ -164,8 +165,8 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
         player.p1_available = False
         player.p3_available = None
 
-        # Roll Active Pool (ready_dice + contractor_dice)
-        active_dice: List[Die] = list(player.ready_dice) + list(player.contractor_dice)
+        # Roll Active Pool (ready_for_release_dice + contractor_dice)
+        active_dice: List[Die] = list(player.ready_for_release_dice) + list(player.contractor_dice)
         for die in active_dice:
             die.is_locked = False
             res_face = die.roll(engine.rng)
@@ -353,111 +354,73 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
                     elif face.shield_color == ShieldColor.ANY:
                         validated_commitments[idx] = ShieldColor.BLUE
 
-        # 6. Gain Resource Outputs on Effective Faces (RULES.md v0.8)
+        # Post-Reroll Triage & Production Assignment (v0.22.0 Canonical)
+        # 1. Unresolved Glitches:
+        surviving_active: List[Die] = []
+        new_commitments: Dict[int, ShieldColor] = {}
+
         for idx, die in enumerate(active_dice):
             face = die.current_face
-            if not face or face.is_glitch:
-                continue
-
-            if idx not in validated_commitments:
-                eff = die.effective_face
-                if eff:
-                    player.money += eff.money
-                    player.patches += eff.patches
-                    player.secrets += eff.secrets
-                    if eff.is_star:
-                        if eff.star_code == "Y2":
-                            count = len({d.color for d in player.colored_dice})
-                            total_payout = min(engine.config.y2_max_payout, engine.config.y2_base_payout + count)
-                            bonus = total_payout - eff.money
-                            player.money += max(0, bonus)
-                        elif eff.star_code == "Y3":
-                            if die in player.ready_dice:
-                                player.ready_dice.remove(die)
-                                player.unpatched_dice.append(die)
+            if face and face.is_glitch:
+                if die.color == DieColor.WHITE:
+                    # White Contractor with glitch: discarded to supply
+                    if die in player.contractor_dice:
+                        player.contractor_dice.remove(die)
+                    engine.state.contractor_supply += 1
+                else:
+                    # Permanent die with unresolved glitch: moves immediately to glitched_dice
+                    if die in player.ready_for_release_dice:
+                        player.ready_for_release_dice.remove(die)
+                    player.glitched_dice.append(die)
             else:
-                # Die is assigned to defense: collect hybrid star boot outputs
-                if face.is_star:
-                    if face.star_code == "R1":
-                        player.money += 2
-                    elif face.star_code in ("G1", "G2"):
-                        player.patches += 1
+                new_idx = len(surviving_active)
+                surviving_active.append(die)
+                if idx in validated_commitments:
+                    new_commitments[new_idx] = validated_commitments[idx]
 
-            # Track rolled Star abilities for Phase 3 eligibility
-            if face.is_star:
+        # 2. Cryptographic Hash Match (triplets among active surviving dice)
+        hash_secrets = detect_hash_matches(surviving_active)
+        if hash_secrets > 0:
+            player.secrets += hash_secrets
+            player.hash_matches_secrets += hash_secrets
+
+        # 3. Assign Production Roles and Deploy to in_production_dice
+        player.in_production_dice.clear()
+        for idx, die in enumerate(surviving_active):
+            face = die.effective_face or die.current_face
+            if idx in new_commitments:
+                s_color = new_commitments[idx]
+                if s_color == ShieldColor.RED:
+                    die.production_role = ProductionRole.RED_SHIELD
+                elif s_color == ShieldColor.BLUE:
+                    die.production_role = ProductionRole.BLUE_SHIELD
+                elif s_color == ShieldColor.GREEN:
+                    die.production_role = ProductionRole.GREEN_SHIELD
+                else:
+                    die.production_role = ProductionRole.BLUE_SHIELD
+            else:
+                die.production_role = ProductionRole.INCOME
+
+            # Star Special eligibility tracking for Phase 3
+            if face and face.is_star:
                 if face.star_code == "B2":
-                    if idx not in validated_commitments:
+                    if idx not in new_commitments:
                         player.b2_available = True
                 elif face.star_code == "Y1":
                     player.y1_available = True
                 elif face.star_code == "P1":
                     player.p1_available = True
                 elif face.star_code == "P3":
-                    if idx in validated_commitments:
-                        player.p3_available = validated_commitments[idx]
+                    if idx in new_commitments:
+                        player.p3_available = new_commitments[idx]
 
-        # Cryptographic Hash Match (RULES.md v0.17.0 Baseline)
-        hash_secrets = detect_hash_matches(active_dice)
-        if hash_secrets > 0:
-            player.secrets += hash_secrets
-            player.hash_matches_secrets += hash_secrets
+            player.in_production_dice.append(die)
 
-        # Glitch Backlash Routine (RULES.md v0.12.0)
-        # For each unresolved glitch face across active dice:
-        unresolved_glitches = [
-            d for d in active_dice
-            if d.current_face and d.current_face.is_glitch
-        ]
-        for g_die in unresolved_glitches:
-            chosen = player.bot.choose_glitch_demotion(
-                player_state=player,
-                glitch_die=g_die,
-                active_dice=active_dice,
-                validated_commitments=validated_commitments,
-                rng=engine.rng,
-            )
-            if chosen and (chosen in player.contractor_dice or chosen.color == DieColor.WHITE):
-                if chosen in player.contractor_dice:
-                    player.contractor_dice.remove(chosen)
-                elif player.contractor_dice:
-                    player.contractor_dice.pop(0)
-                engine.state.contractor_supply += 1
-                if chosen in active_dice:
-                    c_idx = active_dice.index(chosen)
-                    if c_idx in validated_commitments:
-                        del validated_commitments[c_idx]
-            elif chosen and chosen in player.ready_dice:
-                player.ready_dice.remove(chosen)
-                player.unpatched_dice.append(chosen)
-                if chosen in active_dice:
-                    r_idx = active_dice.index(chosen)
-                    if r_idx in validated_commitments:
-                        del validated_commitments[r_idx]
-            elif player.contractor_dice:
-                c_die = player.contractor_dice.pop(0)
-                engine.state.contractor_supply += 1
-                if c_die in active_dice:
-                    c_idx = active_dice.index(c_die)
-                    if c_idx in validated_commitments:
-                        del validated_commitments[c_idx]
-            elif player.ready_dice:
-                uncommitted = [
-                    d for d in player.ready_dice
-                    if d in active_dice and active_dice.index(d) not in validated_commitments
-                ]
-                candidates = uncommitted if uncommitted else list(player.ready_dice)
-                target = min(
-                    candidates,
-                    key=lambda d: (0 if d.color == DieColor.GRAY else 1, getattr(d, "vp", 0), getattr(d, "cost", 0)),
-                )
-                player.ready_dice.remove(target)
-                player.unpatched_dice.append(target)
-                if target in active_dice:
-                    t_idx = active_dice.index(target)
-                    if t_idx in validated_commitments:
-                        del validated_commitments[t_idx]
+        # Clear ready_for_release_dice since all rolled ready dice deployed or glitched
+        player.ready_for_release_dice.clear()
 
-        player_commitments.append((player, list(active_dice), validated_commitments))
+        # INCOME DELAY INVARIANT: No money, patch, or secret face outputs collected in Phase 1!
+        player_commitments.append((player, list(surviving_active), new_commitments))
 
     engine.state.active_phase1_locks.clear()
     return player_commitments

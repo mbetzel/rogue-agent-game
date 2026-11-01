@@ -53,8 +53,11 @@ class TestModelCPatches(unittest.TestCase):
             Die(die_id=i, color=DieColor.GRAY, cost=0, vp=0, faces=[patch_face] * 6)
             for i in range(4)
         ]
-        # Execute Phase 1 boot
+        # Execute Phase 1 boot (deploys to in_production_dice)
         execute_phase_1(engine)
+        # In v0.22.0, income is collected in Phase 3 Part 3A
+        from sim.engine.phase3_ops import collect_player_production_income
+        collect_player_production_income(engine, player, Phase3ActionPlan())
 
         # Player started with 2 patches, rolled 4 patches -> total should be 6, NOT capped at 3
         self.assertEqual(player.patches, 6)

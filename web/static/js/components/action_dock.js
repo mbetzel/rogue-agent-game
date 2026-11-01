@@ -30,7 +30,7 @@ import {
   doSpook,
   doDirtyIncome,
   doPhreaker,
-  doSystemReboot,
+  doFastPatch,
   doStarAction,
   doEndTurn,
 } from "../api.js";
@@ -122,7 +122,7 @@ export function renderActionDock() {
       if (unresolvedGlitches > 0) {
         const glitchWarn = document.createElement("div");
         glitchWarn.className = "glitch-warning";
-        glitchWarn.innerHTML = `<span>⚠️ ${unresolvedGlitches} Unresolved Hardware Glitch${unresolvedGlitches > 1 ? "es" : ""}: Committing triggers Backlash (sacrifices Contractor or demotes Ready die to Unpatched).</span>`;
+        glitchWarn.innerHTML = `<span>⚠️ ${unresolvedGlitches} Unresolved Hardware Glitch${unresolvedGlitches > 1 ? "es" : ""}: Committing routes glitched dice to the Glitched Box (White Contractors are discarded to supply).</span>`;
         controls.appendChild(glitchWarn);
       }
 
@@ -610,21 +610,46 @@ export function renderActionDock() {
       controls.appendChild(spookWrap);
     }
 
-    // Patch Toggle
-    const patchToggle = document.createElement("label");
-    patchToggle.style.fontSize = "0.8rem";
-    patchToggle.style.display = "inline-flex";
-    patchToggle.style.alignItems = "center";
-    patchToggle.style.gap = "4px";
-    patchToggle.innerHTML = `
-      <input type="checkbox" id="patchModeToggle" ${patchCashSelected ? "checked" : ""}>
-      Use Cash ($2) for Patching
-    `;
-    patchToggle.querySelector("input").onchange = (e) => {
-      setPatchCashSelected(e.target.checked);
-      renderPlayerMats();
-    };
-    controls.appendChild(patchToggle);
+    // Fast-Patch Action Control (1 🔧)
+    const glitchedDice = human.glitched_dice || [];
+    if (caps.can_fast_patch && glitchedDice.length > 0) {
+      const fpWrap = document.createElement("div");
+      fpWrap.style.display = "inline-flex";
+      fpWrap.style.alignItems = "center";
+      fpWrap.style.gap = "6px";
+
+      const fpSelect = document.createElement("select");
+      fpSelect.id = "fastPatchDieSelect";
+      fpSelect.style.padding = "4px 8px";
+      fpSelect.style.background = "var(--bg-card)";
+      fpSelect.style.color = "#fff";
+      fpSelect.style.border = "1px solid var(--border-color)";
+      fpSelect.style.borderRadius = "4px";
+
+      glitchedDice.forEach((d) => {
+        const opt = document.createElement("option");
+        opt.value = String(d.die_id);
+        opt.innerText = `Fast-Patch: ${d.color.toUpperCase()}${d.vp ? ' (' + d.vp + 'VP)' : ''}`;
+        fpSelect.appendChild(opt);
+      });
+
+      const fpBtn = document.createElement("button");
+      fpBtn.className = "action-btn";
+      fpBtn.style.borderColor = "#38bdf8";
+      fpBtn.style.color = "#38bdf8";
+      fpBtn.innerText = "Fast-Patch (1 🔧 → Scanned)";
+      fpBtn.onclick = () => {
+        const targetId = parseInt(fpSelect.value, 10);
+        if (!isNaN(targetId)) {
+          doFastPatch([targetId]);
+          renderPlayerMats();
+        }
+      };
+
+      fpWrap.appendChild(fpSelect);
+      fpWrap.appendChild(fpBtn);
+      controls.appendChild(fpWrap);
+    }
 
     // Star abilities
     if (caps.can_star && caps.can_star.B2) {
@@ -683,16 +708,6 @@ export function renderActionDock() {
       controls.appendChild(p3Btn);
     }
 
-    // Emergency System Reboot (Once per game when entering/reaching Phase 3 with 0 ready dice)
-    if (caps.can_system_reboot) {
-      const rebootBtn = document.createElement("button");
-      rebootBtn.className = "action-btn";
-      rebootBtn.style.borderColor = "#22c55e";
-      rebootBtn.style.color = "#4ade80";
-      rebootBtn.innerText = "⚡ Emergency: System Reboot (Restore Gray Dice)";
-      rebootBtn.onclick = () => doSystemReboot();
-      controls.appendChild(rebootBtn);
-    }
 
     // End Turn
     const endTurnBtn = document.createElement("button");

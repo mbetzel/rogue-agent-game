@@ -35,8 +35,8 @@ class Phase3ActionPlan:
     use_cipher_ability: bool = False
     cipher_mode: Optional[str] = None  # "BUY_FREE_DIE" or "DIRTY_INCOME"
     cipher_free_die_color: Optional[DieColor] = None
-    # Emergency Phase 3 actions
-    use_system_reboot: bool = False
+    # Phase 3 Part 3B Fast-patching (v0.22.0)
+    fast_patch_indices: List[int] = field(default_factory=list)
 
 
 def choose_backlash_die_index(ready_dice: List[Die]) -> int:
@@ -404,13 +404,57 @@ class BaseBot:
 
         return min(other_ready_dice, key=sacrifice_key)
 
-    def should_trigger_system_reboot(
+    def choose_fast_patches(
         self,
         player_state: PlayerState,
-        game_state: Optional[GameState] = None,
-    ) -> bool:
-        """Returns True if the bot should trigger the emergency System Reboot in Phase 3."""
-        return player_state.can_system_reboot
+        game_state: GameState,
+        rng: random.Random,
+    ) -> List[int]:
+        """Returns indices in player_state.glitched_dice to fast-patch to scanned_dice.
+
+        Heuristic Priorities per Section 7.1:
+        1. Patch Cap Avoidance: If player_state.patches > 3, ALWAYS spend down to <= 3
+           to avoid discarding unspent patches at end-of-round cleanup.
+        2. Infrastructure Need: If ready_for_release pool < 4 dice and incoming threat > 5,
+           spend patches aggressively.
+        3. Die Quality Sorting: Fast-patch colored dice first (higher output/defense value),
+           leaving Gray starter dice to shift naturally along the conveyor.
+        4. Final Round Valuation: In the final round, fast-patch colored dice into Ready
+           to maximize Tiebreaker #2 (Active Colored Module Dice).
+        """
+        if player_state.patches <= 0 or not player_state.glitched_dice:
+            return []
+
+        available_patches = player_state.patches
+        glitched = list(player_state.glitched_dice)
+
+        def sort_key(idx: int) -> Tuple[int, int]:
+            d = glitched[idx]
+            is_colored = 1 if d.color != DieColor.GRAY and d.color != DieColor.WHITE else 0
+            return (is_colored, getattr(d, "cost", 0))
+
+        sorted_indices = sorted(range(len(glitched)), key=sort_key, reverse=True)
+        chosen: List[int] = []
+
+        # 1. Patch Cap Avoidance: spend down to <= 3
+        excess_patches = max(0, available_patches - 3)
+        for idx in sorted_indices:
+            if len(chosen) < excess_patches and len(chosen) < available_patches:
+                chosen.append(idx)
+
+        # 2. Final round or infrastructure need
+        is_final_round = getattr(game_state, "is_final_round", False) or getattr(game_state, "singularity_triggered", False)
+        threat_level = sum(game_state.staging_cup.values())
+        if hasattr(game_state, "tower"):
+            threat_level += sum(game_state.tower.get_stuck_copy().values())
+        need_infra = len(player_state.ready_for_release_dice) < 4 and threat_level > 5
+
+        if is_final_round or need_infra:
+            for idx in sorted_indices:
+                if idx not in chosen and len(chosen) < available_patches:
+                    chosen.append(idx)
+
+        return chosen
 
     def take_phase3_actions(
         self,
@@ -419,9 +463,6 @@ class BaseBot:
         rng: random.Random,
     ) -> Phase3ActionPlan:
         """Returns the actions to execute during Phase 3: Corporate Operations."""
-        plan = Phase3ActionPlan()
-        if self.should_trigger_system_reboot(player_state, game_state):
-            plan.use_system_reboot = True
-        return plan
+        return Phase3ActionPlan()
 
 

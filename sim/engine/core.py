@@ -66,9 +66,9 @@ class GameEngine:
         starting_cash_bonus = 1 if self.version_deck[0].directive_code == "DATA_SCRAPER" else 0
 
         for i, bot in enumerate(bots):
-            ready_dice: List[Die] = []
+            ready_for_release_dice: List[Die] = []
             for _ in range(config.starting_gray_dice):
-                ready_dice.append(create_gray_die(next_die_id))
+                ready_for_release_dice.append(create_gray_die(next_die_id))
                 next_die_id += 1
 
             arch = self.archetypes[i] if i < len(self.archetypes) else None
@@ -78,7 +78,7 @@ class GameEngine:
                 money=config.starting_money + starting_cash_bonus,
                 secrets=self.config.get_starting_secrets(self.config.num_players),
                 patches=self.config.get_starting_patches(self.config.num_players),
-                ready_dice=ready_dice,
+                ready_for_release_dice=ready_for_release_dice,
                 archetype=arch,
                 ability_v1_status=AbilityStatus.AVAILABLE,
                 ability_v2_status=AbilityStatus.LOCKED,

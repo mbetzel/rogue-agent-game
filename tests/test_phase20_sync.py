@@ -83,6 +83,9 @@ class TestPhase20Sync(unittest.TestCase):
         # Ensure player has rolled dice in rolled_pool AND a newly bought colored die in ready_dice
         yellow_die = create_colored_die(DieColor.YELLOW, die_id=999)
         p0.ready_dice.append(yellow_die)
+        gray_starter = create_gray_die(die_id=888)
+        p0.ready_dice.append(gray_starter)
+        meta0["rolled_pool"] = [gray_starter]
         # Active rolled_pool has the starter gray dice, while visual ready_dice has yellow_die
         state_before = ctrl.get_full_state()
         p0_ser_before = state_before["players"][0]
@@ -220,12 +223,12 @@ class TestPhase20Sync(unittest.TestCase):
         res2 = self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
         self.assertTrue(res2["success"])
         p0_state = res2["state"]["players"][0]
-        # Glitch face produces $0; gray_cash produces +$2 ($5 + $2 = $7) and is then demoted by Glitch Backlash
-        self.assertEqual(p0_state["money"], 7)
+        # Delayed Income: money remains 5 until Phase 3 operations
+        self.assertEqual(p0_state["money"], 5)
         unpatched_ids = [d["die_id"] for d in p0_state["unpatched_dice"]]
         rolled_ids = [d["die_id"] for d in p0_state["rolled_pool"]]
-        self.assertIn(302, unpatched_ids)
-        self.assertNotIn(302, rolled_ids)
+        self.assertIn(301, unpatched_ids)
+        self.assertNotIn(301, rolled_ids)
 
     # -------------------------------------------------------------------------
     # 5. Glitch Contractor Sacrifice Cleanup & Commitment Re-indexing
@@ -245,9 +248,9 @@ class TestPhase20Sync(unittest.TestCase):
         rolled = [contractor_die] + other_dice
         ctrl.player_meta[0]["rolled_pool"] = rolled
 
-        # Contractor die shows +$1, Die 1 shows Glitch, Die 2 shows Block 1 Red
-        contractor_die.current_face = Face(name="+$1", money=1)
-        rolled[1].current_face = Face(name="Glitch", is_glitch=True)
+        # Contractor die shows Glitch, Die 1 shows +$1, Die 2 shows Block 1 Red
+        contractor_die.current_face = Face(name="Glitch", is_glitch=True)
+        rolled[1].current_face = Face(name="+$1", money=1)
         rolled[2].current_face = Face(name="Block 1 Red", block_amount=1, shield_color=ShieldColor.RED)
         rolled[3].current_face = Face(name="+$1", money=1)
         rolled[4].current_face = Face(name="+$1", money=1)

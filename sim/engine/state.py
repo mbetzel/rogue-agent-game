@@ -23,12 +23,62 @@ from sim.entities import (
     get_random_archetypes,
 )
 from sim.tower import CubeTower
+from enum import Enum
 
 if TYPE_CHECKING:
     from sim.bots.base import BaseBot
 
 
+class ProductionRole(str, Enum):
+    """Assignment role of a die deployed In Production."""
+
+    INCOME = "INCOME"
+    RED_SHIELD = "RED_SHIELD"
+    BLUE_SHIELD = "BLUE_SHIELD"
+    GREEN_SHIELD = "GREEN_SHIELD"
+
+
 @dataclass
+class _UnderDevelopmentProxy(list):
+    """Proxy list enabling legacy code and tests to mutate unpatched_dice directly."""
+
+    def __init__(self, player: "PlayerState") -> None:
+        self.player = player
+        super().__init__(player.glitched_dice + player.scanned_dice)
+
+    def append(self, item: Die) -> None:
+        self.player.glitched_dice.append(item)
+        super().append(item)
+
+    def extend(self, iterable: Any) -> None:
+        for item in iterable:
+            self.append(item)
+
+    def insert(self, index: int, item: Die) -> None:
+        self.player.glitched_dice.insert(index, item)
+        super().insert(index, item)
+
+    def remove(self, item: Die) -> None:
+        if item in self.player.glitched_dice:
+            self.player.glitched_dice.remove(item)
+        elif item in self.player.scanned_dice:
+            self.player.scanned_dice.remove(item)
+        super().remove(item)
+
+    def pop(self, index: int = -1) -> Die:
+        item = super().pop(index)
+        if item in self.player.glitched_dice:
+            self.player.glitched_dice.remove(item)
+        elif item in self.player.scanned_dice:
+            self.player.scanned_dice.remove(item)
+        return item
+
+    def clear(self) -> None:
+        self.player.glitched_dice.clear()
+        self.player.scanned_dice.clear()
+        super().clear()
+
+
 class PlayerState:
     """Tracks corporate resources, dice pools, and breach status for one player."""
 
@@ -37,10 +87,15 @@ class PlayerState:
     money: int
     secrets: int
     patches: int
-    ready_dice: List[Die] = field(default_factory=list)
-    unpatched_dice: List[Die] = field(default_factory=list)
+
+    # --- CI/CD Pipeline Zones (v0.22.0 Canonical) ---
+    ready_for_release_dice: List[Die] = field(default_factory=list)
+    in_production_dice: List[Die] = field(default_factory=list)
+    glitched_dice: List[Die] = field(default_factory=list)
+    scanned_dice: List[Die] = field(default_factory=list)
     contractor_dice: List[Die] = field(default_factory=list)
     hired_contractor_count: int = 0
+
     is_patient_zero: bool = False
     elimination_round: Optional[int] = None
     elimination_reason: Optional[str] = None
@@ -51,6 +106,7 @@ class PlayerState:
     total_contractors_hired: int = 0
     total_rerolls_used: int = 0
     hash_matches_secrets: int = 0
+    total_fast_patches: int = 0
     b2_available: bool = False
     y1_available: bool = False
     p1_available: bool = False
@@ -59,36 +115,175 @@ class PlayerState:
     ability_v1_status: AbilityStatus = AbilityStatus.AVAILABLE
     ability_v2_status: AbilityStatus = AbilityStatus.LOCKED
     ability_v3_status: AbilityStatus = AbilityStatus.LOCKED
-    system_reboot_used: bool = False
+
+    def __init__(
+        self,
+        player_id: int,
+        bot: BaseBot,
+        money: int,
+        secrets: int,
+        patches: int,
+        ready_for_release_dice: Optional[List[Die]] = None,
+        in_production_dice: Optional[List[Die]] = None,
+        glitched_dice: Optional[List[Die]] = None,
+        scanned_dice: Optional[List[Die]] = None,
+        contractor_dice: Optional[List[Die]] = None,
+        hired_contractor_count: int = 0,
+        is_patient_zero: bool = False,
+        elimination_round: Optional[int] = None,
+        elimination_reason: Optional[str] = None,
+        debt: int = 0,
+        breach_depth: int = 0,
+        unfulfilled_destructions: int = 0,
+        total_dirty_income_taken: int = 0,
+        total_contractors_hired: int = 0,
+        total_rerolls_used: int = 0,
+        hash_matches_secrets: int = 0,
+        total_fast_patches: int = 0,
+        b2_available: bool = False,
+        y1_available: bool = False,
+        p1_available: bool = False,
+        p3_available: Optional[ShieldColor] = None,
+        archetype: Optional[ArchetypeCard] = None,
+        ability_v1_status: AbilityStatus = AbilityStatus.AVAILABLE,
+        ability_v2_status: AbilityStatus = AbilityStatus.LOCKED,
+        ability_v3_status: AbilityStatus = AbilityStatus.LOCKED,
+        ready_dice: Optional[List[Die]] = None,
+        unpatched_dice: Optional[List[Die]] = None,
+        **kwargs: Any,
+    ) -> None:
+        self.player_id = player_id
+        self.bot = bot
+        self.money = money
+        self.secrets = secrets
+        self.patches = patches
+
+        if ready_for_release_dice is not None:
+            self.ready_for_release_dice = list(ready_for_release_dice)
+        elif ready_dice is not None:
+            self.ready_for_release_dice = list(ready_dice)
+        else:
+            self.ready_for_release_dice = []
+
+        self.in_production_dice = list(in_production_dice) if in_production_dice is not None else []
+
+        if glitched_dice is not None:
+            self.glitched_dice = list(glitched_dice)
+            self.scanned_dice = list(scanned_dice) if scanned_dice is not None else []
+        elif unpatched_dice is not None:
+            self.glitched_dice = list(unpatched_dice)
+            self.scanned_dice = list(scanned_dice) if scanned_dice is not None else []
+        else:
+            self.glitched_dice = []
+            self.scanned_dice = list(scanned_dice) if scanned_dice is not None else []
+
+        self.contractor_dice = list(contractor_dice) if contractor_dice is not None else []
+        self.hired_contractor_count = hired_contractor_count
+
+        self.is_patient_zero = is_patient_zero
+        self.elimination_round = elimination_round
+        self.elimination_reason = elimination_reason
+        self.debt = debt
+        self.breach_depth = breach_depth
+        self.unfulfilled_destructions = unfulfilled_destructions
+        self.total_dirty_income_taken = total_dirty_income_taken
+        self.total_contractors_hired = total_contractors_hired
+        self.total_rerolls_used = total_rerolls_used
+        self.hash_matches_secrets = hash_matches_secrets
+        self.total_fast_patches = total_fast_patches
+        self.b2_available = b2_available
+        self.y1_available = y1_available
+        self.p1_available = p1_available
+        self.p3_available = p3_available
+        self.archetype = archetype
+        self.ability_v1_status = ability_v1_status
+        self.ability_v2_status = ability_v2_status
+        self.ability_v3_status = ability_v3_status
+
+    # --- CI/CD Pipeline In Production Role Accessors ---
+    @property
+    def income_dice(self) -> List[Die]:
+        """Modules in In Production producing cash, patches, or special abilities."""
+        return [
+            d for d in self.in_production_dice
+            if getattr(d, "production_role", None) == ProductionRole.INCOME
+        ]
 
     @property
-    def can_system_reboot(self) -> bool:
-        return not self.system_reboot_used and len(self.ready_dice) == 0
+    def red_shield_dice(self) -> List[Die]:
+        """Modules in In Production actively assigned to Red defense."""
+        return [
+            d for d in self.in_production_dice
+            if getattr(d, "production_role", None) == ProductionRole.RED_SHIELD
+        ]
 
-    def execute_system_reboot(self) -> List[Die]:
-        if not self.can_system_reboot:
-            raise ValueError("Cannot execute system reboot: player already used reboot or has ready dice")
-        self.system_reboot_used = True
-        restored: List[Die] = []
-        remaining_unpatched: List[Die] = []
-        for die in self.unpatched_dice:
-            if die.color == DieColor.GRAY:
-                die.is_locked = False
-                die.chosen_choice_index = None
-                self.ready_dice.append(die)
-                restored.append(die)
-            else:
-                remaining_unpatched.append(die)
-        self.unpatched_dice = remaining_unpatched
-        return restored
+    @property
+    def blue_shield_dice(self) -> List[Die]:
+        """Modules in In Production actively assigned to Blue defense."""
+        return [
+            d for d in self.in_production_dice
+            if getattr(d, "production_role", None) == ProductionRole.BLUE_SHIELD
+        ]
+
+    @property
+    def green_shield_dice(self) -> List[Die]:
+        """Modules in In Production actively assigned to Green defense."""
+        return [
+            d for d in self.in_production_dice
+            if getattr(d, "production_role", None) == ProductionRole.GREEN_SHIELD
+        ]
+
+    @property
+    def shield_dice(self) -> List[Die]:
+        """All modules actively assigned to defense across Red, Blue, and Green."""
+        return [
+            d for d in self.in_production_dice
+            if getattr(d, "production_role", None) in (
+                ProductionRole.RED_SHIELD,
+                ProductionRole.BLUE_SHIELD,
+                ProductionRole.GREEN_SHIELD,
+            )
+        ]
+
+    @property
+    def under_development_dice(self) -> List[Die]:
+        """All modules currently in the Under Development pipeline (Glitched + Scanned)."""
+        return self.glitched_dice + self.scanned_dice
+
+    # --- Backward Compatibility Accessors & Aliases ---
+    @property
+    def ready_dice(self) -> List[Die]:
+        """Backward compatibility alias for ready_for_release_dice."""
+        return self.ready_for_release_dice
+
+    @ready_dice.setter
+    def ready_dice(self, value: List[Die]) -> None:
+        self.ready_for_release_dice = list(value)
+
+    @property
+    def unpatched_dice(self) -> List[Die]:
+        """Backward compatibility alias mapping to under_development_dice (glitched + scanned)."""
+        return _UnderDevelopmentProxy(self)
+
+    @unpatched_dice.setter
+    def unpatched_dice(self, value: List[Die]) -> None:
+        self.glitched_dice = list(value)
+        self.scanned_dice.clear()
 
     @property
     def total_dice(self) -> List[Die]:
-        return self.ready_dice + self.unpatched_dice
+        """All owned dice across all terminal zones (excludes temporary White contractors)."""
+        return (
+            self.ready_for_release_dice
+            + self.in_production_dice
+            + self.glitched_dice
+            + self.scanned_dice
+        )
 
     @property
     def colored_dice(self) -> List[Die]:
-        return [d for d in self.total_dice if d.color != DieColor.GRAY]
+        """All owned non-Gray software module dice across all terminal zones."""
+        return [d for d in self.total_dice if d.color != DieColor.GRAY and d.color != DieColor.WHITE]
 
     @staticmethod
     def _normalize_version_key(v: str) -> int:

@@ -229,8 +229,6 @@ class VentureGreedBot(BaseBot):
         rng: random.Random,
     ) -> Phase3ActionPlan:
         plan = Phase3ActionPlan()
-        if self.should_trigger_system_reboot(player_state, game_state):
-            plan.use_system_reboot = True
         current_money = player_state.money
         is_final_round = getattr(game_state, "is_final_round", False)
         cash_cushion = 0 if is_final_round else 2
@@ -274,14 +272,6 @@ class VentureGreedBot(BaseBot):
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
             current_money += game_state.config.dirty_income_cash
 
-        patch_cash_cost = game_state.config.patch_cash_cost
-        current_patches = player_state.patches
-
-        if is_final_round:
-            current_money, current_patches = plan_final_round_repairs(
-                player_state, game_state, current_money, current_patches, patch_cash_cost, plan
-            )
-
         b2_cost = game_state.config.b2_secret_cost
         b2_cap = game_state.config.b2_secret_cap
         if player_state.b2_available and (current_money >= b2_cost if is_final_round else (current_money - b2_cost >= cash_cushion)) and (b2_cap is None or player_state.secrets < b2_cap):
@@ -303,16 +293,6 @@ class VentureGreedBot(BaseBot):
                     plan.market_purchases.append(DieColor.BLUE)
                     current_money -= 5
                     purchases += 1
-
-        if not is_final_round and len(player_state.ready_dice) <= 2:
-            start_patch_idx = 1 if plan.use_phreaker_ability else 0
-            for idx in range(start_patch_idx, len(player_state.unpatched_dice)):
-                if current_patches > 0:
-                    plan.patch_actions.append({"die_index": idx, "use_cash": False})
-                    current_patches -= 1
-                elif current_money - patch_cash_cost >= cash_cushion:
-                    plan.patch_actions.append({"die_index": idx, "use_cash": True})
-                    current_money -= patch_cash_cost
 
         return plan
 

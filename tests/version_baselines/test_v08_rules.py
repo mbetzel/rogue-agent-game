@@ -38,6 +38,7 @@ from sim.bots import (
 )
 from sim.config import CubeColor, DieColor, GameConfig, ShieldColor
 from sim.engine import GameEngine, PlayerState
+from sim.engine.phase3_ops import collect_player_production_income
 from sim.entities import (
     Die,
     Face,
@@ -366,6 +367,7 @@ class TestV08Rules(unittest.TestCase):
 
         self.assertNotIn(0, p0_commit)
         self.assertEqual(blue_die.chosen_choice_index, 1)
+        collect_player_production_income(engine, player, None)
         self.assertEqual(player.patches, 1)
 
     # -------------------------------------------------------------------------
@@ -391,6 +393,7 @@ class TestV08Rules(unittest.TestCase):
         engine._execute_phase_1()
 
         self.assertEqual(gray_die.chosen_choice_index, 0)
+        collect_player_production_income(engine, player, None)
         self.assertEqual(player.money, 8)  # +$1
         self.assertEqual(player.patches, 1)  # unchanged
 
@@ -417,6 +420,7 @@ class TestV08Rules(unittest.TestCase):
         engine._execute_phase_1()
 
         self.assertEqual(gray_die.chosen_choice_index, 1)
+        collect_player_production_income(engine, player, None)
         self.assertEqual(player.money, 7)  # unchanged
         self.assertEqual(player.patches, 2)  # +1 🔧
 
@@ -443,6 +447,7 @@ class TestV08Rules(unittest.TestCase):
         player.bot = Choice0Bot(0)
         engine._execute_phase_1()
         self.assertEqual(green_die.chosen_choice_index, 0)
+        collect_player_production_income(engine, player, None)
         self.assertEqual(player.patches, 1)
         self.assertEqual(player.money, 7)
 
@@ -450,6 +455,7 @@ class TestV08Rules(unittest.TestCase):
         green_die.chosen_choice_index = None
         player.patches = 0
         player.money = 7
+        player.ready_dice = [green_die]
 
         class Choice1Bot(BaseBot):
             def declare_choices(self, *args, **kwargs) -> Dict[int, int]:
@@ -458,6 +464,7 @@ class TestV08Rules(unittest.TestCase):
         player.bot = Choice1Bot(0)
         engine._execute_phase_1()
         self.assertEqual(green_die.chosen_choice_index, 1)
+        collect_player_production_income(engine, player, None)
         self.assertEqual(player.patches, 0)
         self.assertEqual(player.money, 8)
 
@@ -496,7 +503,8 @@ class TestV08Rules(unittest.TestCase):
         self.assertIn(0, p0_commit)
         self.assertIn(1, p0_commit)
 
-        # Step 6 collected boot outputs: +$2 from R1, +1 🔧 from G1
+        # Step 6 collected boot outputs: +$2 from R1, +1 🔧 from G1 (at Phase 3 start)
+        collect_player_production_income(engine, player, None)
         self.assertEqual(player.money, 9)
         self.assertEqual(player.patches, 1)
 
@@ -600,10 +608,11 @@ class TestV08Rules(unittest.TestCase):
         self.assertEqual(gray.chosen_choice_index, 0)
         self.assertEqual(green.chosen_choice_index, 0)
 
-        # Outputs applied in Step 6:
+        # Outputs applied in Phase 3 turn:
         # Gray choice 0: +$1 -> money 8
         # Green choice 0: +1 🔧 -> patches 1
         # Blue choice 0: committed to defense -> 0 patches
+        collect_player_production_income(ctrl.engine, p0, None)
         self.assertEqual(p0.money, 8)
         self.assertEqual(p0.patches, 1)
 
@@ -612,7 +621,7 @@ class TestV08Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_blue_choice_face_blocks_damage_and_wears_in_phase_2(self) -> None:
         """When Blue Face 4 is committed to Blue defense and 1 Blue cube exits in Phase 2:
-        0 Blue damage is taken (secrets stay intact) and the Blue die wears to unpatched_dice.
+        0 Blue damage is taken (secrets stay intact) and under Zero Dice Wear the Blue die remains in production.
         """
         engine = GameEngine(config=GameConfig(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
@@ -641,9 +650,9 @@ class TestV08Rules(unittest.TestCase):
         self.assertEqual(player.secrets, initial_secrets)
         self.assertFalse(player.is_patient_zero)
 
-        # Blue die actively blocked 1 Blue cube -> wore to unpatched_dice
-        self.assertNotIn(blue_die, player.ready_dice)
-        self.assertIn(blue_die, player.unpatched_dice)
+        # Blue die actively blocked 1 Blue cube -> under Zero Dice Wear, remains intact without wear
+        self.assertIn(blue_die, player.ready_dice)
+        self.assertEqual(len(player.unpatched_dice), 0)
 
 
 if __name__ == "__main__":

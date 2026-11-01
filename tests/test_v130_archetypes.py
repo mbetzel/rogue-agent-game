@@ -244,7 +244,8 @@ class TestV130Archetypes(unittest.TestCase):
         # Prodigy activates Brute-Force Bypass
         self.assertEqual(player.ability_v1_status, AbilityStatus.USED)
         # Die 0 should have been overridden to a valid non-star, non-glitch face
-        face = player.ready_dice[0].current_face
+        active_dice = player.in_production_dice or player.ready_dice
+        face = active_dice[0].current_face
         self.assertIsNotNone(face)
         self.assertFalse(face.is_glitch)
         self.assertFalse(face.is_star)
@@ -253,7 +254,7 @@ class TestV130Archetypes(unittest.TestCase):
         """8. All 6 archetype dossier texts accurately reflect v0.13.0 rules."""
         cards = {c.code: c for c in get_all_archetype_cards()}
         self.assertIn("ignore 1 Attack Cube", cards[ArchetypeCode.ACOUSTIC].description)
-        self.assertIn("Move 1 worn die", cards[ArchetypeCode.PHREAKER].description)
+        self.assertIn("Glitched Box", cards[ArchetypeCode.PHREAKER].description)
         self.assertIn("turn 1 of your rolled dice to any non-Star face", cards[ArchetypeCode.PRODIGY].description)
         self.assertIn("Absorb up to 2 Corporate Secret loss", cards[ArchetypeCode.SPOOK].description)
         self.assertIn("$2 discount", cards[ArchetypeCode.CIPHER].description)

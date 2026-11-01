@@ -49,13 +49,43 @@ def complete_round(controller: GameController) -> None:
     """Executes round cleanup and either starts the next round or concludes the game."""
     num_players = len(controller.state.players)
 
-    # End-of-Round Cleanup: discard unspent patch tokens in excess of max_patch_tokens (Model C)
+    # Part 3B: Pipeline Prep (v0.22.0 Canonical)
     for p in controller.state.players:
-        if not p.is_patient_zero and p.patches > controller.state.config.max_patch_tokens:
-            discarded = p.patches - controller.state.config.max_patch_tokens
-            p.patches = controller.state.config.max_patch_tokens
+        if p.is_patient_zero:
+            continue
+        # 1. Scanned Graduation
+        for d in p.scanned_dice:
+            d.production_role = None
+            d.is_locked = False
+            d.chosen_choice_index = None
+            d.current_face = None
+            p.ready_for_release_dice.append(d)
+        p.scanned_dice.clear()
+
+        # 2. Production Return
+        for d in p.in_production_dice:
+            d.production_role = None
+            d.is_locked = False
+            d.chosen_choice_index = None
+            d.current_face = None
+            p.ready_for_release_dice.append(d)
+        p.in_production_dice.clear()
+
+        # 3. Conveyor Shift
+        for d in p.glitched_dice:
+            d.production_role = None
+            d.is_locked = False
+            d.chosen_choice_index = None
+            d.current_face = None
+            p.scanned_dice.append(d)
+        p.glitched_dice.clear()
+
+        # 4. End-of-Round Cleanup: discard unspent patch tokens in excess of 3 (Model C)
+        if p.patches > 3:
+            discarded = p.patches - 3
+            p.patches = 3
             controller.event_log.append(
-                f"{controller.player_meta[p.player_id]['name']} discarded {discarded} excess Patch token(s) at End-of-Round Cleanup (cap: {controller.state.config.max_patch_tokens})."
+                f"{controller.player_meta[p.player_id]['name']} discarded {discarded} excess Patch token(s) at End-of-Round Cleanup (cap: 3)."
             )
 
     # Check Final Round condition

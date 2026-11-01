@@ -286,7 +286,7 @@ class TestGroupBVariantCardBehaviors(unittest.TestCase):
         self.assertEqual(player.money, 5)
 
     def test_b3_air_gapped_backup_wear_immunity(self) -> None:
-        """7. B3 blocks 1 Blue and moves 1 other Ready die to Unpatched (or falls back to moving itself if solo)."""
+        """7. Under canonical v0.22.0 Zero Dice Wear, B3 blocks 1 Blue cleanly without wearing down."""
         all_vars = get_all_variant_cards()
         b3_card = all_vars["B3"]
 
@@ -304,7 +304,7 @@ class TestGroupBVariantCardBehaviors(unittest.TestCase):
         gray_starter = create_gray_die(die_id=204)
         player.ready_dice = [b3_die, gray_starter]
 
-        # Case A: Sacrificial demotion when another Ready die exists
+        # Case A: B3 blocks 1 Blue attack cube cleanly
         commitments = {0: ShieldColor.BLUE}
         attack_strengths = {CubeColor.RED: 0, CubeColor.BLUE: 1, CubeColor.GREEN: 0}
         exited_cubes = {CubeColor.RED: 0, CubeColor.BLUE: 1, CubeColor.GREEN: 0, CubeColor.BLACK: 0}
@@ -317,26 +317,12 @@ class TestGroupBVariantCardBehaviors(unittest.TestCase):
             exited_cubes=exited_cubes,
             active_directive="SCRIPT_KIDDIE",
         )
-        # B3 die remains in ready_dice; gray_starter is demoted to unpatched_dice
+        # Under Zero Dice Wear: shields do not wear down
         self.assertIn(b3_die, player.ready_dice)
-        self.assertIn(gray_starter, player.unpatched_dice)
-        self.assertEqual(len(player.unpatched_dice), 1)
+        self.assertIn(gray_starter, player.ready_dice)
+        self.assertEqual(len(player.unpatched_dice), 0)
 
-        # Case B: Solo fallback when no other Ready dice exist
-        player.ready_dice = [b3_die]
-        player.unpatched_dice.clear()
-        engine._resolve_player_defense_and_wear(
-            player=player,
-            rolled_dice=[b3_die],
-            commitments=commitments,
-            attack_strengths=attack_strengths,
-            exited_cubes=exited_cubes,
-            active_directive="SCRIPT_KIDDIE",
-        )
-        self.assertNotIn(b3_die, player.ready_dice)
-        self.assertIn(b3_die, player.unpatched_dice)
-
-        # Case C: 0 Blue attack cubes blocked -> B3 does not actively absorb damage, neither die demoted
+        # Case B: 0 Blue attack cubes blocked -> neither die demoted
         player.ready_dice = [b3_die, gray_starter]
         player.unpatched_dice.clear()
         engine._resolve_player_defense_and_wear(
@@ -694,12 +680,12 @@ class TestGroupDWebGameController(unittest.TestCase):
         initial_unpatched_count = len(player.unpatched_dice)
         initial_ready_count = len(player.ready_dice)
 
-        # Patch die using cash ($2) - should succeed without error
-        gc.patch_die(player_id=0, die_index=0, use_cash=True)
+        # In v0.22.0, cash patching is abolished; attempting cash patch raises ValueError
+        with self.assertRaises(ValueError):
+            gc.patch_die(player_id=0, die_index=0, use_cash=True)
 
-        self.assertEqual(player.money, 0)
-        self.assertEqual(len(player.unpatched_dice), initial_unpatched_count - 1)
-        self.assertEqual(len(player.ready_dice), initial_ready_count + 1)
+        self.assertEqual(player.money, config_cost)
+        self.assertEqual(len(player.unpatched_dice), initial_unpatched_count)
 
 
 # =====================================================================

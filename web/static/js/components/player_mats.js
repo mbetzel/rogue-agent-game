@@ -10,7 +10,7 @@ import {
   activePlayerTab,
   setActivePlayerTab,
 } from "../state.js";
-import { doDebugUnlock, doPatch } from "../api.js";
+import { doDebugUnlock, doFastPatch } from "../api.js";
 import { renderVersionSlotBadge } from "./header.js";
 
 let renderAppCallback = null;
@@ -44,7 +44,7 @@ const CHARACTER_DOSSIERS = {
     flavor: "A strip of Mylar splicing tape and a 2600-Hz whistle will fix what ten grand of silicon can't.",
     timing: "P3: OPERATIONS",
     abilityName: "Magnetic Splice",
-    abilityDesc: "Move 1 worn die from your Unpatched Zone back to your Ready Zone for free (without spending 🔧 or $).",
+    abilityDesc: "Move 1 die from your Glitched Box directly to your Ready for Release Zone for free (bypassing Scanned and saving 1 🔧)",
     themeColor: "#4ade80",
   },
   PRODIGY: {
@@ -301,9 +301,6 @@ export function renderPlayerMats() {
         </div>
         <div class="terminal-banner-right">
           ${isCISO ? '<span class="ciso-pill">★ LEAD CONSULTANT (CISO)</span>' : ''}
-          <span class="reboot-pill ${p.system_reboot_used ? 'reboot-used' : 'reboot-ready'}">
-            ${p.system_reboot_used ? 'REBOOT: USED' : 'REBOOT: READY (1x/GAME)'}
-          </span>
           ${p.is_patient_zero ? '<span class="breach-pill">TOTAL DATA BREACH</span>' : ''}
           <span class="vp-pill">${p.secrets} Secrets</span>
         </div>
@@ -357,24 +354,24 @@ export function renderPlayerMats() {
         </div>
 
         <!-- ========================================================= -->
-        <!-- RIGHT COLUMN: Operational Dice Zones & Defense Matrix      -->
+        <!-- RIGHT COLUMN: Operational Dice Zones & CI/CD Pipeline Matrix -->
         <!-- ========================================================= -->
         <div class="terminal-right-col">
-          <!-- 1. Ready Zone -->
+          <!-- Zone 1: Ready for Release Zone -->
           <div class="operational-zone ready-zone-panel">
             <div class="zone-header-strip">
               <div class="zone-title-wrap">
-                <span class="zone-name">READY ZONE</span>
-                <span class="zone-count-badge">(${p.ready_dice.length + (!p.has_rolled && p.contractor_dice ? p.contractor_dice.length : 0)})</span>
+                <span class="zone-name">READY FOR RELEASE</span>
+                <span class="zone-count-badge">(${((p.ready_for_release_dice && p.ready_for_release_dice.length) || (p.ready_dice && p.ready_dice.length) || 0) + (!p.has_rolled && p.contractor_dice ? p.contractor_dice.length : 0)})</span>
               </div>
               <div class="zone-subtext">
-                Start: 4 Gray Dice | Phase 1: Roll all Ready + hired Contractors
+                Start: 4 Gray Dice | Phase 1: Roll all Ready + hired Contractors | Offline dice do not roll
               </div>
             </div>
             <div class="dice-tray ready-tray" id="ready_tray_${p.player_id}"></div>
           </div>
 
-          <!-- 2. Active Zone (Rolled Pool) -->
+          <!-- Active Zone (Rolled Pool) -->
           <div class="operational-zone active-zone-panel">
             <div class="zone-header-strip">
               <div class="zone-title-wrap">
@@ -383,89 +380,128 @@ export function renderPlayerMats() {
               </div>
               <div class="zone-subtext">
                 ${p.is_human && state.phase === 1 && !p.has_committed 
-                  ? `Free Rerolls: <strong>${p.rerolls_remaining || 0}</strong>/2 | Spend 1 🔧 to Unlock 🔒` 
-                  : `Max 2 Free Rerolls | Spend 1 🔧 to Unlock 🔒 | Unassigned yield $ & 🔧`}
+                  ? `Free Rerolls: <strong>${p.rerolls_remaining || 0}</strong>/2 | Spend 1 🔧 to Unlock 🔒 | Glitches → Glitched Box` 
+                  : `Max 2 Free Rerolls | Spend 1 🔧 to Unlock 🔒 | Glitches move to Glitched Box`}
               </div>
             </div>
             <div class="zone-watermark-note">
-              ROLLED POOL // DECLARE ( / ) CHOICES & ASSIGN SHIELDS BEFORE COLLECTING OUTPUTS
+              ROLLED POOL // YAHTZEE REROLLS & DEBUG UNLOCK // DEPLOY TO IN PRODUCTION
             </div>
             <div class="dice-tray active-tray" id="rolled_tray_${p.player_id}"></div>
           </div>
 
-          <!-- 3. Shield Slots Row (3 Columns: Red, Blue, Green) -->
-          <div class="shield-matrix-row">
-            <!-- Red Shields -->
-            <div class="shield-box red-shield-box">
-              <div class="shield-header-bar">
-                <div class="shield-title">
-                  <span class="shield-symbol">◆</span>
-                  <span>RED SHIELDS</span>
-                  <span class="shield-count">(${p.shield_slots.red.length})</span>
-                </div>
-              </div>
-              <div class="shield-desc-sub1">Blocks Ransomware</div>
-              <div class="shield-desc-sub2">Unblocked: -$1 → 🔧 → -1 Secret</div>
-              <div class="shield-slots-tray" id="shields_red_${p.player_id}"></div>
-            </div>
-
-            <!-- Blue Shields -->
-            <div class="shield-box blue-shield-box">
-              <div class="shield-header-bar">
-                <div class="shield-title">
-                  <span class="shield-symbol">●</span>
-                  <span>BLUE SHIELDS</span>
-                  <span class="shield-count">(${p.shield_slots.blue.length})</span>
-                </div>
-              </div>
-              <div class="shield-desc-sub1">Blocks Spyware</div>
-              <div class="shield-desc-sub2">Unblocked: -1 Corporate Secret</div>
-              <div class="shield-slots-tray" id="shields_blue_${p.player_id}"></div>
-            </div>
-
-            <!-- Green Shields -->
-            <div class="shield-box green-shield-box">
-              <div class="shield-header-bar">
-                <div class="shield-title">
-                  <span class="shield-symbol">▲</span>
-                  <span>GREEN SHIELDS</span>
-                  <span class="shield-count">(${p.shield_slots.green.length})</span>
-                </div>
-              </div>
-              <div class="shield-desc-sub1">Blocks Malware</div>
-              <div class="shield-desc-sub2">Unblocked: Wear 1 Ready (Yellow 1st!)</div>
-              <div class="shield-slots-tray" id="shields_green_${p.player_id}"></div>
-            </div>
-          </div>
-
-          <!-- Dice Wear Transition Caption -->
-          <div class="wear-transition-caption">
-            <span>DICE WEAR: Permanent Shields blocking ≥ 1 cube move to Unpatched | 0 cubes blocked = stay Ready | Contractors → Supply</span>
-          </div>
-
-          <!-- 4. Unpatched Zone -->
-          <div class="operational-zone unpatched-zone-panel">
+          <!-- Zone 2: In Production (Income slot + Red, Blue, Green Shield slots) -->
+          <div class="operational-zone production-zone-panel" style="border: 1px solid rgba(56, 189, 248, 0.3); background: rgba(15, 23, 42, 0.4); border-radius: 6px; padding: 10px; margin-bottom: 12px;">
             <div class="zone-header-strip">
               <div class="zone-title-wrap">
-                <span class="zone-name">UNPATCHED ZONE</span>
-                <span class="zone-count-badge">(${p.unpatched_dice.length})</span>
+                <span class="zone-name" style="color: #38bdf8;">IN PRODUCTION</span>
+                <span class="zone-count-badge">(${(p.in_production_dice || []).length})</span>
               </div>
               <div class="zone-subtext">
-                Offline (Do Not Roll) | Phase 3 Patch: Pay 1 🔧 or $2 per die → Ready Zone
+                Delayed Income: Collect $, 🔧, ★ at start of Phase 3 | Zero Dice Wear: Shields absorb cleanly without wear!
               </div>
             </div>
-            <div class="dice-tray unpatched-tray" id="unpatched_tray_${p.player_id}"></div>
 
-            <!-- Integrated System Reboot Slot -->
-            <div class="system-reboot-strip">
-              <div class="reboot-indicator-card ${p.system_reboot_used ? 'used' : 'ready'}">
-                <span class="reboot-check-icon">${p.system_reboot_used ? '✓' : '□'}</span>
-                <span class="reboot-card-name">SYSTEM REBOOT</span>
-                <span class="reboot-card-status">(${p.system_reboot_used ? 'USED' : 'READY'})</span>
-                <span class="reboot-card-badge">1x / GAME</span>
+            <!-- In Production Grid (Income + 3 Shield Slots) -->
+            <div class="shield-matrix-row" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px;">
+              <!-- Income Slot -->
+              <div class="shield-box" style="border-color: #eab308; background: rgba(234, 179, 8, 0.08);">
+                <div class="shield-header-bar">
+                  <div class="shield-title">
+                    <span class="shield-symbol" style="color: #eab308;">$</span>
+                    <span style="color: #eab308;">INCOME</span>
+                    <span class="shield-count">(${((p.production_slots && p.production_slots.income) || []).length})</span>
+                  </div>
+                </div>
+                <div class="shield-desc-sub1">Delayed Yield</div>
+                <div class="shield-desc-sub2">$, 🔧, ★ in P3</div>
+                <div class="shield-slots-tray" id="income_tray_${p.player_id}"></div>
               </div>
-              <div class="reboot-explanation-text">
-                <strong>Phase 3 Emergency Reboot:</strong> If you have <strong>0 Ready dice</strong>, return all <strong>Gray Starter Dice</strong> from Unpatched → Ready.
+
+              <!-- Red Shields -->
+              <div class="shield-box red-shield-box">
+                <div class="shield-header-bar">
+                  <div class="shield-title">
+                    <span class="shield-symbol">◆</span>
+                    <span>RED SHIELDS</span>
+                    <span class="shield-count">(${((p.shield_slots && p.shield_slots.red) || []).length})</span>
+                  </div>
+                </div>
+                <div class="shield-desc-sub1">Blocks Ransomware</div>
+                <div class="shield-desc-sub2">Unblocked: -$1 → Leaks Secret</div>
+                <div class="shield-slots-tray" id="shields_red_${p.player_id}"></div>
+              </div>
+
+              <!-- Blue Shields -->
+              <div class="shield-box blue-shield-box">
+                <div class="shield-header-bar">
+                  <div class="shield-title">
+                    <span class="shield-symbol">●</span>
+                    <span>BLUE SHIELDS</span>
+                    <span class="shield-count">(${((p.shield_slots && p.shield_slots.blue) || []).length})</span>
+                  </div>
+                </div>
+                <div class="shield-desc-sub1">Blocks Spyware</div>
+                <div class="shield-desc-sub2">Unblocked: -1 Secret</div>
+                <div class="shield-slots-tray" id="shields_blue_${p.player_id}"></div>
+              </div>
+
+              <!-- Green Shields -->
+              <div class="shield-box green-shield-box">
+                <div class="shield-header-bar">
+                  <div class="shield-title">
+                    <span class="shield-symbol">▲</span>
+                    <span>GREEN SHIELDS</span>
+                    <span class="shield-count">(${((p.shield_slots && p.shield_slots.green) || []).length})</span>
+                  </div>
+                </div>
+                <div class="shield-desc-sub1">Blocks Malware</div>
+                <div class="shield-desc-sub2">Unblocked: Glitches 1 die</div>
+                <div class="shield-slots-tray" id="shields_green_${p.player_id}"></div>
+              </div>
+            </div>
+
+            <!-- Zero Dice Wear Note -->
+            <div class="wear-transition-caption" style="margin-top: 8px;">
+              <span style="color: #4ade80;">ZERO DICE WEAR: Permanent shields blocking attacks DO NOT wear down! They remain deployed in In Production.</span>
+            </div>
+          </div>
+
+          <!-- Zone 3: Under Development (Two-stage conveyor: Glitched Box -> Scanned Box) -->
+          <div class="operational-zone pipeline-zone-panel" style="border: 1px solid rgba(244, 63, 94, 0.3); background: rgba(15, 23, 42, 0.4); border-radius: 6px; padding: 10px; margin-bottom: 12px;">
+            <div class="zone-header-strip">
+              <div class="zone-title-wrap">
+                <span class="zone-name" style="color: #f43f5e;">UNDER DEVELOPMENT (CI/CD PIPELINE)</span>
+                <span class="zone-count-badge">(${p.under_development_count !== undefined ? p.under_development_count : ((p.glitched_dice || []).length + (p.scanned_dice || []).length)})</span>
+              </div>
+              <div class="zone-subtext">
+                Two-Stage Conveyor: Glitched Box → Scanned Box → Ready for Release
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
+              <!-- Glitched Box -->
+              <div style="border: 1px solid rgba(244, 63, 94, 0.4); background: rgba(244, 63, 94, 0.08); border-radius: 6px; padding: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <span style="font-weight: 600; color: #f43f5e; font-size: 0.85rem;">⚠️ GLITCHED BOX (${(p.glitched_dice || []).length})</span>
+                  <span style="font-size: 0.75rem; color: var(--text-dim);">Fast-Patch: 1 🔧 → Scanned</span>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 6px;">
+                  Unpatched dice shift to Scanned Box at round end (free)
+                </div>
+                <div class="dice-tray" id="glitched_tray_${p.player_id}" style="min-height: 48px;"></div>
+              </div>
+
+              <!-- Scanned Box -->
+              <div style="border: 1px solid rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.08); border-radius: 6px; padding: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <span style="font-weight: 600; color: #38bdf8; font-size: 0.85rem;">✓ SCANNED BOX (${(p.scanned_dice || []).length})</span>
+                  <span style="font-size: 0.75rem; color: #4ade80;">Ready next round!</span>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 6px;">
+                  Graduates to Ready for Release at round end (Zero 🔧 natural shift)
+                </div>
+                <div class="dice-tray" id="scanned_tray_${p.player_id}" style="min-height: 48px;"></div>
               </div>
             </div>
           </div>
@@ -630,6 +666,18 @@ export function renderPlayerMats() {
       });
     }
 
+    // Income Tray
+    const incomeTray = terminalMat.querySelector(`#income_tray_${p.player_id}`);
+    if (incomeTray) {
+      const incomeDice = (p.production_slots && p.production_slots.income) || [];
+      incomeDice.forEach((d) => {
+        const item = document.createElement("div");
+        item.className = `shield-die-chip ${d.color}`;
+        item.innerText = `${d.color.toUpperCase()}: ${d.effective_face ? d.effective_face.name : (d.current_face ? d.current_face.name : 'Yield')}`;
+        incomeTray.appendChild(item);
+      });
+    }
+
     // Shield Slots
     ["red", "blue", "green"].forEach((c) => {
       const slotEl = terminalMat.querySelector(`#shields_${c}_${p.player_id}`);
@@ -643,22 +691,32 @@ export function renderPlayerMats() {
       }
     });
 
-    // Unpatched Zone Tray
-    const unpatchedTray = terminalMat.querySelector(`#unpatched_tray_${p.player_id}`);
-    if (unpatchedTray) {
-      p.unpatched_dice.forEach((d, idx) => {
+    // Glitched Box Tray
+    const glitchedTray = terminalMat.querySelector(`#glitched_tray_${p.player_id}`);
+    if (glitchedTray) {
+      const canPatchActiveMode = (p.is_human && isTurn && state.phase === 3 && p.patches > 0);
+      (p.glitched_dice || []).forEach((d) => {
         const chip = document.createElement("div");
-        const canPatchActiveMode = patchCashSelected
-          ? Boolean(state.action_capabilities && state.action_capabilities.can_patch_cash)
-          : Boolean(state.action_capabilities && state.action_capabilities.can_patch_token);
-        const canPatch = (p.is_human && isTurn && canPatchActiveMode);
-        chip.className = `die-chip ${d.color} ${canPatch ? "clickable" : ""}`;
+        const canFastPatch = canPatchActiveMode;
+        chip.className = `die-chip ${d.color} ${canFastPatch ? "clickable" : ""}`;
         chip.innerHTML = `<span>${d.color.toUpperCase()}</span>`;
-        if (canPatch) {
-          chip.title = patchCashSelected ? "Click to patch this die ($2 Cash)" : "Click to patch this die (1 🔧 Token)";
-          chip.onclick = () => doPatch(idx, patchCashSelected);
+        if (canFastPatch) {
+          chip.title = "Click to Fast-Patch (Spend 1 🔧 → Scanned Box)";
+          chip.onclick = () => doFastPatch([d.die_id]);
         }
-        unpatchedTray.appendChild(chip);
+        glitchedTray.appendChild(chip);
+      });
+    }
+
+    // Scanned Box Tray
+    const scannedTray = terminalMat.querySelector(`#scanned_tray_${p.player_id}`);
+    if (scannedTray) {
+      (p.scanned_dice || []).forEach((d) => {
+        const chip = document.createElement("div");
+        chip.className = `die-chip ${d.color}`;
+        chip.title = "Scanned: graduates to Ready for Release at end of round";
+        chip.innerHTML = `<span>${d.color.toUpperCase()}</span>`;
+        scannedTray.appendChild(chip);
       });
     }
   });

@@ -36,6 +36,7 @@ from sim.bots import (
 )
 from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
 from sim.engine import GameEngine, PlayerState
+from sim.engine.phase3_ops import collect_player_production_income
 from sim.entities import (
     Die,
     Face,
@@ -447,10 +448,11 @@ class TestV06Rules(unittest.TestCase):
 
         # Verify immediate outputs:
         # Glitch gave 0 cash and 0 patches
-        # Locked cash die gave +$2
-        self.assertEqual(ctrl.state.players[0].money, 2)
         # Shield was committed to blue shields
         self.assertEqual(len(ctrl.player_meta[0]["shield_slots"]["blue"]), 1)
+        # In v0.22.0 Delayed Income, cash is collected from surviving in_production_dice at start of Phase 3
+        collect_player_production_income(ctrl.engine, ctrl.state.players[0], None)
+        self.assertEqual(ctrl.state.players[0].money, 2)
 
     # -------------------------------------------------------------------------
     # 15. White Contractor Dice Wear Immunity
@@ -485,7 +487,7 @@ class TestV06Rules(unittest.TestCase):
         # Gray die was unused -> NOT in unpatched_dice
         self.assertEqual(len(p0.unpatched_dice), 0)
 
-        # If 2 Red cubes hit: White absorbs 1 (immune), Gray absorbs 1 (wears down)
+        # If 2 Red cubes hit: under v0.22.0 Zero Dice Wear, shields do not wear down
         p0.ready_dice = [gray_die]
         p0.unpatched_dice = []
         engine._resolve_player_defense_and_wear(
@@ -497,8 +499,7 @@ class TestV06Rules(unittest.TestCase):
             active_directive="NONE",
         )
 
-        self.assertEqual(len(p0.unpatched_dice), 1)
-        self.assertEqual(p0.unpatched_dice[0].color, DieColor.GRAY)
+        self.assertEqual(len(p0.unpatched_dice), 0)
 
     # -------------------------------------------------------------------------
     # 16. Green Malware Contractor Sacrifice & Expiration

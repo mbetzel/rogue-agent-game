@@ -368,8 +368,6 @@ class AdaptiveBalancedBot(BaseBot):
         rng: random.Random,
     ) -> Phase3ActionPlan:
         plan = Phase3ActionPlan()
-        if self.should_trigger_system_reboot(player_state, game_state):
-            plan.use_system_reboot = True
         current_money = player_state.money
         current_patches = player_state.patches
         threats = self._get_threat_levels(game_state.staging_cup, game_state.tower.stuck_cubes)
@@ -428,22 +426,11 @@ class AdaptiveBalancedBot(BaseBot):
                 plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
                 current_money += game_state.config.dirty_income_cash
 
-        # 2. Patching: patch worn dice using tokens first, then cash if preserving cushion
-        patch_cash_cost = game_state.config.patch_cash_cost
-
+        # 2. Fast-Patching is handled in Part 3B via choose_fast_patches (zero cash patching)
         if is_final_round:
             current_money, current_patches = plan_final_round_repairs(
-                player_state, game_state, current_money, current_patches, patch_cash_cost, plan
+                player_state, game_state, current_money, current_patches, 0, plan
             )
-        else:
-            start_patch_idx = 1 if plan.use_phreaker_ability else 0
-            for idx in range(start_patch_idx, len(player_state.unpatched_dice)):
-                if current_patches > 0:
-                    plan.patch_actions.append({"die_index": idx, "use_cash": False})
-                    current_patches -= 1
-                elif current_money - patch_cash_cost >= cash_cushion:
-                    plan.patch_actions.append({"die_index": idx, "use_cash": True})
-                    current_money -= patch_cash_cost
 
         # 3. Secret Conversion Abilities (B2, Y1) - prioritized especially in final round
         b2_cost = game_state.config.b2_secret_cost

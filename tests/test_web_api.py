@@ -367,12 +367,13 @@ class TestWebAPI(unittest.TestCase):
         self.assertEqual(p0_state1["patches"], 0)
         self.assertEqual(len(p0_state1["unpatched_dice"]), 1)
 
-        # Patch 2: Using cash ($2)
-        res2 = self._post("/api/game/action/patch", {"player_id": 0, "die_index": 0, "use_cash": True})
-        self.assertTrue(res2["success"])
-        p0_state2 = res2["state"]["players"][0]
-        self.assertEqual(p0_state2["money"], 3)  # $5 - $2
-        self.assertEqual(len(p0_state2["unpatched_dice"]), 0)
+        # Patch 2: Using cash ($2) is abolished in v0.22.0 -> returns 400
+        url = f"{self.base_url}/api/game/action/patch"
+        bad_req = json.dumps({"player_id": 0, "die_index": 0, "use_cash": True}).encode("utf-8")
+        req = urllib.request.Request(url, data=bad_req, headers={"Content-Type": "application/json"}, method="POST")
+        with self.assertRaises(urllib.error.HTTPError) as ctx:
+            urllib.request.urlopen(req)
+        self.assertEqual(ctx.exception.code, 400)
 
     # -------------------------------------------------------------------------
     # 12. Phase 3: Dirty Income Success

@@ -227,8 +227,6 @@ class SecOpsTurtleBot(BaseBot):
         rng: random.Random,
     ) -> Phase3ActionPlan:
         plan = Phase3ActionPlan()
-        if self.should_trigger_system_reboot(player_state, game_state):
-            plan.use_system_reboot = True
         current_money = player_state.money
         current_patches = player_state.patches
         is_final_round = getattr(game_state, "is_final_round", False)
@@ -264,19 +262,7 @@ class SecOpsTurtleBot(BaseBot):
                 plan.cipher_mode = "CASH"
                 current_money += game_state.config.cipher_arbitrage_cash
 
-        if is_final_round:
-            current_money, current_patches = plan_final_round_repairs(
-                player_state, game_state, current_money, current_patches, patch_cash_cost, plan
-            )
-        else:
-            start_patch_idx = 1 if plan.use_phreaker_ability else 0
-            for idx in range(start_patch_idx, len(player_state.unpatched_dice)):
-                if current_patches > 0:
-                    plan.patch_actions.append({"die_index": idx, "use_cash": False})
-                    current_patches -= 1
-                elif current_money - patch_cash_cost >= cash_cushion:
-                    plan.patch_actions.append({"die_index": idx, "use_cash": True})
-                    current_money -= patch_cash_cost
+        # 2. Fast-Patching is handled in Part 3B via choose_fast_patches (zero cash patching)
 
         b2_cost = game_state.config.b2_secret_cost
         b2_cap = game_state.config.b2_secret_cap

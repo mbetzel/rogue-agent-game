@@ -37,7 +37,7 @@ const MARKET_BASE_SPECS = {
     baseCost: 5,
     row1: "⚀ +$3 | ⚁-⚂ +$2",
     row2: "⚃ +$1 & +1 🔧 | ⚄ 🔒 Glitch | ⚅ ★ Variant",
-    warning: "EXPOSURE: Green hits Yellow 1st!",
+    warning: null,
   },
   purple: {
     title: "PURPLE // BLK-HAT",

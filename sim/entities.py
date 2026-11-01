@@ -93,6 +93,7 @@ class Die:
     variant_code: Optional[str] = None
     is_locked: bool = False
     chosen_choice_index: Optional[int] = None
+    production_role: Optional[Any] = None
 
     def roll(self, rng: random.Random) -> Face:
         """Roll the die and record the rolled face."""
@@ -747,14 +748,14 @@ def get_all_archetype_cards() -> List[ArchetypeCard]:
         ArchetypeCard(
             code=ArchetypeCode.PHREAKER,
             name="The Phreaker",
-            timing_window="Phase 3: Operations Turn",
+            timing_window="Phase 3: Pipeline Prep",
             ability_name="Magnetic Splice",
-            description="Move 1 worn die from your Unpatched Zone back to your Ready Zone for free (without spending 🔧 or $).",
+            description="Move 1 die from your Glitched Box directly to your Ready for Release Zone for free (bypassing Scanned and saving 1 🔧).",
         ),
         ArchetypeCard(
             code=ArchetypeCode.PRODIGY,
             name="The Prodigy",
-            timing_window="Phase 1: Reroll Step",
+            timing_window="Phase 1: Step 4 Rerolls",
             ability_name="Brute-Force Bypass",
             description="During your rerolls this phase, you may include any number of Locked dice in your free rerolls without spending 🔧 tokens. In addition, you may turn 1 of your rolled dice to any non-Star face of your choice.",
         ),
@@ -770,7 +771,7 @@ def get_all_archetype_cards() -> List[ArchetypeCard]:
             name="The Cipher",
             timing_window="Phase 3: Operations Turn",
             ability_name="Algorithmic Arbitrage",
-            description="Purchase 1 Colored Die from the Market at a $2 discount (minimum cost $0), OR take the Backdoor Siphon (Dirty Income) action without demoting a Ready die to Unpatched.",
+            description="Purchase 1 Colored Die from the Market at a $2 discount (minimum cost $0), OR gain an immediate +$2 cash payout from the bank.",
         ),
         ArchetypeCard(
             code=ArchetypeCode.OPERATOR,
@@ -909,7 +910,7 @@ def create_colored_die(
             Face(name="+$2", money=2),
             Face(name="+$2", money=2),
             Face(name="+$1 & +1 🔧", money=1, patches=1),
-            star_face,
+            glitch_face,
             star_face,
         ]
         return Die(die_id=die_id, color=color, cost=5, vp=0, faces=faces, variant_code=var_code)
@@ -920,7 +921,7 @@ def create_colored_die(
             Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
             Face(name="+$2", money=2),
             Face(name="+$1 & +1 🔧", money=1, patches=1),
-            star_face,
+            glitch_face,
             star_face,
         ]
         return Die(die_id=die_id, color=color, cost=4, vp=0, faces=faces, variant_code=var_code)

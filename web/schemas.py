@@ -79,6 +79,11 @@ class GameStateSerializer:
             "current_face": GameStateSerializer.serialize_face(die.current_face),
             "chosen_choice_index": getattr(die, "chosen_choice_index", None),
             "effective_face": GameStateSerializer.serialize_face(die.effective_face),
+            "production_role": (
+                die.production_role.value
+                if hasattr(getattr(die, "production_role", None), "value")
+                else getattr(die, "production_role", None)
+            ),
         }
         if include_faces:
             data["faces"] = [GameStateSerializer.serialize_face(f) for f in die.faces]
@@ -232,8 +237,6 @@ class GameStateSerializer:
             "v1_used": getattr(player, "v1_used", False),
             "v2_used": getattr(player, "v2_used", False),
             "v3_used": getattr(player, "v3_used", False),
-            "system_reboot_used": getattr(player, "system_reboot_used", False),
-            "can_system_reboot": getattr(player, "can_system_reboot", False),
             "money": player.money,
             "secrets": player.secrets,
             "patches": player.patches,
@@ -246,7 +249,21 @@ class GameStateSerializer:
             "total_dirty_income_taken": player.total_dirty_income_taken,
             "portfolio_value": vp,
             "rank": rank,
-            # Dice zones
+            # Canonical CI/CD zones (v0.22.0)
+            "ready_for_release_dice": [cls.serialize_die(d) for d in player.ready_for_release_dice],
+            "in_production_dice": [cls.serialize_die(d) for d in player.in_production_dice],
+            "glitched_dice": [cls.serialize_die(d) for d in player.glitched_dice],
+            "scanned_dice": [cls.serialize_die(d) for d in player.scanned_dice],
+            "production_slots": {
+                "income": [cls.serialize_die(d) for d in player.income_dice],
+                "red_shield": [cls.serialize_die(d) for d in player.red_shield_dice],
+                "blue_shield": [cls.serialize_die(d) for d in player.blue_shield_dice],
+                "green_shield": [cls.serialize_die(d) for d in player.green_shield_dice],
+            },
+            "under_development_count": len(player.glitched_dice) + len(player.scanned_dice),
+            "glitched_count": len(player.glitched_dice),
+            "scanned_count": len(player.scanned_dice),
+            # Backward compatibility aliases
             "ready_dice": [cls.serialize_die(d) for d in visual_ready],
             "all_ready_dice": [cls.serialize_die(d) for d in player.ready_dice],
             "unpatched_dice": [cls.serialize_die(d) for d in player.unpatched_dice],

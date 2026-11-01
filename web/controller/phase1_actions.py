@@ -15,6 +15,7 @@ from sim.bots import (
 from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
 from sim.engine.phase1_boot import detect_hash_matches
+from sim.engine.state import ProductionRole
 from sim.entities import (
     AbilityStatus,
     ArchetypeCard,
@@ -422,43 +423,39 @@ def commit_defenses(
                     chosen = 0
                 die.chosen_choice_index = chosen
 
-    # Collect resource outputs on effective faces (RULES.md v0.8 Phase 1 Step 6)
-    demoted_or_sacrificed_ids: set[int] = set()
-    for idx, die in enumerate(rolled):
-        face = die.current_face
-        if not face or face.is_glitch:
-            continue
-
-        if idx not in validated_commitments:
-            eff = die.effective_face
-            if eff:
-                player.money += eff.money
-                player.patches += eff.patches
-                player.secrets += eff.secrets
-                if eff.is_star:
-                    if eff.star_code == "Y2":
-                        distinct_count = len({d.color for d in player.colored_dice})
-                        total_payout = min(controller.state.config.y2_max_payout, controller.state.config.y2_base_payout + distinct_count)
-                        bonus = total_payout - eff.money
-                        player.money += max(0, bonus)
-                    elif eff.star_code == "Y3":
-                        if die in player.ready_dice:
-                            player.ready_dice.remove(die)
-                            player.unpatched_dice.append(die)
-                            demoted_or_sacrificed_ids.add(die.die_id)
-        else:
-            # Assigned to defense: hybrid star boot outputs
-            if face.is_star:
-                if face.star_code == "R1":
-                    player.money += 2
-                elif face.star_code in ("G1", "G2"):
-                    player.patches += 1
-
     spent_from_kept = meta.get("spent_from_kept", 0)
     player.patches = max(0, player.patches - spent_from_kept)
 
+    # Glitch Triage (v0.22.0 Canonical)
+    surviving_active: List[Die] = []
+    new_commitments: Dict[int, ShieldColor] = {}
+    for idx, die in enumerate(rolled):
+        face = die.current_face
+        if face and face.is_glitch:
+            if die.color == DieColor.WHITE:
+                if die in player.contractor_dice:
+                    player.contractor_dice.remove(die)
+                controller.state.contractor_supply += 1
+                player.hired_contractor_count = max(0, len(player.contractor_dice))
+                meta["hired_contractors"] = len(player.contractor_dice)
+                controller.event_log.append(
+                    f"{meta['name']} White Contractor glitched: discarded to supply."
+                )
+            else:
+                if die in player.ready_for_release_dice:
+                    player.ready_for_release_dice.remove(die)
+                player.glitched_dice.append(die)
+                controller.event_log.append(
+                    f"{meta['name']} {die.color.value.capitalize()} Die glitched: moved directly to Glitched Box."
+                )
+        else:
+            new_idx = len(surviving_active)
+            surviving_active.append(die)
+            if idx in validated_commitments:
+                new_commitments[new_idx] = validated_commitments[idx]
+
     # Cryptographic Hash Match (RULES.md v0.17.0 Baseline)
-    hash_secrets = detect_hash_matches(rolled)
+    hash_secrets = detect_hash_matches(surviving_active)
     if hash_secrets > 0:
         player.secrets += hash_secrets
         player.hash_matches_secrets = getattr(player, "hash_matches_secrets", 0) + hash_secrets
@@ -466,114 +463,47 @@ def commit_defenses(
             f"{meta['name']} triggered Cryptographic Hash Match (+{hash_secrets} Corporate Secret{'s' if hash_secrets > 1 else ''})!"
         )
 
-    # Glitch Backlash Routine (RULES.md v0.12.0)
-    unresolved_glitches = [
-        d for d in rolled
-        if d.current_face and d.current_face.is_glitch
-    ]
-    for g_die in unresolved_glitches:
-        chosen = player.bot.choose_glitch_demotion(
-            player_state=player,
-            glitch_die=g_die,
-            active_dice=rolled,
-            validated_commitments=validated_commitments,
-            rng=controller.engine.rng,
-        )
-        if chosen and (chosen in player.contractor_dice or chosen.color == DieColor.WHITE):
-            if chosen in player.contractor_dice:
-                player.contractor_dice.remove(chosen)
-            elif player.contractor_dice:
-                chosen = player.contractor_dice.pop(0)
-            controller.state.contractor_supply += 1
-            player.hired_contractor_count = max(0, len(player.contractor_dice))
-            meta["hired_contractors"] = len(player.contractor_dice)
-            demoted_or_sacrificed_ids.add(chosen.die_id)
-            if chosen in rolled:
-                c_idx = rolled.index(chosen)
-                if c_idx in validated_commitments:
-                    del validated_commitments[c_idx]
-            controller.event_log.append(
-                f"{meta['name']} resolved Glitch Backlash: sacrificed 1 White Contractor die to supply."
-            )
-        elif chosen and chosen in player.ready_dice:
-            player.ready_dice.remove(chosen)
-            player.unpatched_dice.append(chosen)
-            demoted_or_sacrificed_ids.add(chosen.die_id)
-            if chosen in rolled:
-                r_idx = rolled.index(chosen)
-                if r_idx in validated_commitments:
-                    del validated_commitments[r_idx]
-            controller.event_log.append(
-                f"{meta['name']} resolved Glitch Backlash: demoted {chosen.color.value.capitalize()} die to Unpatched Zone."
-            )
-        elif player.contractor_dice:
-            c_die = player.contractor_dice.pop(0)
-            controller.state.contractor_supply += 1
-            player.hired_contractor_count = max(0, len(player.contractor_dice))
-            meta["hired_contractors"] = len(player.contractor_dice)
-            demoted_or_sacrificed_ids.add(c_die.die_id)
-            if c_die in rolled:
-                c_idx = rolled.index(c_die)
-                if c_idx in validated_commitments:
-                    del validated_commitments[c_idx]
-            controller.event_log.append(
-                f"{meta['name']} resolved Glitch Backlash: sacrificed 1 White Contractor die to supply."
-            )
-        elif player.ready_dice:
-            uncommitted = [
-                d for d in player.ready_dice
-                if d in rolled and rolled.index(d) not in validated_commitments
-            ]
-            candidates = uncommitted if uncommitted else list(player.ready_dice)
-            target = min(
-                candidates,
-                key=lambda d: (0 if d.color == DieColor.GRAY else 1, getattr(d, "vp", 0), getattr(d, "cost", 0)),
-            )
-            player.ready_dice.remove(target)
-            player.unpatched_dice.append(target)
-            demoted_or_sacrificed_ids.add(target.die_id)
-            if target in rolled:
-                t_idx = rolled.index(target)
-                if t_idx in validated_commitments:
-                    del validated_commitments[t_idx]
-            controller.event_log.append(
-                f"{meta['name']} resolved Glitch Backlash: demoted {target.color.value.capitalize()} die to Unpatched Zone."
-            )
-
-    # Track star ability eligibility for Phase 3
-    for idx, die in enumerate(rolled):
-        if die.die_id in demoted_or_sacrificed_ids:
-            continue
-        face = die.current_face
-        if not face or not face.is_star:
-            continue
-        if face.star_code == "B2":
-            if idx not in validated_commitments:
-                player.b2_available = True
-        elif face.star_code == "Y1":
-            player.y1_available = True
-        elif face.star_code == "P1":
-            player.p1_available = True
-        elif face.star_code == "P3":
-            if idx in validated_commitments:
-                player.p3_available = validated_commitments[idx]
-
-    # Filter out sacrificed contractor dice and demoted dice from rolled_pool and re-index commitments
-    new_rolled: List[Die] = []
-    new_commitments: Dict[int, str] = {}
+    # Assign Production Roles and Deploy to in_production_dice (v0.22.0 Canonical)
+    player.in_production_dice.clear()
     slots: Dict[str, List[Die]] = {"red": [], "blue": [], "green": []}
-    for old_idx, die in enumerate(rolled):
-        if die.die_id in demoted_or_sacrificed_ids:
-            continue
-        new_idx = len(new_rolled)
-        new_rolled.append(die)
-        if old_idx in validated_commitments:
-            color = validated_commitments[old_idx]
-            new_commitments[new_idx] = color.value
-            slots[color.value].append(die)
+    for idx, die in enumerate(surviving_active):
+        face = die.effective_face or die.current_face
+        if idx in new_commitments:
+            s_color = new_commitments[idx]
+            if s_color == ShieldColor.RED:
+                die.production_role = ProductionRole.RED_SHIELD
+                slots["red"].append(die)
+            elif s_color == ShieldColor.BLUE:
+                die.production_role = ProductionRole.BLUE_SHIELD
+                slots["blue"].append(die)
+            elif s_color == ShieldColor.GREEN:
+                die.production_role = ProductionRole.GREEN_SHIELD
+                slots["green"].append(die)
+            else:
+                die.production_role = ProductionRole.BLUE_SHIELD
+                slots["blue"].append(die)
+        else:
+            die.production_role = ProductionRole.INCOME
 
-    meta["rolled_pool"] = new_rolled
-    meta["commitments"] = new_commitments
+        # Star Special eligibility tracking for Phase 3
+        if face and face.is_star:
+            if face.star_code == "B2":
+                if idx not in new_commitments:
+                    player.b2_available = True
+            elif face.star_code == "Y1":
+                player.y1_available = True
+            elif face.star_code == "P1":
+                player.p1_available = True
+            elif face.star_code == "P3":
+                if idx in new_commitments:
+                    player.p3_available = new_commitments[idx]
+
+        player.in_production_dice.append(die)
+
+    player.ready_for_release_dice.clear()
+
+    meta["rolled_pool"] = surviving_active
+    meta["commitments"] = {idx: s.value for idx, s in new_commitments.items()}
     meta["has_committed"] = True
     meta["shield_slots"] = slots
 
@@ -828,39 +758,36 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
                 elif face.shield_color == ShieldColor.ANY:
                     validated[idx] = ShieldColor.BLUE
 
-        # 6. Gain Resource Outputs on Effective Faces (RULES.md v0.8)
-        demoted_or_sacrificed_ids: set[int] = set()
+        # Glitch Triage (v0.22.0 Canonical)
+        surviving_active: List[Die] = []
+        new_commitments: Dict[int, ShieldColor] = {}
         for idx, die in enumerate(active_dice):
             face = die.current_face
-            if not face or face.is_glitch:
-                continue
-
-            if idx not in validated:
-                eff = die.effective_face
-                if eff:
-                    player.money += eff.money
-                    player.patches += eff.patches
-                    player.secrets += eff.secrets
-                    if eff.is_star:
-                        if eff.star_code == "Y2":
-                            distinct_count = len({d.color for d in player.colored_dice})
-                            total_payout = min(controller.state.config.y2_max_payout, controller.state.config.y2_base_payout + distinct_count)
-                            bonus = total_payout - eff.money
-                            player.money += max(0, bonus)
-                        elif eff.star_code == "Y3":
-                            if die in player.ready_dice:
-                                player.ready_dice.remove(die)
-                                player.unpatched_dice.append(die)
-                                demoted_or_sacrificed_ids.add(die.die_id)
+            if face and face.is_glitch:
+                if die.color == DieColor.WHITE:
+                    if die in player.contractor_dice:
+                        player.contractor_dice.remove(die)
+                    controller.state.contractor_supply += 1
+                    player.hired_contractor_count = max(0, len(player.contractor_dice))
+                    meta["hired_contractors"] = len(player.contractor_dice)
+                    controller.event_log.append(
+                        f"{meta['name']} White Contractor glitched: discarded to supply."
+                    )
+                else:
+                    if die in player.ready_for_release_dice:
+                        player.ready_for_release_dice.remove(die)
+                    player.glitched_dice.append(die)
+                    controller.event_log.append(
+                        f"{meta['name']} {die.color.value.capitalize()} Die glitched: moved directly to Glitched Box."
+                    )
             else:
-                if face.is_star:
-                    if face.star_code == "R1":
-                        player.money += 2
-                    elif face.star_code in ("G1", "G2"):
-                        player.patches += 1
+                new_idx = len(surviving_active)
+                surviving_active.append(die)
+                if idx in validated:
+                    new_commitments[new_idx] = validated[idx]
 
         # Cryptographic Hash Match (RULES.md v0.17.0 Baseline)
-        hash_secrets = detect_hash_matches(active_dice)
+        hash_secrets = detect_hash_matches(surviving_active)
         if hash_secrets > 0:
             player.secrets += hash_secrets
             player.hash_matches_secrets = getattr(player, "hash_matches_secrets", 0) + hash_secrets
@@ -868,113 +795,47 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
                 f"{meta['name']} triggered Cryptographic Hash Match (+{hash_secrets} Corporate Secret{'s' if hash_secrets > 1 else ''})!"
             )
 
-        # Glitch Backlash Routine (RULES.md v0.12.0)
-        unresolved_glitches = [
-            d for d in active_dice
-            if d.current_face and d.current_face.is_glitch
-        ]
-        for g_die in unresolved_glitches:
-            chosen = player.bot.choose_glitch_demotion(
-                player_state=player,
-                glitch_die=g_die,
-                active_dice=active_dice,
-                validated_commitments=validated,
-                rng=controller.engine.rng,
-            )
-            if chosen and (chosen in player.contractor_dice or chosen.color == DieColor.WHITE):
-                if chosen in player.contractor_dice:
-                    player.contractor_dice.remove(chosen)
-                elif player.contractor_dice:
-                    chosen = player.contractor_dice.pop(0)
-                controller.state.contractor_supply += 1
-                player.hired_contractor_count = max(0, len(player.contractor_dice))
-                meta["hired_contractors"] = len(player.contractor_dice)
-                demoted_or_sacrificed_ids.add(chosen.die_id)
-                if chosen in active_dice:
-                    c_idx = active_dice.index(chosen)
-                    if c_idx in validated:
-                        del validated[c_idx]
-                controller.event_log.append(
-                    f"{meta['name']} resolved Glitch Backlash: sacrificed 1 White Contractor die to supply."
-                )
-            elif chosen and chosen in player.ready_dice:
-                player.ready_dice.remove(chosen)
-                player.unpatched_dice.append(chosen)
-                demoted_or_sacrificed_ids.add(chosen.die_id)
-                if chosen in active_dice:
-                    r_idx = active_dice.index(chosen)
-                    if r_idx in validated:
-                        del validated[r_idx]
-                controller.event_log.append(
-                    f"{meta['name']} resolved Glitch Backlash: demoted {chosen.color.value.capitalize()} die to Unpatched Zone."
-                )
-            elif player.contractor_dice:
-                c_die = player.contractor_dice.pop(0)
-                controller.state.contractor_supply += 1
-                player.hired_contractor_count = max(0, len(player.contractor_dice))
-                meta["hired_contractors"] = len(player.contractor_dice)
-                demoted_or_sacrificed_ids.add(c_die.die_id)
-                if c_die in active_dice:
-                    c_idx = active_dice.index(c_die)
-                    if c_idx in validated:
-                        del validated[c_idx]
-                controller.event_log.append(
-                    f"{meta['name']} resolved Glitch Backlash: sacrificed 1 White Contractor die to supply."
-                )
-            elif player.ready_dice:
-                uncommitted = [
-                    d for d in player.ready_dice
-                    if d in active_dice and active_dice.index(d) not in validated
-                ]
-                candidates = uncommitted if uncommitted else list(player.ready_dice)
-                target = min(
-                    candidates,
-                    key=lambda d: (0 if d.color == DieColor.GRAY else 1, getattr(d, "vp", 0), getattr(d, "cost", 0)),
-                )
-                player.ready_dice.remove(target)
-                player.unpatched_dice.append(target)
-                demoted_or_sacrificed_ids.add(target.die_id)
-                if target in active_dice:
-                    t_idx = active_dice.index(target)
-                    if t_idx in validated:
-                        del validated[t_idx]
-                controller.event_log.append(
-                    f"{meta['name']} resolved Glitch Backlash: demoted {target.color.value.capitalize()} die to Unpatched Zone."
-                )
-
-        # Track Star availability
-        for idx, die in enumerate(active_dice):
-            if die.die_id in demoted_or_sacrificed_ids:
-                continue
-            face = die.current_face
-            if not face or not face.is_star:
-                continue
-            if face.star_code == "B2":
-                if idx not in validated:
-                    player.b2_available = True
-            elif face.star_code == "Y1":
-                player.y1_available = True
-            elif face.star_code == "P1":
-                player.p1_available = True
-            elif face.star_code == "P3":
-                if idx in validated:
-                    player.p3_available = validated[idx]
-
-        new_rolled: List[Die] = []
-        new_commitments: Dict[int, str] = {}
+        # Assign Production Roles and Deploy to in_production_dice (v0.22.0 Canonical)
+        player.in_production_dice.clear()
         slots: Dict[str, List[Die]] = {"red": [], "blue": [], "green": []}
-        for old_idx, die in enumerate(active_dice):
-            if die.die_id in demoted_or_sacrificed_ids:
-                continue
-            new_idx = len(new_rolled)
-            new_rolled.append(die)
-            if old_idx in validated:
-                color = validated[old_idx]
-                new_commitments[new_idx] = color.value
-                slots[color.value].append(die)
+        for idx, die in enumerate(surviving_active):
+            face = die.effective_face or die.current_face
+            if idx in new_commitments:
+                s_color = new_commitments[idx]
+                if s_color == ShieldColor.RED:
+                    die.production_role = ProductionRole.RED_SHIELD
+                    slots["red"].append(die)
+                elif s_color == ShieldColor.BLUE:
+                    die.production_role = ProductionRole.BLUE_SHIELD
+                    slots["blue"].append(die)
+                elif s_color == ShieldColor.GREEN:
+                    die.production_role = ProductionRole.GREEN_SHIELD
+                    slots["green"].append(die)
+                else:
+                    die.production_role = ProductionRole.BLUE_SHIELD
+                    slots["blue"].append(die)
+            else:
+                die.production_role = ProductionRole.INCOME
 
-        meta["rolled_pool"] = new_rolled
-        meta["commitments"] = new_commitments
+            # Star Special eligibility tracking for Phase 3
+            if face and face.is_star:
+                if face.star_code == "B2":
+                    if idx not in new_commitments:
+                        player.b2_available = True
+                elif face.star_code == "Y1":
+                    player.y1_available = True
+                elif face.star_code == "P1":
+                    player.p1_available = True
+                elif face.star_code == "P3":
+                    if idx in new_commitments:
+                        player.p3_available = new_commitments[idx]
+
+            player.in_production_dice.append(die)
+
+        player.ready_for_release_dice.clear()
+
+        meta["rolled_pool"] = surviving_active
+        meta["commitments"] = {idx: s.value for idx, s in new_commitments.items()}
         meta["has_rolled"] = True
         meta["has_committed"] = True
         meta["shield_slots"] = slots

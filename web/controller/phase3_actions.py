@@ -14,6 +14,7 @@ from sim.bots import (
 )
 from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
+from sim.engine.phase3_ops import collect_player_production_income
 from sim.entities import (
     AbilityStatus,
     ArchetypeCard,
@@ -47,6 +48,12 @@ def advance_phase3_turns(controller: GameController) -> None:
             controller.active_player_index = next_pid
             meta["purchases_this_turn"] = 0
             meta["dirty_income_taken_this_turn"] = False
+            if not meta.get("income_collected_this_turn", False):
+                collect_player_production_income(controller.engine, player, None)
+                meta["income_collected_this_turn"] = True
+                controller.event_log.append(
+                    f"{meta['name']} collected delayed income from active production modules."
+                )
             return
 
         # Bot player turn: execute automatically
@@ -63,43 +70,55 @@ def execute_bot_phase3(controller: GameController, player: PlayerState, meta: Di
     """Executes Phase 3 plan for a single bot player."""
     plan: Phase3ActionPlan = player.bot.take_phase3_actions(player, controller.state, controller.engine.rng)
 
-    # Emergency System Reboot (once per game when entering Phase 3 with 0 ready dice)
-    if plan.use_system_reboot and player.can_system_reboot:
-        restored = player.execute_system_reboot()
-        restored_ids = {d.die_id for d in restored}
-        meta["rolled_pool"] = [
-            d for d in meta.get("rolled_pool", []) if d.die_id not in restored_ids
-        ]
-        controller.event_log.append(
-            f"{meta['name']} (Bot) executed emergency System Reboot: restored {len(restored)} starter Gray dice."
-        )
+    # 1. Collect Delayed Income from all surviving dice in in_production_dice (v0.22.0 Canonical)
+    collect_player_production_income(controller.engine, player, plan)
+    meta["income_collected_this_turn"] = True
+    controller.event_log.append(
+        f"{meta['name']} (Bot) collected delayed income from active production modules."
+    )
 
-    # Archetype: The Phreaker (Magnetic Splice)
+    # Bot Fast-Patching in Under Development
+    fast_patches = player.bot.choose_fast_patches(player, controller.state, controller.engine.rng)
+    if fast_patches and player.patches > 0 and player.glitched_dice:
+        valid_indices = sorted(
+            {idx for idx in fast_patches if 0 <= idx < len(player.glitched_dice)},
+            reverse=True,
+        )
+        for f_idx in valid_indices:
+            if player.patches <= 0 or f_idx >= len(player.glitched_dice):
+                break
+            p_die = player.glitched_dice.pop(f_idx)
+            p_die.production_role = None
+            p_die.is_locked = False
+            p_die.chosen_choice_index = None
+            p_die.current_face = None
+            player.scanned_dice.append(p_die)
+            player.patches -= 1
+
+    # Archetype: The Phreaker (Magnetic Splice - v0.22.0: Glitched Box directly to Ready for Release)
     if (
         plan.use_phreaker_ability
         and player.archetype is not None
         and player.archetype.code == ArchetypeCode.PHREAKER
         and player.is_ability_available()
-        and player.unpatched_dice
+        and player.glitched_dice
     ):
-        repair_count = min(1, len(player.unpatched_dice))
-        for _ in range(repair_count):
-            best_idx = max(
-                range(len(player.unpatched_dice)),
-                key=lambda i: (
-                    1 if player.unpatched_dice[i].color != DieColor.GRAY else 0,
-                    getattr(player.unpatched_dice[i], "vp", 0),
-                    getattr(player.unpatched_dice[i], "cost", 0),
-                ),
-            )
-            repaired = player.unpatched_dice.pop(best_idx)
-            player.ready_dice.append(repaired)
-            meta["rolled_pool"] = [
-                d for d in meta.get("rolled_pool", []) if d.die_id != repaired.die_id
-            ]
+        best_idx = max(
+            range(len(player.glitched_dice)),
+            key=lambda i: (
+                1 if player.glitched_dice[i].color != DieColor.GRAY else 0,
+                getattr(player.glitched_dice[i], "cost", 0),
+            ),
+        )
+        phreaker_die = player.glitched_dice.pop(best_idx)
+        phreaker_die.production_role = None
+        phreaker_die.is_locked = False
+        phreaker_die.chosen_choice_index = None
+        phreaker_die.current_face = None
+        player.ready_for_release_dice.append(phreaker_die)
         player.mark_ability_used()
         controller.event_log.append(
-            f"{meta['name']} (Bot) used Phreaker Magnetic Splice: repaired {repair_count} die for free."
+            f"{meta['name']} (Bot) used Phreaker Magnetic Splice: spliced 1 die directly to Ready for Release for free."
         )
 
     # Archetype: The Cipher (Algorithmic Arbitrage)
@@ -312,18 +331,13 @@ def patch_die(controller: GameController, player_id: int, die_index: int, use_ca
     if not (0 <= die_index < len(player.unpatched_dice)):
         raise ValueError(f"Invalid die_index {die_index} in unpatched zone (size: {len(player.unpatched_dice)})")
 
-    patch_cash_cost = controller.state.config.patch_cash_cost
-
     if use_cash:
-        if player.money < patch_cash_cost:
-            raise ValueError(f"Insufficient cash for patching: costs ${patch_cash_cost}, player has ${player.money}")
-        player.money -= patch_cash_cost
-        cost_desc = f"${patch_cash_cost} cash"
-    else:
-        if player.patches < controller.state.config.patch_token_cost:
-            raise ValueError(f"Insufficient patch tokens: costs {controller.state.config.patch_token_cost} 🔧, player has {player.patches} 🔧")
-        player.patches -= controller.state.config.patch_token_cost
-        cost_desc = "1 🔧 token"
+        raise ValueError("Cash patching has been abolished in v0.22.0. Use Fast-Patch with 1 🔧.")
+
+    if player.patches < controller.state.config.patch_token_cost:
+        raise ValueError(f"Insufficient patch tokens: costs {controller.state.config.patch_token_cost} 🔧, player has {player.patches} 🔧")
+    player.patches -= controller.state.config.patch_token_cost
+    cost_desc = "1 🔧 token"
 
     patched_die = player.unpatched_dice.pop(die_index)
     player.ready_dice.append(patched_die)
@@ -447,7 +461,7 @@ def use_phreaker_ability(
     die_index: int = 0,
     die_id: Optional[int] = None,
 ) -> Dict[str, Any]:
-    """Human action: repairs 1 unpatched die for free using Phreaker Magnetic Splice (v0.13.0)."""
+    """Human action: moves 1 die from Glitched directly to Ready for Release for free using Magnetic Splice (v0.22.0)."""
     if controller.phase != 3:
         raise ValueError(f"Cannot use Phreaker ability in phase {controller.phase}")
     if player_id != controller.active_player_index:
@@ -465,31 +479,81 @@ def use_phreaker_ability(
         raise ValueError("Phreaker ability is not available")
     if count < 1:
         raise ValueError("count must be at least 1")
-    if not player.unpatched_dice:
-        raise ValueError("No unpatched dice available to repair")
+
+    source_pool = player.glitched_dice if player.glitched_dice else player.unpatched_dice
+    if not source_pool:
+        raise ValueError("No glitched dice available to splice")
 
     repaired: Optional[Die] = None
     if die_id is not None:
-        for d in player.unpatched_dice:
+        for d in source_pool:
             if d.die_id == die_id:
                 repaired = d
                 break
         if repaired is None:
-            raise ValueError(f"Die with die_id {die_id} is not in unpatched zone")
-        player.unpatched_dice.remove(repaired)
+            raise ValueError(f"Die with die_id {die_id} is not in glitched zone")
+        source_pool.remove(repaired)
     else:
-        if not (0 <= die_index < len(player.unpatched_dice)):
-            raise ValueError(f"Invalid die_index {die_index} in unpatched zone")
-        repaired = player.unpatched_dice.pop(die_index)
+        if not (0 <= die_index < len(source_pool)):
+            raise ValueError(f"Invalid die_index {die_index} in glitched zone")
+        repaired = source_pool.pop(die_index)
 
-    player.ready_dice.append(repaired)
-    meta["rolled_pool"] = [
-        d for d in meta.get("rolled_pool", []) if d.die_id != repaired.die_id
-    ]
+    repaired.production_role = None
+    repaired.is_locked = False
+    repaired.chosen_choice_index = None
+    repaired.current_face = None
+    player.ready_for_release_dice.append(repaired)
 
     player.mark_ability_used(active_ver)
     controller.event_log.append(
-        f"{meta['name']} activated Phreaker Magnetic Splice: repaired {repaired.color.value.capitalize()} Die for free."
+        f"{meta['name']} activated Phreaker Magnetic Splice: spliced {repaired.color.value.capitalize()} Die directly to Ready for Release for free."
+    )
+    return controller.get_full_state()
+
+
+def fast_patch(
+    controller: GameController,
+    player_id: int,
+    die_ids: Optional[List[int]] = None,
+    die_indices: Optional[List[int]] = None,
+) -> Dict[str, Any]:
+    """Human action: spends 1 🔧 per die to accelerate dice from glitched_dice to scanned_dice."""
+    if controller.phase != 3:
+        raise ValueError(f"Cannot fast-patch in phase {controller.phase}")
+    player = controller.state.players[player_id]
+    meta = controller.player_meta[player_id]
+    if player.is_patient_zero:
+        raise ValueError("Eliminated players cannot perform operations")
+
+    targets: List[Die] = []
+    if die_ids is not None:
+        for d_id in die_ids:
+            match = next((d for d in player.glitched_dice if d.die_id == d_id), None)
+            if match and match not in targets:
+                targets.append(match)
+    elif die_indices is not None:
+        for idx in die_indices:
+            if 0 <= idx < len(player.glitched_dice):
+                d = player.glitched_dice[idx]
+                if d not in targets:
+                    targets.append(d)
+
+    if not targets:
+        raise ValueError("No valid glitched dice selected for fast-patching")
+    if player.patches < len(targets):
+        raise ValueError(f"Not enough patches: have {player.patches}, need {len(targets)}")
+
+    for d in targets:
+        player.glitched_dice.remove(d)
+        d.production_role = None
+        d.is_locked = False
+        d.chosen_choice_index = None
+        d.current_face = None
+        player.scanned_dice.append(d)
+        player.patches -= 1
+
+    controller.event_log.append(
+        f"{meta['name']} fast-patched {len(targets)} die/dice from Glitched to Scanned for {len(targets)} 🔧."
     )
     return controller.get_full_state()
 
@@ -636,29 +700,8 @@ def execute_star_action(
 
 
 def system_reboot(controller: GameController, player_id: int) -> Dict[str, Any]:
-    """Human action: executes once-per-game emergency System Reboot during Phase 3."""
-    if controller.phase != 3:
-        raise ValueError(f"Cannot execute system reboot in phase {controller.phase}")
-    if player_id != controller.active_player_index:
-        raise ValueError(f"Not player {player_id}'s turn (current: {controller.active_player_index})")
-
-    player = controller.state.players[player_id]
-    meta = controller.player_meta[player_id]
-
-    if player.is_patient_zero:
-        raise ValueError("Eliminated players cannot perform operations")
-    if not player.can_system_reboot:
-        raise ValueError("System Reboot cannot be executed (already used or player has ready dice)")
-
-    restored = player.execute_system_reboot()
-    restored_ids = {d.die_id for d in restored}
-    meta["rolled_pool"] = [
-        d for d in meta.get("rolled_pool", []) if d.die_id not in restored_ids
-    ]
-    controller.event_log.append(
-        f"{meta['name']} executed emergency System Reboot: restored {len(restored)} starter Gray dice."
-    )
-    return controller.get_full_state()
+    """Deprecated in v0.22.0. Soft-locks are eliminated by the CI/CD conveyor."""
+    raise ValueError("System Reboot has been deprecated in v0.22.0. Soft-locks are eliminated by the CI/CD conveyor.")
 
 
 

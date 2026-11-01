@@ -265,10 +265,19 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
 
-                elif clean_path == "/api/game/action/system_reboot":
+                elif clean_path == "/api/game/action/fast_patch":
                     pid = get_target_pid(default_to_human=False)
-                    state = self.controller.system_reboot(pid)
+                    die_ids = data.get("die_ids")
+                    die_indices = data.get("die_indices")
+                    state = self.controller.fast_patch(pid, die_ids=die_ids, die_indices=die_indices)
                     payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
+                elif clean_path == "/api/game/action/system_reboot":
+                    payload, code = error_response(
+                        "System Reboot has been deprecated in v0.22.0. Soft-locks are eliminated by the CI/CD conveyor.",
+                        410,
+                    )
                     self._send_json_response(payload, code)
 
                 elif clean_path == "/api/game/action/end_turn":

@@ -277,10 +277,11 @@ export async function doStarAction(actionType, cubeColor = null) {
   }
 }
 
-export async function doSystemReboot() {
-  const newState = await apiCall("/api/game/action/system_reboot", "POST", {
-    player_id: getHumanPlayerId(),
-  });
+export async function doFastPatch(dieIds = null, dieIndices = null) {
+  const payload = { player_id: getHumanPlayerId() };
+  if (dieIds) payload.die_ids = dieIds;
+  if (dieIndices) payload.die_indices = dieIndices;
+  const newState = await apiCall("/api/game/action/fast_patch", "POST", payload);
   if (newState) {
     setState(newState);
     notifyRender();
