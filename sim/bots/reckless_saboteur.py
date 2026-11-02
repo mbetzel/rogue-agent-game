@@ -4,7 +4,7 @@ import random
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
-from sim.entities import ArchetypeCode
+from sim.entities import ArchetypeCode, CompanyCode, WhiteHatCode
 from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index, plan_final_round_repairs
 
 if TYPE_CHECKING:
@@ -100,6 +100,11 @@ class RecklessSaboteurBot(BaseBot):
             return 0
         return min(player_state.money, secrets_at_risk)
 
+    choose_meridian_override = choose_operator_ability
+    choose_helix_override = choose_prodigy_ability
+    choose_aegis_override = choose_acoustic_ability
+    choose_dto_override = choose_spook_ability
+
     def choose_debug_unlocks(
         self,
         player_state: PlayerState,
@@ -173,31 +178,40 @@ class RecklessSaboteurBot(BaseBot):
         cash_cushion = 0 if is_final_round else 2
 
         active_ver = game_state.active_version.version_str
+        is_omnidyne = bool(
+            (player_state.company and player_state.company.code == CompanyCode.OMNIDYNE)
+            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.PHREAKER)
+        )
         if (
-            player_state.archetype
-            and player_state.archetype.code == ArchetypeCode.PHREAKER
+            is_omnidyne
             and player_state.is_ability_available(active_ver)
             and len(player_state.unpatched_dice) >= 1
         ):
+            plan.use_omnidyne_override = True
             plan.use_phreaker_ability = True
 
+        is_prometheus = bool(
+            (player_state.company and player_state.company.code == CompanyCode.PROMETHEUS)
+            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.CIPHER)
+        )
         if (
-            player_state.archetype
-            and player_state.archetype.code == ArchetypeCode.CIPHER
+            is_prometheus
             and player_state.is_ability_available(active_ver)
         ):
             if not is_final_round and player_state.secrets > 1:
                 for c in [DieColor.PURPLE, DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]:
                     cost = (4 if c in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5) - game_state.config.cipher_market_discount
                     if game_state.market.get(c, 0) > 0 and current_money >= cost:
+                        plan.use_prometheus_override = True
                         plan.use_cipher_ability = True
-                        plan.cipher_mode = "BUY_FREE_DIE"
-                        plan.cipher_free_die_color = c
+                        plan.prometheus_mode = "BUY_FREE_DIE"
+                        plan.prometheus_discount_die_color = c
                         current_money -= cost
                         break
             if not plan.use_cipher_ability:
+                plan.use_prometheus_override = True
                 plan.use_cipher_ability = True
-                plan.cipher_mode = "CASH"
+                plan.prometheus_mode = "CASH"
                 current_money += game_state.config.cipher_arbitrage_cash
 
         if (

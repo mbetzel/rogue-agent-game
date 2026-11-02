@@ -6,7 +6,7 @@ import random
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
-from sim.entities import ArchetypeCode, create_colored_die
+from sim.entities import ArchetypeCode, CompanyCode, WhiteHatCode, Face, create_colored_die
 from sim.engine.state import ProductionRole
 
 if TYPE_CHECKING:
@@ -39,12 +39,100 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
             elif eff.star_code == "Y3":
                 # Proprietary Training: move die to glitched_dice after collecting secret
                 dice_to_glitch.append(die)
+            elif eff.star_code == "PURPLE_STAR":
+                # Operative Protocol Resolution for Income Timing
+                is_acoustic = bool(
+                    (player.white_hat and player.white_hat.code == WhiteHatCode.ACOUSTIC)
+                    or (player.archetype and player.archetype.code == ArchetypeCode.ACOUSTIC)
+                )
+                is_cipher = bool(
+                    (player.white_hat and player.white_hat.code == WhiteHatCode.CIPHER)
+                    or (player.archetype and player.archetype.code == ArchetypeCode.CIPHER)
+                )
+                is_spook = bool(
+                    (player.white_hat and player.white_hat.code == WhiteHatCode.SPOOK)
+                    or (player.archetype and player.archetype.code == ArchetypeCode.SPOOK)
+                )
+                if is_acoustic:
+                    # The Acoustic (Resonance Sensor): +$1 per unique cube color in Exit Tray (R, B, G, K; max +$4)
+                    exited = getattr(engine.state, "last_exited_cubes", None)
+                    if not exited:
+                        exited = getattr(engine.state.tower, "last_exited_cubes", {})
+                    unique_colors = len({c for c, count in exited.items() if count > 0})
+                    player.money += min(4, unique_colors)
+                elif is_cipher:
+                    # The Cipher (Algorithmic Parity): Phase 3 Income: +$2
+                    player.money += 2
+                elif is_spook:
+                    # The Spook (Burn Notice): Base Phase 3 Ops: +$2
+                    player.money += 2
 
     for die in dice_to_glitch:
         if die in player.in_production_dice:
             player.in_production_dice.remove(die)
             die.production_role = None
             player.glitched_dice.append(die)
+
+
+def resolve_spook_burn_notice(
+    engine: GameEngine,
+    player: PlayerState,
+    die_id: int,
+) -> bool:
+    """Spook Face 6 Protocol (Burn Notice):
+    Permanently returns 1 owned colored die to market to gain +1 Corporate Secret.
+    """
+    target_die: Optional[Die] = None
+    for zone in (player.in_production_dice, player.glitched_dice, player.scanned_dice, player.ready_for_release_dice):
+        for d in zone:
+            if d.die_id == die_id and d.color not in (DieColor.GRAY, DieColor.WHITE):
+                target_die = d
+                zone.remove(d)
+                break
+        if target_die:
+            break
+
+    if not target_die:
+        return False
+
+    if target_die.color in engine.state.market:
+        engine.state.market[target_die.color] += 1
+    # If Purple, die is scrapped and not returned to market
+    player.secrets += 1
+    return True
+
+
+def resolve_phreaker_jumper_diagnostics(
+    engine: GameEngine,
+    player: PlayerState,
+    die_id: Optional[int] = None,
+    rng: Optional[random.Random] = None,
+    forced_face: Optional[Face] = None,
+) -> Optional[Face]:
+    """Phreaker Face 6 Protocol (Jumper Diagnostics):
+    Rolls 1 die currently in Under Development; harvests rolled cash/patches; die remains in place.
+    """
+    ud_dice = player.under_development_dice
+    if not ud_dice:
+        return None
+
+    target_die = None
+    if die_id is not None:
+        target_die = next((d for d in ud_dice if d.die_id == die_id), None)
+    if target_die is None:
+        target_die = ud_dice[0]
+
+    if forced_face is not None:
+        target_die.current_face = forced_face
+        face = forced_face
+    else:
+        roll_rng = rng or engine.rng
+        face = target_die.roll(roll_rng)
+
+    if face and not face.is_glitch and not face.is_star:
+        player.money += face.money
+        player.patches += face.patches
+    return face
 
 
 def execute_phase_3(engine: GameEngine) -> None:
@@ -92,20 +180,38 @@ def execute_phase_3(engine: GameEngine) -> None:
                 demoted = player.ready_dice.pop(0)
             player.glitched_dice.append(demoted)
 
-        # 2. Archetype Ability: The Cipher (Algorithmic Arbitrage)
-        cipher_discount_applied = False
+        # 2. Institutional Override: The Prometheus Foundation (Algorithmic Arbitrage)
+        prometheus_discount_applied = False
+        is_prometheus = bool(
+            (player.company and player.company.code == CompanyCode.PROMETHEUS)
+            or (player.archetype and player.archetype.code == ArchetypeCode.CIPHER)
+        ) and player.is_ability_available(active_ver)
+        use_prom = bool(getattr(plan, "use_prometheus_override", False) or getattr(plan, "use_cipher_ability", False))
+        prom_mode = getattr(plan, "prometheus_mode", None) or getattr(plan, "cipher_mode", None)
+        prom_color = getattr(plan, "prometheus_discount_die_color", None) or getattr(plan, "cipher_free_die_color", None)
+
         if (
-            plan.use_cipher_ability
-            and plan.cipher_mode in ("BUY_FREE_DIE", 1)
-            and plan.cipher_free_die_color is not None
-            and player.archetype is not None
-            and player.archetype.code == ArchetypeCode.CIPHER
-            and player.is_ability_available(active_ver)
+            use_prom
+            and prom_mode in ("BUY_FREE_DIE", "DISCOUNT", 1)
+            and prom_color is not None
+            and is_prometheus
         ):
-            free_color = plan.cipher_free_die_color
+            free_color = prom_color
             normal_cost = 4 if free_color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5
             discounted_cost = max(0, normal_cost - engine.state.config.cipher_market_discount)
-            if engine.state.market.get(free_color, 0) > 0 and player.money >= discounted_cost:
+            if free_color == DieColor.PURPLE:
+                if player.personal_purple_reserve > 0 and player.money >= discounted_cost:
+                    player.money -= discounted_cost
+                    player.personal_purple_reserve -= 1
+                    new_die = create_colored_die(
+                        color=DieColor.PURPLE,
+                        die_id=engine.state.next_die_id,
+                    )
+                    engine.state.next_die_id += 1
+                    player.ready_for_release_dice.append(new_die)
+                    player.mark_ability_used(active_ver)
+                    prometheus_discount_applied = True
+            elif engine.state.market.get(free_color, 0) > 0 and player.money >= discounted_cost:
                 player.money -= discounted_cost
                 engine.state.market[free_color] -= 1
                 new_die = create_colored_die(
@@ -116,17 +222,15 @@ def execute_phase_3(engine: GameEngine) -> None:
                 engine.state.next_die_id += 1
                 player.ready_for_release_dice.append(new_die)
                 player.mark_ability_used(active_ver)
-                cipher_discount_applied = True
+                prometheus_discount_applied = True
 
-        is_cipher_cash = (
-            plan.use_cipher_ability
-            and plan.cipher_mode in ("CASH", "ARBITRAGE_CASH", "DIRTY_INCOME")
-            and player.archetype is not None
-            and player.archetype.code == ArchetypeCode.CIPHER
-            and player.is_ability_available(active_ver)
-            and not cipher_discount_applied
+        is_prom_cash = (
+            use_prom
+            and prom_mode in ("CASH", "ARBITRAGE_CASH", "DIRTY_INCOME")
+            and is_prometheus
+            and not prometheus_discount_applied
         )
-        if is_cipher_cash:
+        if is_prom_cash:
             player.money += engine.state.config.cipher_arbitrage_cash
             player.mark_ability_used(active_ver)
 
@@ -168,23 +272,66 @@ def execute_phase_3(engine: GameEngine) -> None:
                     )
                     player.p3_available = None
 
+        # Operative Protocol Face 6 Resolution in Phase 3A (Spook & Phreaker)
+        has_purple_star = any(
+            (d.effective_face or d.current_face)
+            and (d.effective_face or d.current_face).is_star
+            and (d.effective_face or d.current_face).star_code == "PURPLE_STAR"
+            for d in player.in_production_dice
+        )
+        if has_purple_star:
+            is_spook = bool(
+                (player.white_hat and player.white_hat.code == WhiteHatCode.SPOOK)
+                or (player.archetype and player.archetype.code == ArchetypeCode.SPOOK)
+            )
+            is_phreaker = bool(
+                (player.white_hat and player.white_hat.code == WhiteHatCode.PHREAKER)
+                or (player.archetype and player.archetype.code == ArchetypeCode.PHREAKER)
+            )
+            if is_spook and plan.spook_burn_die_id is not None:
+                resolve_spook_burn_notice(engine, player, plan.spook_burn_die_id)
+            elif is_phreaker and player.under_development_dice:
+                diag_id = plan.phreaker_diagnostics_die_id
+                if diag_id is None:
+                    diag_id = player.bot.choose_phreaker_jumper_diagnostics(player, engine.state, engine.rng)
+                if diag_id is not None:
+                    resolve_phreaker_jumper_diagnostics(engine, player, diag_id, engine.rng)
+
         # 4. Market Purchases (Limit 2 dice per turn; deliver directly to ready_for_release_dice)
-        purchased_count = 1 if cipher_discount_applied else 0
-        for color in plan.market_purchases:
+        purchased_count = 1 if prometheus_discount_applied else 0
+        purchases_list = list(plan.market_purchases)
+        if plan.buy_purple_reserve and DieColor.PURPLE not in purchases_list:
+            purchases_list.append(DieColor.PURPLE)
+
+        for color in purchases_list:
             if purchased_count >= engine.state.config.max_market_purchases_per_turn:
                 break
-            cost = 4 if color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5
-            if engine.state.market.get(color, 0) > 0 and player.money >= cost:
-                player.money -= cost
-                engine.state.market[color] -= 1
-                purchased_count += 1
-                new_die = create_colored_die(
-                    color=color,
-                    die_id=engine.state.next_die_id,
-                    variant_card=engine.state.variant_cards.get(color),
-                )
-                engine.state.next_die_id += 1
-                player.ready_for_release_dice.append(new_die)
+
+            if color == DieColor.PURPLE:
+                cost = 4
+                if player.personal_purple_reserve > 0 and player.money >= cost:
+                    player.money -= cost
+                    player.personal_purple_reserve -= 1
+                    purchased_count += 1
+                    new_die = create_colored_die(
+                        color=DieColor.PURPLE,
+                        die_id=engine.state.next_die_id,
+                    )
+                    engine.state.next_die_id += 1
+                    player.ready_for_release_dice.append(new_die)
+            else:
+                cost = 4 if color in (DieColor.RED, DieColor.GREEN) else 5
+                if engine.state.market.get(color, 0) > 0 and player.money >= cost:
+                    player.money -= cost
+                    engine.state.market[color] -= 1
+                    purchased_count += 1
+                    new_die = create_colored_die(
+                        color=color,
+                        die_id=engine.state.next_die_id,
+                        variant_card=engine.state.variant_cards.get(color),
+                    )
+                    engine.state.next_die_id += 1
+                    player.ready_for_release_dice.append(new_die)
 
     # -------------------------------------------------------------------------
     # Part 3B: Pipeline Prep & End-of-Round Staging (Simultaneous)
@@ -195,28 +342,38 @@ def execute_phase_3(engine: GameEngine) -> None:
 
         active_ver = engine.state.active_version.version_str
 
-        # 1. Fast-Patching & Phreaker Magnetic Splice
-        # Hook: The Phreaker (Magnetic Splice) — moves 1 die from glitched_dice directly to ready_for_release_dice for free
+        # 1. Fast-Patching & Omnidyne Magnetic Splice
+        # Hook: Omnidyne Systems (Magnetic Splice) — moves 1 die from glitched_dice directly to ready_for_release_dice for free
+        is_omnidyne = bool(
+            (player.company and player.company.code == CompanyCode.OMNIDYNE)
+            or (player.archetype and player.archetype.code == ArchetypeCode.PHREAKER)
+        ) and player.is_ability_available(active_ver)
         if (
-            player.archetype is not None
-            and player.archetype.code == ArchetypeCode.PHREAKER
-            and player.is_ability_available(active_ver)
+            is_omnidyne
             and player.glitched_dice
         ):
-            # Prioritize colored dice over gray dice
-            best_idx = max(
-                range(len(player.glitched_dice)),
-                key=lambda i: (
-                    1 if player.glitched_dice[i].color != DieColor.GRAY else 0,
-                    getattr(player.glitched_dice[i], "cost", 0),
-                ),
-            )
-            phreaker_die = player.glitched_dice.pop(best_idx)
-            phreaker_die.production_role = None
-            phreaker_die.is_locked = False
-            phreaker_die.chosen_choice_index = None
-            phreaker_die.current_face = None
-            player.ready_for_release_dice.append(phreaker_die)
+            target_id = player.bot.choose_omnidyne_override(player, engine.state, engine.rng)
+            chosen_idx = None
+            if target_id is not None:
+                for i, d in enumerate(player.glitched_dice):
+                    if d.die_id == target_id:
+                        chosen_idx = i
+                        break
+            if chosen_idx is None:
+                # Prioritize colored dice over gray dice
+                chosen_idx = max(
+                    range(len(player.glitched_dice)),
+                    key=lambda i: (
+                        1 if player.glitched_dice[i].color != DieColor.GRAY else 0,
+                        getattr(player.glitched_dice[i], "cost", 0),
+                    ),
+                )
+            omnidyne_die = player.glitched_dice.pop(chosen_idx)
+            omnidyne_die.production_role = None
+            omnidyne_die.is_locked = False
+            omnidyne_die.chosen_choice_index = None
+            omnidyne_die.current_face = None
+            player.ready_for_release_dice.append(omnidyne_die)
             player.mark_ability_used(active_ver)
 
         # Bot Fast-Patch Decision: spend 1 🔧 per die to move from glitched_dice to scanned_dice

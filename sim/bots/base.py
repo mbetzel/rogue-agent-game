@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
-from sim.entities import ArchetypeCode
+from sim.entities import ArchetypeCode, Face
 
 if TYPE_CHECKING:
     from sim.engine import GameState, PlayerState
@@ -25,18 +25,40 @@ class Phase3ActionPlan:
     patch_actions: List[Dict[str, int | bool]] = field(default_factory=list)
     # Market purchases: list of die colors to buy (up to 2)
     market_purchases: List[DieColor] = field(default_factory=list)
+    buy_purple_reserve: bool = False
     # Special star actions
     use_b2_secret: bool = False  # Pay $4 for +1 Secret
     use_y1_secret: bool = False  # Pay $2 for +1 Secret
     p1_cube_choice: Optional[CubeColor] = None  # Add 1 Attack cube via P1
     p3_cube_choice: Optional[CubeColor] = None  # Add 1 Attack cube via P3
-    # Archetype Phase 3 actions
-    use_phreaker_ability: bool = False
-    use_cipher_ability: bool = False
-    cipher_mode: Optional[str] = None  # "BUY_FREE_DIE" or "DIRTY_INCOME"
-    cipher_free_die_color: Optional[DieColor] = None
+    # Institutional Overrides (Company)
+    use_omnidyne_override: bool = False
+    use_prometheus_override: bool = False
+    prometheus_mode: Optional[str] = None  # "DISCOUNT" / "BUY_FREE_DIE" or "CASH" / "DIRTY_INCOME"
+    prometheus_discount_die_color: Optional[DieColor] = None
+    # White Hat Face 6 Protocols
+    spook_burn_die_id: Optional[int] = None
+    phreaker_diagnostics_die_id: Optional[int] = None
+    prodigy_override_die_id: Optional[int] = None
+    prodigy_override_target_face: Optional[Face] = None
     # Phase 3 Part 3B Fast-patching (v0.22.0)
     fast_patch_indices: List[int] = field(default_factory=list)
+
+    # Legacy Backward Compatibility fields
+    use_phreaker_ability: bool = False
+    use_cipher_ability: bool = False
+    cipher_mode: Optional[str] = None
+    cipher_free_die_color: Optional[DieColor] = None
+
+    def __post_init__(self) -> None:
+        if self.use_phreaker_ability:
+            self.use_omnidyne_override = True
+        if self.use_cipher_ability:
+            self.use_prometheus_override = True
+        if self.cipher_mode is not None and self.prometheus_mode is None:
+            self.prometheus_mode = self.cipher_mode
+        if self.cipher_free_die_color is not None and self.prometheus_discount_die_color is None:
+            self.prometheus_discount_die_color = self.cipher_free_die_color
 
 
 def choose_backlash_die_index(ready_dice: List[Die]) -> int:
@@ -181,7 +203,11 @@ class BaseBot:
 
         return min(player_state.ready_dice, key=get_demotion_key)
 
-    def choose_operator_ability(
+    # =========================================================================
+    # Company Institutional Overrides (Once-per-Version)
+    # =========================================================================
+
+    def choose_meridian_override(
         self,
         player_state: PlayerState,
         contractor_supply: int,
@@ -190,7 +216,7 @@ class BaseBot:
         rng: random.Random,
         corruption_track: int = 0,
     ) -> bool:
-        """Returns True if the bot activates The Operator's Redundant Crew ability."""
+        """Returns True if the bot activates Meridian's Redundant Crew override."""
         return False
 
     def choose_operator_buy_third_die(
@@ -205,7 +231,48 @@ class BaseBot:
         """Returns True if the bot purchases a 3rd contractor die for progressive cost ($3) after using Redundant Crew."""
         return False
 
-    def choose_prodigy_ability(
+    def choose_omnidyne_override(
+        self,
+        player_state: PlayerState,
+        game_state: Any,
+        rng: random.Random,
+    ) -> Optional[int]:
+        """Returns die_id in glitched_dice to splice directly to ready, or None."""
+        if not player_state.glitched_dice:
+            return None
+        colored = [d for d in player_state.glitched_dice if d.color not in (DieColor.GRAY, DieColor.WHITE)]
+        return colored[0].die_id if colored else player_state.glitched_dice[0].die_id
+
+    def choose_aegis_override(
+        self,
+        player_state: PlayerState,
+        qualifying_colors: List[CubeColor],
+        exited_cubes: Dict[CubeColor, int],
+        active_version_str: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> Optional[CubeColor]:
+        """Returns CubeColor to ignore via Aegis Baffle Echo, or None."""
+        if not qualifying_colors:
+            return None
+        if CubeColor.BLUE in qualifying_colors:
+            return CubeColor.BLUE
+        if CubeColor.RED in qualifying_colors:
+            return CubeColor.RED
+        return qualifying_colors[0]
+
+    def choose_dto_override(
+        self,
+        player_state: PlayerState,
+        secrets_at_risk: int,
+        active_version_str: str,
+        rng: random.Random,
+        corruption_track: int = 0,
+    ) -> int:
+        """Returns secrets to absorb via DTO Slush Fund (up to 2)."""
+        return min(2, secrets_at_risk)
+
+    def choose_helix_override(
         self,
         player_state: PlayerState,
         active_dice: List[Die],
@@ -216,10 +283,33 @@ class BaseBot:
         rng: random.Random,
         corruption_track: int = 0,
     ) -> bool:
-        """Returns True if the bot activates The Prodigy's Brute-Force Bypass ability."""
+        """Returns True if the bot activates Helix's Brute-Force Bypass override."""
+        fn = getattr(self, "choose_prodigy_ability", None)
+        if fn is not None:
+            func_target = getattr(fn, "__func__", fn)
+            if func_target is not BaseBot.choose_helix_override:
+                try:
+                    return fn(
+                        player_state=player_state,
+                        active_dice=active_dice,
+                        staging_cubes=staging_cubes,
+                        stuck_cubes=stuck_cubes,
+                        directive_code=directive_code,
+                        rng=rng,
+                        corruption_track=corruption_track,
+                    )
+                except TypeError:
+                    return fn(
+                        player_state,
+                        active_dice,
+                        staging_cubes,
+                        stuck_cubes,
+                        directive_code,
+                        rng,
+                    )
         return False
 
-    def choose_prodigy_face_override(
+    def choose_helix_face_override(
         self,
         player_state: PlayerState,
         active_dice: List[Die],
@@ -229,6 +319,22 @@ class BaseBot:
         rng: random.Random,
     ) -> Optional[Tuple[int, Face]]:
         """Returns (die_index, target_face) to turn 1 rolled die to any legal non-Star face, or None."""
+        fn = getattr(self, "choose_prodigy_face_override", None)
+        if fn is not None:
+            func_target = getattr(fn, "__func__", fn)
+            if func_target is not BaseBot.choose_helix_face_override:
+                try:
+                    return fn(
+                        player_state=player_state,
+                        active_dice=active_dice,
+                        staging_cubes=staging_cubes,
+                        stuck_cubes=stuck_cubes,
+                        directive_code=directive_code,
+                        rng=rng,
+                    )
+                except TypeError:
+                    return fn(player_state, active_dice, rng)
+
         if not active_dice:
             return None
         candidates = [
@@ -251,34 +357,38 @@ class BaseBot:
                     best_choice = (idx, f)
         return best_choice
 
-    def choose_acoustic_ability(
+    def choose_prometheus_override(
         self,
         player_state: PlayerState,
-        qualifying_colors: List[CubeColor],
-        exited_cubes: Dict[CubeColor, int],
-        active_version_str: str,
+        game_state: Any,
         rng: random.Random,
-        corruption_track: int = 0,
-    ) -> Optional[CubeColor]:
-        """Returns the CubeColor of an exited cube to permanently remove via Baffle Echo, or None."""
-        if not qualifying_colors:
-            return None
-        if CubeColor.BLUE in qualifying_colors:
-            return CubeColor.BLUE
-        if CubeColor.RED in qualifying_colors:
-            return CubeColor.RED
-        return qualifying_colors[0]
+    ) -> str:
+        """Returns 'DISCOUNT' or 'CASH' for Prometheus Algorithmic Arbitrage."""
+        return "DISCOUNT" if player_state.money >= 2 else "CASH"
 
-    def choose_spook_ability(
+    # =========================================================================
+    # White Hat Signature Protocols (Purple Face 6)
+    # =========================================================================
+
+    def choose_operator_contingent_staffing(
         self,
         player_state: PlayerState,
-        secrets_at_risk: int,
-        active_version_str: str,
+        contractor_supply: int,
         rng: random.Random,
-        corruption_track: int = 0,
-    ) -> int:
-        """Returns the number of dollars to pay from supply to prevent Corporate Secret loss via Slush Fund."""
-        return 0
+    ) -> bool:
+        """Operator Protocol: Always accepts free White Contractor die into pool."""
+        return contractor_supply > 0
+
+    # =========================================================================
+    # Backward Compatibility Aliases
+    # =========================================================================
+    choose_operator_ability = choose_meridian_override
+    choose_phreaker_ability = choose_omnidyne_override
+    choose_acoustic_ability = choose_aegis_override
+    choose_spook_ability = choose_dto_override
+    choose_prodigy_ability = choose_helix_override
+    choose_prodigy_face_override = choose_helix_face_override
+    choose_cipher_ability = choose_prometheus_override
 
     def choose_malware_sacrifice(
         self,
@@ -457,5 +567,74 @@ class BaseBot:
     ) -> Phase3ActionPlan:
         """Returns the actions to execute during Phase 3: Corporate Operations."""
         return Phase3ActionPlan()
+
+    def choose_purple_reserve_purchase(
+        self,
+        player_state: PlayerState,
+        game_state: GameState,
+        rng: random.Random,
+    ) -> bool:
+        """Determines whether to purchase a Purple die from Personal Reserve for $4."""
+        if getattr(player_state, "personal_purple_reserve", 0) <= 0:
+            return False
+        if player_state.money < 4:
+            return False
+        # Baseline heuristic: Buy if cash reserves allow and ready dice pool is small
+        return len(player_state.ready_for_release_dice) < 5 or player_state.money >= 8
+
+    def choose_spook_burn_notice(
+        self,
+        player_state: PlayerState,
+        game_state: GameState,
+        rng: random.Random,
+    ) -> Optional[int]:
+        """Chooses an owned colored die to permanently burn to market for +1 Secret."""
+        if player_state.secrets <= 3 and not getattr(game_state, "is_final_round", False):
+            return None  # Do not cannibalize dice early if secrets are precarious
+        # Prioritize burning glitched colored dice over active ready dice
+        glitched_colored = [d for d in player_state.glitched_dice if d.color not in (DieColor.GRAY, DieColor.WHITE)]
+        if glitched_colored:
+            return glitched_colored[0].die_id
+        if getattr(game_state, "is_final_round", False):
+            # In final round, burn lowest-impact colored die for +1 Secret tiebreaker
+            candidates = [d for d in player_state.colored_dice if d.color != DieColor.PURPLE]
+            if candidates:
+                return candidates[0].die_id
+        return None
+
+    def choose_phreaker_jumper_diagnostics(
+        self,
+        player_state: PlayerState,
+        game_state: GameState,
+        rng: random.Random,
+    ) -> Optional[int]:
+        """Selects a die in Under Development to roll for cash/patch diagnostics."""
+        ud_dice = player_state.under_development_dice
+        if not ud_dice:
+            return None
+        # Prioritize Green/Yellow dice which have highest cash/patch yield
+        best_die = max(
+            ud_dice,
+            key=lambda d: 2 if d.color in (DieColor.GREEN, DieColor.YELLOW) else 1,
+        )
+        return best_die.die_id
+
+    def choose_prodigy_purple_star_override(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        rng: random.Random,
+    ) -> Optional[Tuple[int, Face]]:
+        """Selects a die in active pool to override to any legal non-Star face."""
+        # Find any other die with a Glitch or unwanted face
+        for idx, d in enumerate(active_dice):
+            eff = d.effective_face or d.current_face
+            if eff and eff.is_star and eff.star_code == "PURPLE_STAR":
+                continue
+            if d.current_face and d.current_face.is_glitch:
+                # Override to Block 1 Any or +$2
+                target = Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY)
+                return (idx, target)
+        return None
 
 

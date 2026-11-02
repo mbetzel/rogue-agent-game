@@ -336,6 +336,12 @@ class GameController:
     def use_spook_ability(self, player_id: int, dollars: int) -> Dict[str, Any]:
         return phase3_actions.use_spook_ability(self, player_id, dollars)
 
+    def spook_burn(self, player_id: int, die_id: int) -> Dict[str, Any]:
+        return phase3_actions.spook_burn(self, player_id, die_id)
+
+    def phreaker_diagnostics(self, player_id: int, die_id: Optional[int] = None) -> Dict[str, Any]:
+        return phase3_actions.phreaker_diagnostics(self, player_id, die_id)
+
     def execute_star_action(
         self,
         player_id: int,

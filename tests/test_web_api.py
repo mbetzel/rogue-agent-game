@@ -156,10 +156,11 @@ class TestWebAPI(unittest.TestCase):
         for key in required_keys:
             self.assertIn(key, state)
 
-        # Market contains all 5 colored dice
-        for col in ["red", "blue", "green", "yellow", "purple"]:
+        # Market contains 4 central market colored dice (INV-PURPLE-02: Purple excluded)
+        for col in ["red", "blue", "green", "yellow"]:
             self.assertIn(col, state["market"])
             self.assertEqual(state["market"][col]["stock"], 8)  # 2 * 4 players
+        self.assertNotIn("purple", state["market"])
 
     # -------------------------------------------------------------------------
     # 4. Phase 1: Roll Action

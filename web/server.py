@@ -260,6 +260,25 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
 
+                elif clean_path == "/api/game/action/spook_burn":
+                    pid = get_target_pid(default_to_human=False)
+                    if "die_id" not in data:
+                        payload, code = error_response("Missing required field 'die_id'", 400)
+                        self._send_json_response(payload, code)
+                        return
+                    die_id = int(data["die_id"])
+                    state = self.controller.spook_burn(pid, die_id)
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
+                elif clean_path == "/api/game/action/phreaker_diagnostics":
+                    pid = get_target_pid(default_to_human=False)
+                    die_id_raw = data.get("die_id")
+                    die_id = int(die_id_raw) if die_id_raw is not None else None
+                    state = self.controller.phreaker_diagnostics(pid, die_id)
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
                 elif clean_path == "/api/game/action/star":
                     pid = get_target_pid(default_to_human=False)
                     action_type = str(data.get("action_type", ""))

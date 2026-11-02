@@ -6,7 +6,7 @@ import random
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, EndGameReason, ShieldColor
-from sim.entities import ArchetypeCode, CorruptionSpace, Die
+from sim.entities import ArchetypeCode, CompanyCode, WhiteHatCode, CorruptionSpace, Die
 from sim.engine.state import ProductionRole, RoundTelemetry
 
 if TYPE_CHECKING:
@@ -24,6 +24,7 @@ def execute_phase_2(
 
     # Drop all staged cubes into the tower
     exited_cubes = engine.state.tower.drop(engine.state.staging_cup, engine.rng)
+    engine.state.last_exited_cubes = dict(exited_cubes)
     stuck_after = engine.state.tower.get_stuck_copy()
 
     # Clear staging cup
@@ -254,22 +255,22 @@ def resolve_player_defense_and_wear(
         CubeColor.GREEN: raw_shields[ShieldColor.GREEN],
     }
 
-    # Hook Phase 2 Step 2B: The Acoustic (Baffle Echo - v0.13.0)
+    # Hook Phase 2 Step 2B: Aegis Defense Relay (Baffle Echo - v0.13.0)
     # When resolving compiler damage, ignore 1 Attack Cube of your choice for yourself this round.
     # Exited cubes remain in the exit tray and recycle as normal.
     player_attacks = dict(attack_strengths)
-    if (
-        player.archetype is not None
-        and player.archetype.code == ArchetypeCode.ACOUSTIC
-        and player.is_ability_available(active_ver)
-    ):
+    is_aegis = bool(
+        (player.company and player.company.code == CompanyCode.AEGIS)
+        or (player.archetype and player.archetype.code == ArchetypeCode.ACOUSTIC)
+    ) and player.is_ability_available(active_ver)
+    if is_aegis:
         # Determine qualifying attack colors where threat exceeds shields (or causes unblocked damage)
         qualifying = [
             c for c in [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN]
             if player_attacks.get(c, 0) > 0 and exited_cubes.get(c, 0) > 0
         ]
         if qualifying:
-            chosen_color = player.bot.choose_acoustic_ability(
+            chosen_color = player.bot.choose_aegis_override(
                 player_state=player,
                 qualifying_colors=qualifying,
                 exited_cubes=exited_cubes,
@@ -337,16 +338,17 @@ def resolve_player_defense_and_wear(
             player.patches -= patches_absorbed
             unpaid_ransom -= patches_absorbed
 
-    # Hook Phase 2 Step 2B: The Spook (Slush Fund - v0.13.0)
-    # The Spook accesses emergency black budget reserves:
+    # Hook Phase 2 Step 2B: Dept. of Telecom (DTO) (Slush Fund - v0.13.0)
     # Absorb up to 2 Corporate Secret loss (from Blue Spyware or unpaid Red Ransom) for free without paying cash.
     # (Any additional Secret loss may be absorbed by paying $1 per Secret as normal).
     potential_secret_loss = unpaid_ransom + unblocked_blue
+    is_dto = bool(
+        (player.company and player.company.code == CompanyCode.DTO)
+        or (player.archetype and player.archetype.code == ArchetypeCode.SPOOK)
+    ) and player.is_ability_available(active_ver)
     if (
         potential_secret_loss > 0
-        and player.archetype is not None
-        and player.archetype.code == ArchetypeCode.SPOOK
-        and player.is_ability_available(active_ver)
+        and is_dto
     ):
         # 1. Absorb up to 2 Secrets for FREE from emergency slush reserves
         free_absorb = min(2, potential_secret_loss)
@@ -359,19 +361,19 @@ def resolve_player_defense_and_wear(
 
         # 2. If excess secret loss remains and player has cash, allow additional cash absorption at $1/Secret
         if potential_secret_loss > 0 and player.money > 0:
-            spook_dollars = player.bot.choose_spook_ability(
+            dto_dollars = player.bot.choose_dto_override(
                 player_state=player,
                 secrets_at_risk=potential_secret_loss,
                 active_version_str=active_ver,
                 rng=engine.rng,
                 corruption_track=engine.state.corruption_track,
             )
-            actual_spook_dollars = max(0, min(spook_dollars, player.money, potential_secret_loss))
-            if actual_spook_dollars > 0:
-                player.money -= actual_spook_dollars
-                absorbed_paid_ransom = min(unpaid_ransom, actual_spook_dollars)
+            actual_dto_dollars = max(0, min(dto_dollars, player.money, potential_secret_loss))
+            if actual_dto_dollars > 0:
+                player.money -= actual_dto_dollars
+                absorbed_paid_ransom = min(unpaid_ransom, actual_dto_dollars)
                 unpaid_ransom -= absorbed_paid_ransom
-                remaining_paid = actual_spook_dollars - absorbed_paid_ransom
+                remaining_paid = actual_dto_dollars - absorbed_paid_ransom
                 unblocked_blue -= remaining_paid
 
     if unpaid_ransom > 0:
@@ -503,7 +505,9 @@ def return_player_colored_dice_step2a(
             if returned >= count:
                 break
             zone.remove(die)
-            engine.state.market[die.color] = engine.state.market.get(die.color, 0) + 1
+            if die.color in engine.state.market:
+                engine.state.market[die.color] += 1
+            # If Purple, die is scrapped and not returned to market
             returned += 1
 
     # 2. In Production (Income dice first, then Shield dice)
@@ -519,7 +523,9 @@ def return_player_colored_dice_step2a(
             if returned >= count:
                 break
             player.in_production_dice.remove(die)
-            engine.state.market[die.color] = engine.state.market.get(die.color, 0) + 1
+            if die.color in engine.state.market:
+                engine.state.market[die.color] += 1
+            # If Purple, die is scrapped and not returned to market
             if die in rolled_dice:
                 idx = rolled_dice.index(die)
                 commitments.pop(idx, None)
@@ -535,7 +541,9 @@ def return_player_colored_dice_step2a(
             if returned >= count:
                 break
             player.ready_for_release_dice.remove(die)
-            engine.state.market[die.color] = engine.state.market.get(die.color, 0) + 1
+            if die.color in engine.state.market:
+                engine.state.market[die.color] += 1
+            # If Purple, die is scrapped and not returned to market
             returned += 1
 
 

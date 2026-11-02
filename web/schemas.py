@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, EndGameReason, ShieldColor
 from sim.engine import EndGameResult, GameState, PlayerState, RoundTelemetry
-from sim.entities import AbilityStatus, ArchetypeCard, Die, Face, VariantCard, VersionCard
+from sim.entities import AbilityStatus, ArchetypeCard, Company, Die, Face, VariantCard, VersionCard, WhiteHat
 
 
 ARCHETYPE_FLAVOR: Dict[str, Dict[str, str]] = {
@@ -130,6 +130,34 @@ class GameStateSerializer:
         }
 
     @staticmethod
+    def serialize_company(company: Optional[Company]) -> Optional[Dict[str, Any]]:
+        if company is None:
+            return None
+        return {
+            "code": company.code.value if hasattr(company.code, "value") else str(company.code),
+            "name": company.name,
+            "sector": company.sector,
+            "override_name": company.override_name,
+            "timing_window": company.timing_window,
+            "description": company.description,
+            "flavor": company.flavor,
+        }
+
+    @staticmethod
+    def serialize_white_hat(white_hat: Optional[WhiteHat]) -> Optional[Dict[str, Any]]:
+        if white_hat is None:
+            return None
+        return {
+            "code": white_hat.code.value if hasattr(white_hat.code, "value") else str(white_hat.code),
+            "name": white_hat.name,
+            "role": white_hat.role,
+            "protocol_name": white_hat.protocol_name,
+            "timing_window": white_hat.timing_window,
+            "description": white_hat.description,
+            "flavor": white_hat.flavor,
+        }
+
+    @staticmethod
     def serialize_archetype_card(card: Optional[ArchetypeCard]) -> Optional[Dict[str, Any]]:
         if card is None:
             return None
@@ -218,6 +246,8 @@ class GameStateSerializer:
             "name": name,
             "is_human": is_human,
             "bot_archetype": bot_archetype,
+            "company": cls.serialize_company(getattr(player, "company", None)),
+            "white_hat": cls.serialize_white_hat(getattr(player, "white_hat", None)),
             "archetype": cls.serialize_archetype_card(getattr(player, "archetype", None)),
             "ability_v1_status": (
                 player.ability_v1_status.value
@@ -280,6 +310,13 @@ class GameStateSerializer:
             "rerolls_remaining": rerolls_remaining,
             "max_rerolls": max_rerolls,
             "unlocked_dice_indices": [i for i, d in enumerate(active_rolled_dice) if not getattr(d, "is_locked", False)],
+            # Personal Reserve (v0.24.0)
+            "personal_purple_reserve": getattr(player, "personal_purple_reserve", 2),
+            "can_buy_purple_reserve": (
+                getattr(player, "personal_purple_reserve", 2) > 0
+                and player.money >= 4
+                and purchases_this_turn < getattr(config, "max_market_purchases_per_turn", 2)
+            ),
             # Phase 3 interaction state
             "purchases_this_turn": purchases_this_turn,
             "dirty_income_taken_this_turn": dirty_income_taken_this_turn,
@@ -303,7 +340,7 @@ class GameStateSerializer:
         market_serialized = {
             color.value: {
                 "stock": state.market.get(color, 0),
-                "cost": 4 if color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5,
+                "cost": 4 if color in (DieColor.RED, DieColor.GREEN) else 5,
                 "vp": 0,
                 "variant": cls.serialize_variant_card(state.variant_cards[color])
                 if color in state.variant_cards
@@ -314,7 +351,6 @@ class GameStateSerializer:
                 DieColor.BLUE,
                 DieColor.GREEN,
                 DieColor.YELLOW,
-                DieColor.PURPLE,
             ]
         }
 

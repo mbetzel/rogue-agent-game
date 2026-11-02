@@ -19,6 +19,12 @@ class CubeTower:
             CubeColor.GREEN: 0,
             CubeColor.BLACK: 0,
         }
+        self.last_exited_cubes: Dict[CubeColor, int] = {
+            CubeColor.RED: 0,
+            CubeColor.BLUE: 0,
+            CubeColor.GREEN: 0,
+            CubeColor.BLACK: 0,
+        }
 
     def total_stuck(self) -> int:
         """Returns the total number of cubes currently stuck inside the tower."""
@@ -28,6 +34,8 @@ class CubeTower:
         """Clears all stuck cubes from inside the tower."""
         for color in self.stuck_cubes:
             self.stuck_cubes[color] = 0
+        for color in self.last_exited_cubes:
+            self.last_exited_cubes[color] = 0
 
     def load_stuck(self, cubes: Dict[CubeColor, int]) -> None:
         """Loads specific stuck cubes into the tower (for deterministic unit testing)."""
@@ -88,4 +96,5 @@ class CubeTower:
                     new_stuck[color] += 1
 
         self.stuck_cubes = new_stuck
+        self.last_exited_cubes = dict(exited)
         return exited

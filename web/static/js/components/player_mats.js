@@ -10,7 +10,7 @@ import {
   activePlayerTab,
   setActivePlayerTab,
 } from "../state.js";
-import { doFastPatch } from "../api.js";
+import { doFastPatch, doBuy } from "../api.js";
 import { renderVersionSlotBadge } from "./header.js";
 
 let renderAppCallback = null;
@@ -25,69 +25,128 @@ function requestRender() {
   }
 }
 
-// Full Dossier specs matching pnp/generate_pnp.py CHARACTERS
-const CHARACTER_DOSSIERS = {
-  ACOUSTIC: {
-    code: "ACOUSTIC",
-    name: "The Acoustic",
-    role: "Pattern Genius // Mainframe Resonance",
-    flavor: "Every mainframe hums before it strikes. Listen to the baffles -- you can hear which packet drops next.",
+// Full Modular Dossier specs matching pnp/generate_pnp.py CHARACTERS & COMPANIES
+const COMPANIES_DATA = {
+  MERIDIAN: {
+    code: "MERIDIAN",
+    name: "Meridian Global Logistics",
+    sector: "Defense & Logistics",
+    overrideName: "Contingent Staffing",
+    timing: "P1: STAFFING",
+    description: "Roll 1 additional Contractor die without paying cash cost during Phase 1 Boot.",
+    themeColor: "#f59e0b",
+  },
+  OMNIDYNE: {
+    code: "OMNIDYNE",
+    name: "Omnidyne Systems",
+    sector: "Industrial Automation",
+    overrideName: "Magnetic Splice",
+    timing: "P3: OPERATIONS",
+    description: "Move 1 die from your Glitched Box directly to Ready for Release for free (bypassing Scanned and saving 1 🔧).",
+    themeColor: "#4ade80",
+  },
+  AEGIS: {
+    code: "AEGIS",
+    name: "Aegis Security Group",
+    sector: "Physical & Cyber Defense",
+    overrideName: "Baffle Echo",
     timing: "P2: STEP 2B DMG",
-    abilityName: "Baffle Echo",
-    abilityDesc: "When resolving compiler damage, ignore 1 Attack Cube (Red, Blue, or Green) of your choice for yourself this round. Exited cubes remain in tray and recycle as normal.",
+    description: "Ignore 1 attack cube (Red, Blue, or Green) when resolving compiler damage for yourself this round.",
     themeColor: "#38bdf8",
+  },
+  DTO: {
+    code: "DTO",
+    name: "DTO Sovereign Trust",
+    sector: "Offshore Banking & Intelligence",
+    overrideName: "Slush Fund",
+    timing: "P2: STEP 2B DMG",
+    description: "Absorb up to 2 Corporate Secret loss (from Blue Spyware or Red Ransom) for free without paying cash.",
+    themeColor: "#a855f7",
+  },
+  HELIX: {
+    code: "HELIX",
+    name: "Helix Bio-Informatics",
+    sector: "Genomic Computation",
+    overrideName: "Wildcard Hash Match",
+    timing: "P1: HASH MATCH",
+    description: "Set 1 Gray die to any face of choice to complete a Hash Match triplet.",
+    themeColor: "#f43f5e",
+  },
+  PROMETHEUS: {
+    code: "PROMETHEUS",
+    name: "Prometheus Quantitative",
+    sector: "High-Frequency Arbitrage",
+    overrideName: "Algorithmic Arbitrage",
+    timing: "P3: OPERATIONS",
+    description: "Mode A: $2 discount on purchasing 1 Colored or Purple Specialist Die; Mode B: Gain +$3 cash payout directly.",
+    themeColor: "#00d4ff",
+  },
+};
+
+const WHITE_HATS_DATA = {
+  OPERATOR: {
+    code: "OPERATOR",
+    name: "The Operator",
+    role: "Master Strategist // Contractor Dispatch",
+    flavor: "Never burn internal hardware when three night-shift phreakers are waiting by a payphone.",
+    protocolName: "Overtime Sprint",
+    protocolDesc: "Phase 1 Staffing: hire up to 2 White Contractors for free.",
+    passiveDesc: "Gray die with [1 $, 1 🔧] yields +$1 extra.",
+    themeColor: "#f59e0b",
   },
   PHREAKER: {
     code: "PHREAKER",
     name: "The Phreaker",
     role: "Hardware Tinkerer // Emergency Relays",
     flavor: "A strip of Mylar splicing tape and a 2600-Hz whistle will fix what ten grand of silicon can't.",
-    timing: "P3: OPERATIONS",
-    abilityName: "Magnetic Splice",
-    abilityDesc: "Move 1 die from your Glitched Box directly to your Ready for Release Zone for free (bypassing Scanned and saving 1 🔧)",
+    protocolName: "Packet Sniffer",
+    protocolDesc: "Phase 3 Ops: Roll 1 die in Scanned or Glitched; gain rolled cash/patches; die remains in place.",
+    passiveDesc: "Free Phase 3 diagnostic roll on 1 die in Scanned or Glitched.",
     themeColor: "#4ade80",
   },
-  PRODIGY: {
-    code: "PRODIGY",
-    name: "The Prodigy",
-    role: "Reckless Hacker // Lock Bypassing",
-    flavor: "Locked memory is just a polite suggestion from someone who left debug interrupts enabled.",
-    timing: "P1: REROLL STEP",
-    abilityName: "Brute-Force Bypass",
-    abilityDesc: "During rerolls, include any number of Locked dice in free rerolls without spending 🔧. Turn 1 rolled die to any non-Star face of choice.",
-    themeColor: "#f43f5e",
+  ACOUSTIC: {
+    code: "ACOUSTIC",
+    name: "The Acoustic",
+    role: "Pattern Genius // Mainframe Resonance",
+    flavor: "Every mainframe hums before it strikes. Listen to the baffles -- you can hear which packet drops next.",
+    protocolName: "Decoy Route",
+    protocolDesc: "Phase 3 Income: +$1 for each distinct attack cube color in Exit Tray (Red, Blue, Green, Black; max +$4).",
+    passiveDesc: "Production dice produce +1 🔧 each time they generate patches.",
+    themeColor: "#38bdf8",
   },
   SPOOK: {
     code: "SPOOK",
     name: "The Spook",
     role: "Ex-Intelligence // OpSec & Slush Funds",
     flavor: "Every breach has a price tag. That's what non-attributable slush accounts are for.",
-    timing: "P2: STEP 2B DMG",
-    abilityName: "Slush Fund",
-    abilityDesc: "Absorb up to 2 Corporate Secret loss (from Blue Spyware or unpaid Red Ransom) for free without paying cash. (Additional loss absorbed at $1/Secret).",
+    protocolName: "Burn Notice",
+    protocolDesc: "Phase 3 Ops: Gain +$2; optional: permanently return 1 owned colored die to market for +1 Corporate Secret.",
+    passiveDesc: "Once per turn in Phase 3, burn 1 owned colored die for +1 Secret.",
     themeColor: "#a855f7",
+  },
+  PRODIGY: {
+    code: "PRODIGY",
+    name: "The Prodigy",
+    role: "Reckless Hacker // Lock Bypassing",
+    flavor: "Locked memory is just a polite suggestion from someone who left debug interrupts enabled.",
+    protocolName: "Exploit Payload",
+    protocolDesc: "Phase 1 Rerolls: Turn any 1 other rolled die to any legal non-Star face of choice.",
+    passiveDesc: "If Gray die has only 🔧, generate +1 extra 🔧.",
+    themeColor: "#f43f5e",
   },
   CIPHER: {
     code: "CIPHER",
     name: "The Cipher",
     role: "Mathematician // Algorithmic Arbitrage",
     flavor: "Why pay retail for entropy when SETEC's own arbitrage equations subsidize the upgrade?",
-    timing: "P3: OPERATIONS",
-    abilityName: "Algorithmic Arbitrage",
-    abilityDesc: "In Phase 3, buy 1 Colored Die at a $2 discount (min $0), OR take Backdoor Siphon (Dirty Income) without demoting a Ready die to Unpatched.",
+    protocolName: "Sub-Zero Ledger",
+    protocolDesc: "Phase 1 Hash Match: Wildcard completing pair to triplet (+1 Secret); Phase 3 Income: +$2.",
+    passiveDesc: "Purple Specialist Die faces yield optimized cryptographic yield.",
     themeColor: "#00d4ff",
   },
-  OPERATOR: {
-    code: "OPERATOR",
-    name: "The Operator",
-    role: "Master Strategist // Contractor Dispatch",
-    flavor: "Never burn internal hardware when three night-shift phreakers are waiting by a payphone.",
-    timing: "P1: STAFFING",
-    abilityName: "Redundant Crew",
-    abilityDesc: "In Phase 1 Staffing, hire up to 2 White Contractor Dice for free this round (bypassing progressive costs).",
-    themeColor: "#f59e0b",
-  },
 };
+
+const CHARACTER_DOSSIERS = WHITE_HATS_DATA;
 
 function getDossier(code) {
   if (!code) return null;
@@ -277,16 +336,32 @@ export function renderPlayerMats() {
   targetList.forEach((p) => {
     const isTurn = (p.player_id === state.active_player_index && state.phase === 3);
     const isCISO = (p.player_id === state.first_player_index);
-    const archetypeCode = (p.archetype && p.archetype.code) ? p.archetype.code : "";
-    const dossier = getDossier(archetypeCode) || {
-      name: p.archetype ? p.archetype.name : p.name,
-      role: p.archetype && p.archetype.role ? p.archetype.role : "Cybersecurity Specialist",
-      flavor: p.archetype && p.archetype.flavor ? p.archetype.flavor : "Data flows through darkness, leaving traces only we can read.",
-      timing: p.archetype ? p.archetype.timing_window : "TACTICAL",
-      abilityName: p.archetype ? p.archetype.ability_name : "Special Routine",
-      abilityDesc: p.archetype ? p.archetype.description : "Consultancy ability active across versions.",
-      code: archetypeCode,
-    };
+
+    // Resolve modular Client Company and White Hat Dossier (with backward compatibility)
+    const companyCode = (p.company && p.company.code) ? p.company.code : (p.archetype ? p.archetype.code : "MERIDIAN");
+    const whiteHatCode = (p.white_hat && p.white_hat.code) ? p.white_hat.code : (p.archetype ? p.archetype.code : "OPERATOR");
+
+    const compFallback = COMPANIES_DATA[companyCode] || COMPANIES_DATA["MERIDIAN"];
+    const company = p.company ? {
+      name: p.company.name || compFallback.name,
+      sector: p.company.sector || compFallback.sector,
+      overrideName: p.company.override_name || compFallback.overrideName,
+      timing: p.company.timing_window || compFallback.timing,
+      description: p.company.description || compFallback.description,
+      themeColor: p.company.theme_color || compFallback.themeColor,
+    } : compFallback;
+
+    const whFallback = WHITE_HATS_DATA[whiteHatCode] || WHITE_HATS_DATA["OPERATOR"];
+    const whiteHat = p.white_hat ? {
+      code: p.white_hat.code || whFallback.code,
+      name: p.white_hat.name || whFallback.name,
+      role: p.white_hat.role || whFallback.role,
+      flavor: p.white_hat.flavor || whFallback.flavor,
+      protocolName: p.white_hat.protocol_name || (p.white_hat.purple_star_spec ? p.white_hat.purple_star_spec.split(":")[0] : whFallback.protocolName),
+      protocolDesc: p.white_hat.description || p.white_hat.purple_star_spec || whFallback.protocolDesc,
+      passiveDesc: p.white_hat.passive_protocol || whFallback.passiveDesc,
+      themeColor: p.white_hat.theme_color || whFallback.themeColor,
+    } : whFallback;
 
     const isActivelyRolling = Boolean(p.has_rolled && !p.has_committed);
     const readyDiceList = (p.ready_for_release_dice && p.ready_for_release_dice.length !== undefined)
@@ -329,42 +404,62 @@ export function renderPlayerMats() {
         <!-- LEFT COLUMN: Identity, Wireframe, Flavor, & Ability Card  -->
         <!-- ========================================================= -->
         <div class="terminal-left-col">
-          <!-- Character Header -->
-          <div class="character-identity-box">
-            <h3 class="character-name">${dossier.name.toUpperCase()}</h3>
-            <div class="character-role">${dossier.role.toUpperCase()}</div>
-          </div>
-
-          <!-- Schematic Blueprint Wireframe -->
-          <div class="schematic-blueprint-box">
-            ${renderSchematicSvg(dossier.code)}
-          </div>
-
-          <!-- Flavor Text Box -->
-          <div class="flavor-quote-box">
-            <em>"${dossier.flavor}"</em>
-          </div>
-
-          <!-- Special Ability Box -->
-          <div class="special-ability-card">
-            <div class="ability-card-header">
-              <span class="ability-card-title">${dossier.abilityName.toUpperCase()}</span>
-              <span class="ability-timing-pill">${dossier.timing}</span>
+          <!-- Client Company Box -->
+          <div class="company-card-box" style="margin-bottom: 8px; border: 1px solid ${company.themeColor || 'var(--border-color)'}; border-radius: 4px; padding: 6px; background: rgba(0,0,0,0.35);">
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+              <span style="font-weight: 700; font-size: 0.8rem; color: ${company.themeColor || '#fff'};">${company.name.toUpperCase()}</span>
+              <span style="font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase;">${company.sector}</span>
             </div>
-            <div class="ability-card-body">
-              ${dossier.abilityDesc}
+            <div style="margin-top: 4px; display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 600; font-size: 0.75rem; color: #f1f5f9;">OVERRIDE: ${company.overrideName.toUpperCase()}</span>
+              <span class="ability-timing-pill" style="font-size: 0.6rem;">${company.timing}</span>
             </div>
-            
-            <!-- Once-Per-Version Ability Track inside Ability Card -->
-            <div class="version-ability-track-panel">
+            <div style="font-size: 0.7rem; color: #cbd5e1; margin-top: 2px; line-height: 1.25;">
+              ${company.description}
+            </div>
+            <div class="version-ability-track-panel" style="margin-top: 6px;">
               <div class="version-track-header">
-                <span class="track-hdr-lbl">ONCE / VER:</span>
+                <span class="track-hdr-lbl">OVERRIDE CHARGE (ONCE / VER):</span>
                 <span class="track-hdr-sub">Unused charge forfeits on SETEC upgrade</span>
               </div>
               <div class="version-track-slots-row">
                 ${renderVersionSlotBadge("v1.0", p.ability_v1_status)}
                 ${renderVersionSlotBadge("v2.0", p.ability_v2_status)}
                 ${renderVersionSlotBadge("v3.0", p.ability_v3_status)}
+              </div>
+            </div>
+          </div>
+
+          <!-- White Hat Dossier Box -->
+          <div class="white-hat-card-box" style="border: 1px solid ${whiteHat.themeColor || 'var(--border-color)'}; border-radius: 4px; padding: 6px; background: rgba(0,0,0,0.25);">
+            <div class="character-identity-box" style="margin-bottom: 4px;">
+              <h3 class="character-name" style="font-size: 0.85rem; margin: 0; color: ${whiteHat.themeColor || '#fff'};">${whiteHat.name.toUpperCase()}</h3>
+              <div class="character-role" style="font-size: 0.65rem; color: var(--text-dim);">${whiteHat.role.toUpperCase()}</div>
+            </div>
+
+            <!-- Schematic Blueprint Wireframe -->
+            <div class="schematic-blueprint-box">
+              ${renderSchematicSvg(whiteHat.code)}
+            </div>
+
+            <!-- Flavor Text Box -->
+            <div class="flavor-quote-box" style="margin: 4px 0; font-size: 0.68rem;">
+              <em>"${whiteHat.flavor}"</em>
+            </div>
+
+            ${whiteHat.passiveDesc ? `
+            <div style="font-size: 0.7rem; color: #94a3b8; margin-bottom: 4px; line-height: 1.2;">
+              <span style="color: #38bdf8; font-weight: 600;">PASSIVE:</span> ${whiteHat.passiveDesc}
+            </div>` : ''}
+
+            <!-- Face 6 Purple Star Protocol -->
+            <div class="signature-protocol-panel" style="padding-top: 4px; border-top: 1px dashed rgba(168, 85, 247, 0.4);">
+              <div class="protocol-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                <span style="font-weight: bold; color: #c084fc; font-size: 0.72rem;">PURPLE ★ PROTOCOL: ${(whiteHat.protocolName || 'SIGNATURE').toUpperCase()}</span>
+                <span class="ability-timing-pill" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; font-size: 0.6rem;">FACE 6</span>
+              </div>
+              <div style="font-size: 0.7rem; color: #cbd5e1; line-height: 1.25;">
+                ${whiteHat.protocolDesc || ''}
               </div>
             </div>
           </div>
@@ -576,10 +671,40 @@ export function renderPlayerMats() {
             ${p.secrets <= 0 ? '<strong style="color: #ff0055;">TOTAL DATA BREACH (PATIENT ZERO)</strong>' : 'Start: 8 (2P/3P) | 10 (4P) — ≤0 = Total Breach'}
           </div>
         </div>
+
+        <!-- 4. Personal Purple Reserve -->
+        <div class="reserve-card purple-reserve-card ${p.can_buy_purple_reserve ? 'clickable' : ''}" id="purple_reserve_${p.player_id}" style="border-color: rgba(168, 85, 247, 0.4);">
+          <div class="reserve-card-header">
+            <span class="reserve-card-title" style="color: #c084fc;">▼ PURPLE RESERVE</span>
+            <span class="reserve-rate-pill" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">${p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 2}/2 DICE</span>
+          </div>
+          <div class="reserve-card-main" style="display: flex; gap: 8px; justify-content: center; padding: 4px 0;">
+            <div class="patch-token-slot ${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 2) >= 1 ? 'filled' : 'empty'}" style="border-color: #a855f7;">
+              <span class="slot-number-lbl">DIE 1</span>
+              <span class="slot-wrench-icon" style="color: #c084fc;">${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 2) >= 1 ? '▼ $4' : '✓'}</span>
+            </div>
+            <div class="patch-token-slot ${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 2) >= 2 ? 'filled' : 'empty'}" style="border-color: #a855f7;">
+              <span class="slot-number-lbl">DIE 2</span>
+              <span class="slot-wrench-icon" style="color: #c084fc;">${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 2) >= 2 ? '▼ $4' : '✓'}</span>
+            </div>
+          </div>
+          <div class="reserve-card-footer">
+            ${p.can_buy_purple_reserve ? '<strong style="color: #c084fc;">CLICK TO PROCURE ($4)</strong>' : 'Private Reserve | Dual-Shield & Face 6 Protocol'}
+          </div>
+        </div>
       </div>
     `;
 
     terminalsGrid.appendChild(terminalMat);
+
+    // Personal Purple Reserve Click Handler
+    const purpleReserveEl = terminalMat.querySelector(`#purple_reserve_${p.player_id}`);
+    if (purpleReserveEl && p.can_buy_purple_reserve && p.is_human) {
+      purpleReserveEl.style.cursor = "pointer";
+      purpleReserveEl.onclick = () => {
+        doBuy("purple");
+      };
+    }
 
     // =========================================================
     // Populate Dice in Trays

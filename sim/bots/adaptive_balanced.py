@@ -4,7 +4,7 @@ import random
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
-from sim.entities import ArchetypeCode
+from sim.entities import ArchetypeCode, CompanyCode, WhiteHatCode
 from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index, plan_final_round_repairs
 
 if TYPE_CHECKING:
@@ -126,6 +126,11 @@ class AdaptiveBalancedBot(BaseBot):
             return min(player_state.money, secrets_at_risk)
         return min(player_state.money, min(secrets_at_risk, 1))
 
+    choose_meridian_override = choose_operator_ability
+    choose_helix_override = choose_prodigy_ability
+    choose_aegis_override = choose_acoustic_ability
+    choose_dto_override = choose_spook_ability
+
     def choose_debug_unlocks(
         self,
         player_state: PlayerState,
@@ -208,7 +213,7 @@ class AdaptiveBalancedBot(BaseBot):
 
             if not face.is_shield and not face.has_shield_option and not threats_covered:
                 rerolls.append(idx)
-            elif not face.is_shield and not face.has_shield_option and not face.has_cash_option and face.money <= 1 and face.patches == 0:
+            elif not face.is_star and not face.is_shield and not face.has_shield_option and not face.has_cash_option and face.money <= 1 and face.patches == 0:
                 rerolls.append(idx)
         return rerolls
 
@@ -369,22 +374,29 @@ class AdaptiveBalancedBot(BaseBot):
 
         active_ver = game_state.active_version.version_str
 
-        # 0. Consultancy Archetype Phase 3 Abilities
+        # 0. Consultancy Archetype / Institutional Override Phase 3 Abilities
+        is_omnidyne = bool(
+            (player_state.company and player_state.company.code == CompanyCode.OMNIDYNE)
+            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.PHREAKER)
+        )
         if (
-            player_state.archetype
-            and player_state.archetype.code == ArchetypeCode.PHREAKER
+            is_omnidyne
             and player_state.is_ability_available(active_ver)
             and len(player_state.unpatched_dice) >= 1
         ):
+            plan.use_omnidyne_override = True
             plan.use_phreaker_ability = True
 
         preferred_colors = [DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]
         if threats[CubeColor.RED] > threats[CubeColor.BLUE]:
             preferred_colors = [DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW]
 
+        is_prometheus = bool(
+            (player_state.company and player_state.company.code == CompanyCode.PROMETHEUS)
+            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.CIPHER)
+        )
         if (
-            player_state.archetype
-            and player_state.archetype.code == ArchetypeCode.CIPHER
+            is_prometheus
             and player_state.is_ability_available(active_ver)
         ):
             discounted_colors = []
@@ -395,13 +407,15 @@ class AdaptiveBalancedBot(BaseBot):
                         discounted_colors.append((c, cost))
 
             if not is_final_round and discounted_colors and (current_money >= 3 or player_state.secrets <= 1):
+                plan.use_prometheus_override = True
                 plan.use_cipher_ability = True
-                plan.cipher_mode = "BUY_FREE_DIE"
-                plan.cipher_free_die_color = discounted_colors[0][0]
+                plan.prometheus_mode = "BUY_FREE_DIE"
+                plan.prometheus_discount_die_color = discounted_colors[0][0]
                 current_money -= discounted_colors[0][1]
             else:
+                plan.use_prometheus_override = True
                 plan.use_cipher_ability = True
-                plan.cipher_mode = "CASH"
+                plan.prometheus_mode = "CASH"
                 current_money += game_state.config.cipher_arbitrage_cash
 
         # 1. Dirty Income: (Guarded by config.dirty_income_enabled)
@@ -439,9 +453,38 @@ class AdaptiveBalancedBot(BaseBot):
             plan.use_y1_secret = True
             current_money -= 6
 
+        # Operative Protocol Selectors (Spook & Phreaker)
+        is_spook = bool(
+            (player_state.white_hat and player_state.white_hat.code == WhiteHatCode.SPOOK)
+            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.SPOOK)
+        )
+        if is_spook:
+            burn_id = self.choose_spook_burn_notice(player_state, game_state, rng)
+            if burn_id is not None:
+                plan.spook_burn_die_id = burn_id
+
+        is_phreaker = bool(
+            (player_state.white_hat and player_state.white_hat.code == WhiteHatCode.PHREAKER)
+            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.PHREAKER)
+        )
+        if is_phreaker:
+            diag_id = self.choose_phreaker_jumper_diagnostics(player_state, game_state, rng)
+            if diag_id is not None:
+                plan.phreaker_diagnostics_die_id = diag_id
+
         # 4. Market Purchases: buy counter dice matching high threats (never in final round to preserve cash for Tiebreaker #1)
         if not is_final_round:
             purchases = 0
+            if (
+                purchases < game_state.config.max_market_purchases_per_turn
+                and self.choose_purple_reserve_purchase(player_state, game_state, rng)
+                and (current_money - 4 >= cash_cushion)
+            ):
+                plan.market_purchases.append(DieColor.PURPLE)
+                plan.buy_purple_reserve = True
+                current_money -= 4
+                purchases += 1
+
             preferred_colors = [DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]
             if threats[CubeColor.RED] > threats[CubeColor.BLUE]:
                 preferred_colors = [DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW]
@@ -449,7 +492,7 @@ class AdaptiveBalancedBot(BaseBot):
             for color in preferred_colors:
                 if purchases >= game_state.config.max_market_purchases_per_turn:
                     break
-                cost = 4 if color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5
+                cost = 4 if color in (DieColor.RED, DieColor.GREEN) else 5
                 if game_state.market.get(color, 0) > 0 and (current_money - cost >= cash_cushion):
                     plan.market_purchases.append(color)
                     current_money -= cost

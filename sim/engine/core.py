@@ -17,6 +17,16 @@ from sim.config import (
 from sim.entities import (
     AbilityStatus,
     ArchetypeCard,
+    ArchetypeCode,
+    Company,
+    CompanyCode,
+    WhiteHat,
+    WhiteHatCode,
+    COMPANIES,
+    WHITE_HATS,
+    INTRODUCTORY_PRESETS,
+    CANONICAL_COMPANY_FOR_OPERATIVE,
+    CANONICAL_OPERATIVE_FOR_COMPANY,
     Die,
     Face,
     VariantCard,
@@ -28,6 +38,8 @@ from sim.entities import (
     get_default_variant_cards,
     get_default_version_deck,
     get_random_archetypes,
+    get_random_companies,
+    get_random_white_hats,
 )
 from sim.tower import CubeTower
 from sim.engine.state import EndGameResult, GameState, PlayerState, RoundTelemetry
@@ -45,6 +57,9 @@ class GameEngine:
         variant_cards: Optional[Dict[DieColor, VariantCard]] = None,
         version_deck: Optional[List[VersionCard]] = None,
         archetypes: Optional[List[ArchetypeCard]] = None,
+        companies: Optional[List[Company]] = None,
+        white_hats: Optional[List[WhiteHat]] = None,
+        use_introductory_presets: bool = False,
     ) -> None:
         if bots is None:
             bots = [AdaptiveBalancedBot(i) for i in range(config.num_players)]
@@ -55,10 +70,40 @@ class GameEngine:
         self.config = config
         self.variant_cards = variant_cards or get_default_variant_cards()
         self.version_deck = version_deck or get_default_version_deck(profile=config.corruption_track_profile)
-        if archetypes is None:
-            self.archetypes = get_random_archetypes(config.num_players, self.rng)
-        else:
+
+        # Modular Setup Resolution (INV-SETUP-01..04)
+        if use_introductory_presets and config.num_players in INTRODUCTORY_PRESETS:
+            preset = INTRODUCTORY_PRESETS[config.num_players]
+            self.companies = [COMPANIES[c] for c, _ in preset]
+            self.white_hats = [WHITE_HATS[w] for _, w in preset]
+            self.archetypes = [get_archetype_by_code(wh.code.value) for wh in self.white_hats]
+        elif companies is not None and white_hats is not None:
+            self.companies = list(companies)
+            self.white_hats = list(white_hats)
+            self.archetypes = [get_archetype_by_code(wh.code.value) for wh in self.white_hats]
+        elif archetypes is not None:
+            self.companies = []
+            self.white_hats = []
+            for arch in archetypes:
+                if arch is not None:
+                    legacy_code = arch.code if isinstance(arch.code, ArchetypeCode) else ArchetypeCode(arch.code)
+                    wh_code = WhiteHatCode(legacy_code.value)
+                    self.companies.append(COMPANIES[CANONICAL_COMPANY_FOR_OPERATIVE[wh_code]])
+                    self.white_hats.append(WHITE_HATS[wh_code])
+                else:
+                    self.companies.append(None)
+                    self.white_hats.append(None)
             self.archetypes = list(archetypes)
+        else:
+            arch_sample = get_random_archetypes(config.num_players, self.rng)
+            self.archetypes = arch_sample
+            self.companies = []
+            self.white_hats = []
+            for arch in arch_sample:
+                legacy_code = arch.code if isinstance(arch.code, ArchetypeCode) else ArchetypeCode(arch.code)
+                wh_code = WhiteHatCode(legacy_code.value)
+                self.companies.append(COMPANIES[CANONICAL_COMPANY_FOR_OPERATIVE[wh_code]])
+                self.white_hats.append(WHITE_HATS[wh_code])
 
         # Initialize players
         players: List[PlayerState] = []
@@ -71,7 +116,8 @@ class GameEngine:
                 ready_for_release_dice.append(create_gray_die(next_die_id))
                 next_die_id += 1
 
-            arch = self.archetypes[i] if i < len(self.archetypes) else None
+            comp = self.companies[i] if i < len(self.companies) else None
+            wh = self.white_hats[i] if i < len(self.white_hats) else None
             player = PlayerState(
                 player_id=i,
                 bot=bot,
@@ -79,21 +125,21 @@ class GameEngine:
                 secrets=self.config.get_starting_secrets(self.config.num_players),
                 patches=self.config.get_starting_patches(self.config.num_players),
                 ready_for_release_dice=ready_for_release_dice,
-                archetype=arch,
+                company=comp,
+                white_hat=wh,
                 ability_v1_status=AbilityStatus.AVAILABLE,
                 ability_v2_status=AbilityStatus.LOCKED,
                 ability_v3_status=AbilityStatus.LOCKED,
             )
             players.append(player)
 
-        # Initialize Market: 2 * num_players dice per colored die
+        # Initialize Market: 2 * num_players dice per colored die (INV-PURPLE-02: Purple excluded from Central Market)
         market_per_color = config.dice_per_color_multiplier * config.num_players
         market: Dict[DieColor, int] = {
             DieColor.RED: market_per_color,
             DieColor.BLUE: market_per_color,
             DieColor.GREEN: market_per_color,
             DieColor.YELLOW: market_per_color,
-            DieColor.PURPLE: market_per_color,
         }
 
         # Staging Cup: payload from starting v1.0 card

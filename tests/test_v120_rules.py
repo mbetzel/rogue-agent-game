@@ -162,7 +162,7 @@ class TestV120Rules(unittest.TestCase):
         self.assertTrue(yellow.faces[4].is_glitch)
         self.assertTrue(yellow.faces[5].is_star)
 
-        purple = create_colored_die(DieColor.PURPLE, 5, self.variants[DieColor.PURPLE])
+        purple = create_colored_die(DieColor.PURPLE, 5, self.variants.get(DieColor.PURPLE))
         self.assertEqual(purple.cost, 4)
         self.assertEqual(purple.vp, 0)
         self.assertEqual(purple.faces[0].name, "Block 1 Any")

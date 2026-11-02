@@ -18,6 +18,8 @@ from sim.entities import (
     AbilityStatus,
     ArchetypeCard,
     ArchetypeCode,
+    CompanyCode,
+    WhiteHatCode,
     Die,
     VariantCard,
     VersionCard,
@@ -68,8 +70,11 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     active_ver = controller.state.active_version.version_str if (controller.state and controller.state.active_version) else None
     ability_avail = player.is_ability_available(active_ver) if active_ver else player.is_ability_available()
 
-    # Consultancy Archetype Capabilities
-    is_operator = bool(player.archetype and player.archetype.code == ArchetypeCode.OPERATOR)
+    # Company Institutional Overrides & Operative Protocol Capabilities
+    is_operator = bool(
+        (player.company and player.company.code == CompanyCode.MERIDIAN)
+        or (player.archetype and player.archetype.code == ArchetypeCode.OPERATOR)
+    )
     can_operator = bool(
         controller.phase == 1
         and not meta["has_rolled"]
@@ -80,8 +85,14 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         and controller.state.contractor_supply > 0
     )
 
-    is_prodigy = bool(player.archetype and player.archetype.code == ArchetypeCode.PRODIGY)
-    is_phreaker = bool(player.archetype and player.archetype.code == ArchetypeCode.PHREAKER)
+    is_prodigy = bool(
+        (player.company and player.company.code == CompanyCode.HELIX)
+        or (player.archetype and player.archetype.code == ArchetypeCode.PRODIGY)
+    )
+    is_phreaker = bool(
+        (player.company and player.company.code == CompanyCode.OMNIDYNE)
+        or (player.archetype and player.archetype.code == ArchetypeCode.PHREAKER)
+    )
     can_phreaker = bool(
         controller.phase == 3
         and is_active
@@ -91,11 +102,19 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         and len(player.unpatched_dice) > 0
     )
 
-    is_cipher = bool(player.archetype and player.archetype.code == ArchetypeCode.CIPHER)
+    is_cipher = bool(
+        (player.company and player.company.code == CompanyCode.PROMETHEUS)
+        or (player.archetype and player.archetype.code == ArchetypeCode.CIPHER)
+    )
     can_cipher_buy = {}
     for color in [DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW, DieColor.PURPLE]:
         base_cost = 4 if color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5
         disc_cost = max(0, base_cost - 2)
+        has_stock = (
+            getattr(player, "personal_purple_reserve", 0) > 0
+            if color == DieColor.PURPLE
+            else controller.state.market.get(color, 0) > 0
+        )
         can_cipher_buy[color.value] = bool(
             controller.phase == 3
             and is_active
@@ -103,7 +122,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             and is_cipher
             and ability_avail
             and meta["purchases_this_turn"] < controller.state.config.max_market_purchases_per_turn
-            and controller.state.market.get(color, 0) > 0
+            and has_stock
             and player.money >= disc_cost
         )
     can_cipher_cash = bool(
@@ -115,7 +134,10 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     )
     can_cipher_dirty = can_cipher_cash
 
-    is_acoustic = bool(player.archetype and player.archetype.code == ArchetypeCode.ACOUSTIC)
+    is_acoustic = bool(
+        (player.company and player.company.code == CompanyCode.AEGIS)
+        or (player.archetype and player.archetype.code == ArchetypeCode.ACOUSTIC)
+    )
     can_acoustic = bool(
         not is_eliminated
         and is_acoustic
@@ -127,7 +149,10 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         )
     )
 
-    is_spook = bool(player.archetype and player.archetype.code == ArchetypeCode.SPOOK)
+    is_spook = bool(
+        (player.company and player.company.code == CompanyCode.DTO)
+        or (player.archetype and player.archetype.code == ArchetypeCode.SPOOK)
+    )
     can_spook = bool(
         not is_eliminated
         and is_spook
@@ -195,15 +220,21 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     can_buy = {}
     for color in [DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW, DieColor.PURPLE]:
         cost = 4 if color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5
+        has_stock = (
+            getattr(player, "personal_purple_reserve", 0) > 0
+            if color == DieColor.PURPLE
+            else controller.state.market.get(color, 0) > 0
+        )
         can_buy[color.value] = (
             controller.phase == 3
             and not can_confirm_income
             and is_active
             and not is_eliminated
             and meta["purchases_this_turn"] < controller.state.config.max_market_purchases_per_turn
-            and controller.state.market.get(color, 0) > 0
+            and has_stock
             and player.money >= cost
         )
+    can_buy_purple_reserve = bool(can_buy.get("purple", False))
 
     # Star actions
     can_star = {
@@ -244,6 +275,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         "can_compile": can_compile,
         "can_confirm_income": can_confirm_income,
         "can_buy": can_buy,
+        "can_buy_purple_reserve": can_buy_purple_reserve,
         "can_patch_cash": can_patch_cash,
         "can_patch_token": can_patch_token,
         "can_dirty_income": can_dirty,

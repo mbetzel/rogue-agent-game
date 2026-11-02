@@ -21,6 +21,28 @@ class ArchetypeCode(str, Enum):
     OPERATOR = "OPERATOR"
 
 
+class CompanyCode(str, Enum):
+    """Enumeration of the 6 Client Companies providing Institutional Overrides."""
+
+    MERIDIAN = "MERIDIAN"
+    OMNIDYNE = "OMNIDYNE"
+    AEGIS = "AEGIS"
+    DTO = "DTO"
+    HELIX = "HELIX"
+    PROMETHEUS = "PROMETHEUS"
+
+
+class WhiteHatCode(str, Enum):
+    """Enumeration of the 6 White Hat Operatives providing Signature Protocols."""
+
+    OPERATOR = "OPERATOR"
+    PHREAKER = "PHREAKER"
+    ACOUSTIC = "ACOUSTIC"
+    SPOOK = "SPOOK"
+    PRODIGY = "PRODIGY"
+    CIPHER = "CIPHER"
+
+
 class AbilityStatus(str, Enum):
     """Lifecycle status of once-per-version archetype special abilities."""
 
@@ -39,6 +61,32 @@ class ArchetypeCard:
     timing_window: str
     ability_name: str
     description: str
+
+
+@dataclass(frozen=True)
+class Company:
+    """Represents a Client Company card contracting the terminal."""
+
+    code: CompanyCode
+    name: str
+    sector: str
+    override_name: str
+    timing_window: str
+    description: str
+    flavor: str
+
+
+@dataclass(frozen=True)
+class WhiteHat:
+    """Represents a White Hat Operative dossier card assigned to the terminal."""
+
+    code: WhiteHatCode
+    name: str
+    role: str
+    protocol_name: str
+    timing_window: str
+    description: str
+    flavor: str
 
 
 @dataclass(frozen=True)
@@ -387,19 +435,18 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
 
 
 def get_default_variant_cards() -> Dict[DieColor, VariantCard]:
-    """Returns the default baseline variant card (1 per colored die: R1, B1, G1, Y1, P1)."""
+    """Returns the default baseline variant card for central market dice (Red, Blue, Green, Yellow)."""
     all_cards = get_all_variant_cards()
     return {
         DieColor.RED: all_cards["R1"],
         DieColor.BLUE: all_cards["B1"],
         DieColor.GREEN: all_cards["G1"],
         DieColor.YELLOW: all_cards["Y1"],
-        DieColor.PURPLE: all_cards["P1"],
     }
 
 
 def get_random_variant_cards(rng: random.Random) -> Dict[DieColor, VariantCard]:
-    """Randomly selects 1 Variant Card per colored die (Red, Blue, Green, Yellow, Purple)."""
+    """Randomly selects 1 Variant Card per central market colored die (Red, Blue, Green, Yellow)."""
     all_variants = list(get_all_variant_cards().values())
     chosen: Dict[DieColor, VariantCard] = {}
     for color in [
@@ -407,7 +454,6 @@ def get_random_variant_cards(rng: random.Random) -> Dict[DieColor, VariantCard]:
         DieColor.BLUE,
         DieColor.GREEN,
         DieColor.YELLOW,
-        DieColor.PURPLE,
     ]:
         matching = [v for v in all_variants if v.die_color == color]
         chosen[color] = rng.choice(matching)
@@ -800,6 +846,208 @@ def get_random_archetypes(num_players: int, rng: random.Random) -> List[Archetyp
     return rng.sample(all_cards, num_players)
 
 
+ARCHETYPES: Dict[ArchetypeCode, ArchetypeCard] = {c.code: c for c in get_all_archetype_cards()}
+
+
+# =====================================================================
+# Modular Client Companies & White Hat Operatives (v0.25.0 Canonical)
+# =====================================================================
+
+COMPANIES: Dict[CompanyCode, Company] = {
+    CompanyCode.MERIDIAN: Company(
+        code=CompanyCode.MERIDIAN,
+        name="Meridian Financial Trust",
+        sector="Banking Infrastructure",
+        override_name="Redundant Crew",
+        timing_window="Phase 1: Staffing Step",
+        description="Hire up to 2 White Contractor Dice for free this round, bypassing progressive contractor costs.",
+        flavor="When liquidity is limitless, headcount is merely an accounting variable.",
+    ),
+    CompanyCode.OMNIDYNE: Company(
+        code=CompanyCode.OMNIDYNE,
+        name="Omnidyne Systems",
+        sector="Tech Giant",
+        override_name="Magnetic Splice",
+        timing_window="Phase 3: Pipeline Prep",
+        description="Move 1 die from your Glitched Box directly to your Ready for Release Zone for free (bypassing Scanned and saving 1 🔧).",
+        flavor="Proprietary hardware backplanes allow instantaneous hot-swapping under live load.",
+    ),
+    CompanyCode.AEGIS: Company(
+        code=CompanyCode.AEGIS,
+        name="Aegis Defense Relay",
+        sector="Security Firm",
+        override_name="Baffle Echo",
+        timing_window="Phase 2: Step 2B Damage",
+        description="When resolving compiler damage, ignore 1 Attack Cube (Red, Blue, or Green) of your choice for yourself this round. (All exited cubes remain in the exit tray and recycle into the Staging Cup as normal).",
+        flavor="Multi-layered kinetic dampeners disperse inbound network blast energy.",
+    ),
+    CompanyCode.DTO: Company(
+        code=CompanyCode.DTO,
+        name="Department of Telecommunications Oversight",
+        sector="Federal Agency",
+        override_name="Slush Fund",
+        timing_window="Phase 2: Step 2B Damage",
+        description="Absorb up to 2 Corporate Secret loss (from Blue Spyware or unpaid Red Ransom) for free without paying cash. (Any additional Secret loss may be absorbed by paying $1 per Secret as normal).",
+        flavor="Classified black budget allocations absorb compliance failures without public oversight.",
+    ),
+    CompanyCode.HELIX: Company(
+        code=CompanyCode.HELIX,
+        name="Helix Biomedical Consortium",
+        sector="Medical Research",
+        override_name="Brute-Force Bypass",
+        timing_window="Phase 1: Step 4 Rerolls",
+        description="During your rerolls this phase, you may include any number of Locked dice in your free rerolls without spending 🔧 tokens. In addition, you may turn 1 of your rolled dice to any non-Star face of your choice.",
+        flavor="Massively parallel quantum sequencing breaks deterministic encryption gates.",
+    ),
+    CompanyCode.PROMETHEUS: Company(
+        code=CompanyCode.PROMETHEUS,
+        name="The Prometheus Foundation",
+        sector="Non-Profit",
+        override_name="Algorithmic Arbitrage",
+        timing_window="Phase 3: Operations Turn",
+        description="Purchase 1 Colored Die from the Market or Personal Reserve at a $2 discount (minimum cost $0), OR gain an immediate +$2 cash payout from the bank.",
+        flavor="Open-source cryptographic protocols circumvent proprietary enterprise licensing fees.",
+    ),
+}
+
+WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
+    WhiteHatCode.OPERATOR: WhiteHat(
+        code=WhiteHatCode.OPERATOR,
+        name="The Operator",
+        role="Tactical Staffing & Logistics Lead",
+        protocol_name="Contingent Staffing",
+        timing_window="Phase 1: Step 4 Rolling",
+        description="When Purple ★ is rolled, immediately roll 1 free White Contractor die from the supply directly into your active pool. Eligible for remaining rerolls.",
+        flavor="Redundant contractor pipelines ready on zero notice.",
+    ),
+    WhiteHatCode.PHREAKER: WhiteHat(
+        code=WhiteHatCode.PHREAKER,
+        name="The Phreaker",
+        role="Hardware Intrusion Specialist",
+        protocol_name="Jumper Diagnostics",
+        timing_window="Phase 3: Operations Turn",
+        description="When Purple ★ is rolled, roll 1 offline die in your Under Development pipeline (Glitched or Scanned). Collect rolled cash/patches; die remains in place.",
+        flavor="Raw voltage pulses extract signal from dormant silicon.",
+    ),
+    WhiteHatCode.ACOUSTIC: WhiteHat(
+        code=WhiteHatCode.ACOUSTIC,
+        name="The Acoustic",
+        role="Side-Channel Cryptanalyst",
+        protocol_name="Resonance Sensor",
+        timing_window="Phase 3: Step 2 Income",
+        description="When Purple ★ is rolled, gain +$1 cash per distinct cube color present in the Exit Tray this round (Red, Blue, Green, Black; max +$4).",
+        flavor="Harmonic resonance frequencies decode physical chassis vibrations.",
+    ),
+    WhiteHatCode.SPOOK: WhiteHat(
+        code=WhiteHatCode.SPOOK,
+        name="The Spook",
+        role="Covert Intelligence Specialist",
+        protocol_name="Burn Notice",
+        timing_window="Phase 3: Operations Turn",
+        description="When Purple ★ is rolled, gain +$2 cash payout. Additionally, you may optionally burn 1 owned colored die back to supply to gain +1 Corporate Secret.",
+        flavor="Scorched-earth protocols ensure zero forensic recovery.",
+    ),
+    WhiteHatCode.PRODIGY: WhiteHat(
+        code=WhiteHatCode.PRODIGY,
+        name="The Prodigy",
+        role="Autonomous Exploit Hacker",
+        protocol_name="Arbitrary Code Execution",
+        timing_window="Phase 1: Step 4 Rolling",
+        description="When Purple ★ is rolled, turn 1 other rolled die in your active pool to any legal non-Star face of that die's color.",
+        flavor="Payload injection executes before memory boundaries establish.",
+    ),
+    WhiteHatCode.CIPHER: WhiteHat(
+        code=WhiteHatCode.CIPHER,
+        name="The Cipher",
+        role="Distributed Ledger Architect",
+        protocol_name="Algorithmic Parity",
+        timing_window="Phase 1: Step 5 & Phase 3: Step 2",
+        description="Purple ★ acts as wildcard completing any pair to a 3-of-a-kind triplet (+1 Secret in Phase 1 Step 5). In Phase 3A Income, Purple ★ generates +$2 cash.",
+        flavor="Parity calculations balance zero-knowledge proofs flawlessly.",
+    ),
+}
+
+INTRODUCTORY_PRESETS: Dict[int, List[Tuple[CompanyCode, WhiteHatCode]]] = {
+    2: [
+        (CompanyCode.MERIDIAN, WhiteHatCode.OPERATOR),
+        (CompanyCode.OMNIDYNE, WhiteHatCode.PHREAKER),
+    ],
+    3: [
+        (CompanyCode.MERIDIAN, WhiteHatCode.OPERATOR),
+        (CompanyCode.OMNIDYNE, WhiteHatCode.PHREAKER),
+        (CompanyCode.AEGIS, WhiteHatCode.ACOUSTIC),
+    ],
+    4: [
+        (CompanyCode.MERIDIAN, WhiteHatCode.OPERATOR),
+        (CompanyCode.OMNIDYNE, WhiteHatCode.PHREAKER),
+        (CompanyCode.AEGIS, WhiteHatCode.ACOUSTIC),
+        (CompanyCode.DTO, WhiteHatCode.SPOOK),
+    ],
+}
+
+CANONICAL_COMPANY_FOR_OPERATIVE: Dict[WhiteHatCode, CompanyCode] = {
+    WhiteHatCode.OPERATOR: CompanyCode.MERIDIAN,
+    WhiteHatCode.PHREAKER: CompanyCode.OMNIDYNE,
+    WhiteHatCode.ACOUSTIC: CompanyCode.AEGIS,
+    WhiteHatCode.SPOOK: CompanyCode.DTO,
+    WhiteHatCode.PRODIGY: CompanyCode.HELIX,
+    WhiteHatCode.CIPHER: CompanyCode.PROMETHEUS,
+}
+
+CANONICAL_OPERATIVE_FOR_COMPANY: Dict[CompanyCode, WhiteHatCode] = {
+    CompanyCode.MERIDIAN: WhiteHatCode.OPERATOR,
+    CompanyCode.OMNIDYNE: WhiteHatCode.PHREAKER,
+    CompanyCode.AEGIS: WhiteHatCode.ACOUSTIC,
+    CompanyCode.DTO: WhiteHatCode.SPOOK,
+    CompanyCode.HELIX: WhiteHatCode.PRODIGY,
+    CompanyCode.PROMETHEUS: WhiteHatCode.CIPHER,
+}
+
+
+def get_all_companies() -> List[Company]:
+    """Returns all 6 Client Companies."""
+    return list(COMPANIES.values())
+
+
+def get_company_by_code(code: CompanyCode | str) -> Company:
+    """Retrieves a Company by enum or string code/name."""
+    code_str = code.value.upper() if isinstance(code, CompanyCode) else str(code).upper()
+    for comp in COMPANIES.values():
+        if comp.code.value.upper() == code_str or comp.code.name.upper() == code_str or comp.name.upper() == code_str:
+            return comp
+    raise ValueError(f"Unknown Company code: {code}")
+
+
+def get_random_companies(num_players: int, rng: random.Random) -> List[Company]:
+    """Randomly selects unique Client Companies without replacement for all players."""
+    all_comps = get_all_companies()
+    if not (1 <= num_players <= len(all_comps)):
+        raise ValueError(f"num_players must be between 1 and {len(all_comps)}, got {num_players}")
+    return rng.sample(all_comps, num_players)
+
+
+def get_all_white_hats() -> List[WhiteHat]:
+    """Returns all 6 White Hat Operatives."""
+    return list(WHITE_HATS.values())
+
+
+def get_white_hat_by_code(code: WhiteHatCode | str) -> WhiteHat:
+    """Retrieves a White Hat Operative by enum or string code/name."""
+    code_str = code.value.upper() if isinstance(code, WhiteHatCode) else str(code).upper()
+    for wh in WHITE_HATS.values():
+        if wh.code.value.upper() == code_str or wh.code.name.upper() == code_str or wh.name.upper() == code_str:
+            return wh
+    raise ValueError(f"Unknown White Hat code: {code}")
+
+
+def get_random_white_hats(num_players: int, rng: random.Random) -> List[WhiteHat]:
+    """Randomly selects unique White Hat Operatives without replacement for all players."""
+    all_wh = get_all_white_hats()
+    if not (1 <= num_players <= len(all_wh)):
+        raise ValueError(f"num_players must be between 1 and {len(all_wh)}, got {num_players}")
+    return rng.sample(all_wh, num_players)
+
+
 def create_gray_die(die_id: int) -> Die:
     """Creates a Gray (Legacy Code) starter die."""
     faces = [
@@ -916,6 +1164,11 @@ def create_colored_die(
         return Die(die_id=die_id, color=color, cost=5, vp=0, faces=faces, variant_code=var_code)
 
     elif color == DieColor.PURPLE:
+        star_face = Face(
+            name="Purple ★",
+            is_star=True,
+            star_code="PURPLE_STAR",
+        )
         faces = [
             Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
             Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
@@ -924,6 +1177,6 @@ def create_colored_die(
             glitch_face,
             star_face,
         ]
-        return Die(die_id=die_id, color=color, cost=4, vp=0, faces=faces, variant_code=var_code)
+        return Die(die_id=die_id, color=color, cost=4, vp=0, faces=faces, variant_code="PURPLE_STAR")
 
     raise ValueError(f"Unsupported die color: {color}")

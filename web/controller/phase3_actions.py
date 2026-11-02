@@ -14,15 +14,21 @@ from sim.bots import (
 )
 from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
-from sim.engine.phase3_ops import collect_player_production_income
+from sim.engine.phase3_ops import (
+    collect_player_production_income,
+    resolve_phreaker_jumper_diagnostics,
+    resolve_spook_burn_notice,
+)
 from sim.engine.state import ProductionRole
 from sim.entities import (
     AbilityStatus,
     ArchetypeCard,
     ArchetypeCode,
+    CompanyCode,
     Die,
     VariantCard,
     VersionCard,
+    WhiteHatCode,
     create_colored_die,
     create_white_die,
 )
@@ -246,11 +252,14 @@ def execute_bot_phase3(controller: GameController, player: PlayerState, meta: Di
             player.scanned_dice.append(p_die)
             player.patches -= 1
 
-    # Archetype: The Phreaker (Magnetic Splice - v0.22.0: Glitched Box directly to Ready for Release)
+    # Corporate Override: Omnidyne (Magnetic Splice - v0.22.0: Glitched Box directly to Ready for Release)
+    has_omnidyne = bool(
+        (player.company and player.company.code == CompanyCode.OMNIDYNE)
+        or (player.archetype and player.archetype.code == ArchetypeCode.PHREAKER)
+    )
     if (
-        plan.use_phreaker_ability
-        and player.archetype is not None
-        and player.archetype.code == ArchetypeCode.PHREAKER
+        (plan.use_omnidyne_override or plan.use_phreaker_ability)
+        and has_omnidyne
         and player.is_ability_available()
         and player.glitched_dice
     ):
@@ -269,22 +278,43 @@ def execute_bot_phase3(controller: GameController, player: PlayerState, meta: Di
         player.ready_for_release_dice.append(phreaker_die)
         player.mark_ability_used()
         controller.event_log.append(
-            f"{meta['name']} (Bot) used Phreaker Magnetic Splice: spliced 1 die directly to Ready for Release for free."
+            f"{meta['name']} (Bot) used Omnidyne Magnetic Splice: spliced 1 die directly to Ready for Release for free."
         )
 
-    # Archetype: The Cipher (Algorithmic Arbitrage)
+    # Corporate Override: Prometheus (Algorithmic Arbitrage)
     cipher_used = False
+    has_prometheus = bool(
+        (player.company and player.company.code == CompanyCode.PROMETHEUS)
+        or (player.archetype and player.archetype.code == ArchetypeCode.CIPHER)
+    )
     if (
-        plan.use_cipher_ability
-        and player.archetype is not None
-        and player.archetype.code == ArchetypeCode.CIPHER
+        (plan.use_prometheus_override or plan.use_cipher_ability)
+        and has_prometheus
         and player.is_ability_available()
     ):
-        if plan.cipher_mode in ("BUY_FREE_DIE", 1) and plan.cipher_free_die_color is not None:
-            free_color = plan.cipher_free_die_color
+        p_mode = plan.prometheus_mode or plan.cipher_mode
+        p_color = plan.prometheus_discount_die_color or plan.cipher_free_die_color
+        if p_mode in ("BUY_FREE_DIE", 1) and p_color is not None:
+            free_color = p_color
             normal_cost = 4 if free_color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5
             discounted_cost = max(0, normal_cost - controller.state.config.cipher_market_discount)
-            if controller.state.market.get(free_color, 0) > 0 and player.money >= discounted_cost:
+            if free_color == DieColor.PURPLE:
+                if player.personal_purple_reserve > 0 and player.money >= discounted_cost:
+                    player.money -= discounted_cost
+                    player.personal_purple_reserve -= 1
+                    meta["purchases_this_turn"] += 1
+                    new_die = create_colored_die(
+                        color=DieColor.PURPLE,
+                        die_id=controller.state.next_die_id,
+                    )
+                    controller.state.next_die_id += 1
+                    player.ready_dice.append(new_die)
+                    player.mark_ability_used()
+                    cipher_used = True
+                    controller.event_log.append(
+                        f"{meta['name']} (Bot) used Prometheus Algorithmic Arbitrage: Purple Die from Reserve at ${discounted_cost}."
+                    )
+            elif controller.state.market.get(free_color, 0) > 0 and player.money >= discounted_cost:
                 player.money -= discounted_cost
                 controller.state.market[free_color] -= 1
                 meta["purchases_this_turn"] += 1
@@ -298,9 +328,9 @@ def execute_bot_phase3(controller: GameController, player: PlayerState, meta: Di
                 player.mark_ability_used()
                 cipher_used = True
                 controller.event_log.append(
-                    f"{meta['name']} (Bot) used Cipher Algorithmic Arbitrage: {free_color.value.capitalize()} Die at ${discounted_cost}."
+                    f"{meta['name']} (Bot) used Prometheus Algorithmic Arbitrage: {free_color.value.capitalize()} Die at ${discounted_cost}."
                 )
-        elif plan.cipher_mode in ("DIRTY_INCOME", 2):
+        elif p_mode in ("DIRTY_INCOME", 2):
             if player.secrets > controller.state.config.dirty_income_secret_cost:
                 player.secrets -= controller.state.config.dirty_income_secret_cost
                 player.money += controller.state.config.dirty_income_cash
@@ -312,7 +342,7 @@ def execute_bot_phase3(controller: GameController, player: PlayerState, meta: Di
                 player.mark_ability_used()
                 cipher_used = True
                 controller.event_log.append(
-                    f"{meta['name']} (Bot) used Cipher Algorithmic Arbitrage: Backlash-free Dirty Income."
+                    f"{meta['name']} (Bot) used Prometheus Algorithmic Arbitrage: Backlash-free Dirty Income."
                 )
 
     # 1. Dirty Income
@@ -389,24 +419,76 @@ def execute_bot_phase3(controller: GameController, player: PlayerState, meta: Di
                 patched = player.unpatched_dice.pop(idx)
                 player.ready_dice.append(patched)
 
+    # White Hat Protocol Face 6 Resolution in Phase 3A (Spook & Phreaker)
+    has_purple_star = any(
+        (d.effective_face or d.current_face)
+        and (d.effective_face or d.current_face).is_star
+        and (d.effective_face or d.current_face).star_code == "PURPLE_STAR"
+        for d in player.in_production_dice
+    )
+    if has_purple_star:
+        is_spook = bool(
+            (player.white_hat and player.white_hat.code == WhiteHatCode.SPOOK)
+            or (player.archetype and player.archetype.code == ArchetypeCode.SPOOK)
+        )
+        is_phreaker = bool(
+            (player.white_hat and player.white_hat.code == WhiteHatCode.PHREAKER)
+            or (player.archetype and player.archetype.code == ArchetypeCode.PHREAKER)
+        )
+        if is_spook and plan.spook_burn_die_id is not None:
+            if resolve_spook_burn_notice(controller.engine or controller, player, plan.spook_burn_die_id):
+                controller.event_log.append(
+                    f"{meta['name']} (Bot) executed Spook Burn Notice on die {plan.spook_burn_die_id}."
+                )
+        elif is_phreaker and player.under_development_dice:
+            diag_id = plan.phreaker_diagnostics_die_id
+            if diag_id is None:
+                diag_id = player.bot.choose_phreaker_jumper_diagnostics(player, controller.state, controller.rng)
+            if diag_id is not None:
+                face = resolve_phreaker_jumper_diagnostics(controller.engine or controller, player, diag_id, controller.rng)
+                if face:
+                    controller.event_log.append(
+                        f"{meta['name']} (Bot) executed Phreaker Jumper Diagnostics: rolled '{face.name}'."
+                    )
+
     # 4. Market Purchases
-    purchases = 0
-    for color in plan.market_purchases:
+    purchases = meta.get("purchases_this_turn", 0)
+    purchases_list = list(plan.market_purchases)
+    if plan.buy_purple_reserve and DieColor.PURPLE not in purchases_list:
+        purchases_list.append(DieColor.PURPLE)
+
+    for color in purchases_list:
         if purchases >= controller.state.config.max_market_purchases_per_turn:
             break
-        cost = 4 if color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5
-        if controller.state.market.get(color, 0) > 0 and player.money >= cost:
-            player.money -= cost
-            controller.state.market[color] -= 1
-            purchases += 1
-            new_die = create_colored_die(
-                color=color,
-                die_id=controller.state.next_die_id,
-                variant_card=controller.state.variant_cards.get(color),
-            )
-            controller.state.next_die_id += 1
-            player.ready_dice.append(new_die)
-            controller.event_log.append(f"{meta['name']} (Bot) bought {color.value.capitalize()} Die.")
+        if color == DieColor.PURPLE:
+            cost = 4
+            if player.personal_purple_reserve > 0 and player.money >= cost:
+                player.money -= cost
+                player.personal_purple_reserve -= 1
+                purchases += 1
+                meta["purchases_this_turn"] = meta.get("purchases_this_turn", 0) + 1
+                new_die = create_colored_die(
+                    color=DieColor.PURPLE,
+                    die_id=controller.state.next_die_id,
+                )
+                controller.state.next_die_id += 1
+                player.ready_dice.append(new_die)
+                controller.event_log.append(f"{meta['name']} (Bot) procured Purple Die from Personal Reserve.")
+        else:
+            cost = 4 if color in (DieColor.RED, DieColor.GREEN) else 5
+            if controller.state.market.get(color, 0) > 0 and player.money >= cost:
+                player.money -= cost
+                controller.state.market[color] -= 1
+                purchases += 1
+                meta["purchases_this_turn"] = meta.get("purchases_this_turn", 0) + 1
+                new_die = create_colored_die(
+                    color=color,
+                    die_id=controller.state.next_die_id,
+                    variant_card=controller.state.variant_cards.get(color),
+                )
+                controller.state.next_die_id += 1
+                player.ready_dice.append(new_die)
+                controller.event_log.append(f"{meta['name']} (Bot) bought {color.value.capitalize()} Die.")
 
 
 
@@ -415,6 +497,7 @@ def buy_die(
     player_id: int,
     color_str: str,
     use_cipher_ability: bool = False,
+    use_prometheus_override: bool = False,
 ) -> Dict[str, Any]:
     if controller.subphase == "confirm_income":
         confirm_income(controller, player_id)
@@ -433,12 +516,46 @@ def buy_die(
     color = DieColor(color_str.lower())
     cost = 4 if color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5
 
-    if use_cipher_ability:
-        if not player.archetype or player.archetype.code != ArchetypeCode.CIPHER:
-            raise ValueError("Player does not have the Cipher archetype")
+    use_discount = use_cipher_ability or use_prometheus_override
+    if use_discount:
+        has_prometheus = bool(
+            (player.company and player.company.code == CompanyCode.PROMETHEUS)
+            or (player.archetype and player.archetype.code == ArchetypeCode.CIPHER)
+        )
+        if not has_prometheus:
+            raise ValueError("Player does not have the Prometheus company override or Cipher archetype")
         if not player.is_ability_available():
-            raise ValueError("Cipher ability is not available")
+            raise ValueError("Prometheus/Cipher ability is not available")
         cost = max(0, cost - controller.state.config.cipher_market_discount)
+
+    if color == DieColor.PURPLE:
+        # INV-PURPLE-03: Purchase from Personal Reserve
+        if player.personal_purple_reserve <= 0:
+            raise ValueError(f"Personal Purple Reserve is depleted (remaining: {player.personal_purple_reserve})")
+        if player.money < cost:
+            raise ValueError(f"Insufficient funds: Purple Reserve die costs ${cost}, but player only has ${player.money}")
+
+        player.money -= cost
+        player.personal_purple_reserve -= 1
+        meta["purchases_this_turn"] += 1
+
+        new_die = create_colored_die(
+            color=DieColor.PURPLE,
+            die_id=controller.state.next_die_id,
+        )
+        controller.state.next_die_id += 1
+        player.ready_for_release_dice.append(new_die)
+
+        if use_discount:
+            player.mark_ability_used()
+            controller.event_log.append(
+                f"{meta['name']} used Prometheus Algorithmic Arbitrage to procure a Purple Specialist Die from Personal Reserve for ${cost}! (Reserve remaining: {player.personal_purple_reserve})."
+            )
+        else:
+            controller.event_log.append(
+                f"{meta['name']} procured a Purple Specialist Die from Personal Reserve for ${cost}. (Reserve remaining: {player.personal_purple_reserve})."
+            )
+        return controller.get_full_state()
 
     if controller.state.market.get(color, 0) <= 0:
         raise ValueError(f"Market stock for {color.value} is depleted")
@@ -457,15 +574,83 @@ def buy_die(
     controller.state.next_die_id += 1
     player.ready_dice.append(new_die)
 
-    if use_cipher_ability:
+    if use_discount:
         player.mark_ability_used()
         controller.event_log.append(
-            f"{meta['name']} used Cipher Algorithmic Arbitrage to acquire a {color.value.capitalize()} Die at a ${controller.state.config.cipher_market_discount} discount (${cost})! (Stock remaining: {controller.state.market[color]})."
+            f"{meta['name']} used Prometheus Algorithmic Arbitrage to acquire a {color.value.capitalize()} Die at a ${controller.state.config.cipher_market_discount} discount (${cost})! (Stock remaining: {controller.state.market[color]})."
         )
     else:
         controller.event_log.append(
             f"{meta['name']} purchased a {color.value.capitalize()} Die for ${cost}. (Stock remaining: {controller.state.market[color]})."
         )
+    return controller.get_full_state()
+
+
+def spook_burn(
+    controller: GameController,
+    player_id: int,
+    die_id: int,
+) -> Dict[str, Any]:
+    """Human action: Spook burns 1 owned colored die for +1 Secret."""
+    if controller.subphase == "confirm_income":
+        confirm_income(controller, player_id)
+
+    if player_id != controller.active_player_index:
+        raise ValueError(f"Not player {player_id}'s turn (current: {controller.active_player_index})")
+
+    player = controller.state.players[player_id]
+    meta = controller.player_meta[player_id]
+
+    if player.is_patient_zero:
+        raise ValueError("Eliminated players cannot perform operations")
+    has_spook = bool(
+        (player.white_hat and player.white_hat.code == WhiteHatCode.SPOOK)
+        or (player.archetype and player.archetype.code == ArchetypeCode.SPOOK)
+    )
+    if not has_spook:
+        raise ValueError("Player does not have the Spook white hat dossier or archetype")
+
+    success = resolve_spook_burn_notice(controller.engine or controller, player, die_id)
+    if not success:
+        raise ValueError(f"Colored die {die_id} not found among owned dice to burn")
+
+    controller.event_log.append(
+        f"{meta['name']} executed Spook Burn Notice, burning die {die_id} to market for +1 Corporate Secret."
+    )
+    return controller.get_full_state()
+
+
+def phreaker_diagnostics(
+    controller: GameController,
+    player_id: int,
+    die_id: Optional[int] = None,
+) -> Dict[str, Any]:
+    """Human action: Phreaker rolls 1 die in Under Development for diagnostics."""
+    if controller.subphase == "confirm_income":
+        confirm_income(controller, player_id)
+
+    if player_id != controller.active_player_index:
+        raise ValueError(f"Not player {player_id}'s turn (current: {controller.active_player_index})")
+
+    player = controller.state.players[player_id]
+    meta = controller.player_meta[player_id]
+
+    if player.is_patient_zero:
+        raise ValueError("Eliminated players cannot perform operations")
+    has_phreaker = bool(
+        (player.white_hat and player.white_hat.code == WhiteHatCode.PHREAKER)
+        or (player.archetype and player.archetype.code == ArchetypeCode.PHREAKER)
+    )
+    if not has_phreaker:
+        raise ValueError("Player does not have the Phreaker white hat dossier or archetype")
+
+    face = resolve_phreaker_jumper_diagnostics(controller.engine or controller, player, die_id, controller.rng)
+    if face is None:
+        raise ValueError("No dice available in Under Development for diagnostics")
+
+    controller.event_log.append(
+        f"{meta['name']} executed Phreaker Jumper Diagnostics, rolling face '{face.name}' (money: +${face.money}, patches: +{face.patches} 🔧)."
+    )
     return controller.get_full_state()
 
 
@@ -510,9 +695,9 @@ def take_cipher_arbitrage(
     controller: GameController,
     player_id: int,
 ) -> Dict[str, Any]:
-    """Executes Cipher Algorithmic Arbitrage mode 2: immediate cash arbitrage payout."""
+    """Executes Prometheus Algorithmic Arbitrage mode 2: immediate cash arbitrage payout."""
     if controller.phase != 3:
-        raise ValueError(f"Cannot use Cipher ability in phase {controller.phase}")
+        raise ValueError(f"Cannot use Prometheus/Cipher ability in phase {controller.phase}")
     if player_id != controller.active_player_index:
         raise ValueError(f"Not player {player_id}'s turn (current: {controller.active_player_index})")
 
@@ -521,17 +706,24 @@ def take_cipher_arbitrage(
 
     if player.is_patient_zero:
         raise ValueError("Eliminated players cannot perform operations")
-    if not player.archetype or player.archetype.code != ArchetypeCode.CIPHER:
-        raise ValueError("Player does not have the Cipher archetype")
+    has_prometheus = bool(
+        (player.company and player.company.code == CompanyCode.PROMETHEUS)
+        or (player.archetype and player.archetype.code == ArchetypeCode.CIPHER)
+    )
+    if not has_prometheus:
+        raise ValueError("Player does not have the Prometheus company override or Cipher archetype")
     if not player.is_ability_available():
-        raise ValueError("Cipher ability is not available")
+        raise ValueError("Prometheus/Cipher ability is not available")
 
     player.money += controller.state.config.cipher_arbitrage_cash
     player.mark_ability_used()
     controller.event_log.append(
-        f"{meta['name']} used Cipher Algorithmic Arbitrage: gained +${controller.state.config.cipher_arbitrage_cash} cash arbitrage payout."
+        f"{meta['name']} used Prometheus Algorithmic Arbitrage: gained +${controller.state.config.cipher_arbitrage_cash} cash arbitrage payout."
     )
     return controller.get_full_state()
+
+
+take_prometheus_arbitrage = take_cipher_arbitrage
 
 
 def take_dirty_income(
@@ -615,9 +807,9 @@ def use_phreaker_ability(
     die_index: int = 0,
     die_id: Optional[int] = None,
 ) -> Dict[str, Any]:
-    """Human action: moves 1 die from Glitched directly to Ready for Release for free using Magnetic Splice (v0.22.0)."""
+    """Human action: moves 1 die from Glitched directly to Ready for Release for free using Omnidyne Magnetic Splice (v0.22.0)."""
     if controller.phase != 3:
-        raise ValueError(f"Cannot use Phreaker ability in phase {controller.phase}")
+        raise ValueError(f"Cannot use Omnidyne/Phreaker ability in phase {controller.phase}")
     if player_id != controller.active_player_index:
         raise ValueError(f"Not player {player_id}'s turn (current: {controller.active_player_index})")
 
@@ -627,10 +819,14 @@ def use_phreaker_ability(
 
     if player.is_patient_zero:
         raise ValueError("Eliminated players cannot perform operations")
-    if not player.archetype or player.archetype.code != ArchetypeCode.PHREAKER:
-        raise ValueError("Player does not have the Phreaker archetype")
+    has_omnidyne = bool(
+        (player.company and player.company.code == CompanyCode.OMNIDYNE)
+        or (player.archetype and player.archetype.code == ArchetypeCode.PHREAKER)
+    )
+    if not has_omnidyne:
+        raise ValueError("Player does not have the Omnidyne company override or Phreaker archetype")
     if not player.is_ability_available(active_ver):
-        raise ValueError("Phreaker ability is not available")
+        raise ValueError("Omnidyne/Phreaker ability is not available")
     if count < 1:
         raise ValueError("count must be at least 1")
 
@@ -660,9 +856,12 @@ def use_phreaker_ability(
 
     player.mark_ability_used(active_ver)
     controller.event_log.append(
-        f"{meta['name']} activated Phreaker Magnetic Splice: spliced {repaired.color.value.capitalize()} Die directly to Ready for Release for free."
+        f"{meta['name']} activated Omnidyne Magnetic Splice: spliced {repaired.color.value.capitalize()} Die directly to Ready for Release for free."
     )
     return controller.get_full_state()
+
+
+use_omnidyne_override = use_phreaker_ability
 
 
 def fast_patch(
@@ -714,16 +913,20 @@ def fast_patch(
 
 
 def use_acoustic_ability(controller: GameController, player_id: int, chosen_color_str: str) -> Dict[str, Any]:
-    """Human action: activates Acoustic Baffle Echo to remove 1 exited attack cube."""
+    """Human action: activates Aegis Baffle Echo to remove 1 exited attack cube."""
     player = controller.state.players[player_id]
     meta = controller.player_meta[player_id]
 
     if player.is_patient_zero:
         raise ValueError("Eliminated players cannot use abilities")
-    if not player.archetype or player.archetype.code != ArchetypeCode.ACOUSTIC:
-        raise ValueError("Player does not have the Acoustic archetype")
+    has_aegis = bool(
+        (player.company and player.company.code == CompanyCode.AEGIS)
+        or (player.archetype and player.archetype.code == ArchetypeCode.ACOUSTIC)
+    )
+    if not has_aegis:
+        raise ValueError("Player does not have the Aegis company override or Acoustic archetype")
     if not player.is_ability_available():
-        raise ValueError("Acoustic ability is not available")
+        raise ValueError("Aegis/Acoustic ability is not available")
 
     chosen_color = CubeColor(chosen_color_str.lower())
     if chosen_color not in (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN):
@@ -748,23 +951,29 @@ def use_acoustic_ability(controller: GameController, player_id: int, chosen_colo
 
     player.mark_ability_used()
     controller.event_log.append(
-        f"{meta['name']} activated Acoustic Baffle Echo: ignored 1 {chosen_color.value} cube for self."
+        f"{meta['name']} activated Aegis Baffle Echo: ignored 1 {chosen_color.value} cube for self."
     )
     return controller.get_full_state()
 
 
+use_aegis_override = use_acoustic_ability
+
 
 def use_spook_ability(controller: GameController, player_id: int, dollars: int = 0) -> Dict[str, Any]:
-    """Human action: activates Spook Slush Fund (v0.13.0: absorbs up to 2 secrets free + optional cash)."""
+    """Human action: activates DTO Slush Fund (v0.13.0: absorbs up to 2 secrets free + optional cash)."""
     player = controller.state.players[player_id]
     meta = controller.player_meta[player_id]
 
     if player.is_patient_zero:
         raise ValueError("Eliminated players cannot use abilities")
-    if not player.archetype or player.archetype.code != ArchetypeCode.SPOOK:
-        raise ValueError("Player does not have the Spook archetype")
+    has_dto = bool(
+        (player.company and player.company.code == CompanyCode.DTO)
+        or (player.archetype and player.archetype.code == ArchetypeCode.SPOOK)
+    )
+    if not has_dto:
+        raise ValueError("Player does not have the DTO company override or Spook archetype")
     if not player.is_ability_available():
-        raise ValueError("Spook ability is not available")
+        raise ValueError("DTO/Spook ability is not available")
     if dollars < 0:
         raise ValueError("dollars must be non-negative")
 
@@ -776,9 +985,12 @@ def use_spook_ability(controller: GameController, player_id: int, dollars: int =
     player.secrets = min(10, player.secrets + total_secrets_absorbed)
     player.mark_ability_used()
     controller.event_log.append(
-        f"{meta['name']} activated Spook Slush Fund: absorbed {total_secrets_absorbed} secrets ({free_secrets} free, ${cash_spent} cash)."
+        f"{meta['name']} activated DTO Slush Fund: absorbed {total_secrets_absorbed} secrets ({free_secrets} free, ${cash_spent} cash)."
     )
     return controller.get_full_state()
+
+
+use_dto_override = use_spook_ability
 
 
 

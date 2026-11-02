@@ -82,17 +82,16 @@ class TestGroupASetupRandomization(unittest.TestCase):
     """Unit tests for setup card randomization in sim/entities.py."""
 
     def test_get_random_variant_cards_structure(self) -> None:
-        """1. Returns 1 variant card per colored die (5 colors: Red, Blue, Green, Yellow, Purple)."""
+        """1. Returns 1 variant card per central market colored die (4 colors: Red, Blue, Green, Yellow)."""
         rng = random.Random(42)
         var_cards = get_random_variant_cards(rng)
 
-        self.assertEqual(len(var_cards), 5)
+        self.assertEqual(len(var_cards), 4)
         expected_colors = [
             DieColor.RED,
             DieColor.BLUE,
             DieColor.GREEN,
             DieColor.YELLOW,
-            DieColor.PURPLE,
         ]
         for color in expected_colors:
             self.assertIn(color, var_cards)
@@ -601,7 +600,7 @@ class TestGroupDWebGameController(unittest.TestCase):
         gc = GameController()
         gc.new_game(num_players=4, randomize_cards=False)
 
-        expected_var_codes = {"RED": "R1", "BLUE": "B1", "GREEN": "G1", "YELLOW": "Y1", "PURPLE": "P1"}
+        expected_var_codes = {"RED": "R1", "BLUE": "B1", "GREEN": "G1", "YELLOW": "Y1"}
         actual_var_codes = {c.value.upper(): v.code for c, v in gc.state.variant_cards.items()}
         self.assertEqual(actual_var_codes, expected_var_codes)
 
@@ -642,7 +641,6 @@ class TestGroupDWebGameController(unittest.TestCase):
         self.assertIn("B1", log_text)
         self.assertIn("G1", log_text)
         self.assertIn("Y1", log_text)
-        self.assertIn("P1", log_text)
 
     def test_polymorphic_worm_patch_cash_cost_matches_config(self) -> None:
         """Verifies that under POLYMORPHIC_WORM:
@@ -738,7 +736,7 @@ class TestGroupEWebAPIServer(unittest.TestCase):
         self.assertTrue(data["success"])
         state = data["state"]
 
-        baseline_codes = {"red": "R1", "blue": "B1", "green": "G1", "yellow": "Y1", "purple": "P1"}
+        baseline_codes = {"red": "R1", "blue": "B1", "green": "G1", "yellow": "Y1"}
         market_codes = {k: v["variant"]["code"] for k, v in state["market"].items()}
         self.assertEqual(market_codes, baseline_codes)
 
@@ -748,8 +746,8 @@ class TestGroupEWebAPIServer(unittest.TestCase):
         try:
             ctrl = test_server.RequestHandlerClass.controller
             self.assertIsNotNone(ctrl.engine)
-            # Randomized setup has 5 variant cards and 3 version cards in state
-            self.assertEqual(len(ctrl.state.variant_cards), 5)
+            # Randomized setup has 4 variant cards and 3 version cards in state
+            self.assertEqual(len(ctrl.state.variant_cards), 4)
             self.assertEqual(len(ctrl.state.version_deck), 3)
         finally:
             test_server.server_close()

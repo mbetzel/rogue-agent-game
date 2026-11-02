@@ -14,12 +14,18 @@ from sim.bots import (
 )
 from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
-from sim.engine.phase1_boot import detect_hash_matches
+from sim.engine.phase1_boot import (
+    check_operator_contingent_staffing,
+    detect_hash_matches,
+    resolve_prodigy_purple_star_override,
+)
 from sim.engine.state import ProductionRole
 from sim.entities import (
     AbilityStatus,
     ArchetypeCard,
     ArchetypeCode,
+    CompanyCode,
+    WhiteHatCode,
     Die,
     VariantCard,
     VersionCard,
@@ -60,7 +66,11 @@ def hire_contractors(
 
     active_ver = controller.state.active_version.version_str
     if use_operator_ability:
-        if not (player.archetype and player.archetype.code == ArchetypeCode.OPERATOR):
+        is_operator_corp = bool(
+            (player.company and player.company.code == CompanyCode.MERIDIAN)
+            or (player.archetype and player.archetype.code == ArchetypeCode.OPERATOR)
+        )
+        if not is_operator_corp:
             raise ValueError("Player is not The Operator")
         if not player.is_ability_available(active_ver):
             raise ValueError(f"Operator ability already used or forfeited for {active_ver}")
@@ -136,6 +146,18 @@ def roll_pool(controller: GameController, player_id: int) -> Dict[str, Any]:
         die.is_locked = False
         die.roll(controller.engine.rng)
 
+    # Operator Contingent Staffing Face 6 Protocol
+    is_operator_op = bool(
+        (player.white_hat and player.white_hat.code == WhiteHatCode.OPERATOR)
+        or (player.archetype and player.archetype.code == ArchetypeCode.OPERATOR)
+    )
+    if is_operator_op:
+        c_die = check_operator_contingent_staffing(controller.engine or controller, player, active_dice)
+        if c_die:
+            controller.event_log.append(
+                f"{meta['name']} triggered Operator Contingent Staffing: free White Contractor die rolled into pool."
+            )
+
     meta["rolled_pool"] = list(active_dice)
     meta["has_rolled"] = True
     controller.subphase = "waiting_for_commit"
@@ -187,7 +209,11 @@ def perform_reroll(
         raise ValueError("reroll_indices must be a non-empty list of integers")
 
     if use_prodigy_ability:
-        if not player.archetype or player.archetype.code != ArchetypeCode.PRODIGY:
+        is_helix = bool(
+            (player.company and player.company.code == CompanyCode.HELIX)
+            or (player.archetype and player.archetype.code == ArchetypeCode.PRODIGY)
+        )
+        if not is_helix:
             raise ValueError("Player does not have the Prodigy archetype")
         if not meta.get("prodigy_active", False) and not player.is_ability_available():
             raise ValueError("Prodigy ability is not available")
@@ -230,6 +256,18 @@ def perform_reroll(
             d.is_locked = True
         elif "SHIELD" in controller.state.active_phase1_locks and face.has_shield_option:
             d.is_locked = True
+
+    # Operator Contingent Staffing Face 6 Protocol (if not triggered yet)
+    is_operator_op = bool(
+        (player.white_hat and player.white_hat.code == WhiteHatCode.OPERATOR)
+        or (player.archetype and player.archetype.code == ArchetypeCode.OPERATOR)
+    )
+    if is_operator_op:
+        c_die = check_operator_contingent_staffing(controller.engine or controller, player, rolled)
+        if c_die:
+            controller.event_log.append(
+                f"{meta['name']} triggered Operator Contingent Staffing: free White Contractor die rolled into pool."
+            )
 
     controller.event_log.append(
         f"{meta['name']} rerolled dice {', '.join(rerolled_faces)} ({meta['rerolls_remaining']} rerolls remaining)."
@@ -422,8 +460,9 @@ def commit_defenses(
             if idx in validated_commitments:
                 new_commitments[new_idx] = validated_commitments[idx]
 
-    # Cryptographic Hash Match (RULES.md v0.17.0 Baseline)
-    hash_secrets = detect_hash_matches(surviving_active)
+    # Cryptographic Hash Match (RULES.md v0.17.0 Baseline & Cipher Wildcard v0.24.0)
+    is_cipher = bool(player.archetype and player.archetype.code == ArchetypeCode.CIPHER)
+    hash_secrets = detect_hash_matches(surviving_active, is_cipher=is_cipher)
     if hash_secrets > 0:
         player.secrets += hash_secrets
         player.hash_matches_secrets = getattr(player, "hash_matches_secrets", 0) + hash_secrets
@@ -514,11 +553,11 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
         # 1. Temp Staffing (Contractor Hiring)
         active_ver = controller.state.active_version.version_str
         used_operator = False
-        if (
-            player.archetype is not None
-            and player.archetype.code == ArchetypeCode.OPERATOR
-            and player.is_ability_available(active_ver)
-        ):
+        is_meridian = bool(
+            (player.company and player.company.code == CompanyCode.MERIDIAN)
+            or (player.archetype and player.archetype.code == ArchetypeCode.OPERATOR)
+        ) and player.is_ability_available(active_ver)
+        if is_meridian:
             use_op = player.bot.choose_operator_ability(
                 player_state=player,
                 contractor_supply=controller.state.contractor_supply,
@@ -599,13 +638,12 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
         active_directive = controller.state.active_directive_code
         max_free_rerolls = controller.state.config.default_free_rerolls
 
-        is_prodigy = (
-            player.archetype is not None
-            and player.archetype.code == ArchetypeCode.PRODIGY
-            and player.is_ability_available(active_ver)
-        )
+        is_helix = bool(
+            (player.company and player.company.code == CompanyCode.HELIX)
+            or (player.archetype and player.archetype.code == ArchetypeCode.PRODIGY)
+        ) and player.is_ability_available(active_ver)
         prodigy_active = False
-        if is_prodigy:
+        if is_helix:
             use_prodigy = player.bot.choose_prodigy_ability(
                 player_state=player,
                 active_dice=active_dice,
@@ -743,8 +781,12 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
                 if idx in validated:
                     new_commitments[new_idx] = validated[idx]
 
-        # Cryptographic Hash Match (RULES.md v0.17.0 Baseline)
-        hash_secrets = detect_hash_matches(surviving_active)
+        # Cryptographic Hash Match (RULES.md v0.17.0 Baseline & Cipher Wildcard v0.24.0)
+        is_cipher = bool(
+            (player.white_hat and player.white_hat.code == WhiteHatCode.CIPHER)
+            or (player.archetype and player.archetype.code == ArchetypeCode.CIPHER)
+        )
+        hash_secrets = detect_hash_matches(surviving_active, is_cipher=is_cipher)
         if hash_secrets > 0:
             player.secrets += hash_secrets
             player.hash_matches_secrets = getattr(player, "hash_matches_secrets", 0) + hash_secrets

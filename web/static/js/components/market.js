@@ -56,7 +56,7 @@ export function renderMarket() {
   if (!container) return;
   container.innerHTML = "";
 
-  const order = ["red", "blue", "green", "yellow", "purple"];
+  const order = ["red", "blue", "green", "yellow"];
 
   // Outer Market Board Wrapper
   const boardEl = document.createElement("div");

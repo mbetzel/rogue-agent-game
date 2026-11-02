@@ -10,6 +10,15 @@ from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldCol
 from sim.entities import (
     AbilityStatus,
     ArchetypeCard,
+    ArchetypeCode,
+    Company,
+    CompanyCode,
+    WhiteHat,
+    WhiteHatCode,
+    COMPANIES,
+    WHITE_HATS,
+    CANONICAL_COMPANY_FOR_OPERATIVE,
+    CANONICAL_OPERATIVE_FOR_COMPANY,
     Die,
     Face,
     VariantCard,
@@ -96,6 +105,11 @@ class PlayerState:
     contractor_dice: List[Die] = field(default_factory=list)
     hired_contractor_count: int = 0
 
+    # --- Personal Reserve (v0.24.0 Canonical) ---
+    personal_purple_reserve: int = 2
+    purple_star_available: bool = False
+    purple_star_count: int = 0
+
     is_patient_zero: bool = False
     elimination_round: Optional[int] = None
     elimination_reason: Optional[str] = None
@@ -111,7 +125,8 @@ class PlayerState:
     y1_available: bool = False
     p1_available: bool = False
     p3_available: Optional[ShieldColor] = None
-    archetype: Optional[ArchetypeCard] = None
+    company: Optional[Company] = None
+    white_hat: Optional[WhiteHat] = None
     ability_v1_status: AbilityStatus = AbilityStatus.AVAILABLE
     ability_v2_status: AbilityStatus = AbilityStatus.LOCKED
     ability_v3_status: AbilityStatus = AbilityStatus.LOCKED
@@ -129,6 +144,9 @@ class PlayerState:
         scanned_dice: Optional[List[Die]] = None,
         contractor_dice: Optional[List[Die]] = None,
         hired_contractor_count: int = 0,
+        personal_purple_reserve: int = 2,
+        purple_star_available: bool = False,
+        purple_star_count: int = 0,
         is_patient_zero: bool = False,
         elimination_round: Optional[int] = None,
         elimination_reason: Optional[str] = None,
@@ -144,6 +162,8 @@ class PlayerState:
         y1_available: bool = False,
         p1_available: bool = False,
         p3_available: Optional[ShieldColor] = None,
+        company: Optional[Company] = None,
+        white_hat: Optional[WhiteHat] = None,
         archetype: Optional[ArchetypeCard] = None,
         ability_v1_status: AbilityStatus = AbilityStatus.AVAILABLE,
         ability_v2_status: AbilityStatus = AbilityStatus.LOCKED,
@@ -195,10 +215,62 @@ class PlayerState:
         self.y1_available = y1_available
         self.p1_available = p1_available
         self.p3_available = p3_available
-        self.archetype = archetype
+
+        if company is not None and white_hat is not None:
+            self.company = company
+            self.white_hat = white_hat
+        elif archetype is not None:
+            self.archetype = archetype
+        elif company is not None:
+            self.company = company
+            self.white_hat = WHITE_HATS[CANONICAL_OPERATIVE_FOR_COMPANY[company.code]]
+        elif white_hat is not None:
+            self.white_hat = white_hat
+            self.company = COMPANIES[CANONICAL_COMPANY_FOR_OPERATIVE[white_hat.code]]
+        else:
+            self.company = None
+            self.white_hat = None
+
         self.ability_v1_status = ability_v1_status
         self.ability_v2_status = ability_v2_status
         self.ability_v3_status = ability_v3_status
+        self.personal_purple_reserve = personal_purple_reserve
+        self.purple_star_available = purple_star_available
+        self.purple_star_count = purple_star_count
+
+    # --- Backward Compatibility Properties ---
+    @property
+    def archetype(self) -> Optional[ArchetypeCard]:
+        """Backward compatibility bridge mapping Company/WhiteHat to legacy ArchetypeCard."""
+        if self.white_hat is not None:
+            code_str = self.white_hat.code.value
+            return get_archetype_by_code(code_str)
+        if self.company is not None:
+            compat_map = {
+                CompanyCode.MERIDIAN: ArchetypeCode.OPERATOR,
+                CompanyCode.OMNIDYNE: ArchetypeCode.PHREAKER,
+                CompanyCode.AEGIS: ArchetypeCode.ACOUSTIC,
+                CompanyCode.DTO: ArchetypeCode.SPOOK,
+                CompanyCode.HELIX: ArchetypeCode.PRODIGY,
+                CompanyCode.PROMETHEUS: ArchetypeCode.CIPHER,
+            }
+            legacy_code = compat_map.get(self.company.code)
+            if legacy_code:
+                return get_archetype_by_code(legacy_code)
+        return None
+
+    @archetype.setter
+    def archetype(self, value: Optional[ArchetypeCard]) -> None:
+        """Backward compatibility setter initializing Company and WhiteHat from legacy ArchetypeCard."""
+        if value is None:
+            self.company = None
+            self.white_hat = None
+            return
+
+        legacy_code = value.code if isinstance(value.code, ArchetypeCode) else ArchetypeCode(value.code)
+        wh_code = WhiteHatCode(legacy_code.value)
+        self.company = COMPANIES[CANONICAL_COMPANY_FOR_OPERATIVE[wh_code]]
+        self.white_hat = WHITE_HATS[wh_code]
 
     # --- CI/CD Pipeline In Production Role Accessors ---
     @property
@@ -445,6 +517,7 @@ class GameState:
     )
     last_round_buffer_overflow: bool = False
     total_buffer_overflows: int = 0
+    last_exited_cubes: Dict[CubeColor, int] = field(default_factory=dict)
     first_player_index: int = 0
     current_round: int = 1
     game_over: bool = False

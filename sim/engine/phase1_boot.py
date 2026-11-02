@@ -6,7 +6,7 @@ import random
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
-from sim.entities import ArchetypeCode, Die, Face, create_white_die
+from sim.entities import ArchetypeCode, CompanyCode, WhiteHatCode, Die, Face, create_white_die
 from sim.engine.state import ProductionRole
 
 if TYPE_CHECKING:
@@ -33,23 +33,111 @@ def get_face_signature(face: Optional[Face]) -> Optional[Tuple]:
     )
 
 
-def detect_hash_matches(dice: List[Die]) -> int:
+def detect_hash_matches_with_cipher(
+    dice: List[Die],
+    is_cipher: bool = False,
+) -> int:
     """Calculates Corporate Secrets gained from Cryptographic Hash Matches (triplets).
 
     For every set of 3 dice showing the exact same printed output (excluding Glitches),
     the player gains +1 Corporate Secret (uncapped). Choice faces match their declared option.
+
+    If is_cipher is True and a Purple die showing PURPLE_STAR is present in dice,
+    one Purple Star acts as a wildcard completing any natural pair (count == 2)
+    into a 3-of-a-kind triplet.
     """
     counts: Dict[Tuple, int] = {}
+    purple_star_wildcards = 0
+
     for d in dice:
         eff = d.effective_face
+        if not eff or eff.is_glitch:
+            continue
+        if is_cipher and eff.is_star and eff.star_code == "PURPLE_STAR":
+            purple_star_wildcards += 1
+            continue
         sig = get_face_signature(eff)
         if sig is not None:
             counts[sig] = counts.get(sig, 0) + 1
 
     secrets_gained = 0
-    for count in counts.values():
+    # Natural triplets
+    for sig, count in list(counts.items()):
         secrets_gained += count // 3
+        counts[sig] = count % 3
+
+    # Cipher wildcard resolution: completes any natural pair into a triplet
+    if is_cipher and purple_star_wildcards > 0:
+        for sig, remainder in list(counts.items()):
+            if remainder == 2 and purple_star_wildcards > 0:
+                secrets_gained += 1
+                purple_star_wildcards -= 1
+                counts[sig] = 0
+
     return secrets_gained
+
+
+def detect_hash_matches(dice: List[Die], is_cipher: bool = False) -> int:
+    """Calculates Corporate Secrets gained from triplets (calls detect_hash_matches_with_cipher)."""
+    return detect_hash_matches_with_cipher(dice, is_cipher=is_cipher)
+
+
+def resolve_prodigy_purple_star_override(
+    player: PlayerState,
+    active_dice: List[Die],
+    rng: random.Random,
+    target_idx: Optional[int] = None,
+    target_face: Optional[Face] = None,
+) -> bool:
+    """Prodigy Face 6 Protocol (Arbitrary Code Execution):
+    Turn any 1 other rolled die to any legal non-Star face of choice.
+    """
+    purple_star_indices = [
+        i for i, d in enumerate(active_dice)
+        if d.current_face and d.current_face.is_star and d.current_face.star_code == "PURPLE_STAR"
+    ]
+    if not purple_star_indices:
+        return False
+
+    if target_idx is None or target_face is None:
+        choice = player.bot.choose_prodigy_purple_star_override(player, active_dice, rng)
+        if choice is not None:
+            target_idx, target_face = choice
+
+    if target_idx is not None and target_face is not None:
+        if 0 <= target_idx < len(active_dice) and not target_face.is_star:
+            if target_idx not in purple_star_indices:
+                active_dice[target_idx].current_face = target_face
+                active_dice[target_idx].is_locked = False
+                active_dice[target_idx].chosen_choice_index = None
+                return True
+    return False
+
+
+def check_operator_contingent_staffing(
+    engine: GameEngine,
+    player: PlayerState,
+    active_dice: List[Die],
+) -> Optional[Die]:
+    """Operator Face 6 Protocol (Contingent Staffing):
+    Immediately roll 1 free White Contractor die into rolled pool.
+    """
+    if engine.state.contractor_supply <= 0:
+        return None
+    has_purple_star = any(
+        d.current_face and d.current_face.is_star and d.current_face.star_code == "PURPLE_STAR"
+        for d in active_dice
+    )
+    if not has_purple_star:
+        return None
+
+    engine.state.contractor_supply -= 1
+    c_die = create_white_die(engine.state.next_die_id)
+    engine.state.next_die_id += 1
+    c_die.roll(engine.rng)
+    active_dice.append(c_die)
+    player.contractor_dice.append(c_die)
+    return c_die
 
 
 def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]]:
@@ -79,15 +167,14 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
             player.contractor_dice = []
             player.hired_contractor_count = 0
 
-        # Hook Phase 1 Step 2: The Operator (Redundant Crew)
-        is_operator = (
-            player.archetype is not None
-            and player.archetype.code == ArchetypeCode.OPERATOR
-            and player.is_ability_available(active_ver)
-        )
+        # Hook Phase 1 Step 2: Meridian Financial Trust (Redundant Crew)
+        is_meridian = bool(
+            (player.company and player.company.code == CompanyCode.MERIDIAN)
+            or (player.archetype and player.archetype.code == ArchetypeCode.OPERATOR)
+        ) and player.is_ability_available(active_ver)
         used_operator = False
-        if is_operator:
-            use_op = player.bot.choose_operator_ability(
+        if is_meridian:
+            use_op = player.bot.choose_meridian_override(
                 player_state=player,
                 contractor_supply=engine.state.contractor_supply,
                 staging_cubes=staging_copy,
@@ -164,6 +251,8 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
         player.y1_available = False
         player.p1_available = False
         player.p3_available = None
+        player.purple_star_available = False
+        player.purple_star_count = 0
 
         # Roll Active Pool (ready_for_release_dice + contractor_dice)
         active_dice: List[Die] = list(player.ready_for_release_dice) + list(player.contractor_dice)
@@ -172,6 +261,25 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
             res_face = die.roll(engine.rng)
             if res_face and die.current_face != res_face:
                 die.current_face = res_face
+
+        # Protocol Check: The Operator (Contingent Staffing Face 6 Trigger)
+        is_operator_operative = bool(
+            (player.white_hat and player.white_hat.code == WhiteHatCode.OPERATOR)
+            or (player.archetype and player.archetype.code == ArchetypeCode.OPERATOR)
+        )
+        operator_contingent_staffing_triggered = False
+        if is_operator_operative:
+            new_contractor = check_operator_contingent_staffing(engine, player, active_dice)
+            if new_contractor is not None:
+                operator_contingent_staffing_triggered = True
+
+        # Protocol Check: The Prodigy (Arbitrary Code Execution Face 6 Trigger)
+        is_prodigy_operative = bool(
+            (player.white_hat and player.white_hat.code == WhiteHatCode.PRODIGY)
+            or (player.archetype and player.archetype.code == ArchetypeCode.PRODIGY)
+        )
+        if is_prodigy_operative:
+            resolve_prodigy_purple_star_override(player, active_dice, engine.rng)
 
         # 4. Lock Evaluation & Yahtzee Rerolls Loop
         active_directive = engine.state.active_directive_code
@@ -193,14 +301,13 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
 
         _evaluate_locks(active_dice)
 
-        is_prodigy = (
-            player.archetype is not None
-            and player.archetype.code == ArchetypeCode.PRODIGY
-            and player.is_ability_available(active_ver)
-        )
-        prodigy_active = False
-        if is_prodigy:
-            use_prodigy = player.bot.choose_prodigy_ability(
+        is_helix = bool(
+            (player.company and player.company.code == CompanyCode.HELIX)
+            or (player.archetype and player.archetype.code == ArchetypeCode.PRODIGY)
+        ) and player.is_ability_available(active_ver)
+        helix_active = False
+        if is_helix:
+            use_helix = player.bot.choose_helix_override(
                 player_state=player,
                 active_dice=active_dice,
                 rerolls_remaining=max_free_rerolls,
@@ -210,14 +317,14 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
                 rng=engine.rng,
                 corruption_track=engine.state.corruption_track,
             )
-            if use_prodigy:
-                prodigy_active = True
+            if use_helix:
+                helix_active = True
                 player.mark_ability_used(active_ver)
 
         # Pure Rerolls: ZERO debug actions, ZERO patch deductions
         rerolls_remaining = max_free_rerolls
         while rerolls_remaining > 0:
-            # Choose rerolls among unlocked dice (or any dice if prodigy_active)
+            # Choose rerolls among unlocked dice (or any dice if helix_active)
             reroll_res = player.bot.choose_yahtzee_rerolls(
                 player_state=player,
                 active_dice=active_dice,
@@ -232,8 +339,8 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
             else:
                 reroll_indices = reroll_res or []
 
-            # Filter reroll indices: Prodigy may reroll locked dice; standard players cannot
-            if prodigy_active:
+            # Filter reroll indices: Helix/Prodigy override may reroll locked dice; standard players cannot
+            if helix_active:
                 valid_rerolls = [
                     idx for idx in reroll_indices
                     if 0 <= idx < len(active_dice)
@@ -253,12 +360,23 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
                 active_dice[r_idx].is_locked = False
 
             _evaluate_locks(active_dice)
+            if is_operator_operative and not operator_contingent_staffing_triggered:
+                new_contractor = check_operator_contingent_staffing(engine, player, active_dice)
+                if new_contractor is not None:
+                    operator_contingent_staffing_triggered = True
+                    _evaluate_locks(active_dice)
+
             player.total_rerolls_used += 1
             rerolls_remaining -= 1
 
-        # Prodigy face override (RULES.md v0.13.0)
-        if prodigy_active:
-            override = player.bot.choose_prodigy_face_override(
+        # Prodigy Face 6 protocol check after rerolls (Arbitrary Code Execution)
+        if is_prodigy_operative:
+            resolve_prodigy_purple_star_override(player, active_dice, engine.rng)
+            _evaluate_locks(active_dice)
+
+        # Helix face override (Brute-Force Bypass)
+        if helix_active:
+            override = player.bot.choose_helix_face_override(
                 player_state=player,
                 active_dice=active_dice,
                 staging_cubes=staging_copy,
@@ -358,7 +476,11 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
                     new_commitments[new_idx] = validated_commitments[idx]
 
         # 2. Cryptographic Hash Match (triplets among active surviving dice)
-        hash_secrets = detect_hash_matches(surviving_active)
+        is_cipher = bool(
+            (player.white_hat and player.white_hat.code == WhiteHatCode.CIPHER)
+            or (player.archetype and player.archetype.code == ArchetypeCode.CIPHER)
+        )
+        hash_secrets = detect_hash_matches_with_cipher(surviving_active, is_cipher=is_cipher)
         if hash_secrets > 0:
             player.secrets += hash_secrets
             player.hash_matches_secrets += hash_secrets
@@ -392,6 +514,9 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
                 elif face.star_code == "P3":
                     if idx in new_commitments:
                         player.p3_available = new_commitments[idx]
+                elif face.star_code == "PURPLE_STAR":
+                    player.purple_star_available = True
+                    player.purple_star_count += 1
 
             player.in_production_dice.append(die)
 
