@@ -314,13 +314,15 @@ export function renderCompiler() {
 
           <!-- Phase 3 -->
           <div class="seq-card">
-            <div class="seq-card-header">PHASE 3: OPERATIONS (Clockwise Turns)</div>
+            <div class="seq-card-header">PHASE 3: OPERATIONS & PIPELINE PREP</div>
             <div class="seq-card-body">
-              1. <strong>Buy Dice (max 2):</strong> Pay $ → place into Ready Zone.<br>
-              2. <strong>Patch Dice (unlimited):</strong> Pay 1 🔧 or $2 per die → Ready Zone.<br>
-              3. <strong>Backdoor Siphon (max 1):</strong> Pay 1 Secret + demote 1 Ready + 1 Black → Cup => Gain +$3.<br>
-              4. <strong>System Reboot (1x/game):</strong> If 0 Ready dice, return all Gray Starter from Unpatched → Ready.<br>
-              5. <strong>Cleanup:</strong> Un-worn dice stay Ready; pass CISO clockwise.
+              <strong>3A. Operations Turns (Clockwise):</strong><br>
+              1. <strong>Collect Income & Outputs:</strong> $ & 🔧 from surviving Production dice.<br>
+              2. <strong>Buy Software Dice (max 2):</strong> Pay $ → place into Ready for Release.<br>
+              <strong>3B. Pipeline Prep (Simultaneous):</strong><br>
+              3. <strong>Fast-Patching:</strong> Spend 1 🔧 per die: Glitched → Scanned.<br>
+              4. <strong>CI/CD Graduation:</strong> Scanned & surviving Production → Ready for Release.<br>
+              5. <strong>Conveyor Shift:</strong> Glitched → Scanned for next round; pass First Player.
             </div>
           </div>
 

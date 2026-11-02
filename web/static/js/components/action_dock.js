@@ -106,7 +106,7 @@ export function renderActionDock() {
         const btn = document.createElement("button");
         btn.className = "action-btn btn-accent";
         const poolSize = human.ready_dice.length + (human.contractor_dice ? human.contractor_dice.length : 0);
-        btn.innerText = `Roll Active Pool (${poolSize} dice)`;
+        btn.innerText = `Roll Ready Pool (${poolSize} dice)`;
         btn.onclick = () => {
           clearSelectedRerolls();
           doRoll();

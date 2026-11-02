@@ -25,13 +25,13 @@ export function getEligibleBacklashDice(player) {
   for (const d of (player.ready_dice || [])) {
     if (!seen.has(d.die_id)) {
       seen.add(d.die_id);
-      result.push({ ...d, zone_label: "Ready Zone" });
+      result.push({ ...d, zone_label: "Ready for Release" });
     }
   }
   for (const d of (player.rolled_pool || [])) {
     if (!d.is_contractor && d.color !== "white" && !seen.has(d.die_id)) {
       seen.add(d.die_id);
-      result.push({ ...d, zone_label: "Active Pool" });
+      result.push({ ...d, zone_label: "Ready for Release" });
     }
   }
   return result;

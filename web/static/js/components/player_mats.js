@@ -288,6 +288,13 @@ export function renderPlayerMats() {
       code: archetypeCode,
     };
 
+    const isActivelyRolling = Boolean(p.has_rolled && !p.has_committed);
+    const readyDiceList = (p.ready_for_release_dice && p.ready_for_release_dice.length !== undefined)
+      ? p.ready_for_release_dice
+      : (p.ready_dice || []);
+    const contractorCount = (!p.has_rolled && p.contractor_dice) ? p.contractor_dice.length : 0;
+    const readyCount = readyDiceList.length + contractorCount;
+
     const terminalMat = document.createElement("div");
     terminalMat.className = `pnp-terminal-mat ${isTurn ? "active-turn" : ""} ${p.is_patient_zero ? "patient-zero" : ""}`;
 
@@ -357,37 +364,30 @@ export function renderPlayerMats() {
         <!-- RIGHT COLUMN: Operational Dice Zones & CI/CD Pipeline Matrix -->
         <!-- ========================================================= -->
         <div class="terminal-right-col">
-          <!-- Zone 1: Ready for Release Zone -->
+          <!-- Zone 1: Ready for Release Zone (Rolls managed here, then move to In Production) -->
           <div class="operational-zone ready-zone-panel">
             <div class="zone-header-strip">
               <div class="zone-title-wrap">
                 <span class="zone-name">READY FOR RELEASE</span>
-                <span class="zone-count-badge">(${((p.ready_for_release_dice && p.ready_for_release_dice.length) || (p.ready_dice && p.ready_dice.length) || 0) + (!p.has_rolled && p.contractor_dice ? p.contractor_dice.length : 0)})</span>
+                <span class="zone-count-badge">(${isActivelyRolling 
+                  ? `${p.rolled_pool.length} ROLLED` 
+                  : `${readyCount} READY`})</span>
               </div>
               <div class="zone-subtext">
-                Start: 4 Gray Dice | Phase 1: Roll all Ready + hired Contractors | Offline dice do not roll
+                ${isActivelyRolling 
+                  ? (p.is_human && state.phase === 1 
+                      ? `Free Rerolls: <strong>${p.rerolls_remaining || 0}</strong>/2 | Click unlocked dice to reroll | Glitches lock immediately` 
+                      : `Phase 1 Rolling | Glitches lock immediately → Glitched Box`)
+                  : (p.has_committed 
+                      ? (readyCount > 0 ? 'Dice ready for next round' : 'All dice deployed to In Production | Dice return or graduate here in Phase 3')
+                      : 'Start: 4 Gray Dice | Phase 1: Roll all Ready + hired Contractors | Offline dice do not roll')}
               </div>
             </div>
-            <div class="dice-tray ready-tray" id="ready_tray_${p.player_id}"></div>
-          </div>
-
-          <!-- Active Zone (Rolled Pool) -->
-          <div class="operational-zone active-zone-panel">
-            <div class="zone-header-strip">
-              <div class="zone-title-wrap">
-                <span class="zone-name">ACTIVE ZONE</span>
-                <span class="zone-count-badge">(${p.rolled_pool.length} ROLLED)</span>
-              </div>
-              <div class="zone-subtext">
-                ${p.is_human && state.phase === 1 && !p.has_committed 
-                  ? `Free Rerolls: <strong>${p.rerolls_remaining || 0}</strong>/2 | Glitches lock immediately → Glitched Box` 
-                  : `Max 2 Free Rerolls | Glitches lock immediately → Glitched Box`}
-              </div>
-            </div>
+            ${isActivelyRolling ? `
             <div class="zone-watermark-note">
               ROLLED POOL // YAHTZEE REROLLS // DEPLOY TO IN PRODUCTION
-            </div>
-            <div class="dice-tray active-tray" id="rolled_tray_${p.player_id}"></div>
+            </div>` : ''}
+            <div class="dice-tray ready-tray" id="ready_tray_${p.player_id}"></div>
           </div>
 
           <!-- Zone 2: In Production (Income slot + Red, Blue, Green Shield slots) -->
@@ -575,91 +575,110 @@ export function renderPlayerMats() {
     // Populate Dice in Trays
     // =========================================================
 
-    // Ready Zone Tray
+    // Ready Zone Tray (Managing rolls & ready dice)
     const readyTray = terminalMat.querySelector(`#ready_tray_${p.player_id}`);
     if (readyTray) {
-      p.ready_dice.forEach((d) => {
-        const chip = document.createElement("div");
-        chip.className = `die-chip ${d.color}`;
-        chip.innerHTML = `<span>${d.color.toUpperCase()}</span>`;
-        readyTray.appendChild(chip);
-      });
-      if (!p.has_rolled && p.contractor_dice) {
-        p.contractor_dice.forEach((d) => {
+      if (isActivelyRolling) {
+        // While rolling / rerolling in Phase 1: manage rolls directly in Ready for Release
+        p.rolled_pool.forEach((d, idx) => {
           const chip = document.createElement("div");
-          chip.className = `die-chip ${d.color}`;
-          chip.innerHTML = `<span>${d.color.toUpperCase()} <span class="badge-contractor">CONTRACTOR</span></span>`;
+          const isLocked = Boolean(d.is_locked);
+          const isContractor = Boolean(d.is_contractor || d.color === "white");
+          const isGlitch = Boolean(d.current_face && d.current_face.is_glitch);
+          const isSelectedReroll = selectedRerollIndices.has(idx);
+
+          chip.className = `die-chip ${d.color} ${isLocked ? "locked" : ""} ${isGlitch ? "glitch" : ""} ${isSelectedReroll ? "selected-reroll" : ""}`;
+          const faceName = d.current_face ? d.current_face.name : "Unrolled";
+
+          const isChoice = Boolean(d.current_face && d.current_face.is_choice);
+          let badgeHtml = "";
+          if (isContractor) badgeHtml += `<span class="badge-contractor">CONTRACTOR</span> `;
+          if (isLocked) badgeHtml += `<span class="badge-locked">🔒 LOCKED</span> `;
+          if (isGlitch) badgeHtml += `<span class="badge-glitch">⚠️ GLITCH</span> `;
+          if (isChoice) badgeHtml += `<span class="badge-choice">CHOICE</span> `;
+
+          let faceNameDisplay = faceName;
+          if (d.effective_face && d.chosen_choice_index !== null && d.chosen_choice_index !== undefined) {
+            faceNameDisplay += ` [→ ${d.effective_face.name}]`;
+          }
+
+          chip.innerHTML = `
+            <div style="display: flex; gap: 4px; align-items: center;">
+              <span>${d.color.toUpperCase()}</span>
+              ${badgeHtml}
+            </div>
+            <span class="die-face-name">${faceNameDisplay}</span>
+          `;
+
+          if (p.is_human && state.phase === 1 && !p.has_committed) {
+            const canProdigyReroll = Boolean(
+              p.archetype && p.archetype.code === "PRODIGY" &&
+              (Boolean(state.action_capabilities && state.action_capabilities.can_prodigy) ||
+               p.ability_v1_status === "AVAILABLE" || p.ability_v2_status === "AVAILABLE" || p.ability_v3_status === "AVAILABLE")
+            );
+
+            if (!isLocked && (p.rerolls_remaining || 0) > 0) {
+              chip.classList.add("clickable");
+              chip.title = "Click to toggle for Yahtzee reroll";
+              chip.onclick = () => {
+                if (selectedRerollIndices.has(idx)) {
+                  selectedRerollIndices.delete(idx);
+                } else {
+                  selectedRerollIndices.add(idx);
+                }
+                requestRender();
+              };
+            } else if (isLocked && canProdigyReroll && (p.rerolls_remaining || 0) > 0) {
+              chip.classList.add("clickable");
+              chip.title = "⚡ Prodigy: Click to include locked die in Brute-Force Bypass reroll";
+              chip.onclick = () => {
+                if (selectedRerollIndices.has(idx)) {
+                  selectedRerollIndices.delete(idx);
+                } else {
+                  selectedRerollIndices.add(idx);
+                }
+                requestRender();
+              };
+            }
+          }
           readyTray.appendChild(chip);
         });
+      } else if (!p.has_rolled) {
+        // Unrolled: ready dice + hired contractors
+        p.ready_dice.forEach((d) => {
+          const chip = document.createElement("div");
+          chip.className = `die-chip ${d.color}`;
+          chip.innerHTML = `<span>${d.color.toUpperCase()}</span>`;
+          readyTray.appendChild(chip);
+        });
+        if (p.contractor_dice) {
+          p.contractor_dice.forEach((d) => {
+            const chip = document.createElement("div");
+            chip.className = `die-chip ${d.color}`;
+            chip.innerHTML = `<span>${d.color.toUpperCase()} <span class="badge-contractor">CONTRACTOR</span></span>`;
+            readyTray.appendChild(chip);
+          });
+        }
+      } else {
+        // Completed rolls: dice have been deployed to In Production
+        if (p.ready_dice && p.ready_dice.length > 0) {
+          p.ready_dice.forEach((d) => {
+            const chip = document.createElement("div");
+            chip.className = `die-chip ${d.color}`;
+            chip.innerHTML = `<span>${d.color.toUpperCase()}</span>`;
+            readyTray.appendChild(chip);
+          });
+        } else {
+          const emptyMsg = document.createElement("div");
+          emptyMsg.className = "empty-tray-msg";
+          emptyMsg.style.fontSize = "0.68rem";
+          emptyMsg.style.color = "var(--text-muted)";
+          emptyMsg.style.fontStyle = "italic";
+          emptyMsg.style.padding = "4px 8px";
+          emptyMsg.innerText = "All dice deployed to In Production";
+          readyTray.appendChild(emptyMsg);
+        }
       }
-    }
-
-    // Active Zone Tray (Rolled Pool)
-    const rolledTray = terminalMat.querySelector(`#rolled_tray_${p.player_id}`);
-    if (rolledTray) {
-      p.rolled_pool.forEach((d, idx) => {
-        const chip = document.createElement("div");
-        const isLocked = Boolean(d.is_locked);
-        const isContractor = Boolean(d.is_contractor || d.color === "white");
-        const isGlitch = Boolean(d.current_face && d.current_face.is_glitch);
-        const isSelectedReroll = selectedRerollIndices.has(idx);
-
-        chip.className = `die-chip ${d.color} ${isLocked ? "locked" : ""} ${isGlitch ? "glitch" : ""} ${isSelectedReroll ? "selected-reroll" : ""}`;
-        const faceName = d.current_face ? d.current_face.name : "Unrolled";
-
-        const isChoice = Boolean(d.current_face && d.current_face.is_choice);
-        let badgeHtml = "";
-        if (isContractor) badgeHtml += `<span class="badge-contractor">CONTRACTOR</span> `;
-        if (isLocked) badgeHtml += `<span class="badge-locked">🔒 LOCKED</span> `;
-        if (isGlitch) badgeHtml += `<span class="badge-glitch">⚠️ GLITCH</span> `;
-        if (isChoice) badgeHtml += `<span class="badge-choice">CHOICE</span> `;
-
-        let faceNameDisplay = faceName;
-        if (d.effective_face && d.chosen_choice_index !== null && d.chosen_choice_index !== undefined) {
-          faceNameDisplay += ` [→ ${d.effective_face.name}]`;
-        }
-
-        chip.innerHTML = `
-          <div style="display: flex; gap: 4px; align-items: center;">
-            <span>${d.color.toUpperCase()}</span>
-            ${badgeHtml}
-          </div>
-          <span class="die-face-name">${faceNameDisplay}</span>
-        `;
-
-        if (p.is_human && state.phase === 1 && !p.has_committed) {
-          const canProdigyReroll = Boolean(
-            p.archetype && p.archetype.code === "PRODIGY" &&
-            (Boolean(state.action_capabilities && state.action_capabilities.can_prodigy) ||
-             p.ability_v1_status === "AVAILABLE" || p.ability_v2_status === "AVAILABLE" || p.ability_v3_status === "AVAILABLE")
-          );
-
-          if (!isLocked && (p.rerolls_remaining || 0) > 0) {
-            chip.classList.add("clickable");
-            chip.title = "Click to toggle for Yahtzee reroll";
-            chip.onclick = () => {
-              if (selectedRerollIndices.has(idx)) {
-                selectedRerollIndices.delete(idx);
-              } else {
-                selectedRerollIndices.add(idx);
-              }
-              requestRender();
-            };
-          } else if (isLocked && canProdigyReroll && (p.rerolls_remaining || 0) > 0) {
-            chip.classList.add("clickable");
-            chip.title = "⚡ Prodigy: Click to include locked die in Brute-Force Bypass reroll";
-            chip.onclick = () => {
-              if (selectedRerollIndices.has(idx)) {
-                selectedRerollIndices.delete(idx);
-              } else {
-                selectedRerollIndices.add(idx);
-              }
-              requestRender();
-            };
-          }
-        }
-        rolledTray.appendChild(chip);
-      });
     }
 
     // Income Tray
