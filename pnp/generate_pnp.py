@@ -1,7 +1,7 @@
 """Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.25.0 Baseline).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
-  - 01_Player_Boards.pdf (6 pages — 4x Consultancy Terminal Mats with dual card docks + 6x Client Company Cards sheet + 6x White Hat Dossier Cards sheet)
+  - 01_Player_Boards.pdf (6 pages — 4x Consultancy Terminal Mats with empty modular card docks + 6x Client Company Cards sheet + 6x White Hat Dossier Cards sheet)
   - 02_Central_Game_Boards.pdf (2 pages — SETEC Agent Board matching Wireframe Page 2 + Market & Supply Board)
   - 03_Dice_Visual_Aids_and_Market_Cards.pdf (4 pages — Master Pip Aid, 4x Player Pocket Aids, 12x Variant ★ Cards)
   - 04_SETEC_Version_Cards_and_Tokens.pdf (2 pages — 6x SETEC Version Tiles sized to board slots + Cut-Out PnP Tokens)
@@ -659,11 +659,143 @@ def _draw_white_hat_card(page: PDFPage, x: float, y: float, w: float, h: float, 
     page.text(x + w - 8.0, y + 208.0, "2x PURPLE SPECIALIST DICE IN RESERVE", font="mono", size=4.5, color=PALETTE["purple"], align="right")
 
 
+def _draw_empty_company_card_slot(page: PDFPage, x: float, y: float, w: float, h: float, idx: int = 1) -> None:
+    """Render an empty docking slot for the Client Company Card (w ~ 238, h ~ 210)."""
+    # Outer Card Dock Frame
+    page.rect(x, y, w, h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
+
+    # 1. Header Strip (y..y+18)
+    page.rect(x, y, w, 18.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
+    page.text(x + 6.0, y + 12.0, "CLIENT COMPANY CARD [MODULAR DOCK]", font="mono_bold", size=6.0, color=PALETTE["ink"])
+    page.text(x + w - 6.0, y + 12.0, "ONCE / VER OVERRIDE", font="mono_bold", size=5.6, color=PALETTE["ink_soft"], align="right")
+
+    # Inset dashed placement guide matching 3.30" x 2.92" cut card
+    page.rect(x + 4.0, y + 21.0, w - 8.0, h - 25.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.75, dash=(3.0, 2.0))
+    page.corner_ticks(x + 4.0, y + 21.0, w - 8.0, h - 25.0, size=6.0, color=PALETTE["ink_soft"])
+
+    # Center Slot Callout
+    page.text(x + w / 2.0, y + 36.0, "SLOT CLIENT COMPANY CARD HERE", font="bold", size=8.5, color=PALETTE["ink"], align="center")
+    page.text(x + w / 2.0, y + 46.0, "3.30\" x 2.92\" Modular Card  |  Cut from Sheet [Page 5]", font="mono", size=5.4, color=PALETTE["ink_soft"], align="center")
+
+    page.line(x + 16.0, y + 51.0, x + w - 16.0, y + 51.0, stroke=PALETTE["rule"], width=0.5, dash=(2.0, 1.5))
+
+    # Rules Summary Box
+    by = y + 54.0
+    bw = w - 16.0
+    bh = 94.0
+    page.rounded_rect(x + 8.0, by, bw, bh, r=3.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.75)
+    page.rect(x + 8.0, by, bw, 14.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.6)
+    page.text(x + 12.0, by + 10.0, "ROLE 1: CLIENT CONTRACTOR RULES", font="mono_bold", size=5.6, color=PALETTE["ink"])
+    page.text(x + bw + 4.0, by + 10.0, "1 CARD / PLAYER", font="mono_bold", size=5.2, color=PALETTE["ink_soft"], align="right")
+
+    rules_text = (
+        "**1. Contract Assignment:** Draw 1 Client Company at setup and slot flush into this dock.\n"
+        "**2. Institutional Override:** Each company grants 1 powerful override per SETEC Version (**v1.0**, **v2.0**, **v3.0**).\n"
+        "**3. Use-It-or-Lose-It:** Must activate before SETEC advances in Step 2A (unspent charges forfeit upon upgrade).\n"
+        "**4. Immediate Unlock:** Upgraded version override unlocks immediately upon compiler advancement."
+    )
+    page.rich_paragraph(x + 12.0, by + 23.0, bw - 8.0, rules_text, size=5.6, leading=7.6, color=PALETTE["ink"])
+
+    intro_comps = [
+        "Meridian Financial Trust (COMP-01)",
+        "Omnidyne Systems (COMP-02)",
+        "Aegis Defense Relay (COMP-03)",
+        "Dept of Telecom Oversight (COMP-04)",
+    ]
+    comp_preset = intro_comps[idx - 1] if 1 <= idx <= len(intro_comps) else "Open Assignment"
+    page.line(x + 12.0, by + bh - 14.0, x + 8.0 + bw - 4.0, by + bh - 14.0, stroke=PALETTE["rule"], width=0.5, dash=(2.0, 1.5))
+    page.rich_line(x + w / 2.0, by + bh - 5.0, f"**Intro Preset (Optional):** {comp_preset}", size=5.2, color=PALETTE["ink_soft"], align="center")
+
+    # Slotted Card Track Mockup
+    ty = y + 152.0
+    page.text(x + 10.0, ty + 10.0, "SLOTTED CARD TRACK:", font="mono_bold", size=5.3, color=PALETTE["ink_soft"])
+    page.text(x + w - 10.0, ty + 10.0, "3 VERSION SLOTS", font="mono", size=5.0, color=PALETTE["muted"], align="right")
+    slots = ["v1.0", "v2.0", "v3.0"]
+    sx_start = x + 10.0
+    sw_box = (w - 20.0 - 2 * 4.0) / 3.0
+    for s_idx, ver_lbl in enumerate(slots):
+        bx_s = sx_start + s_idx * (sw_box + 4.0)
+        page.rounded_rect(bx_s, ty + 13.0, sw_box, 15.0, r=2.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.5, dash=(2.0, 1.5))
+        page.rect(bx_s + 4.0, ty + 16.0, 9.0, 9.0, stroke=PALETTE["rule"], fill=PALETTE["white"], line_width=0.5)
+        page.text(bx_s + 17.0, ty + 23.0, f"{ver_lbl} [Ready]", font="mono_bold", size=5.4, color=PALETTE["muted"])
+
+    # Bottom Tag
+    page.line(x + 8.0, y + 193.0, x + w - 8.0, y + 193.0, stroke=PALETTE["rule"], width=0.5)
+    page.text(x + 8.0, y + 203.0, "SLIPS FLUSH BESIDE MAT", font="mono", size=4.6, color=PALETTE["muted"])
+    page.text(x + w - 8.0, y + 203.0, "6 ENTERPRISE CLIENTS (PAGE 5)", font="mono", size=4.6, color=PALETTE["muted"], align="right")
+
+
+def _draw_empty_white_hat_slot(page: PDFPage, x: float, y: float, w: float, h: float, idx: int = 1) -> None:
+    """Render an empty docking slot for the White Hat Dossier (w ~ 238, h ~ 210)."""
+    # Outer Card Dock Frame
+    page.rect(x, y, w, h, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=1.0)
+
+    # 1. Header Strip (y..y+18)
+    page.rect(x, y, w, 18.0, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.8)
+    page.rect(x, y, w, 2.5, stroke=None, fill=PALETTE["purple"])
+    page.draw_color_badge(x + 9.0, y + 10.0, 5.0, "purple")
+    page.text(x + 19.0, y + 12.0, "WHITE HAT DOSSIER [MODULAR DOCK]", font="bold", size=6.2, color=PALETTE["purple"])
+    page.text(x + w - 6.0, y + 12.0, "TACTICAL ROLE & PROTOCOL", font="mono_bold", size=5.6, color=PALETTE["purple"], align="right")
+
+    # Inset dashed placement guide matching 3.30" x 2.92" cut card
+    page.rect(x + 4.0, y + 21.0, w - 8.0, h - 25.0, stroke=PALETTE["purple_light"], fill=PALETTE["paper_tint"], line_width=0.75, dash=(3.0, 2.0))
+    page.corner_ticks(x + 4.0, y + 21.0, w - 8.0, h - 25.0, size=6.0, color=PALETTE["purple"])
+
+    # Center Slot Callout
+    page.text(x + w / 2.0, y + 36.0, "SLOT WHITE HAT DOSSIER HERE", font="bold", size=8.5, color=PALETTE["purple"], align="center")
+    page.text(x + w / 2.0, y + 46.0, "3.30\" x 2.92\" Modular Card  |  Cut from Sheet [Page 6]", font="mono", size=5.4, color=PALETTE["purple"], align="center")
+
+    page.line(x + 16.0, y + 51.0, x + w - 16.0, y + 51.0, stroke=PALETTE["purple_light"], width=0.5, dash=(2.0, 1.5))
+
+    # Rules Summary Box
+    by = y + 54.0
+    bw = w - 16.0
+    bh = 94.0
+    page.rounded_rect(x + 8.0, by, bw, bh, r=3.0, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.75)
+    page.rect(x + 8.0, by, bw, 14.0, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.6)
+    page.text(x + 12.0, by + 10.0, "ROLE 2: WHITE HAT OPERATIVE RULES", font="mono_bold", size=5.6, color=PALETTE["purple"])
+    page.text(x + bw + 4.0, by + 10.0, "1 DOSSIER / PLAYER", font="mono_bold", size=5.2, color=PALETTE["purple"], align="right")
+
+    wh_rules_text = (
+        "**1. Operative Assignment:** Draw 1 White Hat Dossier at setup and slot flush into this dock.\n"
+        "**2. Personal Reserve:** Holds your **2 Purple Specialist Dice** ($4 each in Phase 3A Operations).\n"
+        "**3. Face 6 Signature Protocol ({STAR}):** Rolling Purple Face 6 triggers your operative's repeatable protocol.\n"
+        "**4. Repeatable:** Each rolled Purple Star ({STAR}) triggers the protocol once."
+    )
+    page.rich_paragraph(x + 12.0, by + 23.0, bw - 8.0, wh_rules_text, size=5.6, leading=7.6, color=PALETTE["ink"])
+
+    intro_wh = [
+        "The Operator (WH-01)",
+        "The Phreaker (WH-02)",
+        "The Acoustic (WH-03)",
+        "The Spook (WH-04)",
+    ]
+    wh_preset = intro_wh[idx - 1] if 1 <= idx <= len(intro_wh) else "Open Assignment"
+    page.line(x + 12.0, by + bh - 14.0, x + 8.0 + bw - 4.0, by + bh - 14.0, stroke=PALETTE["purple_light"], width=0.5, dash=(2.0, 1.5))
+    page.rich_line(x + w / 2.0, by + bh - 5.0, f"**Intro Preset (Optional):** {wh_preset}", size=5.2, color=PALETTE["purple"], align="center")
+
+    # Purple Specialist Dice Faces Strip
+    f_y = y + 152.0
+    page.text(x + 10.0, f_y + 10.0, "PURPLE SPECIALIST FACES (d6 // $4):", font="mono_bold", size=5.3, color=PALETTE["purple"])
+    cell_w = (w - 20.0 - 4 * 2.5) / 5.0
+    labels = ["1-2: Any Shld", "3: +$2 Cash", "4: +$1 & 1 {WRENCH}", "5: {LOCK} Glitch", "6: {STAR} Proto"]
+    for c_i, lbl in enumerate(labels):
+        cx_i = x + 10.0 + c_i * (cell_w + 2.5)
+        c_fill = PALETTE["purple_light"] if c_i in (4, 5) else PALETTE["paper_tint"]
+        page.rounded_rect(cx_i, f_y + 13.0, cell_w, 15.0, r=2.0, stroke=PALETTE["purple"], fill=c_fill, line_width=0.5, dash=(2.0, 1.5))
+        page.rich_line(cx_i + cell_w / 2.0, f_y + 23.0, lbl, size=4.4, color=PALETTE["purple"], align="center")
+
+    # Bottom Tag
+    page.line(x + 8.0, y + 193.0, x + w - 8.0, y + 193.0, stroke=PALETTE["purple_light"], width=0.5)
+    page.text(x + 8.0, y + 204.0, "SLIPS FLUSH BESIDE MAT", font="mono", size=4.6, color=PALETTE["muted"])
+    page.text(x + w - 8.0, y + 204.0, "2x PURPLE SPECIALIST DICE IN RESERVE", font="mono", size=4.6, color=PALETTE["purple"], align="right")
+
+
 def render_player_board(
     page: PDFPage,
     idx: int,
-    comp: CompanyCardSpec,
-    white_hat: WhiteHatDossierSpec,
+    comp: Optional[CompanyCardSpec] = None,
+    white_hat: Optional[WhiteHatDossierSpec] = None,
 ) -> None:
     draw_board_outer_frame(
         page,
@@ -677,10 +809,16 @@ def render_player_board(
     lx, lw = 40.0, 238.0
 
     # Top Card: Client Company Card (Once-per-Version Institutional Override)
-    _draw_company_card(page, lx, 36.0, lw, 210.0, comp, is_dock=True)
+    if comp is not None:
+        _draw_company_card(page, lx, 36.0, lw, 210.0, comp, is_dock=True)
+    else:
+        _draw_empty_company_card_slot(page, lx, 36.0, lw, 210.0, idx=idx)
 
     # Bottom Card: White Hat Dossier Card (Personal Reserve & Purple Face 6 Protocol)
-    _draw_white_hat_card(page, lx, 252.0, lw, 210.0, white_hat, is_dock=True)
+    if white_hat is not None:
+        _draw_white_hat_card(page, lx, 252.0, lw, 210.0, white_hat, is_dock=True)
+    else:
+        _draw_empty_white_hat_slot(page, lx, 252.0, lw, 210.0, idx=idx)
 
     # -------------------------------------------------------------------------
     # RIGHT COLUMN (x = 292..752, w = 460) — Revised Player Terminal Layout
@@ -1974,17 +2112,11 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     os.makedirs(out_dir, exist_ok=True)
     generated: List[str] = []
 
-    # 1. Player Terminal Mats & Split Cards (6 pages: 4x Mats + 1x Company Cards + 1x White Hat Cards)
+    # 1. Player Terminal Mats & Split Cards (6 pages: 4x Mats with empty modular docks + 1x Company Cards + 1x White Hat Cards)
     doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.25.0)")
-    canonical_pairs = [
-        (COMPANIES[0], WHITE_HATS[0]),  # Meridian Financial Trust + The Operator
-        (COMPANIES[1], WHITE_HATS[1]),  # Omnidyne Systems + The Phreaker
-        (COMPANIES[2], WHITE_HATS[2]),  # Aegis Defense Relay + The Acoustic
-        (COMPANIES[3], WHITE_HATS[3]),  # Dept of Telecom Oversight + The Spook
-    ]
-    for idx, (comp, wh) in enumerate(canonical_pairs, start=1):
+    for idx in range(1, 5):
         p = doc_players.add_page()
-        render_player_board(p, idx, comp, wh)
+        render_player_board(p, idx)
 
     # Page 5: 6x Client Company Cards Sheet
     render_company_cards_page(doc_players.add_page())
