@@ -175,6 +175,12 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
 
+                elif clean_path == "/api/game/action/confirm_income":
+                    pid = get_target_pid(default_to_human=True)
+                    state = self.controller.confirm_income(pid)
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
                 elif clean_path == "/api/game/action/buy":
                     pid = get_target_pid(default_to_human=False)
                     if "color" not in data:

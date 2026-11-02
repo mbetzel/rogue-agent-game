@@ -14,6 +14,7 @@ import {
   doHotfix,
   doCommit,
   doCompile,
+  doConfirmIncome,
   doBuy,
   doPatch,
   doDirtyIncome,
@@ -86,6 +87,7 @@ window.doRoll = doRoll;
 window.doHotfix = doHotfix;
 window.doCommit = doCommit;
 window.doCompile = doCompile;
+window.doConfirmIncome = doConfirmIncome;
 window.doBuy = doBuy;
 window.doPatch = doPatch;
 window.doDirtyIncome = doDirtyIncome;

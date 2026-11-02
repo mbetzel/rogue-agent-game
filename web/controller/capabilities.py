@@ -161,9 +161,11 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     can_commit = (controller.phase == 1 and meta["has_rolled"] and not meta["has_committed"] and not is_eliminated)
     can_compile = (controller.phase == 2 and controller.subphase == "ready_for_compile")
 
+    can_confirm_income = bool(controller.phase == 3 and controller.subphase == "confirm_income")
     can_patch_cash = False
     can_patch_token = (
         controller.phase == 3
+        and not can_confirm_income
         and is_active
         and not is_eliminated
         and len(player.unpatched_dice) > 0
@@ -172,6 +174,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     can_dirty = bool(
         controller.state.config.dirty_income_enabled
         and controller.phase == 3
+        and not can_confirm_income
         and is_active
         and not is_eliminated
         and not meta["dirty_income_taken_this_turn"]
@@ -181,11 +184,12 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     can_system_reboot = False
     can_fast_patch = bool(
         controller.phase == 3
+        and not can_confirm_income
         and not is_eliminated
         and player.patches > 0
         and len(player.glitched_dice) > 0
     )
-    can_end_turn = (controller.phase == 3 and is_active and not is_eliminated)
+    can_end_turn = (controller.phase == 3 and not can_confirm_income and is_active and not is_eliminated)
 
     # Market purchase availability per color
     can_buy = {}
@@ -193,6 +197,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         cost = 4 if color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5
         can_buy[color.value] = (
             controller.phase == 3
+            and not can_confirm_income
             and is_active
             and not is_eliminated
             and meta["purchases_this_turn"] < controller.state.config.max_market_purchases_per_turn
@@ -204,6 +209,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     can_star = {
         "B2": bool(
             controller.phase == 3
+            and not can_confirm_income
             and is_active
             and player.b2_available
             and player.money >= controller.state.config.b2_secret_cost
@@ -212,15 +218,21 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
                 or player.secrets < controller.state.config.b2_secret_cap
             )
         ),
-        "Y1": bool(controller.phase == 3 and is_active and player.y1_available and player.money >= 6),
-        "P1": bool(controller.phase == 3 and is_active and player.p1_available),
+        "Y1": bool(controller.phase == 3 and not can_confirm_income and is_active and player.y1_available and player.money >= 6),
+        "P1": bool(controller.phase == 3 and not can_confirm_income and is_active and player.p1_available),
         "P3": bool(
             controller.phase == 3
+            and not can_confirm_income
             and is_active
             and player.p3_available is not None
             and player.money >= controller.state.config.p3_cube_cash_cost
         ),
     }
+
+    if can_confirm_income:
+        can_phreaker = False
+        can_cipher_buy = {color.value: False for color in [DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW, DieColor.PURPLE]}
+        can_cipher_dirty = False
 
     return {
         "can_roll": can_roll,
@@ -230,6 +242,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         "can_hotfix": can_hotfix,
         "can_commit": can_commit,
         "can_compile": can_compile,
+        "can_confirm_income": can_confirm_income,
         "can_buy": can_buy,
         "can_patch_cash": can_patch_cash,
         "can_patch_token": can_patch_token,

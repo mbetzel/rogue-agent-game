@@ -30,6 +30,36 @@ if TYPE_CHECKING:
     from web.controller.core import GameController
 
 
+def confirm_income(controller: GameController, player_id: int) -> Dict[str, Any]:
+    """Confirms compile results and income, moving surviving dice from in_production_dice to scanned_dice."""
+    if controller.phase != 3:
+        raise ValueError(f"Cannot confirm income in phase {controller.phase}")
+
+    # Move all surviving in_production_dice to scanned_dice for all players
+    for pid, p in enumerate(controller.state.players):
+        if p.is_patient_zero:
+            continue
+        meta = controller.player_meta[pid]
+        meta["shield_slots"] = {"red": [], "blue": [], "green": []}
+
+        for die in list(p.in_production_dice):
+            die.production_role = None
+            die.is_locked = False
+            die.chosen_choice_index = None
+            die.current_face = None
+            p.scanned_dice.append(die)
+        p.in_production_dice.clear()
+
+    controller.subphase = "player_turn"
+    controller.event_log.append(
+        "Production income confirmed; all operational modules transferred to CI/CD pipeline (Scanned Box)."
+    )
+
+    # Now advance clockwise queue starting with First Player
+    advance_phase3_turns(controller)
+    return controller.get_full_state()
+
+
 def advance_phase3_turns(controller: GameController) -> None:
     """Processes Phase 3 turns clockwise, automatically executing bots until a human turn or round end."""
     while controller.phase3_turn_queue:
@@ -265,6 +295,9 @@ def buy_die(
     color_str: str,
     use_cipher_ability: bool = False,
 ) -> Dict[str, Any]:
+    if controller.subphase == "confirm_income":
+        confirm_income(controller, player_id)
+
     if player_id != controller.active_player_index:
         raise ValueError(f"Not player {player_id}'s turn (current: {controller.active_player_index})")
 
@@ -707,6 +740,9 @@ def system_reboot(controller: GameController, player_id: int) -> Dict[str, Any]:
 
 def end_turn(controller: GameController, player_id: int) -> Dict[str, Any]:
     """Human action: finishes Phase 3 operations and advances clockwise."""
+    if controller.subphase == "confirm_income":
+        confirm_income(controller, player_id)
+
     if controller.phase != 3:
         raise ValueError(f"Cannot end turn in phase {controller.phase}")
     if player_id != controller.active_player_index:

@@ -179,6 +179,16 @@ export async function doCompile() {
   }
 }
 
+export async function doConfirmIncome() {
+  const newState = await apiCall("/api/game/action/confirm_income", "POST", {
+    player_id: getHumanPlayerId(),
+  });
+  if (newState) {
+    setState(newState);
+    notifyRender();
+  }
+}
+
 export async function doBuy(color, useCipher = false) {
   const newState = await apiCall("/api/game/action/buy", "POST", {
     player_id: getHumanPlayerId(),

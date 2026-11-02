@@ -344,6 +344,9 @@ class GameController:
     ) -> Dict[str, Any]:
         return phase3_actions.execute_star_action(self, player_id, action_type, cube_color)
 
+    def confirm_income(self, player_id: int) -> Dict[str, Any]:
+        return phase3_actions.confirm_income(self, player_id)
+
     def end_turn(self, player_id: int) -> Dict[str, Any]:
         return phase3_actions.end_turn(self, player_id)
 

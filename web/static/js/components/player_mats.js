@@ -295,6 +295,16 @@ export function renderPlayerMats() {
     const contractorCount = (!p.has_rolled && p.contractor_dice) ? p.contractor_dice.length : 0;
     const readyCount = readyDiceList.length + contractorCount;
 
+    const redShieldDice = (p.shield_slots && p.shield_slots.red && p.shield_slots.red.length)
+      ? p.shield_slots.red
+      : ((p.production_slots && p.production_slots.red_shield) || []);
+    const blueShieldDice = (p.shield_slots && p.shield_slots.blue && p.shield_slots.blue.length)
+      ? p.shield_slots.blue
+      : ((p.production_slots && p.production_slots.blue_shield) || []);
+    const greenShieldDice = (p.shield_slots && p.shield_slots.green && p.shield_slots.green.length)
+      ? p.shield_slots.green
+      : ((p.production_slots && p.production_slots.green_shield) || []);
+
     const terminalMat = document.createElement("div");
     terminalMat.className = `pnp-terminal-mat ${isTurn ? "active-turn" : ""} ${p.is_patient_zero ? "patient-zero" : ""}`;
 
@@ -424,7 +434,7 @@ export function renderPlayerMats() {
                   <div class="shield-title">
                     <span class="shield-symbol">◆</span>
                     <span>RED SHIELDS</span>
-                    <span class="shield-count">(${((p.shield_slots && p.shield_slots.red) || []).length})</span>
+                    <span class="shield-count">(${redShieldDice.length})</span>
                   </div>
                 </div>
                 <div class="shield-desc-sub1">Blocks Ransomware</div>
@@ -438,7 +448,7 @@ export function renderPlayerMats() {
                   <div class="shield-title">
                     <span class="shield-symbol">●</span>
                     <span>BLUE SHIELDS</span>
-                    <span class="shield-count">(${((p.shield_slots && p.shield_slots.blue) || []).length})</span>
+                    <span class="shield-count">(${blueShieldDice.length})</span>
                   </div>
                 </div>
                 <div class="shield-desc-sub1">Blocks Spyware</div>
@@ -452,7 +462,7 @@ export function renderPlayerMats() {
                   <div class="shield-title">
                     <span class="shield-symbol">▲</span>
                     <span>GREEN SHIELDS</span>
-                    <span class="shield-count">(${((p.shield_slots && p.shield_slots.green) || []).length})</span>
+                    <span class="shield-count">(${greenShieldDice.length})</span>
                   </div>
                 </div>
                 <div class="shield-desc-sub1">Blocks Malware</div>
@@ -696,8 +706,11 @@ export function renderPlayerMats() {
     // Shield Slots
     ["red", "blue", "green"].forEach((c) => {
       const slotEl = terminalMat.querySelector(`#shields_${c}_${p.player_id}`);
-      if (slotEl && p.shield_slots && p.shield_slots[c]) {
-        p.shield_slots[c].forEach((d) => {
+      if (slotEl) {
+        const slotDice = (p.shield_slots && p.shield_slots[c] && p.shield_slots[c].length)
+          ? p.shield_slots[c]
+          : ((p.production_slots && p.production_slots[`${c}_shield`]) || []);
+        slotDice.forEach((d) => {
           const item = document.createElement("div");
           item.className = `shield-die-chip ${d.color}`;
           item.innerText = `${d.color.toUpperCase()}: ${d.current_face ? d.current_face.name : 'Shield'}`;

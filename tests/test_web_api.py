@@ -287,6 +287,33 @@ class TestWebAPI(unittest.TestCase):
             self.assertEqual(len(unpatched_ids.intersection(ready_ids)), 0)
             self.assertEqual(len(rolled_ids.intersection(ready_ids)), 0)
 
+        # Verify intermediate confirm_income state
+        self.assertEqual(state["subphase"], "confirm_income")
+        self.assertTrue(state["action_capabilities"]["can_confirm_income"])
+        self.assertFalse(state["action_capabilities"]["can_end_turn"])
+
+        # Call confirm_income
+        res_conf = self._post("/api/game/action/confirm_income", {"player_id": 0})
+        self.assertTrue(res_conf["success"])
+        conf_state = res_conf["state"]
+        self.assertEqual(conf_state["subphase"], "player_turn")
+        self.assertFalse(conf_state["action_capabilities"]["can_confirm_income"])
+        self.assertTrue(conf_state["action_capabilities"]["can_end_turn"])
+        p0 = conf_state["players"][0]
+        # In Production is now cleared; surviving dice moved to scanned_dice
+        self.assertEqual(len(p0["in_production_dice"]), 0)
+        self.assertGreater(len(p0["scanned_dice"]), 0)
+
+    def test_confirm_income_invalid_phase(self) -> None:
+        """POST /api/game/action/confirm_income rejects call outside Phase 3."""
+        self._post("/api/game/new", {"num_players": 4, "seed": 42})
+        url = f"{self.base_url}/api/game/action/confirm_income"
+        body = json.dumps({"player_id": 0}).encode("utf-8")
+        req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"}, method="POST")
+        with self.assertRaises(urllib.error.HTTPError) as ctx:
+            urllib.request.urlopen(req)
+        self.assertEqual(ctx.exception.code, 400)
+
     # -------------------------------------------------------------------------
     # 9. Phase 3: Market Purchase
     # -------------------------------------------------------------------------

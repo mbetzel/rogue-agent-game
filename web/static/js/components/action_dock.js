@@ -26,6 +26,7 @@ import {
   doReroll,
   doCommit,
   doCompile,
+  doConfirmIncome,
   doAcoustic,
   doSpook,
   doDirtyIncome,
@@ -404,6 +405,97 @@ export function renderActionDock() {
       controls.appendChild(spookWrap);
     }
   } else if (state.phase === 3) {
+    if (caps.can_confirm_income || state.subphase === "confirm_income") {
+      const compileRes = state.last_compile_result || {};
+      const exited = compileRes.exited_cubes || {};
+      const humanIncome = (compileRes.income_summary && compileRes.income_summary[human.player_id]) || compileRes.human_income || { money: 0, patches: 0, secrets: 0, details: [] };
+      const humanThreat = (compileRes.threat_summary && compileRes.threat_summary[human.player_id]) || compileRes.human_threat || {};
+
+      const redInfo = humanThreat.red || { cubes: exited.red || 0, shields: 0, unblocked: exited.red || 0 };
+      const blueInfo = humanThreat.blue || { cubes: exited.blue || 0, shields: 0, unblocked: exited.blue || 0 };
+      const greenInfo = humanThreat.green || { cubes: exited.green || 0, shields: 0, unblocked: exited.green || 0 };
+      const blackCubes = exited.black || 0;
+
+      const panel = document.createElement("div");
+      panel.className = "confirm-income-panel";
+
+      panel.innerHTML = `
+        <div class="confirm-income-header">
+          <div class="confirm-income-title-wrap">
+            <span class="confirm-badge">STEP 2B / 3A RESOLUTION</span>
+            <span class="confirm-income-title">COMPILE DROP & PRODUCTION HARVEST SUMMARY</span>
+          </div>
+          <span style="font-size: 0.72rem; color: var(--text-dim); font-family: monospace;">
+            Round ${state.current_round} // Review Output Before Moving to Pipeline
+          </span>
+        </div>
+
+        <div class="confirm-income-grid">
+          <!-- Card 1: Threat Resolution -->
+          <div class="confirm-income-card">
+            <div class="confirm-income-card-hdr">
+              <span>CUBE TOWER OUTPUT & DEFENSES</span>
+              <span style="color: var(--text-highlight);">${exited.red || 0}R · ${exited.blue || 0}B · ${exited.green || 0}G · ${exited.black || 0}K</span>
+            </div>
+            <div class="confirm-threat-row">
+              <span style="color: var(--color-black); font-weight: 700;">■ BLACK // CORRUPTION</span>
+              <span>${blackCubes} cube${blackCubes === 1 ? '' : 's'} -> Track space ${state.corruption_track || 0}</span>
+            </div>
+            <div class="confirm-threat-row">
+              <span style="color: var(--color-red); font-weight: 700;">◆ RED // RANSOMWARE</span>
+              <span>${redInfo.cubes} exited vs ${redInfo.shields} shields -> ${redInfo.unblocked > 0 ? `<strong style="color: #f43f5e;">-${redInfo.unblocked} Cash/Secrets</strong>` : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
+            </div>
+            <div class="confirm-threat-row">
+              <span style="color: var(--color-blue); font-weight: 700;">● BLUE // SPYWARE</span>
+              <span>${blueInfo.cubes} exited vs ${blueInfo.shields} shields -> ${blueInfo.unblocked > 0 ? `<strong style="color: #f43f5e;">-${blueInfo.unblocked} Secrets</strong>` : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
+            </div>
+            <div class="confirm-threat-row">
+              <span style="color: var(--color-green); font-weight: 700;">▲ GREEN // MALWARE</span>
+              <span>${greenInfo.cubes} exited vs ${greenInfo.shields} shields -> ${greenInfo.unblocked > 0 ? `<strong style="color: #f43f5e;">${greenInfo.unblocked} Die Glitched</strong>` : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Harvested Income -->
+          <div class="confirm-income-card" style="border-color: rgba(234, 179, 8, 0.4);">
+            <div class="confirm-income-card-hdr">
+              <span style="color: #facc15;">HARVESTED PRODUCTION INCOME</span>
+              <span>Delayed Yield (Surviving Dice)</span>
+            </div>
+            <div class="confirm-pills-row">
+              <span class="income-pill money">+$${humanIncome.money} Cash</span>
+              <span class="income-pill patches">+${humanIncome.patches} 🔧 Patches</span>
+              ${humanIncome.secrets > 0 ? `<span class="income-pill secrets">+${humanIncome.secrets} Secrets</span>` : ''}
+            </div>
+            <div class="confirm-dice-chips">
+              ${(humanIncome.details && humanIncome.details.length > 0)
+                ? humanIncome.details.map((d) => `
+                    <span class="confirm-die-chip ${d.color}">
+                      <strong>${d.color.toUpperCase()}:</strong> ${d.face_name}${d.star_note ? ' (' + d.star_note + ')' : ''}
+                    </span>
+                  `).join('')
+                : '<span style="font-size: 0.75rem; color: var(--text-dim); font-style: italic;">No surviving production dice yielded income.</span>'}
+            </div>
+          </div>
+        </div>
+
+        <div class="confirm-action-bar">
+          <span style="font-size: 0.75rem; color: var(--text-dim);">
+            Confirming clears <strong>In Production</strong> and transfers surviving dice to the <strong>Scanned Box</strong> for next round. Glitched dice remain in <strong>Glitched Box</strong>.
+          </span>
+          <button class="action-btn btn-confirm-income" id="btnConfirmIncome">
+            ✓ Confirm Income & Move Dice to Pipeline
+          </button>
+        </div>
+      `;
+
+      panel.querySelector("#btnConfirmIncome").onclick = () => {
+        doConfirmIncome();
+      };
+
+      controls.appendChild(panel);
+      return;
+    }
+
     // Dirty Income with Backlash die selector
     if (caps.can_dirty_income || caps.can_cipher_dirty) {
       const dirtyWrap = document.createElement("div");
