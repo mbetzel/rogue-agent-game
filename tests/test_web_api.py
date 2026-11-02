@@ -314,6 +314,89 @@ class TestWebAPI(unittest.TestCase):
             urllib.request.urlopen(req)
         self.assertEqual(ctx.exception.code, 400)
 
+    def test_confirm_income_with_green_malware_glitch_choice(self) -> None:
+        """Unblocked Green malware allows user to choose which die to move to glitched_dice."""
+        self._post("/api/game/new", {"num_players": 4, "seed": 42})
+        ctrl = RogueAgentRequestHandler.controller
+        # Force green cubes in staging cup to guarantee unblocked green malware
+        ctrl.state.staging_cup[CubeColor.GREEN] = 3
+        self._post("/api/game/action/roll", {"player_id": 0})
+        # Commit 0 green shields
+        self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
+
+        res_comp = self._post("/api/game/action/compile", {})
+        self.assertTrue(res_comp["success"])
+        state = res_comp["state"]
+        p0 = state["players"][0]
+        compile_res = state["last_compile_result"]
+
+        # If tower drop resulted in unblocked green malware:
+        unblocked_green = compile_res["human_threat"]["green"]["unblocked"]
+        if unblocked_green > 0:
+            candidates = compile_res["candidate_glitch_dice"]
+            self.assertGreater(len(candidates), 0)
+            chosen_die = candidates[0]
+            chosen_die_id = chosen_die["die_id"]
+
+            # Before confirmation, dice in in_production_dice are not glitched yet
+            self.assertEqual(len(p0["glitched_dice"]), 0)
+
+            # Confirm income with chosen die
+            res_conf = self._post("/api/game/action/confirm_income", {
+                "player_id": 0,
+                "glitch_die_ids": [chosen_die_id],
+            })
+            self.assertTrue(res_conf["success"])
+            conf_state = res_conf["state"]
+            conf_p0 = conf_state["players"][0]
+
+            # The chosen die is now in glitched_dice!
+            glitched_ids = [d["die_id"] for d in conf_p0["glitched_dice"]]
+            self.assertIn(chosen_die_id, glitched_ids)
+
+            # In production is cleared; surviving dice moved to scanned_dice
+            self.assertEqual(len(conf_p0["in_production_dice"]), 0)
+            scanned_ids = [d["die_id"] for d in conf_p0["scanned_dice"]]
+            self.assertNotIn(chosen_die_id, scanned_ids)
+
+    def test_confirm_income_with_contractor_sacrifice(self) -> None:
+        """Unblocked Green malware can be absorbed by sacrificing an active White Contractor."""
+        self._post("/api/game/new", {"num_players": 4, "seed": 42})
+        ctrl = RogueAgentRequestHandler.controller
+        ctrl.state.staging_cup[CubeColor.GREEN] = 1
+        ctrl.state.staging_cup[CubeColor.RED] = 0
+        ctrl.state.staging_cup[CubeColor.BLUE] = 0
+        ctrl.state.staging_cup[CubeColor.BLACK] = 0
+
+        # Hire 1 contractor
+        self._post("/api/game/action/hire_contractors", {"player_id": 0, "count": 1})
+        self._post("/api/game/action/roll", {"player_id": 0})
+        self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
+
+        res_comp = self._post("/api/game/action/compile", {})
+        state = res_comp["state"]
+        compile_res = state["last_compile_result"]
+
+        unblocked_green = compile_res["human_threat"]["green"]["unblocked"]
+        self.assertEqual(unblocked_green, 1)
+        candidates = compile_res["candidate_glitch_dice"]
+        contractor_candidate = next((c for c in candidates if c.get("is_contractor")), None)
+        self.assertIsNotNone(contractor_candidate)
+        contractor_id = contractor_candidate["die_id"]
+
+        res_conf = self._post("/api/game/action/confirm_income", {
+            "player_id": 0,
+            "glitch_die_ids": [contractor_id],
+        })
+        self.assertTrue(res_conf["success"])
+        conf_p0 = res_conf["state"]["players"][0]
+
+        # Contractor is discarded to supply, NOT placed in glitched_dice
+        glitched_ids = [d["die_id"] for d in conf_p0["glitched_dice"]]
+        self.assertNotIn(contractor_id, glitched_ids)
+        # None of the permanent dice were forced to glitch
+        self.assertEqual(len(conf_p0["glitched_dice"]), 0)
+
     # -------------------------------------------------------------------------
     # 9. Phase 3: Market Purchase
     # -------------------------------------------------------------------------

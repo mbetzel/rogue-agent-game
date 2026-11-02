@@ -11,6 +11,7 @@ export let patchCashSelected = false;
 export let cipherDiscountSelected = false;
 export let selectedRerollIndices = new Set();
 export let selectedChoiceDeclarations = {};
+export let selectedGlitchDieIds = new Set();
 export let activePlayerTab = "human"; // "human", player_id number, or "all"
 export let activeBoardView = "tabletop"; // "tabletop", "terminals", "agent", "market"
 
@@ -88,6 +89,28 @@ export function sanitizeSelectionState(newState) {
   if (!unpatched.some((d) => d.die_id === selectedPhreakerDieId)) {
     selectedPhreakerDieId = unpatched.length > 0 ? unpatched[0].die_id : null;
   }
+
+  // 5. Glitch selection state
+  if (newState.phase !== 3 || newState.subphase !== "confirm_income") {
+    selectedGlitchDieIds.clear();
+  }
+}
+
+export function toggleSelectedGlitchDieId(dieId, maxAllowed = 1) {
+  if (selectedGlitchDieIds.has(dieId)) {
+    selectedGlitchDieIds.delete(dieId);
+  } else {
+    if (maxAllowed === 1) {
+      selectedGlitchDieIds.clear();
+      selectedGlitchDieIds.add(dieId);
+    } else if (selectedGlitchDieIds.size < maxAllowed) {
+      selectedGlitchDieIds.add(dieId);
+    }
+  }
+}
+
+export function clearSelectedGlitchDieIds() {
+  selectedGlitchDieIds.clear();
 }
 
 export function setState(newState) {

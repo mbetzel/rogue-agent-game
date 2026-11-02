@@ -2526,13 +2526,180 @@ button.btn-confirm-income {
   transition: all 0.2s;
 }
 
-button.btn-confirm-income:hover {
+button.btn-confirm-income:hover:not(:disabled) {
   filter: brightness(1.2);
   transform: translateY(-1px);
 }
 
+button.btn-confirm-income.disabled,
+button.btn-confirm-income:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+  box-shadow: none;
+  transform: none;
+}
+
+/* Malware Selection in Confirm Income Overlay */
+.confirm-malware-panel {
+  background: rgba(244, 63, 94, 0.08);
+  border: 1px solid rgba(244, 63, 94, 0.45);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { border-color: rgba(244, 63, 94, 0.45); }
+  50% { border-color: rgba(244, 63, 94, 0.85); box-shadow: 0 0 14px rgba(244, 63, 94, 0.25); }
+}
+
+.confirm-malware-hdr {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.confirm-malware-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.confirm-malware-badge {
+  background: rgba(244, 63, 94, 0.3);
+  color: #f43f5e;
+  border: 1px solid #f43f5e;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.confirm-malware-title {
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+}
+
+.confirm-malware-sub {
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  line-height: 1.35;
+}
+
+.confirm-malware-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.malware-die-card {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  user-select: none;
+}
+
+.malware-die-card:hover {
+  border-color: rgba(244, 63, 94, 0.65);
+  transform: translateY(-1px);
+}
+
+.malware-die-card.selected {
+  background: rgba(244, 63, 94, 0.22);
+  border: 2px solid #f43f5e;
+  box-shadow: 0 0 12px rgba(244, 63, 94, 0.45);
+}
+
+.malware-die-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.malware-die-role {
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  font-size: 0.68rem;
+}
+
+.malware-die-role.income {
+  background: rgba(234, 179, 8, 0.2);
+  color: #facc15;
+}
+
+.malware-die-role.red-shield {
+  background: rgba(244, 63, 94, 0.2);
+  color: #f43f5e;
+}
+
+.malware-die-role.blue-shield {
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+}
+
+.malware-die-role.green-shield {
+  background: rgba(74, 222, 128, 0.2);
+  color: #4ade80;
+}
+
+.malware-die-role.contractor {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.malware-die-face {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.malware-die-consequence {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  line-height: 1.25;
+}
+
+.malware-die-status {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-align: right;
+  margin-top: 2px;
+}
+
+.malware-die-card.selected .malware-die-status {
+  color: #f43f5e;
+}
+
+.confirm-die-chip.glitched-chip {
+  opacity: 0.45;
+  text-decoration: line-through;
+  border-color: #f43f5e !important;
+  color: #f43f5e !important;
+}
+
 @media (max-width: 900px) {
   .confirm-income-grid {
+    grid-template-columns: 1fr;
+  }
+  .confirm-malware-grid {
     grid-template-columns: 1fr;
   }
 }

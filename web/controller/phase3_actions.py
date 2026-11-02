@@ -15,6 +15,7 @@ from sim.bots import (
 from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
 from sim.engine.phase3_ops import collect_player_production_income
+from sim.engine.state import ProductionRole
 from sim.entities import (
     AbilityStatus,
     ArchetypeCard,
@@ -30,17 +31,137 @@ if TYPE_CHECKING:
     from web.controller.core import GameController
 
 
-def confirm_income(controller: GameController, player_id: int) -> Dict[str, Any]:
-    """Confirms compile results and income, moving surviving dice from in_production_dice to scanned_dice."""
+def confirm_income(
+    controller: GameController,
+    player_id: int,
+    glitch_die_ids: Optional[List[int]] = None,
+) -> Dict[str, Any]:
+    """Confirms compile results and income, resolving human green malware glitch selections, harvesting production income, and moving surviving dice to scanned_dice."""
     if controller.phase != 3:
         raise ValueError(f"Cannot confirm income in phase {controller.phase}")
+    if player_id not in controller.player_meta:
+        raise ValueError(f"Invalid player_id {player_id}")
+
+    player = controller.state.players[player_id]
+    meta = controller.player_meta[player_id]
+    if player.is_patient_zero:
+        raise ValueError(f"Player {player_id} is eliminated")
+
+    pending_green = getattr(player, "pending_unblocked_green", 0)
+    selected_ids = list(glitch_die_ids) if glitch_die_ids is not None else []
+
+    if pending_green > 0:
+        glitched_count = 0
+        for die_id in selected_ids:
+            if glitched_count >= pending_green:
+                break
+            # 1. Check contractor dice
+            matching_contractor = next((d for d in player.contractor_dice if d.die_id == die_id), None)
+            if not matching_contractor and any(d.die_id == die_id and d.color == DieColor.WHITE for d in player.in_production_dice):
+                matching_contractor = next(d for d in player.in_production_dice if d.die_id == die_id and d.color == DieColor.WHITE)
+
+            if matching_contractor:
+                if matching_contractor in player.contractor_dice:
+                    player.contractor_dice.remove(matching_contractor)
+                if matching_contractor in player.in_production_dice:
+                    player.in_production_dice.remove(matching_contractor)
+                controller.state.contractor_supply += 1
+                glitched_count += 1
+                controller.event_log.append(
+                    f"{meta['name']} sacrificed White Contractor die to absorb Green malware."
+                )
+                continue
+
+            # 2. Check in_production_dice
+            matching_prod = next((d for d in player.in_production_dice if d.die_id == die_id), None)
+            if matching_prod:
+                player.in_production_dice.remove(matching_prod)
+                # Remove from shield slot visual tracking if present
+                for slot_color in ["red", "blue", "green"]:
+                    if slot_color in meta.get("shield_slots", {}):
+                        meta["shield_slots"][slot_color] = [d for d in meta["shield_slots"][slot_color] if d.die_id != die_id]
+                matching_prod.production_role = None
+                matching_prod.is_locked = False
+                matching_prod.chosen_choice_index = None
+                matching_prod.current_face = None
+                player.glitched_dice.append(matching_prod)
+                glitched_count += 1
+                controller.event_log.append(
+                    f"{meta['name']} moved {matching_prod.color.value.capitalize()} Die to Glitched Box due to Green malware."
+                )
+                continue
+
+            # 3. Check destruction fallback from Under Development / Ready
+            matching_fallback = next((d for d in (player.glitched_dice + player.scanned_dice + player.ready_for_release_dice) if d.die_id == die_id), None)
+            if matching_fallback:
+                if matching_fallback in player.glitched_dice:
+                    player.glitched_dice.remove(matching_fallback)
+                elif matching_fallback in player.scanned_dice:
+                    player.scanned_dice.remove(matching_fallback)
+                elif matching_fallback in player.ready_for_release_dice:
+                    player.ready_for_release_dice.remove(matching_fallback)
+                glitched_count += 1
+                controller.event_log.append(
+                    f"{meta['name']} destroyed {matching_fallback.color.value.capitalize()} Die from Under Development due to Green malware fallback."
+                )
+                continue
+
+        # If user didn't select enough dice (or selected none, e.g. API fallback), auto-select remainder
+        remaining_needed = pending_green - glitched_count
+        if remaining_needed > 0:
+            for _ in range(remaining_needed):
+                if player.contractor_dice:
+                    player.contractor_dice.pop(0)
+                    controller.state.contractor_supply += 1
+                elif player.in_production_dice:
+                    def glitch_sort_key(d: Die) -> Tuple[int, int, int]:
+                        role = getattr(d, "production_role", None)
+                        is_shield = 0 if role in (ProductionRole.RED_SHIELD, ProductionRole.BLUE_SHIELD, ProductionRole.GREEN_SHIELD) else 1
+                        is_gray = 0 if d.color == DieColor.GRAY else 1
+                        return (is_shield, is_gray, getattr(d, "cost", 0))
+                    target_die = min(player.in_production_dice, key=glitch_sort_key)
+                    player.in_production_dice.remove(target_die)
+                    for slot_color in ["red", "blue", "green"]:
+                        if slot_color in meta.get("shield_slots", {}):
+                            meta["shield_slots"][slot_color] = [d for d in meta["shield_slots"][slot_color] if d.die_id != target_die.die_id]
+                    target_die.production_role = None
+                    target_die.is_locked = False
+                    target_die.chosen_choice_index = None
+                    target_die.current_face = None
+                    player.glitched_dice.append(target_die)
+                elif player.glitched_dice:
+                    player.glitched_dice.pop(0)
+                elif player.scanned_dice:
+                    player.scanned_dice.pop(0)
+                elif player.ready_for_release_dice:
+                    player.ready_for_release_dice.pop(0)
+                else:
+                    player.unfulfilled_destructions += 1
+
+        player.pending_unblocked_green = 0
+
+    # Contractor expiration for this player
+    controller.state.contractor_supply += len(player.contractor_dice)
+    player.contractor_dice.clear()
+    player.hired_contractor_count = 0
+    for wd in [d for d in player.in_production_dice if d.color == DieColor.WHITE]:
+        player.in_production_dice.remove(wd)
+        controller.state.contractor_supply += 1
+
+    # Harvest production income from surviving in_production_dice if not already collected
+    if not meta.get("income_collected_this_turn", False):
+        collect_player_production_income(controller.engine, player, None)
+        meta["income_collected_this_turn"] = True
+        controller.event_log.append(
+            f"{meta['name']} harvested delayed income from active production modules."
+        )
 
     # Move all surviving in_production_dice to scanned_dice for all players
     for pid, p in enumerate(controller.state.players):
         if p.is_patient_zero:
             continue
-        meta = controller.player_meta[pid]
-        meta["shield_slots"] = {"red": [], "blue": [], "green": []}
+        p_meta = controller.player_meta[pid]
+        p_meta["shield_slots"] = {"red": [], "blue": [], "green": []}
 
         for die in list(p.in_production_dice):
             die.production_role = None

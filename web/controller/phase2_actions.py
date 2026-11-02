@@ -15,6 +15,7 @@ from sim.bots import (
 from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
 from sim.engine.phase3_ops import collect_player_production_income
+from sim.engine.state import ProductionRole
 from sim.entities import (
     AbilityStatus,
     ArchetypeCard,
@@ -58,15 +59,21 @@ def compile_drop(controller: GameController) -> Dict[str, Any]:
             "green": sum(1 for c in commitments.values() if c == "green"),
         }
 
-    # Execute Phase 2 via engine
-    telemetry = controller.engine._execute_phase_2(player_commitments)
+    # Human player ids whose green malware resolution is deferred for user choice
+    human_pids = {pid for pid, meta in controller.player_meta.items() if meta.get("is_human")}
+
+    # Execute Phase 2 via engine (deferring green malware resolution for human players)
+    telemetry = controller.engine._execute_phase_2(player_commitments, defer_green_for_pids=human_pids)
 
     # Calculate harvested income and details for each player from in_production_dice
     income_breakdowns: Dict[int, Dict[str, Any]] = {}
+    player_candidate_glitches: Dict[int, List[Dict[str, Any]]] = {}
+
     for pid, player in enumerate(controller.state.players):
         if player.is_patient_zero:
             continue
         meta = controller.player_meta[pid]
+        is_human = meta.get("is_human", False)
         
         # Calculate income details from current in_production_dice
         details = []
@@ -95,6 +102,7 @@ def compile_drop(controller: GameController) -> Dict[str, Any]:
                     star_note = "Universal Sandbox (+1 🔧)"
                 elif eff.star_code == "G3":
                     star_note = "Live Reboot (+$1, +2 🔧)"
+            role_val = getattr(die, "production_role", None)
             details.append({
                 "die_id": die.die_id,
                 "color": die.color.value,
@@ -103,22 +111,107 @@ def compile_drop(controller: GameController) -> Dict[str, Any]:
                 "patches": p_patches,
                 "secrets": s,
                 "star_note": star_note,
-                "role": getattr(die, "production_role", None).value if getattr(die, "production_role", None) else "INCOME",
+                "role": role_val.value if role_val else "INCOME",
             })
 
-        money_before = player.money
-        patches_before = player.patches
-        secrets_before = player.secrets
+        # Build candidate glitch dice for this player
+        candidates: List[Dict[str, Any]] = []
+        # 1. Any contractor dice
+        for d in player.contractor_dice:
+            eff = d.effective_face or d.current_face
+            candidates.append({
+                "die_id": d.die_id,
+                "color": d.color.value,
+                "face_name": eff.name if eff else "Contractor",
+                "role": "Contractor",
+                "money": 0,
+                "patches": 0,
+                "secrets": 0,
+                "star_note": None,
+                "is_contractor": True,
+                "is_shield": False,
+                "is_income": False,
+                "is_fallback": False,
+            })
+        # 2. In production dice (income and shields)
+        for d in player.in_production_dice:
+            eff = d.effective_face or d.current_face
+            role_val = getattr(d, "production_role", None)
+            role_name = "Income"
+            is_shield = False
+            is_income = True
+            if role_val in (ProductionRole.RED_SHIELD, ProductionRole.BLUE_SHIELD, ProductionRole.GREEN_SHIELD):
+                role_name = role_val.value.replace("_", " ").title()
+                is_shield = True
+                is_income = False
+            d_money = 0
+            d_patches = 0
+            d_secrets = 0
+            d_star_note = None
+            for det in details:
+                if det["die_id"] == d.die_id:
+                    d_money = det["money"]
+                    d_patches = det["patches"]
+                    d_secrets = det["secrets"]
+                    d_star_note = det["star_note"]
+                    break
 
-        collect_player_production_income(controller.engine, player, None)
-        meta["income_collected_this_turn"] = True
+            candidates.append({
+                "die_id": d.die_id,
+                "color": d.color.value,
+                "face_name": eff.name if eff else "Module",
+                "role": role_name,
+                "money": d_money,
+                "patches": d_patches,
+                "secrets": d_secrets,
+                "star_note": d_star_note,
+                "is_contractor": (d.color == DieColor.WHITE),
+                "is_shield": is_shield,
+                "is_income": is_income,
+                "is_fallback": False,
+            })
 
-        income_breakdowns[pid] = {
-            "money": max(0, player.money - money_before),
-            "patches": max(0, player.patches - patches_before),
-            "secrets": max(0, player.secrets - secrets_before),
-            "details": details,
-        }
+        # 3. Fallback if no active dice exist in In Production or Contractors
+        if not candidates:
+            for d in player.glitched_dice + player.scanned_dice + player.ready_for_release_dice:
+                candidates.append({
+                    "die_id": d.die_id,
+                    "color": d.color.value,
+                    "face_name": "Under Development",
+                    "role": "Destruction Fallback",
+                    "money": 0,
+                    "patches": 0,
+                    "secrets": 0,
+                    "star_note": None,
+                    "is_contractor": False,
+                    "is_shield": False,
+                    "is_income": False,
+                    "is_fallback": True,
+                })
+
+        player_candidate_glitches[pid] = candidates
+
+        if not is_human:
+            money_before = player.money
+            patches_before = player.patches
+            secrets_before = player.secrets
+            collect_player_production_income(controller.engine, player, None)
+            meta["income_collected_this_turn"] = True
+            income_breakdowns[pid] = {
+                "money": max(0, player.money - money_before),
+                "patches": max(0, player.patches - patches_before),
+                "secrets": max(0, player.secrets - secrets_before),
+                "details": details,
+            }
+        else:
+            # Human player: income preview (actual collection happens on confirm_income after glitch choices)
+            meta["income_collected_this_turn"] = False
+            income_breakdowns[pid] = {
+                "money": sum(d["money"] for d in details),
+                "patches": sum(d["patches"] for d in details),
+                "secrets": sum(d["secrets"] for d in details),
+                "details": details,
+            }
 
     exited_dict = {c.value: count for c, count in telemetry.exited_cubes.items()}
     atk_dict = {c.value: count for c, count in telemetry.attack_strengths.items()}
@@ -149,6 +242,8 @@ def compile_drop(controller: GameController) -> Dict[str, Any]:
                 "shields": shields["green"],
                 "blocked": min(shields["green"], green_atk),
                 "unblocked": max(0, green_atk - shields["green"]),
+                "pending_glitches": getattr(controller.state.players[pid], "pending_unblocked_green", 0),
+                "candidate_dice": player_candidate_glitches.get(pid, []),
             },
             "black": {
                 "cubes": exited_dict.get("black", 0),
@@ -180,6 +275,8 @@ def compile_drop(controller: GameController) -> Dict[str, Any]:
         "threat_summary": threat_summaries,
         "human_income": income_breakdowns.get(human_pid, {"money": 0, "patches": 0, "secrets": 0, "details": []}),
         "human_threat": threat_summaries.get(human_pid, {}),
+        "candidate_glitch_dice": player_candidate_glitches.get(human_pid, []),
+        "pending_glitches": getattr(controller.state.players[human_pid], "pending_unblocked_green", 0) if human_pid < len(controller.state.players) else 0,
     }
 
     if getattr(telemetry, "buffer_overflow", False):

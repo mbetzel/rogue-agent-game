@@ -179,9 +179,10 @@ export async function doCompile() {
   }
 }
 
-export async function doConfirmIncome() {
+export async function doConfirmIncome(glitchDieIds = []) {
   const newState = await apiCall("/api/game/action/confirm_income", "POST", {
     player_id: getHumanPlayerId(),
+    glitch_die_ids: glitchDieIds,
   });
   if (newState) {
     setState(newState);

@@ -147,8 +147,9 @@ class GameEngine:
     def _execute_phase_2(
         self,
         player_commitments: List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]],
+        defer_green_for_pids: Optional[Set[int]] = None,
     ) -> RoundTelemetry:
-        return phase2_threat.execute_phase_2(self, player_commitments)
+        return phase2_threat.execute_phase_2(self, player_commitments, defer_green_for_pids=defer_green_for_pids)
 
     def _resolve_player_defense_and_wear(
         self,

@@ -19,6 +19,9 @@ import {
   selectedRerollIndices,
   clearSelectedRerolls,
   selectedChoiceDeclarations,
+  selectedGlitchDieIds,
+  toggleSelectedGlitchDieId,
+  clearSelectedGlitchDieIds,
 } from "../state.js";
 import {
   doHireContractors,
@@ -408,7 +411,7 @@ export function renderActionDock() {
     if (caps.can_confirm_income || state.subphase === "confirm_income") {
       const compileRes = state.last_compile_result || {};
       const exited = compileRes.exited_cubes || {};
-      const humanIncome = (compileRes.income_summary && compileRes.income_summary[human.player_id]) || compileRes.human_income || { money: 0, patches: 0, secrets: 0, details: [] };
+      const rawIncome = (compileRes.income_summary && compileRes.income_summary[human.player_id]) || compileRes.human_income || { money: 0, patches: 0, secrets: 0, details: [] };
       const humanThreat = (compileRes.threat_summary && compileRes.threat_summary[human.player_id]) || compileRes.human_threat || {};
 
       const redInfo = humanThreat.red || { cubes: exited.red || 0, shields: 0, unblocked: exited.red || 0 };
@@ -416,8 +419,138 @@ export function renderActionDock() {
       const greenInfo = humanThreat.green || { cubes: exited.green || 0, shields: 0, unblocked: exited.green || 0 };
       const blackCubes = exited.black || 0;
 
+      const unblockedGreen = greenInfo.unblocked || 0;
+      let candidates = compileRes.candidate_glitch_dice || (greenInfo.candidate_dice) || [];
+      if (!candidates || candidates.length === 0) {
+        const fallbackCandidates = [];
+        (human.contractor_dice || []).forEach((d) => {
+          fallbackCandidates.push({
+            die_id: d.die_id,
+            color: "white",
+            face_name: (d.current_face && d.current_face.name) || "Contractor",
+            role: "Contractor",
+            money: 0,
+            patches: 0,
+            secrets: 0,
+            is_contractor: true,
+            is_shield: false,
+            is_income: false,
+          });
+        });
+        (human.in_production_dice || []).forEach((d) => {
+          const eff = d.effective_face || d.current_face;
+          const role = d.production_role || "income";
+          const isShield = String(role).toLowerCase().includes("shield");
+          fallbackCandidates.push({
+            die_id: d.die_id,
+            color: d.color,
+            face_name: (eff && eff.name) || "Module",
+            role: isShield ? String(role).replace(/_/g, " ").toUpperCase() : "Income",
+            money: (eff && !isShield) ? (eff.money || 0) : 0,
+            patches: (eff && !isShield) ? (eff.patches || 0) : 0,
+            secrets: (eff && !isShield) ? (eff.secrets || 0) : 0,
+            is_contractor: d.color === "white",
+            is_shield: isShield,
+            is_income: !isShield,
+          });
+        });
+        candidates = fallbackCandidates;
+      }
+
+      const actualRequired = Math.min(unblockedGreen, candidates.length);
+
+      // Clean up stale selections
+      const validCandidateIds = new Set(candidates.map((c) => c.die_id));
+      for (const id of Array.from(selectedGlitchDieIds)) {
+        if (!validCandidateIds.has(id)) {
+          selectedGlitchDieIds.delete(id);
+        }
+      }
+
+      // If only 1 candidate die exists and 1 is required, auto-select it for convenience
+      if (actualRequired === 1 && candidates.length === 1 && selectedGlitchDieIds.size === 0) {
+        selectedGlitchDieIds.add(candidates[0].die_id);
+      }
+
+      // Compute effective income based on current glitch selections
+      const effectiveDetails = (rawIncome.details || []).map((det) => {
+        const isGlitched = selectedGlitchDieIds.has(det.die_id);
+        return {
+          ...det,
+          is_glitched: isGlitched,
+        };
+      });
+
+      const effectiveMoney = effectiveDetails
+        .filter((d) => !d.is_glitched)
+        .reduce((sum, d) => sum + (d.money || 0), 0);
+      const effectivePatches = effectiveDetails
+        .filter((d) => !d.is_glitched)
+        .reduce((sum, d) => sum + (d.patches || 0), 0);
+      const effectiveSecrets = effectiveDetails
+        .filter((d) => !d.is_glitched)
+        .reduce((sum, d) => sum + (d.secrets || 0), 0);
+
+      const hasEnoughSelections = (actualRequired === 0) || (selectedGlitchDieIds.size === actualRequired);
+
+      let btnText = "✓ Confirm Income & Move Dice to Pipeline";
+      if (actualRequired > 0) {
+        if (!hasEnoughSelections) {
+          const needed = actualRequired - selectedGlitchDieIds.size;
+          btnText = `Select ${needed} Die to Glitch (${selectedGlitchDieIds.size}/${actualRequired})`;
+        } else {
+          btnText = `✓ Confirm & Move ${actualRequired} Selected Die${actualRequired > 1 ? 's' : ''} to Glitched Box`;
+        }
+      }
+
       const panel = document.createElement("div");
       panel.className = "confirm-income-panel";
+
+      let malwareHtml = "";
+      if (actualRequired > 0) {
+        malwareHtml = `
+          <div class="confirm-malware-panel">
+            <div class="confirm-malware-hdr">
+              <div class="confirm-malware-title-row">
+                <span class="confirm-malware-badge">⚠️ MALWARE BREACH</span>
+                <span class="confirm-malware-title">LOGIC BOMB INFECTION (${unblockedGreen} Unblocked Green Cube${unblockedGreen > 1 ? 's' : ''})</span>
+              </div>
+              <span class="confirm-malware-sub">
+                You took unblocked malware damage! Click below to select <strong>${actualRequired}</strong> active module${actualRequired > 1 ? 's' : ''} to move to the <strong>Glitched Box</strong> (or sacrifice White Contractor). A glitched Income die forfeits its revenue this round; a sacrificed Shield die absorbs the damage to protect your income.
+              </span>
+            </div>
+            <div class="confirm-malware-grid">
+              ${candidates.map((c) => {
+                const isSel = selectedGlitchDieIds.has(c.die_id);
+                const roleClass = (c.role || "").toLowerCase().replace(/[^a-z0-9]/g, "-");
+                let consequenceText = "";
+                if (c.is_contractor) {
+                  consequenceText = "Contractor Sacrifice: Discard to supply (saves permanent modules)";
+                } else if (c.is_shield) {
+                  consequenceText = "Shield Sacrifice: Already blocked attack; moves to Glitched Box (protects income!)";
+                } else if (c.is_fallback) {
+                  consequenceText = "Destruction Fallback: Destroyed from Under Development";
+                } else {
+                  consequenceText = `Income Forfeiture: Moves to Glitched Box (-$${c.money || 0}${c.patches ? ', -' + c.patches + '🔧' : ''})`;
+                }
+                return `
+                  <div class="malware-die-card ${c.color} ${isSel ? 'selected' : ''}" data-die-id="${c.die_id}">
+                    <div class="malware-die-top">
+                      <span class="malware-die-role ${roleClass}">${c.role.toUpperCase()}</span>
+                      <span style="font-weight: 700; font-size: 0.72rem; color: #fff;">${c.color.toUpperCase()} DIE</span>
+                    </div>
+                    <div class="malware-die-face">${c.face_name}${c.star_note ? ' (' + c.star_note + ')' : ''}</div>
+                    <div class="malware-die-consequence">${consequenceText}</div>
+                    <div class="malware-die-status">
+                      ${isSel ? '⚠️ SELECTED FOR GLITCH' : '○ Click to Glitch'}
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
 
       panel.innerHTML = `
         <div class="confirm-income-header">
@@ -451,7 +584,7 @@ export function renderActionDock() {
             </div>
             <div class="confirm-threat-row">
               <span style="color: var(--color-green); font-weight: 700;">▲ GREEN // MALWARE</span>
-              <span>${greenInfo.cubes} exited vs ${greenInfo.shields} shields -> ${greenInfo.unblocked > 0 ? `<strong style="color: #f43f5e;">${greenInfo.unblocked} Die Glitched</strong>` : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
+              <span>${greenInfo.cubes} exited vs ${greenInfo.shields} shields -> ${greenInfo.unblocked > 0 ? `<strong style="color: #f43f5e;">${greenInfo.unblocked} Unblocked Malware</strong>` : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
             </div>
           </div>
 
@@ -462,15 +595,15 @@ export function renderActionDock() {
               <span>Delayed Yield (Surviving Dice)</span>
             </div>
             <div class="confirm-pills-row">
-              <span class="income-pill money">+$${humanIncome.money} Cash</span>
-              <span class="income-pill patches">+${humanIncome.patches} 🔧 Patches</span>
-              ${humanIncome.secrets > 0 ? `<span class="income-pill secrets">+${humanIncome.secrets} Secrets</span>` : ''}
+              <span class="income-pill money">+$${effectiveMoney} Cash</span>
+              <span class="income-pill patches">+${effectivePatches} 🔧 Patches</span>
+              ${effectiveSecrets > 0 ? `<span class="income-pill secrets">+${effectiveSecrets} Secrets</span>` : ''}
             </div>
             <div class="confirm-dice-chips">
-              ${(humanIncome.details && humanIncome.details.length > 0)
-                ? humanIncome.details.map((d) => `
-                    <span class="confirm-die-chip ${d.color}">
-                      <strong>${d.color.toUpperCase()}:</strong> ${d.face_name}${d.star_note ? ' (' + d.star_note + ')' : ''}
+              ${(effectiveDetails && effectiveDetails.length > 0)
+                ? effectiveDetails.map((d) => `
+                    <span class="confirm-die-chip ${d.color} ${d.is_glitched ? 'glitched-chip' : ''}">
+                      <strong>${d.color.toUpperCase()}:</strong> ${d.face_name}${d.star_note ? ' (' + d.star_note + ')' : ''} ${d.is_glitched ? '<em>(GLITCHED)</em>' : ''}
                     </span>
                   `).join('')
                 : '<span style="font-size: 0.75rem; color: var(--text-dim); font-style: italic;">No surviving production dice yielded income.</span>'}
@@ -478,19 +611,35 @@ export function renderActionDock() {
           </div>
         </div>
 
+        ${malwareHtml}
+
         <div class="confirm-action-bar">
           <span style="font-size: 0.75rem; color: var(--text-dim);">
-            Confirming clears <strong>In Production</strong> and transfers surviving dice to the <strong>Scanned Box</strong> for next round. Glitched dice remain in <strong>Glitched Box</strong>.
+            Confirming clears <strong>In Production</strong> and transfers surviving dice to the <strong>Scanned Box</strong> for next round. Glitched dice move to <strong>Glitched Box</strong>.
           </span>
-          <button class="action-btn btn-confirm-income" id="btnConfirmIncome">
-            ✓ Confirm Income & Move Dice to Pipeline
+          <button class="action-btn btn-confirm-income ${hasEnoughSelections ? '' : 'disabled'}" id="btnConfirmIncome" ${hasEnoughSelections ? '' : 'disabled'}>
+            ${btnText}
           </button>
         </div>
       `;
 
-      panel.querySelector("#btnConfirmIncome").onclick = () => {
-        doConfirmIncome();
-      };
+      panel.querySelectorAll(".malware-die-card").forEach((card) => {
+        card.onclick = () => {
+          const dId = parseInt(card.getAttribute("data-die-id"), 10);
+          toggleSelectedGlitchDieId(dId, actualRequired);
+          renderActionDock();
+        };
+      });
+
+      const confirmBtn = panel.querySelector("#btnConfirmIncome");
+      if (confirmBtn) {
+        confirmBtn.onclick = () => {
+          if (!hasEnoughSelections && actualRequired > 0) return;
+          const toGlitch = Array.from(selectedGlitchDieIds);
+          clearSelectedGlitchDieIds();
+          doConfirmIncome(toGlitch);
+        };
+      }
 
       controls.appendChild(panel);
       return;

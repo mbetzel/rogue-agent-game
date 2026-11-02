@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 def execute_phase_2(
     engine: GameEngine,
     player_commitments: List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]],
+    defer_green_for_pids: Optional[Set[int]] = None,
 ) -> RoundTelemetry:
     staged_before = dict(engine.state.staging_cup)
     stuck_before = engine.state.tower.get_stuck_copy()
@@ -136,6 +137,7 @@ def execute_phase_2(
 
         # Resolve each player's committed shields against attacks
         for player, rolled_dice, commitments in player_commitments:
+            should_defer = bool(defer_green_for_pids and player.player_id in defer_green_for_pids)
             resolve_player_defense_and_wear(
                 engine=engine,
                 player=player,
@@ -144,6 +146,7 @@ def execute_phase_2(
                 attack_strengths=attack_strengths,
                 exited_cubes=exited_cubes,
                 active_directive=active_directive,
+                defer_green_malware=should_defer,
             )
 
         # Snowball Recycle: Exited Red, Blue, Green cubes return to Staging Cup
@@ -154,6 +157,8 @@ def execute_phase_2(
 
         # Contractor Expiration: All remaining White Contractor dice across all players return to supply
         for player in engine.state.players:
+            if defer_green_for_pids and player.player_id in defer_green_for_pids and getattr(player, "pending_unblocked_green", 0) > 0:
+                continue
             engine.state.contractor_supply += len(player.contractor_dice)
             player.contractor_dice.clear()
             player.hired_contractor_count = 0
@@ -221,6 +226,7 @@ def resolve_player_defense_and_wear(
     attack_strengths: Dict[CubeColor, int],
     exited_cubes: Dict[CubeColor, int],
     active_directive: str,
+    defer_green_malware: bool = False,
 ) -> None:
     active_ver = engine.state.active_version.version_str
     # Calculate raw committed shields per color
@@ -386,6 +392,10 @@ def resolve_player_defense_and_wear(
         player.breach_depth = max(0, -player.secrets)
 
     # Green (Malware / Logic Bombs): Move 1 active die from in_production_dice to glitched_dice per cube
+    player.pending_unblocked_green = unblocked_green
+    if defer_green_malware:
+        return
+
     for _ in range(unblocked_green):
         sacrifice = player.bot.choose_malware_sacrifice(
             player_state=player,
@@ -425,6 +435,8 @@ def resolve_player_defense_and_wear(
         else:
             # Completely wiped out; record unfulfilled die destruction
             player.unfulfilled_destructions += 1
+
+    player.pending_unblocked_green = 0
 
 
 def demote_player_dice_step2a(
