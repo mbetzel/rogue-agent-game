@@ -252,8 +252,9 @@ class VentureGreedBot(BaseBot):
             and player_state.is_ability_available(active_ver)
         ):
             if not is_final_round:
-                for c in [DieColor.YELLOW, DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.PURPLE]:
-                    cost = (4 if c in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5) - game_state.config.cipher_market_discount
+                for c in [DieColor.YELLOW, DieColor.BLUE, DieColor.RED, DieColor.GREEN]:
+                    base_cost = game_state.get_market_die_cost(c)
+                    cost = max(0, base_cost - game_state.config.cipher_market_discount)
                     if game_state.market.get(c, 0) > 0 and current_money >= cost:
                         plan.use_prometheus_override = True
                         plan.use_cipher_ability = True
@@ -261,6 +262,15 @@ class VentureGreedBot(BaseBot):
                         plan.prometheus_discount_die_color = c
                         current_money -= cost
                         break
+                if not plan.use_cipher_ability and getattr(player_state, "personal_purple_reserve", 0) > 0:
+                    base_purple_cost = player_state.get_purple_reserve_cost()
+                    disc_purple_cost = max(0, base_purple_cost - game_state.config.cipher_market_discount)
+                    if current_money >= disc_purple_cost:
+                        plan.use_prometheus_override = True
+                        plan.use_cipher_ability = True
+                        plan.prometheus_mode = "BUY_FREE_DIE"
+                        plan.prometheus_discount_die_color = DieColor.PURPLE
+                        current_money -= disc_purple_cost
             if not plan.use_cipher_ability:
                 plan.use_prometheus_override = True
                 plan.use_cipher_ability = True
@@ -290,14 +300,16 @@ class VentureGreedBot(BaseBot):
 
         if not is_final_round:
             purchases = 0
+            yellow_cost = game_state.get_market_die_cost(DieColor.YELLOW)
+            blue_cost = game_state.get_market_die_cost(DieColor.BLUE)
             for _ in range(game_state.config.max_market_purchases_per_turn):
-                if game_state.market.get(DieColor.YELLOW, 0) > 0 and (current_money - 5 >= cash_cushion):
+                if game_state.market.get(DieColor.YELLOW, 0) > 0 and (current_money - yellow_cost >= cash_cushion):
                     plan.market_purchases.append(DieColor.YELLOW)
-                    current_money -= 5
+                    current_money -= yellow_cost
                     purchases += 1
-                elif game_state.market.get(DieColor.BLUE, 0) > 0 and (current_money - 5 >= cash_cushion):
+                elif game_state.market.get(DieColor.BLUE, 0) > 0 and (current_money - blue_cost >= cash_cushion):
                     plan.market_purchases.append(DieColor.BLUE)
-                    current_money -= 5
+                    current_money -= blue_cost
                     purchases += 1
 
         return plan

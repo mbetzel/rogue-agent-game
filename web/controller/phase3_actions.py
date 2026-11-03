@@ -514,8 +514,16 @@ def buy_die(
         raise ValueError(f"Purchase limit reached ({controller.state.config.max_market_purchases_per_turn} dice per turn)")
 
     color = DieColor(color_str.lower())
-    cost = 4 if color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5
+    if color == DieColor.PURPLE:
+        base_cost = player.get_purple_reserve_cost() if hasattr(player, "get_purple_reserve_cost") else (
+            getattr(player.white_hat, "reserve_cost", 4) if getattr(player, "white_hat", None) else 4
+        )
+    else:
+        base_cost = controller.state.get_market_die_cost(color) if hasattr(controller.state, "get_market_die_cost") else (
+            4 if color in (DieColor.RED, DieColor.GREEN) else 5
+        )
 
+    cost = base_cost
     use_discount = use_cipher_ability or use_prometheus_override
     if use_discount:
         has_prometheus = bool(
@@ -526,7 +534,7 @@ def buy_die(
             raise ValueError("Player does not have the Prometheus company override or Cipher archetype")
         if not player.is_ability_available():
             raise ValueError("Prometheus/Cipher ability is not available")
-        cost = max(0, cost - controller.state.config.cipher_market_discount)
+        cost = max(0, base_cost - controller.state.config.cipher_market_discount)
 
     if color == DieColor.PURPLE:
         # INV-PURPLE-03: Purchase from Personal Reserve
@@ -542,6 +550,7 @@ def buy_die(
         new_die = create_colored_die(
             color=DieColor.PURPLE,
             die_id=controller.state.next_die_id,
+            reserve_cost=player.get_purple_reserve_cost() if hasattr(player, "get_purple_reserve_cost") else 4,
         )
         controller.state.next_die_id += 1
         player.ready_for_release_dice.append(new_die)

@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.25.0)
+# Too Many Secrets — Rules Draft (v0.26.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -58,12 +58,12 @@ When the dust settles, any consultancy that suffers a **Total Data Breach** (`<=
 * **12 White "Contractor" Dice** (Temporary freelance phreakers / night-shift operators for hire in Phase 1; high risk: 2 Glitches)
 * **Colored Software Module Dice:**
   * **4 Central Market Colors (`2 × Players` dice per color; universal format: 4 core faces, 1 Face 5 Glitch, 1 Face 6 Star `★`):**
-    * **Red Dice** — *FinSec / Encryption* (`$4`)
-    * **Blue Dice** — *Firewall / Data Vault* (`$5`)
-    * **Green Dice** — *Antivirus / Auto-Patcher* (`$4`)
-    * **Yellow Dice** — *Commercial AI (High Revenue / Fast Capital)* (`$5`)
+    * **Red Dice** — *FinSec / Encryption* (`$5–$6`, determined by face-up Variant Card)
+    * **Blue Dice** — *Firewall / Data Vault* (`$5–$7`, determined by face-up Variant Card)
+    * **Green Dice** — *Antivirus / Auto-Patcher* (`$5–$6`, determined by face-up Variant Card)
+    * **Yellow Dice** — *Commercial AI (High Revenue / Fast Capital)* (`$6–$7`, determined by face-up Variant Card)
   * **Purple Proprietary Specialist Dice (`2` dice per player, 8 total; held in Personal Reserves):**
-    * **Purple Dice** — *Proprietary Specialist / Black-Hat AI* (`$4` procurement; standardized high-reliability baseline + bespoke Archetype Signature Protocols)
+    * **Purple Dice** — *Proprietary Specialist / Black-Hat AI* (`$4–$6` procurement determined by assigned White Hat Dossier; standardized high-reliability baseline + bespoke Archetype Signature Protocols)
 * **Software Module Variant Cards:** Multiple cards per market die color (**Red, Blue, Green, Yellow**); **1 card per color** is used each game to define that color's Special (`★`) Face 6. *(Purple dice do not use market variant cards; their Face 6 triggers the player's bespoke Archetype Signature Protocol).*
 * **Money Tokens (`$`)**, **Corporate Secret Tokens**, **Patch Tokens (`🔧`)** *(styled as magnetic tape splice kits / jumper wires)*, and a **First Player (Lead Consultant) Marker**.
 
@@ -83,7 +83,7 @@ When the dust settles, any consultancy that suffers a **Total Data Breach** (`<=
        * **3 Players:** Player 1 (*Meridian* + *The Operator*), Player 2 (*Omnidyne* + *The Phreaker*), Player 3 (*Aegis Defense Relay* + *The Acoustic*).
        * **4 Players:** Player 1 (*Meridian* + *The Operator*), Player 2 (*Omnidyne* + *The Phreaker*), Player 3 (*Aegis* + *The Acoustic*), Player 4 (*DTO* + *The Spook*).
    * Place **4 Gray Legacy Dice** into your **Ready for Release Zone**.
-   * Take **`$7` Starting Money** `[TUNE: test $6–$8]`.
+   * Take **`$4` Starting Money** `[TUNE: $4 baseline; test $4–$5]`.
    * **Corporate Secrets & Starting Patch Tokens by Player Count:**
      * **2 Players:** Take **`8` Corporate Secrets** and **`2` Patch Tokens (`🔧`)**.
      * **3 Players:** Take **`8` Corporate Secrets** and **`2` Patch Tokens (`🔧`)**.
@@ -195,9 +195,9 @@ On your turn, perform any of the following operations:
    * Collect all **`$` Money tokens**, **Patch Tokens (`🔧`)**, and trigger any immediate `★` outputs from **all dice remaining in In Production** (both the **Income** slot and the **Shield** slots). *(Dice that were glitched during Phase 1 or by Phase 2 Green malware/corruption produce 0 outputs).*
    * *(Operative Protocol Timing: Rolling Face 6 `Purple ★` triggers **The Phreaker's** Jumper Diagnostics [roll 1 offline die in Under Development], **The Acoustic's** Resonance Sensor [+$1 cash per distinct exit tray color], **The Spook's** Burn Notice [+$2 cash and optional die burn for +1 Secret], or **The Cipher's** Algorithmic Parity [+$2 cash income]).*
 2. **Purchase Software Module Dice (Limit `2` dice per turn `[TUNE]`):**
-   * **Central Market:** Pay the `$` cost of any available Colored Die (**Red, Blue, Green, Yellow**) in the Market and place it directly into your **Ready for Release Zone** (available to roll immediately next round!).
-   * **Personal Reserve Procurement:** Alternatively (or in addition), invest **`$4`** to purchase 1 **Purple Proprietary Specialist Die** directly from your **Personal Reserve** and place it into your **Ready for Release Zone**. This purchase counts toward your limit of 2 dice purchases per turn.
-   * *(Institutional Override Timing: Contracting **The Prometheus Foundation** may trigger Algorithmic Arbitrage here to purchase 1 Colored Die at a **$2 discount**, or gain **+$2 cash**).*
+   * **Central Market:** Pay the `$` cost of any available Colored Die (**Red, Blue, Green, Yellow**) as printed on its active face-up **Variant Card** (`$5`–`$7`) and place it directly into your **Ready for Release Zone** (available to roll immediately next round!).
+   * **Personal Reserve Procurement:** Alternatively (or in addition), invest the `$` procurement cost printed on your assigned **White Hat Dossier Card** (`$4`–`$6`) to purchase 1 **Purple Proprietary Specialist Die** directly from your **Personal Reserve** and place it into your **Ready for Release Zone**. This purchase counts toward your limit of 2 dice purchases per turn.
+   * *(Institutional Override Timing: Contracting **The Prometheus Foundation** may trigger Algorithmic Arbitrage here to purchase 1 Colored Die from the Market or Personal Reserve at a **$2 discount** [min $0], or gain **+$2 cash**).*
 
 #### Part 3B: Pipeline Prep & End-of-Round Staging (Simultaneous)
 All consultancies simultaneously update their terminal pipeline:
@@ -240,34 +240,34 @@ When the game ends (via Singularity when `v3.0` fills, or via Patient Zero check
 | :--- | :---: | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Gray (Legacy)** | Starter | `Block 1 Any` | `Block 1 Any` | `+$1` | `+$1` | `+$1 / +1 🔧` | `+1 🔧` |
 | **White (Contractor)** | Prog. `$1/$2/$3` | `Block 1 Any` | `Block 1 Any` | `Block 1 Any` | `+$1` | `Glitch (Locked)` | `Glitch (Locked)` |
-| **Red (FinSec)** | `$4` | `Block 1 Red` | `+$2` | `+$2` | `+$2` | `Glitch (Locked)` | `Red ★` |
-| **Blue (Firewall)** | `$5` | `Block 1 Blue` | `+1 🔧` | `+$1` | `Block 1 Blue / +1 🔧` | `Glitch (Locked)` | `Blue ★` |
-| **Green (Antivirus)** | `$4` | `Block 1 Green` | `+1 🔧` | `+2 🔧` | `+1 🔧 / +$1` | `Glitch (Locked)` | `Green ★` |
-| **Yellow (Commercial)**| `$5` | `+$3` | `+$2` | `+$2` | `+$1 & +1 🔧` | `Glitch (Locked)` | `Yellow ★` |
-| **Purple (Specialist)** | `$4` (Reserve) | `Block 1 Any` | `Block 1 Any` | `+$2` | `+$1 & +1 🔧` | `Glitch (Locked)` | `Purple ★ (Signature Protocol)` |
+| **Red (FinSec)** | `$5–$6` (Variant) | `Block 1 Red` | `+$2` | `+$2` | `+$2` | `Glitch (Locked)` | `Red ★` |
+| **Blue (Firewall)** | `$5–$7` (Variant) | `Block 1 Blue` | `+1 🔧` | `+$1` | `Block 1 Blue / +1 🔧` | `Glitch (Locked)` | `Blue ★` |
+| **Green (Antivirus)** | `$5–$6` (Variant) | `Block 1 Green` | `+1 🔧` | `+2 🔧` | `+1 🔧 / +$1` | `Glitch (Locked)` | `Green ★` |
+| **Yellow (Commercial)**| `$6–$7` (Variant) | `+$3` | `+$2` | `+$2` | `+$1 & +1 🔧` | `Glitch (Locked)` | `Yellow ★` |
+| **Purple (Specialist)** | `$4–$6` (Dossier) | `Block 1 Any` | `Block 1 Any` | `+$2` | `+$1 & +1 🔧` | `Glitch (Locked)` | `Purple ★ (Signature Protocol)` |
 
 * **Choice Faces (`/`):** Faces with a slash (`/`) indicate a Choice Face. During Phase 1 Step 5, the player declares which of the two options the die fulfills for this round.
   * **Phase 1 Lock Interactions:** A choice face displaying a Cash option (e.g. `+$1 / +1 🔧` on Gray or `+1 🔧 / +$1` on Green) is treated as a Cash face when Cash faces are locked by a Corruption Track effect (e.g. `v2.0 RaaS` Space 3). A choice face displaying a Shield option (e.g. `Block 1 Blue / +1 🔧` on Blue) is treated as a Shield face when Shield faces are locked by a Corruption Track effect (e.g. `v3.0 Zero-Day Override` Space 3). Locked dice cannot be unlocked in Phase 1 (Absolute Locks; only The Prodigy can bypass locks during rerolls).
 * **Hardware Glitch Faces (`Glitch (Locked)`):** Face 5 on all 4 Market Module Dice and Purple Specialist dice (and Faces 5 & 6 on White Contractor dice) represents an unstable software glitch. When rolled, the die is locked immediately and cannot be rerolled (Absolute Lock; only The Prodigy may bypass). At the end of Phase 1 rerolls, any unresolved glitch face moves immediately to the Glitched Box in Under Development. Glitch faces produce 0 shields and 0 resource outputs.
 
 ### B. Sample Module Variant Cards (`★` Effects)
-*(Note: Common market variant cards define Face 6 for Red, Blue, Green, and Yellow module dice. Purple Proprietary Specialist dice do not use market variant cards; their Face 6 triggers the player's bespoke Archetype Signature Protocol detailed in Section 6D).*
+*(Note: Common market variant cards define Face 6 for Red, Blue, Green, and Yellow module dice. The purchase cost of each colored die is printed directly on its active face-up Variant Card. Purple Proprietary Specialist dice do not use market variant cards; their procurement cost and Face 6 are defined on the player's assigned White Hat Dossier detailed in Section 6D).*
 * **Red `★` Variants:**
-  * *R1 — Ransom Insurance:* `[In Production — Defense]` `Block 1 Red` + `[In Production — Income]` gain `+$2`.
-  * *R2 — Threat Bounty:* `[In Production — Defense]` `Block 2 Red`; if you take `0` unblocked Red damage this round, gain `+$2`.
-  * *R3 — Short Squeeze:* `[In Production — Income]` Gain `+$3` (or `+$4` if 3+ Red cubes exit the tower this round).
+  * *R1 — Ransom Insurance (`$6`):* `[In Production — Defense]` `Block 1 Red` + `[In Production — Income]` gain `+$2`.
+  * *R2 — Threat Bounty (`$6`):* `[In Production — Defense]` `Block 2 Red`; if you take `0` unblocked Red damage this round, gain `+$2`.
+  * *R3 — Short Squeeze (`$5`):* `[In Production — Income]` Gain `+$3` (or `+$4` if 3+ Red cubes exit the tower this round).
 * **Blue `★` Variants:**
-  * *B1 — Honeypot Telemetry:* `[In Production — Defense]` `Block 2 Blue`; if 1+ Blue cubes exit the tower and you take `0` Blue damage, gain `+$3`.
-  * *B2 — Deep R&D Vault:* `[In Production — Defense]` `Block 1 Blue`, **OR** `[Phase 3 — Operations]` pay `$4` during Phase 3 to gain `+1 Corporate Secret` `[TUNE]`.
-  * *B3 — Air-Gapped Backup:* `[In Production — Defense]` `Block 1 Blue`; when an unblocked Green malware hits, you may sacrifice `1` other Ready die of your choice to **Under Development** instead of this die `[TUNE]`.
+  * *B1 — Honeypot Telemetry (`$6`):* `[In Production — Defense]` `Block 2 Blue`; if 1+ Blue cubes exit the tower and you take `0` Blue damage, gain `+$3`.
+  * *B2 — Deep R&D Vault (`$7`):* `[In Production — Defense]` `Block 1 Blue`, **OR** `[Phase 3 — Operations]` pay `$4` during Phase 3 to gain `+1 Corporate Secret` `[TUNE]`.
+  * *B3 — Air-Gapped Backup (`$5`):* `[In Production — Defense]` `Block 1 Blue`; when an unblocked Green malware hits, you may sacrifice `1` other Ready die of your choice to **Under Development** instead of this die `[TUNE]`.
 * **Green `★` Variants:**
-  * *G1 — Self-Healing Kernel:* `[In Production — Defense]` `Block 2 Green` + `[In Production — Income]` gain `+1 🔧`.
-  * *G2 — Universal Sandbox:* `[In Production — Defense]` `Block 1 Any` + `[In Production — Income]` gain `+1 🔧`.
-  * *G3 — Live Reboot:* `[In Production — Income]` Gain `+2 🔧` + `+$1`.
+  * *G1 — Self-Healing Kernel (`$6`):* `[In Production — Defense]` `Block 2 Green` + `[In Production — Income]` gain `+1 🔧`.
+  * *G2 — Universal Sandbox (`$5`):* `[In Production — Defense]` `Block 1 Any` + `[In Production — Income]` gain `+1 🔧`.
+  * *G3 — Live Reboot (`$5`):* `[In Production — Income]` Gain `+2 🔧` + `+$1`.
 * **Yellow `★` Variants:**
-  * *Y1 — Algorithmic Trading:* `[In Production — Income]` Gain `+$4`, **OR** `[Phase 3 — Operations]` pay `$2` in Phase 3 to gain `+1 Corporate Secret`.
-  * *Y2 — Cloud Monopoly:* `[In Production — Income]` Gain `+$2`, plus `+$1` per different colored module die you own (max `+$5`) `[TUNE]`.
-  * *Y3 — Proprietary Training:* `[In Production — Income]` Gain `+1 Corporate Secret`, then immediately move this die to **Under Development (Glitched)**.
+  * *Y1 — Algorithmic Trading (`$7`):* `[In Production — Income]` Gain `+$4`, **OR** `[Phase 3 — Operations]` pay `$2` in Phase 3 to gain `+1 Corporate Secret`.
+  * *Y2 — Cloud Monopoly (`$6`):* `[In Production — Income]` Gain `+$2`, plus `+$1` per different colored module die you own (max `+$5`) `[TUNE]`.
+  * *Y3 — Proprietary Training (`$6`):* `[In Production — Income]` Gain `+1 Corporate Secret`, then immediately move this die to **Under Development (Glitched)**.
 
 ### C. Sample SETEC Version Cards & Per-Version Corruption Tracks `[TUNE]`
 
@@ -314,16 +314,16 @@ Each player contracts with 1 enterprise Client Company for the duration of the m
 | **PROMETHEUS** | **The Prometheus Foundation** | Non-Profit | *Algorithmic Arbitrage* | Phase 3: Part 3A Operations Turn | Purchase **1 Colored Die** from the Market or Personal Reserve at a **`$2 discount`** (minimum cost `$0`), **OR** gain an immediate **`+$2` cash payout** from the bank. | *"Open-source cryptographic protocols circumvent proprietary enterprise licensing fees."* |
 
 #### 2. The 6 White Hat Dossiers (`WhiteHat`) — Personal Reserve & Face 6 Signature Protocols
-Each player directs 1 specialist operative lead. Your White Hat provides a private **Personal Reserve** (2 Purple Specialist dice, `$4` procurement in Phase 3A) and defines the **Signature Protocol** triggered whenever you roll Face 6 (`Purple ★`) on a Purple Specialist die:
+Each player directs 1 specialist operative lead. Your White Hat provides a private **Personal Reserve** (2 Purple Specialist dice, with procurement cost determined by operative) and defines the **Signature Protocol** triggered whenever you roll Face 6 (`Purple ★`) on a Purple Specialist die:
 
-| White Hat Code | Operative Name | Role | Signature Protocol | Timing Window | Description | Flavor Quote |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **OPERATOR** | **The Operator** | Tactical Staffing & Logistics Lead | *Contingent Staffing* | Phase 1: Step 4 Rolling | When Face 6 (`Purple ★`) is rolled, immediately roll **1 free White Contractor Die** from the supply directly into your active pool (eligible for all remaining rerolls this phase). | *"Redundant contractor pipelines ready on zero notice."* |
-| **PHREAKER** | **The Phreaker** | Hardware Intrusion Specialist | *Jumper Diagnostics* | Phase 3: Part 3A Operations Turn | When Face 6 (`Purple ★`) is rolled, select and roll **1 offline die** currently in your **Glitched Box** or **Scanned Box**; immediately collect any cash or patches rolled (shields/glitches produce 0). The die remains in Under Development. | *"Raw voltage pulses extract signal from dormant silicon."* |
-| **ACOUSTIC** | **The Acoustic** | Side-Channel Cryptanalyst | *Resonance Sensor* | Phase 3: Part 3A Income | When Face 6 (`Purple ★`) is rolled, gain **`+$1 cash`** per distinct cube color present in the Tower Exit Tray this round (`Red`, `Blue`, `Green`, `Black`; up to **`+$4`** max). | *"Harmonic resonance frequencies decode physical chassis vibrations."* |
-| **SPOOK** | **The Spook** | Covert Intelligence Specialist | *Burn Notice* | Phase 3: Part 3A Operations Turn | When Face 6 (`Purple ★`) is rolled, gain an immediate **`+$2` cash payout**; in addition, you may optionally **permanently return 1 owned colored module die to the market** to gain **`+1 Corporate Secret`**. | *"Scorched-earth protocols ensure zero forensic recovery."* |
-| **PRODIGY** | **The Prodigy** | Autonomous Exploit Hacker | *Arbitrary Code Execution* | Phase 1: Step 4 Rolling | When Face 6 (`Purple ★`) is rolled, turn **1 other rolled die** in your active pool to **any legal non-Star face of that die's color**. | *"Payload injection executes before memory boundaries establish."* |
-| **CIPHER** | **The Cipher** | Distributed Ledger Architect | *Algorithmic Parity* | Phase 1: Step 5 & Phase 3: Part 3A | **Phase 1 Step 5:** Purple Star acts as a **Wildcard** completing any rolled pair into a 3-of-a-kind triplet (**`+1 Corporate Secret`**).<br>**Phase 3A Income:** Purple Star generates an additional **`+$2` cash**. | *"Parity calculations balance zero-knowledge proofs flawlessly."* |
+| White Hat Code | Operative Name | Role | Reserve Cost | Signature Protocol | Timing Window | Description | Flavor Quote |
+| :--- | :--- | :--- | :---: | :--- | :--- | :--- | :--- |
+| **OPERATOR** | **The Operator** | Tactical Staffing & Logistics Lead | **`$5`** | *Contingent Staffing* | Phase 1: Step 4 Rolling | When Face 6 (`Purple ★`) is rolled, immediately roll **1 free White Contractor Die** from the supply directly into your active pool (eligible for all remaining rerolls this phase). | *"Redundant contractor pipelines ready on zero notice."* |
+| **PHREAKER** | **The Phreaker** | Hardware Intrusion Specialist | **`$4`** | *Jumper Diagnostics* | Phase 3: Part 3A Operations Turn | When Face 6 (`Purple ★`) is rolled, select and roll **1 offline die** currently in your **Glitched Box** or **Scanned Box**; immediately collect any cash or patches rolled (shields/glitches produce 0). The die remains in Under Development. | *"Raw voltage pulses extract signal from dormant silicon."* |
+| **ACOUSTIC** | **The Acoustic** | Side-Channel Cryptanalyst | **`$4`** | *Resonance Sensor* | Phase 3: Part 3A Income | When Face 6 (`Purple ★`) is rolled, gain **`+$1 cash`** per distinct cube color present in the Tower Exit Tray this round (`Red`, `Blue`, `Green`, `Black`; up to **`+$4`** max). | *"Harmonic resonance frequencies decode physical chassis vibrations."* |
+| **SPOOK** | **The Spook** | Covert Intelligence Specialist | **`$5`** | *Burn Notice* | Phase 3: Part 3A Operations Turn | When Face 6 (`Purple ★`) is rolled, gain an immediate **`+$2` cash payout**; in addition, you may optionally **permanently return 1 owned colored module die to the market** to gain **`+1 Corporate Secret`**. | *"Scorched-earth protocols ensure zero forensic recovery."* |
+| **PRODIGY** | **The Prodigy** | Autonomous Exploit Hacker | **`$5`** | *Arbitrary Code Execution* | Phase 1: Step 4 Rolling | When Face 6 (`Purple ★`) is rolled, turn **1 other rolled die** in your active pool to **any legal non-Star face of that die's color**. | *"Payload injection executes before memory boundaries establish."* |
+| **CIPHER** | **The Cipher** | Distributed Ledger Architect | **`$6`** | *Algorithmic Parity* | Phase 1: Step 5 & Phase 3: Part 3A | **Phase 1 Step 5:** Purple Star acts as a **Wildcard** completing any rolled pair into a 3-of-a-kind triplet (**`+1 Corporate Secret`**).<br>**Phase 3A Income:** Purple Star generates an additional **`+$2` cash**. | *"Parity calculations balance zero-knowledge proofs flawlessly."* |
 
 #### 3. Canonical Pairings & 36-Combination Synergy Setup
 Players may freely combine any Client Company with any White Hat Operative ($6 \times 6 = 36$ total combinations).

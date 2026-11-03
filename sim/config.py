@@ -50,7 +50,7 @@ class GameConfig:
 
     # Player count & setup
     num_players: int = 4
-    starting_money: int = 7  # [TUNE: $6–$8]
+    starting_money: int = 4  # [TUNE: $4 baseline] [v0.26.0 Calibration: Calibrated from $7 to $4 (INV-START-CASH-01)]
     starting_secrets_by_player_count: Dict[int, int] = field(
         default_factory=lambda: {2: 8, 3: 8, 4: 12}
     )

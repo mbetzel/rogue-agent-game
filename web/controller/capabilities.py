@@ -108,13 +108,18 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     )
     can_cipher_buy = {}
     for color in [DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW, DieColor.PURPLE]:
-        base_cost = 4 if color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5
-        disc_cost = max(0, base_cost - 2)
-        has_stock = (
-            getattr(player, "personal_purple_reserve", 0) > 0
-            if color == DieColor.PURPLE
-            else controller.state.market.get(color, 0) > 0
-        )
+        if color == DieColor.PURPLE:
+            base_cost = player.get_purple_reserve_cost() if hasattr(player, "get_purple_reserve_cost") else (
+                getattr(player.white_hat, "reserve_cost", 4) if getattr(player, "white_hat", None) else 4
+            )
+            has_stock = getattr(player, "personal_purple_reserve", 0) > 0
+        else:
+            base_cost = controller.state.get_market_die_cost(color) if hasattr(controller.state, "get_market_die_cost") else (
+                4 if color in (DieColor.RED, DieColor.GREEN) else 5
+            )
+            has_stock = controller.state.market.get(color, 0) > 0
+
+        disc_cost = max(0, base_cost - controller.state.config.cipher_market_discount)
         can_cipher_buy[color.value] = bool(
             controller.phase == 3
             and is_active
@@ -219,13 +224,18 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     # Market purchase availability per color
     can_buy = {}
     for color in [DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW, DieColor.PURPLE]:
-        cost = 4 if color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5
-        has_stock = (
-            getattr(player, "personal_purple_reserve", 0) > 0
-            if color == DieColor.PURPLE
-            else controller.state.market.get(color, 0) > 0
-        )
-        can_buy[color.value] = (
+        if color == DieColor.PURPLE:
+            cost = player.get_purple_reserve_cost() if hasattr(player, "get_purple_reserve_cost") else (
+                getattr(player.white_hat, "reserve_cost", 4) if getattr(player, "white_hat", None) else 4
+            )
+            has_stock = getattr(player, "personal_purple_reserve", 0) > 0
+        else:
+            cost = controller.state.get_market_die_cost(color) if hasattr(controller.state, "get_market_die_cost") else (
+                4 if color in (DieColor.RED, DieColor.GREEN) else 5
+            )
+            has_stock = controller.state.market.get(color, 0) > 0
+
+        can_buy[color.value] = bool(
             controller.phase == 3
             and not can_confirm_income
             and is_active

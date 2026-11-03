@@ -152,6 +152,7 @@ export function renderMarket() {
         <div class="variant-card-slot-header">
           <span class="variant-star-icon">★</span>
           <span class="variant-header-title">${color.toUpperCase()} VARIANT CARD</span>
+          ${item.variant && item.variant.cost ? `<span class="variant-cost-badge" style="margin-left: auto; background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px; font-weight: bold; color: #4ade80;">$${item.variant.cost}</span>` : ''}
         </div>
         ${item.variant ? `
           <div class="variant-card-body">

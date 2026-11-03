@@ -3,8 +3,16 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
-- [x] **Rules Draft `v0.25.0`** captured in [RULES.md](./RULES.md)
+- [x] **Rules Draft `v0.26.0`** captured in [RULES.md](./RULES.md)
 - [x] **Multi-Agent SDLC Pipeline** defined in Section 2 below
+- [x] **Phase 33: Variable Module Dice Costs & Turn-1 Economic Calibration (`v0.26.0` Baseline)**
+  - [x] *Pre-SDLC Game Designer Modeling:* Diagnosed Turn-1 purchasing power bloat ($9.36 mean capital) enabling double-buys; modeled starting cash reduction to $4; established dynamic pricing tiers across Central Market Variant Cards ($5–$7: R1/R2 $6, R3 $5, B1 $6, B2 $7, B3 $5, G1 $6, G2/G3 $5, Y1 $7, Y2/Y3 $6) and White Hat Operative Personal Reserves ($4 for Acoustic/Phreaker, $5 for Operator/Prodigy/Spook, $6 for Cipher); verified strict elimination of Turn-1 double-buys (0.00%). Signed off by User.
+  - [x] *Technical Architecture Spec (`principal-engineer`):* Authored comprehensive specification `docs/specs/v260_variable_dice_costs_spec.md` detailing INV-START-CASH-01, INV-VAR-COST-01, INV-RES-COST-01, INV-PROMETHEUS-01, INV-DIE-COST-01 invariants, dynamic state lookup helpers, bot heuristic updates, web schemas, and 30-test verification matrix.
+  - [x] *Implementation (`senior-engineer`):* Implemented dynamic costs across `sim/config.py`, `sim/entities.py`, `sim/engine/` (`state.py`, `phase3_ops.py`), `sim/bots/`, `web/`, and verified dedicated unit suite `tests/test_v260_variable_dice_costs.py` (466/466 tests passing).
+  - [x] *Code Review Gate (`staff-engineer`):* Conducted independent line-by-line review, resolved SecOps Turtle hardcoded reserve cost defect, confirmed zero hardcoded cost constants, audited Prometheus dynamic discount integration, and verified 100% test pass via WSL — `APPROVED`.
+  - [x] *Scenario Execution & Telemetry Compilation (`product-owner`):* Authored `scripts/run_v260_telemetry_sweep.py` running a 3,000-match Monte Carlo sweep across 2P, 3P, and 4P pods ($9,000$ player-games); verified 0.00% Turn-1 double-buys, 8.16–8.82 round pacing, tight operational cash ($0.06–$0.20), and compiled telemetry report at `docs/findings/v260_telemetry_sweep_report.md`.
+  - [x] *Balance Assessment & Final Sign-Off (`game-designer`):* Verified mathematical parity, pacing invariance, reining in of The Cipher (32.5%), updated `RULES.md` and logged Section 21 in `FINDINGS.md` (`v0.26.0` Baseline).
+  - [x] *Print-and-Play & Asset Generation (`graphic-designer`):* Synchronize `pnp/generate_pnp.py` to render dynamic variant cost badges, White Hat dossier procurement costs, $4 starting cash, and regenerate all 5 PnP PDFs in `pnp/` and `pnp/output/`.
 - [x] **Phase 32: Modular Client Companies & White Hat Dossiers (`v0.25.0` Baseline)**
   - [x] *Pre-SDLC Game Designer Modeling:* Orthogonally decoupled monolithic Consultancy Archetypes into 6 Client Companies (Once-per-Version Institutional Overrides) and 6 White Hat Operatives (Personal Reserve Purple dice + Face 6 Signature Protocols), expanding setup combinations from 6 to 36 ($360$ setups in 4P) without rules bloat. Signed off by User.
   - [x] *Technical Architecture Spec (`principal-engineer`):* Authored comprehensive specification `docs/specs/v250_technical_architecture_spec.md` detailing INV-SETUP-01 through 03, INV-OVERRIDE-01, INV-PURPLE-01 invariants, Company & WhiteHat data models, decoupled bot heuristics, web schemas, and 29 unit tests.

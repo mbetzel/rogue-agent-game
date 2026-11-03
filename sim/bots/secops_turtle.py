@@ -223,10 +223,15 @@ class SecOpsTurtleBot(BaseBot):
         game_state: GameState,
         rng: random.Random,
     ) -> bool:
-        """SecOpsTurtleBot places high priority on Purple reserve ($4 for 2 wild blocks)."""
+        """SecOpsTurtleBot places high priority on Purple reserve using dynamic operative reserve cost."""
         if getattr(player_state, "personal_purple_reserve", 0) <= 0:
             return False
-        if player_state.money < 4:
+        reserve_cost = (
+            player_state.get_purple_reserve_cost()
+            if hasattr(player_state, "get_purple_reserve_cost")
+            else 4
+        )
+        if player_state.money < reserve_cost:
             return False
         return True
 
@@ -277,8 +282,9 @@ class SecOpsTurtleBot(BaseBot):
             and player_state.is_ability_available(active_ver)
         ):
             if not is_final_round:
-                for c in [DieColor.BLUE, DieColor.GREEN, DieColor.RED, DieColor.YELLOW, DieColor.PURPLE]:
-                    cost = (4 if c in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5) - game_state.config.cipher_market_discount
+                for c in [DieColor.BLUE, DieColor.GREEN, DieColor.RED, DieColor.YELLOW]:
+                    base_cost = game_state.get_market_die_cost(c)
+                    cost = max(0, base_cost - game_state.config.cipher_market_discount)
                     if game_state.market.get(c, 0) > 0 and current_money - cost >= cash_cushion:
                         plan.use_prometheus_override = True
                         plan.use_cipher_ability = True
@@ -286,6 +292,15 @@ class SecOpsTurtleBot(BaseBot):
                         plan.prometheus_discount_die_color = c
                         current_money -= cost
                         break
+                if not plan.use_cipher_ability and getattr(player_state, "personal_purple_reserve", 0) > 0:
+                    base_purple_cost = player_state.get_purple_reserve_cost()
+                    disc_purple_cost = max(0, base_purple_cost - game_state.config.cipher_market_discount)
+                    if current_money - disc_purple_cost >= cash_cushion:
+                        plan.use_prometheus_override = True
+                        plan.use_cipher_ability = True
+                        plan.prometheus_mode = "BUY_FREE_DIE"
+                        plan.prometheus_discount_die_color = DieColor.PURPLE
+                        current_money -= disc_purple_cost
             if not plan.use_cipher_ability:
                 plan.use_prometheus_override = True
                 plan.use_cipher_ability = True
@@ -309,19 +324,20 @@ class SecOpsTurtleBot(BaseBot):
             current_money -= 6
 
         if not is_final_round:
+            purple_cost = player_state.get_purple_reserve_cost()
             if (
                 len(plan.market_purchases) < game_state.config.max_market_purchases_per_turn
                 and self.choose_purple_reserve_purchase(player_state, game_state, rng)
-                and (current_money - 4 >= cash_cushion)
+                and (current_money - purple_cost >= cash_cushion)
             ):
                 plan.market_purchases.append(DieColor.PURPLE)
                 plan.buy_purple_reserve = True
-                current_money -= 4
+                current_money -= purple_cost
 
             for color in [DieColor.BLUE, DieColor.GREEN, DieColor.RED]:
                 if len(plan.market_purchases) >= game_state.config.max_market_purchases_per_turn:
                     break
-                cost = 4 if color in (DieColor.RED, DieColor.GREEN) else 5
+                cost = game_state.get_market_die_cost(color)
                 if game_state.market.get(color, 0) > 0 and (current_money - cost >= cash_cushion):
                     plan.market_purchases.append(color)
                     current_money -= cost

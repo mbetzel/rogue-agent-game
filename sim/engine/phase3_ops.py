@@ -197,7 +197,10 @@ def execute_phase_3(engine: GameEngine) -> None:
             and is_prometheus
         ):
             free_color = prom_color
-            normal_cost = 4 if free_color in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5
+            if free_color == DieColor.PURPLE:
+                normal_cost = player.get_purple_reserve_cost()
+            else:
+                normal_cost = engine.state.get_market_die_cost(free_color)
             discounted_cost = max(0, normal_cost - engine.state.config.cipher_market_discount)
             if free_color == DieColor.PURPLE:
                 if player.personal_purple_reserve > 0 and player.money >= discounted_cost:
@@ -206,6 +209,7 @@ def execute_phase_3(engine: GameEngine) -> None:
                     new_die = create_colored_die(
                         color=DieColor.PURPLE,
                         die_id=engine.state.next_die_id,
+                        reserve_cost=player.get_purple_reserve_cost(),
                     )
                     engine.state.next_die_id += 1
                     player.ready_for_release_dice.append(new_die)
@@ -308,7 +312,7 @@ def execute_phase_3(engine: GameEngine) -> None:
                 break
 
             if color == DieColor.PURPLE:
-                cost = 4
+                cost = player.get_purple_reserve_cost()
                 if player.personal_purple_reserve > 0 and player.money >= cost:
                     player.money -= cost
                     player.personal_purple_reserve -= 1
@@ -316,11 +320,12 @@ def execute_phase_3(engine: GameEngine) -> None:
                     new_die = create_colored_die(
                         color=DieColor.PURPLE,
                         die_id=engine.state.next_die_id,
+                        reserve_cost=cost,
                     )
                     engine.state.next_die_id += 1
                     player.ready_for_release_dice.append(new_die)
             else:
-                cost = 4 if color in (DieColor.RED, DieColor.GREEN) else 5
+                cost = engine.state.get_market_die_cost(color)
                 if engine.state.market.get(color, 0) > 0 and player.money >= cost:
                     player.money -= cost
                     engine.state.market[color] -= 1

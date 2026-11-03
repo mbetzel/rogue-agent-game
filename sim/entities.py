@@ -87,6 +87,7 @@ class WhiteHat:
     timing_window: str
     description: str
     flavor: str
+    reserve_cost: int = 5  # [v0.26.0 Baseline: Personal Reserve Purple die cost (INV-RES-COST-01)]
 
 
 @dataclass(frozen=True)
@@ -172,6 +173,7 @@ class VariantCard:
     die_color: DieColor
     description: str
     star_face: Face
+    cost: int = 5  # [v0.26.0 Baseline: Dynamic market cost per variant card (INV-VAR-COST-01)]
 
 
 @dataclass(frozen=True)
@@ -230,6 +232,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Ransom Insurance",
             die_color=DieColor.RED,
             description="Block 1 Red + gain +$2.",
+            cost=6,
             star_face=Face(
                 name="R1: Ransom Insurance",
                 block_amount=1,
@@ -244,6 +247,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Threat Bounty",
             die_color=DieColor.RED,
             description="Block 2 Red; if you take 0 unblocked Red damage this round, gain +$2.",
+            cost=6,
             star_face=Face(
                 name="R2: Threat Bounty",
                 block_amount=2,
@@ -258,6 +262,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Short Squeeze",
             die_color=DieColor.RED,
             description="Gain +$3 (or +$4 if 3+ Red cubes exit the tower this round).",
+            cost=5,
             star_face=Face(
                 name="R3: Short Squeeze",
                 block_amount=0,
@@ -272,6 +277,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Honeypot Telemetry",
             die_color=DieColor.BLUE,
             description="Block 2 Blue; if 1+ Blue cubes exit the tower and you take 0 Blue damage, gain +$3.",
+            cost=6,
             star_face=Face(
                 name="B1: Honeypot Telemetry",
                 block_amount=2,
@@ -286,6 +292,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Deep R&D Vault",
             die_color=DieColor.BLUE,
             description="Block 1 Blue, OR pay $4 during Phase 3 to gain +1 Corporate Secret.",
+            cost=7,
             star_face=Face(
                 name="B2: Deep R&D Vault",
                 block_amount=1,
@@ -299,6 +306,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Air-Gapped Backup",
             die_color=DieColor.BLUE,
             description="Block 1 Blue; when this die actively blocks, you may move 1 other Ready die of your choice to Unpatched instead of this die (if you have no other Ready dice, this die moves to Unpatched).",
+            cost=5,
             star_face=Face(
                 name="B3: Air-Gapped Backup",
                 block_amount=1,
@@ -313,6 +321,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Self-Healing Kernel",
             die_color=DieColor.GREEN,
             description="Block 2 Green + gain +1 🔧.",
+            cost=6,
             star_face=Face(
                 name="G1: Self-Healing Kernel",
                 block_amount=2,
@@ -327,6 +336,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Universal Sandbox",
             die_color=DieColor.GREEN,
             description="Block 1 Any + gain +1 🔧.",
+            cost=5,
             star_face=Face(
                 name="G2: Universal Sandbox",
                 block_amount=1,
@@ -341,6 +351,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Live Reboot",
             die_color=DieColor.GREEN,
             description="Gain +2 🔧 + +$1.",
+            cost=5,
             star_face=Face(
                 name="G3: Live Reboot",
                 block_amount=0,
@@ -356,6 +367,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Algorithmic Trading",
             die_color=DieColor.YELLOW,
             description="Gain +$4, OR pay $2 in Phase 3 to gain +1 Corporate Secret.",
+            cost=7,
             star_face=Face(
                 name="Y1: Algorithmic Trading",
                 block_amount=0,
@@ -369,6 +381,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Cloud Monopoly",
             die_color=DieColor.YELLOW,
             description="Gain +$2, plus +$1 per different colored module die owned (max +$5).",
+            cost=6,
             star_face=Face(
                 name="Y2: Cloud Monopoly",
                 block_amount=0,
@@ -382,6 +395,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Proprietary Training",
             die_color=DieColor.YELLOW,
             description="Gain +1 Corporate Secret, then move this die to Unpatched.",
+            cost=6,
             star_face=Face(
                 name="Y3: Proprietary Training",
                 block_amount=0,
@@ -396,6 +410,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Zero-Day Injection",
             die_color=DieColor.PURPLE,
             description="Gain +$2; in Phase 3 you may add 1 Attack Cube (Red/Blue/Green) to the Staging Cup.",
+            cost=5,
             star_face=Face(
                 name="P1: Zero-Day Injection",
                 block_amount=0,
@@ -409,6 +424,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Chaos Profiteer",
             die_color=DieColor.PURPLE,
             description="Gain +$1 now, plus +$2 per Black Cube that exits the tower in Phase 2.",
+            cost=5,
             star_face=Face(
                 name="P2: Chaos Profiteer",
                 block_amount=0,
@@ -422,6 +438,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Packet Deflection",
             die_color=DieColor.PURPLE,
             description="Block 2 of any single color; in Phase 3 you may pay $1 to add 1 cube of that color from the supply to the Staging Cup.",
+            cost=5,
             star_face=Face(
                 name="P3: Packet Deflection",
                 block_amount=2,
@@ -919,6 +936,7 @@ WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
         timing_window="Phase 1: Step 4 Rolling",
         description="When Purple ★ is rolled, immediately roll 1 free White Contractor die from the supply directly into your active pool. Eligible for remaining rerolls.",
         flavor="Redundant contractor pipelines ready on zero notice.",
+        reserve_cost=5,
     ),
     WhiteHatCode.PHREAKER: WhiteHat(
         code=WhiteHatCode.PHREAKER,
@@ -928,6 +946,7 @@ WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
         timing_window="Phase 3: Operations Turn",
         description="When Purple ★ is rolled, roll 1 offline die in your Under Development pipeline (Glitched or Scanned). Collect rolled cash/patches; die remains in place.",
         flavor="Raw voltage pulses extract signal from dormant silicon.",
+        reserve_cost=4,
     ),
     WhiteHatCode.ACOUSTIC: WhiteHat(
         code=WhiteHatCode.ACOUSTIC,
@@ -937,6 +956,7 @@ WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
         timing_window="Phase 3: Step 2 Income",
         description="When Purple ★ is rolled, gain +$1 cash per distinct cube color present in the Exit Tray this round (Red, Blue, Green, Black; max +$4).",
         flavor="Harmonic resonance frequencies decode physical chassis vibrations.",
+        reserve_cost=4,
     ),
     WhiteHatCode.SPOOK: WhiteHat(
         code=WhiteHatCode.SPOOK,
@@ -946,6 +966,7 @@ WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
         timing_window="Phase 3: Operations Turn",
         description="When Purple ★ is rolled, gain +$2 cash payout. Additionally, you may optionally burn 1 owned colored die back to supply to gain +1 Corporate Secret.",
         flavor="Scorched-earth protocols ensure zero forensic recovery.",
+        reserve_cost=5,
     ),
     WhiteHatCode.PRODIGY: WhiteHat(
         code=WhiteHatCode.PRODIGY,
@@ -955,6 +976,7 @@ WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
         timing_window="Phase 1: Step 4 Rolling",
         description="When Purple ★ is rolled, turn 1 other rolled die in your active pool to any legal non-Star face of that die's color.",
         flavor="Payload injection executes before memory boundaries establish.",
+        reserve_cost=5,
     ),
     WhiteHatCode.CIPHER: WhiteHat(
         code=WhiteHatCode.CIPHER,
@@ -964,6 +986,7 @@ WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
         timing_window="Phase 1: Step 5 & Phase 3: Step 2",
         description="Purple ★ acts as wildcard completing any pair to a 3-of-a-kind triplet (+1 Secret in Phase 1 Step 5). In Phase 3A Income, Purple ★ generates +$2 cash.",
         flavor="Parity calculations balance zero-knowledge proofs flawlessly.",
+        reserve_cost=6,
     ),
 }
 
@@ -1094,8 +1117,10 @@ def create_colored_die(
     color: DieColor,
     die_id: int,
     variant_card: Optional[VariantCard] = None,
+    reserve_cost: Optional[int] = None,
+    cost: Optional[int] = None,
 ) -> Die:
-    """Creates a colored die of the specified color per RULES.md (v0.12.0 Baseline)."""
+    """Creates a colored die of the specified color with dynamic cost (v0.26.0 Baseline)."""
     if color == DieColor.GRAY:
         return create_gray_die(die_id)
     if color == DieColor.WHITE:
@@ -1104,6 +1129,27 @@ def create_colored_die(
     star_face = variant_card.star_face if variant_card else Face(name=f"{color.value} ★", is_star=True)
     var_code = variant_card.code if variant_card else None
     glitch_face = Face(name="Glitch (Locked)", is_glitch=True)
+
+    # Derive dynamic cost with safe default fallbacks
+    if cost is not None:
+        die_cost = cost
+    elif color == DieColor.PURPLE:
+        die_cost = reserve_cost if reserve_cost is not None else (
+            variant_card.cost if variant_card is not None else 4
+        )
+    else:
+        if variant_card is not None:
+            die_cost = variant_card.cost
+        else:
+            # Fallback default costs if variant card is omitted:
+            # Red default R1: $6, Blue default B1: $6, Green default G1: $6, Yellow default Y1: $7
+            default_costs = {
+                DieColor.RED: 6,
+                DieColor.BLUE: 6,
+                DieColor.GREEN: 6,
+                DieColor.YELLOW: 7,
+            }
+            die_cost = default_costs.get(color, 4)
 
     if color == DieColor.RED:
         faces = [
@@ -1114,7 +1160,7 @@ def create_colored_die(
             glitch_face,
             star_face,
         ]
-        return Die(die_id=die_id, color=color, cost=4, vp=0, faces=faces, variant_code=var_code)
+        return Die(die_id=die_id, color=color, cost=die_cost, vp=0, faces=faces, variant_code=var_code)
 
     elif color == DieColor.BLUE:
         faces = [
@@ -1132,7 +1178,7 @@ def create_colored_die(
             glitch_face,
             star_face,
         ]
-        return Die(die_id=die_id, color=color, cost=5, vp=0, faces=faces, variant_code=var_code)
+        return Die(die_id=die_id, color=color, cost=die_cost, vp=0, faces=faces, variant_code=var_code)
 
     elif color == DieColor.GREEN:
         faces = [
@@ -1150,7 +1196,7 @@ def create_colored_die(
             glitch_face,
             star_face,
         ]
-        return Die(die_id=die_id, color=color, cost=4, vp=0, faces=faces, variant_code=var_code)
+        return Die(die_id=die_id, color=color, cost=die_cost, vp=0, faces=faces, variant_code=var_code)
 
     elif color == DieColor.YELLOW:
         faces = [
@@ -1161,7 +1207,7 @@ def create_colored_die(
             glitch_face,
             star_face,
         ]
-        return Die(die_id=die_id, color=color, cost=5, vp=0, faces=faces, variant_code=var_code)
+        return Die(die_id=die_id, color=color, cost=die_cost, vp=0, faces=faces, variant_code=var_code)
 
     elif color == DieColor.PURPLE:
         star_face = Face(
@@ -1177,6 +1223,6 @@ def create_colored_die(
             glitch_face,
             star_face,
         ]
-        return Die(die_id=die_id, color=color, cost=4, vp=0, faces=faces, variant_code="PURPLE_STAR")
+        return Die(die_id=die_id, color=color, cost=die_cost, vp=0, faces=faces, variant_code="PURPLE_STAR")
 
     raise ValueError(f"Unsupported die color: {color}")

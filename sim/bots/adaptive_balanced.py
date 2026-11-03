@@ -400,11 +400,20 @@ class AdaptiveBalancedBot(BaseBot):
             and player_state.is_ability_available(active_ver)
         ):
             discounted_colors = []
-            for c in preferred_colors + [DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW, DieColor.PURPLE]:
+            candidate_pool = preferred_colors + [DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]
+            for c in candidate_pool:
                 if c not in [dc[0] for dc in discounted_colors] and game_state.market.get(c, 0) > 0:
-                    cost = (4 if c in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5) - game_state.config.cipher_market_discount
+                    base_cost = game_state.get_market_die_cost(c)
+                    cost = max(0, base_cost - game_state.config.cipher_market_discount)
                     if current_money - cost >= cash_cushion:
                         discounted_colors.append((c, cost))
+
+            # Check Purple Reserve candidate for Prometheus discount
+            if getattr(player_state, "personal_purple_reserve", 0) > 0:
+                base_purple_cost = player_state.get_purple_reserve_cost()
+                disc_purple_cost = max(0, base_purple_cost - game_state.config.cipher_market_discount)
+                if current_money - disc_purple_cost >= cash_cushion:
+                    discounted_colors.append((DieColor.PURPLE, disc_purple_cost))
 
             if not is_final_round and discounted_colors and (current_money >= 3 or player_state.secrets <= 1):
                 plan.use_prometheus_override = True
@@ -475,14 +484,15 @@ class AdaptiveBalancedBot(BaseBot):
         # 4. Market Purchases: buy counter dice matching high threats (never in final round to preserve cash for Tiebreaker #1)
         if not is_final_round:
             purchases = 0
+            purple_cost = player_state.get_purple_reserve_cost()
             if (
                 purchases < game_state.config.max_market_purchases_per_turn
                 and self.choose_purple_reserve_purchase(player_state, game_state, rng)
-                and (current_money - 4 >= cash_cushion)
+                and (current_money - purple_cost >= cash_cushion)
             ):
                 plan.market_purchases.append(DieColor.PURPLE)
                 plan.buy_purple_reserve = True
-                current_money -= 4
+                current_money -= purple_cost
                 purchases += 1
 
             preferred_colors = [DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]
@@ -492,7 +502,7 @@ class AdaptiveBalancedBot(BaseBot):
             for color in preferred_colors:
                 if purchases >= game_state.config.max_market_purchases_per_turn:
                     break
-                cost = 4 if color in (DieColor.RED, DieColor.GREEN) else 5
+                cost = game_state.get_market_die_cost(color)
                 if game_state.market.get(color, 0) > 0 and (current_money - cost >= cash_cushion):
                     plan.market_purchases.append(color)
                     current_money -= cost

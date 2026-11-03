@@ -681,15 +681,15 @@ export function renderPlayerMats() {
           <div class="reserve-card-main" style="display: flex; gap: 8px; justify-content: center; padding: 4px 0;">
             <div class="patch-token-slot ${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 2) >= 1 ? 'filled' : 'empty'}" style="border-color: #a855f7;">
               <span class="slot-number-lbl">DIE 1</span>
-              <span class="slot-wrench-icon" style="color: #c084fc;">${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 2) >= 1 ? '▼ $4' : '✓'}</span>
+              <span class="slot-wrench-icon" style="color: #c084fc;">${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 2) >= 1 ? `▼ $${p.purple_reserve_cost !== undefined ? p.purple_reserve_cost : 4}` : '✓'}</span>
             </div>
             <div class="patch-token-slot ${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 2) >= 2 ? 'filled' : 'empty'}" style="border-color: #a855f7;">
               <span class="slot-number-lbl">DIE 2</span>
-              <span class="slot-wrench-icon" style="color: #c084fc;">${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 2) >= 2 ? '▼ $4' : '✓'}</span>
+              <span class="slot-wrench-icon" style="color: #c084fc;">${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 2) >= 2 ? `▼ $${p.purple_reserve_cost !== undefined ? p.purple_reserve_cost : 4}` : '✓'}</span>
             </div>
           </div>
           <div class="reserve-card-footer">
-            ${p.can_buy_purple_reserve ? '<strong style="color: #c084fc;">CLICK TO PROCURE ($4)</strong>' : 'Private Reserve | Dual-Shield & Face 6 Protocol'}
+            ${p.can_buy_purple_reserve ? `<strong style="color: #c084fc;">CLICK TO PROCURE ($${p.purple_reserve_cost !== undefined ? p.purple_reserve_cost : 4})</strong>` : 'Private Reserve | Dual-Shield & Face 6 Protocol'}
           </div>
         </div>
       </div>

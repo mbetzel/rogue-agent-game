@@ -560,7 +560,7 @@ class TestV250ModularSetup(unittest.TestCase):
         )
         p0 = engine.state.players[0]
         self.assertEqual(p0.company.code, CompanyCode.PROMETHEUS)
-        p0.money = 3  # Normal colored die costs $4 or $5; with $2 discount, cost is $2
+        p0.money = 5  # Red R1 costs $6; with $2 discount, cost is $4
         engine.state.market[DieColor.RED] = 5
 
         class PrometheusBot(BaseBot):
@@ -575,7 +575,7 @@ class TestV250ModularSetup(unittest.TestCase):
         execute_phase_3(engine)
 
         self.assertEqual(p0.ability_v1_status, AbilityStatus.USED)
-        self.assertEqual(p0.money, 1, "Purchasing Red ($4) with $2 discount costs $2 (3 - 2 = 1)")
+        self.assertEqual(p0.money, 1, "Purchasing Red ($6) with $2 discount costs $4 (5 - 4 = 1)")
         self.assertTrue(any(d.color == DieColor.RED for d in p0.ready_for_release_dice))
 
     def test_mod_24_phase3_acoustic_protocol(self) -> None:

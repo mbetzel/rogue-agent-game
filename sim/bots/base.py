@@ -574,13 +574,14 @@ class BaseBot:
         game_state: GameState,
         rng: random.Random,
     ) -> bool:
-        """Determines whether to purchase a Purple die from Personal Reserve for $4."""
+        """Determines whether to purchase a Purple die from Personal Reserve using dynamic operative cost."""
         if getattr(player_state, "personal_purple_reserve", 0) <= 0:
             return False
-        if player_state.money < 4:
+        reserve_cost = player_state.get_purple_reserve_cost() if hasattr(player_state, "get_purple_reserve_cost") else 4
+        if player_state.money < reserve_cost:
             return False
         # Baseline heuristic: Buy if cash reserves allow and ready dice pool is small
-        return len(player_state.ready_for_release_dice) < 5 or player_state.money >= 8
+        return len(player_state.ready_for_release_dice) < 5 or player_state.money >= (reserve_cost * 2)
 
     def choose_spook_burn_notice(
         self,

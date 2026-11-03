@@ -97,6 +97,7 @@ class GameStateSerializer:
             "die_color": card.die_color.value,
             "description": card.description,
             "star_face": GameStateSerializer.serialize_face(card.star_face),
+            "cost": card.cost,  # Added in v0.26.0 (INV-VAR-COST-01)
         }
 
     @staticmethod
@@ -155,6 +156,7 @@ class GameStateSerializer:
             "timing_window": white_hat.timing_window,
             "description": white_hat.description,
             "flavor": white_hat.flavor,
+            "reserve_cost": getattr(white_hat, "reserve_cost", 4),  # Added in v0.26.0 (INV-RES-COST-01)
         }
 
     @staticmethod
@@ -241,6 +243,10 @@ class GameStateSerializer:
         else:
             next_contractor_cost = None
 
+        purple_reserve_cost = player.get_purple_reserve_cost() if hasattr(player, "get_purple_reserve_cost") else (
+            getattr(player.white_hat, "reserve_cost", 4) if getattr(player, "white_hat", None) else 4
+        )
+
         return {
             "player_id": player.player_id,
             "name": name,
@@ -310,11 +316,12 @@ class GameStateSerializer:
             "rerolls_remaining": rerolls_remaining,
             "max_rerolls": max_rerolls,
             "unlocked_dice_indices": [i for i, d in enumerate(active_rolled_dice) if not getattr(d, "is_locked", False)],
-            # Personal Reserve (v0.24.0)
+            # Personal Reserve (v0.24.0 / v0.26.0)
             "personal_purple_reserve": getattr(player, "personal_purple_reserve", 2),
+            "purple_reserve_cost": purple_reserve_cost,
             "can_buy_purple_reserve": (
                 getattr(player, "personal_purple_reserve", 2) > 0
-                and player.money >= 4
+                and player.money >= purple_reserve_cost
                 and purchases_this_turn < getattr(config, "max_market_purchases_per_turn", 2)
             ),
             # Phase 3 interaction state
@@ -340,7 +347,7 @@ class GameStateSerializer:
         market_serialized = {
             color.value: {
                 "stock": state.market.get(color, 0),
-                "cost": 4 if color in (DieColor.RED, DieColor.GREEN) else 5,
+                "cost": state.get_market_die_cost(color) if hasattr(state, "get_market_die_cost") else (4 if color in (DieColor.RED, DieColor.GREEN) else 5),
                 "vp": 0,
                 "variant": cls.serialize_variant_card(state.variant_cards[color])
                 if color in state.variant_cards

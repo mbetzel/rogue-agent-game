@@ -230,15 +230,26 @@ class AccelerationistBot(BaseBot):
                 plan.use_cipher_ability = True
                 plan.prometheus_mode = "DIRTY_INCOME"
             elif not is_final_round:
-                for c in [DieColor.PURPLE, DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]:
-                    cost = (4 if c in (DieColor.RED, DieColor.GREEN, DieColor.PURPLE) else 5) - game_state.config.cipher_market_discount
-                    if game_state.market.get(c, 0) > 0 and current_money >= cost:
-                        plan.use_prometheus_override = True
-                        plan.use_cipher_ability = True
-                        plan.prometheus_mode = "BUY_FREE_DIE"
-                        plan.prometheus_discount_die_color = c
-                        current_money -= cost
-                        break
+                candidates = []
+                if getattr(player_state, "personal_purple_reserve", 0) > 0:
+                    base_purple_cost = player_state.get_purple_reserve_cost()
+                    disc_purple_cost = max(0, base_purple_cost - game_state.config.cipher_market_discount)
+                    if current_money >= disc_purple_cost:
+                        candidates.append((DieColor.PURPLE, disc_purple_cost))
+
+                for c in [DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]:
+                    if game_state.market.get(c, 0) > 0:
+                        base_cost = game_state.get_market_die_cost(c)
+                        cost = max(0, base_cost - game_state.config.cipher_market_discount)
+                        if current_money >= cost:
+                            candidates.append((c, cost))
+
+                if candidates:
+                    plan.use_prometheus_override = True
+                    plan.use_cipher_ability = True
+                    plan.prometheus_mode = "BUY_FREE_DIE"
+                    plan.prometheus_discount_die_color = candidates[0][0]
+                    current_money -= candidates[0][1]
             if not plan.use_cipher_ability:
                 plan.use_prometheus_override = True
                 plan.use_cipher_ability = True
@@ -283,9 +294,17 @@ class AccelerationistBot(BaseBot):
             for color in [DieColor.PURPLE, DieColor.BLUE]:
                 if purchases >= game_state.config.max_market_purchases_per_turn:
                     break
-                cost = 4 if color == DieColor.PURPLE else 5
-                if game_state.market.get(color, 0) > 0 and (current_money - cost >= cash_cushion):
+                if color == DieColor.PURPLE:
+                    cost = player_state.get_purple_reserve_cost()
+                    has_stock = getattr(player_state, "personal_purple_reserve", 0) > 0
+                else:
+                    cost = game_state.get_market_die_cost(color)
+                    has_stock = game_state.market.get(color, 0) > 0
+
+                if has_stock and (current_money - cost >= cash_cushion):
                     plan.market_purchases.append(color)
+                    if color == DieColor.PURPLE:
+                        plan.buy_purple_reserve = True
                     current_money -= cost
                     purchases += 1
 

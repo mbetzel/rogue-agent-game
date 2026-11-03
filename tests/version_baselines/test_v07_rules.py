@@ -126,7 +126,7 @@ class TestV07Rules(unittest.TestCase):
         """Yellow die face 2 is +$2 and VP is 0 in v0.19.0."""
         yellow_die = create_colored_die(DieColor.YELLOW, 201)
         self.assertEqual(yellow_die.vp, 0)
-        self.assertEqual(yellow_die.cost, 5)
+        self.assertEqual(yellow_die.cost, 7)
         self.assertEqual(len(yellow_die.faces), 6)
 
         # Faces: [+$3, +$2, +$2, +$1 & +1 🔧, star, star]

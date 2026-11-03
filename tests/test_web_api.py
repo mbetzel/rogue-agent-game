@@ -417,7 +417,7 @@ class TestWebAPI(unittest.TestCase):
         state = res["state"]
 
         p0_state = state["players"][0]
-        self.assertEqual(p0_state["money"], 5)  # $10 - $5
+        self.assertEqual(p0_state["money"], 4)  # $10 - $6 (B1)
         self.assertEqual(state["market"]["blue"]["stock"], initial_stock - 1)
         self.assertEqual(p0_state["purchases_this_turn"], 1)
 

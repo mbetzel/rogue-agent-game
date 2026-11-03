@@ -72,7 +72,8 @@ class TestV240Rules(unittest.TestCase):
         p0.bot = BuyPurpleBot(0)
         execute_phase_3(engine)
 
-        self.assertEqual(p0.money, 3, "Procuring Purple die must cost exactly $4 (7 - 4 = 3)")
+        # Operator reserve cost is calibrated to $5 (7 - 5 = 2)
+        self.assertEqual(p0.money, 2, "Procuring Purple die must cost operative reserve cost (7 - 5 = 2)")
         self.assertEqual(p0.personal_purple_reserve, 1, "Reserve must decrement from 2 to 1")
         self.assertEqual(len(p0.ready_for_release_dice), initial_ready_count + 1)
         purple_dice = [d for d in p0.ready_for_release_dice if d.color == DieColor.PURPLE]
@@ -487,12 +488,13 @@ class TestV240Rules(unittest.TestCase):
         p0.personal_purple_reserve = 2
 
         state = gc.buy_die(player_id=0, color_str="purple")
-        self.assertEqual(p0.money, 2)
+        # Operator reserve cost is $5 (6 - 5 = 1)
+        self.assertEqual(p0.money, 1)
         self.assertEqual(p0.personal_purple_reserve, 1)
         self.assertTrue(any(d.color == DieColor.PURPLE for d in p0.ready_for_release_dice))
 
     def test_cipher_discount_applies_to_personal_purple_reserve(self) -> None:
-        """Cipher Algorithmic Arbitrage discount applies to Personal Reserve purchase ($4 - $2 = $2)."""
+        """Cipher Algorithmic Arbitrage discount applies to Personal Reserve purchase ($6 - $2 = $4)."""
         gc = GameController()
         gc.new_game(num_players=2, seed=42)
         gc.phase = 3
@@ -504,7 +506,8 @@ class TestV240Rules(unittest.TestCase):
         p0.personal_purple_reserve = 2
 
         state = gc.buy_die(player_id=0, color_str="purple", use_cipher_ability=True)
-        self.assertEqual(p0.money, 2, "Purple die should cost $2 after $2 Cipher discount (4 - 2 = 2)")
+        # Cipher operative reserve cost is $6, discounted by $2 to $4 (4 - 4 = 0)
+        self.assertEqual(p0.money, 0, "Purple die under Cipher ($6) should cost $4 after $2 Cipher discount (4 - 4 = 0)")
         self.assertEqual(p0.personal_purple_reserve, 1)
 
     def test_reserve_dice_immune_to_corruption_track_market_returns(self) -> None:

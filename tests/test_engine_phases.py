@@ -159,8 +159,8 @@ class TestEnginePhases(unittest.TestCase):
 
         engine._execute_phase_3()
 
-        # Money: 10 + 3 (dirty) - 5 (market) = 8
-        self.assertEqual(p0.money, 8)
+        # Money: 10 + 3 (dirty) - 6 (market B1) = 7
+        self.assertEqual(p0.money, 7)
         self.assertEqual(p0.total_dirty_income_taken, 1)
         self.assertEqual(engine.state.staging_cup[CubeColor.BLACK], initial_staging_black + 1)
         self.assertEqual(engine.state.staging_cup[CubeColor.RED], initial_staging_red)

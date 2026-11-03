@@ -436,6 +436,12 @@ class PlayerState:
         else:
             raise ValueError(f"Unknown version string: {version_str}")
 
+    def get_purple_reserve_cost(self) -> int:
+        """Returns the dynamic procurement cost for this player's Personal Purple Reserve."""
+        if self.white_hat is not None:
+            return getattr(self.white_hat, "reserve_cost", 4)
+        return 4
+
     @property
     def v1_used(self) -> bool:
         return self.ability_v1_status == AbilityStatus.USED
@@ -546,5 +552,18 @@ class GameState:
         if self.config.corruption_track_flat_capacity is not None:
             return self.config.corruption_track_flat_capacity
         return self.active_version.track_capacity
+
+    def get_market_die_cost(self, color: DieColor) -> int:
+        """Returns the dynamic cost of a Central Market die based on the active variant card."""
+        if color in self.variant_cards:
+            return self.variant_cards[color].cost
+        # Fallback default costs if variant cards not registered:
+        default_costs = {
+            DieColor.RED: 6,
+            DieColor.BLUE: 6,
+            DieColor.GREEN: 6,
+            DieColor.YELLOW: 7,
+        }
+        return default_costs.get(color, 4)
 
 

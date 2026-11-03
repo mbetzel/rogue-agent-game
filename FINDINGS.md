@@ -1065,3 +1065,67 @@ Comprehensive multi-pod telemetry was collected via `scripts/run_v250_telemetry_
 
 **Status: OFFICIALLY APPROVED (`v0.25.0` Baseline).**
 
+---
+
+## 21. Phase 33: Variable Module Dice Costs & Turn-1 Economic Calibration (`v0.26.0`)
+
+Based on Product Owner telemetry sweep (`scripts/run_v260_telemetry_sweep.py`, $N=3,000$ matches across 2P, 3P, and 4P pods; $9,000$ player-games, Base Seed `42` via WSL):
+
+### A. Problem Statement & Motivation
+In physical and simulation playtesting of `v0.25.0`, players and bot agents experienced capital bloat during early rounds. Starting with `$7` cash plus an expected Gray income of $\sim \$2.36$ gave players $\sim \$9.36$ on Turn 1. With static die prices ($4 for Red/Green, $5 for Blue/Yellow, $4 for Purple Reserve), players routinely purchased **two colored dice on Round 1** (a Turn-1 double-buy rate over 40%), leading to early economic runaway, trivialized Red ransomware, and diminished early-game survival tension.
+
+### B. Approved Solutions (v0.26.0 Baseline)
+1. **Starting Cash Recalibration:** Default starting cash reduced from **`$7` to `$4`** (`INV-START-CASH-01`).
+2. **Dynamic Variant Die Pricing:** Central Market die costs derive dynamically from active face-up `VariantCard.cost` (`INV-VAR-COST-01`):
+   - **Red:** `R1` ($6), `R2` ($6), `R3` ($5)
+   - **Blue:** `B1` ($6), `B2` ($7), `B3` ($5)
+   - **Green:** `G1` ($6), `G2` ($5), `G3` ($5)
+   - **Yellow:** `Y1` ($7), `Y2` ($6), `Y3` ($6)
+3. **Dynamic White Hat Reserve Procurement Pricing (Option B):** Personal Reserve Purple dice procurement decoupled by operative dossier (`INV-RES-COST-01`):
+   - **The Acoustic:** `$4`
+   - **The Phreaker:** `$4`
+   - **The Operator:** `$5`
+   - **The Prodigy:** `$5`
+   - **The Spook:** `$5`
+   - **The Cipher:** `$6`
+4. **Dynamic Prometheus Discount:** Prometheus *Algorithmic Arbitrage* computes $\max(0, \text{cost} - 2)$ dynamically against target variant or operative reserve cost.
+
+### C. Multi-Pod Telemetry Summary (3,000 Matches Total)
+
+| Metric | 2-Player Pod (2P) | 3-Player Pod (3P) | 4-Player Pod (4P) | Target Benchmark |
+| :--- | :---: | :---: | :---: | :---: |
+| **Average Match Duration** | **8.35 rds** | **8.16 rds** | **8.82 rds** | 8.0–9.0 rounds |
+| **Duration Range (Min / Max)** | 4 / 11 rds | 4 / 11 rds | 5 / 11 rds | Min $\ge 3$, Max $\le 15$ |
+| **Turn 1 Double-Buys (2 dice)** | **0.00%** | **0.00%** | **0.00%** | **Strict 0.00%** |
+| **Turn 1 Purchases (0 / 1 / 2)** | 97.4% / 2.6% / 0% | 96.9% / 3.1% / 0% | 96.0% / 4.0% / 0% | Organic single acquisition |
+| **Patient Zero Rate (%)** | **99.6%** | **99.9%** | **98.5%** | Primary win/loss driver |
+| **Singularity Rate (%)** | **11.6%** | **7.8%** | **24.8%** | 10%–30% existential threat |
+| **Total Wipeout Rate (%)** | **34.2%\*** | **19.2%** | **16.8%** | Controlled survival pressure |
+| **v3.0 Reach Rate (%)** | **85.4%** | **81.2%** | **93.9%** | $> 80.0\%$ climax exposure |
+| **Ending Secrets (Mean / Med)** | -0.1 / -1.0 | 0.8 / 0.0 | 0.6 / 0.0 | 1.0–2.5 secrets |
+| **Ending Money (Mean / Med)** | **$0.06 / $0.0** | **$0.20 / $0.0** | **$0.10 / $0.0** | $< \$1.00$ (Tight Liquidity) |
+
+*\*Note: In 2P pods, any simultaneous Patient Zero elimination triggers a total wipeout tiebreaker.*
+
+### D. Key Empirical Takeaways & Balance Rationale
+
+1. **Turn-1 Double-Buy Eradication:**
+   - Turn-1 double purchases dropped from $>40\%$ to strictly **0.00% across all 9,000 player-games**.
+   - Players acquire at most 1 module on Turn 1 (3.23% rate), pacing engine development organically from 4 dice $\to$ 5 dice $\to$ 6 dice.
+2. **Operational Capital Tightness Restored:**
+   - Average ending capital dropped to **$0.06–$0.20**, eliminating stranded cash bloat.
+   - Red Ransomware ($1/unblocked cube) now exerts immediate survival tension, creating genuine risk of corporate secret leaks when unshielded.
+3. **Cipher Reined In & Parity Stabilized:**
+   - Raising The Cipher's Personal Reserve cost to `$6` trimmed Cipher's 4P win rate to **32.5%** (down from 39.5%), bringing it much closer to the target 20%–30% corridor.
+   - Discounting The Phreaker and The Acoustic to `$4` reserve cost increased adoption (Phreaker: 8.6% adoption; Acoustic: 5.1% adoption) and improved viability.
+4. **Pacing Invariance Preserved:**
+   - Average match duration remained solidly stable at **8.16–8.82 rounds**, proving that tighter starting money and variable dice costs do not cause game stalling.
+
+---
+
+### E. Formal Design Sign-Off
+- **Baseline Adoption:** Formally approve and adopt `$4` starting cash, variable Central Market variant pricing ($5–$7), and operative-specific Purple Personal Reserve pricing ($4–$6) as the official baseline for **`v0.26.0`**.
+- **Parity Synchronized:** Fully synchronized across `RULES.md`, `PLAN.md`, `sim/entities.py`, `sim/engine/`, `sim/bots/`, `web/`, and `tests/test_v260_variable_dice_costs.py`.
+
+**Status: OFFICIALLY APPROVED (`v0.26.0` Baseline).**
+

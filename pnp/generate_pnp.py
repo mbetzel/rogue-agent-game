@@ -1,4 +1,4 @@
-"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.25.0 Baseline).
+"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.26.0 Baseline).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
   - 01_Player_Boards.pdf (6 pages — 4x Consultancy Terminal Mats with empty modular card docks + 6x Client Company Cards sheet + 6x White Hat Dossier Cards sheet)
@@ -19,7 +19,7 @@ from pnp.pdf_engine import PALETTE, Color, PDFDocument, PDFPage, measure_text
 
 
 # =============================================================================
-# Canonical Game Data (Synchronized 1:1 with RULES.md v0.25.0 & sim/entities.py)
+# Canonical Game Data (Synchronized 1:1 with RULES.md v0.26.0 & sim/entities.py)
 # =============================================================================
 
 @dataclass(frozen=True)
@@ -116,6 +116,7 @@ class WhiteHatDossierSpec:
     code: str
     name: str
     role: str
+    reserve_cost_str: str
     flavor: str
     purple_faces: Tuple[str, str, str, str, str, str]
     protocol_name: str
@@ -128,6 +129,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         code="OPERATOR",
         name="The Operator",
         role="Tactical Staffing & Logistics Lead",
+        reserve_cost_str="$5",
         flavor='"Redundant contractor pipelines ready on zero notice."',
         purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {WRENCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
         protocol_name="Contingent Staffing",
@@ -141,6 +143,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         code="PHREAKER",
         name="The Phreaker",
         role="Hardware Intrusion Specialist",
+        reserve_cost_str="$4",
         flavor='"Raw voltage pulses extract signal from dormant silicon."',
         purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {WRENCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
         protocol_name="Jumper Diagnostics",
@@ -155,6 +158,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         code="ACOUSTIC",
         name="The Acoustic",
         role="Side-Channel Cryptanalyst",
+        reserve_cost_str="$4",
         flavor='"Harmonic resonance frequencies decode physical chassis vibrations."',
         purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {WRENCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
         protocol_name="Resonance Sensor",
@@ -168,6 +172,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         code="SPOOK",
         name="The Spook",
         role="Covert Intelligence Specialist",
+        reserve_cost_str="$5",
         flavor='"Scorched-earth protocols ensure zero forensic recovery."',
         purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {WRENCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
         protocol_name="Burn Notice",
@@ -182,6 +187,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         code="PRODIGY",
         name="The Prodigy",
         role="Autonomous Exploit Hacker",
+        reserve_cost_str="$5",
         flavor='"Payload injection executes before memory boundaries establish."',
         purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {WRENCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
         protocol_name="Arbitrary Code Execution",
@@ -195,6 +201,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         code="CIPHER",
         name="The Cipher",
         role="Distributed Ledger Architect",
+        reserve_cost_str="$6",
         flavor='"Parity calculations balance zero-knowledge proofs flawlessly."',
         purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {WRENCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
         protocol_name="Algorithmic Parity",
@@ -239,7 +246,7 @@ DICE_SPECS: List[DieSpec] = [
         color_key="red",
         title="RED",
         subtitle="FinSec",
-        cost_str="$4",
+        cost_str="$5–$6 (by Variant)",
         faces=("Block 1 {RED}", "+$2", "+$2", "+$2", "{LOCK} Glitch", "{RED} {STAR}"),
         notes="FinSec revenue & defense. Face 5 Glitch (Locked), Face 6 Red {STAR}.",
     ),
@@ -247,7 +254,7 @@ DICE_SPECS: List[DieSpec] = [
         color_key="blue",
         title="BLUE",
         subtitle="Firewall",
-        cost_str="$5",
+        cost_str="$5–$7 (by Variant)",
         faces=("Block 1 {BLUE}", "+1 {WRENCH}", "+$1", "Block 1 {BLUE} / +1 {WRENCH}", "{LOCK} Glitch", "{BLUE} {STAR}"),
         notes="Spyware defense & patch hybrid. Face 5 Glitch (Locked), Face 6 Blue {STAR}.",
     ),
@@ -255,7 +262,7 @@ DICE_SPECS: List[DieSpec] = [
         color_key="green",
         title="GREEN",
         subtitle="Antivirus",
-        cost_str="$4",
+        cost_str="$5–$6 (by Variant)",
         faces=("Block 1 {GREEN}", "+1 {WRENCH}", "+2 {WRENCH}", "+1 {WRENCH} / +$1", "{LOCK} Glitch", "{GREEN} {STAR}"),
         notes="Malware defense & patch engine. Face 5 Glitch (Locked), Face 6 Green {STAR}.",
     ),
@@ -263,7 +270,7 @@ DICE_SPECS: List[DieSpec] = [
         color_key="yellow",
         title="YELLOW",
         subtitle="Commercial AI",
-        cost_str="$5",
+        cost_str="$6–$7 (by Variant)",
         faces=("+$3", "+$2", "+$2", "+$1 & +1 {WRENCH}", "{LOCK} Glitch", "{YELLOW} {STAR}"),
         notes="Commercial AI revenue. Face 5 Glitch (Locked), Face 6 Yellow {STAR}.",
     ),
@@ -271,7 +278,7 @@ DICE_SPECS: List[DieSpec] = [
         color_key="purple",
         title="PURPLE",
         subtitle="Specialist AI",
-        cost_str="$4 (Reserve)",
+        cost_str="$4–$6 (by Operative)",
         faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {WRENCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
         notes="Standardized Any-shields & utility + Archetype Signature Protocol. Face 5 Glitch (Locked), Face 6 Purple {STAR}.",
     ),
@@ -295,21 +302,21 @@ class VariantCardSpec:
 VARIANT_CARDS: List[VariantCardSpec] = [
     # RED (R1-R3)
     VariantCardSpec(
-        "R1", "red", "RED // FINSEC", "$4",
+        "R1", "red", "RED // FINSEC", "$6",
         "{PIP1} 1{RED}  |  {PIP2}{PIP3}{PIP4} +$2", "{PIP5} {LOCK}Glitch  |  {PIP6} {STAR}",
         "Ransom Insurance", "P1 BOOT + P2 DEFENSE",
         "**Block 1 {RED} Red** in Phase 2 **AND** gain **+$2** in Phase 1 Boot.",
         "Locks in v2.0 RaaS & v3.0 Zero-Day.",
     ),
     VariantCardSpec(
-        "R2", "red", "RED // FINSEC", "$4",
+        "R2", "red", "RED // FINSEC", "$6",
         "{PIP1} 1{RED}  |  {PIP2}{PIP3}{PIP4} +$2", "{PIP5} {LOCK}Glitch  |  {PIP6} {STAR}",
         "Threat Bounty", "P2 DEFENSE + BONUS",
         "**Block 2 {RED} Red**; if you take **0 unblocked Red** damage this round, gain **+$2**.",
         "Locks in v3.0 Zero-Day (Shield).",
     ),
     VariantCardSpec(
-        "R3", "red", "RED // FINSEC", "$4",
+        "R3", "red", "RED // FINSEC", "$5",
         "{PIP1} 1{RED}  |  {PIP2}{PIP3}{PIP4} +$2", "{PIP5} {LOCK}Glitch  |  {PIP6} {STAR}",
         "Short Squeeze", "P1 BOOT + P2 SURGE",
         "Gain **+$3** in Phase 1 (or **+$4** total if **3+ {RED} Red** cubes exit the tower in Phase 2).",
@@ -317,14 +324,14 @@ VARIANT_CARDS: List[VariantCardSpec] = [
     ),
     # BLUE (B1-B3)
     VariantCardSpec(
-        "B1", "blue", "BLUE // FIREWALL", "$5",
+        "B1", "blue", "BLUE // FIREWALL", "$6",
         "{PIP1} 1{BLUE} | {PIP2} +1{WRENCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{WRENCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Honeypot Telemetry", "P2 DEFENSE + BONUS",
         "**Block 2 {BLUE} Blue**; if **1+ {BLUE} Blue** cubes exit and you take **0 Blue** damage, gain **+$3**.",
         "Locks in v3.0 Zero-Day (Shield).",
     ),
     VariantCardSpec(
-        "B2", "blue", "BLUE // FIREWALL", "$5",
+        "B2", "blue", "BLUE // FIREWALL", "$7",
         "{PIP1} 1{BLUE} | {PIP2} +1{WRENCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{WRENCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Deep R&D Vault", "P2 DEF -OR- P3 OPS",
         "**Block 1 {BLUE} Blue**, **OR** leave unassigned to pay **$4** in Phase 3 for **+1 Secret**.",
@@ -339,21 +346,21 @@ VARIANT_CARDS: List[VariantCardSpec] = [
     ),
     # GREEN (G1-G3)
     VariantCardSpec(
-        "G1", "green", "GREEN // ANTIVIRUS", "$4",
+        "G1", "green", "GREEN // ANTIVIRUS", "$6",
         "{PIP1} 1{GREEN} | {PIP2} +1{WRENCH} | {PIP3} +2{WRENCH}", "{PIP4} 1{WRENCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Self-Healing Kernel", "P1 BOOT + P2 DEFENSE",
         "**Block 2 {GREEN} Green** in Phase 2 **AND** gain **+1 {WRENCH}** in Phase 1 Boot.",
         "Locks in v3.0 Zero-Day (Shield).",
     ),
     VariantCardSpec(
-        "G2", "green", "GREEN // ANTIVIRUS", "$4",
+        "G2", "green", "GREEN // ANTIVIRUS", "$5",
         "{PIP1} 1{GREEN} | {PIP2} +1{WRENCH} | {PIP3} +2{WRENCH}", "{PIP4} 1{WRENCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Universal Sandbox", "P1 BOOT + P2 DEFENSE",
         "**Block 1 Any** color in Phase 2 **AND** gain **+1 {WRENCH}** in Phase 1 Boot.",
         "Commit color in Step 5. Locks in v3.0.",
     ),
     VariantCardSpec(
-        "G3", "green", "GREEN // ANTIVIRUS", "$4",
+        "G3", "green", "GREEN // ANTIVIRUS", "$5",
         "{PIP1} 1{GREEN} | {PIP2} +1{WRENCH} | {PIP3} +2{WRENCH}", "{PIP4} 1{WRENCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Live Reboot", "P1 BOOT OUTPUT",
         "Gain **+2 {WRENCH}** and **+$1** immediately in Phase 1 Step 6.",
@@ -361,21 +368,21 @@ VARIANT_CARDS: List[VariantCardSpec] = [
     ),
     # YELLOW (Y1-Y3)
     VariantCardSpec(
-        "Y1", "yellow", "YELLOW // COMM. AI", "$5",
+        "Y1", "yellow", "YELLOW // COMM. AI", "$7",
         "{PIP1} +$3   {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH} | {PIP5} {LOCK}Glitch",
         "Algorithmic Trading", "P1 INCOME + P3 OPTION",
         "Gain **+$4** in Phase 3; in Phase 3 you may also pay **$2** to gain **+1 Corporate Secret**.",
         "Locks in v2.0 RaaS (Cash).",
     ),
     VariantCardSpec(
-        "Y2", "yellow", "YELLOW // COMM. AI", "$5",
+        "Y2", "yellow", "YELLOW // COMM. AI", "$6",
         "{PIP1} +$3   {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH} | {PIP5} {LOCK}Glitch",
         "Cloud Monopoly", "P1 SCALING REVENUE",
         "Gain **+$2**, plus **+$1 per different colored** module die you own (**max +$5** total).",
         "Counts R/B/G/Y owned. Locks in v2.0 RaaS.",
     ),
     VariantCardSpec(
-        "Y3", "yellow", "YELLOW // COMM. AI", "$5",
+        "Y3", "yellow", "YELLOW // COMM. AI", "$6",
         "{PIP1} +$3   {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH} | {PIP5} {LOCK}Glitch",
         "Proprietary Training", "P1 SECRET + GLITCH",
         "Gain **+1 Corporate Secret** in Phase 1 Step 5, then immediately move **this die to Under Development (Glitched)**.",
@@ -595,7 +602,12 @@ def _draw_white_hat_card(page: PDFPage, x: float, y: float, w: float, h: float, 
     page.draw_color_badge(x + 9.0, y + 10.0, 5.0, "purple")
     dock_tag = " [MODULAR DOCK]" if is_dock else ""
     page.text(x + 19.0, y + 12.0, f"WHITE HAT DOSSIER{dock_tag}", font="bold", size=6.2, color=PALETTE["purple"])
-    page.text(x + w - 6.0, y + 12.0, f"REF: WH-{white_hat.code}", font="mono_bold", size=5.6, color=PALETTE["purple"], align="right")
+    # Prominent Procurement Cost Pill in Header
+    cost_pill_w = 46.0
+    cost_pill_x = x + w - 46.0 - 52.0
+    page.rounded_rect(cost_pill_x, y + 3.0, cost_pill_w, 12.0, r=2.0, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.6)
+    page.rich_line(cost_pill_x + cost_pill_w / 2.0, y + 11.2, f"**DICE: {white_hat.reserve_cost_str}**", size=5.4, color=PALETTE["purple"], align="center")
+    page.text(x + w - 6.0, y + 12.0, f"REF: WH-{white_hat.code}", font="mono_bold", size=5.2, color=PALETTE["purple"], align="right")
 
     # 2. Operative Name & Tactical Role (y+20..y+40)
     page.text(x + w / 2.0, y + 29.5, white_hat.name.upper(), font="bold", size=10.5, color=PALETTE["ink"], align="center")
@@ -604,7 +616,7 @@ def _draw_white_hat_card(page: PDFPage, x: float, y: float, w: float, h: float, 
     # 3. Purple Die Face Reference Breakdown Strip (y+42..y+69, h=27)
     f_y, f_h = y + 42.0, 27.0
     page.rect(x + 6.0, f_y, w - 12.0, f_h, stroke=PALETTE["purple"], fill=PALETTE["paper_tint"], line_width=0.6)
-    page.text(x + 9.0, f_y + 8.5, "PURPLE SPECIALIST DIE FACES (d6 // $4 Reserve):", font="mono_bold", size=4.8, color=PALETTE["purple"])
+    page.text(x + 9.0, f_y + 8.5, f"PURPLE SPECIALIST DIE FACES (d6 // Procure: {white_hat.reserve_cost_str} in Reserve):", font="mono_bold", size=4.8, color=PALETTE["purple"])
 
     cell_y = f_y + 11.5
     cell_h = 12.5
@@ -656,7 +668,7 @@ def _draw_white_hat_card(page: PDFPage, x: float, y: float, w: float, h: float, 
 
     # Bottom Tag
     page.text(x + 8.0, y + 208.0, "SLIPS FLUSH BESIDE TERMINAL MAT", font="mono", size=4.5, color=PALETTE["muted"])
-    page.text(x + w - 8.0, y + 208.0, "2x PURPLE SPECIALIST DICE IN RESERVE", font="mono", size=4.5, color=PALETTE["purple"], align="right")
+    page.text(x + w - 8.0, y + 208.0, f"2x PURPLE SPECIALIST DICE ({white_hat.reserve_cost_str} EA IN RESERVE)", font="mono", size=4.5, color=PALETTE["purple"], align="right")
 
 
 def _draw_empty_company_card_slot(page: PDFPage, x: float, y: float, w: float, h: float, idx: int = 1) -> None:
@@ -758,7 +770,7 @@ def _draw_empty_white_hat_slot(page: PDFPage, x: float, y: float, w: float, h: f
 
     wh_rules_text = (
         "**1. Operative Assignment:** Draw 1 White Hat Dossier at setup and slot flush into this dock.\n"
-        "**2. Personal Reserve:** Holds your **2 Purple Specialist Dice** ($4 each in Phase 3A Operations).\n"
+        "**2. Personal Reserve:** Holds your **2 Purple Specialist Dice** ($4–$6 (per Dossier) in Phase 3A Operations).\n"
         "**3. Face 6 Signature Protocol ({STAR}):** Rolling Purple Face 6 triggers your operative's repeatable protocol.\n"
         "**4. Repeatable:** Each rolled Purple Star ({STAR}) triggers the protocol once."
     )
@@ -776,7 +788,7 @@ def _draw_empty_white_hat_slot(page: PDFPage, x: float, y: float, w: float, h: f
 
     # Purple Specialist Dice Faces Strip
     f_y = y + 152.0
-    page.text(x + 10.0, f_y + 10.0, "PURPLE SPECIALIST FACES (d6 // $4):", font="mono_bold", size=5.3, color=PALETTE["purple"])
+    page.text(x + 10.0, f_y + 10.0, "PURPLE SPECIALIST FACES (d6 // $4–$6 Reserve):", font="mono_bold", size=5.3, color=PALETTE["purple"])
     cell_w = (w - 20.0 - 4 * 2.5) / 5.0
     labels = ["1-2: Any Shld", "3: +$2 Cash", "4: +$1 & 1 {WRENCH}", "5: {LOCK} Glitch", "6: {STAR} Proto"]
     for c_i, lbl in enumerate(labels):
@@ -788,7 +800,7 @@ def _draw_empty_white_hat_slot(page: PDFPage, x: float, y: float, w: float, h: f
     # Bottom Tag
     page.line(x + 8.0, y + 193.0, x + w - 8.0, y + 193.0, stroke=PALETTE["purple_light"], width=0.5)
     page.text(x + 8.0, y + 204.0, "SLIPS FLUSH BESIDE MAT", font="mono", size=4.6, color=PALETTE["muted"])
-    page.text(x + w - 8.0, y + 204.0, "2x PURPLE SPECIALIST DICE IN RESERVE", font="mono", size=4.6, color=PALETTE["purple"], align="right")
+    page.text(x + w - 8.0, y + 204.0, "2x PURPLE SPECIALIST DICE ($4–$6 IN RESERVE)", font="mono", size=4.6, color=PALETTE["purple"], align="right")
 
 
 def render_player_board(
@@ -800,7 +812,7 @@ def render_player_board(
     draw_board_outer_frame(
         page,
         left_tag=f"TOO MANY SECRETS // CONSULTANCY TERMINAL [TERM-0{idx}/4]",
-        right_tag="PNP PROTOTYPE v0.25.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.26.0 // US LETTER",
     )
 
     # -------------------------------------------------------------------------
@@ -887,7 +899,7 @@ def render_player_board(
 
     page.rich_line(
         x_res + w_res / 2.0, r1_y + 63.5,
-        "**$4 Each** in Phase 3A -> Ready",
+        "**$4–$6 (per Dossier)** in P3A",
         size=5.8, color=PALETTE["purple"], align="center",
     )
     page.text(
@@ -1081,7 +1093,7 @@ def render_player_board(
     page.rect(mx, by, bw, 20.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
     page.text(mx + 8, by + 13.8, "MONEY ($)", font="bold", size=9.5, color=PALETTE["ink"])
     page.text(mx + bw / 2.0, by + 66.0, "$", font="bold", size=28.0, color=PALETTE["guide"], align="center")
-    page.text(mx + bw / 2.0, by + bh - 7.0, "Start: $7 (+$1 Data Scraper)  |  Never drops below $0", font="regular", size=6.7, color=PALETTE["muted"], align="center")
+    page.text(mx + bw / 2.0, by + bh - 7.0, "Start: $4 (+$1 Data Scraper)  |  Never drops below $0", font="regular", size=6.7, color=PALETTE["muted"], align="center")
 
     # 2. Patches (with 3 dedicated token slots enforcing Cleanup Cap: Max 3 🔧)
     px = mx + bw + bgap
@@ -1118,7 +1130,7 @@ def render_company_cards_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x CLIENT COMPANY CARDS [PAGE 5/6]",
-        right_tag="PNP PROTOTYPE v0.25.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.26.0 // US LETTER",
     )
 
     page.text(
@@ -1167,7 +1179,7 @@ def render_white_hat_dossiers_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x WHITE HAT DOSSIER CARDS [PAGE 6/6]",
-        right_tag="PNP PROTOTYPE v0.25.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.26.0 // US LETTER",
     )
 
     page.text(
@@ -1204,7 +1216,7 @@ def render_white_hat_dossiers_page(page: PDFPage) -> None:
 
     wh_rules_text = (
         "**1. Operative Assignment:** At setup, each player is dealt 1 White Hat Dossier card (or introductory preset). Place card flush into the Terminal Mat bottom dock.\n"
-        "**2. Personal Reserve (2 Purple Dice):** Each player holds **2 Purple Specialist Dice** in their private dock on the Terminal Mat. Procured for **$4 each** in Phase 3A Operations (counts to 2-dice buy limit).\n"
+        "**2. Personal Reserve (2 Purple Dice):** Each player holds **2 Purple Specialist Dice** in their private dock on the Terminal Mat. Procured for **$4–$6 each (per Dossier)** in Phase 3A Operations (counts to 2-dice buy limit).\n"
         "**3. Standardized Faces 1-5:** All Purple Specialist dice feature: **Faces 1-2:** `Block 1 Any`, **Face 3:** `+$2`, **Face 4:** `+$1 & +1 🔧`, **Face 5:** `Glitch (Locked)`.\n"
         "**4. Face 6 Signature Protocol:** Rolling Face 6 ({PURPLE} {STAR}) triggers the operative's bespoke Signature Protocol. Repeatable: each rolled Star triggers the protocol once."
     )
@@ -1219,7 +1231,7 @@ def render_agent_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // CENTRAL ROGUE AGENT & COMPILER BOARD [1/2]",
-        right_tag="PNP PROTOTYPE v0.25.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.26.0 // US LETTER",
     )
 
     # Top Title Bar inside board
@@ -1533,10 +1545,10 @@ def render_market_board(page: PDFPage) -> None:
     mw = (712.0 - 3 * mgap) / 4.0  # 166.0 pt wide each!
 
     market_colors = [
-        ("red", "RED // FINSEC", "$4", "{PIP1} 1{RED} | {PIP2}-{PIP4} +$2", "{PIP5} {LOCK}Glitch | {PIP6} {STAR}", ""),
-        ("blue", "BLUE // FIREWALL", "$5", "{PIP1} 1{BLUE} | {PIP2} +1{WRENCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{WRENCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}", ""),
-        ("green", "GREEN // ANTIVIRUS", "$4", "{PIP1} 1{GREEN} | {PIP2} +1{WRENCH} | {PIP3} +2{WRENCH}", "{PIP4} 1{WRENCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}", ""),
-        ("yellow", "YELLOW // COMM. AI", "$5", "{PIP1} +$3 | {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH} | {PIP5} {LOCK}Glitch", ""),
+        ("red", "RED // FINSEC", "$5–$6", "{PIP1} 1{RED} | {PIP2}-{PIP4} +$2", "{PIP5} {LOCK}Glitch | {PIP6} {STAR}", ""),
+        ("blue", "BLUE // FIREWALL", "$5–$7", "{PIP1} 1{BLUE} | {PIP2} +1{WRENCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{WRENCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}", ""),
+        ("green", "GREEN // ANTIVIRUS", "$5–$6", "{PIP1} 1{GREEN} | {PIP2} +1{WRENCH} | {PIP3} +2{WRENCH}", "{PIP4} 1{WRENCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}", ""),
+        ("yellow", "YELLOW // COMM. AI", "$6–$7", "{PIP1} +$3 | {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH} | {PIP5} {LOCK}Glitch", ""),
     ]
 
     for idx, (ckey, mtitle, mcost, f_row1, f_row2, passive_warn) in enumerate(market_colors):
@@ -1586,10 +1598,10 @@ def render_market_board(page: PDFPage) -> None:
     page.text(48.0, fy + 11.8, "SETUP QUICK-REFERENCE & COMPILER PRIMING", font="bold", size=7.8, color=PALETTE["ink"])
     page.rich_paragraph(
         48.0, fy + 26.5, fw - 16.0,
-        "- **2P:** $7 | **8 Secrets** | **2** {WRENCH} | **4 Dice/col** | *Track: 4 spaces*\n"
-        "- **3P:** $7 | **8 Secrets** | **2** {WRENCH} | **6 Dice/col** | *Track: 5 spaces*\n"
-        "- **4P:** $7 | **12 Secrets** | **2** {WRENCH} | **8 Dice/col** | *Track: 6 spaces*\n"
-        "- **Setup:** 4 Market Stacks (R/B/G/Y). 2 Purple Specialist dice per player placed in Personal Reserves ($4 procurement; not in central market).",
+        "- **2P:** $4 | **8 Secrets** | **2** {WRENCH} | **4 Dice/col** | *Track: 4 spaces*\n"
+        "- **3P:** $4 | **8 Secrets** | **2** {WRENCH} | **6 Dice/col** | *Track: 5 spaces*\n"
+        "- **4P:** $4 | **12 Secrets** | **2** {WRENCH} | **8 Dice/col** | *Track: 6 spaces*\n"
+        "- **Setup:** 4 Market Stacks (R/B/G/Y). 2 Purple Specialist dice per player placed in Personal Reserves ($4–$6 (per Dossier); not in central market).",
         size=6.2, leading=8.7, color=PALETTE["ink"],
     )
 
@@ -1661,7 +1673,13 @@ def render_master_dice_reference(page: PDFPage) -> None:
         # Cost cell
         mx = tx + col_die
         page.line(mx, ry, mx, ry + row_h, stroke=PALETTE["rule"], width=0.7)
-        page.text(mx + col_meta / 2.0, ry + 32.0, dspec.cost_str, font="bold", size=8.5, color=PALETTE["ink"], align="center")
+        if " (" in dspec.cost_str:
+            main_cost, paren = dspec.cost_str.split(" (", 1)
+            paren = "(" + paren
+            page.text(mx + col_meta / 2.0, ry + 25.0, main_cost, font="bold", size=8.5, color=PALETTE["ink"], align="center")
+            page.text(mx + col_meta / 2.0, ry + 38.0, paren, font="mono", size=5.4, color=PALETTE["ink_soft"], align="center")
+        else:
+            page.text(mx + col_meta / 2.0, ry + 32.0, dspec.cost_str, font="bold", size=8.5, color=PALETTE["ink"], align="center")
 
         # 6 Face cells
         for f_idx, f_mk in enumerate(dspec.faces):
@@ -1717,7 +1735,7 @@ def render_master_dice_reference(page: PDFPage) -> None:
         (
             "PERSONAL RESERVE & ZERO WEAR PIPELINE",
             (
-                "- **Personal Reserve:** Each player holds **2 Purple Specialist dice** ($4 in Phase 3A).\n"
+                "- **Personal Reserve:** Each player holds **2 Purple Specialist dice** ($4–$6 (per Dossier) in Phase 3A).\n"
                 "- **Zero Dice Wear:** Shields **never wear down** when blocking in Phase 2.\n"
                 "- **Glitched Box:** Unresolved Glitch faces or Green Malware move to Under Development.\n"
                 "- **Triage Conveyor:** Fast-Patch (**1** {WRENCH}) moves Glitched -> Scanned immediately."
@@ -1749,11 +1767,11 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
     compact_rows = [
         ("gray", "GRAY", "Starter", ("1 Any", "1 Any", "+$1", "+$1", "$1 / 1{WRENCH}", "+1{WRENCH}")),
         ("white", "WHITE", "$1-$3", ("1 Any", "1 Any", "1 Any", "+$1", "{LOCK}Glitch", "{LOCK}Glitch")),
-        ("red", "RED", "Cost: $4", ("1 {RED}", "+$2", "+$2", "+$2", "{LOCK}Glitch", "{RED} {STAR}")),
-        ("blue", "BLUE", "Cost: $5", ("1 {BLUE}", "+1{WRENCH}", "+$1", "1{BLUE}/1{WRENCH}", "{LOCK}Glitch", "{BLUE} {STAR}")),
-        ("green", "GREEN", "Cost: $4", ("1 {GREEN}", "+1{WRENCH}", "+2{WRENCH}", "1{WRENCH}/$1", "{LOCK}Glitch", "{GREEN} {STAR}")),
-        ("yellow", "YELLOW", "Cost: $5", ("+$3", "+$2", "+$2", "$1 & 1{WRENCH}", "{LOCK}Glitch", "{YELLOW} {STAR}")),
-        ("purple", "PURPLE", "Reserve $4", ("1 Any", "1 Any", "+$2", "$1 & 1{WRENCH}", "{LOCK}Glitch", "{PURPLE}★ Protocol")),
+        ("red", "RED", "$5–$6", ("1 {RED}", "+$2", "+$2", "+$2", "{LOCK}Glitch", "{RED} {STAR}")),
+        ("blue", "BLUE", "$5–$7", ("1 {BLUE}", "+1{WRENCH}", "+$1", "1{BLUE}/1{WRENCH}", "{LOCK}Glitch", "{BLUE} {STAR}")),
+        ("green", "GREEN", "$5–$6", ("1 {GREEN}", "+1{WRENCH}", "+2{WRENCH}", "1{WRENCH}/$1", "{LOCK}Glitch", "{GREEN} {STAR}")),
+        ("yellow", "YELLOW", "$6–$7", ("+$3", "+$2", "+$2", "$1 & 1{WRENCH}", "{LOCK}Glitch", "{YELLOW} {STAR}")),
+        ("purple", "PURPLE", "Res $4–$6", ("1 Any", "1 Any", "+$2", "$1 & 1{WRENCH}", "{LOCK}Glitch", "{PURPLE}★ Protocol")),
     ]
 
     for r in range(2):
@@ -1803,7 +1821,7 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
                 x + 6.0, fy + 6.0, cw - 12.0,
                 "**P1 Roll & Deploy:** +1{BLACK} -> Hire {WHITE} ($1/$2/$3, max 3) -> Roll Ready + Contractors -> Up to 2 Pure Rerolls (Glitches lock immediately; no P1 patch unlocks) -> Unresolved Glitches -> Glitched Box -> Commit Shields & Income -> Hash Match (3-of-a-kind = +1 Secret).\n"
                 "**P2 SETEC Compile:** Drop Staging Cup -> 2A: {BLACK} advances track (4/5/6=Upgr/Singularity) -> 2B: Resolve vs Shields (Zero Wear!) -> Dmg: {RED} -$1 (Unpaid: -1 Secret) | {BLUE} -1 Secret | {GREEN} Glitch 1 die (Income 1st, then Shield; empty: destroy Under Dev) -> Recycle {RED}{BLUE}{GREEN} -> 2C: End Check (Singularity or <=0 Secrets).\n"
-                "**P3 Operations & Pipeline:** Collect Income ($/🔧/★) -> Buy <=2 dice (Market R/B/G/Y or $4 Personal Reserve Purple) -> Fast-Patch (1{WRENCH}: Glitched -> Scanned) -> Scanned -> Ready -> In Production -> Ready -> Glitched -> Scanned -> Cap held 🔧 at 3 -> Pass 1st Player.\n"
+                "**P3 Operations & Pipeline:** Collect Income ($/🔧/★) -> Buy <=2 dice (Market R/B/G/Y or $4–$6 (per Dossier) Personal Reserve Purple) -> Fast-Patch (1{WRENCH}: Glitched -> Scanned) -> Scanned -> Ready -> In Production -> Ready -> Glitched -> Scanned -> Cap held 🔧 at 3 -> Pass 1st Player.\n"
                 "**VICTORY:** Most Corporate Secrets among survivors. Patient Zero (<=0 Secrets) eliminated. Ties: 1. $ Capital  2. Ready Modules  3. Patches  4. Fewest Under Dev.",
                 size=5.4, leading=7.7, color=PALETTE["ink"],
             )
@@ -1863,7 +1881,7 @@ def _draw_color_divider_card(page: PDFPage, x: float, y: float, w: float, h: flo
     page.rounded_rect(x, y, w, h, r=4.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=1.0)
     page.rect(x, y, w, 22.0, stroke=PALETTE["ink"], fill=fg, line_width=0.8)
     page.text(x + w / 2.0, y + 14.5, f"{dspec.title} // ALL VARIANTS", font="bold", size=7.2, color=PALETTE["white"], align="center")
-    page.text(x + w / 2.0, y + 33.0, f"Cost: {dspec.cost_str}  |  Market Summary", font="regular", size=6.2, color=PALETTE["ink_soft"], align="center")
+    page.text(x + w / 2.0, y + 33.0, f"Market Cost: {dspec.cost_str}", font="bold", size=5.8, color=PALETTE["ink_soft"], align="center")
 
     cy = y + 46.0
     for v in variants:
@@ -2113,7 +2131,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated: List[str] = []
 
     # 1. Player Terminal Mats & Split Cards (6 pages: 4x Mats with empty modular docks + 1x Company Cards + 1x White Hat Cards)
-    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.25.0)")
+    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.26.0)")
     for idx in range(1, 5):
         p = doc_players.add_page()
         render_player_board(p, idx)
@@ -2154,7 +2172,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated.append(path_versions)
 
     # 5. Combined Master Print-and-Play Pack (All 14 pages)
-    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.25.0)")
+    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.26.0)")
     for sub_doc in (doc_central, doc_players, doc_dice, doc_versions):
         for pg in sub_doc.pages:
             doc_master.pages.append(pg)
