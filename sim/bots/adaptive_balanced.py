@@ -508,6 +508,33 @@ class AdaptiveBalancedBot(BaseBot):
                     current_money -= cost
                     purchases += 1
 
+        # 5. Hardware Track Upgrades & Patent Filings (v0.28.0)
+        res_available = player_state.research_tokens
+        def_cost = player_state.get_track_upgrade_cost("DEFENSE")
+        if (
+            player_state.defense_level < 1
+            and def_cost is not None
+            and res_available >= def_cost
+            and (total_threat >= 4 or game_state.current_round >= 2)
+        ):
+            plan.track_upgrades.append("DEFENSE")
+            res_available -= def_cost
+
+        pipe_cost = player_state.get_track_upgrade_cost("PIPELINE")
+        if (
+            player_state.pipeline_level < 1
+            and pipe_cost is not None
+            and res_available >= pipe_cost
+            and len(player_state.glitched_dice) >= 2
+        ):
+            plan.track_upgrades.append("PIPELINE")
+            res_available -= pipe_cost
+
+        # Patent filings with remaining research
+        patent_cost = player_state.get_patent_cost()
+        if res_available >= patent_cost:
+            plan.patent_filings = res_available // patent_cost
+
         return plan
 
 

@@ -95,7 +95,18 @@ class PlayerState:
     bot: BaseBot
     money: int
     secrets: int
-    patches: int
+    research_tokens: int = 0
+
+    # --- CI/CD Pipeline & Hardware Bottlenecks (v0.28.0 Canonical) ---
+    defense_capacity: int = 2
+    triage_bandwidth: int = 2
+    release_bandwidth: int = 2
+    pipeline_level: int = 0
+    defense_level: int = 0
+    patent_level: int = 0
+    has_emergency_hotfix: bool = False
+    has_passive_firewall: bool = False
+    upgrade_discount: int = 0
 
     # --- CI/CD Pipeline Zones (v0.22.0 Canonical) ---
     ready_for_release_dice: List[Die] = field(default_factory=list)
@@ -170,13 +181,23 @@ class PlayerState:
         ability_v3_status: AbilityStatus = AbilityStatus.LOCKED,
         ready_dice: Optional[List[Die]] = None,
         unpatched_dice: Optional[List[Die]] = None,
+        research_tokens: Optional[int] = None,
+        defense_capacity: Optional[int] = None,
+        triage_bandwidth: Optional[int] = None,
+        release_bandwidth: Optional[int] = None,
+        pipeline_level: Optional[int] = None,
+        defense_level: Optional[int] = None,
+        patent_level: Optional[int] = None,
+        has_emergency_hotfix: bool = False,
+        has_passive_firewall: bool = False,
+        upgrade_discount: Optional[int] = None,
         **kwargs: Any,
     ) -> None:
         self.player_id = player_id
         self.bot = bot
         self.money = money
         self.secrets = secrets
-        self.patches = patches
+        self.research_tokens = patches if research_tokens is None else research_tokens
 
         if ready_for_release_dice is not None:
             self.ready_for_release_dice = list(ready_for_release_dice)
@@ -231,12 +252,122 @@ class PlayerState:
             self.company = None
             self.white_hat = None
 
+        if self.company is not None:
+            self.defense_capacity = getattr(self.company, "starting_defense_capacity", 2) if defense_capacity is None else defense_capacity
+            self.triage_bandwidth = getattr(self.company, "starting_triage_bandwidth", 2) if triage_bandwidth is None else triage_bandwidth
+            self.release_bandwidth = getattr(self.company, "starting_release_bandwidth", 2) if release_bandwidth is None else release_bandwidth
+            self.pipeline_level = getattr(self.company, "starting_pipeline_level", 0) if pipeline_level is None else pipeline_level
+            self.defense_level = getattr(self.company, "starting_defense_level", 0) if defense_level is None else defense_level
+            self.patent_level = getattr(self.company, "starting_patent_level", 0) if patent_level is None else patent_level
+            self.upgrade_discount = getattr(self.company, "upgrade_discount", 0) if upgrade_discount is None else upgrade_discount
+        else:
+            self.defense_capacity = 2 if defense_capacity is None else defense_capacity
+            self.triage_bandwidth = 2 if triage_bandwidth is None else triage_bandwidth
+            self.release_bandwidth = 2 if release_bandwidth is None else release_bandwidth
+            self.pipeline_level = 0 if pipeline_level is None else pipeline_level
+            self.defense_level = 0 if defense_level is None else defense_level
+            self.patent_level = 0 if patent_level is None else patent_level
+            self.upgrade_discount = 0 if upgrade_discount is None else upgrade_discount
+
+        self.has_emergency_hotfix = has_emergency_hotfix or (self.pipeline_level >= 2)
+        self.has_passive_firewall = has_passive_firewall or (self.defense_level >= 2)
+
         self.ability_v1_status = ability_v1_status
         self.ability_v2_status = ability_v2_status
         self.ability_v3_status = ability_v3_status
         self.personal_purple_reserve = personal_purple_reserve
         self.purple_star_available = purple_star_available
         self.purple_star_count = purple_star_count
+
+    # --- Backward Compatibility Properties & Hardware Methods ---
+    @property
+    def patches(self) -> int:
+        """Backward compatibility bridge forwarding patches to research_tokens."""
+        return self.research_tokens
+
+    @patches.setter
+    def patches(self, value: int) -> None:
+        self.research_tokens = value
+
+    def get_track_upgrade_cost(self, track: str) -> Optional[int]:
+        """Calculates research cost to upgrade the specified terminal mat track (INV-UPGRADE-TRACK-01)."""
+        t = track.upper().strip()
+        if t == "PIPELINE":
+            if self.pipeline_level == 0:
+                base_cost = 2
+            elif self.pipeline_level == 1:
+                base_cost = 3
+            else:
+                return None
+        elif t == "DEFENSE":
+            if self.defense_level == 0:
+                base_cost = 2
+            elif self.defense_level == 1:
+                base_cost = 3
+            else:
+                return None
+        elif t == "PATENT":
+            if self.patent_level == 0:
+                base_cost = 2
+            elif self.patent_level == 1:
+                base_cost = 3
+            else:
+                return None
+        else:
+            return None
+        return max(1, base_cost - self.upgrade_discount)
+
+    def upgrade_track(self, track: str) -> bool:
+        """Upgrades the specified terminal track, expanding hardware capabilities (INV-UPGRADE-TRACK-01)."""
+        t = track.upper().strip()
+        cost = self.get_track_upgrade_cost(t)
+        if cost is None or self.research_tokens < cost:
+            return False
+        self.research_tokens -= cost
+        if t == "PIPELINE":
+            if self.pipeline_level == 0:
+                self.pipeline_level = 1
+                self.triage_bandwidth = max(self.triage_bandwidth, 3)
+                self.release_bandwidth = max(self.release_bandwidth, 3)
+            elif self.pipeline_level == 1:
+                self.pipeline_level = 2
+                self.triage_bandwidth = max(self.triage_bandwidth, 4)
+                self.release_bandwidth = max(self.release_bandwidth, 4)
+                self.has_emergency_hotfix = True
+        elif t == "DEFENSE":
+            if self.defense_level == 0:
+                self.defense_level = 1
+                self.defense_capacity = max(self.defense_capacity, 3)
+            elif self.defense_level == 1:
+                self.defense_level = 2
+                self.defense_capacity = max(self.defense_capacity, 4)
+                self.has_passive_firewall = True
+        elif t == "PATENT":
+            if self.patent_level == 0:
+                self.patent_level = 1
+            elif self.patent_level == 1:
+                self.patent_level = 2
+        return True
+
+    def get_patent_cost(self) -> int:
+        """Returns research token cost to file a Cryptographic Patent for +1 Corporate Secret."""
+        if self.patent_level == 0:
+            return 4
+        elif self.patent_level == 1:
+            return 3
+        else:
+            return 2
+
+    def file_patent(self) -> bool:
+        """Files a Cryptographic Patent: spends research tokens to gain +1 Corporate Secret (INV-PATENT-CONV-01)."""
+        cost = self.get_patent_cost()
+        if self.research_tokens < cost:
+            return False
+        self.research_tokens -= cost
+        self.secrets += 1
+        if self.patent_level >= 2:
+            self.money += 1
+        return True
 
     # --- Backward Compatibility Properties ---
     @property

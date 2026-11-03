@@ -461,7 +461,7 @@ def execute_bot_phase3(controller: GameController, player: PlayerState, meta: Di
         if purchases >= controller.state.config.max_market_purchases_per_turn:
             break
         if color == DieColor.PURPLE:
-            cost = 4
+            cost = player.get_purple_reserve_cost() if hasattr(player, "get_purple_reserve_cost") else 4
             if player.personal_purple_reserve > 0 and player.money >= cost:
                 player.money -= cost
                 player.personal_purple_reserve -= 1
@@ -470,12 +470,15 @@ def execute_bot_phase3(controller: GameController, player: PlayerState, meta: Di
                 new_die = create_colored_die(
                     color=DieColor.PURPLE,
                     die_id=controller.state.next_die_id,
+                    reserve_cost=cost,
                 )
                 controller.state.next_die_id += 1
                 player.ready_dice.append(new_die)
                 controller.event_log.append(f"{meta['name']} (Bot) procured Purple Die from Personal Reserve.")
         else:
-            cost = 4 if color in (DieColor.RED, DieColor.GREEN) else 5
+            cost = controller.state.get_market_die_cost(color) if hasattr(controller.state, "get_market_die_cost") else (
+                4 if color in (DieColor.RED, DieColor.GREEN) else 5
+            )
             if controller.state.market.get(color, 0) > 0 and player.money >= cost:
                 player.money -= cost
                 controller.state.market[color] -= 1
@@ -489,6 +492,25 @@ def execute_bot_phase3(controller: GameController, player: PlayerState, meta: Di
                 controller.state.next_die_id += 1
                 player.ready_dice.append(new_die)
                 controller.event_log.append(f"{meta['name']} (Bot) bought {color.value.capitalize()} Die.")
+
+    # 5. Terminal Mat Track Upgrades (INV-UPGRADE-TRACK-01)
+    upgrades = getattr(plan, "track_upgrades", [])
+    for track in upgrades:
+        cost = player.get_track_upgrade_cost(track)
+        if cost is not None and player.research_tokens >= cost:
+            player.upgrade_track(track)
+            controller.event_log.append(f"{meta['name']} (Bot) upgraded {str(track).capitalize()} track.")
+
+    # 6. Cryptographic Patent Filings (INV-PATENT-CONV-01)
+    patent_filings = getattr(plan, "patent_filings", 0)
+    while patent_filings > 0:
+        cost = player.get_patent_cost()
+        if player.research_tokens >= cost:
+            player.file_patent()
+            controller.event_log.append(f"{meta['name']} (Bot) filed Cryptographic Patent (+1 Secret).")
+            patent_filings -= 1
+        else:
+            break
 
 
 
@@ -1099,4 +1121,77 @@ def end_turn(controller: GameController, player_id: int) -> Dict[str, Any]:
     # Advance to next turn (or complete round)
     advance_phase3_turns(controller)
     return controller.get_full_state()
+
+
+def upgrade_hardware_track(
+    controller: GameController,
+    player_id: int,
+    track_type: str,
+) -> Dict[str, Any]:
+    """Human action: Upgrades the specified terminal mat hardware track (INV-UPGRADE-TRACK-01)."""
+    if controller.subphase == "confirm_income":
+        confirm_income(controller, player_id)
+
+    if controller.phase != 3:
+        raise ValueError(f"Cannot upgrade hardware tracks in phase {controller.phase}")
+    if player_id != controller.active_player_index:
+        raise ValueError(f"Not player {player_id}'s turn (current: {controller.active_player_index})")
+
+    player = controller.state.players[player_id]
+    meta = controller.player_meta[player_id]
+
+    if player.is_patient_zero:
+        raise ValueError("Eliminated players cannot upgrade hardware tracks")
+
+    t = str(track_type).upper().strip()
+    cost = player.get_track_upgrade_cost(t)
+    if cost is None:
+        raise ValueError(f"Track {track_type} is already at maximum level")
+    if player.research_tokens < cost:
+        raise ValueError(f"Insufficient research tokens: need {cost} 🔬, have {player.research_tokens} 🔬")
+
+    success = player.upgrade_track(t)
+    if not success:
+        raise ValueError(f"Failed to upgrade track {track_type}")
+
+    new_level = getattr(player, f"{t.lower()}_level", 1)
+    controller.event_log.append(
+        f"{meta['name']} upgraded {t.capitalize()} Track to Level {new_level} for {cost} 🔬."
+    )
+    return controller.get_full_state()
+
+
+def file_cryptographic_patent(
+    controller: GameController,
+    player_id: int,
+) -> Dict[str, Any]:
+    """Human action: Files a Cryptographic Patent for +1 Corporate Secret (INV-PATENT-CONV-01)."""
+    if controller.subphase == "confirm_income":
+        confirm_income(controller, player_id)
+
+    if controller.phase != 3:
+        raise ValueError(f"Cannot file cryptographic patents in phase {controller.phase}")
+    if player_id != controller.active_player_index:
+        raise ValueError(f"Not player {player_id}'s turn (current: {controller.active_player_index})")
+
+    player = controller.state.players[player_id]
+    meta = controller.player_meta[player_id]
+
+    if player.is_patient_zero:
+        raise ValueError("Eliminated players cannot file cryptographic patents")
+
+    cost = player.get_patent_cost()
+    if player.research_tokens < cost:
+        raise ValueError(f"Insufficient research tokens: need {cost} 🔬, have {player.research_tokens} 🔬")
+
+    success = player.file_patent()
+    if not success:
+        raise ValueError("Failed to file cryptographic patent")
+
+    cash_note = " and +$1 cash" if player.patent_level >= 2 else ""
+    controller.event_log.append(
+        f"{meta['name']} filed Cryptographic Patent (+1 Secret{cash_note}) for {cost} 🔬."
+    )
+    return controller.get_full_state()
+
 

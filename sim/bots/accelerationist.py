@@ -308,6 +308,12 @@ class AccelerationistBot(BaseBot):
                     current_money -= cost
                     purchases += 1
 
+        # Hardware Upgrades & Patents (v0.28.0)
+        res_available = player_state.research_tokens
+        patent_cost = player_state.get_patent_cost()
+        if res_available >= patent_cost:
+            plan.patent_filings = res_available // patent_cost
+
         return plan
 
 

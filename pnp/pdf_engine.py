@@ -166,7 +166,7 @@ class RichSpan:
 
 
 _ICON_TOKENS = {
-    "{WRENCH}", "{STAR}", "{LOCK}", "{SECRET}",
+    "{WRENCH}", "{RESEARCH}", "{STAR}", "{LOCK}", "{SECRET}",
     "{RED}", "{BLUE}", "{GREEN}", "{YELLOW}", "{PURPLE}", "{BLACK}", "{GRAY}", "{WHITE}",
     "{PIP1}", "{PIP2}", "{PIP3}", "{PIP4}", "{PIP5}", "{PIP6}",
 }
@@ -456,6 +456,37 @@ class PDFPage:
         # Jaw notch cutout
         self.line(cx + r * 0.45, cy - r * 0.45, cx + r * 0.90, cy - r * 0.90, stroke=PALETTE["white"], width=size * 0.24)
 
+    def draw_research_icon(self, cx: float, cy: float, size: float, color: Color = PALETTE["purple"]) -> None:
+        """Draw an elegant minimalist Erlenmeyer flask / research beaker icon centered at (cx, cy)."""
+        w = size * 0.72
+        h = size * 0.86
+        x = cx - w / 2.0
+        y = cy - h / 2.0
+        top_w = size * 0.22
+        neck_h = size * 0.30
+        pts = [
+            (cx - top_w / 2.0, y),
+            (cx + top_w / 2.0, y),
+            (cx + top_w / 2.0, y + neck_h),
+            (cx + w / 2.0, y + h),
+            (cx - w / 2.0, y + h),
+            (cx - top_w / 2.0, y + neck_h),
+        ]
+        self.polygon(pts, stroke=color, fill=PALETTE["white"], line_width=size * 0.10)
+        # Rim lip
+        self.line(cx - top_w * 0.75, y, cx + top_w * 0.75, y, stroke=color, width=size * 0.12)
+        # Liquid level in bottom
+        liq_pts = [
+            (cx - w * 0.34, y + h * 0.65),
+            (cx + w * 0.34, y + h * 0.65),
+            (cx + w / 2.0 - size * 0.05, y + h - size * 0.05),
+            (cx - w / 2.0 + size * 0.05, y + h - size * 0.05),
+        ]
+        self.polygon(liq_pts, stroke=None, fill=color)
+        # Small bubble dot above liquid
+        self.circle(cx - size * 0.06, y + h * 0.48, size * 0.06, stroke=None, fill=color)
+        self.circle(cx + size * 0.08, y + h * 0.38, size * 0.04, stroke=None, fill=color)
+
     def draw_star_icon(self, cx: float, cy: float, size: float, fill: Color = PALETTE["ink"], stroke: Optional[Color] = None) -> None:
         """Draw a sharp 5-pointed star icon centered at (cx, cy)."""
         outer = size * 0.54
@@ -529,6 +560,8 @@ class PDFPage:
         """Dispatch inline rich-text icon token centered at (cx, cy)."""
         if token == "{WRENCH}":
             self.draw_wrench_icon(cx, cy, size, color=PALETTE["green"])
+        elif token == "{RESEARCH}":
+            self.draw_research_icon(cx, cy, size, color=PALETTE["purple"])
         elif token == "{STAR}":
             self.draw_star_icon(cx, cy, size, fill=PALETTE["ink"])
         elif token == "{LOCK}":
@@ -573,7 +606,7 @@ class PDFPage:
     @staticmethod
     def _parse_rich_tokens(markup: str, base_font: str = "regular") -> List[RichSpan]:
         """Parse lightweight inline markup (`**bold**`, `*italic*`, `` `mono` ``, `{ICON}`) into word/icon spans."""
-        markup = markup.replace("🔧", "{WRENCH}").replace("★", "{STAR}")
+        markup = markup.replace("🔧", "{WRENCH}").replace("★", "{STAR}").replace("🔬", "{RESEARCH}")
         style_pat = re.compile(r"(\*\*[^*]+\*\*|`[^`]+`|\*[^*]+\*)")
         icon_pat = re.compile(r"(\{[A-Z0-9_]+\})")
         spans: List[RichSpan] = []

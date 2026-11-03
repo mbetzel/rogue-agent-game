@@ -74,6 +74,16 @@ class Company:
     timing_window: str
     description: str
     flavor: str
+    starting_defense_capacity: int = 2
+    starting_triage_bandwidth: int = 2
+    starting_release_bandwidth: int = 2
+    starting_pipeline_level: int = 0
+    starting_defense_level: int = 0
+    starting_patent_level: int = 0
+    starting_cash_bonus: int = 0
+    starting_research_bonus: int = 0
+    starting_secrets_bonus: int = 0
+    upgrade_discount: int = 0
 
 
 @dataclass(frozen=True)
@@ -879,6 +889,10 @@ COMPANIES: Dict[CompanyCode, Company] = {
         timing_window="Phase 1: Staffing Step",
         description="Hire up to 2 White Contractor Dice for free this round, bypassing progressive contractor costs.",
         flavor="When liquidity is limitless, headcount is merely an accounting variable.",
+        starting_defense_capacity=2,
+        starting_triage_bandwidth=2,
+        starting_release_bandwidth=1,
+        starting_cash_bonus=2,
     ),
     CompanyCode.OMNIDYNE: Company(
         code=CompanyCode.OMNIDYNE,
@@ -888,6 +902,10 @@ COMPANIES: Dict[CompanyCode, Company] = {
         timing_window="Phase 3: Pipeline Prep",
         description="Move 1 die from your Glitched Box directly to your Ready for Release Zone for free (bypassing Scanned and saving 1 🔧).",
         flavor="Proprietary hardware backplanes allow instantaneous hot-swapping under live load.",
+        starting_defense_capacity=1,
+        starting_triage_bandwidth=3,
+        starting_release_bandwidth=3,
+        starting_pipeline_level=1,
     ),
     CompanyCode.AEGIS: Company(
         code=CompanyCode.AEGIS,
@@ -897,6 +915,10 @@ COMPANIES: Dict[CompanyCode, Company] = {
         timing_window="Phase 2: Step 2B Damage",
         description="When resolving compiler damage, ignore 1 Attack Cube (Red, Blue, or Green) of your choice for yourself this round. (All exited cubes remain in the exit tray and recycle into the Staging Cup as normal).",
         flavor="Multi-layered kinetic dampeners disperse inbound network blast energy.",
+        starting_defense_capacity=3,
+        starting_triage_bandwidth=1,
+        starting_release_bandwidth=1,
+        starting_defense_level=1,
     ),
     CompanyCode.DTO: Company(
         code=CompanyCode.DTO,
@@ -906,6 +928,10 @@ COMPANIES: Dict[CompanyCode, Company] = {
         timing_window="Phase 2: Step 2B Damage",
         description="Absorb up to 2 Corporate Secret loss (from Blue Spyware or unpaid Red Ransom) for free without paying cash. (Any additional Secret loss may be absorbed by paying $1 per Secret as normal).",
         flavor="Classified black budget allocations absorb compliance failures without public oversight.",
+        starting_defense_capacity=2,
+        starting_triage_bandwidth=2,
+        starting_release_bandwidth=2,
+        starting_secrets_bonus=1,
     ),
     CompanyCode.HELIX: Company(
         code=CompanyCode.HELIX,
@@ -915,6 +941,11 @@ COMPANIES: Dict[CompanyCode, Company] = {
         timing_window="Phase 1: Step 4 Rerolls",
         description="During your rerolls this phase, you may include any number of Locked dice in your free rerolls without spending 🔧 tokens. In addition, you may turn 1 of your rolled dice to any non-Star face of your choice.",
         flavor="Massively parallel quantum sequencing breaks deterministic encryption gates.",
+        starting_defense_capacity=2,
+        starting_triage_bandwidth=2,
+        starting_release_bandwidth=2,
+        starting_patent_level=1,
+        starting_research_bonus=2,
     ),
     CompanyCode.PROMETHEUS: Company(
         code=CompanyCode.PROMETHEUS,
@@ -924,6 +955,10 @@ COMPANIES: Dict[CompanyCode, Company] = {
         timing_window="Phase 3: Operations Turn",
         description="Purchase 1 Colored Die from the Market or Personal Reserve at a $2 discount (minimum cost $0), OR gain an immediate +$2 cash payout from the bank.",
         flavor="Open-source cryptographic protocols circumvent proprietary enterprise licensing fees.",
+        starting_defense_capacity=2,
+        starting_triage_bandwidth=2,
+        starting_release_bandwidth=2,
+        upgrade_discount=1,
     ),
 }
 

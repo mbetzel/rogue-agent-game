@@ -37,6 +37,8 @@ import {
   doFastPatch,
   doStarAction,
   doEndTurn,
+  doUpgradeTrack,
+  doFilePatent,
 } from "../api.js";
 import { openModal } from "./modals.js";
 import { renderMarket } from "./market.js";
@@ -949,6 +951,62 @@ export function renderActionDock() {
       controls.appendChild(p3Btn);
     }
 
+
+    // Cryptographic Patents (INV-PATENT-CONV-01)
+    const patCost = caps.patent_cost || 4;
+    const canPat = caps.can_file_patent || false;
+    const patBtn = document.createElement("button");
+    patBtn.className = "action-btn";
+    patBtn.style.borderColor = "#c084fc";
+    patBtn.style.color = "#c084fc";
+    patBtn.innerText = `📜 File Patent (${patCost} 🔬 → +1 Sec${(human.patent_level || 0) >= 2 ? ', +$1' : ''})`;
+    patBtn.disabled = !canPat;
+    patBtn.title = canPat ? `Spend ${patCost} 🔬 to gain +1 Corporate Secret` : `Requires ${patCost} 🔬 to file patent`;
+    patBtn.onclick = () => doFilePatent();
+    controls.appendChild(patBtn);
+
+    // Terminal Hardware Upgrade Tracks (INV-UPGRADE-TRACK-01)
+    const upgradeCosts = caps.upgrade_track_costs || {};
+    const canUp = caps.can_upgrade_track || {};
+
+    if ((human.pipeline_level || 0) < 2 && upgradeCosts.pipeline !== null && upgradeCosts.pipeline !== undefined) {
+      const pipeCost = upgradeCosts.pipeline;
+      const pipeBtn = document.createElement("button");
+      pipeBtn.className = "action-btn";
+      pipeBtn.style.borderColor = "#38bdf8";
+      pipeBtn.style.color = "#38bdf8";
+      pipeBtn.innerText = `⚡ Upgr Pipeline [L${(human.pipeline_level || 0) + 1}] (${pipeCost} 🔬)`;
+      pipeBtn.disabled = !canUp.pipeline;
+      pipeBtn.title = canUp.pipeline ? `Upgrade Pipeline to Level ${(human.pipeline_level || 0) + 1} (${pipeCost} 🔬)` : `Requires ${pipeCost} 🔬`;
+      pipeBtn.onclick = () => doUpgradeTrack("pipeline");
+      controls.appendChild(pipeBtn);
+    }
+
+    if ((human.defense_level || 0) < 2 && upgradeCosts.defense !== null && upgradeCosts.defense !== undefined) {
+      const defCost = upgradeCosts.defense;
+      const defBtn = document.createElement("button");
+      defBtn.className = "action-btn";
+      defBtn.style.borderColor = "#4ade80";
+      defBtn.style.color = "#4ade80";
+      defBtn.innerText = `🛡️ Upgr Defense [L${(human.defense_level || 0) + 1}] (${defCost} 🔬)`;
+      defBtn.disabled = !canUp.defense;
+      defBtn.title = canUp.defense ? `Upgrade Defense Grid to Level ${(human.defense_level || 0) + 1} (${defCost} 🔬)` : `Requires ${defCost} 🔬`;
+      defBtn.onclick = () => doUpgradeTrack("defense");
+      controls.appendChild(defBtn);
+    }
+
+    if ((human.patent_level || 0) < 2 && upgradeCosts.patent !== null && upgradeCosts.patent !== undefined) {
+      const patentTrackCost = upgradeCosts.patent;
+      const patUpBtn = document.createElement("button");
+      patUpBtn.className = "action-btn";
+      patUpBtn.style.borderColor = "#a855f7";
+      patUpBtn.style.color = "#a855f7";
+      patUpBtn.innerText = `🔬 Upgr Patents [L${(human.patent_level || 0) + 1}] (${patentTrackCost} 🔬)`;
+      patUpBtn.disabled = !canUp.patent;
+      patUpBtn.title = canUp.patent ? `Upgrade Patent R&D to Level ${(human.patent_level || 0) + 1} (${patentTrackCost} 🔬)` : `Requires ${patentTrackCost} 🔬`;
+      patUpBtn.onclick = () => doUpgradeTrack("patent");
+      controls.appendChild(patUpBtn);
+    }
 
     // End Turn
     const endTurnBtn = document.createElement("button");

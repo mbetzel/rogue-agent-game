@@ -746,6 +746,91 @@ class TestWebAPI(unittest.TestCase):
             urllib.request.urlopen(req)
         self.assertEqual(ctx.exception.code, 400)
 
+    # -------------------------------------------------------------------------
+    # 21. v0.28.0: Defense Capacity Enforcement in Phase 1 Commit
+    # -------------------------------------------------------------------------
+    def test_v280_defense_capacity_enforcement(self) -> None:
+        """INV-DEF-CAP-01: Phase 1 commit clamps total shields to player.defense_capacity."""
+        self._post("/api/game/new", {"num_players": 4, "seed": 42})
+        self._post("/api/game/action/roll", {"player_id": 0})
+
+        # Set player 0's rolled dice to all be shield faces
+        shield_face = Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY)
+        RogueAgentRequestHandler.controller.state.players[0].defense_capacity = 2
+        for d in RogueAgentRequestHandler.controller.player_meta[0]["rolled_pool"]:
+            d.current_face = shield_face
+
+        # Try to commit 4 shields
+        commitments = {"0": "red", "1": "blue", "2": "green", "3": "blue"}
+        res = self._post("/api/game/action/commit", {"player_id": 0, "commitments": commitments})
+        self.assertTrue(res["success"])
+        p0 = res["state"]["players"][0]
+        # Committed shields must not exceed defense_capacity (2)
+        total_shields = len(p0["shield_slots"]["red"]) + len(p0["shield_slots"]["blue"]) + len(p0["shield_slots"]["green"])
+        self.assertLessEqual(total_shields, 2)
+        self.assertEqual(total_shields, 2)
+
+    # -------------------------------------------------------------------------
+    # 22. v0.28.0: Terminal Track Upgrade API
+    # -------------------------------------------------------------------------
+    def test_v280_upgrade_track_api(self) -> None:
+        """POST /api/game/action/upgrade_track upgrades hardware tracks using research tokens."""
+        self._post("/api/game/new", {"num_players": 4, "seed": 42})
+        self._post("/api/game/action/roll", {"player_id": 0})
+        self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
+        self._post("/api/game/action/compile", {})
+        self._post("/api/game/action/confirm_income", {"player_id": 0, "glitch_die_ids": []})
+
+        # Advance to human player 0's turn in Phase 3
+        ctrl = RogueAgentRequestHandler.controller
+        ctrl.active_player_index = 0
+        p0_state = ctrl.state.players[0]
+        p0_state.research_tokens = 5
+        p0_state.pipeline_level = 0
+        p0_state.defense_level = 0
+
+        # Upgrade Pipeline track from L0 -> L1 (Cost: 2 🔬)
+        res = self._post("/api/game/action/upgrade_track", {"player_id": 0, "track_type": "pipeline"})
+        self.assertTrue(res["success"])
+        p0 = res["state"]["players"][0]
+        self.assertEqual(p0["pipeline_level"], 1)
+        self.assertEqual(p0["triage_bandwidth"], 3)
+        self.assertEqual(p0["release_bandwidth"], 3)
+        self.assertEqual(p0["research_tokens"], 3)
+
+        # Upgrade Defense track from L0 -> L1 (Cost: 2 🔬)
+        res2 = self._post("/api/game/action/upgrade_track", {"player_id": 0, "track_type": "defense"})
+        self.assertTrue(res2["success"])
+        p0_after_def = res2["state"]["players"][0]
+        self.assertEqual(p0_after_def["defense_level"], 1)
+        self.assertEqual(p0_after_def["defense_capacity"], 3)
+        self.assertEqual(p0_after_def["research_tokens"], 1)
+
+    # -------------------------------------------------------------------------
+    # 23. v0.28.0: Cryptographic Patent Filing API
+    # -------------------------------------------------------------------------
+    def test_v280_patent_api(self) -> None:
+        """POST /api/game/action/patent converts research tokens to Corporate Secrets."""
+        self._post("/api/game/new", {"num_players": 4, "seed": 42})
+        self._post("/api/game/action/roll", {"player_id": 0})
+        self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
+        self._post("/api/game/action/compile", {})
+        self._post("/api/game/action/confirm_income", {"player_id": 0, "glitch_die_ids": []})
+
+        ctrl = RogueAgentRequestHandler.controller
+        ctrl.active_player_index = 0
+        p0_state = ctrl.state.players[0]
+        p0_state.patent_level = 0
+        p0_state.research_tokens = 4
+        initial_secrets = p0_state.secrets
+
+        # Patent at Level 0 costs 4 🔬 -> +1 Secret
+        res = self._post("/api/game/action/patent", {"player_id": 0})
+        self.assertTrue(res["success"])
+        p0 = res["state"]["players"][0]
+        self.assertEqual(p0["secrets"], initial_secrets + 1)
+        self.assertEqual(p0["research_tokens"], 0)
+
 
 if __name__ == "__main__":
     unittest.main()

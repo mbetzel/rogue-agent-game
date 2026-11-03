@@ -270,6 +270,57 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         ),
     }
 
+    # Hardware Upgrade Tracks & Cryptographic Patents (v0.28.0)
+    pipeline_cost = player.get_track_upgrade_cost("PIPELINE") if hasattr(player, "get_track_upgrade_cost") else None
+    defense_cost = player.get_track_upgrade_cost("DEFENSE") if hasattr(player, "get_track_upgrade_cost") else None
+    patent_track_cost = player.get_track_upgrade_cost("PATENT") if hasattr(player, "get_track_upgrade_cost") else None
+    patent_cost = player.get_patent_cost() if hasattr(player, "get_patent_cost") else 4
+    research_avail = getattr(player, "research_tokens", player.patches)
+
+    can_upgrade_track = {
+        "pipeline": bool(
+            controller.phase == 3
+            and not can_confirm_income
+            and is_active
+            and not is_eliminated
+            and getattr(player, "pipeline_level", 0) < 2
+            and pipeline_cost is not None
+            and research_avail >= pipeline_cost
+        ),
+        "defense": bool(
+            controller.phase == 3
+            and not can_confirm_income
+            and is_active
+            and not is_eliminated
+            and getattr(player, "defense_level", 0) < 2
+            and defense_cost is not None
+            and research_avail >= defense_cost
+        ),
+        "patent": bool(
+            controller.phase == 3
+            and not can_confirm_income
+            and is_active
+            and not is_eliminated
+            and getattr(player, "patent_level", 0) < 2
+            and patent_track_cost is not None
+            and research_avail >= patent_track_cost
+        ),
+    }
+
+    can_file_patent = bool(
+        controller.phase == 3
+        and not can_confirm_income
+        and is_active
+        and not is_eliminated
+        and research_avail >= patent_cost
+    )
+
+    upgrade_track_costs = {
+        "pipeline": pipeline_cost,
+        "defense": defense_cost,
+        "patent": patent_track_cost,
+    }
+
     if can_confirm_income:
         can_phreaker = False
         can_cipher_buy = {color.value: False for color in [DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW, DieColor.PURPLE]}
@@ -292,6 +343,10 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         "can_fast_patch": can_fast_patch,
         "can_system_reboot": can_system_reboot,
         "can_star": can_star,
+        "can_upgrade_track": can_upgrade_track,
+        "upgrade_track_costs": upgrade_track_costs,
+        "can_file_patent": can_file_patent,
+        "patent_cost": patent_cost,
         "can_end_turn": can_end_turn,
         # Archetype capabilities
         "can_operator": can_operator,

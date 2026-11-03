@@ -295,6 +295,19 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
 
+                elif clean_path == "/api/game/action/upgrade_track":
+                    pid = get_target_pid(default_to_human=False)
+                    track_type = str(data.get("track_type", ""))
+                    state = self.controller.upgrade_track(pid, track_type)
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
+                elif clean_path == "/api/game/action/patent":
+                    pid = get_target_pid(default_to_human=False)
+                    state = self.controller.file_patent(pid)
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
                 elif clean_path == "/api/game/action/system_reboot":
                     payload, code = error_response(
                         "System Reboot has been deprecated in v0.22.0. Soft-locks are eliminated by the CI/CD conveyor.",

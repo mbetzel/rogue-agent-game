@@ -118,18 +118,29 @@ class GameEngine:
 
             comp = self.companies[i] if i < len(self.companies) else None
             wh = self.white_hats[i] if i < len(self.white_hats) else None
+            use_asym = getattr(config, "enable_corporate_asymmetry", False)
+            comp_cash = getattr(comp, "starting_cash_bonus", 0) if (comp and use_asym) else 0
+            comp_res = getattr(comp, "starting_research_bonus", 0) if (comp and use_asym) else 0
+            comp_sec = getattr(comp, "starting_secrets_bonus", 0) if (comp and use_asym) else 0
             player = PlayerState(
                 player_id=i,
                 bot=bot,
-                money=config.starting_money + starting_cash_bonus,
-                secrets=self.config.get_starting_secrets(self.config.num_players),
-                patches=self.config.get_starting_patches(self.config.num_players),
+                money=config.starting_money + starting_cash_bonus + comp_cash,
+                secrets=self.config.get_starting_secrets(self.config.num_players) + comp_sec,
+                patches=self.config.get_starting_patches(self.config.num_players) + comp_res,
                 ready_for_release_dice=ready_for_release_dice,
                 company=comp,
                 white_hat=wh,
                 ability_v1_status=AbilityStatus.AVAILABLE,
                 ability_v2_status=AbilityStatus.LOCKED,
                 ability_v3_status=AbilityStatus.LOCKED,
+                defense_capacity=comp.starting_defense_capacity if (comp and use_asym) else 2,
+                triage_bandwidth=comp.starting_triage_bandwidth if (comp and use_asym) else 2,
+                release_bandwidth=comp.starting_release_bandwidth if (comp and use_asym) else 2,
+                pipeline_level=comp.starting_pipeline_level if (comp and use_asym) else 0,
+                defense_level=comp.starting_defense_level if (comp and use_asym) else 0,
+                patent_level=comp.starting_patent_level if (comp and use_asym) else 0,
+                upgrade_discount=comp.upgrade_discount if (comp and use_asym) else 0,
             )
             players.append(player)
 

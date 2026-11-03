@@ -414,6 +414,21 @@ def commit_defenses(
             if face.shield_color in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN) and face.star_code != "B2":
                 validated_commitments[idx] = face.shield_color
 
+    # Enforce Defense Grid Shield Capacity (INV-DEF-CAP-01)
+    if len(validated_commitments) > player.defense_capacity:
+        priority_map = {ShieldColor.BLUE: 0, ShieldColor.RED: 1, ShieldColor.GREEN: 2}
+        sorted_items = sorted(
+            validated_commitments.items(),
+            key=lambda item: priority_map.get(item[1], 3),
+        )
+        allowed = dict(sorted_items[:player.defense_capacity])
+        rejected_indices = set(validated_commitments.keys()) - set(allowed.keys())
+        validated_commitments = allowed
+        for r_idx in rejected_indices:
+            r_die = rolled[r_idx]
+            if r_die.current_face and r_die.current_face.is_choice and r_die.current_face.has_shield_option:
+                r_die.chosen_choice_index = 1
+
     # Sync choice faces
     for idx, die in enumerate(rolled):
         face = die.current_face

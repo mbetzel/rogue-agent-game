@@ -282,6 +282,13 @@ def resolve_player_defense_and_wear(
                 player_attacks[chosen_color] = max(0, player_attacks[chosen_color] - 1)
                 player.mark_ability_used(active_ver)
 
+    # Passive Firewall (Level 2 Defense Track - INV-UPGRADE-TRACK-01)
+    if getattr(player, "has_passive_firewall", False):
+        candidates = [c for c in [CubeColor.BLUE, CubeColor.RED, CubeColor.GREEN] if player_attacks.get(c, 0) > 0]
+        if candidates:
+            best_c = max(candidates, key=lambda c: player_attacks.get(c, 0) - effective_shields.get(c, 0))
+            player_attacks[best_c] = max(0, player_attacks[best_c] - 1)
+
     # Calculate blocked and unblocked attacks
     blocked_red = min(effective_shields[CubeColor.RED], player_attacks[CubeColor.RED])
     unblocked_red = player_attacks[CubeColor.RED] - blocked_red

@@ -312,6 +312,16 @@ class VentureGreedBot(BaseBot):
                     current_money -= blue_cost
                     purchases += 1
 
+        # Hardware Upgrades & Patents (v0.28.0)
+        res_available = player_state.research_tokens
+        pat_cost = player_state.get_track_upgrade_cost("PATENT")
+        if pat_cost is not None and res_available >= pat_cost and player_state.patent_level < 1:
+            plan.track_upgrades.append("PATENT")
+            res_available -= pat_cost
+        patent_cost = player_state.get_patent_cost()
+        if res_available >= patent_cost:
+            plan.patent_filings = res_available // patent_cost
+
         return plan
 
 

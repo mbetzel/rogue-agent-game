@@ -451,6 +451,21 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
                     elif face.shield_color == ShieldColor.ANY:
                         validated_commitments[idx] = ShieldColor.BLUE
 
+        # Enforce Defense Grid Shield Capacity (INV-DEF-CAP-01)
+        if len(validated_commitments) > player.defense_capacity:
+            priority_map = {ShieldColor.BLUE: 0, ShieldColor.RED: 1, ShieldColor.GREEN: 2}
+            sorted_items = sorted(
+                validated_commitments.items(),
+                key=lambda item: priority_map.get(item[1], 3),
+            )
+            allowed = dict(sorted_items[:player.defense_capacity])
+            rejected_indices = set(validated_commitments.keys()) - set(allowed.keys())
+            validated_commitments = allowed
+            for r_idx in rejected_indices:
+                r_die = active_dice[r_idx]
+                if r_die.current_face and r_die.current_face.is_choice and r_die.current_face.has_shield_option:
+                    r_die.chosen_choice_index = 1
+
         # Post-Reroll Triage & Production Assignment (v0.22.0 Canonical)
         # 1. Unresolved Glitches:
         surviving_active: List[Die] = []

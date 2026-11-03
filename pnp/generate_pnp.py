@@ -1,4 +1,4 @@
-"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.26.0 Baseline).
+"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.28.0 Baseline).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
   - 01_Player_Boards.pdf (6 pages — 4x Consultancy Terminal Mats with empty modular card docks + 6x Client Company Cards sheet + 6x White Hat Dossier Cards sheet)
@@ -19,7 +19,7 @@ from pnp.pdf_engine import PALETTE, Color, PDFDocument, PDFPage, measure_text
 
 
 # =============================================================================
-# Canonical Game Data (Synchronized 1:1 with RULES.md v0.26.0 & sim/entities.py)
+# Canonical Game Data (Synchronized 1:1 with RULES.md v0.28.0 & sim/entities.py)
 # =============================================================================
 
 @dataclass(frozen=True)
@@ -31,6 +31,8 @@ class CompanyCardSpec:
     override_timing: str
     override_desc: str
     flavor: str
+    hardware_summary: str = ""
+    starting_bonus: str = ""
 
 
 COMPANIES: List[CompanyCardSpec] = [
@@ -45,6 +47,8 @@ COMPANIES: List[CompanyCardSpec] = [
             "bypassing progressive contractor costs."
         ),
         flavor='"When liquidity is limitless, headcount is merely an accounting variable."',
+        hardware_summary="DEF CAP: 2  |  PIPELINE: Triage 2 / Release 1",
+        starting_bonus="START BONUS: +$2 Cash ($6 Starting Capital)",
     ),
     CompanyCardSpec(
         code="OMNIDYNE",
@@ -54,9 +58,11 @@ COMPANIES: List[CompanyCardSpec] = [
         override_timing="P3: PIPELINE PREP",
         override_desc=(
             "Move **1 die** from your **Glitched Box** directly to your "
-            "**Ready for Release Zone** for **free** (bypassing Scanned and saving {WRENCH})."
+            "**Ready for Release Zone** for **free** (bypassing Scanned and saving 1 {RESEARCH})."
         ),
         flavor='"Proprietary hardware backplanes allow instantaneous hot-swapping under live load."',
+        hardware_summary="DEF CAP: 1  |  PIPELINE: Triage 3 / Release 3 (L1)",
+        starting_bonus="STARTS AT PIPELINE TRACK LEVEL 1",
     ),
     CompanyCardSpec(
         code="AEGIS",
@@ -69,6 +75,8 @@ COMPANIES: List[CompanyCardSpec] = [
             "of your choice for yourself this round. Exited cubes remain in tray and recycle as normal."
         ),
         flavor='"Multi-layered kinetic dampeners disperse inbound network blast energy."',
+        hardware_summary="DEF CAP: 3 (L1)  |  PIPELINE: Triage 1 / Release 1",
+        starting_bonus="STARTS AT DEFENSE TRACK LEVEL 1",
     ),
     CompanyCardSpec(
         code="DTO",
@@ -81,6 +89,8 @@ COMPANIES: List[CompanyCardSpec] = [
             "(from Blue Spyware or unpaid Red Ransom) for free without paying cash."
         ),
         flavor='"Classified black budget allocations absorb compliance failures without public oversight."',
+        hardware_summary="DEF CAP: 2  |  PIPELINE: Triage 2 / Release 2",
+        starting_bonus="START BONUS: +1 Corporate Secret",
     ),
     CompanyCardSpec(
         code="HELIX",
@@ -90,10 +100,12 @@ COMPANIES: List[CompanyCardSpec] = [
         override_timing="P1: STEP 4 REROLLS",
         override_desc=(
             "During your rerolls this phase, you may include **any number of Locked dice** in "
-            "your free rerolls without spending {WRENCH} tokens. In addition, turn **1 rolled die** to "
+            "your free rerolls without spending {RESEARCH} tokens. In addition, turn **1 rolled die** to "
             "any legal non-Star face of choice."
         ),
         flavor='"Massively parallel quantum sequencing breaks deterministic encryption gates."',
+        hardware_summary="DEF CAP: 2  |  PIPELINE: Triage 2 / Release 2",
+        starting_bonus="STARTS AT PATENT LEVEL 1  |  +2 {RESEARCH} (4 {RESEARCH} start)",
     ),
     CompanyCardSpec(
         code="PROMETHEUS",
@@ -107,6 +119,8 @@ COMPANIES: List[CompanyCardSpec] = [
             "from the bank."
         ),
         flavor='"Open-source cryptographic protocols circumvent proprietary enterprise licensing fees."',
+        hardware_summary="DEF CAP: 2  |  PIPELINE: Triage 2 / Release 2",
+        starting_bonus="TRAIT: -1 {RESEARCH} Track Upgrade Discount (min 1 {RESEARCH})",
     ),
 ]
 
@@ -129,9 +143,9 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         code="OPERATOR",
         name="The Operator",
         role="Tactical Staffing & Logistics Lead",
-        reserve_cost_str="$5",
+        reserve_cost_str="$4",
         flavor='"Redundant contractor pipelines ready on zero notice."',
-        purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {WRENCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
+        purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {RESEARCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
         protocol_name="Contingent Staffing",
         protocol_timing="P1: STEP 4 ROLLING",
         protocol_desc=(
@@ -145,12 +159,12 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         role="Hardware Intrusion Specialist",
         reserve_cost_str="$4",
         flavor='"Raw voltage pulses extract signal from dormant silicon."',
-        purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {WRENCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
+        purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {RESEARCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
         protocol_name="Jumper Diagnostics",
         protocol_timing="P3: PART 3A OPS",
         protocol_desc=(
             "When Face 6 ({PURPLE} {STAR}) is rolled, select & roll **1 offline die** currently in your "
-            "Glitched Box or Scanned Box; immediately collect rolled cash and patches "
+            "Glitched Box or Scanned Box; immediately collect rolled cash and research "
             "(shields/glitches produce 0; die remains in place)."
         ),
     ),
@@ -160,7 +174,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         role="Side-Channel Cryptanalyst",
         reserve_cost_str="$4",
         flavor='"Harmonic resonance frequencies decode physical chassis vibrations."',
-        purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {WRENCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
+        purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {RESEARCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
         protocol_name="Resonance Sensor",
         protocol_timing="P3: PART 3A INCOME",
         protocol_desc=(
@@ -172,9 +186,9 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         code="SPOOK",
         name="The Spook",
         role="Covert Intelligence Specialist",
-        reserve_cost_str="$5",
+        reserve_cost_str="$4",
         flavor='"Scorched-earth protocols ensure zero forensic recovery."',
-        purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {WRENCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
+        purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {RESEARCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
         protocol_name="Burn Notice",
         protocol_timing="P3: PART 3A OPS",
         protocol_desc=(
@@ -187,9 +201,9 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         code="PRODIGY",
         name="The Prodigy",
         role="Autonomous Exploit Hacker",
-        reserve_cost_str="$5",
+        reserve_cost_str="$4",
         flavor='"Payload injection executes before memory boundaries establish."',
-        purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {WRENCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
+        purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {RESEARCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
         protocol_name="Arbitrary Code Execution",
         protocol_timing="P1: STEP 4 REROLLS",
         protocol_desc=(
@@ -201,9 +215,9 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         code="CIPHER",
         name="The Cipher",
         role="Distributed Ledger Architect",
-        reserve_cost_str="$6",
+        reserve_cost_str="$4",
         flavor='"Parity calculations balance zero-knowledge proofs flawlessly."',
-        purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {WRENCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
+        purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {RESEARCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
         protocol_name="Algorithmic Parity",
         protocol_timing="P1: STEP 5 & P3: 3A",
         protocol_desc=(
@@ -231,8 +245,8 @@ DICE_SPECS: List[DieSpec] = [
         title="GRAY",
         subtitle="Legacy Code",
         cost_str="Starter (x4)",
-        faces=("Block 1 Any", "Block 1 Any", "+$1", "+$1", "+$1 / +1 {WRENCH}", "+1 {WRENCH}"),
-        notes="Starter pool (4 per player). Face 5 is a Choice (/): declare +$1 or +1 {WRENCH} in Step 5.",
+        faces=("Block 1 Any", "Block 1 Any", "+$1", "+$1", "+$1 / +1 {RESEARCH}", "+1 {RESEARCH}"),
+        notes="Starter pool (4 per player). Face 5 is a Choice (/): declare +$1 or +1 {RESEARCH} in Step 5.",
     ),
     DieSpec(
         color_key="white",
@@ -246,7 +260,7 @@ DICE_SPECS: List[DieSpec] = [
         color_key="red",
         title="RED",
         subtitle="FinSec",
-        cost_str="$5–$6 (by Variant)",
+        cost_str="$4–$5 (by Variant)",
         faces=("Block 1 {RED}", "+$2", "+$2", "+$2", "{LOCK} Glitch", "{RED} {STAR}"),
         notes="FinSec revenue & defense. Face 5 Glitch (Locked), Face 6 Red {STAR}.",
     ),
@@ -254,32 +268,32 @@ DICE_SPECS: List[DieSpec] = [
         color_key="blue",
         title="BLUE",
         subtitle="Firewall",
-        cost_str="$5–$7 (by Variant)",
-        faces=("Block 1 {BLUE}", "+1 {WRENCH}", "+$1", "Block 1 {BLUE} / +1 {WRENCH}", "{LOCK} Glitch", "{BLUE} {STAR}"),
-        notes="Spyware defense & patch hybrid. Face 5 Glitch (Locked), Face 6 Blue {STAR}.",
+        cost_str="$4–$5 (by Variant)",
+        faces=("Block 1 {BLUE}", "+1 {RESEARCH}", "+$1", "Block 1 {BLUE} / +1 {RESEARCH}", "{LOCK} Glitch", "{BLUE} {STAR}"),
+        notes="Spyware defense & research hybrid. Face 5 Glitch (Locked), Face 6 Blue {STAR}.",
     ),
     DieSpec(
         color_key="green",
         title="GREEN",
         subtitle="Antivirus",
-        cost_str="$5–$6 (by Variant)",
-        faces=("Block 1 {GREEN}", "+1 {WRENCH}", "+2 {WRENCH}", "+1 {WRENCH} / +$1", "{LOCK} Glitch", "{GREEN} {STAR}"),
-        notes="Malware defense & patch engine. Face 5 Glitch (Locked), Face 6 Green {STAR}.",
+        cost_str="$4 (by Variant)",
+        faces=("Block 1 {GREEN}", "+1 {RESEARCH}", "+2 {RESEARCH}", "+1 {RESEARCH} / +$1", "{LOCK} Glitch", "{GREEN} {STAR}"),
+        notes="Malware defense & research engine. Face 5 Glitch (Locked), Face 6 Green {STAR}.",
     ),
     DieSpec(
         color_key="yellow",
         title="YELLOW",
         subtitle="Commercial AI",
-        cost_str="$6–$7 (by Variant)",
-        faces=("+$3", "+$2", "+$2", "+$1 & +1 {WRENCH}", "{LOCK} Glitch", "{YELLOW} {STAR}"),
+        cost_str="$4–$5 (by Variant)",
+        faces=("+$3", "+$2", "+$2", "+$1 & +1 {RESEARCH}", "{LOCK} Glitch", "{YELLOW} {STAR}"),
         notes="Commercial AI revenue. Face 5 Glitch (Locked), Face 6 Yellow {STAR}.",
     ),
     DieSpec(
         color_key="purple",
         title="PURPLE",
         subtitle="Specialist AI",
-        cost_str="$4–$6 (by Operative)",
-        faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {WRENCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
+        cost_str="$4 (Personal Reserve)",
+        faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {RESEARCH}", "{LOCK} Glitch", "{PURPLE} {STAR}"),
         notes="Standardized Any-shields & utility + Archetype Signature Protocol. Face 5 Glitch (Locked), Face 6 Purple {STAR}.",
     ),
 ]
@@ -302,21 +316,21 @@ class VariantCardSpec:
 VARIANT_CARDS: List[VariantCardSpec] = [
     # RED (R1-R3)
     VariantCardSpec(
-        "R1", "red", "RED // FINSEC", "$6",
+        "R1", "red", "RED // FINSEC", "$4",
         "{PIP1} 1{RED}  |  {PIP2}{PIP3}{PIP4} +$2", "{PIP5} {LOCK}Glitch  |  {PIP6} {STAR}",
         "Ransom Insurance", "P1 BOOT + P2 DEFENSE",
         "**Block 1 {RED} Red** in Phase 2 **AND** gain **+$2** in Phase 1 Boot.",
         "Locks in v2.0 RaaS & v3.0 Zero-Day.",
     ),
     VariantCardSpec(
-        "R2", "red", "RED // FINSEC", "$6",
+        "R2", "red", "RED // FINSEC", "$5",
         "{PIP1} 1{RED}  |  {PIP2}{PIP3}{PIP4} +$2", "{PIP5} {LOCK}Glitch  |  {PIP6} {STAR}",
         "Threat Bounty", "P2 DEFENSE + BONUS",
         "**Block 2 {RED} Red**; if you take **0 unblocked Red** damage this round, gain **+$2**.",
         "Locks in v3.0 Zero-Day (Shield).",
     ),
     VariantCardSpec(
-        "R3", "red", "RED // FINSEC", "$5",
+        "R3", "red", "RED // FINSEC", "$4",
         "{PIP1} 1{RED}  |  {PIP2}{PIP3}{PIP4} +$2", "{PIP5} {LOCK}Glitch  |  {PIP6} {STAR}",
         "Short Squeeze", "P1 BOOT + P2 SURGE",
         "Gain **+$3** in Phase 1 (or **+$4** total if **3+ {RED} Red** cubes exit the tower in Phase 2).",
@@ -324,66 +338,66 @@ VARIANT_CARDS: List[VariantCardSpec] = [
     ),
     # BLUE (B1-B3)
     VariantCardSpec(
-        "B1", "blue", "BLUE // FIREWALL", "$6",
-        "{PIP1} 1{BLUE} | {PIP2} +1{WRENCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{WRENCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
+        "B1", "blue", "BLUE // FIREWALL", "$4",
+        "{PIP1} 1{BLUE} | {PIP2} +1{RESEARCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{RESEARCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Honeypot Telemetry", "P2 DEFENSE + BONUS",
         "**Block 2 {BLUE} Blue**; if **1+ {BLUE} Blue** cubes exit and you take **0 Blue** damage, gain **+$3**.",
         "Locks in v3.0 Zero-Day (Shield).",
     ),
     VariantCardSpec(
-        "B2", "blue", "BLUE // FIREWALL", "$7",
-        "{PIP1} 1{BLUE} | {PIP2} +1{WRENCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{WRENCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
+        "B2", "blue", "BLUE // FIREWALL", "$5",
+        "{PIP1} 1{BLUE} | {PIP2} +1{RESEARCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{RESEARCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Deep R&D Vault", "P2 DEF -OR- P3 OPS",
         "**Block 1 {BLUE} Blue**, **OR** leave unassigned to pay **$4** in Phase 3 for **+1 Secret**.",
         "Locks in v3.0 Zero-Day (Shield).",
     ),
     VariantCardSpec(
-        "B3", "blue", "BLUE // FIREWALL", "$5",
-        "{PIP1} 1{BLUE} | {PIP2} +1{WRENCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{WRENCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
+        "B3", "blue", "BLUE // FIREWALL", "$4",
+        "{PIP1} 1{BLUE} | {PIP2} +1{RESEARCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{RESEARCH} | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Air-Gapped Backup", "P2 DEFENSE (REDIRECT)",
         "**Block 1 {BLUE} Blue**; when taking unblocked **Green Malware**, sacrifice **1 other Ready die** to Under Development instead of In Production.",
         "Locks in v3.0 Zero-Day (Shield).",
     ),
     # GREEN (G1-G3)
     VariantCardSpec(
-        "G1", "green", "GREEN // ANTIVIRUS", "$6",
-        "{PIP1} 1{GREEN} | {PIP2} +1{WRENCH} | {PIP3} +2{WRENCH}", "{PIP4} 1{WRENCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
+        "G1", "green", "GREEN // ANTIVIRUS", "$4",
+        "{PIP1} 1{GREEN} | {PIP2} +1{RESEARCH} | {PIP3} +2{RESEARCH}", "{PIP4} 1{RESEARCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Self-Healing Kernel", "P1 BOOT + P2 DEFENSE",
-        "**Block 2 {GREEN} Green** in Phase 2 **AND** gain **+1 {WRENCH}** in Phase 1 Boot.",
+        "**Block 2 {GREEN} Green** in Phase 2 **AND** gain **+1 {RESEARCH}** in Phase 1 Boot.",
         "Locks in v3.0 Zero-Day (Shield).",
     ),
     VariantCardSpec(
-        "G2", "green", "GREEN // ANTIVIRUS", "$5",
-        "{PIP1} 1{GREEN} | {PIP2} +1{WRENCH} | {PIP3} +2{WRENCH}", "{PIP4} 1{WRENCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
+        "G2", "green", "GREEN // ANTIVIRUS", "$4",
+        "{PIP1} 1{GREEN} | {PIP2} +1{RESEARCH} | {PIP3} +2{RESEARCH}", "{PIP4} 1{RESEARCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Universal Sandbox", "P1 BOOT + P2 DEFENSE",
-        "**Block 1 Any** color in Phase 2 **AND** gain **+1 {WRENCH}** in Phase 1 Boot.",
+        "**Block 1 Any** color in Phase 2 **AND** gain **+1 {RESEARCH}** in Phase 1 Boot.",
         "Commit color in Step 5. Locks in v3.0.",
     ),
     VariantCardSpec(
-        "G3", "green", "GREEN // ANTIVIRUS", "$5",
-        "{PIP1} 1{GREEN} | {PIP2} +1{WRENCH} | {PIP3} +2{WRENCH}", "{PIP4} 1{WRENCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
+        "G3", "green", "GREEN // ANTIVIRUS", "$4",
+        "{PIP1} 1{GREEN} | {PIP2} +1{RESEARCH} | {PIP3} +2{RESEARCH}", "{PIP4} 1{RESEARCH}/$1 | {PIP5} {LOCK}Glitch | {PIP6} {STAR}",
         "Live Reboot", "P1 BOOT OUTPUT",
-        "Gain **+2 {WRENCH}** and **+$1** immediately in Phase 1 Step 6.",
+        "Gain **+2 {RESEARCH}** and **+$1** immediately in Phase 1 Step 6.",
         "Locks in v2.0 RaaS (Cash).",
     ),
     # YELLOW (Y1-Y3)
     VariantCardSpec(
-        "Y1", "yellow", "YELLOW // COMM. AI", "$7",
-        "{PIP1} +$3   {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH} | {PIP5} {LOCK}Glitch",
+        "Y1", "yellow", "YELLOW // COMM. AI", "$5",
+        "{PIP1} +$3   {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{RESEARCH} | {PIP5} {LOCK}Glitch",
         "Algorithmic Trading", "P1 INCOME + P3 OPTION",
         "Gain **+$4** in Phase 3; in Phase 3 you may also pay **$2** to gain **+1 Corporate Secret**.",
         "Locks in v2.0 RaaS (Cash).",
     ),
     VariantCardSpec(
-        "Y2", "yellow", "YELLOW // COMM. AI", "$6",
-        "{PIP1} +$3   {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH} | {PIP5} {LOCK}Glitch",
+        "Y2", "yellow", "YELLOW // COMM. AI", "$5",
+        "{PIP1} +$3   {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{RESEARCH} | {PIP5} {LOCK}Glitch",
         "Cloud Monopoly", "P1 SCALING REVENUE",
         "Gain **+$2**, plus **+$1 per different colored** module die you own (**max +$5** total).",
         "Counts R/B/G/Y owned. Locks in v2.0 RaaS.",
     ),
     VariantCardSpec(
-        "Y3", "yellow", "YELLOW // COMM. AI", "$6",
-        "{PIP1} +$3   {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{WRENCH} | {PIP5} {LOCK}Glitch",
+        "Y3", "yellow", "YELLOW // COMM. AI", "$4",
+        "{PIP1} +$3   {PIP2}{PIP3} +$2", "{PIP4} +$1 & +1{RESEARCH} | {PIP5} {LOCK}Glitch",
         "Proprietary Training", "P1 SECRET + GLITCH",
         "Gain **+1 Corporate Secret** in Phase 1 Step 5, then immediately move **this die to Under Development (Glitched)**.",
         "Locks in v2.0 RaaS (Cash).",
@@ -416,7 +430,7 @@ VERSION_TILES: List[VersionTileSpec] = [
         banner_text="**Kernel Lock:** Space 4 locks Shields next Phase 1.\nFinal space triggers Singularity!",
         spaces=(
             VersionTrackSpaceSpec(1, "+1 {RED} 1 {BLUE} 1 {GREEN}"),
-            VersionTrackSpaceSpec(2, "Lose $3 & 1 {WRENCH}\n+1 {BLACK}"),
+            VersionTrackSpaceSpec(2, "Lose $3 & 1 {RESEARCH}\n+1 {BLACK}"),
             VersionTrackSpaceSpec(3, "+1 {RED} +1 {BLUE}"),
             VersionTrackSpaceSpec(4, "Lock {SHIELD}\nNext P1 +1 {BLACK}"),
             VersionTrackSpaceSpec(5, "Return 1\nColored Die"),
@@ -430,7 +444,7 @@ VERSION_TILES: List[VersionTileSpec] = [
         banner_text="**Overclocked Surge:** 2+ Black: Lead Attack +2.\nSpace 4 leaks 1 Secret.",
         spaces=(
             VersionTrackSpaceSpec(1, "Glitch 1 Die\n+1 {RED} 1 {BLUE}"),
-            VersionTrackSpaceSpec(2, "Lose $3 & 1 {WRENCH}\n+1 {BLACK}"),
+            VersionTrackSpaceSpec(2, "Lose $3 & 1 {RESEARCH}\n+1 {BLACK}"),
             VersionTrackSpaceSpec(3, "+1 {RED} +1 {GREEN}"),
             VersionTrackSpaceSpec(4, "Lose 1 Secret\n+1 {BLACK}"),
             VersionTrackSpaceSpec(5, "Return 1\nColored Die"),
@@ -446,7 +460,7 @@ VERSION_TILES: List[VersionTileSpec] = [
             VersionTrackSpaceSpec(1, "All Lose $2"),
             VersionTrackSpaceSpec(2, "+1 {RED} +1 {GREEN}\n+1 {BLACK}"),
             VersionTrackSpaceSpec(3, "Lock Cash ($)\nNext P1"),
-            VersionTrackSpaceSpec(4, "Lose $3 & 1 {WRENCH}\n+1 {BLACK}"),
+            VersionTrackSpaceSpec(4, "Lose $3 & 1 {RESEARCH}\n+1 {BLACK}"),
             VersionTrackSpaceSpec(5, "UPGRADE v3.0\n+1 {RED}", is_milestone=True),
         ),
     ),
@@ -454,11 +468,11 @@ VERSION_TILES: List[VersionTileSpec] = [
         version="v2.0",
         name="Polymorphic Worm",
         profile="ESCALATION",
-        banner_text="**Subroutine Throttling:** 1 Free Reroll.\nSpace 3 locks Patches next Phase 1.",
+        banner_text="**Subroutine Throttling:** 1 Free Reroll.\nSpace 3 locks Research next Phase 1.",
         spaces=(
-            VersionTrackSpaceSpec(1, "Lose 2 {WRENCH}"),
+            VersionTrackSpaceSpec(1, "Lose 2 {RESEARCH}"),
             VersionTrackSpaceSpec(2, "+2 {GREEN}\n+1 {BLACK}"),
-            VersionTrackSpaceSpec(3, "Lock {WRENCH}\nNext P1"),
+            VersionTrackSpaceSpec(3, "Lock {RESEARCH}\nNext P1"),
             VersionTrackSpaceSpec(4, "Glitch 1 Die\n+1 {BLACK}"),
             VersionTrackSpaceSpec(5, "UPGRADE v3.0\n+1 {RED}", is_milestone=True),
         ),
@@ -471,8 +485,8 @@ VERSION_TILES: List[VersionTileSpec] = [
         spaces=(
             VersionTrackSpaceSpec(1, "+1 {RED}"),
             VersionTrackSpaceSpec(2, "All Lose $2\n+1 {BLACK}"),
-            VersionTrackSpaceSpec(3, "Lose 1 {WRENCH}"),
-            VersionTrackSpaceSpec(4, "UPGRADE v2.0\nLose 1 {WRENCH}", is_milestone=True),
+            VersionTrackSpaceSpec(3, "Lose 1 {RESEARCH}"),
+            VersionTrackSpaceSpec(4, "UPGRADE v2.0\nLose 1 {RESEARCH}", is_milestone=True),
         ),
     ),
     VersionTileSpec(
@@ -481,7 +495,7 @@ VERSION_TILES: List[VersionTileSpec] = [
         profile="INITIAL",
         banner_text="**Setup Payload:** Add 1 {RED} 2 {BLUE} to Staging Cup.\nAll players start with +$1.",
         spaces=(
-            VersionTrackSpaceSpec(1, "Lose 1 {WRENCH}"),
+            VersionTrackSpaceSpec(1, "Lose 1 {RESEARCH}"),
             VersionTrackSpaceSpec(2, "Lose $1\n+1 {BLACK}"),
             VersionTrackSpaceSpec(3, "+1 {GREEN}"),
             VersionTrackSpaceSpec(4, "UPGRADE v2.0\nGlitch 1 Die", is_milestone=True),
@@ -528,7 +542,7 @@ def draw_board_outer_frame(page: PDFPage, left_tag: str, right_tag: str) -> None
 # =============================================================================
 
 def _draw_company_card(page: PDFPage, x: float, y: float, w: float, h: float, comp: CompanyCardSpec, is_dock: bool = False) -> None:
-    """Render a single Client Company card (w ~ 238, h ~ 210) with sector, flavor, override, and 3 version slots."""
+    """Render a single Client Company card (w ~ 238, h ~ 210) with sector, hardware specs, flavor, override, and 3 version slots."""
     # Outer Card Frame
     page.rect(x, y, w, h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
 
@@ -539,53 +553,59 @@ def _draw_company_card(page: PDFPage, x: float, y: float, w: float, h: float, co
     page.text(x + w - 6.0, y + 12.0, comp.sector.upper(), font="mono_bold", size=5.8, color=PALETTE["ink_soft"], align="right")
 
     # 2. Company Name (y+20..y+34)
-    page.text(x + w / 2.0, y + 30.5, comp.name.upper(), font="bold", size=10.2, color=PALETTE["ink"], align="center")
+    page.text(x + w / 2.0, y + 30.5, comp.name.upper(), font="bold", size=9.8, color=PALETTE["ink"], align="center")
 
-    # 3. Flavor Quote Box (y+36..y+60, h=24)
-    fy, fh = y + 36.0, 24.0
+    # 3. Flavor Quote Box (y+34..y+53, h=19)
+    fy, fh = y + 34.0, 19.0
     page.rect(x + 6.0, fy, w - 12.0, fh, stroke=PALETTE["guide"], fill=PALETTE["paper_tint"], line_width=0.5)
     page.rich_paragraph(
-        x + 10.0, fy + 8.0, w - 20.0,
+        x + 10.0, fy + 7.0, w - 20.0,
         f"*{comp.flavor}*",
-        size=5.9, leading=7.6, color=PALETTE["ink_soft"], align="center",
+        size=5.6, leading=7.2, color=PALETTE["ink_soft"], align="center",
     )
 
-    # 4. Once-Per-Version Institutional Override Box (y+64..y+184, h=120)
-    o_y, o_h = y + 64.0, 120.0
+    # 4. Hardware Baseline & Starting Trait Box (y+55..y+77, h=22)
+    hw_y, hw_h = y + 55.0, 22.0
+    page.rect(x + 6.0, hw_y, w - 12.0, hw_h, stroke=PALETTE["ink"], fill=PALETTE["purple_light"], line_width=0.6)
+    page.rich_line(x + w / 2.0, hw_y + 8.5, f"**{comp.hardware_summary}**", size=5.6, color=PALETTE["ink"], align="center")
+    page.rich_line(x + w / 2.0, hw_y + 17.5, f"**{comp.starting_bonus}**", size=5.2, color=PALETTE["purple"], align="center")
+
+    # 5. Once-Per-Version Institutional Override Box (y+79..y+185, h=106)
+    o_y, o_h = y + 79.0, 106.0
     page.rect(x + 6.0, o_y, w - 12.0, o_h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.85)
 
     # Sub-header strip with Override Name & Timing Pill
-    page.rect(x + 6.0, o_y, w - 12.0, 16.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.6)
-    page.text(x + 10.0, o_y + 11.2, f"1x/VER: {comp.override_name.upper()}", font="bold", size=7.2, color=PALETTE["ink"])
+    page.rect(x + 6.0, o_y, w - 12.0, 15.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.6)
+    page.text(x + 10.0, o_y + 10.5, f"1x/VER: {comp.override_name.upper()}", font="bold", size=7.0, color=PALETTE["ink"])
 
-    tw = measure_text(comp.override_timing, font="mono_bold", size=5.6) + 6.0
-    page.rounded_rect(x + w - 10.0 - tw, o_y + 2.5, tw, 11.0, r=2.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.55)
-    page.text(x + w - 10.0 - tw / 2.0, o_y + 10.2, comp.override_timing, font="mono_bold", size=5.6, color=PALETTE["ink"], align="center")
+    tw = measure_text(comp.override_timing, font="mono_bold", size=5.4) + 6.0
+    page.rounded_rect(x + w - 10.0 - tw, o_y + 2.0, tw, 11.0, r=2.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.55)
+    page.text(x + w - 10.0 - tw / 2.0, o_y + 9.5, comp.override_timing, font="mono_bold", size=5.4, color=PALETTE["ink"], align="center")
 
     # Override Description Paragraph
     page.rich_paragraph(
-        x + 10.0, o_y + 24.0, w - 20.0,
+        x + 10.0, o_y + 22.0, w - 20.0,
         comp.override_desc,
-        size=6.6, leading=8.8, color=PALETTE["ink"],
+        size=6.3, leading=8.3, color=PALETTE["ink"],
     )
 
     # Version Check Boxes Track (y+142..y+178)
-    ty = o_y + o_h - 32.0
+    ty = o_y + o_h - 30.0
     page.line(x + 10.0, ty, x + w - 10.0, ty, stroke=PALETTE["rule"], width=0.5, dash=(2, 1.5))
-    page.text(x + 10.0, ty + 12.0, "ONCE / VER:", font="mono_bold", size=5.6, color=PALETTE["ink_soft"])
+    page.text(x + 10.0, ty + 11.0, "ONCE / VER:", font="mono_bold", size=5.5, color=PALETTE["ink_soft"])
 
     slots = ["v1.0", "v2.0", "v3.0"]
     sx_start = x + 58.0
     sw_box = 44.0
     for s_idx, ver_lbl in enumerate(slots):
         bx = sx_start + s_idx * (sw_box + 4.0)
-        page.rounded_rect(bx, ty + 2.5, sw_box, 14.0, r=2.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.6)
-        page.rect(bx + 3.0, ty + 5.0, 9.0, 9.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.6)
-        page.text(bx + 15.0, ty + 12.0, ver_lbl, font="mono_bold", size=6.2, color=PALETTE["ink"])
+        page.rounded_rect(bx, ty + 2.0, sw_box, 13.0, r=2.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.6)
+        page.rect(bx + 3.0, ty + 4.5, 8.0, 8.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.6)
+        page.text(bx + 14.0, ty + 11.0, ver_lbl, font="mono_bold", size=6.0, color=PALETTE["ink"])
 
-    page.text(x + w / 2.0, o_y + o_h - 4.5, "Unused charge forfeits upon SETEC upgrade.", font="italic", size=5.0, color=PALETTE["muted"], align="center")
+    page.text(x + w / 2.0, o_y + o_h - 4.0, "Unused charge forfeits upon SETEC upgrade.", font="italic", size=4.8, color=PALETTE["muted"], align="center")
 
-    # 5. Bottom Card Footer (y+188..y+206)
+    # 6. Bottom Card Footer (y+188..y+206)
     page.line(x + 6.0, y + 192.0, x + w - 6.0, y + 192.0, stroke=PALETTE["guide"], width=0.5)
     page.text(x + 8.0, y + 203.0, f"REF: COMP-{comp.code}", font="mono", size=5.2, color=PALETTE["muted"])
     page.text(x + w - 8.0, y + 203.0, "SLIPS FLUSH BESIDE TERMINAL MAT", font="mono", size=4.8, color=PALETTE["muted"], align="right")
@@ -771,9 +791,9 @@ def _draw_empty_white_hat_slot(page: PDFPage, x: float, y: float, w: float, h: f
 
     # Purple Specialist Dice Faces Strip
     f_y = y + 152.0
-    page.text(x + 10.0, f_y + 10.0, "PURPLE SPECIALIST FACES (d6 // $4–$6 Reserve):", font="mono_bold", size=5.3, color=PALETTE["purple"])
+    page.text(x + 10.0, f_y + 10.0, "PURPLE SPECIALIST FACES (d6 // $4 Reserve):", font="mono_bold", size=5.3, color=PALETTE["purple"])
     cell_w = (w - 20.0 - 4 * 2.5) / 5.0
-    labels = ["1-2: Any Shld", "3: +$2 Cash", "4: +$1 & 1 {WRENCH}", "5: {LOCK} Glitch", "6: {STAR} Proto"]
+    labels = ["1-2: Any Shld", "3: +$2 Cash", "4: +$1 & 1 {RESEARCH}", "5: {LOCK} Glitch", "6: {STAR} Proto"]
     for c_i, lbl in enumerate(labels):
         cx_i = x + 10.0 + c_i * (cell_w + 2.5)
         c_fill = PALETTE["purple_light"] if c_i in (4, 5) else PALETTE["paper_tint"]
@@ -783,7 +803,7 @@ def _draw_empty_white_hat_slot(page: PDFPage, x: float, y: float, w: float, h: f
     # Bottom Tag
     page.line(x + 8.0, y + 193.0, x + w - 8.0, y + 193.0, stroke=PALETTE["purple_light"], width=0.5)
     page.text(x + 8.0, y + 204.0, "SLIPS FLUSH BESIDE MAT", font="mono", size=4.6, color=PALETTE["muted"])
-    page.text(x + w - 8.0, y + 204.0, "2x PURPLE SPECIALIST DICE ($4–$6 IN RESERVE)", font="mono", size=4.6, color=PALETTE["purple"], align="right")
+    page.text(x + w - 8.0, y + 204.0, "2x PURPLE SPECIALIST DICE ($4 IN RESERVE)", font="mono", size=4.6, color=PALETTE["purple"], align="right")
 
 
 def render_player_board(
@@ -795,7 +815,7 @@ def render_player_board(
     draw_board_outer_frame(
         page,
         left_tag=f"TOO MANY SECRETS // CONSULTANCY TERMINAL [TERM-0{idx}/4]",
-        right_tag="PNP PROTOTYPE v0.26.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.28.0 // US LETTER",
     )
 
     # -------------------------------------------------------------------------
@@ -870,7 +890,7 @@ def render_player_board(
 
     page.rich_line(
         x_res + w_res / 2.0, r1_y + 63.5,
-        "**$4–$6 (per Dossier)** in P3A",
+        "**$4 (Personal Reserve)** in P3A",
         size=5.8, color=PALETTE["purple"], align="center",
     )
     page.text(
@@ -892,10 +912,10 @@ def render_player_board(
     page.rect(rx, r2_y, rw, 18.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
     page.rich_line(
         rx + 8, r2_y + 12.5,
-        "**ZONE 2: IN PRODUCTION** (Zero Dice Wear — Shields never wear down!)",
-        size=8.2, color=PALETTE["ink"],
+        "**ZONE 2: IN PRODUCTION** (Defense Grid Cap: 2 Committed Dice — Upgrades to 3 / 4)",
+        size=7.6, color=PALETTE["ink"],
     )
-    page.text(rx + rw - 8, r2_y + 12.5, "DEPLOYED MODULES", font="mono_bold", size=6.5, color=PALETTE["ink_soft"], align="right")
+    page.text(rx + rw - 8, r2_y + 12.5, "ZERO WEAR ON SHIELDS", font="mono_bold", size=6.2, color=PALETTE["ink_soft"], align="right")
 
     # Sub-box 1: Income (wide rectangle spanning the width)
     ix = rx + 7.0
@@ -904,13 +924,13 @@ def render_player_board(
     ih = 48.0
     page.rect(ix, iy, iw, ih, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.8)
     page.rect(ix, iy, iw, 15.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.6)
-    page.rich_line(ix + 6.0, iy + 10.5, "**INCOME SLOT** (Cash, Patches & Non-Shield Star Outputs)", size=7.2, color=PALETTE["ink"])
+    page.rich_line(ix + 6.0, iy + 10.5, "**INCOME SLOT** (Cash, Research & Non-Shield Star Outputs)", size=7.2, color=PALETTE["ink"])
     page.text(ix + iw - 6.0, iy + 10.5, "COLLECTED IN PHASE 3", font="mono_bold", size=5.8, color=PALETTE["muted"], align="right")
 
     page.rich_paragraph(
         ix + 12.0, iy + 25.0, iw - 24.0,
-        "Modules producing cash, patches, and non-shield star abilities.\n"
-        "**Delayed Income:** Surviving dice collect cash & patches in Phase 3.",
+        "Modules producing cash, research ({RESEARCH}), and non-shield star abilities.\n"
+        "**Delayed Income:** Surviving dice collect cash & research in Phase 3.",
         size=6.6, leading=9.0, color=PALETTE["ink_soft"],
     )
 
@@ -946,8 +966,8 @@ def render_player_board(
     page.rect(rx, r3_y, rw, 18.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
     page.rich_line(
         rx + 8, r3_y + 12.5,
-        "**ZONE 3: UNDER DEVELOPMENT** (CI/CD Triage Conveyor)",
-        size=8.2, color=PALETTE["ink"],
+        "**ZONE 3: UNDER DEVELOPMENT** (Pipeline Bandwidth: Triage 2 & Release 2 — Upgrades to 3 / 4)",
+        size=7.6, color=PALETTE["ink"],
     )
     page.text(rx + rw - 8, r3_y + 12.5, "OFFLINE MODULES (DO NOT ROLL)", font="mono_bold", size=6.4, color=PALETTE["muted"], align="right")
 
@@ -966,20 +986,20 @@ def render_player_board(
         size=5.8, leading=7.6, color=PALETTE["ink_soft"],
     )
     # Fast-Patch option on right of Glitched Box
-    fp_x = gx + 98.0
-    fp_w = gw - 104.0
+    fp_x = gx + 94.0
+    fp_w = gw - 100.0
     dy_g = gy + 48.0
     ds_g = 25.0
-    page.rounded_rect(fp_x, dy_g, fp_w, ds_g, r=2.5, stroke=PALETTE["green"], fill=PALETTE["green_light"], line_width=0.7)
-    page.rich_line(fp_x + fp_w / 2.0, dy_g + 10.0, "**FAST-PATCH**", size=5.6, color=PALETTE["green"], align="center")
-    page.rich_line(fp_x + fp_w / 2.0, dy_g + 19.5, "Pay **1** {WRENCH} -> Scanned", size=5.0, color=PALETTE["ink"], align="center")
+    page.rounded_rect(fp_x, dy_g, fp_w, ds_g, r=2.5, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.7)
+    page.rich_line(fp_x + fp_w / 2.0, dy_g + 10.0, "**FAST-PATCH**", size=5.6, color=PALETTE["purple"], align="center")
+    page.rich_line(fp_x + fp_w / 2.0, dy_g + 19.5, "Pay **1** {RESEARCH} -> Scanned", size=5.0, color=PALETTE["ink"], align="center")
 
     # Conveyor Arrow connecting Glitched to Scanned
     c_x1 = gx + gw + 4.0
     c_x2 = rx + rw - 7.0 - 180.0 - 4.0
     c_cx = (c_x1 + c_x2) / 2.0
-    page.rich_line(c_cx, gy + 16.0, "**Fast-Patch**", size=6.3, color=PALETTE["green"], align="center")
-    page.rich_line(c_cx, gy + 25.5, "(Pay 1 {WRENCH})", size=5.6, color=PALETTE["ink_soft"], align="center")
+    page.rich_line(c_cx, gy + 16.0, "**Fast-Patch**", size=6.3, color=PALETTE["purple"], align="center")
+    page.rich_line(c_cx, gy + 25.5, "(Pay 1 {RESEARCH})", size=5.6, color=PALETTE["ink_soft"], align="center")
 
     # Arrow line and head
     page.line(c_x1 + 4.0, gy + 42.0, c_x2 - 4.0, gy + 42.0, stroke=PALETTE["ink"], width=1.4)
@@ -988,7 +1008,7 @@ def render_player_board(
 
     page.text(c_cx, gy + 58.0, "OR", font="mono_bold", size=5.5, color=PALETTE["muted"], align="center")
     page.text(c_cx, gy + 67.0, "NATURAL SHIFT", font="mono_bold", size=5.8, color=PALETTE["ink_soft"], align="center")
-    page.text(c_cx, gy + 75.5, "at Round End (Free)", font="italic", size=5.1, color=PALETTE["muted"], align="center")
+    page.text(c_cx, gy + 75.5, "(Up to Triage Bandwidth)", font="italic", size=5.0, color=PALETTE["muted"], align="center")
 
     # Sub-box 2: Scanned Box
     sx = rx + rw - 7.0 - 180.0
@@ -1005,18 +1025,18 @@ def render_player_board(
         size=5.8, leading=7.6, color=PALETTE["ink_soft"],
     )
     # Graduation status pill on right of Scanned Box
-    grad_x = sx + 98.0
-    grad_w = sw_sc - 104.0
+    grad_x = sx + 94.0
+    grad_w = sw_sc - 100.0
     page.rounded_rect(grad_x, dy_g, grad_w, ds_g, r=2.5, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.7)
     page.text(grad_x + grad_w / 2.0, dy_g + 10.0, "GRADUATION", font="mono_bold", size=5.6, color=PALETTE["ink"], align="center")
-    page.rich_line(grad_x + grad_w / 2.0, dy_g + 19.5, "-> **Ready** at EOR", size=5.2, color=PALETTE["ink_soft"], align="center")
+    page.rich_line(grad_x + grad_w / 2.0, dy_g + 19.5, "-> **Ready** (max Bandwidth)", size=4.8, color=PALETTE["ink_soft"], align="center")
 
     # Bottom caption across Zone 3
     page.line(rx + 8.0, r3_y + 107.0, rx + rw - 8.0, r3_y + 107.0, stroke=PALETTE["rule"], width=0.5, dash=(2.0, 2.0))
     page.rich_paragraph(
         rx + 8.0, r3_y + 116.0, rw - 16.0,
-        "**PIPELINE TRANSITION:** At round end, Scanned dice graduate to Ready for Release; remaining Glitched dice shift naturally to Scanned *(or Fast-Patch for 1 {WRENCH})*. Surviving In Production dice return to Ready.",
-        size=5.7, leading=7.7, color=PALETTE["ink_soft"], align="center",
+        "**PIPELINE TRANSITION:** Scanned dice graduate to Ready (up to Release Bandwidth); remaining Glitched dice shift naturally to Scanned (up to Triage Bandwidth; or Fast-Patch for 1 {RESEARCH}). Excess dice remain offline.",
+        size=5.5, leading=7.6, color=PALETTE["ink_soft"], align="center",
     )
     page.text(
         rx + rw / 2.0, r3_y + 130.5,
@@ -1025,48 +1045,90 @@ def render_player_board(
     )
 
     # -------------------------------------------------------------------------
-    # BOTTOM ROW: Money | Patches | Secrets (x = 40..752, y = 468..578)
+    # BOTTOM ROW: Money | Research | Hardware Upgrade Tracks | Secrets
+    # (x = 40..752, w = 712, y = 468..578, h = 110)
     # -------------------------------------------------------------------------
     by, bh = 468.0, 110.0
-    bgap = 14.0
-    bw = (712.0 - 2 * bgap) / 3.0  # 228.0 pt each
 
-    # 1. Money
-    mx = 40.0
-    page.rect(mx, by, bw, bh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
-    page.rect(mx, by, bw, 20.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
-    page.text(mx + 8, by + 13.8, "MONEY ($)", font="bold", size=9.5, color=PALETTE["ink"])
-    page.text(mx + bw / 2.0, by + 66.0, "$", font="bold", size=28.0, color=PALETTE["guide"], align="center")
-    page.text(mx + bw / 2.0, by + bh - 7.0, "Start: $4 (+$1 Data Scraper)  |  Never drops below $0", font="regular", size=6.7, color=PALETTE["muted"], align="center")
+    # 1. Money ($) (w = 104)
+    mx, mw = 40.0, 104.0
+    page.rect(mx, by, mw, bh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
+    page.rect(mx, by, mw, 18.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
+    page.text(mx + mw / 2.0, by + 12.2, "MONEY ($)", font="bold", size=8.0, color=PALETTE["ink"], align="center")
+    page.text(mx + mw / 2.0, by + 58.0, "$", font="bold", size=26.0, color=PALETTE["guide"], align="center")
+    page.text(mx + mw / 2.0, by + bh - 19.0, "Start: $4", font="bold", size=6.6, color=PALETTE["ink_soft"], align="center")
+    page.text(mx + mw / 2.0, by + bh - 10.0, "(+$2 Meridian: $6)", font="regular", size=5.4, color=PALETTE["muted"], align="center")
 
-    # 2. Patches (with 3 dedicated token slots enforcing Cleanup Cap: Max 3 🔧)
-    px = mx + bw + bgap
-    page.rect(px, by, bw, bh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
-    page.rect(px, by, bw, 20.0, stroke=PALETTE["ink"], fill=PALETTE["green_light"], line_width=0.8)
-    page.rich_line(px + 8, by + 13.8, "{WRENCH} **PATCHES**", size=9.2, color=PALETTE["green"])
-    page.text(px + bw - 8, by + 13.8, "CLEANUP CAP: 3", font="mono_bold", size=7.4, color=PALETTE["green"], align="right")
+    # 2. Research Tokens (🔬) (w = 116)
+    rx_t, rw_t = 152.0, 116.0
+    page.rect(rx_t, by, rw_t, bh, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=1.0)
+    page.rect(rx_t, by, rw_t, 18.0, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.8)
+    page.rich_line(rx_t + 6.0, by + 12.2, "{RESEARCH} **RESEARCH**", size=7.8, color=PALETTE["purple"])
+    page.text(rx_t + rw_t - 6.0, by + 12.2, "UNCAPPED", font="mono_bold", size=5.5, color=PALETTE["purple"], align="right")
+    page.draw_research_icon(rx_t + rw_t / 2.0, by + 50.0, 22.0, color=PALETTE["purple"])
+    page.text(rx_t + rw_t / 2.0, by + bh - 24.0, "Start: 2 {RESEARCH} (+2 Helix)", font="regular", size=5.6, color=PALETTE["ink_soft"], align="center")
+    page.text(rx_t + rw_t / 2.0, by + bh - 14.5, "Fast-Patch: 1 {RESEARCH} / die", font="regular", size=5.4, color=PALETTE["muted"], align="center")
+    page.text(rx_t + rw_t / 2.0, by + bh - 6.0, "Patents: 4 / 3 / 2 {RESEARCH}", font="bold", size=5.4, color=PALETTE["purple"], align="center")
 
-    ps_size = 50.0
-    ps_gap = 12.0
-    ps_x0 = px + (bw - (3 * ps_size + 2 * ps_gap)) / 2.0
-    ps_y = by + 30.0
-    for p_i in range(3):
-        sx = ps_x0 + p_i * (ps_size + ps_gap)
-        page.rounded_rect(sx, ps_y, ps_size, ps_size, r=6.0, stroke=PALETTE["muted"], fill=PALETTE["paper_tint"], line_width=0.75, dash=(3, 2))
-        lbl = f"SLOT {p_i + 1}" if p_i < 2 else "CLEANUP (3)"
-        page.text(sx + ps_size / 2.0, ps_y + 13.0, lbl, font="mono", size=5.8, color=PALETTE["muted"], align="center")
-        page.draw_wrench_icon(sx + ps_size / 2.0, ps_y + 31.0, 14.0, color=PALETTE["rule"])
-    page.rich_line(px + bw / 2.0, by + bh - 7.0, "Start: **2** Tokens  |  Fast-Patch (1 {WRENCH}: Glitched -> Scanned)  |  Discard >3 at Cleanup", size=5.8, color=PALETTE["muted"], align="center")
+    # 3. Hardware & R&D Upgrade Tracks (w = 344)
+    tx, tw = 276.0, 344.0
+    page.rect(tx, by, tw, bh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
+    page.rect(tx, by, tw, 18.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
+    page.text(tx + 8.0, by + 12.2, "TERMINAL HARDWARE & R&D UPGRADE TRACKS", font="bold", size=7.2, color=PALETTE["ink"])
+    page.rich_line(tx + tw - 8.0, by + 12.2, "SPEND {RESEARCH} IN P3A", size=5.8, color=PALETTE["purple"], align="right")
 
-    # 3. Secrets
-    scx = px + bw + bgap
-    page.rect(scx, by, bw, bh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
-    page.rect(scx, by, bw, 20.0, stroke=PALETTE["ink"], fill=PALETTE["blue_light"], line_width=0.8)
-    page.rich_line(scx + 8, by + 13.8, "{SECRET} **SECRETS**", size=9.2, color=PALETTE["blue"])
-    page.text(scx + bw - 8, by + 13.8, "PRIMARY OBJECTIVE", font="mono_bold", size=7.5, color=PALETTE["blue"], align="right")
-    page.draw_secret_icon(scx + bw / 2.0, by + 56.0, 26.0, color=PALETTE["guide"])
-    page.text(scx + bw / 2.0, by + bh - 16.5, "Start: 8 Secrets (2P/3P)  |  12 Secrets (4P)", font="regular", size=6.7, color=PALETTE["ink_soft"], align="center")
-    page.text(scx + bw / 2.0, by + bh - 6.0, "<= 0 SECRETS = TOTAL DATA BREACH (PATIENT ZERO)", font="bold", size=6.5, color=PALETTE["red"], align="center")
+    # 3 Track Rows: Pipeline, Defense, Patents
+    track_rows = [
+        ("PIPELINE", "Triage & Release", "[L0] 2 / 2", "3 / 3 (2 {RESEARCH})", "4 / 4 + Hotfix (3 {RESEARCH})"),
+        ("DEFENSE", "Shield Capacity", "[L0] 2 Cap", "3 Cap (2 {RESEARCH})", "4 Cap + Firewall (3 {RESEARCH})"),
+        ("PATENTS", "VP Conversion", "[L0] 4 {RESEARCH} -> +1 Sec", "3 {RESEARCH} (2 {RESEARCH})", "2 {RESEARCH} + $1 (3 {RESEARCH})"),
+    ]
+    r_h = 24.0
+    lbl_w = 66.0
+    c0_w = 64.0
+    c1_w = 100.0
+    c2_w = 104.0
+    for t_idx, (t_name, t_sub, l0_txt, l1_txt, l2_txt) in enumerate(track_rows):
+        ty_row = by + 21.0 + t_idx * (r_h + 2.0)
+        # Track label cell
+        page.rect(tx + 4.0, ty_row, lbl_w, r_h, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.5)
+        page.text(tx + 8.0, ty_row + 10.0, t_name, font="bold", size=6.0, color=PALETTE["ink"])
+        page.text(tx + 8.0, ty_row + 19.0, t_sub, font="mono", size=4.8, color=PALETTE["muted"])
+
+        # Level 0 (Default)
+        cx0 = tx + 4.0 + lbl_w + 2.0
+        page.rect(cx0, ty_row, c0_w, r_h, stroke=PALETTE["rule"], fill=PALETTE["white"], line_width=0.5)
+        page.rich_line(cx0 + c0_w / 2.0, ty_row + 14.5, f"**{l0_txt}**", size=5.4, color=PALETTE["ink_soft"], align="center")
+
+        # Level 1 (Cost 2 🔬) with Checkbox
+        cx1 = cx0 + c0_w + 2.0
+        page.rect(cx1, ty_row, c1_w, r_h, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.6)
+        page.rect(cx1 + 5.0, ty_row + 7.0, 10.0, 10.0, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.6)
+        page.rich_line(cx1 + 18.0, ty_row + 14.5, f"[L1] **{l1_txt}**", size=5.2, color=PALETTE["purple"])
+
+        # Level 2 (Cost 3 🔬) with Checkbox
+        cx2 = cx1 + c1_w + 2.0
+        page.rect(cx2, ty_row, c2_w, r_h, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.6)
+        page.rect(cx2 + 5.0, ty_row + 7.0, 10.0, 10.0, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.6)
+        page.rich_line(cx2 + 18.0, ty_row + 14.5, f"[L2] **{l2_txt}**", size=5.0, color=PALETTE["purple"])
+
+    # Bottom note across tracks
+    page.rich_line(
+        tx + tw / 2.0, by + bh - 4.5,
+        "*The Prometheus Foundation receives a -1 {RESEARCH} discount on all track upgrades (min 1 {RESEARCH}).*",
+        size=4.9, color=PALETTE["muted"], align="center",
+    )
+
+    # 4. Secrets (w = 124)
+    scx, scw = 628.0, 124.0
+    page.rect(scx, by, scw, bh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
+    page.rect(scx, by, scw, 18.0, stroke=PALETTE["ink"], fill=PALETTE["blue_light"], line_width=0.8)
+    page.rich_line(scx + 6.0, by + 12.2, "{SECRET} **SECRETS**", size=7.8, color=PALETTE["blue"])
+    page.text(scx + scw - 6.0, by + 12.2, "VICTORY", font="mono_bold", size=5.5, color=PALETTE["blue"], align="right")
+    page.draw_secret_icon(scx + scw / 2.0, by + 48.0, 20.0, color=PALETTE["guide"])
+    page.text(scx + scw / 2.0, by + bh - 24.0, "Start: 8 (2P/3P) | 12 (4P)", font="regular", size=5.6, color=PALETTE["ink_soft"], align="center")
+    page.text(scx + scw / 2.0, by + bh - 15.0, "DTO: +1 Secret Bonus", font="mono_bold", size=5.4, color=PALETTE["blue"], align="center")
+    page.text(scx + scw / 2.0, by + bh - 6.0, "<= 0 SECRETS = PATIENT ZERO", font="bold", size=5.2, color=PALETTE["red"], align="center")
 
 
 def render_company_cards_page(page: PDFPage) -> None:
@@ -1074,7 +1136,7 @@ def render_company_cards_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x CLIENT COMPANY CARDS [PAGE 5/6]",
-        right_tag="PNP PROTOTYPE v0.26.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.28.0 // US LETTER",
     )
 
     page.text(
@@ -1123,7 +1185,7 @@ def render_white_hat_dossiers_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x WHITE HAT DOSSIER CARDS [PAGE 6/6]",
-        right_tag="PNP PROTOTYPE v0.26.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.28.0 // US LETTER",
     )
 
     page.text(
@@ -1160,8 +1222,8 @@ def render_white_hat_dossiers_page(page: PDFPage) -> None:
 
     wh_rules_text = (
         "**1. Operative Assignment:** At setup, each player is dealt 1 White Hat Dossier card (or introductory preset). Place card flush into the Terminal Mat bottom dock.\n"
-        "**2. Personal Reserve (2 Purple Dice):** Each player holds **2 Purple Specialist Dice** in their private dock on the Terminal Mat. Procured for **$4–$6 each (per Dossier)** in Phase 3A Operations (counts to 2-dice buy limit).\n"
-        "**3. Standardized Faces 1-5:** All Purple Specialist dice feature: **Faces 1-2:** `Block 1 Any`, **Face 3:** `+$2`, **Face 4:** `+$1 & +1 🔧`, **Face 5:** `Glitch (Locked)`.\n"
+        "**2. Personal Reserve (2 Purple Dice):** Each player holds **2 Purple Specialist Dice** in their private dock on the Terminal Mat. Procured for **$4 each** in Phase 3A Operations (counts to 2-dice buy limit).\n"
+        "**3. Standardized Faces 1-5:** All Purple Specialist dice feature: **Faces 1-2:** `Block 1 Any`, **Face 3:** `+$2`, **Face 4:** `+$1 & +1 {RESEARCH}`, **Face 5:** `Glitch (Locked)`.\n"
         "**4. Face 6 Signature Protocol:** Rolling Face 6 ({PURPLE} {STAR}) triggers the operative's bespoke Signature Protocol. Repeatable: each rolled Star triggers the protocol once."
     )
     page.rich_paragraph(rx + 10.0, ry + 25.0, rw - 20.0, wh_rules_text, size=6.4, leading=8.6, color=PALETTE["ink"])
@@ -1175,7 +1237,7 @@ def render_agent_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // CENTRAL ROGUE AGENT & COMPILER BOARD [1/2]",
-        right_tag="PNP PROTOTYPE v0.26.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.28.0 // US LETTER",
     )
 
     # Top Title Bar inside board
@@ -1333,10 +1395,10 @@ def render_agent_board(page: PDFPage) -> None:
         (
             "PHASE 3: OPERATIONS & PIPELINE PREP",
             (
-                "1. **Collect Income:** All cash, patches, & non-shield {STAR} from dice in In Production.\n"
-                "2. **Buy Dice (max 2/turn):** Pay $ -> place in **Ready Zone**.\n"
-                "3. **Pipeline Prep:** Fast-Patch (**1** {WRENCH}: Glitched -> Scanned); Scanned -> Ready; In Production -> Ready; Glitched -> Scanned.\n"
-                "4. **Cleanup:** Discard unspent {WRENCH} >3; pass 1st Player."
+                "1. **Collect Income:** All cash ($), Research ({RESEARCH}), & non-shield {STAR} from In Production.\n"
+                "2. **Operations:** Buy Dice (max 2/round) | Research Upgrades: Defense, Bandwidth, or File Patents ({RESEARCH}).\n"
+                "3. **Pipeline Conveyor:** Scanned -> Ready (up to Bandwidth); In Prod -> Ready; Glitched -> Scanned (up to Bandwidth). Fast-Patch: 1 {RESEARCH} / die.\n"
+                "4. **Cleanup:** Uncapped Research storage (never discarded); pass 1st Player."
             ),
         ),
         (
@@ -1344,7 +1406,7 @@ def render_agent_board(page: PDFPage) -> None:
             (
                 "**Surviving Firms Only** *(Patient Zero eliminated at <=0 Secrets)*:\n"
                 "**Most Corporate Secrets Wins!** (Uncapped).\n"
-                "*Tiebreakers: 1. Most Cash ($)  2. Ready Colored Dice  3. Patches ({WRENCH})  4. Fewest Under Dev.*"
+                "*Tiebreakers: 1. Most Cash ($)  2. Ready Colored Dice  3. Research ({RESEARCH})  4. Fewest Under Dev.*"
             ),
         ),
     ]
@@ -1365,7 +1427,7 @@ def render_market_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // SOFTWARE MODULE MARKET & CENTRAL SUPPLY [2/2]",
-        right_tag="PNP PROTOTYPE v0.25.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.28.0 // US LETTER",
     )
 
     # Top Title Bar
@@ -1485,10 +1547,10 @@ def render_market_board(page: PDFPage) -> None:
     page.text(48.0, fy + 11.8, "SETUP QUICK-REFERENCE & COMPILER PRIMING", font="bold", size=7.8, color=PALETTE["ink"])
     page.rich_paragraph(
         48.0, fy + 26.5, fw - 16.0,
-        "- **2P:** $4 | **8 Secrets** | **2** {WRENCH} | **4 Dice/col** | *Track: 4 spaces*\n"
-        "- **3P:** $4 | **8 Secrets** | **2** {WRENCH} | **6 Dice/col** | *Track: 5 spaces*\n"
-        "- **4P:** $4 | **12 Secrets** | **2** {WRENCH} | **8 Dice/col** | *Track: 6 spaces*\n"
-        "- **Setup:** 4 Market Stacks (R/B/G/Y). 2 Purple Specialist dice per player placed in Personal Reserves ($4–$6 (per Dossier); not in central market).",
+        "- **2P:** $4 | **8 Secrets** | **2** {RESEARCH} | **4 Dice/col** | *Track: 4 spaces*\n"
+        "- **3P:** $4 | **8 Secrets** | **2** {RESEARCH} | **6 Dice/col** | *Track: 5 spaces*\n"
+        "- **4P:** $4 | **12 Secrets** | **2** {RESEARCH} | **8 Dice/col** | *Track: 6 spaces*\n"
+        "- **Setup:** 4 Market Stacks (R/B/G/Y). 2 Purple Specialist dice per player placed in Personal Reserves ($4 per Dossier; not in central market). Starting bonuses per Corporation card.",
         size=6.2, leading=8.7, color=PALETTE["ink"],
     )
 
@@ -1500,7 +1562,7 @@ def render_market_board(page: PDFPage) -> None:
     page.rich_paragraph(
         rx_f + 8.0, fy + 27.5, fw - 16.0,
         "- **Primary Victory Condition:** Most remaining **Corporate Secrets** wins! (Uncapped).\n"
-        "- **Tiebreakers:** 1. Most Cash ($)  |  2. Most Ready Colored Dice  |  3. Most Patches ({WRENCH})  |  4. Fewest Under Dev.\n"
+        "- **Tiebreakers:** 1. Most Cash ($)  |  2. Most Ready Colored Dice  |  3. Most Research ({RESEARCH})  |  4. Fewest Under Dev.\n"
         "- *Patient Zero (<=0 Secrets) eliminated! Total wipeout: rank by net breach depth & unfulfilled destructions.*",
         size=6.8, leading=11.8, color=PALETTE["ink"],
     )
@@ -1605,27 +1667,27 @@ def render_master_dice_reference(page: PDFPage) -> None:
         (
             "CHOICE FACES ( / ) & HYBRID ( & )",
             (
-                "- **Slash ( / ):** Choose **1** option in Phase 1 Step 5 *(e.g. Blue Face 4: assign as Block 1 {BLUE} Shield OR keep for +1 {WRENCH})*.\n"
-                "- **Ampersand ( & ):** Gain **both** outputs in Phase 3 *(+$1 & +1 {WRENCH})*.\n"
+                "- **Slash ( / ):** Choose **1** option in Phase 1 Step 5 *(e.g. Blue Face 4: assign as Block 1 {BLUE} Shield OR keep for +1 {RESEARCH})*.\n"
+                "- **Ampersand ( & ):** Gain **both** outputs in Phase 3 *(+$1 & +1 {RESEARCH})*.\n"
                 "- **Purple Specialist:** Dual Any-Shield baseline; Face 6 executes Archetype Signature Protocol."
             ),
         ),
         (
-            "LOCKED DICE ({LOCK}) & ABSOLUTE LOCKS",
+            "LOCKED DICE ({LOCK}) & HARDWARE TRACKS",
             (
                 "- **{LOCK} Glitch:** Face 5 on colored dice is locked; cannot be rerolled.\n"
-                "- **Track Locks:** Corruption spaces lock Cash, Patch, or Shield faces.\n"
-                "- **Absolute Locks:** Locked dice CANNOT be unlocked in Phase 1 (no patch spending).\n"
-                "- **Fast-Patching:** Consolidated in Phase 3 Part 3B (1 {WRENCH}: Glitched -> Scanned)."
+                "- **Track Locks:** Corruption spaces lock Cash, Research, or Shield faces.\n"
+                "- **Absolute Locks:** Locked dice CANNOT be unlocked in Phase 1 (no patch/research spend).\n"
+                "- **Fast-Patching:** Consolidated in Phase 3 Part 3B (1 {RESEARCH}: advance 1 die immediately)."
             ),
         ),
         (
-            "PERSONAL RESERVE & ZERO WEAR PIPELINE",
+            "PERSONAL RESERVE & HARDWARE LIMITS",
             (
-                "- **Personal Reserve:** Each player holds **2 Purple Specialist dice** ($4–$6 (per Dossier) in Phase 3A).\n"
-                "- **Zero Dice Wear:** Shields **never wear down** when blocking in Phase 2.\n"
+                "- **Personal Reserve:** Each player holds **2 Purple Specialist dice** ($4 per Dossier in Phase 3A).\n"
+                "- **Defense Cap & Bandwidth:** Assigned shields cannot exceed Cap; pipeline conveyor limited by Bandwidth.\n"
                 "- **Glitched Box:** Unresolved Glitch faces or Green Malware move to Under Development.\n"
-                "- **Triage Conveyor:** Fast-Patch (**1** {WRENCH}) moves Glitched -> Scanned immediately."
+                "- **Triage Conveyor:** Fast-Patch (**1** {RESEARCH}) advances Glitched -> Scanned immediately."
             ),
         ),
     ]
@@ -1652,13 +1714,13 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
     page.line(20.0, mid_y, 772.0, mid_y, stroke=PALETTE["muted"], width=0.5, dash=(4, 3))
 
     compact_rows = [
-        ("gray", "GRAY", "Starter", ("1 Any", "1 Any", "+$1", "+$1", "$1 / 1{WRENCH}", "+1{WRENCH}")),
+        ("gray", "GRAY", "Starter", ("1 Any", "1 Any", "+$1", "+$1", "$1 / 1{RESEARCH}", "+1{RESEARCH}")),
         ("white", "WHITE", "$1-$3", ("1 Any", "1 Any", "1 Any", "+$1", "{LOCK}Glitch", "{LOCK}Glitch")),
-        ("red", "RED", "$5–$6", ("1 {RED}", "+$2", "+$2", "+$2", "{LOCK}Glitch", "{RED} {STAR}")),
-        ("blue", "BLUE", "$5–$7", ("1 {BLUE}", "+1{WRENCH}", "+$1", "1{BLUE}/1{WRENCH}", "{LOCK}Glitch", "{BLUE} {STAR}")),
-        ("green", "GREEN", "$5–$6", ("1 {GREEN}", "+1{WRENCH}", "+2{WRENCH}", "1{WRENCH}/$1", "{LOCK}Glitch", "{GREEN} {STAR}")),
-        ("yellow", "YELLOW", "$6–$7", ("+$3", "+$2", "+$2", "$1 & 1{WRENCH}", "{LOCK}Glitch", "{YELLOW} {STAR}")),
-        ("purple", "PURPLE", "Res $4–$6", ("1 Any", "1 Any", "+$2", "$1 & 1{WRENCH}", "{LOCK}Glitch", "{PURPLE}★ Protocol")),
+        ("red", "RED", "$4–$5", ("1 {RED}", "+$2", "+$2", "+$2", "{LOCK}Glitch", "{RED} {STAR}")),
+        ("blue", "BLUE", "$4–$5", ("1 {BLUE}", "+1{RESEARCH}", "+$1", "1{BLUE}/1{RESEARCH}", "{LOCK}Glitch", "{BLUE} {STAR}")),
+        ("green", "GREEN", "$4", ("1 {GREEN}", "+1{RESEARCH}", "+2{RESEARCH}", "1{RESEARCH}/$1", "{LOCK}Glitch", "{GREEN} {STAR}")),
+        ("yellow", "YELLOW", "$4–$5", ("+$3", "+$2", "+$2", "$1 & 1{RESEARCH}", "{LOCK}Glitch", "{YELLOW} {STAR}")),
+        ("purple", "PURPLE", "Res $4", ("1 Any", "1 Any", "+$2", "$1 & 1{RESEARCH}", "{LOCK}Glitch", "{PURPLE}★ Protocol")),
     ]
 
     for r in range(2):
@@ -1706,16 +1768,16 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
             page.rect(x, fy, cw, fh, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.7)
             page.rich_paragraph(
                 x + 6.0, fy + 6.0, cw - 12.0,
-                "**P1 Roll & Deploy:** +1{BLACK} -> Hire {WHITE} ($1/$2/$3, max 3) -> Roll Ready + Contractors -> Up to 2 Pure Rerolls (Glitches lock immediately; no P1 patch unlocks) -> Unresolved Glitches -> Glitched Box -> Commit Shields & Income -> Hash Match (3-of-a-kind = +1 Secret).\n"
-                "**P2 SETEC Compile:** Drop Staging Cup -> 2A: {BLACK} advances track (4/5/6=Upgr/Singularity) -> 2B: Resolve vs Shields (Zero Wear!) -> Dmg: {RED} -$1 (Unpaid: -1 Secret) | {BLUE} -1 Secret | {GREEN} Glitch 1 die (Income 1st, then Shield; empty: destroy Under Dev) -> Recycle {RED}{BLUE}{GREEN} -> 2C: End Check (Singularity or <=0 Secrets).\n"
-                "**P3 Operations & Pipeline:** Collect Income ($/🔧/★) -> Buy <=2 dice (Market R/B/G/Y or $4–$6 (per Dossier) Personal Reserve Purple) -> Fast-Patch (1{WRENCH}: Glitched -> Scanned) -> Scanned -> Ready -> In Production -> Ready -> Glitched -> Scanned -> Cap held 🔧 at 3 -> Pass 1st Player.\n"
-                "**VICTORY:** Most Corporate Secrets among survivors. Patient Zero (<=0 Secrets) eliminated. Ties: 1. $ Capital  2. Ready Modules  3. Patches  4. Fewest Under Dev.",
-                size=5.4, leading=7.7, color=PALETTE["ink"],
+                "**P1 Roll & Deploy:** +1{BLACK} -> Hire {WHITE} ($1/$2/$3, max 3) -> Roll Ready + Contractors -> Up to 2 Pure Rerolls (Glitches lock immediately) -> Unresolved Glitches -> Glitched Box -> Commit Shields (max Defense Cap) & Income -> Hash Match (3-of-a-kind = +1 Secret).\n"
+                "**P2 SETEC Compile:** Drop Staging Cup -> 2A: {BLACK} advances track (4/5/6=Upgr/Singularity) -> 2B: Resolve vs Shields (enforce Defense Grid Cap) -> Dmg: {RED} -$1 (Unpaid: -1 Secret) | {BLUE} -1 Secret | {GREEN} Glitch 1 die (Income 1st, then Shield; empty: destroy Under Dev) -> Recycle {RED}{BLUE}{GREEN} -> 2C: End Check (Singularity or <=0 Secrets).\n"
+                "**P3 Operations & Pipeline:** Collect Income ($/{RESEARCH}/★) -> Buy <=2 dice (Market R/B/G/Y or $4 Personal Reserve Purple) | Research Upgrades (Defense, Bandwidth, File Patents) -> Advance Scanned -> Ready (<=Bandwidth), In Prod -> Ready, Glitched -> Scanned (<=Bandwidth). Fast-Patch: 1{RESEARCH}/die -> Uncapped {RESEARCH} Storage -> Pass 1st Player.\n"
+                "**VICTORY:** Most Corporate Secrets among survivors. Patient Zero (<=0 Secrets) eliminated. Ties: 1. $ Capital  2. Ready Modules  3. Research ({RESEARCH})  4. Fewest Under Dev.",
+                size=5.3, leading=7.5, color=PALETTE["ink"],
             )
             # Mini CI/CD Conveyor summary bar at bottom
             cb_y = y + ch - 13.0
             page.rect(x + 5.0, cb_y, cw - 10.0, 11.0, stroke=PALETTE["rule"], fill=PALETTE["white"], line_width=0.5)
-            page.rich_line(x + cw / 2.0, cb_y + 8.2, "**CI/CD CONVEYOR:** Glitched  --(1 {WRENCH} Fast-Patch)-->  Scanned  ---->  Ready for Release (Round End)", size=5.2, color=PALETTE["ink_soft"], align="center")
+            page.rich_line(x + cw / 2.0, cb_y + 8.2, "**CI/CD CONVEYOR:** Glitched  --(1 {RESEARCH} Fast-Patch)-->  Scanned  ---->  Ready for Release (<= Bandwidth)", size=5.2, color=PALETTE["ink_soft"], align="center")
 
 
 def _draw_single_variant_card(page: PDFPage, x: float, y: float, w: float, h: float, card: VariantCardSpec) -> None:
@@ -1933,7 +1995,7 @@ def render_pnp_tokens_page(page: PDFPage) -> None:
 
     page.rect(40.0, 32.0, 712.0, 22.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.9)
     page.text(50.0, 46.8, "OPTIONAL PRINT-AND-PLAY TOKENS & STATUS MARKERS  (CUT GRID)", font="bold", size=9.2, color=PALETTE["ink"])
-    page.text(742.0, 46.5, "1st PLAYER + VERSION MARKER + SECRETS + PATCHES + CREDITS", font="mono", size=6.8, color=PALETTE["muted"], align="right")
+    page.text(742.0, 46.5, "1st PLAYER + VERSION MARKER + SECRETS + RESEARCH + CREDITS", font="mono", size=6.8, color=PALETTE["muted"], align="right")
 
     # Row 1 (y = 64..122): Special Markers + 18x Archetype Slot Markers ([USED] / [FORFEIT])
     # Lead Consultant Marker
@@ -1982,8 +2044,8 @@ def render_pnp_tokens_page(page: PDFPage) -> None:
             page.text(bx + 26.0, by + 16.0, "SECRET", font="bold", size=7.6, color=PALETTE["blue"])
             page.text(bx + 26.0, by + 26.5, "1 Pt  |  Client Data", font="regular", size=5.8, color=PALETTE["muted"])
 
-    # Section 3 (y = 298..410): 16x Patch (🔧) Tokens (8 cols x 2 rows)
-    page.text(42.0, 300.0, "SPLICE / PATCH TOKENS (x16 — CLEANUP CAP: MAX 3 HELD)", font="mono_bold", size=6.8, color=PALETTE["green"])
+    # Section 3 (y = 298..410): 16x Research (🔬) Tokens (8 cols x 2 rows)
+    page.text(42.0, 300.0, "RESEARCH (🔬) TOKENS (x16 — UNCAPPED STORAGE)", font="mono_bold", size=6.8, color=PALETTE["green"])
     py0 = 305.0
     ph = 42.0
     for r in range(2):
@@ -1991,9 +2053,9 @@ def render_pnp_tokens_page(page: PDFPage) -> None:
             bx = 41.0 + c * sw
             by = py0 + r * ph
             page.rect(bx, by, sw, ph, stroke=PALETTE["green"], fill=PALETTE["green_light"], line_width=0.6, dash=(3, 1.5))
-            page.draw_wrench_icon(bx + 15.0, by + 21.0, 13.0, color=PALETTE["green"])
-            page.text(bx + 26.0, by + 18.5, "1 PATCH", font="bold", size=7.6, color=PALETTE["green"])
-            page.text(bx + 26.0, by + 29.5, "Fast-Patch (1/die)", font="regular", size=5.6, color=PALETTE["ink_soft"])
+            page.draw_research_icon(bx + 15.0, by + 21.0, 13.0, color=PALETTE["green"])
+            page.text(bx + 26.0, by + 18.5, "1 RESEARCH", font="bold", size=7.6, color=PALETTE["green"])
+            page.text(bx + 26.0, by + 29.5, "Upgrades & Patents", font="regular", size=5.6, color=PALETTE["ink_soft"])
 
     # Section 4 (y = 404..574): Currency Chits ($1 x 24 + $5 x 16)
     page.text(42.0, 404.0, "CONSULTANCY CREDITS ($1 x 24  &  $5 x 16)", font="mono_bold", size=6.8, color=PALETTE["ink_soft"])
@@ -2022,7 +2084,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated: List[str] = []
 
     # 1. Player Terminal Mats & Split Cards (6 pages: 4x Mats with empty modular docks + 1x Company Cards + 1x White Hat Cards)
-    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.26.0)")
+    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.28.0)")
     for idx in range(1, 5):
         p = doc_players.add_page()
         render_player_board(p, idx)
@@ -2063,7 +2125,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated.append(path_versions)
 
     # 5. Combined Master Print-and-Play Pack (All 14 pages)
-    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.26.0)")
+    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.28.0)")
     for sub_doc in (doc_central, doc_players, doc_dice, doc_versions):
         for pg in sub_doc.pages:
             doc_master.pages.append(pg)

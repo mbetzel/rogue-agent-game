@@ -49,20 +49,41 @@ def complete_round(controller: GameController) -> None:
     """Executes round cleanup and either starts the next round or concludes the game."""
     num_players = len(controller.state.players)
 
-    # Part 3B: Pipeline Prep (v0.22.0 Canonical)
+    # Part 3B: Pipeline Prep (v0.28.0 Canonical)
     for p in controller.state.players:
         if p.is_patient_zero:
             continue
-        # 1. Scanned Graduation
-        for d in p.scanned_dice:
+
+        # Emergency Hotfix (Level 2 Pipeline Track)
+        if getattr(p, "has_emergency_hotfix", False) and p.glitched_dice:
+            h_die = p.glitched_dice.pop(0)
+            h_die.production_role = None
+            h_die.is_locked = False
+            h_die.chosen_choice_index = None
+            h_die.current_face = None
+            p.ready_for_release_dice.append(h_die)
+
+        # 1. Scanned Graduation (Release Bandwidth - INV-PIPE-GRAD-01)
+        grad_count = min(len(p.scanned_dice), p.release_bandwidth)
+        for _ in range(grad_count):
+            d = p.scanned_dice.pop(0)
             d.production_role = None
             d.is_locked = False
             d.chosen_choice_index = None
             d.current_face = None
             p.ready_for_release_dice.append(d)
-        p.scanned_dice.clear()
 
-        # 2. Production Return
+        # 2. Conveyor Shift / Triage (Triage Bandwidth - INV-PIPE-TRIAGE-01)
+        triage_count = min(len(p.glitched_dice), p.triage_bandwidth)
+        for _ in range(triage_count):
+            d = p.glitched_dice.pop(0)
+            d.production_role = None
+            d.is_locked = False
+            d.chosen_choice_index = None
+            d.current_face = None
+            p.scanned_dice.append(d)
+
+        # 3. Production Return
         for d in p.in_production_dice:
             d.production_role = None
             d.is_locked = False
@@ -71,22 +92,7 @@ def complete_round(controller: GameController) -> None:
             p.ready_for_release_dice.append(d)
         p.in_production_dice.clear()
 
-        # 3. Conveyor Shift
-        for d in p.glitched_dice:
-            d.production_role = None
-            d.is_locked = False
-            d.chosen_choice_index = None
-            d.current_face = None
-            p.scanned_dice.append(d)
-        p.glitched_dice.clear()
-
-        # 4. End-of-Round Cleanup: discard unspent patch tokens in excess of 3 (Model C)
-        if p.patches > 3:
-            discarded = p.patches - 3
-            p.patches = 3
-            controller.event_log.append(
-                f"{controller.player_meta[p.player_id]['name']} discarded {discarded} excess Patch token(s) at End-of-Round Cleanup (cap: 3)."
-            )
+        # 4. Uncapped Research: patch cap eliminated (INV-RESEARCH-UNCAPPED-01)
 
     # Check Final Round condition
     if controller.state.is_final_round:

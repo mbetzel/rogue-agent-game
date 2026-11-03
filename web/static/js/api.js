@@ -292,6 +292,27 @@ export async function doFastPatch(dieIds = null, dieIndices = null) {
   }
 }
 
+export async function doUpgradeTrack(trackType) {
+  const newState = await apiCall("/api/game/action/upgrade_track", "POST", {
+    player_id: getHumanPlayerId(),
+    track_type: trackType,
+  });
+  if (newState) {
+    setState(newState);
+    notifyRender();
+  }
+}
+
+export async function doFilePatent() {
+  const newState = await apiCall("/api/game/action/patent", "POST", {
+    player_id: getHumanPlayerId(),
+  });
+  if (newState) {
+    setState(newState);
+    notifyRender();
+  }
+}
+
 export async function doEndTurn() {
   const newState = await apiCall("/api/game/action/end_turn", "POST", { player_id: getHumanPlayerId() });
   if (newState) {

@@ -41,6 +41,9 @@ class Phase3ActionPlan:
     phreaker_diagnostics_die_id: Optional[int] = None
     prodigy_override_die_id: Optional[int] = None
     prodigy_override_target_face: Optional[Face] = None
+    # Phase 3 Hardware Upgrades & Patents (v0.28.0)
+    track_upgrades: List[str] = field(default_factory=list)
+    patent_filings: int = 0
     # Phase 3 Part 3B Fast-patching (v0.22.0)
     fast_patch_indices: List[int] = field(default_factory=list)
 

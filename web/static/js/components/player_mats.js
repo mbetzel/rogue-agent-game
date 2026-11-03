@@ -10,7 +10,7 @@ import {
   activePlayerTab,
   setActivePlayerTab,
 } from "../state.js";
-import { doFastPatch, doBuy } from "../api.js";
+import { doFastPatch, doBuy, doUpgradeTrack, doFilePatent } from "../api.js";
 import { renderVersionSlotBadge } from "./header.js";
 
 let renderAppCallback = null;
@@ -501,9 +501,10 @@ export function renderPlayerMats() {
               <div class="zone-title-wrap">
                 <span class="zone-name" style="color: #38bdf8;">IN PRODUCTION</span>
                 <span class="zone-count-badge">(${(p.in_production_dice || []).length})</span>
+                <span class="zone-count-badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-size: 0.7rem;">SHIELDS: ${redShieldDice.length + blueShieldDice.length + greenShieldDice.length}/${p.defense_capacity || 2} CAP</span>
               </div>
               <div class="zone-subtext">
-                Delayed Income: Collect $, 🔧, ★ at start of Phase 3 | Zero Dice Wear: Shields absorb cleanly without wear!
+                Delayed Income: Collect $, 🔬, ★ in Phase 3 | Defense Capacity: max ${p.defense_capacity || 2} shields${p.has_passive_firewall ? ' | 🛡️ Passive Firewall Active (Absorbs 1 cube free in P2B)' : ''}
               </div>
             </div>
 
@@ -519,7 +520,7 @@ export function renderPlayerMats() {
                   </div>
                 </div>
                 <div class="shield-desc-sub1">Delayed Yield</div>
-                <div class="shield-desc-sub2">$, 🔧, ★ in P3</div>
+                <div class="shield-desc-sub2">$, 🔬, ★ in P3</div>
                 <div class="shield-slots-tray" id="income_tray_${p.player_id}"></div>
               </div>
 
@@ -578,9 +579,10 @@ export function renderPlayerMats() {
               <div class="zone-title-wrap">
                 <span class="zone-name" style="color: #f43f5e;">UNDER DEVELOPMENT (CI/CD PIPELINE)</span>
                 <span class="zone-count-badge">(${p.under_development_count !== undefined ? p.under_development_count : ((p.glitched_dice || []).length + (p.scanned_dice || []).length)})</span>
+                <span class="zone-count-badge" style="background: rgba(244, 63, 94, 0.2); color: #f43f5e; font-size: 0.7rem;">TRIAGE: ${p.triage_bandwidth || 2}/RND | RELEASE: ${p.release_bandwidth || 2}/RND</span>
               </div>
               <div class="zone-subtext">
-                Two-Stage Conveyor: Glitched Box → Scanned Box → Ready for Release
+                Two-Stage Conveyor: Glitched Box → Scanned Box → Ready for Release${p.has_emergency_hotfix ? ' | ⚡ Emergency Hotfix Active (1 die Glitched -> Ready in P3B)' : ''}
               </div>
             </div>
 
@@ -589,10 +591,10 @@ export function renderPlayerMats() {
               <div style="border: 1px solid rgba(244, 63, 94, 0.4); background: rgba(244, 63, 94, 0.08); border-radius: 6px; padding: 8px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                   <span style="font-weight: 600; color: #f43f5e; font-size: 0.85rem;">⚠️ GLITCHED BOX (${(p.glitched_dice || []).length})</span>
-                  <span style="font-size: 0.75rem; color: var(--text-dim);">Fast-Patch: 1 🔧 → Scanned</span>
+                  <span style="font-size: 0.75rem; color: var(--text-dim);">Fast-Patch: 1 🔬 → Scanned</span>
                 </div>
                 <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 6px;">
-                  Unpatched dice shift to Scanned Box at round end (free)
+                  Unpatched dice shift to Scanned Box at round end (up to Triage Bandwidth: ${p.triage_bandwidth || 2})
                 </div>
                 <div class="dice-tray" id="glitched_tray_${p.player_id}" style="min-height: 48px;"></div>
               </div>
@@ -604,7 +606,7 @@ export function renderPlayerMats() {
                   <span style="font-size: 0.75rem; color: #4ade80;">Ready next round!</span>
                 </div>
                 <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 6px;">
-                  Graduates to Ready for Release at round end (Zero 🔧 natural shift)
+                  Graduates to Ready for Release at round end (up to Release Bandwidth: ${p.release_bandwidth || 2})
                 </div>
                 <div class="dice-tray" id="scanned_tray_${p.player_id}" style="min-height: 48px;"></div>
               </div>
@@ -614,7 +616,66 @@ export function renderPlayerMats() {
       </div>
 
       <!-- ========================================================= -->
-      <!-- BOTTOM ROW: Money | Patches | Secrets Balance Sheet       -->
+      <!-- HARDWARE & R&D UPGRADE TRACKS (v0.28.0)                   -->
+      <!-- ========================================================= -->
+      <div class="terminal-hardware-tracks-panel" style="border: 1px solid rgba(168, 85, 247, 0.35); background: rgba(15, 23, 42, 0.5); border-radius: 6px; padding: 10px; margin-bottom: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div>
+            <span style="font-weight: 700; color: #c084fc; font-size: 0.8rem; letter-spacing: 0.5px;">TERMINAL HARDWARE & R&D UPGRADE TRACKS</span>
+            <span style="font-size: 0.65rem; color: var(--text-dim); margin-left: 8px;">Spend 🔬 in Phase 3A Operations</span>
+          </div>
+          <div style="font-size: 0.7rem; color: #a855f7;">
+            ${p.upgrade_discount ? `<span style="background: rgba(168,85,247,0.2); padding: 2px 6px; border-radius: 4px;">-${p.upgrade_discount} 🔬 Track Upgrade Discount</span>` : ''}
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+          <!-- Track 1: Pipeline Track -->
+          <div class="track-card" style="border: 1px solid ${p.pipeline_level >= 1 ? '#38bdf8' : 'var(--border-color)'}; background: rgba(0,0,0,0.25); border-radius: 4px; padding: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 700; font-size: 0.75rem; color: #38bdf8;">⚡ PIPELINE</span>
+              <span style="font-size: 0.65rem; color: var(--text-dim);">Level ${p.pipeline_level || 0}/2</span>
+            </div>
+            <div style="font-size: 0.68rem; color: #cbd5e1; margin-top: 2px;">Triage ${p.triage_bandwidth || 2} / Release ${p.release_bandwidth || 2}</div>
+            <div style="display: flex; gap: 4px; margin-top: 6px;">
+              <span style="flex: 1; text-align: center; font-size: 0.62rem; padding: 3px 0; border-radius: 3px; background: ${(p.pipeline_level || 0) === 0 ? 'rgba(56,189,248,0.3)' : 'rgba(255,255,255,0.05)'}; color: ${(p.pipeline_level || 0) === 0 ? '#38bdf8' : 'var(--text-dim)'}; border: 1px solid ${(p.pipeline_level || 0) === 0 ? '#38bdf8' : 'transparent'}; font-weight: ${(p.pipeline_level || 0) === 0 ? '700' : 'normal'};">[L0] 2 / 2</span>
+              <span style="flex: 1; text-align: center; font-size: 0.62rem; padding: 3px 0; border-radius: 3px; background: ${(p.pipeline_level || 0) === 1 ? 'rgba(56,189,248,0.3)' : 'rgba(255,255,255,0.05)'}; color: ${(p.pipeline_level || 0) === 1 ? '#38bdf8' : 'var(--text-dim)'}; border: 1px solid ${(p.pipeline_level || 0) === 1 ? '#38bdf8' : 'transparent'}; font-weight: ${(p.pipeline_level || 0) === 1 ? '700' : 'normal'};">[L1] 3 / 3</span>
+              <span style="flex: 1; text-align: center; font-size: 0.62rem; padding: 3px 0; border-radius: 3px; background: ${(p.pipeline_level || 0) === 2 ? 'rgba(56,189,248,0.3)' : 'rgba(255,255,255,0.05)'}; color: ${(p.pipeline_level || 0) === 2 ? '#38bdf8' : 'var(--text-dim)'}; border: 1px solid ${(p.pipeline_level || 0) === 2 ? '#38bdf8' : 'transparent'}; font-weight: ${(p.pipeline_level || 0) === 2 ? '700' : 'normal'};">[L2] 4/4+Hotfix</span>
+            </div>
+          </div>
+
+          <!-- Track 2: Defense Track -->
+          <div class="track-card" style="border: 1px solid ${p.defense_level >= 1 ? '#4ade80' : 'var(--border-color)'}; background: rgba(0,0,0,0.25); border-radius: 4px; padding: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 700; font-size: 0.75rem; color: #4ade80;">🛡️ DEFENSE GRID</span>
+              <span style="font-size: 0.65rem; color: var(--text-dim);">Level ${p.defense_level || 0}/2</span>
+            </div>
+            <div style="font-size: 0.68rem; color: #cbd5e1; margin-top: 2px;">Cap: ${p.defense_capacity || 2} Shields${p.has_passive_firewall ? ' + Firewall' : ''}</div>
+            <div style="display: flex; gap: 4px; margin-top: 6px;">
+              <span style="flex: 1; text-align: center; font-size: 0.62rem; padding: 3px 0; border-radius: 3px; background: ${(p.defense_level || 0) === 0 ? 'rgba(74,222,128,0.3)' : 'rgba(255,255,255,0.05)'}; color: ${(p.defense_level || 0) === 0 ? '#4ade80' : 'var(--text-dim)'}; border: 1px solid ${(p.defense_level || 0) === 0 ? '#4ade80' : 'transparent'}; font-weight: ${(p.defense_level || 0) === 0 ? '700' : 'normal'};">[L0] 2 Cap</span>
+              <span style="flex: 1; text-align: center; font-size: 0.62rem; padding: 3px 0; border-radius: 3px; background: ${(p.defense_level || 0) === 1 ? 'rgba(74,222,128,0.3)' : 'rgba(255,255,255,0.05)'}; color: ${(p.defense_level || 0) === 1 ? '#4ade80' : 'var(--text-dim)'}; border: 1px solid ${(p.defense_level || 0) === 1 ? '#4ade80' : 'transparent'}; font-weight: ${(p.defense_level || 0) === 1 ? '700' : 'normal'};">[L1] 3 Cap</span>
+              <span style="flex: 1; text-align: center; font-size: 0.62rem; padding: 3px 0; border-radius: 3px; background: ${(p.defense_level || 0) === 2 ? 'rgba(74,222,128,0.3)' : 'rgba(255,255,255,0.05)'}; color: ${(p.defense_level || 0) === 2 ? '#4ade80' : 'var(--text-dim)'}; border: 1px solid ${(p.defense_level || 0) === 2 ? '#4ade80' : 'transparent'}; font-weight: ${(p.defense_level || 0) === 2 ? '700' : 'normal'};">[L2] 4 Cap+Firewall</span>
+            </div>
+          </div>
+
+          <!-- Track 3: Patents Track -->
+          <div class="track-card" style="border: 1px solid ${p.patent_level >= 1 ? '#c084fc' : 'var(--border-color)'}; background: rgba(0,0,0,0.25); border-radius: 4px; padding: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 700; font-size: 0.75rem; color: #c084fc;">📜 PATENTS R&D</span>
+              <span style="font-size: 0.65rem; color: var(--text-dim);">Level ${p.patent_level || 0}/2</span>
+            </div>
+            <div style="font-size: 0.68rem; color: #cbd5e1; margin-top: 2px;">Cost: ${p.patent_level === 0 ? 4 : (p.patent_level === 1 ? 3 : 2)} 🔬 → +1 Sec${(p.patent_level || 0) >= 2 ? ', +$1' : ''}</div>
+            <div style="display: flex; gap: 4px; margin-top: 6px;">
+              <span style="flex: 1; text-align: center; font-size: 0.62rem; padding: 3px 0; border-radius: 3px; background: ${(p.patent_level || 0) === 0 ? 'rgba(192,132,252,0.3)' : 'rgba(255,255,255,0.05)'}; color: ${(p.patent_level || 0) === 0 ? '#c084fc' : 'var(--text-dim)'}; border: 1px solid ${(p.patent_level || 0) === 0 ? '#c084fc' : 'transparent'}; font-weight: ${(p.patent_level || 0) === 0 ? '700' : 'normal'};">[L0] 4 🔬</span>
+              <span style="flex: 1; text-align: center; font-size: 0.62rem; padding: 3px 0; border-radius: 3px; background: ${(p.patent_level || 0) === 1 ? 'rgba(192,132,252,0.3)' : 'rgba(255,255,255,0.05)'}; color: ${(p.patent_level || 0) === 1 ? '#c084fc' : 'var(--text-dim)'}; border: 1px solid ${(p.patent_level || 0) === 1 ? '#c084fc' : 'transparent'}; font-weight: ${(p.patent_level || 0) === 1 ? '700' : 'normal'};">[L1] 3 🔬</span>
+              <span style="flex: 1; text-align: center; font-size: 0.62rem; padding: 3px 0; border-radius: 3px; background: ${(p.patent_level || 0) === 2 ? 'rgba(192,132,252,0.3)' : 'rgba(255,255,255,0.05)'}; color: ${(p.patent_level || 0) === 2 ? '#c084fc' : 'var(--text-dim)'}; border: 1px solid ${(p.patent_level || 0) === 2 ? '#c084fc' : 'transparent'}; font-weight: ${(p.patent_level || 0) === 2 ? '700' : 'normal'};">[L2] 2 🔬+$1</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================= -->
+      <!-- BOTTOM ROW: Money | Research | Secrets Balance Sheet      -->
       <!-- ========================================================= -->
       <div class="terminal-reserves-row">
         <!-- 1. Money -->
@@ -628,32 +689,22 @@ export function renderPlayerMats() {
             <span class="reserve-currency-value">${p.money}</span>
           </div>
           <div class="reserve-card-footer">
-            Start: $7 | Never drops below $0
+            Start: $4 | Never drops below $0
           </div>
         </div>
 
-        <!-- 2. Patches (with 3 Dedicated Physical Token Slots) -->
-        <div class="reserve-card patches-reserve-card">
+        <!-- 2. Research Tokens (Uncapped v0.28.0) -->
+        <div class="reserve-card patches-reserve-card" style="border-color: rgba(168, 85, 247, 0.4);">
           <div class="reserve-card-header">
-            <span class="reserve-card-title">🔧 PATCHES</span>
-            <span class="reserve-rate-pill">MAX 3 | 0 VP</span>
+            <span class="reserve-card-title" style="color: #c084fc;">🔬 RESEARCH</span>
+            <span class="reserve-rate-pill" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">UNCAPPED</span>
           </div>
-          <div class="reserve-card-main patches-slots-main">
-            <div class="patch-token-slot ${p.patches >= 1 ? 'filled' : 'empty'}">
-              <span class="slot-number-lbl">SLOT 1</span>
-              <span class="slot-wrench-icon">${p.patches >= 1 ? '🔧' : '◌'}</span>
-            </div>
-            <div class="patch-token-slot ${p.patches >= 2 ? 'filled' : 'empty'}">
-              <span class="slot-number-lbl">SLOT 2</span>
-              <span class="slot-wrench-icon">${p.patches >= 2 ? '🔧' : '◌'}</span>
-            </div>
-            <div class="patch-token-slot ${p.patches >= 3 ? 'filled' : 'empty'}">
-              <span class="slot-number-lbl">MAX (3)</span>
-              <span class="slot-wrench-icon">${p.patches >= 3 ? '🔧' : '◌'}</span>
-            </div>
+          <div class="reserve-card-main">
+            <span class="reserve-currency-symbol" style="color: #c084fc;">🔬</span>
+            <span class="reserve-currency-value" style="color: #c084fc;">${p.research_tokens !== undefined ? p.research_tokens : p.patches}</span>
           </div>
           <div class="reserve-card-footer">
-            Start: 2 Tokens | Fast-Patch (Phase 3) / Auto-Absorb $1 Red
+            Fast-Patch (1 🔬) | Upgrades | Patents
           </div>
         </div>
 
@@ -668,7 +719,7 @@ export function renderPlayerMats() {
             <span class="reserve-secrets-value ${p.secrets <= 2 ? 'critical' : ''}">${p.secrets}</span>
           </div>
           <div class="reserve-card-footer ${p.secrets <= 0 ? 'breach-alert' : ''}">
-            ${p.secrets <= 0 ? '<strong style="color: #ff0055;">TOTAL DATA BREACH (PATIENT ZERO)</strong>' : 'Start: 8 (2P/3P) | 10 (4P) — ≤0 = Total Breach'}
+            ${p.secrets <= 0 ? '<strong style="color: #ff0055;">TOTAL DATA BREACH (PATIENT ZERO)</strong>' : 'Start: 8 (2P/3P) | 12 (4P) — ≤0 = Total Breach'}
           </div>
         </div>
 
@@ -847,14 +898,14 @@ export function renderPlayerMats() {
     // Glitched Box Tray
     const glitchedTray = terminalMat.querySelector(`#glitched_tray_${p.player_id}`);
     if (glitchedTray) {
-      const canPatchActiveMode = (p.is_human && isTurn && state.phase === 3 && p.patches > 0);
+      const canPatchActiveMode = (p.is_human && isTurn && state.phase === 3 && (p.research_tokens > 0 || p.patches > 0));
       (p.glitched_dice || []).forEach((d) => {
         const chip = document.createElement("div");
         const canFastPatch = canPatchActiveMode;
         chip.className = `die-chip ${d.color} ${canFastPatch ? "clickable" : ""}`;
         chip.innerHTML = `<span>${d.color.toUpperCase()}</span>`;
         if (canFastPatch) {
-          chip.title = "Click to Fast-Patch (Spend 1 🔧 → Scanned Box)";
+          chip.title = "Click to Fast-Patch (Spend 1 🔬 → Scanned Box)";
           chip.onclick = () => doFastPatch([d.die_id]);
         }
         glitchedTray.appendChild(chip);

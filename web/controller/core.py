@@ -364,6 +364,12 @@ class GameController:
     ) -> Dict[str, Any]:
         return phase3_actions.fast_patch(self, player_id, die_ids=die_ids, die_indices=die_indices)
 
+    def upgrade_track(self, player_id: int, track_type: str) -> Dict[str, Any]:
+        return phase3_actions.upgrade_hardware_track(self, player_id, track_type)
+
+    def file_patent(self, player_id: int) -> Dict[str, Any]:
+        return phase3_actions.file_cryptographic_patent(self, player_id)
+
     def system_reboot(self, player_id: int) -> Dict[str, Any]:
         return phase3_actions.system_reboot(self, player_id)
 

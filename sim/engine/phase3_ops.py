@@ -338,6 +338,23 @@ def execute_phase_3(engine: GameEngine) -> None:
                     engine.state.next_die_id += 1
                     player.ready_for_release_dice.append(new_die)
 
+        # 5. Terminal Mat Track Upgrades (INV-UPGRADE-TRACK-01)
+        upgrades = getattr(plan, "track_upgrades", [])
+        for track in upgrades:
+            cost = player.get_track_upgrade_cost(track)
+            if cost is not None and player.research_tokens >= cost:
+                player.upgrade_track(track)
+
+        # 6. Cryptographic Patent Filings (INV-PATENT-CONV-01)
+        patent_filings = getattr(plan, "patent_filings", 0)
+        while patent_filings > 0:
+            cost = player.get_patent_cost()
+            if player.research_tokens >= cost:
+                player.file_patent()
+                patent_filings -= 1
+            else:
+                break
+
     # -------------------------------------------------------------------------
     # Part 3B: Pipeline Prep & End-of-Round Staging (Simultaneous)
     # -------------------------------------------------------------------------
@@ -347,7 +364,7 @@ def execute_phase_3(engine: GameEngine) -> None:
 
         active_ver = engine.state.active_version.version_str
 
-        # 1. Fast-Patching & Omnidyne Magnetic Splice
+        # 1. Hotfix Capabilities (Omnidyne Magnetic Splice & Emergency Hotfix)
         # Hook: Omnidyne Systems (Magnetic Splice) — moves 1 die from glitched_dice directly to ready_for_release_dice for free
         is_omnidyne = bool(
             (player.company and player.company.code == CompanyCode.OMNIDYNE)
@@ -381,6 +398,22 @@ def execute_phase_3(engine: GameEngine) -> None:
             player.ready_for_release_dice.append(omnidyne_die)
             player.mark_ability_used(active_ver)
 
+        # Emergency Hotfix (Level 2 Pipeline Track - INV-UPGRADE-TRACK-01)
+        if getattr(player, "has_emergency_hotfix", False) and player.glitched_dice:
+            hotfix_idx = max(
+                range(len(player.glitched_dice)),
+                key=lambda i: (
+                    1 if player.glitched_dice[i].color != DieColor.GRAY else 0,
+                    getattr(player.glitched_dice[i], "cost", 0),
+                ),
+            )
+            h_die = player.glitched_dice.pop(hotfix_idx)
+            h_die.production_role = None
+            h_die.is_locked = False
+            h_die.chosen_choice_index = None
+            h_die.current_face = None
+            player.ready_for_release_dice.append(h_die)
+
         # Bot Fast-Patch Decision: spend 1 🔧 per die to move from glitched_dice to scanned_dice
         fast_patches = player.bot.choose_fast_patches(player, engine.state, engine.rng)
         if fast_patches and player.patches > 0 and player.glitched_dice:
@@ -401,16 +434,29 @@ def execute_phase_3(engine: GameEngine) -> None:
                 player.patches -= 1
                 player.total_fast_patches += 1
 
-        # 2. Scanned Graduation: all dice in scanned_dice graduate to ready_for_release_dice
-        for s_die in player.scanned_dice:
+        # 2. Scanned Graduation (Release Bandwidth - INV-PIPE-GRAD-01):
+        # Move up to player.release_bandwidth dice from scanned_dice to ready_for_release_dice
+        grad_count = min(len(player.scanned_dice), player.release_bandwidth)
+        for _ in range(grad_count):
+            s_die = player.scanned_dice.pop(0)
             s_die.production_role = None
             s_die.is_locked = False
             s_die.chosen_choice_index = None
             s_die.current_face = None
             player.ready_for_release_dice.append(s_die)
-        player.scanned_dice.clear()
 
-        # 3. Production Return: all surviving in_production_dice return to ready_for_release_dice
+        # 3. Conveyor Shift / Triage (Triage Bandwidth - INV-PIPE-TRIAGE-01):
+        # Move up to player.triage_bandwidth dice from glitched_dice into scanned_dice
+        triage_count = min(len(player.glitched_dice), player.triage_bandwidth)
+        for _ in range(triage_count):
+            g_die = player.glitched_dice.pop(0)
+            g_die.production_role = None
+            g_die.is_locked = False
+            g_die.chosen_choice_index = None
+            g_die.current_face = None
+            player.scanned_dice.append(g_die)
+
+        # 4. Production Return: all surviving in_production_dice return to ready_for_release_dice
         for p_die in player.in_production_dice:
             p_die.production_role = None
             p_die.is_locked = False
@@ -419,17 +465,7 @@ def execute_phase_3(engine: GameEngine) -> None:
             player.ready_for_release_dice.append(p_die)
         player.in_production_dice.clear()
 
-        # 4. Conveyor Shift: all remaining glitched_dice shift into scanned_dice
-        for g_die in player.glitched_dice:
-            g_die.production_role = None
-            g_die.is_locked = False
-            g_die.chosen_choice_index = None
-            g_die.current_face = None
-            player.scanned_dice.append(g_die)
-        player.glitched_dice.clear()
-
-        # 5. Patch Token Cap: discard unspent patches in excess of 3 🔧
-        player.patches = min(player.patches, 3)
+        # 5. Patch Token Cap Removed: Research tokens are uncapped (INV-RESEARCH-UNCAPPED-01)
 
     # 6. Pass Lead Consultant Marker clockwise
     engine.state.first_player_index = (engine.state.first_player_index + 1) % num_players

@@ -102,6 +102,9 @@ class GameConfig:
     default_free_rerolls: int = 2
     throttled_free_rerolls: int = 1
 
+    # Corporate Asymmetry & Hardware Tracks (v0.28.0)
+    enable_corporate_asymmetry: bool = False  # When True, applies Company-specific hardware and starting resource modifiers
+
     # Variant & Boss Tunables (Phase 10)
     y2_base_payout: int = 2
     y2_max_payout: int = 5

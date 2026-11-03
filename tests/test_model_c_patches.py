@@ -140,12 +140,12 @@ class TestModelCPatches(unittest.TestCase):
         player1.bot = PassiveBot(bot_id=1)
         execute_phase_3(engine)
 
-        # At End-of-Round Cleanup, Player 0 should be clamped to 3, Player 1 stays at 2
-        self.assertEqual(player0.patches, 3)
+        # Under v0.28.0 (INV-RESEARCH-UNCAPPED-01), Research tokens are uncapped (Player 0 retains 5, Player 1 retains 2)
+        self.assertEqual(player0.patches, 5)
         self.assertEqual(player1.patches, 2)
 
     def test_tc05_web_complete_round_discards_excess_patches_and_logs(self):
-        """TC-05: Web controller complete_round() discards excess patches and logs the event."""
+        """TC-05: Web controller complete_round() preserves uncapped research tokens (v0.28.0)."""
         controller = GameController()
         controller.new_game(num_players=2, seed=42)
         player0 = controller.state.players[0]
@@ -153,18 +153,12 @@ class TestModelCPatches(unittest.TestCase):
 
         player0.patches = 5
         player1.patches = 1
-        controller.state.config.max_patch_tokens = 3
 
         complete_round(controller)
 
-        # Player 0 clamped to 3, Player 1 remains 1
-        self.assertEqual(player0.patches, 3)
+        # Under v0.28.0 (INV-RESEARCH-UNCAPPED-01), Player 0 retains 5, Player 1 remains 1
+        self.assertEqual(player0.patches, 5)
         self.assertEqual(player1.patches, 1)
-
-        # Check event log
-        name0 = controller.player_meta[0]["name"]
-        expected_log = f"{name0} discarded 2 excess Patch token(s) at End-of-Round Cleanup (cap: 3)."
-        self.assertIn(expected_log, controller.event_log)
 
     def test_tc06_end_of_round_cleanup_preserves_patches_at_or_below_cap(self):
         """TC-06: End-of-Round Cleanup preserves patches at or below max_patch_tokens without discard or event log."""
