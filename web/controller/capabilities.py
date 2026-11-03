@@ -212,13 +212,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         and len(player.ready_dice) >= 1
     )
     can_system_reboot = False
-    can_fast_patch = bool(
-        controller.phase == 3
-        and not can_confirm_income
-        and not is_eliminated
-        and player.patches > 0
-        and len(player.glitched_dice) > 0
-    )
+    can_fast_patch = False
     can_end_turn = (controller.phase == 3 and not can_confirm_income and is_active and not is_eliminated)
 
     # Market purchase availability per color
@@ -270,7 +264,9 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         ),
     }
 
-    # Hardware Upgrade Tracks & Cryptographic Patents (v0.28.0)
+    # Hardware Upgrade Tracks & Cryptographic Patents (v0.29.0)
+    triage_cost = player.get_track_upgrade_cost("TRIAGE") if hasattr(player, "get_track_upgrade_cost") else None
+    release_cost = player.get_track_upgrade_cost("RELEASE") if hasattr(player, "get_track_upgrade_cost") else None
     pipeline_cost = player.get_track_upgrade_cost("PIPELINE") if hasattr(player, "get_track_upgrade_cost") else None
     defense_cost = player.get_track_upgrade_cost("DEFENSE") if hasattr(player, "get_track_upgrade_cost") else None
     patent_track_cost = player.get_track_upgrade_cost("PATENT") if hasattr(player, "get_track_upgrade_cost") else None
@@ -278,6 +274,24 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     research_avail = getattr(player, "research_tokens", player.patches)
 
     can_upgrade_track = {
+        "triage": bool(
+            controller.phase == 3
+            and not can_confirm_income
+            and is_active
+            and not is_eliminated
+            and getattr(player, "triage_level", 0) < 2
+            and triage_cost is not None
+            and research_avail >= triage_cost
+        ),
+        "release": bool(
+            controller.phase == 3
+            and not can_confirm_income
+            and is_active
+            and not is_eliminated
+            and getattr(player, "release_level", 0) < 2
+            and release_cost is not None
+            and research_avail >= release_cost
+        ),
         "pipeline": bool(
             controller.phase == 3
             and not can_confirm_income
@@ -316,6 +330,8 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     )
 
     upgrade_track_costs = {
+        "triage": triage_cost,
+        "release": release_cost,
         "pipeline": pipeline_cost,
         "defense": defense_cost,
         "patent": patent_track_cost,

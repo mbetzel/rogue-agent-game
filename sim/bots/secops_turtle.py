@@ -352,16 +352,20 @@ class SecOpsTurtleBot(BaseBot):
             plan.take_dirty_income = True
             plan.dirty_income_backlash_die_index = choose_backlash_die_index(player_state.ready_dice)
 
-        # Hardware Upgrades & Patents (v0.28.0)
+        # Hardware Upgrades & Patents (v0.29.0)
         res_available = player_state.research_tokens
         def_cost = player_state.get_track_upgrade_cost("DEFENSE")
         if def_cost is not None and res_available >= def_cost and player_state.defense_level < 2:
             plan.track_upgrades.append("DEFENSE")
             res_available -= def_cost
-        pipe_cost = player_state.get_track_upgrade_cost("PIPELINE")
-        if pipe_cost is not None and res_available >= pipe_cost and player_state.pipeline_level < 1:
-            plan.track_upgrades.append("PIPELINE")
-            res_available -= pipe_cost
+        triage_cost = player_state.get_track_upgrade_cost("TRIAGE")
+        if triage_cost is not None and res_available >= triage_cost and player_state.triage_level < 1:
+            plan.track_upgrades.append("TRIAGE")
+            res_available -= triage_cost
+        rel_cost = player_state.get_track_upgrade_cost("RELEASE")
+        if rel_cost is not None and res_available >= rel_cost and player_state.release_level < 1 and len(player_state.total_dice) > 5:
+            plan.track_upgrades.append("RELEASE")
+            res_available -= rel_cost
         patent_cost = player_state.get_patent_cost()
         if res_available >= patent_cost:
             plan.patent_filings = res_available // patent_cost

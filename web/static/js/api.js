@@ -282,14 +282,7 @@ export async function doStarAction(actionType, cubeColor = null) {
 }
 
 export async function doFastPatch(dieIds = null, dieIndices = null) {
-  const payload = { player_id: getHumanPlayerId() };
-  if (dieIds) payload.die_ids = dieIds;
-  if (dieIndices) payload.die_indices = dieIndices;
-  const newState = await apiCall("/api/game/action/fast_patch", "POST", payload);
-  if (newState) {
-    setState(newState);
-    notifyRender();
-  }
+  console.warn("doFastPatch is deprecated in v0.29.0: fast-patching has been excised.");
 }
 
 export async function doUpgradeTrack(trackType) {

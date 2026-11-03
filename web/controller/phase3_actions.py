@@ -234,24 +234,6 @@ def execute_bot_phase3(controller: GameController, player: PlayerState, meta: Di
         f"{meta['name']} (Bot) collected delayed income from active production modules."
     )
 
-    # Bot Fast-Patching in Under Development
-    fast_patches = player.bot.choose_fast_patches(player, controller.state, controller.engine.rng)
-    if fast_patches and player.patches > 0 and player.glitched_dice:
-        valid_indices = sorted(
-            {idx for idx in fast_patches if 0 <= idx < len(player.glitched_dice)},
-            reverse=True,
-        )
-        for f_idx in valid_indices:
-            if player.patches <= 0 or f_idx >= len(player.glitched_dice):
-                break
-            p_die = player.glitched_dice.pop(f_idx)
-            p_die.production_role = None
-            p_die.is_locked = False
-            p_die.chosen_choice_index = None
-            p_die.current_face = None
-            player.scanned_dice.append(p_die)
-            player.patches -= 1
-
     # Corporate Override: Omnidyne (Magnetic Splice - v0.22.0: Glitched Box directly to Ready for Release)
     has_omnidyne = bool(
         (player.company and player.company.code == CompanyCode.OMNIDYNE)

@@ -169,7 +169,7 @@ class TestScoringAndWipeout(unittest.TestCase):
         self.assertEqual(serialized["portfolio_value"], 2)
 
     def test_final_round_bot_repairs_with_patches_preserving_cash(self) -> None:
-        """In the final round, bot uses available patch tokens to repair colored dice without spending cash."""
+        """In v0.29.0 fast-patching is excised; cash and research tokens remain intact."""
         engine = GameEngine(self.config, [self.bot0, self.bot1], seed=42)
         engine.state.is_final_round = True
 
@@ -188,19 +188,12 @@ class TestScoringAndWipeout(unittest.TestCase):
         score_before = GameStateSerializer.calculate_player_vp(player, self.config)
         self.assertEqual(score_before, 5)
 
-        # Bot chooses Phase 3 actions in the final round
-        plan = self.bot0.take_phase3_actions(player, engine.state, engine.rng)
-        self.assertTrue(len(plan.patch_actions) > 0)
-        self.assertFalse(plan.patch_actions[0]["use_cash"])  # Uses patch token, not cash
-
         # Execute Phase 3
         engine._execute_phase_3()
 
-        # Cash remains intact ($4), patch token consumed
+        # Cash remains intact ($4), fast-patching excised so patches remain intact
         self.assertEqual(player.money, 4)
-        self.assertEqual(player.patches, 0)
-        self.assertEqual(len(player.unpatched_dice), 0)
-        self.assertEqual(len(player.ready_dice), 2)
+        self.assertEqual(player.patches, 1)
 
     def test_all_bots_suppress_dirty_income_in_final_round(self) -> None:
         """All 5 bot archetypes must never take Dirty Income when is_final_round is True."""

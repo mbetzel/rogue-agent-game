@@ -795,7 +795,7 @@ class TestWebAPI(unittest.TestCase):
         p0 = res["state"]["players"][0]
         self.assertEqual(p0["pipeline_level"], 1)
         self.assertEqual(p0["triage_bandwidth"], 3)
-        self.assertEqual(p0["release_bandwidth"], 3)
+        self.assertEqual(p0["release_bandwidth"], 4)
         self.assertEqual(p0["research_tokens"], 3)
 
         # Upgrade Defense track from L0 -> L1 (Cost: 2 🔬)

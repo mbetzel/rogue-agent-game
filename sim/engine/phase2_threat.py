@@ -66,36 +66,40 @@ def execute_phase_2(
         black_dropped = exited_cubes.get(CubeColor.BLACK, 0)
 
         for _ in range(black_dropped):
-            engine.state.corruption_track += 1
-            space_idx = engine.state.corruption_track
-            track = engine.state.active_version.corruption_track
-            if track and 1 <= space_idx <= len(track):
-                space = track[space_idx - 1]
-                resolve_corruption_space(
-                    engine=engine,
-                    space=space,
-                    player_commitments=player_commitments,
-                    exited_cubes=exited_cubes,
-                )
+            if not engine.state.pending_version_advance:
+                engine.state.corruption_track += 1
+                curr_track = engine.state.active_version.corruption_track
+                space_idx = engine.state.corruption_track
+                if curr_track and 1 <= space_idx <= len(curr_track):
+                    resolve_corruption_space(
+                        engine=engine,
+                        space=curr_track[space_idx - 1],
+                        player_commitments=player_commitments,
+                        exited_cubes=exited_cubes,
+                    )
 
-            if engine.state.corruption_track >= engine.state.corruption_track_capacity:
-                if engine.state.current_version_index >= len(engine.state.version_deck) - 1:
-                    # Singularity reached on v3.0!
-                    engine.state.singularity_triggered = True
-                    break
-                else:
-                    # Upgrade to next version: forfeit unspent old ability, unlock new ability
-                    old_version_str = engine.state.active_version.version_str
-                    engine.state.corruption_track = 0
-                    engine.state.current_version_index += 1
-                    new_version_str = engine.state.active_version.version_str
-                    for p in engine.state.players:
-                        p.mark_ability_forfeited(old_version_str)
-                        p.unlock_version_ability(new_version_str)
-                    # Add new version upgrade payload to Staging Cup (drops starting next round, if any)
-                    new_version = engine.state.active_version
-                    for color, count in new_version.get_staging_payload(engine.config.num_players).items():
-                        engine.state.staging_cup[color] = engine.state.staging_cup.get(color, 0) + count
+                if engine.state.corruption_track >= engine.state.corruption_track_capacity:
+                    if engine.state.current_version_index >= len(engine.state.version_deck) - 1:
+                        # Singularity reached on v3.0!
+                        engine.state.singularity_triggered = True
+                        break
+                    else:
+                        # Mark pending advance for next round start; excess cubes spill over immediately
+                        engine.state.pending_version_advance = True
+                        engine.state.overflow_black_cubes_on_next_track = 0
+            else:
+                # Excess cubes spill over onto the upcoming version's track immediately!
+                engine.state.overflow_black_cubes_on_next_track += 1
+                next_ver_idx = min(engine.state.current_version_index + 1, len(engine.state.version_deck) - 1)
+                next_ver = engine.state.version_deck[next_ver_idx]
+                spill_idx = engine.state.overflow_black_cubes_on_next_track
+                if next_ver.corruption_track and 1 <= spill_idx <= len(next_ver.corruption_track):
+                    resolve_corruption_space(
+                        engine=engine,
+                        space=next_ver.corruption_track[spill_idx - 1],
+                        player_commitments=player_commitments,
+                        exited_cubes=exited_cubes,
+                    )
 
         # Apply P2 (Chaos Profiteer) Star bonus: +$2 per exited black cube
         if black_dropped > 0:
@@ -453,30 +457,19 @@ def demote_player_dice_step2a(
     rolled_dice: List[Die],
     commitments: Dict[int, ShieldColor],
     count: int,
+    threat_strengths: Optional[Dict[CubeColor, int]] = None,
 ) -> None:
     demoted = 0
-    # Prioritize Income dice in in_production_dice
-    income_dice = [
-        d for d in list(player.in_production_dice)
-        if getattr(d, "production_role", None) == ProductionRole.INCOME
-    ]
-    income_dice.sort(key=lambda d: (0 if d.color == DieColor.GRAY else 1, getattr(d, "cost", 0)))
-    while demoted < count and income_dice:
-        die = income_dice.pop(0)
-        if die in player.in_production_dice:
-            player.in_production_dice.remove(die)
-            player.glitched_dice.append(die)
-            demoted += 1
-
-    # If still need to demote, move Shield dice and revoke their defensive shield commitment
-    if demoted < count:
-        shield_dice = [
-            d for d in list(player.in_production_dice)
-            if getattr(d, "production_role", None) != ProductionRole.INCOME
-        ]
-        shield_dice.sort(key=lambda d: (0 if d.color == DieColor.GRAY else 1, getattr(d, "cost", 0)))
-        while demoted < count and shield_dice:
-            die = shield_dice.pop(0)
+    threats = threat_strengths or {}
+    prod_dice = list(player.in_production_dice)
+    if prod_dice:
+        if hasattr(player.bot, "choose_dice_to_glitch"):
+            chosen = player.bot.choose_dice_to_glitch(player, prod_dice, count, threats)
+        else:
+            chosen = prod_dice[:count]
+        for die in chosen:
+            if demoted >= count:
+                break
             if die in player.in_production_dice:
                 player.in_production_dice.remove(die)
                 player.glitched_dice.append(die)
@@ -485,7 +478,7 @@ def demote_player_dice_step2a(
                     idx = rolled_dice.index(die)
                     commitments.pop(idx, None)
 
-    # Fallback to ready_for_release_dice if in_production_dice was empty
+    # Fallback to ready_for_release_dice if in_production_dice was empty or exhausted
     if demoted < count and player.ready_for_release_dice:
         ready_pool = list(player.ready_for_release_dice)
         ready_pool.sort(key=lambda d: (0 if d.color == DieColor.GRAY else 1, getattr(d, "cost", 0)))
@@ -583,8 +576,13 @@ def resolve_corruption_space(
 
     # 4. Demote Dice
     if space.demote_dice > 0:
+        threat_strengths = {
+            CubeColor.RED: exited_cubes.get(CubeColor.RED, 0),
+            CubeColor.BLUE: exited_cubes.get(CubeColor.BLUE, 0),
+            CubeColor.GREEN: exited_cubes.get(CubeColor.GREEN, 0),
+        }
         for player, rolled_dice, commitments in player_commitments:
-            demote_player_dice_step2a(player, rolled_dice, commitments, space.demote_dice)
+            demote_player_dice_step2a(player, rolled_dice, commitments, space.demote_dice, threat_strengths)
 
     # 5. Return Colored Dice
     if space.return_colored_dice > 0:
@@ -598,7 +596,7 @@ def resolve_corruption_space(
             if player.secrets <= 0:
                 player.is_patient_zero = True
 
-    # 7. Next Phase Lock
-    if space.next_phase_lock:
+    # 7. Next Phase Lock (Excised in v0.29.0)
+    if getattr(space, "next_phase_lock", None):
         engine.state.pending_next_phase_locks.add(space.next_phase_lock)
 

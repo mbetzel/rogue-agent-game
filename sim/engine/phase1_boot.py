@@ -140,7 +140,36 @@ def check_operator_contingent_staffing(
     return c_die
 
 
+def check_and_execute_start_of_round_version_transition(engine: GameEngine) -> bool:
+    """Executes pending version switch from previous round's filled track (INV-VER-SWITCH-01)."""
+    if not engine.state.pending_version_advance:
+        return False
+
+    old_version_str = engine.state.active_version.version_str
+    engine.state.current_version_index += 1
+    new_version_str = engine.state.active_version.version_str
+
+    # Forfeit unused old ability, unlock new ability
+    for p in engine.state.players:
+        p.mark_ability_forfeited(old_version_str)
+        p.unlock_version_ability(new_version_str)
+
+    # Add new version staging payload to staging cup
+    new_version = engine.state.active_version
+    for color, count in new_version.get_staging_payload(engine.config.num_players).items():
+        engine.state.staging_cup[color] = engine.state.staging_cup.get(color, 0) + count
+
+    # Initialize new track with spilled-over cubes
+    engine.state.corruption_track = engine.state.overflow_black_cubes_on_next_track
+    engine.state.overflow_black_cubes_on_next_track = 0
+    engine.state.pending_version_advance = False
+    return True
+
+
 def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]]:
+    # Start-of-round version switch execution (INV-VER-SWITCH-01)
+    check_and_execute_start_of_round_version_transition(engine)
+
     # Promote pending next-phase locks from previous Phase 2 to active locks for this Phase 1
     engine.state.active_phase1_locks = set(engine.state.pending_next_phase_locks)
     engine.state.pending_next_phase_locks.clear()
@@ -291,12 +320,6 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
                 if not face:
                     continue
                 if face.is_glitch:
-                    d.is_locked = True
-                elif "CASH" in engine.state.active_phase1_locks and face.has_cash_option:
-                    d.is_locked = True
-                elif "PATCH" in engine.state.active_phase1_locks and face.has_patch_option:
-                    d.is_locked = True
-                elif "SHIELD" in engine.state.active_phase1_locks and face.has_shield_option:
                     d.is_locked = True
 
         _evaluate_locks(active_dice)
@@ -489,16 +512,6 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
                 surviving_active.append(die)
                 if idx in validated_commitments:
                     new_commitments[new_idx] = validated_commitments[idx]
-
-        # 2. Cryptographic Hash Match (triplets among active surviving dice)
-        is_cipher = bool(
-            (player.white_hat and player.white_hat.code == WhiteHatCode.CIPHER)
-            or (player.archetype and player.archetype.code == ArchetypeCode.CIPHER)
-        )
-        hash_secrets = detect_hash_matches_with_cipher(surviving_active, is_cipher=is_cipher)
-        if hash_secrets > 0:
-            player.secrets += hash_secrets
-            player.hash_matches_secrets += hash_secrets
 
         # 3. Assign Production Roles and Deploy to in_production_dice
         player.in_production_dice.clear()

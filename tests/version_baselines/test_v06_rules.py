@@ -301,7 +301,7 @@ class TestV06Rules(unittest.TestCase):
         ctrl.roll_pool(player_id=0)
         rolled = ctrl.player_meta[0]["rolled_pool"]
 
-        self.assertTrue(rolled[0].is_locked, "Cash die must be locked under RAAS")
+        self.assertFalse(rolled[0].is_locked, "Cash die is not locked (locks excised in v0.29.0)")
         self.assertFalse(rolled[1].is_locked, "Shield die must NOT be locked under RAAS")
 
     # -------------------------------------------------------------------------
@@ -326,7 +326,7 @@ class TestV06Rules(unittest.TestCase):
         rolled = ctrl.player_meta[0]["rolled_pool"]
 
         self.assertFalse(rolled[0].is_locked, "Cash die must NOT be locked under ZERO_DAY_OVERRIDE")
-        self.assertTrue(rolled[1].is_locked, "Shield die must be locked under ZERO_DAY_OVERRIDE")
+        self.assertFalse(rolled[1].is_locked, "Shield die is not locked (locks excised in v0.29.0)")
 
     # -------------------------------------------------------------------------
     # 11. POLYMORPHIC_WORM Throttles Rerolls
@@ -427,10 +427,10 @@ class TestV06Rules(unittest.TestCase):
 
         ctrl.roll_pool(player_id=0)
 
-        # d_glitch is locked, d_cash is locked by RAAS, d_shield is unlocked
+        # d_glitch is locked, d_cash and d_shield are unlocked (locks excised in v0.29.0)
         rolled = ctrl.player_meta[0]["rolled_pool"]
         self.assertTrue(rolled[0].is_locked)
-        self.assertTrue(rolled[1].is_locked)
+        self.assertFalse(rolled[1].is_locked)
         self.assertFalse(rolled[2].is_locked)
 
         # Commit defenses

@@ -150,7 +150,7 @@ class TestV280TerminalUpgrades(unittest.TestCase):
         p = PlayerState(player_id=0, bot=BaseBot(0), money=5, secrets=8, patches=10)
         self.assertEqual(p.pipeline_level, 0)
         self.assertEqual(p.triage_bandwidth, 2)
-        self.assertEqual(p.release_bandwidth, 2)
+        self.assertEqual(p.release_bandwidth, 4)
         self.assertFalse(p.has_emergency_hotfix)
 
         # Upgrade Level 0 -> 1 costs 2 research
@@ -159,7 +159,7 @@ class TestV280TerminalUpgrades(unittest.TestCase):
         self.assertTrue(ok)
         self.assertEqual(p.pipeline_level, 1)
         self.assertEqual(p.triage_bandwidth, 3)
-        self.assertEqual(p.release_bandwidth, 3)
+        self.assertEqual(p.release_bandwidth, 4)
         self.assertEqual(p.research_tokens, 8)
 
         # Upgrade Level 1 -> 2 costs 3 research
@@ -236,14 +236,14 @@ class TestV280TerminalUpgrades(unittest.TestCase):
         p_omni = engine_omni.state.players[0]
         self.assertEqual(p_omni.defense_capacity, 1, "Omnidyne starts with 1 Defense Capacity")
         self.assertEqual(p_omni.triage_bandwidth, 3, "Omnidyne starts with 3 Triage Bandwidth")
-        self.assertEqual(p_omni.release_bandwidth, 3, "Omnidyne starts with 3 Release Bandwidth")
+        self.assertEqual(p_omni.release_bandwidth, 5, "Omnidyne starts with 5 Release Bandwidth")
         self.assertEqual(p_omni.pipeline_level, 1)
 
         # Test Aegis
         p_aegis = engine_omni.state.players[1]
         self.assertEqual(p_aegis.defense_capacity, 3, "Aegis starts with 3 Defense Capacity")
         self.assertEqual(p_aegis.triage_bandwidth, 1, "Aegis starts with 1 Triage Bandwidth")
-        self.assertEqual(p_aegis.release_bandwidth, 1, "Aegis starts with 1 Release Bandwidth")
+        self.assertEqual(p_aegis.release_bandwidth, 3, "Aegis starts with 3 Release Bandwidth")
         self.assertEqual(p_aegis.defense_level, 1)
 
         # Test Meridian: +$2 starting cash

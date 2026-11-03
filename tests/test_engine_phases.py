@@ -5,6 +5,7 @@ import unittest
 from sim.bots import AdaptiveBalancedBot, BaseBot, Phase3ActionPlan
 from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
 from sim.engine import GameEngine
+from sim.engine.phase1_boot import check_and_execute_start_of_round_version_transition
 from sim.entities import Face, create_colored_die, create_gray_die
 
 
@@ -106,6 +107,10 @@ class TestEnginePhases(unittest.TestCase):
 
         self.assertEqual(engine.state.current_version_index, 0)
         engine._execute_phase_2(commitments)
+        self.assertTrue(engine.state.pending_version_advance)
+
+        # Transition occurs at start of next round (Phase 1)
+        check_and_execute_start_of_round_version_transition(engine)
 
         # Version should advance to v2.0 (index 1)
         self.assertEqual(engine.state.current_version_index, 1)

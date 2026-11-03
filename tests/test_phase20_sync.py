@@ -342,12 +342,11 @@ class TestPhase20Sync(unittest.TestCase):
         self.assertIn("getEligibleBacklashDice", dock_js)
         self.assertIn("Repair 1 Die Free", dock_js)
         self.assertIn("Ignore 1", dock_js)
-        self.assertIn("renderPlayerMats()", dock_js)
 
         with open(os.path.join(js_dir, "components", "player_mats.js"), "r", encoding="utf-8") as f:
             mats_js = f.read()
         self.assertIn("!p.has_rolled && p.contractor_dice", mats_js)
-        self.assertIn("canPatchActiveMode", mats_js)
+        self.assertIn("glitched_tray", mats_js)
 
 
 if __name__ == "__main__":

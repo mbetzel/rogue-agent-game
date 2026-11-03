@@ -1269,4 +1269,136 @@ Prior to `v0.28.0`, player feedback and design analysis identified a critical ag
 
 **Status: OFFICIALLY APPROVED (`v0.28.0` Baseline).**
 
+---
+
+## 24. Phase 36: Rules Streamlining, Decoupled Tracks & CI/CD Wireframe (v0.29.0 Baseline)
+
+Based on Product Owner telemetry sweep (`scripts/run_v290_telemetry_sweep.py`, $N=3,000$ matches across 2P, 3P, and 4P pods; $9,000$ player-games, Base Seed `42` via WSL):
+
+### A. Problem Statement & Design Objectives
+While Phase 35 (`v0.28.0`) established hardware constraints and the uncapped research economy, systems analysis and tabletop ergonomics highlighted six residual friction points:
+1. **Mid-Drop Version Upgrades Disrupting Ability Timing:** Advancing SETEC mid-drop in Step 2A immediately forfeited current version overrides before players could use defensive overrides in Step 2B (e.g., Aegis *Baffle Echo* or DTO *Slush Fund*) or operational overrides in Phase 3 (e.g., Omnidyne *Magnetic Splice* or Prometheus *Algorithmic Arbitrage*).
+2. **Cryptographic Hash Match Procedural Overhead:** Yahtzee-style triplet matching in Phase 1 Step 5 generated cognitive sorting friction during simultaneous deployment without creating thematic strategic depth.
+3. **Phase Lock Spaces & Asymmetric State Baggage:** Corruption track phase locks (locking Cash, Research, or Shields across round boundaries) introduced awkward exception handling, disproportionately punished unlucky rolls, and cluttered mental bandwidth.
+4. **Coupled Pipeline Track & Fast-Patching Currency Burn:** Combining Triage Bandwidth (Glitched $\to$ Scanned) and Release Bandwidth (Scanned $\to$ Ready) into a single track obscured the distinct physical bottlenecks of quarantine triage versus release graduation, necessitating an ad-hoc "fast-patching" token spend in Phase 3B.
+5. **Rigid Corruption Demotion Priority:** Forcing players to glitch Income dice before Shields during "All Players Glitch X Dice" spaces created unintuitive turn squandering when redundant shields were already committed.
+6. **Physical Player Mat Layout Disconnect:** Separating hardware upgrade tracks from the physical dice zones they modify created disjointed visual scanning on the tabletop.
+
+### B. Approved Solutions (`v0.29.0` Baseline)
+1. **Start-of-Round Version Switches & Immediate Black Cube Spillover (`INV-VER-SWITCH-01`):**
+   - When the final space of an active Version's track is filled in Step 2A, excess Black cubes dropped in the same compile step **immediately spill over** onto the next Version's track (triggering newly covered spaces in sequence).
+   - The active version card remains current for the remainder of the round. Current version Institutional Overrides remain legal and usable through Step 2B and Phase 3.
+   - At the start of the next round (in Phase 1 Boot), the version transition officially takes effect: unspent old overrides are forfeited and new overrides unlock to Available.
+   - **Singularity Exception:** Covering Space 6 of `v3.0` triggers Singularity **immediately** in Step 2A.
+2. **Excision of Cryptographic Hash Matching (`INV-HASH-EXCISE-01`):**
+   - Triplet matching in Phase 1 Step 5 is completely excised. Corporate Secrets are earned exclusively through deliberate strategic decisions (Patents, B2/Y1 abilities, Operative protocols).
+3. **The Cipher Signature Protocol — Algorithmic Parity (`INV-CIPHER-FACE6-01`):**
+   - Decoupled from hash matching. Rolling Face 6 (`Purple ★`) on a Purple Specialist die yields **`+$2` Cash AND `+1 🔬` Research Token** during Phase 3A Income collection.
+4. **Free Choice Glitching from In Production (`INV-CORRUPT-CHOICE-01`):**
+   - When a corruption space instructs "All Players Glitch X Dice", players freely choose any dice in In Production (Income or Shields). Redundant shields whose threat color did not drop may be sacrificed to protect income dice.
+5. **Complete Excision of Phase Lock Spaces (`INV-LOCK-EXCISE-01`):**
+   - All phase locks (`LockType`) are eliminated. Spaces are replaced with direct kinetic and glitch threats:
+     - `v2.0` *RaaS* Space 3: **"All lose $2 & Add 1 Red"**
+     - `v2.0` *Polymorphic Worm* Space 3: **"All glitch 1 die & Add 1 Green"**
+     - `v3.0` *Zero-Day Override* Space 4: **"All glitch 1 die & Add 1 Blue, 1 Black"**
+6. **Decoupled 4-Track Hardware Progression (`INV-TRIAGE-TRACK-01`, `INV-RELEASE-TRACK-01`):**
+   - **Triage Track:** Level 0 (Bandwidth 2) $\to$ Level 1 (Bandwidth 3, Cost $2\ 🔬$) $\to$ Level 2 (Bandwidth 4 + Emergency Hotfix, Cost $3\ 🔬$).
+   - **Release Track:** Level 0 (Bandwidth 4) $\to$ Level 1 (Bandwidth 5, Cost $2\ 🔬$) $\to$ Level 2 (Bandwidth 6, Cost $3\ 🔬$).
+   - **Defense Grid Track:** Level 0 (Cap 2) $\to$ Level 1 (Cap 3, Cost $2\ 🔬$) $\to$ Level 2 (Cap 4 + Passive Firewall, Cost $3\ 🔬$).
+   - **Cryptographic Patents Track:** Level 0 (Cost $4\ 🔬$) $\to$ Level 1 (Cost $3\ 🔬$, Upgrade $2\ 🔬$) $\to$ Level 2 (Cost $2\ 🔬 + \$1$, Upgrade $3\ 🔬$).
+7. **Excision of Fast-Patching (`INV-FASTPATCH-EXCISE-01`):**
+   - Fast-patching in Phase 3B is completely eliminated. Throughput is strictly governed by physical hardware bandwidths.
+8. **CI/CD Physical Mat Architecture:**
+   - Hardware upgrade tracks are directly embedded into the functional conveyor zones they govern: Release Bridge between Scanned and Ready, Defense Grid embedded in Shields, Embedded Triage between Glitched and Scanned, and Patents beside the token banks.
+
+---
+
+### C. Multi-Pod Telemetry Summary (3,000 Matches Total; 9,000 Player-Games)
+
+#### 1. Pacing & Progression Invariance Across Pods
+
+| Metric | 2-Player Pod (2P) | 3-Player Pod (3P) | 4-Player Pod (4P) | Target Benchmark | Status |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Average Match Duration** | **8.25 rds** | **7.98 rds** | **8.60 rds** | 8.0–9.0 rounds | **VERIFIED** |
+| **Median Match Duration** | **8.0 rds** | **8.0 rds** | **9.0 rds** | 8.0–9.0 rounds | **VERIFIED** |
+| **Duration Range (Min – Max)** | 4 – 11 rds | 4 – 11 rds | 5 – 11 rds | Min $\ge 3$, Max $\le 12$ | **VERIFIED** |
+| **v1.0 Mean Duration** | **2.82 rds** | **2.74 rds** | **2.68 rds** | 2.5–3.2 rounds | **VERIFIED** |
+| **v2.0 Mean Duration** | **3.24 rds** | **3.18 rds** | **3.31 rds** | 3.0–3.6 rounds | **VERIFIED** |
+| **v3.0 Mean Duration** | **2.19 rds** | **2.06 rds** | **2.61 rds** | 2.0–2.8 rounds | **VERIFIED** |
+| **Black Cube Spillover Rate** | **34.2%** | **38.6%** | **42.1%** | 30%–45% | **VERIFIED** |
+| **Mean Spillover Cubes / Event** | **1.28** | **1.35** | **1.41** | 1.0–1.8 cubes | **VERIFIED** |
+
+*Pacing Invariance Comparison to v0.28.0:* 2P $\Delta -0.04$ rds, 3P $\Delta +0.03$ rds, 4P $\Delta -0.02$ rds. Immediate spillover guarantees identical threat acceleration while preserving player foresight and operational intentionality.
+
+#### 2. End Game Termination Conditions & Casualties
+
+| Termination Condition | 2-Player Pod | 3-Player Pod | 4-Player Pod | Target Corridor | Status |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Singularity Reach Rate** | 0.6% | 0.4% | 0.9% | $< 2.0\%$ | **VERIFIED** |
+| **Patient Zero Trigger Rate** | 58.8% | 77.9% | 83.1% | Primary decider | **VERIFIED** |
+| **Total Wipeout Rate** | 40.6%\* | 21.7% | 16.0% | Controlled tension | **VERIFIED** |
+| **Round Limit Stalls (Turn 12)** | 0.0% | 0.0% | 0.0% | 0 Stalls | **VERIFIED** |
+
+*\*Note: In 2P pods, any simultaneous Patient Zero elimination triggers total wipeout tiebreakers.*
+
+#### 3. Decoupled Hardware Track Adoption Rates Across All 9,000 Player-Games
+
+| Hardware Track | Level 0 (Base) | Level 1 | Level 2 (Cap + Perk) | Mean Level Across All Pods |
+| :--- | :---: | :---: | :---: | :---: |
+| **Triage Bandwidth (2 $\to$ 3 $\to$ 4 + Hotfix)** | 54.2% | 38.6% | 7.2% | **0.53** |
+| **Release Bandwidth (4 $\to$ 5 $\to$ 6)** | 66.8% | 27.5% | 5.7% | **0.39** |
+| **Defense Grid Capacity (2 $\to$ 3 $\to$ 4 + Firewall)** | 28.4% | 46.5% | 25.1% | **0.97** |
+| **Cryptographic Patents (Cost 4 $\to$ 3 $\to$ 2 + $1)** | 69.1% | 23.4% | 7.5% | **0.38** |
+
+#### 4. Corporate Secret & Research Economy Efficiency
+
+| Metric | 2-Player Pod | 3-Player Pod | 4-Player Pod | Target Corridor | Status |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Mean Ending Secrets** | -0.42 | 0.51 | 0.69 | Tight survival margin | **VERIFIED** |
+| **Median Ending Secrets** | 0.0 | 1.0 | 1.0 | 0.0–2.0 | **VERIFIED** |
+| **Mean Ending Research** | 0.01 🔬 | 0.02 🔬 | 0.01 🔬 | $< 0.05\ 🔬$ | **VERIFIED** |
+| **Zero Research Stranded Rate** | **98.8%** | **98.4%** | **99.0%** | $> 95\%$ | **VERIFIED** |
+| **Mean Ending Money** | $0.06 | $0.18 | $0.09 | Tight capital liquidity | **VERIFIED** |
+| **Patents Filed / Player** | 0.22 | 0.41 | 0.36 | Clean VP conversion | **VERIFIED** |
+
+#### 5. Asymmetric Corporate Terminal Mat Balance Matrix
+
+| Client Company | Matches | Survival Rate | Win Rate | Mean Secrets | Mean Triage | Mean Release | Mean Def | Mean Pat |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Aegis Defense Relay** (`AEGIS`) | 1,510 | 27.2% | 12.4% | -0.88 | 0.38 | 0.29 | 1.05 | 0.32 |
+| **Department of Telecom Oversight** (`DTO`) | 1,535 | 56.9% | 36.8% | 1.48 | 0.12 | 0.09 | 0.65 | 0.40 |
+| **Helix Biomedical Consortium** (`HELIX`) | 1,495 | 45.1% | 27.5% | 0.58 | 0.37 | 0.28 | 0.70 | 1.15 |
+| **Meridian Financial Trust** (`MERIDIAN`) | 1,505 | 41.8% | 25.2% | 0.52 | 0.15 | 0.11 | 0.64 | 0.39 |
+| **Omnidyne Systems** (`OMNIDYNE`) | 1,460 | 32.8% | 16.2% | -0.46 | 1.12 | 1.08 | 0.66 | 0.35 |
+| **The Prometheus Foundation** (`PROMETHEUS`) | 1,495 | 48.6% | 31.0% | 1.05 | 0.51 | 0.42 | 0.78 | 0.44 |
+
+---
+
+### D. Key Empirical Takeaways & Design Rationale
+1. **Preserved Pacing Invariance & Agency Protection:**
+   - Shifting version transitions to the start of the next round while spilling excess Black cubes onto the upcoming track immediately preserves exact pacing parity (8.0–8.6 rounds across all pods).
+   - Crucially, this eliminates the "feel-bad cliff" where a player's defensive or operational override was forfeited mid-drop before they had any opportunity to declare it in Step 2B or Phase 3.
+2. **Total Removal of Yahtzee Sorting Overhead:**
+   - Excising Cryptographic Hash Matches successfully cleanses Phase 1 Step 5 into pure tactical assignment: allocating dice to Shields (under Defense Grid Capacity) or Income.
+   - Corporate Secrets are now cleanly anchored to deliberate economic investments: Cryptographic Patents, module abilities (`B2`, `Y1`), and White Hat operative protocols.
+3. **Decoupled Pipeline Tracks Expose True Tabletop Bottlenecks:**
+   - Decoupling demonstrates that players face significantly higher friction in quarantine triage (moving dice from Glitched to Scanned, 45.8% upgrade adoption) than in release graduation (moving Scanned to Ready, 33.2% adoption).
+   - Baseline Release Bandwidth (4 dice/round) prevents artificial staging clogs for moderate dice pools, while baseline Triage Bandwidth (2 dice/round) creates a tense, manageable risk puzzle during malware storms.
+   - Eliminating the ad-hoc fast-patching token spend enforces strict physical hardware throughput, elevating the value of Triage upgrades and Omnidyne's *Magnetic Splice*.
+4. **Flawless Research Economy Liquidity (>98.7% Conversion):**
+   - Over 98.7% of all games conclude with exactly 0 unspent research tokens. The combination of 4 independent hardware upgrade tracks and uncapped patent filings creates an optimal economic sink with zero dead capital.
+5. **Clear Corporate CI/CD Archetypes:**
+   - **Omnidyne** leverages starting Level 1 Triage & Release (bandwidth 3/5) to cycle high-risk dice rapidly, compensating for low starting defense.
+   - **Aegis** boasts peerless early defense (Capacity 3) but must navigate an acute pipeline bottleneck (Triage 1 / Release 3).
+   - **Helix** aggressively pursues early patents (mean Patent Level 1.15) via starting research bonuses.
+   - **DTO**, **Meridian**, and **Prometheus** offer well-differentiated economic buffers, discounts, and liquidity tools.
+
+---
+
+### E. Formal Design Sign-Off
+- **Baseline Adoption:** Formally approve and adopt Start-of-Round Version Transitions with Immediate Cube Spillover, Excision of Cryptographic Hash Matches, Complete Excision of Phase Locks, Decoupled 4-Track Hardware Progression, Excision of Fast-Patching, Free Choice Glitching from In Production, and CI/CD Player Mat Wireframe Architecture as the official baseline for **`v0.29.0`**.
+- **Parity Synchronized:** Fully verified and synchronized across `RULES.md`, `FINDINGS.md`, `docs/findings/v290_telemetry_sweep_report.md`, `docs/specs/v290_rules_streamlining_spec.md`, `sim/entities.py`, `sim/config.py`, `sim/engine/`, `sim/bots/`, `web/`, and `tests/test_v290_rules_streamlining.py`.
+
+**Status: OFFICIALLY APPROVED (`v0.29.0` Baseline).**
+
 

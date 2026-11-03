@@ -162,18 +162,12 @@ def roll_pool(controller: GameController, player_id: int) -> Dict[str, Any]:
     meta["has_rolled"] = True
     controller.subphase = "waiting_for_commit"
 
-    # Evaluate locks per RULES.md v0.15.0
+    # Evaluate locks
     for die in active_dice:
         face = die.current_face
         if not face:
             continue
         if face.is_glitch:
-            die.is_locked = True
-        elif "CASH" in controller.state.active_phase1_locks and face.has_cash_option:
-            die.is_locked = True
-        elif "PATCH" in controller.state.active_phase1_locks and face.has_patch_option:
-            die.is_locked = True
-        elif "SHIELD" in controller.state.active_phase1_locks and face.has_shield_option:
             die.is_locked = True
 
     face_names = [
@@ -249,12 +243,6 @@ def perform_reroll(
         if not face:
             continue
         if face.is_glitch:
-            d.is_locked = True
-        elif "CASH" in controller.state.active_phase1_locks and face.has_cash_option:
-            d.is_locked = True
-        elif "PATCH" in controller.state.active_phase1_locks and face.has_patch_option:
-            d.is_locked = True
-        elif "SHIELD" in controller.state.active_phase1_locks and face.has_shield_option:
             d.is_locked = True
 
     # Operator Contingent Staffing Face 6 Protocol (if not triggered yet)
@@ -474,16 +462,6 @@ def commit_defenses(
             surviving_active.append(die)
             if idx in validated_commitments:
                 new_commitments[new_idx] = validated_commitments[idx]
-
-    # Cryptographic Hash Match (RULES.md v0.17.0 Baseline & Cipher Wildcard v0.24.0)
-    is_cipher = bool(player.archetype and player.archetype.code == ArchetypeCode.CIPHER)
-    hash_secrets = detect_hash_matches(surviving_active, is_cipher=is_cipher)
-    if hash_secrets > 0:
-        player.secrets += hash_secrets
-        player.hash_matches_secrets = getattr(player, "hash_matches_secrets", 0) + hash_secrets
-        controller.event_log.append(
-            f"{meta['name']} triggered Cryptographic Hash Match (+{hash_secrets} Corporate Secret{'s' if hash_secrets > 1 else ''})!"
-        )
 
     # Assign Production Roles and Deploy to in_production_dice (v0.22.0 Canonical)
     player.in_production_dice.clear()
@@ -795,19 +773,6 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
                 surviving_active.append(die)
                 if idx in validated:
                     new_commitments[new_idx] = validated[idx]
-
-        # Cryptographic Hash Match (RULES.md v0.17.0 Baseline & Cipher Wildcard v0.24.0)
-        is_cipher = bool(
-            (player.white_hat and player.white_hat.code == WhiteHatCode.CIPHER)
-            or (player.archetype and player.archetype.code == ArchetypeCode.CIPHER)
-        )
-        hash_secrets = detect_hash_matches(surviving_active, is_cipher=is_cipher)
-        if hash_secrets > 0:
-            player.secrets += hash_secrets
-            player.hash_matches_secrets = getattr(player, "hash_matches_secrets", 0) + hash_secrets
-            controller.event_log.append(
-                f"{meta['name']} triggered Cryptographic Hash Match (+{hash_secrets} Corporate Secret{'s' if hash_secrets > 1 else ''})!"
-            )
 
         # Assign Production Roles and Deploy to in_production_dice (v0.22.0 Canonical)
         player.in_production_dice.clear()

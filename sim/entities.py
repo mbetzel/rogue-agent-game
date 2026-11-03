@@ -76,14 +76,19 @@ class Company:
     flavor: str
     starting_defense_capacity: int = 2
     starting_triage_bandwidth: int = 2
-    starting_release_bandwidth: int = 2
-    starting_pipeline_level: int = 0
+    starting_release_bandwidth: int = 4
+    starting_triage_level: int = 0
+    starting_release_level: int = 0
     starting_defense_level: int = 0
     starting_patent_level: int = 0
     starting_cash_bonus: int = 0
     starting_research_bonus: int = 0
     starting_secrets_bonus: int = 0
     upgrade_discount: int = 0
+
+    @property
+    def starting_pipeline_level(self) -> int:
+        return self.starting_triage_level
 
 
 @dataclass(frozen=True)
@@ -198,7 +203,7 @@ class CorruptionSpace:
     demote_dice: int = 0
     return_colored_dice: int = 0
     lose_secrets: int = 0
-    next_phase_lock: Optional[str] = None  # "CASH", "PATCH", "SHIELD", or None
+    next_phase_lock: Optional[str] = None
     is_upgrade: bool = False
     is_singularity: bool = False
 
@@ -547,7 +552,7 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                 corruption_track=(
                     CorruptionSpace(index=1, label="All lose $2", lose_money=2),
                     CorruptionSpace(index=2, label="Add 1R, 1G + Add 1K", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1, CubeColor.BLACK: 1}),
-                    CorruptionSpace(index=3, label="Lock Cash ($) next Phase 1", next_phase_lock="CASH"),
+                    CorruptionSpace(index=3, label="All lose $2 & Add 1R", lose_money=2, add_cubes={CubeColor.RED: 1}),
                     CorruptionSpace(index=4, label="Lose $3 & 1 🔧 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
                     CorruptionSpace(
                         index=5,
@@ -568,7 +573,7 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                 corruption_track=(
                     CorruptionSpace(index=1, label="Lose 2 🔧", lose_patches=2),
                     CorruptionSpace(index=2, label="Add 2G + Add 1K", add_cubes={CubeColor.GREEN: 2, CubeColor.BLACK: 1}),
-                    CorruptionSpace(index=3, label="Lock Patch (🔧) next Phase 1", next_phase_lock="PATCH"),
+                    CorruptionSpace(index=3, label="All glitch 1 die & Add 1G", demote_dice=1, add_cubes={CubeColor.GREEN: 1}),
                     CorruptionSpace(index=4, label="Demote 2 dice + Add 1K", demote_dice=2, add_cubes={CubeColor.BLACK: 1}),
                     CorruptionSpace(
                         index=5,
@@ -590,7 +595,7 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                     CorruptionSpace(index=1, label="Add 1R, 1B, 1G", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1}),
                     CorruptionSpace(index=2, label="Lose $3 & 1 🔧 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
                     CorruptionSpace(index=3, label="Add 1R, 1B", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}),
-                    CorruptionSpace(index=4, label="Lock Shields next Phase 1 + Add 1K", next_phase_lock="SHIELD", add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=4, label="All glitch 1 die & Add 1B, 1K", demote_dice=1, add_cubes={CubeColor.BLUE: 1, CubeColor.BLACK: 1}),
                     CorruptionSpace(index=5, label="Return 1 Colored Die & demote 1 die", return_colored_dice=1, demote_dice=1),
                     CorruptionSpace(
                         index=6,
@@ -677,7 +682,7 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
             corruption_track=(
                 CorruptionSpace(index=1, label="All lose $2", lose_money=2),
                 CorruptionSpace(index=2, label="Add 1R, 1G + Add 1K", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1, CubeColor.BLACK: 1}),
-                CorruptionSpace(index=3, label="Lock Cash ($) next Phase 1", next_phase_lock="CASH"),
+                CorruptionSpace(index=3, label="All lose $2 & Add 1R", lose_money=2, add_cubes={CubeColor.RED: 1}),
                 CorruptionSpace(index=4, label="Lose $3 & 1 🔧 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
                 CorruptionSpace(
                     index=5,
@@ -698,7 +703,7 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
             corruption_track=(
                 CorruptionSpace(index=1, label="Lose 2 🔧", lose_patches=2),
                 CorruptionSpace(index=2, label="Add 2G + Add 1K", add_cubes={CubeColor.GREEN: 2, CubeColor.BLACK: 1}),
-                CorruptionSpace(index=3, label="Lock Patch (🔧) next Phase 1", next_phase_lock="PATCH"),
+                CorruptionSpace(index=3, label="All glitch 1 die & Add 1G", demote_dice=1, add_cubes={CubeColor.GREEN: 1}),
                 CorruptionSpace(index=4, label="Demote 1 die + Add 1K", demote_dice=1, add_cubes={CubeColor.BLACK: 1}),
                 CorruptionSpace(
                     index=5,
@@ -720,7 +725,7 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                 CorruptionSpace(index=1, label="Add 1R, 1B, 1G", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1}),
                 CorruptionSpace(index=2, label="Lose $3 & 1 🔧 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
                 CorruptionSpace(index=3, label="Add 1R, 1B", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}),
-                CorruptionSpace(index=4, label="Lock Shields next Phase 1 + Add 1K", next_phase_lock="SHIELD", add_cubes={CubeColor.BLACK: 1}),
+                CorruptionSpace(index=4, label="All glitch 1 die & Add 1B, 1K", demote_dice=1, add_cubes={CubeColor.BLUE: 1, CubeColor.BLACK: 1}),
                 CorruptionSpace(index=5, label="Return 1 Colored Die", return_colored_dice=1),
                 CorruptionSpace(
                     index=6,
@@ -891,7 +896,11 @@ COMPANIES: Dict[CompanyCode, Company] = {
         flavor="When liquidity is limitless, headcount is merely an accounting variable.",
         starting_defense_capacity=2,
         starting_triage_bandwidth=2,
-        starting_release_bandwidth=1,
+        starting_release_bandwidth=4,
+        starting_triage_level=0,
+        starting_release_level=0,
+        starting_defense_level=0,
+        starting_patent_level=0,
         starting_cash_bonus=2,
     ),
     CompanyCode.OMNIDYNE: Company(
@@ -904,8 +913,11 @@ COMPANIES: Dict[CompanyCode, Company] = {
         flavor="Proprietary hardware backplanes allow instantaneous hot-swapping under live load.",
         starting_defense_capacity=1,
         starting_triage_bandwidth=3,
-        starting_release_bandwidth=3,
-        starting_pipeline_level=1,
+        starting_release_bandwidth=5,
+        starting_triage_level=1,
+        starting_release_level=1,
+        starting_defense_level=0,
+        starting_patent_level=0,
     ),
     CompanyCode.AEGIS: Company(
         code=CompanyCode.AEGIS,
@@ -917,8 +929,11 @@ COMPANIES: Dict[CompanyCode, Company] = {
         flavor="Multi-layered kinetic dampeners disperse inbound network blast energy.",
         starting_defense_capacity=3,
         starting_triage_bandwidth=1,
-        starting_release_bandwidth=1,
+        starting_release_bandwidth=3,
+        starting_triage_level=0,
+        starting_release_level=0,
         starting_defense_level=1,
+        starting_patent_level=0,
     ),
     CompanyCode.DTO: Company(
         code=CompanyCode.DTO,
@@ -930,7 +945,11 @@ COMPANIES: Dict[CompanyCode, Company] = {
         flavor="Classified black budget allocations absorb compliance failures without public oversight.",
         starting_defense_capacity=2,
         starting_triage_bandwidth=2,
-        starting_release_bandwidth=2,
+        starting_release_bandwidth=4,
+        starting_triage_level=0,
+        starting_release_level=0,
+        starting_defense_level=0,
+        starting_patent_level=0,
         starting_secrets_bonus=1,
     ),
     CompanyCode.HELIX: Company(
@@ -943,7 +962,10 @@ COMPANIES: Dict[CompanyCode, Company] = {
         flavor="Massively parallel quantum sequencing breaks deterministic encryption gates.",
         starting_defense_capacity=2,
         starting_triage_bandwidth=2,
-        starting_release_bandwidth=2,
+        starting_release_bandwidth=4,
+        starting_triage_level=0,
+        starting_release_level=0,
+        starting_defense_level=0,
         starting_patent_level=1,
         starting_research_bonus=2,
     ),
@@ -957,7 +979,11 @@ COMPANIES: Dict[CompanyCode, Company] = {
         flavor="Open-source cryptographic protocols circumvent proprietary enterprise licensing fees.",
         starting_defense_capacity=2,
         starting_triage_bandwidth=2,
-        starting_release_bandwidth=2,
+        starting_release_bandwidth=4,
+        starting_triage_level=0,
+        starting_release_level=0,
+        starting_defense_level=0,
+        starting_patent_level=0,
         upgrade_discount=1,
     ),
 }
@@ -1018,8 +1044,8 @@ WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
         name="The Cipher",
         role="Distributed Ledger Architect",
         protocol_name="Algorithmic Parity",
-        timing_window="Phase 1: Step 5 & Phase 3: Step 2",
-        description="Purple ★ acts as wildcard completing any pair to a 3-of-a-kind triplet (+1 Secret in Phase 1 Step 5). In Phase 3A Income, Purple ★ generates +$2 cash.",
+        timing_window="Phase 3: Operations Turn",
+        description="When Purple ★ is rolled, collect +$2 cash and +1 🔬 Research Token in Phase 3A Income.",
         flavor="Parity calculations balance zero-knowledge proofs flawlessly.",
         reserve_cost=6,
     ),

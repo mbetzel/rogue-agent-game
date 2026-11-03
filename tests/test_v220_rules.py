@@ -455,9 +455,9 @@ class TestV220Rules(unittest.TestCase):
         p0.bot = FastPatchBot(0)
         execute_phase_3(engine)
 
-        # Fast patch moved d1 to scanned, which then graduated to ready_for_release_dice!
-        self.assertEqual(p0.patches, 1)
-        self.assertIn(d1, p0.ready_for_release_dice)
+        # In v0.29.0 fast-patching is excised; triage shifts d1 to scanned with 0 patches
+        self.assertEqual(p0.patches, 2)
+        self.assertIn(d1, p0.scanned_dice)
         self.assertEqual(len(p0.glitched_dice), 0)
 
     def test_phase3_scanned_graduation(self) -> None:

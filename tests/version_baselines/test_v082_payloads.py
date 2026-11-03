@@ -33,6 +33,7 @@ from typing import Dict, List
 from sim.bots import AdaptiveBalancedBot, SecOpsTurtleBot
 from sim.config import CubeColor, DieColor, GameConfig, ShieldColor, TowerMode
 from sim.engine import GameEngine, PlayerState
+from sim.engine.phase1_boot import check_and_execute_start_of_round_version_transition
 from sim.entities import (
     VersionCard,
     get_all_version_cards,
@@ -256,6 +257,7 @@ class TestGroupCEngineAndTowerMechanics(unittest.TestCase):
         engine_4p.state.staging_cup[CubeColor.BLACK] = 4  # 4 Black cubes exiting triggers upgrade
         player_commitments = [(p, [], {}) for p in engine_4p.state.players]
         engine_4p._execute_phase_2(player_commitments)
+        check_and_execute_start_of_round_version_transition(engine_4p)
 
         self.assertEqual(engine_4p.state.current_version_index, 1)
         self.assertEqual(engine_4p.state.active_version.name, "Polymorphic Worm")
@@ -273,6 +275,7 @@ class TestGroupCEngineAndTowerMechanics(unittest.TestCase):
         engine_2p.state.staging_cup[CubeColor.BLACK] = 4
         player_commitments_2p = [(p, [], {}) for p in engine_2p.state.players]
         engine_2p._execute_phase_2(player_commitments_2p)
+        check_and_execute_start_of_round_version_transition(engine_2p)
 
         self.assertEqual(engine_2p.state.current_version_index, 1)
         self.assertEqual(engine_2p.state.active_version.name, "Polymorphic Worm")
@@ -299,6 +302,7 @@ class TestGroupCEngineAndTowerMechanics(unittest.TestCase):
         engine_4p.state.staging_cup[CubeColor.BLACK] = 4
         player_commitments = [(p, [], {}) for p in engine_4p.state.players]
         engine_4p._execute_phase_2(player_commitments)
+        check_and_execute_start_of_round_version_transition(engine_4p)
 
         self.assertEqual(engine_4p.state.current_version_index, 2)
         self.assertEqual(engine_4p.state.active_version.name, "Zero-Day Override")
@@ -318,6 +322,7 @@ class TestGroupCEngineAndTowerMechanics(unittest.TestCase):
         engine_2p.state.staging_cup[CubeColor.BLACK] = 4
         player_commitments_2p = [(p, [], {}) for p in engine_2p.state.players]
         engine_2p._execute_phase_2(player_commitments_2p)
+        check_and_execute_start_of_round_version_transition(engine_2p)
 
         self.assertEqual(engine_2p.state.current_version_index, 2)
         self.assertEqual(engine_2p.state.active_version.name, "Zero-Day Override")

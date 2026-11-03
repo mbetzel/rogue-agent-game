@@ -853,46 +853,6 @@ export function renderActionDock() {
       controls.appendChild(spookWrap);
     }
 
-    // Fast-Patch Action Control (1 🔧)
-    const glitchedDice = human.glitched_dice || [];
-    if (caps.can_fast_patch && glitchedDice.length > 0) {
-      const fpWrap = document.createElement("div");
-      fpWrap.style.display = "inline-flex";
-      fpWrap.style.alignItems = "center";
-      fpWrap.style.gap = "6px";
-
-      const fpSelect = document.createElement("select");
-      fpSelect.id = "fastPatchDieSelect";
-      fpSelect.style.padding = "4px 8px";
-      fpSelect.style.background = "var(--bg-card)";
-      fpSelect.style.color = "#fff";
-      fpSelect.style.border = "1px solid var(--border-color)";
-      fpSelect.style.borderRadius = "4px";
-
-      glitchedDice.forEach((d) => {
-        const opt = document.createElement("option");
-        opt.value = String(d.die_id);
-        opt.innerText = `Fast-Patch: ${d.color.toUpperCase()}${d.vp ? ' (' + d.vp + 'VP)' : ''}`;
-        fpSelect.appendChild(opt);
-      });
-
-      const fpBtn = document.createElement("button");
-      fpBtn.className = "action-btn";
-      fpBtn.style.borderColor = "#38bdf8";
-      fpBtn.style.color = "#38bdf8";
-      fpBtn.innerText = "Fast-Patch (1 🔧 → Scanned)";
-      fpBtn.onclick = () => {
-        const targetId = parseInt(fpSelect.value, 10);
-        if (!isNaN(targetId)) {
-          doFastPatch([targetId]);
-          renderPlayerMats();
-        }
-      };
-
-      fpWrap.appendChild(fpSelect);
-      fpWrap.appendChild(fpBtn);
-      controls.appendChild(fpWrap);
-    }
 
     // Star abilities
     if (caps.can_star && caps.can_star.B2) {
@@ -969,17 +929,30 @@ export function renderActionDock() {
     const upgradeCosts = caps.upgrade_track_costs || {};
     const canUp = caps.can_upgrade_track || {};
 
-    if ((human.pipeline_level || 0) < 2 && upgradeCosts.pipeline !== null && upgradeCosts.pipeline !== undefined) {
-      const pipeCost = upgradeCosts.pipeline;
-      const pipeBtn = document.createElement("button");
-      pipeBtn.className = "action-btn";
-      pipeBtn.style.borderColor = "#38bdf8";
-      pipeBtn.style.color = "#38bdf8";
-      pipeBtn.innerText = `⚡ Upgr Pipeline [L${(human.pipeline_level || 0) + 1}] (${pipeCost} 🔬)`;
-      pipeBtn.disabled = !canUp.pipeline;
-      pipeBtn.title = canUp.pipeline ? `Upgrade Pipeline to Level ${(human.pipeline_level || 0) + 1} (${pipeCost} 🔬)` : `Requires ${pipeCost} 🔬`;
-      pipeBtn.onclick = () => doUpgradeTrack("pipeline");
-      controls.appendChild(pipeBtn);
+    if ((human.triage_level || 0) < 2 && upgradeCosts.triage !== null && upgradeCosts.triage !== undefined) {
+      const triageCost = upgradeCosts.triage;
+      const triageBtn = document.createElement("button");
+      triageBtn.className = "action-btn";
+      triageBtn.style.borderColor = "#38bdf8";
+      triageBtn.style.color = "#38bdf8";
+      triageBtn.innerText = `⚙️ Upgr Triage [L${(human.triage_level || 0) + 1}] (${triageCost} 🔬)`;
+      triageBtn.disabled = !canUp.triage;
+      triageBtn.title = canUp.triage ? `Upgrade Triage to Level ${(human.triage_level || 0) + 1} (${triageCost} 🔬)` : `Requires ${triageCost} 🔬`;
+      triageBtn.onclick = () => doUpgradeTrack("triage");
+      controls.appendChild(triageBtn);
+    }
+
+    if ((human.release_level || 0) < 2 && upgradeCosts.release !== null && upgradeCosts.release !== undefined) {
+      const relCost = upgradeCosts.release;
+      const relBtn = document.createElement("button");
+      relBtn.className = "action-btn";
+      relBtn.style.borderColor = "#06b6d4";
+      relBtn.style.color = "#06b6d4";
+      relBtn.innerText = `🚀 Upgr Release [L${(human.release_level || 0) + 1}] (${relCost} 🔬)`;
+      relBtn.disabled = !canUp.release;
+      relBtn.title = canUp.release ? `Upgrade Release to Level ${(human.release_level || 0) + 1} (${relCost} 🔬)` : `Requires ${relCost} 🔬`;
+      relBtn.onclick = () => doUpgradeTrack("release");
+      controls.appendChild(relBtn);
     }
 
     if ((human.defense_level || 0) < 2 && upgradeCosts.defense !== null && upgradeCosts.defense !== undefined) {

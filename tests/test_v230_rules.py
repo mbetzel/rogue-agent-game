@@ -85,8 +85,8 @@ class TestV230Rules(unittest.TestCase):
         p0.bot = AttemptUnlockBot(0)
         execute_phase_1(engine)
 
-        # Invariant: die remains locked, and patches were NEVER deducted
-        self.assertTrue(gray.is_locked, "Corruption lock CASH must remain locked")
+        # Invariant: Phase locks excised in v0.29.0; die is not locked and patches were NEVER deducted
+        self.assertFalse(gray.is_locked, "Phase 1 locks excised in v0.29.0")
         self.assertEqual(p0.patches, 3, "Patch count must never decrease in Phase 1")
 
     def test_standard_reroll_cannot_include_locked_dice(self) -> None:
@@ -301,10 +301,11 @@ class TestV230Rules(unittest.TestCase):
         p0.bot = PhreakerAndPatchBot(0)
         execute_phase_3(engine)
 
-        # Phreaker moves 1 die free to ready, Fast patch spends 1 🔧 to move the second die
-        self.assertEqual(p0.patches, 0)
+        # Phreaker moves 1 die free to ready; in v0.29.0 fast-patch is excised so remaining die shifts via triage
+        self.assertEqual(p0.patches, 1)
         self.assertEqual(len(p0.glitched_dice), 0)
-        self.assertEqual(len(p0.ready_for_release_dice), 2)
+        self.assertEqual(len(p0.ready_for_release_dice), 1)
+        self.assertEqual(len(p0.scanned_dice), 1)
 
     # =========================================================================
     # Category 3: Consolidated Fast-Patching in Phase 3B
@@ -329,9 +330,10 @@ class TestV230Rules(unittest.TestCase):
         p0.bot = FastPatchBothBot(0)
         execute_phase_3(engine)
 
-        self.assertEqual(p0.patches, 0)
+        # In v0.29.0 fast-patching is excised; natural triage shifts both dice to scanned with 0 patches spent
+        self.assertEqual(p0.patches, 2)
         self.assertEqual(len(p0.glitched_dice), 0)
-        self.assertEqual(len(p0.ready_for_release_dice), 2)
+        self.assertEqual(len(p0.scanned_dice), 2)
 
     def test_fast_patched_dice_graduate_immediately_to_ready(self) -> None:
         """Fast-patched dice move to scanned_dice, then graduate to ready_for_release_dice at round end."""
@@ -350,8 +352,8 @@ class TestV230Rules(unittest.TestCase):
         p0.bot = PatchOneBot(0)
         execute_phase_3(engine)
 
-        self.assertIn(d1, p0.ready_for_release_dice)
-        self.assertEqual(len(p0.scanned_dice), 0)
+        self.assertIn(d1, p0.scanned_dice)
+        self.assertEqual(len(p0.scanned_dice), 1)
         self.assertEqual(len(p0.glitched_dice), 0)
 
     def test_unpatched_dice_shift_naturally_via_conveyor(self) -> None:
@@ -382,14 +384,16 @@ class TestV230Rules(unittest.TestCase):
         self.assertEqual(p0.patches, 0)
 
     def test_patch_token_cap_enforced_at_three(self) -> None:
-        """Patches exceeding 3 🔧 are discarded at round end cleanup."""
+        """Patches exceeding 3 🔧 are discarded at round end cleanup (uncapped in v0.28.0+)."""
         engine = GameEngine(config=GameConfig(num_players=2), seed=42)
         p0 = engine.state.players[0]
+        p0.bot = BaseBot(0)
+        engine.state.players[1].bot = BaseBot(1)
         p0.patches = 5
 
         execute_phase_3(engine)
 
-        self.assertEqual(p0.patches, 3)
+        self.assertEqual(p0.patches, 5)
 
     def test_fast_patch_respects_available_wrench_balance(self) -> None:
         """Fast-patching cannot exceed the player's available patch tokens."""
@@ -411,10 +415,10 @@ class TestV230Rules(unittest.TestCase):
         p0.bot = GreedPatchBot(0)
         execute_phase_3(engine)
 
-        # Only 1 die was fast-patched into ready_for_release; the other die shifted naturally to scanned
-        self.assertEqual(p0.patches, 0)
-        self.assertEqual(len(p0.ready_for_release_dice), 1)
-        self.assertEqual(len(p0.scanned_dice), 1)
+        # In v0.29.0, fast-patching is excised; triage shifts up to bandwidth (2) dice into scanned
+        self.assertEqual(p0.patches, 1)
+        self.assertEqual(len(p0.ready_for_release_dice), 0)
+        self.assertEqual(len(p0.scanned_dice), 2)
         self.assertEqual(len(p0.glitched_dice), 0)
 
     # =========================================================================
@@ -457,20 +461,15 @@ class TestV230Rules(unittest.TestCase):
         engine = GameEngine(config=GameConfig(num_players=2), seed=42)
         chosen = bot.choose_fast_patches(p, engine.state, random.Random(42))
 
-        self.assertGreaterEqual(len(chosen), 1, "Must fast-patch at least 1 die when patches > 3")
+        self.assertEqual(chosen, [], "Fast patching is excised in v0.29.0")
 
     def test_bot_fast_patch_prioritizes_colored_dice(self) -> None:
-        """Bot prioritizes colored dice over gray starter dice during fast-patching."""
+        """BaseBot.choose_fast_patches is deprecated and returns [] in v0.29.0."""
         bot = BaseBot(0)
         p = PlayerState(0, bot, money=5, secrets=8, patches=4)
-        gray = create_gray_die(1)
-        red = create_colored_die(DieColor.RED, 2)
-        p.glitched_dice = [gray, red]  # index 0: gray ($0), index 1: red ($4)
-
         engine = GameEngine(config=GameConfig(num_players=2), seed=42)
         chosen = bot.choose_fast_patches(p, engine.state, random.Random(42))
-
-        self.assertIn(1, chosen, "Red die (index 1) should be chosen first")
+        self.assertEqual(chosen, [])
 
     def test_bot_full_round_wrench_conservation(self) -> None:
         """Run a full game round; verify bots spend 0 patches in Phase 1."""

@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from sim.entities import Die
 
 
-def collect_player_production_income(engine: GameEngine, player: PlayerState, plan: Any) -> None:
+def collect_player_production_income(engine: GameEngine, player: PlayerState, plan: Any = None) -> None:
     """Part 3A Step 1: Collect income from ALL dice remaining in in_production_dice."""
     dice_to_glitch: List[Die] = []
 
@@ -61,8 +61,9 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
                     unique_colors = len({c for c, count in exited.items() if count > 0})
                     player.money += min(4, unique_colors)
                 elif is_cipher:
-                    # The Cipher (Algorithmic Parity): Phase 3 Income: +$2
+                    # The Cipher (Algorithmic Parity): Phase 3 Income: +$2 cash & +1 🔬 Research
                     player.money += 2
+                    player.research_tokens += 1
                 elif is_spook:
                     # The Spook (Burn Notice): Base Phase 3 Ops: +$2
                     player.money += 2
@@ -72,6 +73,9 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
             player.in_production_dice.remove(die)
             die.production_role = None
             player.glitched_dice.append(die)
+
+
+collect_production_income = collect_player_production_income
 
 
 def resolve_spook_burn_notice(
@@ -413,26 +417,6 @@ def execute_phase_3(engine: GameEngine) -> None:
             h_die.chosen_choice_index = None
             h_die.current_face = None
             player.ready_for_release_dice.append(h_die)
-
-        # Bot Fast-Patch Decision: spend 1 🔧 per die to move from glitched_dice to scanned_dice
-        fast_patches = player.bot.choose_fast_patches(player, engine.state, engine.rng)
-        if fast_patches and player.patches > 0 and player.glitched_dice:
-            # Sort indices descending so removal doesn't shift earlier indices
-            valid_indices = sorted(
-                {idx for idx in fast_patches if 0 <= idx < len(player.glitched_dice)},
-                reverse=True,
-            )
-            for f_idx in valid_indices:
-                if player.patches <= 0 or f_idx >= len(player.glitched_dice):
-                    break
-                p_die = player.glitched_dice.pop(f_idx)
-                p_die.production_role = None
-                p_die.is_locked = False
-                p_die.chosen_choice_index = None
-                p_die.current_face = None
-                player.scanned_dice.append(p_die)
-                player.patches -= 1
-                player.total_fast_patches += 1
 
         # 2. Scanned Graduation (Release Bandwidth - INV-PIPE-GRAD-01):
         # Move up to player.release_bandwidth dice from scanned_dice to ready_for_release_dice

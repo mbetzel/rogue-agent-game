@@ -94,13 +94,19 @@ class TestV150CorruptionTracks(unittest.TestCase):
         self.assertEqual(p0.patches, 2)
         self.assertEqual(p1.patches, 2)
 
-        # Check upgrade occurred: active version is now v2.0
-        self.assertEqual(engine.state.active_version.version_str, "v2.0")
+        # Check upgrade flagged: active version remains v1.0 during Phase 2/3 (INV-VER-SWITCH-01)
+        self.assertTrue(engine.state.pending_version_advance)
+        self.assertEqual(engine.state.active_version.version_str, "v1.0")
 
-        # Check carryover: 2nd Black Cube advanced v2.0 to Space 1 (All lose $2: 10 -> $8)
-        self.assertEqual(engine.state.corruption_track, 1)
+        # Check carryover: 2nd Black Cube advanced upcoming v2.0 to Space 1 (All lose $2: 10 -> $8)
+        self.assertEqual(engine.state.overflow_black_cubes_on_next_track, 1)
         self.assertEqual(p0.money, 8)
         self.assertEqual(p1.money, 8)
+
+        # Transition occurs at start of next round (Phase 1)
+        engine._execute_phase_1()
+        self.assertEqual(engine.state.active_version.version_str, "v2.0")
+        self.assertEqual(engine.state.corruption_track, 1)
 
     def test_corruption_space_penalties(self) -> None:
         """Test lose_money, lose_patches, lose_secrets, demote_dice, and return_colored_dice."""

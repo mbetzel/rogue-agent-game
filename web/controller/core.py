@@ -16,6 +16,7 @@ from sim.bots import (
 )
 from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
+from sim.engine.phase1_boot import check_and_execute_start_of_round_version_transition
 from sim.entities import (
     AbilityStatus,
     ArchetypeCard,
@@ -185,6 +186,9 @@ class GameController:
         self.phase = 1
         self.phase_name = "Boot & Configure"
         self.subphase = "waiting_for_roll"
+
+        # Start-of-round version switch execution (INV-VER-SWITCH-01)
+        check_and_execute_start_of_round_version_transition(self.engine)
 
         # 1. Autonomous AI Corruption Pulse per RULES.md Section 4 Phase 1 Step 1
         self.state.staging_cup[CubeColor.BLACK] = (

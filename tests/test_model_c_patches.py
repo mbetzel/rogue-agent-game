@@ -115,10 +115,11 @@ class TestModelCPatches(unittest.TestCase):
         player.bot = CustomBot(bot_id=0)
         execute_phase_3(engine)
 
-        # Player spent 2 patches, leaving 3.
-        self.assertEqual(len(player.unpatched_dice), 0)
+        # In v0.29.0, fast patching is excised; dice shift naturally via CI/CD conveyor
+        self.assertEqual(len(player.scanned_dice), 2)
+        execute_phase_3(engine)
         self.assertEqual(len(player.ready_dice), 2)
-        self.assertEqual(player.patches, 3)
+        self.assertEqual(player.patches, 5)
 
     def test_tc04_sim_engine_end_of_round_cleanup_clamps_unspent_patches(self):
         """TC-04: Sim engine End-of-Round Cleanup clamps unspent patches to max_patch_tokens."""

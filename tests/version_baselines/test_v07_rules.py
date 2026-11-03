@@ -38,6 +38,7 @@ from sim.bots import (
 )
 from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
 from sim.engine import GameEngine, PlayerState
+from sim.engine.phase1_boot import check_and_execute_start_of_round_version_transition
 from sim.entities import (
     Die,
     Face,
@@ -240,6 +241,7 @@ class TestV07Rules(unittest.TestCase):
         engine_2p.state.tower.reset()
         engine_2p.state.staging_cup = {CubeColor.BLACK: 4, CubeColor.RED: 0, CubeColor.BLUE: 0, CubeColor.GREEN: 0}
         engine_2p._execute_phase_2([(engine_2p.state.players[0], [], {}), (engine_2p.state.players[1], [], {})])
+        check_and_execute_start_of_round_version_transition(engine_2p)
 
         self.assertEqual(engine_2p.state.current_version_index, 1)  # v2.0 RaaS
         self.assertEqual(engine_2p.state.staging_cup[CubeColor.RED], 1)  # v0.21.0 Script Kiddie space 1 adds 1 Red
@@ -269,6 +271,7 @@ class TestV07Rules(unittest.TestCase):
         engine_4p.state.tower.reset()
         engine_4p.state.staging_cup = {CubeColor.BLACK: 4, CubeColor.RED: 0, CubeColor.BLUE: 0, CubeColor.GREEN: 0}
         engine_4p._execute_phase_2([(p, [], {}) for p in engine_4p.state.players])
+        check_and_execute_start_of_round_version_transition(engine_4p)
 
         self.assertEqual(engine_4p.state.current_version_index, 1)  # v2.0 RaaS
         self.assertEqual(engine_4p.state.staging_cup[CubeColor.RED], 3)  # Script Kiddie space 1 (1) + 4P payload (2) = 3 Red

@@ -287,14 +287,6 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
 
-                elif clean_path == "/api/game/action/fast_patch":
-                    pid = get_target_pid(default_to_human=False)
-                    die_ids = data.get("die_ids")
-                    die_indices = data.get("die_indices")
-                    state = self.controller.fast_patch(pid, die_ids=die_ids, die_indices=die_indices)
-                    payload, code = success_response({"state": state})
-                    self._send_json_response(payload, code)
-
                 elif clean_path == "/api/game/action/upgrade_track":
                     pid = get_target_pid(default_to_human=False)
                     track_type = str(data.get("track_type", ""))

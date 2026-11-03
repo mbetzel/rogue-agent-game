@@ -508,7 +508,7 @@ class AdaptiveBalancedBot(BaseBot):
                     current_money -= cost
                     purchases += 1
 
-        # 5. Hardware Track Upgrades & Patent Filings (v0.28.0)
+        # 5. Hardware Track Upgrades & Patent Filings (v0.29.0)
         res_available = player_state.research_tokens
         def_cost = player_state.get_track_upgrade_cost("DEFENSE")
         if (
@@ -520,15 +520,25 @@ class AdaptiveBalancedBot(BaseBot):
             plan.track_upgrades.append("DEFENSE")
             res_available -= def_cost
 
-        pipe_cost = player_state.get_track_upgrade_cost("PIPELINE")
+        triage_cost = player_state.get_track_upgrade_cost("TRIAGE")
         if (
-            player_state.pipeline_level < 1
-            and pipe_cost is not None
-            and res_available >= pipe_cost
+            player_state.triage_level < 1
+            and triage_cost is not None
+            and res_available >= triage_cost
             and len(player_state.glitched_dice) >= 2
         ):
-            plan.track_upgrades.append("PIPELINE")
-            res_available -= pipe_cost
+            plan.track_upgrades.append("TRIAGE")
+            res_available -= triage_cost
+
+        rel_cost = player_state.get_track_upgrade_cost("RELEASE")
+        if (
+            player_state.release_level < 1
+            and rel_cost is not None
+            and res_available >= rel_cost
+            and len(player_state.total_dice) > 6
+        ):
+            plan.track_upgrades.append("RELEASE")
+            res_available -= rel_cost
 
         # Patent filings with remaining research
         patent_cost = player_state.get_patent_cost()

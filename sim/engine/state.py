@@ -97,11 +97,12 @@ class PlayerState:
     secrets: int
     research_tokens: int = 0
 
-    # --- CI/CD Pipeline & Hardware Bottlenecks (v0.28.0 Canonical) ---
+    # --- CI/CD Pipeline & Hardware Bottlenecks (v0.29.0 Canonical) ---
     defense_capacity: int = 2
     triage_bandwidth: int = 2
-    release_bandwidth: int = 2
-    pipeline_level: int = 0
+    release_bandwidth: int = 4
+    triage_level: int = 0
+    release_level: int = 0
     defense_level: int = 0
     patent_level: int = 0
     has_emergency_hotfix: bool = False
@@ -185,6 +186,8 @@ class PlayerState:
         defense_capacity: Optional[int] = None,
         triage_bandwidth: Optional[int] = None,
         release_bandwidth: Optional[int] = None,
+        triage_level: Optional[int] = None,
+        release_level: Optional[int] = None,
         pipeline_level: Optional[int] = None,
         defense_level: Optional[int] = None,
         patent_level: Optional[int] = None,
@@ -230,8 +233,6 @@ class PlayerState:
         self.total_dirty_income_taken = total_dirty_income_taken
         self.total_contractors_hired = total_contractors_hired
         self.total_rerolls_used = total_rerolls_used
-        self.hash_matches_secrets = hash_matches_secrets
-        self.total_fast_patches = total_fast_patches
         self.b2_available = b2_available
         self.y1_available = y1_available
         self.p1_available = p1_available
@@ -255,21 +256,27 @@ class PlayerState:
         if self.company is not None:
             self.defense_capacity = getattr(self.company, "starting_defense_capacity", 2) if defense_capacity is None else defense_capacity
             self.triage_bandwidth = getattr(self.company, "starting_triage_bandwidth", 2) if triage_bandwidth is None else triage_bandwidth
-            self.release_bandwidth = getattr(self.company, "starting_release_bandwidth", 2) if release_bandwidth is None else release_bandwidth
-            self.pipeline_level = getattr(self.company, "starting_pipeline_level", 0) if pipeline_level is None else pipeline_level
+            self.release_bandwidth = getattr(self.company, "starting_release_bandwidth", 4) if release_bandwidth is None else release_bandwidth
+            init_triage = triage_level if triage_level is not None else (pipeline_level if pipeline_level is not None else getattr(self.company, "starting_triage_level", 0))
+            init_release = release_level if release_level is not None else (pipeline_level if pipeline_level is not None else getattr(self.company, "starting_release_level", 0))
+            self.triage_level = init_triage
+            self.release_level = init_release
             self.defense_level = getattr(self.company, "starting_defense_level", 0) if defense_level is None else defense_level
             self.patent_level = getattr(self.company, "starting_patent_level", 0) if patent_level is None else patent_level
             self.upgrade_discount = getattr(self.company, "upgrade_discount", 0) if upgrade_discount is None else upgrade_discount
         else:
             self.defense_capacity = 2 if defense_capacity is None else defense_capacity
             self.triage_bandwidth = 2 if triage_bandwidth is None else triage_bandwidth
-            self.release_bandwidth = 2 if release_bandwidth is None else release_bandwidth
-            self.pipeline_level = 0 if pipeline_level is None else pipeline_level
+            self.release_bandwidth = 4 if release_bandwidth is None else release_bandwidth
+            init_triage = triage_level if triage_level is not None else (pipeline_level if pipeline_level is not None else 0)
+            init_release = release_level if release_level is not None else (pipeline_level if pipeline_level is not None else 0)
+            self.triage_level = init_triage
+            self.release_level = init_release
             self.defense_level = 0 if defense_level is None else defense_level
             self.patent_level = 0 if patent_level is None else patent_level
             self.upgrade_discount = 0 if upgrade_discount is None else upgrade_discount
 
-        self.has_emergency_hotfix = has_emergency_hotfix or (self.pipeline_level >= 2)
+        self.has_emergency_hotfix = has_emergency_hotfix or (self.triage_level >= 2)
         self.has_passive_firewall = has_passive_firewall or (self.defense_level >= 2)
 
         self.ability_v1_status = ability_v1_status
@@ -289,13 +296,45 @@ class PlayerState:
     def patches(self, value: int) -> None:
         self.research_tokens = value
 
+    @property
+    def pipeline_level(self) -> int:
+        return self.triage_level
+
+    @pipeline_level.setter
+    def pipeline_level(self, value: int) -> None:
+        self.triage_level = value
+        self.release_level = value
+
+    @property
+    def hash_matches_secrets(self) -> int:
+        return getattr(self, "_hash_matches_secrets", 0)
+
+    @hash_matches_secrets.setter
+    def hash_matches_secrets(self, value: int) -> None:
+        self._hash_matches_secrets = value
+
+    @property
+    def total_fast_patches(self) -> int:
+        return getattr(self, "_total_fast_patches", 0)
+
+    @total_fast_patches.setter
+    def total_fast_patches(self, value: int) -> None:
+        self._total_fast_patches = value
+
     def get_track_upgrade_cost(self, track: str) -> Optional[int]:
         """Calculates research cost to upgrade the specified terminal mat track (INV-UPGRADE-TRACK-01)."""
         t = track.upper().strip()
-        if t == "PIPELINE":
-            if self.pipeline_level == 0:
+        if t == "TRIAGE":
+            if self.triage_level == 0:
                 base_cost = 2
-            elif self.pipeline_level == 1:
+            elif self.triage_level == 1:
+                base_cost = 3
+            else:
+                return None
+        elif t == "RELEASE":
+            if self.release_level == 0:
+                base_cost = 2
+            elif self.release_level == 1:
                 base_cost = 3
             else:
                 return None
@@ -310,6 +349,13 @@ class PlayerState:
             if self.patent_level == 0:
                 base_cost = 2
             elif self.patent_level == 1:
+                base_cost = 3
+            else:
+                return None
+        elif t == "PIPELINE":
+            if self.pipeline_level == 0:
+                base_cost = 2
+            elif self.pipeline_level == 1:
                 base_cost = 3
             else:
                 return None
@@ -324,16 +370,21 @@ class PlayerState:
         if cost is None or self.research_tokens < cost:
             return False
         self.research_tokens -= cost
-        if t == "PIPELINE":
-            if self.pipeline_level == 0:
-                self.pipeline_level = 1
+        if t == "TRIAGE":
+            if self.triage_level == 0:
+                self.triage_level = 1
                 self.triage_bandwidth = max(self.triage_bandwidth, 3)
-                self.release_bandwidth = max(self.release_bandwidth, 3)
-            elif self.pipeline_level == 1:
-                self.pipeline_level = 2
+            elif self.triage_level == 1:
+                self.triage_level = 2
                 self.triage_bandwidth = max(self.triage_bandwidth, 4)
-                self.release_bandwidth = max(self.release_bandwidth, 4)
                 self.has_emergency_hotfix = True
+        elif t == "RELEASE":
+            if self.release_level == 0:
+                self.release_level = 1
+                self.release_bandwidth = max(self.release_bandwidth, 5)
+            elif self.release_level == 1:
+                self.release_level = 2
+                self.release_bandwidth = max(self.release_bandwidth, 6)
         elif t == "DEFENSE":
             if self.defense_level == 0:
                 self.defense_level = 1
@@ -347,6 +398,18 @@ class PlayerState:
                 self.patent_level = 1
             elif self.patent_level == 1:
                 self.patent_level = 2
+        elif t == "PIPELINE":
+            if self.pipeline_level == 0:
+                self.triage_level = 1
+                self.triage_bandwidth = max(self.triage_bandwidth, 3)
+                self.release_level = 1
+                self.release_bandwidth = max(self.release_bandwidth, 3)
+            elif self.pipeline_level == 1:
+                self.triage_level = 2
+                self.triage_bandwidth = max(self.triage_bandwidth, 4)
+                self.release_level = 2
+                self.release_bandwidth = max(self.release_bandwidth, 4)
+                self.has_emergency_hotfix = True
         return True
 
     def get_patent_cost(self) -> int:
@@ -627,6 +690,8 @@ class GameState:
     version_deck: List[VersionCard]
     current_version_index: int = 0
     corruption_track: int = 0
+    pending_version_advance: bool = False
+    overflow_black_cubes_on_next_track: int = 0
     staging_cup: Dict[CubeColor, int] = field(
         default_factory=lambda: {
             CubeColor.RED: 0,
