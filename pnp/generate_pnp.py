@@ -416,7 +416,7 @@ VERSION_TILES: List[VersionTileSpec] = [
         banner_text="**Kernel Lock:** Space 4 locks Shields next Phase 1. Final space triggers Singularity!",
         spaces=(
             VersionTrackSpaceSpec(1, "+1 {RED} 1 {BLUE} 1 {GREEN}"),
-            VersionTrackSpaceSpec(2, "All Lose $2\n+1 {BLACK}"),
+            VersionTrackSpaceSpec(2, "Lose $3 & 1 {WRENCH}\n+1 {BLACK}"),
             VersionTrackSpaceSpec(3, "+1 {RED} +1 {BLUE}"),
             VersionTrackSpaceSpec(4, "Lock {SHIELD}\nNext P1 +1 {BLACK}"),
             VersionTrackSpaceSpec(5, "Return 1\nColored Die"),
@@ -430,7 +430,7 @@ VERSION_TILES: List[VersionTileSpec] = [
         banner_text="**Overclocked Surge:** 2+ Black: Lead Attack +2. Space 4 leaks 1 Secret.",
         spaces=(
             VersionTrackSpaceSpec(1, "Glitch 1 Die\n+1 {RED} 1 {BLUE}"),
-            VersionTrackSpaceSpec(2, "Lose $2 & 1 {WRENCH}\n+1 {BLACK}"),
+            VersionTrackSpaceSpec(2, "Lose $3 & 1 {WRENCH}\n+1 {BLACK}"),
             VersionTrackSpaceSpec(3, "+1 {RED} +1 {GREEN}"),
             VersionTrackSpaceSpec(4, "Lose 1 Secret\n+1 {BLACK}"),
             VersionTrackSpaceSpec(5, "Return 1\nColored Die"),
@@ -443,10 +443,10 @@ VERSION_TILES: List[VersionTileSpec] = [
         profile="5 SPACES // ESCALATION TIER",
         banner_text="**Encrypted Memory:** Space 3 locks Cash next Phase 1. Space 5 upgrades to v3.0.",
         spaces=(
-            VersionTrackSpaceSpec(1, "All Lose $1"),
+            VersionTrackSpaceSpec(1, "All Lose $2"),
             VersionTrackSpaceSpec(2, "+1 {RED} +1 {GREEN}\n+1 {BLACK}"),
             VersionTrackSpaceSpec(3, "Lock Cash ($)\nNext P1"),
-            VersionTrackSpaceSpec(4, "Lose $2 & 1 {WRENCH}\n+1 {BLACK}"),
+            VersionTrackSpaceSpec(4, "Lose $3 & 1 {WRENCH}\n+1 {BLACK}"),
             VersionTrackSpaceSpec(5, "UPGRADE v3.0\n+1 {RED}", is_milestone=True),
         ),
     ),

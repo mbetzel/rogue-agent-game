@@ -97,10 +97,10 @@ class TestV150CorruptionTracks(unittest.TestCase):
         # Check upgrade occurred: active version is now v2.0
         self.assertEqual(engine.state.active_version.version_str, "v2.0")
 
-        # Check carryover: 2nd Black Cube advanced v2.0 to Space 1 (All lose $1: 10 -> $9)
+        # Check carryover: 2nd Black Cube advanced v2.0 to Space 1 (All lose $2: 10 -> $8)
         self.assertEqual(engine.state.corruption_track, 1)
-        self.assertEqual(p0.money, 9)
-        self.assertEqual(p1.money, 9)
+        self.assertEqual(p0.money, 8)
+        self.assertEqual(p1.money, 8)
 
     def test_corruption_space_penalties(self) -> None:
         """Test lose_money, lose_patches, lose_secrets, demote_dice, and return_colored_dice."""

@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.26.0)
+# Too Many Secrets — Rules Draft (v0.27.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -279,10 +279,10 @@ Each Version Card defines its Corruption Track (`4` spaces on `v1.0`, `5` spaces
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **`v1.0`** (4) | *Script Kiddie* | `1R, 1B, 1G` | Add `1R` | All lose `$2` + Add `1K` | Lose `1 🔧` | **Upgrade:** Lose `1 🔧` | — | — |
 | **`v1.0`** (4) | *Data Scraper* | `1R, 2B` (`+$1` start) | Lose `1 🔧` | Lose `$1` + Add `1K` | Add `1G` | **Upgrade:** Demote `1` die | — | — |
-| **`v2.0`** (5) | *RaaS* | — | All lose `$1` | Add `1R, 1G` + Add `1K` | **Lock Cash (`$`)** next Phase 1 | Lose `$2` & `1 🔧` + Add `1K` | **Upgrade:** Add `1R` | — |
+| **`v2.0`** (5) | *RaaS* | — | All lose `$2` | Add `1R, 1G` + Add `1K` | **Lock Cash (`$`)** next Phase 1 | Lose `$3` & `1 🔧` + Add `1K` | **Upgrade:** Add `1R` | — |
 | **`v2.0`** (5) | *Polymorphic Worm* | — | Lose `2 🔧` | Add `2G` + Add `1K` | **Lock Patch (`🔧`)** next Phase 1 | Demote `1` die + Add `1K` | **Upgrade:** Add `1R` | — |
-| **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 1B, 1G` | All lose `$2` + Add `1K` | Add `1R, 1B` | **Lock Shields** next Phase 1 + Add `1K` | Return `1` Colored Die | **Singularity:** Add `2R, 2B, 2G` |
-| **`v3.0`** (6) | *Corrupted Kernel* | — | Demote `1` die + Add `1R, 1B` | Lose `$2` & `1 🔧` + Add `1K` | Add `1R, 1G` | Lose `1 Secret` + Add `1K` | Return `1` Colored Die | **Singularity:** Lose `1 Secret` + Add `2R, 2B, 1G` |
+| **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 1B, 1G` | Lose `$3` & `1 🔧` + Add `1K` | Add `1R, 1B` | **Lock Shields** next Phase 1 + Add `1K` | Return `1` Colored Die | **Singularity:** Add `2R, 2B, 2G` |
+| **`v3.0`** (6) | *Corrupted Kernel* | — | Demote `1` die + Add `1R, 1B` | Lose `$3` & `1 🔧` + Add `1K` | Add `1R, 1G` | Lose `1 Secret` + Add `1K` | Return `1` Colored Die | **Singularity:** Lose `1 Secret` + Add `2R, 2B, 1G` |
 
 #### Profile 2: Aggressive Escalation Tracks (`4 / 5 / 6` Spaces — Heightened Economic Friction)
 

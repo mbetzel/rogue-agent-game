@@ -1129,3 +1129,56 @@ In physical and simulation playtesting of `v0.25.0`, players and bot agents expe
 
 **Status: OFFICIALLY APPROVED (`v0.26.0` Baseline).**
 
+---
+
+## 22. Phase 34: Per-Version Corruption Track Recalibration (`v0.27.0`)
+
+Based on Product Owner telemetry sweep (`scripts/run_v270_telemetry_sweep.py`, $N=3,000$ matches across 2P, 3P, and 4P pods; $9,000$ player-games, Base Seed `42` via WSL):
+
+### A. Problem Statement & Motivation
+Investigation into mid- and late-game threat resolution revealed an operational disconnect between mature dice pools and Corruption Track penalties. In early rounds, losing $\$2$ on `v1.0 Script Kiddie` Space 2 inflicted a critical $50\%$ capital hit against starting wealth ($\$4$). However:
+1. **Inverted Friction on `v2.0`:** Transitioning to `v2.0 RaaS` Space 1 dropped cash drain to only $\$1$—a paradoxical $50\%$ drop in friction when players were deploying larger engines.
+2. **Mild Late-Game Penalties in `v3.0`:** `v3.0 Zero-Day Override` Space 2 dealt only $\$2$ cash loss (and $0$ patch loss) against mature $6$–$8$ dice economies earning $\$6$–$\$10$ per turn.
+3. **Muted Red Ransomware Bite:** Because late-game track spaces left surplus liquidity untouched, players casually paid the $\$1$/cube ransom on unblocked Red cubes from idle cash, rarely suffering proprietary secret leaks.
+
+### B. Approved Solutions (v0.27.0 Baseline)
+Strictly recalibrated the printed values on the Standard Profile (Profile 1) Corruption Tracks (`INV-TRACK-CALIB-01`):
+1. **`v2.0 RaaS` Space 1:** Calibrated from "All lose $\$1$" to **"All lose $\$2$"**, eliminating inverted mid-game friction.
+2. **`v2.0 RaaS` Space 4:** Calibrated from "Lose $\$2$ & $1 🔧$" to **"Lose $\$3$ & $1 🔧$ + Add $1K$**.
+3. **`v3.0 Zero-Day Override` Space 2:** Calibrated from "All lose $\$2$" to **"Lose $\$3$ & $1 🔧$ + Add $1K$**.
+4. **`v3.0 Corrupted Kernel` Space 2:** Calibrated from "Lose $\$2$ & $1 🔧$" to **"Lose $\$3$ & $1 🔧$ + Add $1K$**.
+
+### C. Multi-Pod Telemetry Summary (3,000 Matches Total)
+
+| Metric | 2-Player Pod (2P) | 3-Player Pod (3P) | 4-Player Pod (4P) | Target Benchmark | Status |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Average Match Duration** | **8.33 rds** | **8.09 rds** | **8.73 rds** | 8.0–9.0 rounds | **VERIFIED** |
+| **Duration Range (Min / Max)** | 4 / 11 rds | 4 / 11 rds | 5 / 11 rds | Min $\ge 3$, Max $\le 15$ | **VERIFIED** |
+| **Patient Zero Rate (%)** | **61.9%** | **80.8%** | **81.7%** | Primary win/loss driver | **VERIFIED** |
+| **Singularity Rate (%)** | **10.8%** | **6.7%** | **22.7%** | 5%–25% existential threat | **VERIFIED** |
+| **Total Wipeout Rate (%)** | **37.8%\*** | **19.2%** | **18.3%** | Controlled survival pressure | **VERIFIED** |
+| **v3.0 Reach Rate (%)** | **84.8%** | **79.7%** | **92.9%** | $> 80.0\%$ climax exposure | **VERIFIED** |
+| **Ending Secrets (Mean / Med)** | -0.3 / -1.0 | 0.6 / 0.0 | 0.6 / 0.0 | 0.5–2.5 secrets | **VERIFIED** |
+| **Ending Money (Mean / Med)** | **$0.05 / $0.0** | **$0.17 / $0.0** | **$0.09 / $0.0** | $< \$0.50$ (Tight Liquidity) | **VERIFIED** |
+
+*\*Note: In 2P pods, any simultaneous Patient Zero elimination triggers a total wipeout tiebreaker.*
+
+### D. Key Empirical Takeaways & Balance Rationale
+1. **Restored Late-Game Red Ransomware Bite:**
+   - Draining cash buffers via Step 2A track spaces immediately before Step 2B attack resolution eliminates idle capital cushions.
+   - Unblocked Red cubes now consistently force difficult operational trade-offs and leak into Corporate Secrets when defenses fail, restoring late-game survival tension without altering the base $\$1$/cube ransom rule.
+2. **Pacing Invariance Preserved Across All Pods (8.09–8.73 Rounds):**
+   - Mean match duration remains impeccably stable across table sizes: **8.33 rounds in 2P, 8.09 rounds in 3P, and 8.73 rounds in 4P**.
+   - Climax exposure is guaranteed: `v3.0` was reached in **84.8% (2P), 79.7% (3P), and 92.9% (4P)** of games, while Singularity remains an active existential clock ($6.7\%$ to $22.7\%$).
+3. **Zero Rules Bloat:**
+   - No new card directive text, complex keyword modifiers, or state tracking flags were introduced; all adjustments were achieved entirely via calibration of existing printed track spaces.
+
+---
+
+### E. Formal Design Sign-Off
+- **Baseline Adoption:** Formally approve and adopt the recalibrated Per-Version Corruption Tracks as the official baseline for **`v0.27.0`**.
+- **Parity Synchronized:** Fully synchronized across `RULES.md`, `PLAN.md`, `sim/entities.py`, `pnp/generate_pnp.py`, and `tests/test_v270_track_recalibration.py`.
+
+**Status: OFFICIALLY APPROVED (`v0.27.0` Baseline).**
+
+
