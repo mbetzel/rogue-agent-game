@@ -57,6 +57,7 @@ def compile_drop(controller: GameController) -> Dict[str, Any]:
             "red": sum(1 for c in commitments.values() if c == "red"),
             "blue": sum(1 for c in commitments.values() if c == "blue"),
             "green": sum(1 for c in commitments.values() if c == "green"),
+            "any": sum(1 for c in commitments.values() if c == "any"),
         }
 
     # Human player ids whose green malware resolution is deferred for user choice
@@ -140,7 +141,7 @@ def compile_drop(controller: GameController) -> Dict[str, Any]:
             role_name = "Income"
             is_shield = False
             is_income = True
-            if role_val in (ProductionRole.RED_SHIELD, ProductionRole.BLUE_SHIELD, ProductionRole.GREEN_SHIELD):
+            if role_val in (ProductionRole.RED_SHIELD, ProductionRole.BLUE_SHIELD, ProductionRole.GREEN_SHIELD, ProductionRole.ANY_SHIELD):
                 role_name = role_val.value.replace("_", " ").title()
                 is_shield = True
                 is_income = False
@@ -171,23 +172,8 @@ def compile_drop(controller: GameController) -> Dict[str, Any]:
                 "is_fallback": False,
             })
 
-        # 3. Fallback if no active dice exist in In Production or Contractors
-        if not candidates:
-            for d in player.glitched_dice + player.scanned_dice + player.ready_for_release_dice:
-                candidates.append({
-                    "die_id": d.die_id,
-                    "color": d.color.value,
-                    "face_name": "Under Development",
-                    "role": "Destruction Fallback",
-                    "money": 0,
-                    "patches": 0,
-                    "secrets": 0,
-                    "star_note": None,
-                    "is_contractor": False,
-                    "is_shield": False,
-                    "is_income": False,
-                    "is_fallback": True,
-                })
+        # Under v0.31.0 INV-MALWARE-FIZZLE-01: No Destruction Fallback!
+        # If no active dice exist in In Production or Contractors, Green malware fizzles with 0 penalty.
 
         player_candidate_glitches[pid] = candidates
 
@@ -218,31 +204,63 @@ def compile_drop(controller: GameController) -> Dict[str, Any]:
 
     threat_summaries: Dict[int, Dict[str, Any]] = {}
     for pid, shields in player_shields.items():
+        player = controller.state.players[pid]
+        breakdown = getattr(player, "last_defense_breakdown", None)
         red_atk = atk_dict.get("red", 0)
         blue_atk = atk_dict.get("blue", 0)
         green_atk = atk_dict.get("green", 0)
+
+        if breakdown:
+            red_blocked = breakdown["blocked"]["red"]
+            red_unblocked = breakdown["unblocked"]["red"]
+            blue_blocked = breakdown["blocked"]["blue"]
+            blue_unblocked = breakdown["unblocked"]["blue"]
+            green_blocked = breakdown["blocked"]["green"]
+            green_unblocked = breakdown["unblocked"]["green"]
+            unpaid_ransom = breakdown.get("unpaid_ransom", 0)
+            flat_leak = breakdown.get("flat_ransom_leak", False)
+            fizzled = breakdown.get("malware_fizzled", False)
+            any_shields_count = breakdown["color_shields"].get("any", 0)
+        else:
+            red_blocked = min(shields["red"], red_atk)
+            red_unblocked = max(0, red_atk - shields["red"])
+            blue_blocked = min(shields["blue"], blue_atk)
+            blue_unblocked = max(0, blue_atk - shields["blue"])
+            green_blocked = min(shields["green"], green_atk)
+            green_unblocked = max(0, green_atk - shields["green"])
+            unpaid_ransom = 0
+            flat_leak = False
+            fizzled = False
+            any_shields_count = shields.get("any", 0)
+
         threat_summaries[pid] = {
+            "any": {
+                "shields": any_shields_count,
+            },
             "red": {
                 "cubes": exited_dict.get("red", 0),
                 "attack": red_atk,
                 "shields": shields["red"],
-                "blocked": min(shields["red"], red_atk),
-                "unblocked": max(0, red_atk - shields["red"]),
+                "blocked": red_blocked,
+                "unblocked": red_unblocked,
+                "unpaid_ransom": unpaid_ransom,
+                "flat_leak": flat_leak,
             },
             "blue": {
                 "cubes": exited_dict.get("blue", 0),
                 "attack": blue_atk,
                 "shields": shields["blue"],
-                "blocked": min(shields["blue"], blue_atk),
-                "unblocked": max(0, blue_atk - shields["blue"]),
+                "blocked": blue_blocked,
+                "unblocked": blue_unblocked,
             },
             "green": {
                 "cubes": exited_dict.get("green", 0),
                 "attack": green_atk,
                 "shields": shields["green"],
-                "blocked": min(shields["green"], green_atk),
-                "unblocked": max(0, green_atk - shields["green"]),
-                "pending_glitches": getattr(controller.state.players[pid], "pending_unblocked_green", 0),
+                "blocked": green_blocked,
+                "unblocked": green_unblocked,
+                "fizzled": fizzled,
+                "pending_glitches": getattr(player, "pending_unblocked_green", 0),
                 "candidate_dice": player_candidate_glitches.get(pid, []),
             },
             "black": {

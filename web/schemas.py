@@ -134,6 +134,38 @@ class GameStateSerializer:
     def serialize_company(company: Optional[Company]) -> Optional[Dict[str, Any]]:
         if company is None:
             return None
+        desc_parts = []
+        def_cap = getattr(company, "starting_defense_capacity", 2)
+        tri_bw = getattr(company, "starting_triage_bandwidth", 2)
+        rel_bw = getattr(company, "starting_release_bandwidth", 4)
+        tri_lvl = getattr(company, "starting_triage_level", 0)
+        rel_lvl = getattr(company, "starting_release_level", 0)
+        def_lvl = getattr(company, "starting_defense_level", 0)
+        pat_lvl = getattr(company, "starting_patent_level", 0)
+        cash_bonus = getattr(company, "starting_cash_bonus", 0)
+        res_bonus = getattr(company, "starting_research_bonus", 0)
+        sec_bonus = getattr(company, "starting_secrets_bonus", 0)
+        up_disc = getattr(company, "upgrade_discount", 0)
+
+        if pat_lvl > 0:
+            desc_parts.append(f"Starts at Patent Lvl {pat_lvl} (3 🔬 cost)")
+        if res_bonus > 0:
+            desc_parts.append(f"+{res_bonus} 🔬 Starting Research")
+        if cash_bonus > 0:
+            desc_parts.append(f"+${cash_bonus} Starting Cash")
+        if sec_bonus > 0:
+            desc_parts.append(f"+{sec_bonus} Starting Secret")
+        if def_lvl > 0:
+            desc_parts.append(f"Defense Lvl {def_lvl} ({def_cap} Shields Cap)")
+        if tri_lvl > 0:
+            desc_parts.append(f"Triage Lvl {tri_lvl} (Bandwidth {tri_bw})")
+        if rel_lvl > 0:
+            desc_parts.append(f"Release Lvl {rel_lvl} (Bandwidth {rel_bw})")
+        if up_disc > 0:
+            desc_parts.append(f"-{up_disc} 🔬 Track Upgrade Discount")
+        if not desc_parts:
+            desc_parts.append(f"Def Cap {def_cap}, Triage {tri_bw}, Release {rel_bw}")
+
         return {
             "code": company.code.value if hasattr(company.code, "value") else str(company.code),
             "name": company.name,
@@ -142,6 +174,18 @@ class GameStateSerializer:
             "timing_window": company.timing_window,
             "description": company.description,
             "flavor": company.flavor,
+            "starting_setup_desc": ", ".join(desc_parts),
+            "starting_defense_capacity": def_cap,
+            "starting_triage_bandwidth": tri_bw,
+            "starting_release_bandwidth": rel_bw,
+            "starting_triage_level": tri_lvl,
+            "starting_release_level": rel_lvl,
+            "starting_defense_level": def_lvl,
+            "starting_patent_level": pat_lvl,
+            "starting_cash_bonus": cash_bonus,
+            "starting_research_bonus": res_bonus,
+            "starting_secrets_bonus": sec_bonus,
+            "upgrade_discount": up_disc,
         }
 
     @staticmethod
@@ -226,6 +270,7 @@ class GameStateSerializer:
             "red": [],
             "blue": [],
             "green": [],
+            "any": [],
         }
         if shield_slots:
             for color_key, dice_list in shield_slots.items():
@@ -306,6 +351,7 @@ class GameStateSerializer:
                 "red_shield": [cls.serialize_die(d) for d in player.red_shield_dice],
                 "blue_shield": [cls.serialize_die(d) for d in player.blue_shield_dice],
                 "green_shield": [cls.serialize_die(d) for d in player.green_shield_dice],
+                "any_shield": [cls.serialize_die(d) for d in player.any_shield_dice],
             },
             "under_development_count": len(player.glitched_dice) + len(player.scanned_dice),
             "glitched_count": len(player.glitched_dice),

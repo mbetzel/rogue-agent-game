@@ -443,9 +443,8 @@ class TestV07Rules(unittest.TestCase):
         # 1st malware: Contractor sacrificed to supply
         self.assertEqual(len(p0.contractor_dice), 0)
         self.assertEqual(engine.state.contractor_supply, 11)
-        # 2nd malware: Gray die destroyed via destruction fallback
-        self.assertEqual(len(p0.ready_dice), 1)
-        self.assertEqual(p0.ready_dice[0].color, DieColor.YELLOW)
+        # 2nd malware: In production is empty -> Malware Fizzle in v0.31.0 (zero dice destroyed from ready_dice)
+        self.assertEqual(len(p0.ready_dice), 2)
 
     # -------------------------------------------------------------------------
     # 14. Commercial Exposure: No Yellow Allows Contractor Sacrifice

@@ -448,9 +448,9 @@ class BaseBot:
         directive_code: str,
         rng: random.Random,
     ) -> Dict[int, ShieldColor]:
-        """Maps die indices in rolled_dice to assigned ShieldColor (RED, BLUE, GREEN).
+        """Maps die indices in rolled_dice to assigned ShieldColor.
 
-        Generic (ANY) shields MUST choose a specific color: RED, BLUE, or GREEN.
+        Generic (ANY) shields are committed as ShieldColor.ANY (flexible generic defense, INV-FLEX-SHIELD-01).
         Choice faces with shield options (e.g. Blue Face 4) are committed to their shield color if threatened.
         """
         assignments: Dict[int, ShieldColor] = {}
@@ -464,7 +464,7 @@ class BaseBot:
                 continue
             if face.is_shield:
                 if face.shield_color == ShieldColor.ANY:
-                    assignments[idx] = ShieldColor.BLUE  # Prioritize Blue over Red/Green
+                    assignments[idx] = ShieldColor.ANY
                 else:
                     assignments[idx] = face.shield_color
             elif face.has_shield_option and blue_threat > 0:

@@ -35,6 +35,7 @@ const COMPANIES_DATA = {
     timing: "P1: STAFFING",
     description: "Roll 1 additional Contractor die without paying cash cost during Phase 1 Boot.",
     themeColor: "#f59e0b",
+    startingSetupDesc: "Def Cap 2, Triage 2, Release 4, +$2 Starting Cash ($8 total).",
   },
   OMNIDYNE: {
     code: "OMNIDYNE",
@@ -44,6 +45,7 @@ const COMPANIES_DATA = {
     timing: "P3: OPERATIONS",
     description: "Move 1 die from your Glitched Box directly to Ready for Release for free (bypassing Scanned and saving 1 🔧).",
     themeColor: "#4ade80",
+    startingSetupDesc: "Def Cap 1, Triage Lvl 1 (Bandwidth 3), Release Lvl 1 (Bandwidth 5).",
   },
   AEGIS: {
     code: "AEGIS",
@@ -53,6 +55,7 @@ const COMPANIES_DATA = {
     timing: "P2: STEP 2B DMG",
     description: "Ignore 1 attack cube (Red, Blue, or Green) when resolving compiler damage for yourself this round.",
     themeColor: "#38bdf8",
+    startingSetupDesc: "Defense Lvl 1 (3 Shields Cap), Triage 1, Release 3.",
   },
   DTO: {
     code: "DTO",
@@ -62,6 +65,7 @@ const COMPANIES_DATA = {
     timing: "P2: STEP 2B DMG",
     description: "Absorb up to 2 Corporate Secret loss (from Blue Spyware or Red Ransom) for free without paying cash.",
     themeColor: "#a855f7",
+    startingSetupDesc: "Def Cap 2, Triage 2, Release 4, +1 Corporate Secret.",
   },
   HELIX: {
     code: "HELIX",
@@ -71,6 +75,7 @@ const COMPANIES_DATA = {
     timing: "P1: REROLLS",
     description: "During Phase 1 rerolls, include locked dice for free, and turn 1 rolled die to any legal non-Star face.",
     themeColor: "#f43f5e",
+    startingSetupDesc: "Starts at Patent Lvl 1 (3 🔬 cost), +2 🔬 Starting Research (2 🔬 total).",
   },
   PROMETHEUS: {
     code: "PROMETHEUS",
@@ -80,6 +85,7 @@ const COMPANIES_DATA = {
     timing: "P3: OPERATIONS",
     description: "Mode A: $2 discount on purchasing 1 Colored or Purple Specialist Die; Mode B: Gain +$3 cash payout directly.",
     themeColor: "#00d4ff",
+    startingSetupDesc: "Def Cap 2, Triage 2, Release 4, -1 🔬 Track Upgrade Discount.",
   },
 };
 
@@ -349,6 +355,7 @@ export function renderPlayerMats() {
       timing: p.company.timing_window || compFallback.timing,
       description: p.company.description || compFallback.description,
       themeColor: p.company.theme_color || compFallback.themeColor,
+      startingSetupDesc: p.company.starting_setup_desc || compFallback.startingSetupDesc,
     } : compFallback;
 
     const whFallback = WHITE_HATS_DATA[whiteHatCode] || WHITE_HATS_DATA["OPERATOR"];
@@ -379,6 +386,9 @@ export function renderPlayerMats() {
     const greenShieldDice = (p.shield_slots && p.shield_slots.green && p.shield_slots.green.length)
       ? p.shield_slots.green
       : ((p.production_slots && p.production_slots.green_shield) || []);
+    const anyShieldDice = (p.shield_slots && p.shield_slots.any && p.shield_slots.any.length)
+      ? p.shield_slots.any
+      : ((p.production_slots && p.production_slots.any_shield) || []);
 
     const terminalMat = document.createElement("div");
     terminalMat.className = `pnp-terminal-mat ${isTurn ? "active-turn" : ""} ${p.is_patient_zero ? "patient-zero" : ""}`;
@@ -417,6 +427,11 @@ export function renderPlayerMats() {
             <div style="font-size: 0.7rem; color: #cbd5e1; margin-top: 2px; line-height: 1.25;">
               ${company.description}
             </div>
+            ${(company.startingSetupDesc || compFallback.startingSetupDesc) ? `
+              <div style="font-size: 0.68rem; color: #94a3b8; margin-top: 5px; background: rgba(255,255,255,0.04); padding: 3px 6px; border-radius: 3px; border-left: 2px solid ${company.themeColor || 'var(--border-color)'};">
+                <strong style="color: #e2e8f0;">Starting Setup:</strong> ${company.startingSetupDesc || compFallback.startingSetupDesc}
+              </div>
+            ` : ''}
             <div class="version-ability-track-panel" style="margin-top: 6px;">
               <div class="version-track-header">
                 <span class="track-hdr-lbl">OVERRIDE CHARGE (ONCE / VER):</span>
@@ -501,15 +516,15 @@ export function renderPlayerMats() {
               <div class="zone-title-wrap">
                 <span class="zone-name" style="color: #38bdf8;">IN PRODUCTION</span>
                 <span class="zone-count-badge">(${(p.in_production_dice || []).length})</span>
-                <span class="zone-count-badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-size: 0.7rem;">SHIELDS: ${redShieldDice.length + blueShieldDice.length + greenShieldDice.length}/${p.defense_capacity || 2} CAP</span>
+                <span class="zone-count-badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-size: 0.7rem;">SHIELDS: ${redShieldDice.length + blueShieldDice.length + greenShieldDice.length + anyShieldDice.length}/${p.defense_capacity || 2} CAP</span>
               </div>
               <div class="zone-subtext">
-                Delayed Income: Collect $, 🔬, ★ in Phase 3 | Defense Capacity: max ${p.defense_capacity || 2} shields${p.has_passive_firewall ? ' | 🛡️ Passive Firewall Active (Absorbs 1 cube free in P2B)' : ''}
+                Delayed Income: Collect $, 🔬, ★ in Phase 3 | Defense Capacity: max ${p.defense_capacity || 2} shields (Flexible Firewall Ready)${p.has_passive_firewall ? ' | 🛡️ Passive Firewall Active (Absorbs 1 cube free in P2B)' : ''}
               </div>
             </div>
 
-            <!-- In Production Grid (Income + 3 Shield Slots) -->
-            <div class="shield-matrix-row" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px;">
+            <!-- In Production Grid (Income + Any/Red/Blue/Green Shield Slots) -->
+            <div class="shield-matrix-row" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 8px;">
               <!-- Income Slot -->
               <div class="shield-box" style="border-color: #eab308; background: rgba(234, 179, 8, 0.08);">
                 <div class="shield-header-bar">
@@ -524,6 +539,20 @@ export function renderPlayerMats() {
                 <div class="shield-slots-tray" id="income_tray_${p.player_id}"></div>
               </div>
 
+              <!-- Any Shields -->
+              <div class="shield-box any-shield-box" style="border-color: #38bdf8; background: rgba(56, 189, 248, 0.08);">
+                <div class="shield-header-bar">
+                  <div class="shield-title">
+                    <span class="shield-symbol" style="color: #38bdf8;">🛡️</span>
+                    <span style="color: #38bdf8;">ANY SHIELD</span>
+                    <span class="shield-count">(${anyShieldDice.length})</span>
+                  </div>
+                </div>
+                <div class="shield-desc-sub1">Flexible Defense</div>
+                <div class="shield-desc-sub2">Absorbs in P2B</div>
+                <div class="shield-slots-tray" id="shields_any_${p.player_id}"></div>
+              </div>
+
               <!-- Red Shields -->
               <div class="shield-box red-shield-box">
                 <div class="shield-header-bar">
@@ -534,7 +563,7 @@ export function renderPlayerMats() {
                   </div>
                 </div>
                 <div class="shield-desc-sub1">Blocks Ransomware</div>
-                <div class="shield-desc-sub2">Unblocked: -$1 → Leaks Secret</div>
+                <div class="shield-desc-sub2">Unblocked: -$1 (Flat -1 Sec if unpaid)</div>
                 <div class="shield-slots-tray" id="shields_red_${p.player_id}"></div>
               </div>
 
@@ -562,7 +591,7 @@ export function renderPlayerMats() {
                   </div>
                 </div>
                 <div class="shield-desc-sub1">Blocks Malware</div>
-                <div class="shield-desc-sub2">Unblocked: Glitches 1 die</div>
+                <div class="shield-desc-sub2">Unblocked: Glitches 1 die (Empty: Fizzles)</div>
                 <div class="shield-slots-tray" id="shields_green_${p.player_id}"></div>
               </div>
             </div>
@@ -894,7 +923,7 @@ export function renderPlayerMats() {
     }
 
     // Shield Slots
-    ["red", "blue", "green"].forEach((c) => {
+    ["any", "red", "blue", "green"].forEach((c) => {
       const slotEl = terminalMat.querySelector(`#shields_${c}_${p.player_id}`);
       if (slotEl) {
         const slotDice = (p.shield_slots && p.shield_slots[c] && p.shield_slots[c].length)

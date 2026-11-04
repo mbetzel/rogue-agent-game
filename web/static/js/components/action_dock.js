@@ -290,29 +290,9 @@ export function renderActionDock() {
             wrap.innerHTML = `<span style="color: var(--color-blue);">Die #${idx + 1} (B2):</span>`;
             wrap.appendChild(select);
           } else if (face.shield_color === "any") {
-            const select = document.createElement("select");
-            select.style.padding = "4px 8px";
-            select.style.background = "var(--bg-card)";
-            select.style.color = "#fff";
-            select.style.border = "1px solid var(--border-color)";
-            select.style.borderRadius = "4px";
-
-            ["blue", "red", "green"].forEach((col) => {
-              const opt = document.createElement("option");
-              opt.value = col;
-              opt.innerText = col.toUpperCase();
-              select.appendChild(opt);
-            });
-
-            if (!selectedCommitments[idx]) selectedCommitments[idx] = "blue";
-            select.value = selectedCommitments[idx];
-            select.onchange = (e) => {
-              selectedCommitments[idx] = e.target.value;
-            };
-
+            selectedCommitments[idx] = "any";
             const colStr = d.color === "white" ? "#f8fafc" : `var(--color-${d.color})`;
-            wrap.innerHTML = `<span style="color: ${colStr};">Die #${idx + 1} (${d.color}):</span>`;
-            wrap.appendChild(select);
+            wrap.innerHTML = `<span style="color: ${colStr};">Die #${idx + 1} (${d.color}):</span> <span style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">🛡️ FLEXIBLE ANY SHIELD</span>`;
           } else {
             selectedCommitments[idx] = face.shield_color;
             wrap.innerHTML = `<span style="color: var(--color-${face.shield_color});">Die #${idx + 1} (${face.shield_color.toUpperCase()})</span>`;
@@ -530,8 +510,6 @@ export function renderActionDock() {
                   consequenceText = "Contractor Sacrifice: Discard to supply (saves permanent modules)";
                 } else if (c.is_shield) {
                   consequenceText = "Shield Sacrifice: Already blocked attack; moves to Glitched Box (protects income!)";
-                } else if (c.is_fallback) {
-                  consequenceText = "Destruction Fallback: Destroyed from Under Development";
                 } else {
                   consequenceText = `Income Forfeiture: Moves to Glitched Box (-$${c.money || 0}${c.patches ? ', -' + c.patches + '🔧' : ''})`;
                 }
@@ -549,6 +527,20 @@ export function renderActionDock() {
                   </div>
                 `;
               }).join("")}
+            </div>
+          </div>
+        `;
+      } else if (unblockedGreen > 0) {
+        malwareHtml = `
+          <div class="confirm-malware-panel" style="border-color: rgba(74, 222, 128, 0.4); background: rgba(74, 222, 128, 0.05);">
+            <div class="confirm-malware-hdr">
+              <div class="confirm-malware-title-row">
+                <span class="confirm-malware-badge" style="background: rgba(74, 222, 128, 0.2); color: #4ade80;">🛡️ MALWARE FIZZLE</span>
+                <span class="confirm-malware-title" style="color: #4ade80;">ZERO ACTIVE PRODUCTION EXPLOITS</span>
+              </div>
+              <span class="confirm-malware-sub" style="color: #86efac;">
+                ${unblockedGreen} unblocked Green Malware cube${unblockedGreen > 1 ? 's' : ''} struck your corporate network, but your In Production zone is completely empty! In v0.31.0, excess malware cleanly fizzles with 0 penalty (Destruction Fallback removed).
+              </span>
             </div>
           </div>
         `;
@@ -572,21 +564,27 @@ export function renderActionDock() {
               <span>CUBE TOWER OUTPUT & DEFENSES</span>
               <span style="color: var(--text-highlight);">${exited.red || 0}R · ${exited.blue || 0}B · ${exited.green || 0}G · ${exited.black || 0}K</span>
             </div>
+            ${(humanThreat.any && (humanThreat.any.shields || 0) > 0) ? `
+              <div class="confirm-threat-row" style="background: rgba(168, 85, 247, 0.1); border-left: 3px solid #a855f7; padding-left: 6px;">
+                <span style="color: #c084fc; font-weight: 700;">🛡️ ANY // FLEXIBLE</span>
+                <span>${humanThreat.any.shields} shields committed -> Dynamically absorbed threats in P2B</span>
+              </div>
+            ` : ''}
             <div class="confirm-threat-row">
               <span style="color: var(--color-black); font-weight: 700;">■ BLACK // CORRUPTION</span>
               <span>${blackCubes} cube${blackCubes === 1 ? '' : 's'} -> Track space ${state.corruption_track || 0}</span>
             </div>
             <div class="confirm-threat-row">
               <span style="color: var(--color-red); font-weight: 700;">◆ RED // RANSOMWARE</span>
-              <span>${redInfo.cubes} exited vs ${redInfo.shields} shields -> ${redInfo.unblocked > 0 ? `<strong style="color: #f43f5e;">-${redInfo.unblocked} Cash/Secrets</strong>` : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
+              <span>${redInfo.cubes} exited vs ${redInfo.blocked !== undefined ? redInfo.blocked : redInfo.shields} blocked -> ${redInfo.unblocked > 0 ? (redInfo.flat_leak ? `<strong style="color: #f43f5e;">-${redInfo.unblocked} Cash (Flat -1 Secret Leak!)</strong>` : `<strong style="color: #f43f5e;">-${redInfo.unblocked} Cash</strong>`) : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
             </div>
             <div class="confirm-threat-row">
               <span style="color: var(--color-blue); font-weight: 700;">● BLUE // SPYWARE</span>
-              <span>${blueInfo.cubes} exited vs ${blueInfo.shields} shields -> ${blueInfo.unblocked > 0 ? `<strong style="color: #f43f5e;">-${blueInfo.unblocked} Secrets</strong>` : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
+              <span>${blueInfo.cubes} exited vs ${blueInfo.blocked !== undefined ? blueInfo.blocked : blueInfo.shields} blocked -> ${blueInfo.unblocked > 0 ? `<strong style="color: #f43f5e;">-${blueInfo.unblocked} Secrets</strong>` : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
             </div>
             <div class="confirm-threat-row">
               <span style="color: var(--color-green); font-weight: 700;">▲ GREEN // MALWARE</span>
-              <span>${greenInfo.cubes} exited vs ${greenInfo.shields} shields -> ${greenInfo.unblocked > 0 ? `<strong style="color: #f43f5e;">${greenInfo.unblocked} Unblocked Malware</strong>` : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
+              <span>${greenInfo.cubes} exited vs ${greenInfo.blocked !== undefined ? greenInfo.blocked : greenInfo.shields} blocked -> ${greenInfo.unblocked > 0 ? (greenInfo.fizzled || actualRequired === 0 ? '<strong style="color: #4ade80;">Fizzled (0 penalty)</strong>' : `<strong style="color: #f43f5e;">${greenInfo.unblocked} Unblocked Malware</strong>`) : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
             </div>
           </div>
 

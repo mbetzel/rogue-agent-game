@@ -28,14 +28,11 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
         )
         unpatched_dice_vp_lost = 0
 
-        # Overflow penalties (used if total wipeout: -1 per Secret below 0, -1 per unfulfilled destruction)
+        # Overflow penalties (used if total wipeout: -1 per Secret below 0)
         overflow_penalties = 0
         if all_patient_zero:
             secret_penalty = p.breach_depth * cfg.overflow_penalty_per_secret_debt
-            destruction_penalty = (
-                p.unfulfilled_destructions * cfg.overflow_penalty_per_unfulfilled_destroyed_die
-            )
-            overflow_penalties = secret_penalty + destruction_penalty
+            overflow_penalties = secret_penalty
             net_score = overflow_penalties
         else:
             net_score = portfolio_value
@@ -108,12 +105,11 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
         winner_id = sorted_rankings[0]["player_id"] if sorted_rankings else None
         final_rankings = sorted_rankings
     else:
-        # Total Wipeout: Ranked by Net Score, Secrets, fewest unfulfilled destructions, Money, Ready Colored Dice, Patches, fewest unpatched dice
+        # Total Wipeout: Ranked by Net Score, Secrets, Money, Ready Colored Dice, Patches, fewest unpatched dice
         rankings.sort(
             key=lambda r: (
                 r["net_score"],
                 r["secrets"],
-                -r["unfulfilled_destructions"],
                 r["money"],
                 r["ready_colored_dice_count"],
                 r["patches"],

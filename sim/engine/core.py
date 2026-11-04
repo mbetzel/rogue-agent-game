@@ -82,6 +82,17 @@ class GameEngine:
             self.companies = list(companies)
             self.white_hats = list(white_hats)
             self.archetypes = [get_archetype_by_code(wh.code.value) for wh in self.white_hats]
+        elif companies is not None:
+            self.companies = list(companies)
+            self.white_hats = []
+            for comp in self.companies:
+                if comp is not None:
+                    c_code = comp.code if isinstance(comp.code, CompanyCode) else CompanyCode(comp.code)
+                    wh_code = CANONICAL_OPERATIVE_FOR_COMPANY[c_code]
+                    self.white_hats.append(WHITE_HATS[wh_code])
+                else:
+                    self.white_hats.append(None)
+            self.archetypes = [get_archetype_by_code(wh.code.value) if wh else None for wh in self.white_hats]
         elif archetypes is not None:
             self.companies = []
             self.white_hats = []

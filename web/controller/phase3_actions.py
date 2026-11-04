@@ -83,7 +83,7 @@ def confirm_income(
             if matching_prod:
                 player.in_production_dice.remove(matching_prod)
                 # Remove from shield slot visual tracking if present
-                for slot_color in ["red", "blue", "green"]:
+                for slot_color in ["red", "blue", "green", "any"]:
                     if slot_color in meta.get("shield_slots", {}):
                         meta["shield_slots"][slot_color] = [d for d in meta["shield_slots"][slot_color] if d.die_id != die_id]
                 matching_prod.production_role = None
@@ -97,20 +97,8 @@ def confirm_income(
                 )
                 continue
 
-            # 3. Check destruction fallback from Under Development / Ready
-            matching_fallback = next((d for d in (player.glitched_dice + player.scanned_dice + player.ready_for_release_dice) if d.die_id == die_id), None)
-            if matching_fallback:
-                if matching_fallback in player.glitched_dice:
-                    player.glitched_dice.remove(matching_fallback)
-                elif matching_fallback in player.scanned_dice:
-                    player.scanned_dice.remove(matching_fallback)
-                elif matching_fallback in player.ready_for_release_dice:
-                    player.ready_for_release_dice.remove(matching_fallback)
-                glitched_count += 1
-                controller.event_log.append(
-                    f"{meta['name']} destroyed {matching_fallback.color.value.capitalize()} Die from Under Development due to Green malware fallback."
-                )
-                continue
+            # Under v0.31.0 INV-MALWARE-FIZZLE-01: No Destruction Fallback!
+            # If in_production_dice is empty, malware fizzles with 0 penalty.
 
         # If user didn't select enough dice (or selected none, e.g. API fallback), auto-select remainder
         remaining_needed = pending_green - glitched_count
@@ -122,12 +110,17 @@ def confirm_income(
                 elif player.in_production_dice:
                     def glitch_sort_key(d: Die) -> Tuple[int, int, int]:
                         role = getattr(d, "production_role", None)
-                        is_shield = 0 if role in (ProductionRole.RED_SHIELD, ProductionRole.BLUE_SHIELD, ProductionRole.GREEN_SHIELD) else 1
+                        is_shield = 0 if role in (
+                            ProductionRole.RED_SHIELD,
+                            ProductionRole.BLUE_SHIELD,
+                            ProductionRole.GREEN_SHIELD,
+                            ProductionRole.ANY_SHIELD,
+                        ) else 1
                         is_gray = 0 if d.color == DieColor.GRAY else 1
                         return (is_shield, is_gray, getattr(d, "cost", 0))
                     target_die = min(player.in_production_dice, key=glitch_sort_key)
                     player.in_production_dice.remove(target_die)
-                    for slot_color in ["red", "blue", "green"]:
+                    for slot_color in ["red", "blue", "green", "any"]:
                         if slot_color in meta.get("shield_slots", {}):
                             meta["shield_slots"][slot_color] = [d for d in meta["shield_slots"][slot_color] if d.die_id != target_die.die_id]
                     target_die.production_role = None
@@ -135,14 +128,12 @@ def confirm_income(
                     target_die.chosen_choice_index = None
                     target_die.current_face = None
                     player.glitched_dice.append(target_die)
-                elif player.glitched_dice:
-                    player.glitched_dice.pop(0)
-                elif player.scanned_dice:
-                    player.scanned_dice.pop(0)
-                elif player.ready_for_release_dice:
-                    player.ready_for_release_dice.pop(0)
                 else:
-                    player.unfulfilled_destructions += 1
+                    # MALWARE FIZZLE: in_production_dice is empty. Zero penalty!
+                    controller.event_log.append(
+                        f"Green Malware fizzled against {meta['name']}! (No active production systems to infect, 0 penalty)."
+                    )
+                    break
 
         player.pending_unblocked_green = 0
 

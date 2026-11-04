@@ -337,24 +337,9 @@ class AdaptiveBalancedBot(BaseBot):
                 assignments[idx] = ShieldColor.BLUE
                 committed_blue += 1
 
-        # Assign Generic Any shields prioritizing Blue (protect Secrets) first, then Red, then Green
+        # Assign Generic Any shields as ShieldColor.ANY (INV-FLEX-SHIELD-01)
         for idx in any_shield_indices:
-            if threats[CubeColor.BLUE] > committed_blue:
-                best_color = ShieldColor.BLUE
-            elif threats[CubeColor.RED] > committed_red:
-                best_color = ShieldColor.RED
-            elif threats[CubeColor.GREEN] > committed_green:
-                best_color = ShieldColor.GREEN
-            else:
-                best_color = ShieldColor.BLUE
-
-            assignments[idx] = best_color
-            if best_color == ShieldColor.BLUE:
-                committed_blue += 1
-            elif best_color == ShieldColor.RED:
-                committed_red += 1
-            else:
-                committed_green += 1
+            assignments[idx] = ShieldColor.ANY
 
         return assignments
 

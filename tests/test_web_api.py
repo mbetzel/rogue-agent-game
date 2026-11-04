@@ -364,7 +364,7 @@ class TestWebAPI(unittest.TestCase):
         """Unblocked Green malware can be absorbed by sacrificing an active White Contractor."""
         self._post("/api/game/new", {"num_players": 4, "seed": 42})
         ctrl = RogueAgentRequestHandler.controller
-        ctrl.state.staging_cup[CubeColor.GREEN] = 1
+        ctrl.state.staging_cup[CubeColor.GREEN] = 4
         ctrl.state.staging_cup[CubeColor.RED] = 0
         ctrl.state.staging_cup[CubeColor.BLUE] = 0
         ctrl.state.staging_cup[CubeColor.BLACK] = 0
@@ -766,7 +766,12 @@ class TestWebAPI(unittest.TestCase):
         self.assertTrue(res["success"])
         p0 = res["state"]["players"][0]
         # Committed shields must not exceed defense_capacity (2)
-        total_shields = len(p0["shield_slots"]["red"]) + len(p0["shield_slots"]["blue"]) + len(p0["shield_slots"]["green"])
+        total_shields = (
+            len(p0["shield_slots"]["red"])
+            + len(p0["shield_slots"]["blue"])
+            + len(p0["shield_slots"]["green"])
+            + len(p0["shield_slots"].get("any", []))
+        )
         self.assertLessEqual(total_shields, 2)
         self.assertEqual(total_shields, 2)
 
@@ -830,6 +835,131 @@ class TestWebAPI(unittest.TestCase):
         p0 = res["state"]["players"][0]
         self.assertEqual(p0["secrets"], initial_secrets + 1)
         self.assertEqual(p0["research_tokens"], 0)
+
+    # -------------------------------------------------------------------------
+    # 24. Company Setup & Hardware Baselines (v0.28.0 / v0.30.0)
+    # -------------------------------------------------------------------------
+    def test_new_game_company_setup_helix(self) -> None:
+        """POST /api/game/new with Helix assigns Patent Level 1 and +2 🔬 Research Tokens."""
+        res = self._post("/api/game/new", {
+            "num_players": 4,
+            "seed": 42,
+            "players": [{"is_human": True, "name": "BioHacker", "company": "HELIX"}],
+        })
+        self.assertTrue(res["success"])
+        state = res["state"]
+        p0 = state["players"][0]
+
+        # Verify company identity
+        self.assertEqual(p0["company"]["code"], "HELIX")
+        self.assertEqual(p0["company"]["starting_patent_level"], 1)
+        self.assertEqual(p0["company"]["starting_research_bonus"], 2)
+
+        # Verify starting research level (patent level 1) and starting research tokens (2)
+        self.assertEqual(p0["patent_level"], 1)
+        self.assertEqual(p0["research_tokens"], 2)
+        self.assertEqual(p0["patches"], 2)
+
+        # Verify standard hardware tracks for Helix
+        self.assertEqual(p0["defense_capacity"], 2)
+        self.assertEqual(p0["triage_bandwidth"], 2)
+        self.assertEqual(p0["release_bandwidth"], 4)
+        self.assertEqual(p0["triage_level"], 0)
+        self.assertEqual(p0["release_level"], 0)
+        self.assertEqual(p0["defense_level"], 0)
+
+    def test_new_game_company_setup_omnidyne(self) -> None:
+        """POST /api/game/new with Omnidyne assigns Triage L1, Release L1, and Def Cap 1."""
+        res = self._post("/api/game/new", {
+            "num_players": 4,
+            "seed": 42,
+            "players": [{"is_human": True, "name": "SysAdmin", "company": "OMNIDYNE"}],
+        })
+        self.assertTrue(res["success"])
+        p0 = res["state"]["players"][0]
+
+        self.assertEqual(p0["company"]["code"], "OMNIDYNE")
+        self.assertEqual(p0["defense_capacity"], 1)
+        self.assertEqual(p0["triage_bandwidth"], 3)
+        self.assertEqual(p0["release_bandwidth"], 5)
+        self.assertEqual(p0["triage_level"], 1)
+        self.assertEqual(p0["release_level"], 1)
+        self.assertEqual(p0["patent_level"], 0)
+        self.assertEqual(p0["research_tokens"], 0)
+
+    def test_new_game_company_setup_aegis(self) -> None:
+        """POST /api/game/new with Aegis assigns Defense Level 1 and Defense Cap 3."""
+        res = self._post("/api/game/new", {
+            "num_players": 4,
+            "seed": 42,
+            "players": [{"is_human": True, "name": "SecLead", "company": "AEGIS"}],
+        })
+        self.assertTrue(res["success"])
+        p0 = res["state"]["players"][0]
+
+        self.assertEqual(p0["company"]["code"], "AEGIS")
+        self.assertEqual(p0["defense_capacity"], 3)
+        self.assertEqual(p0["defense_level"], 1)
+        self.assertEqual(p0["triage_bandwidth"], 1)
+        self.assertEqual(p0["release_bandwidth"], 3)
+        self.assertEqual(p0["patent_level"], 0)
+
+    def test_new_game_company_setup_meridian(self) -> None:
+        """POST /api/game/new with Meridian assigns +$2 Starting Cash ($8 start)."""
+        res = self._post("/api/game/new", {
+            "num_players": 4,
+            "seed": 42,
+            "players": [{"is_human": True, "name": "Banker", "company": "MERIDIAN"}],
+        })
+        self.assertTrue(res["success"])
+        p0 = res["state"]["players"][0]
+
+        self.assertEqual(p0["company"]["code"], "MERIDIAN")
+        self.assertEqual(p0["money"], 8)
+        self.assertEqual(p0["defense_capacity"], 2)
+        self.assertEqual(p0["patent_level"], 0)
+
+    def test_new_game_company_setup_dto(self) -> None:
+        """POST /api/game/new with DTO assigns +1 Corporate Secret."""
+        res = self._post("/api/game/new", {
+            "num_players": 4,
+            "seed": 42,
+            "players": [{"is_human": True, "name": "Agent", "company": "DTO"}],
+        })
+        self.assertTrue(res["success"])
+        p0 = res["state"]["players"][0]
+
+        self.assertEqual(p0["company"]["code"], "DTO")
+        self.assertEqual(p0["secrets"], 13)  # 12 baseline in 4P + 1
+
+    def test_new_game_company_setup_prometheus(self) -> None:
+        """POST /api/game/new with Prometheus assigns -1 🔬 Upgrade Discount."""
+        res = self._post("/api/game/new", {
+            "num_players": 4,
+            "seed": 42,
+            "players": [{"is_human": True, "name": "Dev", "company": "PROMETHEUS"}],
+        })
+        self.assertTrue(res["success"])
+        p0 = res["state"]["players"][0]
+
+        self.assertEqual(p0["company"]["code"], "PROMETHEUS")
+        self.assertEqual(p0["company"]["upgrade_discount"], 1)
+
+    def test_new_game_disable_corporate_asymmetry(self) -> None:
+        """POST /api/game/new with enable_corporate_asymmetry=False applies 0 baselines."""
+        res = self._post("/api/game/new", {
+            "num_players": 4,
+            "seed": 42,
+            "enable_corporate_asymmetry": False,
+            "players": [{"is_human": True, "name": "BioHacker", "company": "HELIX"}],
+        })
+        self.assertTrue(res["success"])
+        p0 = res["state"]["players"][0]
+
+        # With asymmetry disabled, company modifiers are not applied
+        self.assertEqual(p0["patent_level"], 0)
+        self.assertEqual(p0["research_tokens"], 0)
+        self.assertEqual(p0["patches"], 0)
 
 
 if __name__ == "__main__":

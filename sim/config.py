@@ -161,7 +161,7 @@ class GameConfig:
     # Total Wipeout Overflow Penalties (v0.19.0: Elimination of Fictitious Wipeout Bonuses)
     overflow_penalty_per_secret_debt: int = -1  # -1 VP per Secret breach depth below 0
     overflow_penalty_per_cash_debt: int = 0  # Obsolete in v0.3 (cash >= 0)
-    overflow_penalty_per_unfulfilled_destroyed_die: int = -1  # -1 VP per unfulfilled die destruction
+    overflow_penalty_per_unfulfilled_destroyed_die: int = 0  # Deprecated in v0.31.0 (INV-MALWARE-FIZZLE-01)
 
     @property
     def corruption_track_capacity(self) -> int:

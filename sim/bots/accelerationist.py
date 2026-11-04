@@ -186,7 +186,7 @@ class AccelerationistBot(BaseBot):
                 continue
             if face.is_shield:
                 if face.shield_color == ShieldColor.ANY:
-                    assignments[idx] = ShieldColor.BLUE
+                    assignments[idx] = ShieldColor.ANY
                 else:
                     assignments[idx] = face.shield_color
             elif face.has_shield_option and blue_threat > 0:

@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.30.0)
+# Too Many Secrets — Rules Draft (v0.31.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -182,7 +182,7 @@ Each player’s contracting Client Company provides a powerful Institutional Ove
        * **Shield Slots & Defense Grid Capacity:** Assign dice showing `Block 1 Red`, `Block 1 Blue`, `Block 1 Green`, or `Block 1 Any` to their corresponding **Red Shields**, **Blue Shields**, or **Green Shields** slots. **Hardware Limit:** The total number of dice assigned across all Shield slots cannot exceed your terminal mat's current **`defense_capacity`** (`2` baseline, upgradable to `3` and `4`). Any rolled die displaying shields that exceeds your capacity cannot block and must be placed into the Income slot (producing `0` output if it has no income face). Any die with a dual output (e.g., Red Star R1 `Block 1 Red` + `+$2`) assigned to a shield slot counts toward defense capacity.
        * **Income Slot:** Assign all other dice (producing `$`, `🔬`, or non-shield `★` abilities) to the **Income** slot.
        * **Choice Faces (`/`):** If a die shows a choice between a Shield and Income (e.g. `Block 1 Blue / +1 🔬`), the player commits it now to either Blue Shields (subject to defense capacity) or Income.
-       * **Generic (`Any`) Shields** (including rolled White Contractor shields) must be committed to a specific color slot (`Red`, `Blue`, or `Green`) *before* Phase 2 begins.
+       * **Generic (`Any`) Shields** (including rolled White Contractor shields) deployed directly to the Defense Grid as flexible Generic ANY shields (`v0.31.0`). Players do not pre-commit them to a specific cube color in Phase 1; generic shields absorb threat reactively in Phase 2 Step 2B after the tower drop.
 
 ---
 
@@ -214,17 +214,20 @@ Calculate the total attack strength of **Red**, **Blue**, and **Green** from exi
 
 Each player simultaneously resolves all three colors against their committed Shields in **In Production**:
 
-1. **Defensive Blocking:** Each die assigned to a color defense blocks **1 cube** of that color (or 2 cubes if displaying a `Block 2` ability). Dice assigned to shields absorb the attack cleanly without wearing down or moving to Under Development, remaining safely deployed in **In Production**.
+1. **Two-Stage Defensive Blocking (`v0.31.0`):**
+   * **Stage 1 (Color-Specific Shields):** Each die assigned to a specific color defense blocks **1 cube** of that color (or 2 cubes for `Block 2`).
+   * **Stage 2 (Reactive Generic ANY Shields):** Available `Block 1 Any` shields absorb remaining unblocked threat reactively across colors according to the 4-tier strategic priority (Tier 1: Blue threat; Tier 2: Unfunded Red shortfall; Tier 3: Green threat; Tier 4: Funded Red cash buffer).
+   * **Zero Wear Retention:** Dice assigned to shields (both color and generic ANY) absorb attacks cleanly without wearing down or moving to Under Development, remaining safely deployed in **In Production**.
 2. **Unblocked Damage:**
    * **Red (Ransomware / Financial Wiretaps):** Pay **`$1`** cash per unblocked Red cube. Held Research Tokens (`🔬`) cannot absorb ransom.
-     * **Unpaid Ransom Leak:** Any unpaid ransom leaks proprietary source code directly to the dark web: lose **`1 Corporate Secret` per unpaid `$1`**! Money is strictly non-negative and never drops below `$0`.
+     * **Unpaid Ransom Leak:** If cash is insufficient to pay all unblocked Red cubes (any shortfall exists), the consultancy suffers a **flat fine of exactly 1 Corporate Secret** (a single dark web leak fine, v0.31.0), regardless of shortfall size. Fully paid ransomware causes 0 Secret loss. Money is strictly non-negative and never drops below `$0`.
    * **Blue (Spyware / Data Exfiltration):** Lose **`1` Corporate Secret** per unblocked Blue cube.
    * *(Institutional Override Timing: Contracting **Department of Telecommunications Oversight [DTO]** may trigger Slush Fund during damage calculation to absorb up to 2 Secret loss for free).*
    * **Green (Malware / Logic Bombs):** For each unblocked Green cube, move **`1` active die from In Production** to the **Glitched Box** in your **Under Development** pipeline!
      * **Income Forfeiture:** Because this occurs before Phase 3 income collection, a die glitched by Green malware **forfeits its resource collection this round**.
      * **Defensive Shield Sacrifice:** Defending consultancies may choose to glitch a die currently in a Shield slot (one that already blocked this round) to protect an Income die!
      * **Contractor Sacrifice:** You may choose to discard **1 active White Contractor die** to the general supply instead of glitching a permanent module die.
-     * **Destruction Fallback:** If you have **no dice in In Production** (or your entire pool is already offline), you must instead **Destroy (return to box) 1 die** from **Under Development**!
+     * **Malware Fizzle (`v0.31.0`):** If you have **no dice in In Production** (or all active dice have already glitched), unblocked Green malware **fizzles with ZERO penalty**! No dice are removed or destroyed from Under Development or Ready for Release.
    * **Patient Zero Check:** If your Corporate Secrets reach **`0` (or below)**, your consultancy suffers a **Total Data Breach** and you become **Patient Zero** *(track negative Secrets below 0 if needed for total-wipeout tiebreakers)*.
 3. **Snowball Recycle & Contractor Expiration:** Place **all exited Red, Blue, and Green cubes** from the tray back into the **Staging Cup** for next round. All White Contractor dice (whether they blocked, sacrificed, or remained unused) return to the general supply.
 4. **Empty Tray (Compile Buffer Overflow):** If **`0 cubes of any color`** exit the tower into the tray this phase:
@@ -293,8 +296,8 @@ When the game ends (via Singularity when `v3.0` fills, or via Patient Zero check
 
 * **Total Wipeout Ending (All Consultancies Breach):**
   * Narrative victory belongs unconditionally to Project: SETEC (The Rogue Agent)!
-  * To rank the human consultancies, calculate **Net Wipeout Score**: evaluate **Overflow Penalties** incurred on the fatal compile (`-1` per Secret below 0 [breach depth], `-1` per unfulfilled die destruction); highest net score takes top honors. Zero positive dice or cash bonuses are added.
-  * Tied wipeout scores are resolved using the standard operational hierarchy (Secrets / breach depth > Unfulfilled Destructions > Money > Ready Colored Modules > Research Tokens > Fewest Unpatched/Glitched Dice).
+  * To rank the human consultancies, calculate **Net Wipeout Score**: purely evaluated as negative breach depth (`net_score = -breach_depth = player.secrets` below 0); highest net score takes top honors. Zero positive dice or cash bonuses are added. (Legacy unfulfilled destruction penalties are excised under v0.31.0).
+  * Tied wipeout scores are resolved using the standard operational hierarchy (Secrets / breach depth > Money > Ready Colored Modules > Research Tokens > Fewest Unpatched/Glitched Dice).
 
 ---
 

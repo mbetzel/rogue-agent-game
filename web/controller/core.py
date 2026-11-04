@@ -21,17 +21,29 @@ from sim.entities import (
     AbilityStatus,
     ArchetypeCard,
     ArchetypeCode,
+    CANONICAL_COMPANY_FOR_OPERATIVE,
+    CANONICAL_OPERATIVE_FOR_COMPANY,
+    COMPANIES,
+    Company,
+    CompanyCode,
     Die,
     VariantCard,
     VersionCard,
+    WHITE_HATS,
+    WhiteHat,
+    WhiteHatCode,
     create_colored_die,
     create_white_die,
+    get_all_companies,
+    get_archetype_by_code,
+    get_company_by_code,
     get_default_variant_cards,
     get_default_version_deck,
     get_random_archetypes,
     get_random_setup,
     get_random_variant_cards,
     get_random_version_deck,
+    get_white_hat_by_code,
 )
 from web.schemas import GameStateSerializer
 from web.controller import (
@@ -75,12 +87,18 @@ class GameController:
         version_deck: Optional[List[VersionCard]] = None,
         randomize_cards: bool = False,
         archetypes: Optional[List[ArchetypeCard]] = None,
+        companies: Optional[List[Company]] = None,
+        white_hats: Optional[List[WhiteHat]] = None,
+        enable_corporate_asymmetry: bool = True,
     ) -> Dict[str, Any]:
         """Creates and initializes a new game match."""
         if not (1 <= num_players <= 4):
             raise ValueError(f"Player count must be between 1 and 4, got {num_players}")
 
-        config = GameConfig(num_players=num_players)
+        config = GameConfig(
+            num_players=num_players,
+            enable_corporate_asymmetry=enable_corporate_asymmetry,
+        )
         rng = random.Random(seed)
 
         # Default bots pool
@@ -150,6 +168,52 @@ class GameController:
                 if version_deck is None:
                     version_deck = get_random_version_deck(setup_rng)
 
+        # Resolve companies and white hats if provided or configured
+        resolved_companies: Optional[List[Company]] = None
+        resolved_white_hats: Optional[List[WhiteHat]] = None
+
+        if companies is not None:
+            resolved_companies = list(companies)
+            if white_hats is not None:
+                resolved_white_hats = list(white_hats)
+            else:
+                resolved_white_hats = [
+                    WHITE_HATS[CANONICAL_OPERATIVE_FOR_COMPANY[c.code]] if c else None
+                    for c in resolved_companies
+                ]
+        elif players_config and any(
+            isinstance(cfg, dict) and (cfg.get("company") or cfg.get("company_code"))
+            for cfg in players_config
+        ):
+            resolved_companies = [None] * num_players
+            resolved_white_hats = [None] * num_players
+            used_company_codes = set()
+
+            for i in range(min(num_players, len(players_config))):
+                cfg = players_config[i]
+                if not isinstance(cfg, dict):
+                    continue
+                c_val = cfg.get("company") or cfg.get("company_code")
+                if c_val and str(c_val).upper() != "RANDOM":
+                    comp = get_company_by_code(c_val)
+                    resolved_companies[i] = comp
+                    used_company_codes.add(comp.code)
+
+                    wh_val = cfg.get("white_hat") or cfg.get("white_hat_code")
+                    if wh_val:
+                        resolved_white_hats[i] = get_white_hat_by_code(wh_val)
+                    else:
+                        resolved_white_hats[i] = WHITE_HATS[CANONICAL_OPERATIVE_FOR_COMPANY[comp.code]]
+
+            setup_rng = random.Random((seed * 31) if seed is not None else None)
+            remaining_comps = [c for c in get_all_companies() if c.code not in used_company_codes]
+            setup_rng.shuffle(remaining_comps)
+            for i in range(num_players):
+                if resolved_companies[i] is None:
+                    comp = remaining_comps.pop(0)
+                    resolved_companies[i] = comp
+                    resolved_white_hats[i] = WHITE_HATS[CANONICAL_OPERATIVE_FOR_COMPANY[comp.code]]
+
         self.engine = GameEngine(
             config=config,
             bots=bots,
@@ -157,6 +221,8 @@ class GameController:
             variant_cards=variant_cards or get_default_variant_cards(),
             version_deck=version_deck or get_default_version_deck(),
             archetypes=archetypes,
+            companies=resolved_companies,
+            white_hats=resolved_white_hats,
         )
 
         variant_summary = ", ".join(v.code for v in self.state.variant_cards.values())
@@ -169,8 +235,30 @@ class GameController:
             f"CISO badge awarded to {self.player_meta[self.state.first_player_index]['name']}.",
         ]
         for p in self.state.players:
-            if p.archetype:
-                p_name = self.player_meta[p.player_id]["name"]
+            p_name = self.player_meta[p.player_id]["name"]
+            if p.company:
+                bonuses = []
+                starting_cash_bonus = 1 if self.state.active_directive_code == "DATA_SCRAPER" else 0
+                if p.money > config.starting_money + starting_cash_bonus:
+                    bonuses.append(f"+${p.company.starting_cash_bonus} Cash")
+                if p.patches > 0:
+                    bonuses.append(f"+{p.patches} 🔬 Research")
+                if p.secrets > config.get_starting_secrets(num_players):
+                    bonuses.append(f"+{p.company.starting_secrets_bonus} Secret")
+                if getattr(p, "patent_level", 0) > 0:
+                    bonuses.append(f"Patent Lvl {p.patent_level}")
+                if getattr(p, "defense_level", 0) > 0:
+                    bonuses.append(f"Defense Lvl {p.defense_level} [Cap {p.defense_capacity}]")
+                if getattr(p, "triage_level", 0) > 0 or getattr(p, "release_level", 0) > 0:
+                    bonuses.append(f"Triage Lvl {p.triage_level}, Release Lvl {p.release_level}")
+                if getattr(p, "upgrade_discount", 0) > 0:
+                    bonuses.append(f"-{p.upgrade_discount} 🔬 Track Upgrade Discount")
+                bonus_str = f" [{', '.join(bonuses)}]" if bonuses else ""
+                wh_str = f" / {p.white_hat.name}" if p.white_hat else ""
+                self.event_log.append(
+                    f"{p_name} contracted with {p.company.name} ({p.company.override_name}){wh_str}{bonus_str}."
+                )
+            elif p.archetype:
                 self.event_log.append(
                     f"{p_name} assigned Consultancy Archetype: {p.archetype.name} ({p.archetype.ability_name})."
                 )

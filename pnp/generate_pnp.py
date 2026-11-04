@@ -1,4 +1,4 @@
-"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.30.0 Baseline).
+"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.31.0 Baseline).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
   - 01_Player_Boards.pdf (6 pages — 4x Consultancy Terminal Mats with CI/CD conveyor loop + 6x Client Company Cards sheet + 6x White Hat Dossier Cards sheet)
@@ -19,7 +19,7 @@ from pnp.pdf_engine import PALETTE, Color, PDFDocument, PDFPage, measure_text
 
 
 # =============================================================================
-# Canonical Game Data (Synchronized 1:1 with RULES.md v0.30.0 & sim/entities.py)
+# Canonical Game Data (Synchronized 1:1 with RULES.md v0.31.0 & sim/entities.py)
 # =============================================================================
 
 @dataclass(frozen=True)
@@ -835,7 +835,7 @@ def render_player_board(
     draw_board_outer_frame(
         page,
         left_tag=f"TOO MANY SECRETS // CONSULTANCY TERMINAL [TERM-0{idx}/4]",
-        right_tag="PNP PROTOTYPE v0.30.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.31.0 // US LETTER",
     )
 
     # -------------------------------------------------------------------------
@@ -959,7 +959,7 @@ def render_player_board(
 
     # Staging instructions & visual dice slots
     page.text(rx + 8.0, r1_y + 28.0, "Phase 1: Roll Ready + Hired Contractors ($1/$2/$3). Max 2 Free Rerolls (Glitched dice cannot be rerolled).", font="regular", size=6.2, color=PALETTE["ink_soft"])
-    page.text(rx + 8.0, r1_y + 39.0, "Assign surviving dice to In Production (Shields up to Defense Capacity; remainder to Income).", font="regular", size=6.0, color=PALETTE["muted"])
+    page.text(rx + 8.0, r1_y + 39.0, "Assign surviving dice to In Production (Color & Any Shields up to Defense Capacity; remainder to Income).", font="regular", size=6.0, color=PALETTE["muted"])
 
     # 8 rounded dice staging guide slots
     ds_rw = 22.0
@@ -1061,16 +1061,16 @@ def render_player_board(
             dx_slot = ib_x + 14.0 + d_j * 26.0
             page.rounded_rect(dx_slot, py + 74.0, 22.0, 20.0, r=2.0, stroke=PALETTE["rule"], fill=PALETTE["white"], line_width=0.5)
 
-    # --- 3B: Defense Grid (Red, Blue, Green Shields) (y = 226..358, h = 132) ---
+    # --- 3B: Defense Grid (Color & Any Shields) (y = 226..358, h = 132) ---
     page.rect(px + 6.0, py + 116.0, pw - 12.0, 134.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.85)
     page.rect(px + 6.0, py + 116.0, pw - 12.0, 14.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.6)
-    page.rich_line(px + 10.0, py + 126.0, "**DEFENSE GRID** (Red, Blue, Green Shields — Committed in Step 5)", size=6.8, color=PALETTE["ink"])
+    page.rich_line(px + 10.0, py + 126.0, "**DEFENSE GRID** (Color & Any Shields — Committed up to Defense Capacity)", size=6.8, color=PALETTE["ink"])
     page.text(px + pw - 16.0, py + 126.0, "DEFENSE CAPACITY ENFORCED", font="mono_bold", size=5.4, color=PALETTE["ink_soft"], align="right")
 
     shield_bays = [
-        ("red", "{RED} RED SHIELDS", "Blocks Ransomware", "-$1 Cash per unblocked", "Unpaid: -1 Secret"),
+        ("red", "{RED} RED SHIELDS", "Blocks Ransomware", "-$1 Cash per unblocked", "Shortfall: -1 Secret flat"),
         ("blue", "{BLUE} BLUE SHIELDS", "Blocks Spyware", "**-1 Corporate Secret**", "per unblocked cube"),
-        ("green", "{GREEN} GREEN SHIELDS", "Blocks Malware", "Unblocked: **Glitch 1 Die**", "Income 1st -> Glitched"),
+        ("green", "{GREEN} GREEN SHIELDS", "Blocks Malware", "Glitch 1 Die / unblocked", "Empty Prod: 0 loss (fizzles)"),
     ]
     sb_w = (pw - 24.0) / 3.0
     for sb_i, (ckey, sb_title, sb_sub1, sb_sub2, sb_sub3) in enumerate(shield_bays):
@@ -1102,7 +1102,7 @@ def render_player_board(
     page.text(px + pw - 16.0, st_y + 10.0, "SPEND {RESEARCH} IN P3A", font="mono_bold", size=5.2, color=PALETTE["purple"], align="right")
 
     cap_levels = [
-        ("Level 0 (Base)", "Cap 2 Shields", "Default shield capacity baseline", False),
+        ("Level 0 (Base)", "Cap 2 Shields", "Accommodates Color & Any shields", False),
         ("Level 1 (Cost 2 {RESEARCH})", "Cap 3 Shields", "Expands grid to 3 shields", True),
         ("Level 2 (Cost 3 {RESEARCH})", "Cap 4 Shields + PASSIVE FIREWALL", "Absorbs 1 cube free in P2B before dmg!", True),
     ]
@@ -1226,7 +1226,7 @@ def render_company_cards_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x CLIENT COMPANY CARDS [PAGE 5/6]",
-        right_tag="PNP PROTOTYPE v0.30.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.31.0 // US LETTER",
     )
 
     page.text(
@@ -1264,8 +1264,8 @@ def render_company_cards_page(page: PDFPage) -> None:
     rules_text = (
         "**1. Contract Assignment:** At setup, each player is dealt 1 Client Company card (or introductory preset). Place card flush into the Terminal Mat top dock.\n"
         "**2. Once-per-Version Lifecycle:** Each company provides 1 Institutional Override per SETEC Version (**v1.0**, **v2.0**, and **v3.0**). Mark the checkbox upon activation.\n"
-        "**3. Version Switch Timing:** When SETEC compiles to a new version (in Phase 2 Step 2A), the version tile switches immediately. Excess {BLACK} corruption cubes immediately **spill over** onto the new version track. Any unspent override charge from the previous version is **forfeited**.\n"
-        "**4. Immediate Version Unlock:** The newly active version's override unlocks immediately in the same round SETEC upgrades, available starting in Step 2B or Phase 3 Operations."
+        "**3. Version Transition Timing:** When SETEC's corruption track fills in Phase 2 Step 2A, the active version remains current for the rest of the round. Defensive and operational overrides remain usable through P2B and P3. Excess {BLACK} cubes immediately **spill over** onto the next track.\n"
+        "**4. Round-Start Switch & Unlock:** At the start of the next round (in Phase 1 Boot), unspent overrides from the old version forfeit, and the new version's override unlocks to Available."
     )
     page.rich_paragraph(rx + 10.0, ry + 25.0, rw - 20.0, rules_text, size=6.4, leading=8.6, color=PALETTE["ink"])
 
@@ -1275,7 +1275,7 @@ def render_white_hat_dossiers_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x WHITE HAT DOSSIER CARDS [PAGE 6/6]",
-        right_tag="PNP PROTOTYPE v0.30.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.31.0 // US LETTER",
     )
 
     page.text(
@@ -1327,7 +1327,7 @@ def render_agent_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // CENTRAL ROGUE AGENT & COMPILER BOARD [1/2]",
-        right_tag="PNP PROTOTYPE v0.30.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.31.0 // US LETTER",
     )
 
     # Top Title Bar inside board
@@ -1411,17 +1411,17 @@ def render_agent_board(page: PDFPage) -> None:
         (
             "red",
             "{RED} RED // RANSOMWARE",
-            "BLOCKS: {RED} SHIELD",
+            "BLOCKS: {RED} / ANY SHIELD",
             (
-                "Lose **$1** per unblocked {RED} cube.\n"
-                "**Ransom Leak:** Any unpaid ransom loses **1 Secret** per $1 unpaid! *(Cash min $0).*"
+                "Pay **$1** per unblocked {RED} cube.\n"
+                "**Ransom Leak:** If any unpaid ransom remains (shortfall > 0), lose **1 Corporate Secret flat** *(Cash min $0)*."
             ),
             88.0,
         ),
         (
             "blue",
             "{BLUE} BLUE // SPYWARE",
-            "BLOCKS: {BLUE} SHIELD",
+            "BLOCKS: {BLUE} / ANY SHIELD",
             (
                 "Lose **1 Corporate Secret** per unblocked {BLUE} cube.\n"
                 "**Patient Zero:** Reaching **<= 0 Secrets** triggers immediate **Total Data Breach** (eliminated)!"
@@ -1431,10 +1431,10 @@ def render_agent_board(page: PDFPage) -> None:
         (
             "green",
             "{GREEN} GREEN // MALWARE",
-            "BLOCKS: {GREEN} SHIELD",
+            "BLOCKS: {GREEN} / ANY SHIELD",
             (
-                "Unblocked: Glitch **1 die from In Production**.\n"
-                "**Destruction Fallback:** If In Production empty, **Destroy 1 die from Under Development**!"
+                "Glitch **1 die from In Production** per unblocked {GREEN} cube.\n"
+                "**Malware Fizzle:** If In Production is empty, excess malware **fizzles with 0 penalty** *(no dice destroyed)*!"
             ),
             88.0,
         ),
@@ -1468,7 +1468,7 @@ def render_agent_board(page: PDFPage) -> None:
                 "**2. Temp Staffing:** Hire {WHITE} Contractors (**$1** / **$2** / **$3**, max 3).\n"
                 "**3. Roll Pool:** Roll Ready Zone + hired Contractors.\n"
                 "**4. Pure Rerolls:** Up to **2 free rerolls** of non-glitched dice. Glitched dice cannot be rerolled.\n"
-                "**5. Assign:** Commit Shields ({RED}/{BLUE}/{GREEN}) & Income. Unresolved Glitches -> **Glitched Box**."
+                "**5. Assign:** Commit Color Shields & flexible Any Shields up to Defense Capacity (without guessing colors) & Income. Glitches -> **Glitched Box**."
             ),
         ),
         (
@@ -1476,7 +1476,7 @@ def render_agent_board(page: PDFPage) -> None:
             (
                 "**Drop** entire Staging Cup into Cube Tower.\n"
                 "**2A.** Resolve {BLACK} Black Cubes on Corruption Track. Track fill upgrades SETEC; excess {BLACK} **spills over** immediately.\n"
-                "**2B.** Resolve {RED} {BLUE} {GREEN} vs Shields (capped by active Shield Bandwidth); apply damage; recycle exited {RED} {BLUE} {GREEN} -> Staging Cup.\n"
+                "**2B.** Resolve {RED} {BLUE} {GREEN} vs Color & Any Shields (up to Defense Capacity). Unblocked: {RED} pay $1/cube (unpaid shortfall: lose 1 Secret flat); {BLUE} -1 Secret/cube; {GREEN} glitch 1 die from In Prod (empty: fizzles 0 penalty). Recycle exited {RED}{BLUE}{GREEN} -> Staging Cup.\n"
                 "**Buffer Overflow:** If 0 cubes exit into tray, idle cycle injects **+1** {RED}, **+1** {BLUE}, **+1** {GREEN} from supply -> Staging Cup.\n"
                 "**2C. End Check:** **Singularity** OR any player **<= 0 Secrets** triggers **Final Round** *(Patient Zero eliminated; survivors take 1 final P3)*."
             ),
@@ -1519,7 +1519,7 @@ def render_market_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // SOFTWARE MODULE MARKET & CENTRAL SUPPLY [2/2]",
-        right_tag="PNP PROTOTYPE v0.30.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.31.0 // US LETTER",
     )
 
     # Top Title Bar
@@ -1655,7 +1655,7 @@ def render_market_board(page: PDFPage) -> None:
         rx_f + 8.0, fy + 27.5, fw - 16.0,
         "- **Primary Victory Condition:** Most remaining **Corporate Secrets** wins! (Uncapped).\n"
         "- **Tiebreakers:** 1. Most Cash ($)  |  2. Most Ready Colored Dice  |  3. Most Research ({RESEARCH})  |  4. Fewest Under Dev.\n"
-        "- *Patient Zero (<=0 Secrets) eliminated! Total wipeout: rank by net breach depth & unfulfilled destructions.*",
+        "- *Patient Zero (<=0 Secrets) eliminated! Total wipeout: rank purely by clean breach depth (Secrets below 0; highest net score wins).*",
         size=6.8, leading=11.8, color=PALETTE["ink"],
     )
 
@@ -1669,7 +1669,7 @@ def render_master_dice_reference(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // MASTER DICE PIP & ABILITY VISUAL AID [1/4]",
-        right_tag="PNP PROTOTYPE v0.30.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.31.0 // US LETTER",
     )
 
     page.rect(40.0, 32.0, 712.0, 24.0, stroke=PALETTE["ink"], fill=PALETTE["ink"], line_width=1.0)
@@ -1777,7 +1777,7 @@ def render_master_dice_reference(page: PDFPage) -> None:
             "PERSONAL RESERVE & HARDWARE UPGRADES",
             (
                 "- **Personal Reserve:** Each player holds **1 Purple Specialist die** ($4-$6 per White Hat Dossier).\n"
-                "- **Shield Upgrade Track:** Capped at 2 -> 3 -> 4 shields (+ Passive Firewall: ignore 1 unblocked cube).\n"
+                "- **Defense Grid Track:** Capacity 2 -> 3 -> 4 Color/Any shields (+ Passive Firewall: absorb 1 unblocked cube).\n"
                 "- **Triage Upgrade Track:** Bandwidth 2 -> 3 -> 4 Glitched -> Scanned (+ Hotfix: repair 1 free immediately).\n"
                 "- **Release Upgrade Track:** Bandwidth 4 -> 5 -> 6 Scanned -> Ready (+ Overclock: deploy 1 extra)."
             ),
@@ -1859,12 +1859,12 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
             fh = y + ch - fy
             page.rect(x, fy, cw, fh, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.7)
             page.rich_paragraph(
-                x + 6.0, fy + 6.0, cw - 12.0,
-                "**P1 Roll & Deploy:** +1{BLACK} -> Hire {WHITE} ($1/$2/$3, max 3) -> Roll Ready + Contractors -> Up to 2 Pure Rerolls (Glitched dice cannot be rerolled) -> Commit Shields (max Shield Bandwidth) & Income -> Unresolved Glitches -> Glitched Box.\n"
-                "**P2 SETEC Compile:** Drop Staging Cup -> 2A: {BLACK} advances track (4/5/6=Upgr/Singularity; excess spills over) -> 2B: Resolve vs Shields (enforce Shield Bandwidth) -> Dmg: {RED} -$1 (Unpaid: -1 Secret) | {BLUE} -1 Secret | {GREEN} Glitch 1 die (Income 1st, then Shield; empty: destroy Under Dev) -> Recycle {RED}{BLUE}{GREEN} -> 2C: End Check (Singularity or <=0 Secrets).\n"
+                x + 6.0, fy + 5.5, cw - 12.0,
+                "**P1 Roll & Deploy:** +1{BLACK} -> Hire {WHITE} ($1/$2/$3, max 3) -> Roll Ready + Contractors -> Up to 2 Pure Rerolls (Glitched dice cannot be rerolled) -> Commit Color & flexible Any Shields up to Defense Capacity (without guessing colors) & Income -> Unresolved Glitches -> Glitched Box.\n"
+                "**P2 SETEC Compile:** Drop Staging Cup -> 2A: {BLACK} advances track (4/5/6=Upgr/Singularity; excess spills) -> 2B: Resolve vs Shields (enforce Def Cap; Any shields block reactively) -> Dmg: {RED} Pay $1/cube (unpaid shortfall: -1 Secret flat) | {BLUE} -1 Secret/cube | {GREEN} Glitch 1 die from In Prod (if empty, excess malware fizzles 0 penalty) -> Recycle {RED}{BLUE}{GREEN} -> 2C: End Check (Singularity or <=0 Secrets).\n"
                 "**P3 Operations & Pipeline:** Collect Income ($/{RESEARCH}/★) -> Buy <=2 dice (Market R/B/G/Y $4-$6 or Personal Reserve Purple $4-$6) | Upgrade Tracks: Shields (2->3->4), Triage (2->3->4), Release (4->5->6), Patents (4->3->2{RESEARCH}) -> Clockwise Conveyor: Scanned -> Ready (<=Release Bandwidth), In Prod -> Ready, Glitched -> Scanned (<=Triage Bandwidth) -> Uncapped {RESEARCH} & $ -> Pass 1st Player.\n"
-                "**VICTORY:** Most Corporate Secrets among survivors. Patient Zero (<=0 Secrets) eliminated. Ties: 1. $ Capital  2. Ready Modules  3. Research ({RESEARCH})  4. Fewest Under Dev.",
-                size=5.3, leading=7.5, color=PALETTE["ink"],
+                "**VICTORY:** Most Corporate Secrets among survivors. Patient Zero (<=0 Secrets) eliminated. Ties: 1. $ Capital  2. Ready Modules  3. Research ({RESEARCH})  4. Fewest Under Dev. Total Wipeout: Rank purely by clean breach depth (Secrets below 0).",
+                size=5.1, leading=7.1, color=PALETTE["ink"],
             )
             # Mini CI/CD Conveyor summary bar at bottom
             cb_y = y + ch - 13.0
@@ -2176,7 +2176,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated: List[str] = []
 
     # 1. Player Terminal Mats & Split Cards (6 pages: 4x Mats with empty modular docks + 1x Company Cards + 1x White Hat Cards)
-    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.30.0)")
+    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.31.0)")
     for idx in range(1, 5):
         p = doc_players.add_page()
         render_player_board(p, idx)
@@ -2217,7 +2217,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated.append(path_versions)
 
     # 5. Combined Master Print-and-Play Pack (All 14 pages)
-    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.30.0)")
+    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.31.0)")
     for sub_doc in (doc_central, doc_players, doc_dice, doc_versions):
         for pg in sub_doc.pages:
             doc_master.pages.append(pg)

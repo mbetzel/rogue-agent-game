@@ -79,8 +79,8 @@ class TestV210Rules(unittest.TestCase):
         )
 
         self.assertEqual(p0.money, 0)
-        self.assertEqual(p0.patches, 3, "Patches must NOT absorb unpaid Red ransom under v0.21.0")
-        self.assertEqual(p0.secrets, 6, "Unpaid ransom must leak directly to Corporate Secrets")
+        self.assertEqual(p0.patches, 3, "Patches must NOT absorb unpaid Red ransom")
+        self.assertEqual(p0.secrets, 7, "Unpaid ransom must leak flat 1 Secret under v0.31.0")
 
     def test_red_ransomware_partial_cash_leak(self) -> None:
         """Cash pays partial ransom; remaining balance leaks to Secrets while patches remain intact."""
@@ -103,7 +103,7 @@ class TestV210Rules(unittest.TestCase):
 
         self.assertEqual(p0.money, 0)
         self.assertEqual(p0.patches, 2, "Patches must remain untouched")
-        self.assertEqual(p0.secrets, 6, "1 cash paid, 2 unpaid ransom leaks 2 Secrets (8 - 2 = 6)")
+        self.assertEqual(p0.secrets, 7, "1 cash paid, unpaid shortfall leaks flat 1 Secret (8 - 1 = 7)")
 
     def test_spook_slush_fund_absorbs_unpaid_ransom_without_patches(self) -> None:
         """Spook Slush Fund absorbs up to 2 Secrets from unpaid Red ransom without using patches."""

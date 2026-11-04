@@ -201,7 +201,7 @@ class TestV240Rules(unittest.TestCase):
         p0.bot = RedShieldBot(0)
         commitments = execute_phase_1(engine)
 
-        self.assertEqual(purple.production_role, ProductionRole.RED_SHIELD)
+        self.assertEqual(purple.production_role, ProductionRole.ANY_SHIELD)
 
         # Set Red threat of 1 cube in Phase 2
         engine.state.staging_cup = {CubeColor.RED: 1, CubeColor.BLUE: 0, CubeColor.GREEN: 0, CubeColor.BLACK: 0}

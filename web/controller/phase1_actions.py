@@ -377,17 +377,17 @@ def commit_defenses(
             raise ValueError(f"Die #{idx + 1} ({die.color.value}) cannot be committed ({face.name if face else 'None'})")
 
         shield_target = ShieldColor(color_str.lower())
-        if shield_target not in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN):
-            raise ValueError(f"Shield target must be red, blue, or green, got {color_str}")
+        if shield_target not in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN, ShieldColor.ANY):
+            raise ValueError(f"Shield target must be red, blue, green, or any, got {color_str}")
 
         if face.is_shield:
             if face.shield_color == ShieldColor.ANY:
-                validated_commitments[idx] = shield_target
+                validated_commitments[idx] = ShieldColor.ANY
             elif face.shield_color in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN):
                 # Fixed colored shields must commit to their color
                 validated_commitments[idx] = face.shield_color
         elif face.has_shield_option:
-            if shield_target == ShieldColor.BLUE:
+            if shield_target in (ShieldColor.BLUE, ShieldColor.ANY):
                 validated_commitments[idx] = ShieldColor.BLUE
                 die.chosen_choice_index = 0
             else:
@@ -395,19 +395,26 @@ def commit_defenses(
         else:
             raise ValueError(f"Die #{idx + 1} ({die.color.value}) is not a shield die ({face.name})")
 
-    # Auto-assign any unassigned fixed colored shields (excluding B2, and excluding choice faces)
+    # Auto-assign any unassigned shields (excluding B2, and excluding choice faces)
     for idx, die in enumerate(rolled):
         face = die.current_face
         if face and face.is_shield and not face.is_choice and idx not in validated_commitments:
             if face.shield_color in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN) and face.star_code != "B2":
                 validated_commitments[idx] = face.shield_color
+            elif face.shield_color == ShieldColor.ANY:
+                validated_commitments[idx] = ShieldColor.ANY
 
-    # Enforce Defense Grid Shield Capacity (INV-DEF-CAP-01)
+    # Enforce Defense Grid Shield Capacity (INV-DEF-CAP-01, INV-FLEX-SHIELD-01)
     if len(validated_commitments) > player.defense_capacity:
-        priority_map = {ShieldColor.BLUE: 0, ShieldColor.RED: 1, ShieldColor.GREEN: 2}
+        priority_map = {
+            ShieldColor.BLUE: 0,
+            ShieldColor.ANY: 1,
+            ShieldColor.RED: 2,
+            ShieldColor.GREEN: 3,
+        }
         sorted_items = sorted(
             validated_commitments.items(),
-            key=lambda item: priority_map.get(item[1], 3),
+            key=lambda item: priority_map.get(item[1], 4),
         )
         allowed = dict(sorted_items[:player.defense_capacity])
         rejected_indices = set(validated_commitments.keys()) - set(allowed.keys())
@@ -465,7 +472,7 @@ def commit_defenses(
 
     # Assign Production Roles and Deploy to in_production_dice (v0.22.0 Canonical)
     player.in_production_dice.clear()
-    slots: Dict[str, List[Die]] = {"red": [], "blue": [], "green": []}
+    slots: Dict[str, List[Die]] = {"red": [], "blue": [], "green": [], "any": []}
     for idx, die in enumerate(surviving_active):
         face = die.effective_face or die.current_face
         if idx in new_commitments:
@@ -479,9 +486,12 @@ def commit_defenses(
             elif s_color == ShieldColor.GREEN:
                 die.production_role = ProductionRole.GREEN_SHIELD
                 slots["green"].append(die)
+            elif s_color == ShieldColor.ANY:
+                die.production_role = ProductionRole.ANY_SHIELD
+                slots["any"].append(die)
             else:
-                die.production_role = ProductionRole.BLUE_SHIELD
-                slots["blue"].append(die)
+                die.production_role = ProductionRole.ANY_SHIELD
+                slots["any"].append(die)
         else:
             die.production_role = ProductionRole.INCOME
 
@@ -507,7 +517,7 @@ def commit_defenses(
     meta["has_committed"] = True
     meta["shield_slots"] = slots
 
-    shield_summary = [f"{len(slots[c])} {c.capitalize()}" for c in ["red", "blue", "green"] if slots[c]]
+    shield_summary = [f"{len(slots[c])} {c.capitalize()}" for c in ["any", "red", "blue", "green"] if slots[c]]
     controller.event_log.append(
         f"{meta['name']} committed shields: {', '.join(shield_summary) if shield_summary else 'No shields'}."
     )
@@ -739,12 +749,32 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
             elif face.is_shield:
                 if idx in commitments:
                     c = commitments[idx]
-                    validated[idx] = c if c in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN) else ShieldColor.BLUE
+                    validated[idx] = c if c in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN, ShieldColor.ANY) else ShieldColor.ANY
                 elif face.shield_color in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN):
                     if face.star_code != "B2":
                         validated[idx] = face.shield_color
                 elif face.shield_color == ShieldColor.ANY:
-                    validated[idx] = ShieldColor.BLUE
+                    validated[idx] = ShieldColor.ANY
+
+        # Enforce Defense Grid Shield Capacity (INV-DEF-CAP-01, INV-FLEX-SHIELD-01)
+        if len(validated) > player.defense_capacity:
+            priority_map = {
+                ShieldColor.BLUE: 0,
+                ShieldColor.ANY: 1,
+                ShieldColor.RED: 2,
+                ShieldColor.GREEN: 3,
+            }
+            sorted_items = sorted(
+                validated.items(),
+                key=lambda item: priority_map.get(item[1], 4),
+            )
+            allowed = dict(sorted_items[:player.defense_capacity])
+            rejected_indices = set(validated.keys()) - set(allowed.keys())
+            validated = allowed
+            for r_idx in rejected_indices:
+                r_die = active_dice[r_idx]
+                if r_die.current_face and r_die.current_face.is_choice and r_die.current_face.has_shield_option:
+                    r_die.chosen_choice_index = 1
 
         # Glitch Triage (v0.22.0 Canonical)
         surviving_active: List[Die] = []
@@ -776,7 +806,7 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
 
         # Assign Production Roles and Deploy to in_production_dice (v0.22.0 Canonical)
         player.in_production_dice.clear()
-        slots: Dict[str, List[Die]] = {"red": [], "blue": [], "green": []}
+        slots: Dict[str, List[Die]] = {"red": [], "blue": [], "green": [], "any": []}
         for idx, die in enumerate(surviving_active):
             face = die.effective_face or die.current_face
             if idx in new_commitments:
@@ -790,9 +820,12 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
                 elif s_color == ShieldColor.GREEN:
                     die.production_role = ProductionRole.GREEN_SHIELD
                     slots["green"].append(die)
+                elif s_color == ShieldColor.ANY:
+                    die.production_role = ProductionRole.ANY_SHIELD
+                    slots["any"].append(die)
                 else:
-                    die.production_role = ProductionRole.BLUE_SHIELD
-                    slots["blue"].append(die)
+                    die.production_role = ProductionRole.ANY_SHIELD
+                    slots["any"].append(die)
             else:
                 die.production_role = ProductionRole.INCOME
 

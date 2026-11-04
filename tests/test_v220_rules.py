@@ -314,10 +314,10 @@ class TestV220Rules(unittest.TestCase):
 
         execute_phase_2(engine, commitments)
 
-        # Paid $2 cash; remaining $2 unpaid leaks to Secrets: 8 - 2 = 6 Secrets
+        # Paid $2 cash; remaining $2 unpaid leaks flat 1 Secret under v0.31.0: 8 - 1 = 7 Secrets
         self.assertEqual(p0.money, 0)
         self.assertEqual(p0.patches, 5, "Patches cannot absorb cash-only ransom")
-        self.assertEqual(p0.secrets, 6)
+        self.assertEqual(p0.secrets, 7)
 
     def test_green_malware_glitches_in_production_die(self) -> None:
         """Verify unblocked Green moves 1 die from in_production_dice to glitched_dice."""
@@ -364,7 +364,7 @@ class TestV220Rules(unittest.TestCase):
         self.assertEqual(len(p0.glitched_dice), 0)
 
     def test_green_malware_destruction_fallback(self) -> None:
-        """Verify when in_production_dice is empty, unblocked Green destroys 1 die from Under Development."""
+        """Verify when in_production_dice is empty, unblocked Green fizzles with 0 penalty (v0.31.0 INV-MALWARE-FIZZLE-01)."""
         engine = GameEngine(config=GameConfig(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.ready_for_release_dice = []
@@ -382,8 +382,9 @@ class TestV220Rules(unittest.TestCase):
 
         execute_phase_2(engine, commitments)
 
-        self.assertEqual(len(p0.glitched_dice), 0)
-        self.assertEqual(len(p0.total_dice), 0)
+        # Under v0.31.0 Malware Fizzle, glitched die is preserved and NOT destroyed
+        self.assertEqual(len(p0.glitched_dice), 1)
+        self.assertEqual(len(p0.total_dice), 1)
 
     def test_green_glitched_die_forfeits_income(self) -> None:
         """Verify a die glitched by Green malware in Phase 2 yields 0 income in Phase 3."""

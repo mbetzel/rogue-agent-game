@@ -99,7 +99,8 @@ class TestWearAndDamage(unittest.TestCase):
         self.assertEqual(player.secrets, 5)
         self.assertFalse(player.is_patient_zero)
 
-        # Additional 5 unblocked Red: drains remaining 5 secrets to 0 -> Patient Zero
+        # Additional unblocked Red when player has 1 secret: flat 1 secret leak -> Patient Zero
+        player.secrets = 1
         engine._resolve_player_defense_and_wear(
             player=player,
             rolled_dice=[],
@@ -160,7 +161,7 @@ class TestWearAndDamage(unittest.TestCase):
 
         # 2 more unblocked Green cubes:
         # First moves the remaining in_production die to glitched (unpatched).
-        # Second has NO active dice left -> destroys 1 unpatched die from Under Development!
+        # Second has NO active dice left -> under v0.31.0 Malware Fizzle, 0 dice destroyed!
         engine._resolve_player_defense_and_wear(
             player=player,
             rolled_dice=[],
@@ -170,7 +171,7 @@ class TestWearAndDamage(unittest.TestCase):
             active_directive="NONE",
         )
         self.assertEqual(len(player.in_production_dice), 0)
-        self.assertEqual(len(player.unpatched_dice), 1)  # 2 were unpatched, 1 destroyed
+        self.assertEqual(len(player.unpatched_dice), 2)  # Both moved to unpatched, 0 destroyed
 
 
 if __name__ == "__main__":

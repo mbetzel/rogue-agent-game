@@ -45,6 +45,15 @@ class ProductionRole(str, Enum):
     RED_SHIELD = "RED_SHIELD"
     BLUE_SHIELD = "BLUE_SHIELD"
     GREEN_SHIELD = "GREEN_SHIELD"
+    ANY_SHIELD = "ANY_SHIELD"
+
+    @classmethod
+    def _missing_(cls, value: object) -> Any:
+        if isinstance(value, str):
+            for member in cls:
+                if member.value.lower() == value.lower():
+                    return member
+        return None
 
 
 @dataclass
@@ -500,14 +509,23 @@ class PlayerState:
         ]
 
     @property
+    def any_shield_dice(self) -> List[Die]:
+        """Modules in In Production actively assigned to Generic Any defense."""
+        return [
+            d for d in self.in_production_dice
+            if getattr(d, "production_role", None) == ProductionRole.ANY_SHIELD
+        ]
+
+    @property
     def shield_dice(self) -> List[Die]:
-        """All modules actively assigned to defense across Red, Blue, and Green."""
+        """All modules actively assigned to defense across Red, Blue, Green, and Any."""
         return [
             d for d in self.in_production_dice
             if getattr(d, "production_role", None) in (
                 ProductionRole.RED_SHIELD,
                 ProductionRole.BLUE_SHIELD,
                 ProductionRole.GREEN_SHIELD,
+                ProductionRole.ANY_SHIELD,
             )
         ]
 

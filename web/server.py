@@ -107,12 +107,14 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     if seed is not None:
                         seed = int(seed)
                     randomize_cards = bool(data.get("randomize_cards", False))
+                    enable_corporate_asymmetry = bool(data.get("enable_corporate_asymmetry", True))
 
                     state = self.controller.new_game(
                         num_players=num_players,
                         players_config=players_config,
                         seed=seed,
                         randomize_cards=randomize_cards,
+                        enable_corporate_asymmetry=enable_corporate_asymmetry,
                     )
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)

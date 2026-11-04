@@ -12,7 +12,7 @@
   <header class="app-header">
     <div class="brand-section">
       <div class="app-title">ROGUE AGENT</div>
-      <div class="version-badge">v0.28.0 RULES BASELINE</div>
+      <div class="version-badge">v0.31.0 RULES BASELINE</div>
     </div>
 
     <div class="game-status-bar">
@@ -118,6 +118,19 @@
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 8px;">
+        <label style="font-size: 0.85rem; color: var(--text-dim);">Client Company (Player 1):</label>
+        <select id="modalCompany" style="padding: 8px; background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); border-radius: 4px;">
+          <option value="RANDOM" selected>🎲 Random Deal (Standard Rules)</option>
+          <option value="HELIX">Helix Biomedical Consortium (Patent Lvl 1 [3 🔬 Cost], +2 🔬 Research)</option>
+          <option value="OMNIDYNE">Omnidyne Systems (Triage Lvl 1 [Bandwidth 3], Release Lvl 1 [Bandwidth 5])</option>
+          <option value="AEGIS">Aegis Defense Relay (Defense Lvl 1 [3 Shields Cap])</option>
+          <option value="MERIDIAN">Meridian Financial Trust (Banking Infrastructure / +$2 Starting Cash)</option>
+          <option value="DTO">Department of Telecommunications Oversight [DTO] (+1 Corporate Secret)</option>
+          <option value="PROMETHEUS">The Prometheus Foundation (-1 🔬 Upgrade Discount on all tracks)</option>
+        </select>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
         <label style="font-size: 0.85rem; color: var(--text-dim);">RNG Master Seed (Optional):</label>
         <input type="number" id="modalSeed" placeholder="Leave empty for random seed" style="padding: 8px; background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); border-radius: 4px;">
       </div>
@@ -127,13 +140,20 @@
         <label for="modalRandomizeCards" style="font-size: 0.85rem; color: #fff; cursor: pointer;">Randomize Variant (★) &amp; Version Cards (Standard Rules)</label>
       </div>
 
+      <div style="display: flex; align-items: center; gap: 8px; margin-top: 2px;">
+        <input type="checkbox" id="modalEnableAsym" checked style="cursor: pointer; width: 16px; height: 16px;">
+        <label for="modalEnableAsym" style="font-size: 0.85rem; color: #fff; cursor: pointer;">Enable Corporate Asymmetry &amp; Hardware Tracks (Standard Rules)</label>
+      </div>
+
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
         <button class="action-btn" onclick="closeModal('newGameModal')">Cancel</button>
         <button class="action-btn btn-accent" onclick="
           const count = parseInt(document.getElementById('modalPlayerCount').value, 10);
+          const company = document.getElementById('modalCompany').value;
           const seed = document.getElementById('modalSeed').value;
           const randomizeCards = document.getElementById('modalRandomizeCards').checked;
-          startNewGame(count, null, seed, randomizeCards);
+          const enableAsym = document.getElementById('modalEnableAsym').checked;
+          startNewGame(count, null, seed, randomizeCards, company, enableAsym);
         ">Launch Match</button>
       </div>
     </div>
@@ -162,25 +182,25 @@
         <div class="cube-effect-item">
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <span class="cube-badge red">Red (Ransomware)</span>
-            <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Red Shield</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Red Shield or Any Shield</span>
           </div>
-          <p>Extorts <strong>$1</strong> per unblocked cube. Cash-only: if cash is empty, unpaid ransom leaks proprietary code directly (lose <strong>1 Corporate Secret per $1 unpaid</strong>). Patches cannot absorb ransom.</p>
+          <p>Extorts <strong>$1</strong> per unblocked cube. If any unpaid ransom remains (shortfall > $0), lose a <strong>flat 1 Corporate Secret</strong> dark web leak fine. Patches cannot absorb ransom.</p>
         </div>
 
         <div class="cube-effect-item">
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <span class="cube-badge blue">Blue (Spyware)</span>
-            <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Blue Shield</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Blue Shield or Any Shield</span>
           </div>
           <p>Directly exfiltrates data: lose <strong>1 Corporate Secret</strong> per unblocked cube. Reaching <strong>0 (or fewer) Secrets</strong> immediately triggers a <strong>Total Data Breach (Patient Zero)</strong>!</p>
         </div>
 
         <div class="cube-effect-item">
           <div style="display: flex; align-items: center; justify-content: space-between;">
-            <span class="cube-badge green">Green (Malware)</span>
-            <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Green Shield</span>
+            <span class="cube-badge green">Malware (Logic Bombs)</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Green Shield or Any Shield</span>
           </div>
-          <p>Corrupts systems: for each unblocked cube, move <strong>1 die from In Production</strong> (Income dice first, then Shields) to your <strong>Glitched Box</strong> in Under Development. If In Production is empty, <strong>Destroy 1 die</strong> from Under Development!</p>
+          <p>Corrupts systems: for each unblocked cube, move <strong>1 active die from In Production</strong> (Income or Shields) to your <strong>Glitched Box</strong> in Under Development (or sacrifice a White Contractor). If In Production is empty, excess malware <strong>fizzles with 0 penalty</strong> (no dice destroyed)!</p>
         </div>
 
         <div class="cube-effect-item">

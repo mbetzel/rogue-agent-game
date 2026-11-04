@@ -86,7 +86,7 @@ class TestScoringAndWipeout(unittest.TestCase):
         )
         # Net score = -1 (overflow penalties only)
 
-        # Player 1: Money = 4, Breach = 3 (-3 penalty), Unfulfilled = 1 (-1 penalty)
+        # Player 1: Money = 4, Breach = 3 (-3 penalty), Unfulfilled destructions excised in v0.31.0
         p1 = PlayerState(
             player_id=1,
             bot=self.bot1,
@@ -99,7 +99,7 @@ class TestScoringAndWipeout(unittest.TestCase):
             unfulfilled_destructions=1,
             ready_dice=[create_colored_die(DieColor.YELLOW, 2)],  # 0 VP
         )
-        # Net score = -4 (overflow penalties only)
+        # Net score = -3 (overflow penalties only)
 
         engine = GameEngine(self.config, [self.bot0, self.bot1], seed=42)
         engine.state.players = [p0, p1]
@@ -113,8 +113,8 @@ class TestScoringAndWipeout(unittest.TestCase):
         self.assertEqual(r0["overflow_penalties"], -1)
         self.assertEqual(r0["net_score"], -1)
 
-        self.assertEqual(r1["overflow_penalties"], -4)
-        self.assertEqual(r1["net_score"], -4)
+        self.assertEqual(r1["overflow_penalties"], -3)
+        self.assertEqual(r1["net_score"], -3)
 
         self.assertEqual(res.rankings[0]["player_id"], 0)
         self.assertEqual(res.rankings[1]["player_id"], 1)
@@ -339,17 +339,17 @@ class TestScoringAndWipeout(unittest.TestCase):
         r0 = [r for r in res.rankings if r["player_id"] == 0][0]
         r1 = [r for r in res.rankings if r["player_id"] == 1][0]
 
-        # P0: breach depth 1 (-1) + unfulfilled destructions 2 (-2) = -3
-        self.assertEqual(r0["overflow_penalties"], -3)
-        self.assertEqual(r0["net_score"], -3)  # Absolutely no dice or cash bonuses added!
+        # P0: breach depth 1 (-1), unfulfilled destructions excised in v0.31.0 = -1
+        self.assertEqual(r0["overflow_penalties"], -1)
+        self.assertEqual(r0["net_score"], -1)  # Absolutely no dice or cash bonuses added!
 
-        # P1: breach depth 2 (-2) + unfulfilled 0 = -2
+        # P1: breach depth 2 (-2) = -2
         self.assertEqual(r1["overflow_penalties"], -2)
         self.assertEqual(r1["net_score"], -2)
 
-        # P1 has higher (less negative) net score (-2 vs -3), so P1 ranks first
-        self.assertEqual(res.rankings[0]["player_id"], 1)
-        self.assertEqual(res.rankings[1]["player_id"], 0)
+        # P0 has higher (less negative) net score (-1 vs -2), so P0 ranks first
+        self.assertEqual(res.rankings[0]["player_id"], 0)
+        self.assertEqual(res.rankings[1]["player_id"], 1)
 
     def test_total_wipeout_hierarchical_tiebreakers(self) -> None:
         """In total wipeout with tied net_score, differentiate by secrets, unfulfilled_destructions, money, colored dice, patches, unpatched."""

@@ -1,7 +1,7 @@
 %PDF-1.4
 %‚„œ”
 1 0 obj
-<< /Title (Too Many Secrets - Player Terminal Mats & Split Cards \(v0.30.0\)) /Producer (Too Many Secrets Vector PnP Engine) >>
+<< /Title (Too Many Secrets - Player Terminal Mats & Split Cards \(v0.31.0\)) /Producer (Too Many Secrets Vector PnP Engine) >>
 endobj
 2 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
@@ -25,7 +25,7 @@ endobj
 << /Type /Pages /Kids [10 0 R 12 0 R 14 0 R 16 0 R 18 0 R 20 0 R] /Count 6 >>
 endobj
 9 0 obj
-<< /Length 94590 >>
+<< /Length 95317 >>
 stream
 q
 0.0588 0.0902 0.1647 RG
@@ -67,7 +67,7 @@ BT /F5 6.50 Tf 28.00 595.00 Td (TOO MANY SECRETS // CONSULTANCY TERMINAL [TERM-0
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.30.0 // US LETTER) Tj ET
+BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.31.0 // US LETTER) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 RG
@@ -1979,7 +1979,7 @@ BT /F1 6.20 Tf 276.00 554.00 Td (Phase 1: Roll Ready + Hired Contractors \($1/$2
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 6.00 Tf 276.00 543.00 Td (Assign surviving dice to In Production \(Shields up to Defense Capacity; remainder to Income\).) Tj ET
+BT /F1 6.00 Tf 276.00 543.00 Td (Assign surviving dice to In Production \(Color & Any Shields up to Defense Capacity; remainder to Income\).) Tj ET
 Q
 q
 0.7961 0.8353 0.8824 RG
@@ -2856,71 +2856,79 @@ BT /F1 6.80 Tf 407.01 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 408.90 376.00 Td (\(Red,) Tj ET
+BT /F1 6.80 Tf 408.90 376.00 Td (\(Color) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 425.52 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 427.41 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 427.41 376.00 Td (Blue,) Tj ET
+BT /F1 6.80 Tf 429.30 376.00 Td (&) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 442.91 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 433.83 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 444.80 376.00 Td (Green) Tj ET
+BT /F1 6.80 Tf 435.72 376.00 Td (Any) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 463.70 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 447.44 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 465.59 376.00 Td (Shields) Tj ET
+BT /F1 6.80 Tf 449.33 376.00 Td (Shields) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 487.89 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 471.63 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 489.78 376.00 Td (--) Tj ET
+BT /F1 6.80 Tf 473.52 376.00 Td (--) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 494.31 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 478.05 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 496.20 376.00 Td (Committed) Tj ET
+BT /F1 6.80 Tf 479.94 376.00 Td (Committed) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 529.07 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 512.81 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 530.96 376.00 Td (in) Tj ET
+BT /F1 6.80 Tf 514.70 376.00 Td (up) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 536.25 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 522.26 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 538.14 376.00 Td (Step) Tj ET
+BT /F1 6.80 Tf 524.15 376.00 Td (to) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 552.13 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 529.82 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 554.02 376.00 Td (5\)) Tj ET
+BT /F1 6.80 Tf 531.71 376.00 Td (Defense) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.80 Tf 557.04 376.00 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.80 Tf 558.93 376.00 Td (Capacity\)) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
@@ -2996,23 +3004,31 @@ BT /F1 5.80 Tf 422.18 332.00 Td (unblocked) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 397.60 321.00 Td (Unpaid:) Tj ET
+BT /F1 5.20 Tf 392.11 321.00 Td (Shortfall:) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 415.52 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 412.63 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 416.97 321.00 Td (-1) Tj ET
+BT /F1 5.20 Tf 414.08 321.00 Td (-1) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 421.59 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 418.70 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 423.04 321.00 Td (Secret) Tj ET
+BT /F1 5.20 Tf 420.14 321.00 Td (Secret) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 5.20 Tf 435.17 321.00 Td ( ) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 5.20 Tf 436.62 321.00 Td (flat) Tj ET
 Q
 q
 0.7765 0.1569 0.1569 RG
@@ -3202,59 +3218,75 @@ BT /F2 6.40 Tf 657.16 344.00 Td (Blocks Malware) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F1 5.80 Tf 649.90 332.00 Td (Unblocked:) Tj ET
+BT /F1 5.80 Tf 650.54 332.00 Td (Glitch) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F1 5.80 Tf 678.91 332.00 Td ( ) Tj ET
+BT /F1 5.80 Tf 665.37 332.00 Td ( ) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 680.52 332.00 Td (Glitch) Tj ET
+BT /F1 5.80 Tf 666.98 332.00 Td (1) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 696.96 332.00 Td ( ) Tj ET
+BT /F1 5.80 Tf 670.20 332.00 Td ( ) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 698.57 332.00 Td (1) Tj ET
+BT /F1 5.80 Tf 671.82 332.00 Td (Die) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 701.80 332.00 Td ( ) Tj ET
+BT /F1 5.80 Tf 680.52 332.00 Td ( ) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 703.41 332.00 Td (Die) Tj ET
+BT /F1 5.80 Tf 682.13 332.00 Td (/) Tj ET
+Q
+q
+0.1804 0.4902 0.1961 rg
+BT /F1 5.80 Tf 683.74 332.00 Td ( ) Tj ET
+Q
+q
+0.1804 0.4902 0.1961 rg
+BT /F1 5.80 Tf 685.35 332.00 Td (unblocked) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 655.08 321.00 Td (Income) Tj ET
+BT /F1 5.20 Tf 649.67 321.00 Td (Empty) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 672.13 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 664.41 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 673.58 321.00 Td (1st) Tj ET
+BT /F1 5.20 Tf 665.85 321.00 Td (Prod:) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 680.52 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 678.28 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 681.96 321.00 Td (->) Tj ET
+BT /F1 5.20 Tf 679.73 321.00 Td (0) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 686.73 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 682.62 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 688.18 321.00 Td (Glitched) Tj ET
+BT /F1 5.20 Tf 684.06 321.00 Td (loss) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 5.20 Tf 693.31 321.00 Td ( ) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 5.20 Tf 694.75 321.00 Td (\(fizzles\)) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 RG
@@ -3407,31 +3439,39 @@ BT /F2 5.40 Tf 377.21 208.00 Td (Shields) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 361.00 202.00 Td (Default) Tj ET
+BT /F1 4.60 Tf 361.00 202.00 Td (Accommodates) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 375.57 202.00 Td ( ) Tj ET
+BT /F1 4.60 Tf 392.70 202.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 376.85 202.00 Td (shield) Tj ET
+BT /F1 4.60 Tf 393.98 202.00 Td (Color) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 388.87 202.00 Td ( ) Tj ET
+BT /F1 4.60 Tf 404.97 202.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 390.15 202.00 Td (capacity) Tj ET
+BT /F1 4.60 Tf 406.25 202.00 Td (&) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 407.02 202.00 Td ( ) Tj ET
+BT /F1 4.60 Tf 409.31 202.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 408.30 202.00 Td (baseline) Tj ET
+BT /F1 4.60 Tf 410.59 202.00 Td (Any) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 4.60 Tf 418.52 202.00 Td ( ) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 4.60 Tf 419.80 202.00 Td (shields) Tj ET
 Q
 q
 0.4157 0.1059 0.6039 RG
@@ -4328,7 +4368,7 @@ endobj
 << /Type /Page /Parent 8 0 R /MediaBox [0 0 792.00 612.00] /Resources 7 0 R /Contents 9 0 R >>
 endobj
 11 0 obj
-<< /Length 94445 >>
+<< /Length 95172 >>
 stream
 q
 0.0588 0.0902 0.1647 RG
@@ -4370,7 +4410,7 @@ BT /F5 6.50 Tf 28.00 595.00 Td (TOO MANY SECRETS // CONSULTANCY TERMINAL [TERM-0
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.30.0 // US LETTER) Tj ET
+BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.31.0 // US LETTER) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 RG
@@ -6274,7 +6314,7 @@ BT /F1 6.20 Tf 276.00 554.00 Td (Phase 1: Roll Ready + Hired Contractors \($1/$2
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 6.00 Tf 276.00 543.00 Td (Assign surviving dice to In Production \(Shields up to Defense Capacity; remainder to Income\).) Tj ET
+BT /F1 6.00 Tf 276.00 543.00 Td (Assign surviving dice to In Production \(Color & Any Shields up to Defense Capacity; remainder to Income\).) Tj ET
 Q
 q
 0.7961 0.8353 0.8824 RG
@@ -7151,71 +7191,79 @@ BT /F1 6.80 Tf 407.01 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 408.90 376.00 Td (\(Red,) Tj ET
+BT /F1 6.80 Tf 408.90 376.00 Td (\(Color) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 425.52 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 427.41 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 427.41 376.00 Td (Blue,) Tj ET
+BT /F1 6.80 Tf 429.30 376.00 Td (&) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 442.91 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 433.83 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 444.80 376.00 Td (Green) Tj ET
+BT /F1 6.80 Tf 435.72 376.00 Td (Any) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 463.70 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 447.44 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 465.59 376.00 Td (Shields) Tj ET
+BT /F1 6.80 Tf 449.33 376.00 Td (Shields) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 487.89 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 471.63 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 489.78 376.00 Td (--) Tj ET
+BT /F1 6.80 Tf 473.52 376.00 Td (--) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 494.31 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 478.05 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 496.20 376.00 Td (Committed) Tj ET
+BT /F1 6.80 Tf 479.94 376.00 Td (Committed) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 529.07 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 512.81 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 530.96 376.00 Td (in) Tj ET
+BT /F1 6.80 Tf 514.70 376.00 Td (up) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 536.25 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 522.26 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 538.14 376.00 Td (Step) Tj ET
+BT /F1 6.80 Tf 524.15 376.00 Td (to) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 552.13 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 529.82 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 554.02 376.00 Td (5\)) Tj ET
+BT /F1 6.80 Tf 531.71 376.00 Td (Defense) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.80 Tf 557.04 376.00 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.80 Tf 558.93 376.00 Td (Capacity\)) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
@@ -7291,23 +7339,31 @@ BT /F1 5.80 Tf 422.18 332.00 Td (unblocked) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 397.60 321.00 Td (Unpaid:) Tj ET
+BT /F1 5.20 Tf 392.11 321.00 Td (Shortfall:) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 415.52 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 412.63 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 416.97 321.00 Td (-1) Tj ET
+BT /F1 5.20 Tf 414.08 321.00 Td (-1) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 421.59 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 418.70 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 423.04 321.00 Td (Secret) Tj ET
+BT /F1 5.20 Tf 420.14 321.00 Td (Secret) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 5.20 Tf 435.17 321.00 Td ( ) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 5.20 Tf 436.62 321.00 Td (flat) Tj ET
 Q
 q
 0.7765 0.1569 0.1569 RG
@@ -7497,59 +7553,75 @@ BT /F2 6.40 Tf 657.16 344.00 Td (Blocks Malware) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F1 5.80 Tf 649.90 332.00 Td (Unblocked:) Tj ET
+BT /F1 5.80 Tf 650.54 332.00 Td (Glitch) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F1 5.80 Tf 678.91 332.00 Td ( ) Tj ET
+BT /F1 5.80 Tf 665.37 332.00 Td ( ) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 680.52 332.00 Td (Glitch) Tj ET
+BT /F1 5.80 Tf 666.98 332.00 Td (1) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 696.96 332.00 Td ( ) Tj ET
+BT /F1 5.80 Tf 670.20 332.00 Td ( ) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 698.57 332.00 Td (1) Tj ET
+BT /F1 5.80 Tf 671.82 332.00 Td (Die) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 701.80 332.00 Td ( ) Tj ET
+BT /F1 5.80 Tf 680.52 332.00 Td ( ) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 703.41 332.00 Td (Die) Tj ET
+BT /F1 5.80 Tf 682.13 332.00 Td (/) Tj ET
+Q
+q
+0.1804 0.4902 0.1961 rg
+BT /F1 5.80 Tf 683.74 332.00 Td ( ) Tj ET
+Q
+q
+0.1804 0.4902 0.1961 rg
+BT /F1 5.80 Tf 685.35 332.00 Td (unblocked) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 655.08 321.00 Td (Income) Tj ET
+BT /F1 5.20 Tf 649.67 321.00 Td (Empty) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 672.13 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 664.41 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 673.58 321.00 Td (1st) Tj ET
+BT /F1 5.20 Tf 665.85 321.00 Td (Prod:) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 680.52 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 678.28 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 681.96 321.00 Td (->) Tj ET
+BT /F1 5.20 Tf 679.73 321.00 Td (0) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 686.73 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 682.62 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 688.18 321.00 Td (Glitched) Tj ET
+BT /F1 5.20 Tf 684.06 321.00 Td (loss) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 5.20 Tf 693.31 321.00 Td ( ) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 5.20 Tf 694.75 321.00 Td (\(fizzles\)) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 RG
@@ -7702,31 +7774,39 @@ BT /F2 5.40 Tf 377.21 208.00 Td (Shields) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 361.00 202.00 Td (Default) Tj ET
+BT /F1 4.60 Tf 361.00 202.00 Td (Accommodates) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 375.57 202.00 Td ( ) Tj ET
+BT /F1 4.60 Tf 392.70 202.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 376.85 202.00 Td (shield) Tj ET
+BT /F1 4.60 Tf 393.98 202.00 Td (Color) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 388.87 202.00 Td ( ) Tj ET
+BT /F1 4.60 Tf 404.97 202.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 390.15 202.00 Td (capacity) Tj ET
+BT /F1 4.60 Tf 406.25 202.00 Td (&) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 407.02 202.00 Td ( ) Tj ET
+BT /F1 4.60 Tf 409.31 202.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 408.30 202.00 Td (baseline) Tj ET
+BT /F1 4.60 Tf 410.59 202.00 Td (Any) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 4.60 Tf 418.52 202.00 Td ( ) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 4.60 Tf 419.80 202.00 Td (shields) Tj ET
 Q
 q
 0.4157 0.1059 0.6039 RG
@@ -8623,7 +8703,7 @@ endobj
 << /Type /Page /Parent 8 0 R /MediaBox [0 0 792.00 612.00] /Resources 7 0 R /Contents 11 0 R >>
 endobj
 13 0 obj
-<< /Length 94586 >>
+<< /Length 95313 >>
 stream
 q
 0.0588 0.0902 0.1647 RG
@@ -8665,7 +8745,7 @@ BT /F5 6.50 Tf 28.00 595.00 Td (TOO MANY SECRETS // CONSULTANCY TERMINAL [TERM-0
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.30.0 // US LETTER) Tj ET
+BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.31.0 // US LETTER) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 RG
@@ -10577,7 +10657,7 @@ BT /F1 6.20 Tf 276.00 554.00 Td (Phase 1: Roll Ready + Hired Contractors \($1/$2
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 6.00 Tf 276.00 543.00 Td (Assign surviving dice to In Production \(Shields up to Defense Capacity; remainder to Income\).) Tj ET
+BT /F1 6.00 Tf 276.00 543.00 Td (Assign surviving dice to In Production \(Color & Any Shields up to Defense Capacity; remainder to Income\).) Tj ET
 Q
 q
 0.7961 0.8353 0.8824 RG
@@ -11454,71 +11534,79 @@ BT /F1 6.80 Tf 407.01 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 408.90 376.00 Td (\(Red,) Tj ET
+BT /F1 6.80 Tf 408.90 376.00 Td (\(Color) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 425.52 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 427.41 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 427.41 376.00 Td (Blue,) Tj ET
+BT /F1 6.80 Tf 429.30 376.00 Td (&) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 442.91 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 433.83 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 444.80 376.00 Td (Green) Tj ET
+BT /F1 6.80 Tf 435.72 376.00 Td (Any) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 463.70 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 447.44 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 465.59 376.00 Td (Shields) Tj ET
+BT /F1 6.80 Tf 449.33 376.00 Td (Shields) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 487.89 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 471.63 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 489.78 376.00 Td (--) Tj ET
+BT /F1 6.80 Tf 473.52 376.00 Td (--) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 494.31 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 478.05 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 496.20 376.00 Td (Committed) Tj ET
+BT /F1 6.80 Tf 479.94 376.00 Td (Committed) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 529.07 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 512.81 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 530.96 376.00 Td (in) Tj ET
+BT /F1 6.80 Tf 514.70 376.00 Td (up) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 536.25 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 522.26 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 538.14 376.00 Td (Step) Tj ET
+BT /F1 6.80 Tf 524.15 376.00 Td (to) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 552.13 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 529.82 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 554.02 376.00 Td (5\)) Tj ET
+BT /F1 6.80 Tf 531.71 376.00 Td (Defense) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.80 Tf 557.04 376.00 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.80 Tf 558.93 376.00 Td (Capacity\)) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
@@ -11594,23 +11682,31 @@ BT /F1 5.80 Tf 422.18 332.00 Td (unblocked) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 397.60 321.00 Td (Unpaid:) Tj ET
+BT /F1 5.20 Tf 392.11 321.00 Td (Shortfall:) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 415.52 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 412.63 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 416.97 321.00 Td (-1) Tj ET
+BT /F1 5.20 Tf 414.08 321.00 Td (-1) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 421.59 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 418.70 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 423.04 321.00 Td (Secret) Tj ET
+BT /F1 5.20 Tf 420.14 321.00 Td (Secret) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 5.20 Tf 435.17 321.00 Td ( ) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 5.20 Tf 436.62 321.00 Td (flat) Tj ET
 Q
 q
 0.7765 0.1569 0.1569 RG
@@ -11800,59 +11896,75 @@ BT /F2 6.40 Tf 657.16 344.00 Td (Blocks Malware) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F1 5.80 Tf 649.90 332.00 Td (Unblocked:) Tj ET
+BT /F1 5.80 Tf 650.54 332.00 Td (Glitch) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F1 5.80 Tf 678.91 332.00 Td ( ) Tj ET
+BT /F1 5.80 Tf 665.37 332.00 Td ( ) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 680.52 332.00 Td (Glitch) Tj ET
+BT /F1 5.80 Tf 666.98 332.00 Td (1) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 696.96 332.00 Td ( ) Tj ET
+BT /F1 5.80 Tf 670.20 332.00 Td ( ) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 698.57 332.00 Td (1) Tj ET
+BT /F1 5.80 Tf 671.82 332.00 Td (Die) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 701.80 332.00 Td ( ) Tj ET
+BT /F1 5.80 Tf 680.52 332.00 Td ( ) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 703.41 332.00 Td (Die) Tj ET
+BT /F1 5.80 Tf 682.13 332.00 Td (/) Tj ET
+Q
+q
+0.1804 0.4902 0.1961 rg
+BT /F1 5.80 Tf 683.74 332.00 Td ( ) Tj ET
+Q
+q
+0.1804 0.4902 0.1961 rg
+BT /F1 5.80 Tf 685.35 332.00 Td (unblocked) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 655.08 321.00 Td (Income) Tj ET
+BT /F1 5.20 Tf 649.67 321.00 Td (Empty) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 672.13 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 664.41 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 673.58 321.00 Td (1st) Tj ET
+BT /F1 5.20 Tf 665.85 321.00 Td (Prod:) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 680.52 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 678.28 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 681.96 321.00 Td (->) Tj ET
+BT /F1 5.20 Tf 679.73 321.00 Td (0) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 686.73 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 682.62 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 688.18 321.00 Td (Glitched) Tj ET
+BT /F1 5.20 Tf 684.06 321.00 Td (loss) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 5.20 Tf 693.31 321.00 Td ( ) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 5.20 Tf 694.75 321.00 Td (\(fizzles\)) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 RG
@@ -12005,31 +12117,39 @@ BT /F2 5.40 Tf 377.21 208.00 Td (Shields) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 361.00 202.00 Td (Default) Tj ET
+BT /F1 4.60 Tf 361.00 202.00 Td (Accommodates) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 375.57 202.00 Td ( ) Tj ET
+BT /F1 4.60 Tf 392.70 202.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 376.85 202.00 Td (shield) Tj ET
+BT /F1 4.60 Tf 393.98 202.00 Td (Color) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 388.87 202.00 Td ( ) Tj ET
+BT /F1 4.60 Tf 404.97 202.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 390.15 202.00 Td (capacity) Tj ET
+BT /F1 4.60 Tf 406.25 202.00 Td (&) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 407.02 202.00 Td ( ) Tj ET
+BT /F1 4.60 Tf 409.31 202.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 408.30 202.00 Td (baseline) Tj ET
+BT /F1 4.60 Tf 410.59 202.00 Td (Any) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 4.60 Tf 418.52 202.00 Td ( ) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 4.60 Tf 419.80 202.00 Td (shields) Tj ET
 Q
 q
 0.4157 0.1059 0.6039 RG
@@ -12926,7 +13046,7 @@ endobj
 << /Type /Page /Parent 8 0 R /MediaBox [0 0 792.00 612.00] /Resources 7 0 R /Contents 13 0 R >>
 endobj
 15 0 obj
-<< /Length 94726 >>
+<< /Length 95453 >>
 stream
 q
 0.0588 0.0902 0.1647 RG
@@ -12968,7 +13088,7 @@ BT /F5 6.50 Tf 28.00 595.00 Td (TOO MANY SECRETS // CONSULTANCY TERMINAL [TERM-0
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.30.0 // US LETTER) Tj ET
+BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.31.0 // US LETTER) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 RG
@@ -14888,7 +15008,7 @@ BT /F1 6.20 Tf 276.00 554.00 Td (Phase 1: Roll Ready + Hired Contractors \($1/$2
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 6.00 Tf 276.00 543.00 Td (Assign surviving dice to In Production \(Shields up to Defense Capacity; remainder to Income\).) Tj ET
+BT /F1 6.00 Tf 276.00 543.00 Td (Assign surviving dice to In Production \(Color & Any Shields up to Defense Capacity; remainder to Income\).) Tj ET
 Q
 q
 0.7961 0.8353 0.8824 RG
@@ -15765,71 +15885,79 @@ BT /F1 6.80 Tf 407.01 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 408.90 376.00 Td (\(Red,) Tj ET
+BT /F1 6.80 Tf 408.90 376.00 Td (\(Color) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 425.52 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 427.41 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 427.41 376.00 Td (Blue,) Tj ET
+BT /F1 6.80 Tf 429.30 376.00 Td (&) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 442.91 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 433.83 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 444.80 376.00 Td (Green) Tj ET
+BT /F1 6.80 Tf 435.72 376.00 Td (Any) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 463.70 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 447.44 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 465.59 376.00 Td (Shields) Tj ET
+BT /F1 6.80 Tf 449.33 376.00 Td (Shields) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 487.89 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 471.63 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 489.78 376.00 Td (--) Tj ET
+BT /F1 6.80 Tf 473.52 376.00 Td (--) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 494.31 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 478.05 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 496.20 376.00 Td (Committed) Tj ET
+BT /F1 6.80 Tf 479.94 376.00 Td (Committed) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 529.07 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 512.81 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 530.96 376.00 Td (in) Tj ET
+BT /F1 6.80 Tf 514.70 376.00 Td (up) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 536.25 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 522.26 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 538.14 376.00 Td (Step) Tj ET
+BT /F1 6.80 Tf 524.15 376.00 Td (to) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 552.13 376.00 Td ( ) Tj ET
+BT /F1 6.80 Tf 529.82 376.00 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.80 Tf 554.02 376.00 Td (5\)) Tj ET
+BT /F1 6.80 Tf 531.71 376.00 Td (Defense) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.80 Tf 557.04 376.00 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.80 Tf 558.93 376.00 Td (Capacity\)) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
@@ -15905,23 +16033,31 @@ BT /F1 5.80 Tf 422.18 332.00 Td (unblocked) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 397.60 321.00 Td (Unpaid:) Tj ET
+BT /F1 5.20 Tf 392.11 321.00 Td (Shortfall:) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 415.52 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 412.63 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 416.97 321.00 Td (-1) Tj ET
+BT /F1 5.20 Tf 414.08 321.00 Td (-1) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 421.59 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 418.70 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 423.04 321.00 Td (Secret) Tj ET
+BT /F1 5.20 Tf 420.14 321.00 Td (Secret) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 5.20 Tf 435.17 321.00 Td ( ) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 5.20 Tf 436.62 321.00 Td (flat) Tj ET
 Q
 q
 0.7765 0.1569 0.1569 RG
@@ -16111,59 +16247,75 @@ BT /F2 6.40 Tf 657.16 344.00 Td (Blocks Malware) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F1 5.80 Tf 649.90 332.00 Td (Unblocked:) Tj ET
+BT /F1 5.80 Tf 650.54 332.00 Td (Glitch) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F1 5.80 Tf 678.91 332.00 Td ( ) Tj ET
+BT /F1 5.80 Tf 665.37 332.00 Td ( ) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 680.52 332.00 Td (Glitch) Tj ET
+BT /F1 5.80 Tf 666.98 332.00 Td (1) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 696.96 332.00 Td ( ) Tj ET
+BT /F1 5.80 Tf 670.20 332.00 Td ( ) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 698.57 332.00 Td (1) Tj ET
+BT /F1 5.80 Tf 671.82 332.00 Td (Die) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 701.80 332.00 Td ( ) Tj ET
+BT /F1 5.80 Tf 680.52 332.00 Td ( ) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 rg
-BT /F2 5.80 Tf 703.41 332.00 Td (Die) Tj ET
+BT /F1 5.80 Tf 682.13 332.00 Td (/) Tj ET
+Q
+q
+0.1804 0.4902 0.1961 rg
+BT /F1 5.80 Tf 683.74 332.00 Td ( ) Tj ET
+Q
+q
+0.1804 0.4902 0.1961 rg
+BT /F1 5.80 Tf 685.35 332.00 Td (unblocked) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 655.08 321.00 Td (Income) Tj ET
+BT /F1 5.20 Tf 649.67 321.00 Td (Empty) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 672.13 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 664.41 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 673.58 321.00 Td (1st) Tj ET
+BT /F1 5.20 Tf 665.85 321.00 Td (Prod:) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 680.52 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 678.28 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 681.96 321.00 Td (->) Tj ET
+BT /F1 5.20 Tf 679.73 321.00 Td (0) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 686.73 321.00 Td ( ) Tj ET
+BT /F1 5.20 Tf 682.62 321.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 5.20 Tf 688.18 321.00 Td (Glitched) Tj ET
+BT /F1 5.20 Tf 684.06 321.00 Td (loss) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 5.20 Tf 693.31 321.00 Td ( ) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 5.20 Tf 694.75 321.00 Td (\(fizzles\)) Tj ET
 Q
 q
 0.1804 0.4902 0.1961 RG
@@ -16316,31 +16468,39 @@ BT /F2 5.40 Tf 377.21 208.00 Td (Shields) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 361.00 202.00 Td (Default) Tj ET
+BT /F1 4.60 Tf 361.00 202.00 Td (Accommodates) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 375.57 202.00 Td ( ) Tj ET
+BT /F1 4.60 Tf 392.70 202.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 376.85 202.00 Td (shield) Tj ET
+BT /F1 4.60 Tf 393.98 202.00 Td (Color) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 388.87 202.00 Td ( ) Tj ET
+BT /F1 4.60 Tf 404.97 202.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 390.15 202.00 Td (capacity) Tj ET
+BT /F1 4.60 Tf 406.25 202.00 Td (&) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 407.02 202.00 Td ( ) Tj ET
+BT /F1 4.60 Tf 409.31 202.00 Td ( ) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F1 4.60 Tf 408.30 202.00 Td (baseline) Tj ET
+BT /F1 4.60 Tf 410.59 202.00 Td (Any) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 4.60 Tf 418.52 202.00 Td ( ) Tj ET
+Q
+q
+0.3922 0.4549 0.5451 rg
+BT /F1 4.60 Tf 419.80 202.00 Td (shields) Tj ET
 Q
 q
 0.4157 0.1059 0.6039 RG
@@ -17237,7 +17397,7 @@ endobj
 << /Type /Page /Parent 8 0 R /MediaBox [0 0 792.00 612.00] /Resources 7 0 R /Contents 15 0 R >>
 endobj
 17 0 obj
-<< /Length 96944 >>
+<< /Length 97848 >>
 stream
 q
 0.0588 0.0902 0.1647 RG
@@ -17279,7 +17439,7 @@ BT /F5 6.50 Tf 28.00 595.00 Td (TOO MANY SECRETS // 6x CLIENT COMPANY CARDS [PAG
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.30.0 // US LETTER) Tj ET
+BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.31.0 // US LETTER) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
@@ -21664,333 +21824,345 @@ BT /F2 6.40 Tf 77.59 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 6.40 Tf 79.37 91.80 Td (Switch) Tj ET
+BT /F2 6.40 Tf 79.37 91.80 Td (Transition) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 6.40 Tf 100.00 91.80 Td ( ) Tj ET
+BT /F2 6.40 Tf 110.31 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 6.40 Tf 101.78 91.80 Td (Timing:) Tj ET
+BT /F2 6.40 Tf 112.09 91.80 Td (Timing:) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 124.89 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 135.20 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 126.67 91.80 Td (When) Tj ET
+BT /F1 6.40 Tf 136.98 91.80 Td (When) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 143.38 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 153.69 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 145.16 91.80 Td (SETEC) Tj ET
+BT /F1 6.40 Tf 155.47 91.80 Td (SETEC's) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 166.50 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 181.23 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 168.28 91.80 Td (compiles) Tj ET
+BT /F1 6.40 Tf 183.01 91.80 Td (corruption) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 193.53 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 211.47 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 195.31 91.80 Td (to) Tj ET
+BT /F1 6.40 Tf 213.25 91.80 Td (track) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 200.64 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 227.12 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 202.42 91.80 Td (a) Tj ET
+BT /F1 6.40 Tf 228.89 91.80 Td (fills) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 205.98 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 238.14 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 207.76 91.80 Td (new) Tj ET
+BT /F1 6.40 Tf 239.92 91.80 Td (in) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 219.50 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 244.89 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 221.28 91.80 Td (version) Tj ET
+BT /F1 6.40 Tf 246.67 91.80 Td (Phase) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 241.91 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 264.82 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 243.68 91.80 Td (\(in) Tj ET
+BT /F1 6.40 Tf 266.60 91.80 Td (2) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 250.80 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 270.16 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 252.57 91.80 Td (Phase) Tj ET
+BT /F1 6.40 Tf 271.93 91.80 Td (Step) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 270.72 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 285.10 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 272.50 91.80 Td (2) Tj ET
+BT /F1 6.40 Tf 286.88 91.80 Td (2A,) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 276.06 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 296.48 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 277.84 91.80 Td (Step) Tj ET
+BT /F1 6.40 Tf 298.26 91.80 Td (the) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 291.00 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 307.16 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 292.78 91.80 Td (2A\),) Tj ET
+BT /F1 6.40 Tf 308.94 91.80 Td (active) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 304.52 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 325.66 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 306.30 91.80 Td (the) Tj ET
+BT /F1 6.40 Tf 327.44 91.80 Td (version) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 315.19 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 348.06 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 316.97 91.80 Td (version) Tj ET
+BT /F1 6.40 Tf 349.84 91.80 Td (remains) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 337.60 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 372.60 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 339.38 91.80 Td (tile) Tj ET
+BT /F1 6.40 Tf 374.38 91.80 Td (current) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 347.56 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 394.30 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 349.34 91.80 Td (switches) Tj ET
+BT /F1 6.40 Tf 396.08 91.80 Td (for) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 373.87 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 403.54 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 375.65 91.80 Td (immediately.) Tj ET
+BT /F1 6.40 Tf 405.32 91.80 Td (the) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 411.57 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 414.22 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 413.35 91.80 Td (Excess) Tj ET
+BT /F1 6.40 Tf 416.00 91.80 Td (rest) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 433.98 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 426.67 91.80 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 428.45 91.80 Td (of) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 433.78 91.80 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 435.56 91.80 Td (the) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 444.46 91.80 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 446.24 91.80 Td (round.) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 464.38 91.80 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 466.16 91.80 Td (Defensive) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 494.62 91.80 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 496.40 91.80 Td (and) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 507.07 91.80 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 508.85 91.80 Td (operational) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 540.51 91.80 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 542.29 91.80 Td (overrides) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 568.61 91.80 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 570.39 91.80 Td (remain) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 589.94 91.80 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 591.72 91.80 Td (usable) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 610.58 91.80 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 612.36 91.80 Td (through) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 634.06 91.80 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 635.84 91.80 Td (P2B) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 647.93 91.80 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 649.71 91.80 Td (and) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 660.39 91.80 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 662.17 91.80 Td (P3.) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 671.77 91.80 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 673.55 91.80 Td (Excess) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 694.18 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 RG
 0.600 w
 0.0667 0.0941 0.1529 rg
-436.76 91.40 5.16 5.16 re B
+696.96 91.40 5.16 5.16 re B
 Q
 q
 1.0000 1.0000 1.0000 rg
-439.34 94.80 m 439.80 94.80 440.16 94.43 440.16 93.98 c 440.16 93.52 439.80 93.15 439.34 93.15 c 438.88 93.15 438.51 93.52 438.51 93.98 c 438.51 94.43 438.88 94.80 439.34 94.80 c h f
+699.54 94.80 m 700.00 94.80 700.37 94.43 700.37 93.98 c 700.37 93.52 700.00 93.15 699.54 93.15 c 699.09 93.15 698.72 93.52 698.72 93.98 c 698.72 94.43 699.09 94.80 699.54 94.80 c h f
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 442.92 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 703.13 91.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 444.70 91.80 Td (corruption) Tj ET
+BT /F1 6.40 Tf 704.91 91.80 Td (cubes) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 473.16 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 47.00 83.20 Td (immediately) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 474.94 91.80 Td (cubes) Tj ET
+BT /F1 6.40 Tf 81.14 83.20 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 492.01 91.80 Td ( ) Tj ET
+BT /F2 6.40 Tf 82.92 83.20 Td (spill) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 493.79 91.80 Td (immediately) Tj ET
+BT /F2 6.40 Tf 95.72 83.20 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 527.93 91.80 Td ( ) Tj ET
+BT /F2 6.40 Tf 97.50 83.20 Td (over) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 6.40 Tf 529.71 91.80 Td (spill) Tj ET
+BT /F1 6.40 Tf 111.02 83.20 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 6.40 Tf 542.51 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 112.80 83.20 Td (onto) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 6.40 Tf 544.29 91.80 Td (over) Tj ET
+BT /F1 6.40 Tf 125.25 83.20 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 557.81 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 127.03 83.20 Td (the) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 559.59 91.80 Td (onto) Tj ET
+BT /F1 6.40 Tf 135.93 83.20 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 572.04 91.80 Td ( ) Tj ET
+BT /F1 6.40 Tf 137.71 83.20 Td (next) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 573.82 91.80 Td (the) Tj ET
+BT /F1 6.40 Tf 149.80 83.20 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 582.72 91.80 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 584.50 91.80 Td (new) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 596.24 91.80 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 598.01 91.80 Td (version) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 618.64 91.80 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 620.42 91.80 Td (track.) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 636.07 91.80 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 637.85 91.80 Td (Any) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 648.88 91.80 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 650.65 91.80 Td (unspent) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 673.43 91.80 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 675.20 91.80 Td (override) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 698.32 91.80 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 700.10 91.80 Td (charge) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 719.67 91.80 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 721.44 91.80 Td (from) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 734.24 91.80 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 736.02 91.80 Td (the) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 47.00 83.20 Td (previous) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 71.19 83.20 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 72.96 83.20 Td (version) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 93.59 83.20 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 95.37 83.20 Td (is) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 99.99 83.20 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F2 6.40 Tf 101.77 83.20 Td (forfeited) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 127.37 83.20 Td (.) Tj ET
+BT /F1 6.40 Tf 151.58 83.20 Td (track.) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
@@ -22002,199 +22174,239 @@ BT /F2 6.40 Tf 52.34 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 6.40 Tf 54.12 74.60 Td (Immediate) Tj ET
+BT /F2 6.40 Tf 54.12 74.60 Td (Round-Start) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 6.40 Tf 85.77 74.60 Td ( ) Tj ET
+BT /F2 6.40 Tf 91.09 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 6.40 Tf 87.55 74.60 Td (Version) Tj ET
+BT /F2 6.40 Tf 92.87 74.60 Td (Switch) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 6.40 Tf 111.03 74.60 Td ( ) Tj ET
+BT /F2 6.40 Tf 113.50 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 6.40 Tf 112.80 74.60 Td (Unlock:) Tj ET
+BT /F2 6.40 Tf 115.28 74.60 Td (&) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 136.27 74.60 Td ( ) Tj ET
+BT /F2 6.40 Tf 119.90 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 138.05 74.60 Td (The) Tj ET
+BT /F2 6.40 Tf 121.68 74.60 Td (Unlock:) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 149.08 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 145.14 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 150.86 74.60 Td (newly) Tj ET
+BT /F1 6.40 Tf 146.92 74.60 Td (At) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 167.22 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 152.97 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 169.00 74.60 Td (active) Tj ET
+BT /F1 6.40 Tf 154.75 74.60 Td (the) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 185.71 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 163.65 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 187.49 74.60 Td (version's) Tj ET
+BT /F1 6.40 Tf 165.43 74.60 Td (start) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 212.54 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 177.87 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 214.32 74.60 Td (override) Tj ET
+BT /F1 6.40 Tf 179.65 74.60 Td (of) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 237.44 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 184.99 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 239.22 74.60 Td (unlocks) Tj ET
+BT /F1 6.40 Tf 186.77 74.60 Td (the) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 260.91 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 195.67 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 262.69 74.60 Td (immediately) Tj ET
+BT /F1 6.40 Tf 197.44 74.60 Td (next) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 296.83 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 209.54 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 298.61 74.60 Td (in) Tj ET
+BT /F1 6.40 Tf 211.32 74.60 Td (round) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 303.59 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 227.68 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 305.37 74.60 Td (the) Tj ET
+BT /F1 6.40 Tf 229.46 74.60 Td (\(in) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 314.26 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 236.57 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 316.04 74.60 Td (same) Tj ET
+BT /F1 6.40 Tf 238.35 74.60 Td (Phase) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 331.69 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 256.50 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 333.47 74.60 Td (round) Tj ET
+BT /F1 6.40 Tf 258.28 74.60 Td (1) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 349.84 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 261.84 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 351.61 74.60 Td (SETEC) Tj ET
+BT /F1 6.40 Tf 263.61 74.60 Td (Boot\),) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 372.95 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 280.69 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 374.73 74.60 Td (upgrades,) Tj ET
+BT /F1 6.40 Tf 282.47 74.60 Td (unspent) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 403.19 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 305.24 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 404.97 74.60 Td (available) Tj ET
+BT /F1 6.40 Tf 307.02 74.60 Td (overrides) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 430.23 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 333.34 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 432.00 74.60 Td (starting) Tj ET
+BT /F1 6.40 Tf 335.12 74.60 Td (from) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 452.99 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 347.92 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 454.77 74.60 Td (in) Tj ET
+BT /F1 6.40 Tf 349.69 74.60 Td (the) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 459.75 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 358.59 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 461.53 74.60 Td (Step) Tj ET
+BT /F1 6.40 Tf 360.37 74.60 Td (old) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 474.69 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 368.91 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 476.47 74.60 Td (2B) Tj ET
+BT /F1 6.40 Tf 370.69 74.60 Td (version) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 484.30 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 391.31 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 486.08 74.60 Td (or) Tj ET
+BT /F1 6.40 Tf 393.09 74.60 Td (forfeit,) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 491.77 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 410.88 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 493.55 74.60 Td (Phase) Tj ET
+BT /F1 6.40 Tf 412.66 74.60 Td (and) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 511.69 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 423.33 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 513.47 74.60 Td (3) Tj ET
+BT /F1 6.40 Tf 425.11 74.60 Td (the) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 517.03 74.60 Td ( ) Tj ET
+BT /F1 6.40 Tf 434.01 74.60 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 518.81 74.60 Td (Operations.) Tj ET
+BT /F1 6.40 Tf 435.79 74.60 Td (new) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 447.52 74.60 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 449.30 74.60 Td (version's) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 474.35 74.60 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 476.13 74.60 Td (override) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 499.25 74.60 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 501.03 74.60 Td (unlocks) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 522.72 74.60 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 524.50 74.60 Td (to) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 529.84 74.60 Td ( ) Tj ET
+Q
+q
+0.0588 0.0902 0.1647 rg
+BT /F1 6.40 Tf 531.62 74.60 Td (Available.) Tj ET
 Q
 endstream
 endobj
@@ -22244,7 +22456,7 @@ BT /F5 6.50 Tf 28.00 595.00 Td (TOO MANY SECRETS // 6x WHITE HAT DOSSIER CARDS [
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.30.0 // US LETTER) Tj ET
+BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.31.0 // US LETTER) Tj ET
 Q
 q
 0.4157 0.1059 0.6039 rg
@@ -25820,20 +26032,20 @@ xref
 0000000657 00000 n 
 0000000740 00000 n 
 0000000833 00000 n 
-0000095475 00000 n 
-0000095586 00000 n 
-0000190084 00000 n 
-0000190196 00000 n 
-0000284835 00000 n 
-0000284947 00000 n 
-0000379726 00000 n 
-0000379838 00000 n 
-0000476835 00000 n 
-0000476947 00000 n 
-0000545286 00000 n 
-0000545398 00000 n 
+0000096202 00000 n 
+0000096313 00000 n 
+0000191538 00000 n 
+0000191650 00000 n 
+0000287016 00000 n 
+0000287128 00000 n 
+0000382634 00000 n 
+0000382746 00000 n 
+0000480647 00000 n 
+0000480759 00000 n 
+0000549098 00000 n 
+0000549210 00000 n 
 trailer
 << /Size 22 /Root 21 0 R /Info 1 0 R >>
 startxref
-545448
+549260
 %%EOF

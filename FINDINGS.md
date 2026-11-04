@@ -1481,3 +1481,82 @@ Following Phase 36 (`v0.29.0`), which established physical hardware pipeline lim
 **Status: OFFICIALLY APPROVED (`v0.30.0` Baseline).**
 
 
+
+---
+
+## 26. Phase 38 Baseline (`v0.31.0`): Flexible Generic Defense, Flat Unpaid Ransom & Malware Fizzle
+
+### A. Context & Pre-SDLC Modeling Diagnostics
+Following Phase 37 (`v0.30.0`), user investigations targeted three high-friction defense and damage mechanics:
+1. **Pre-Commitment Shield Frustration:** Forcing generic `Block 1 Any` shields (Gray, White, Purple, G2) to pre-commit to a single color during Phase 1 Step 5 turned defense into blind guessing against sparse Cube Tower drops, frequently wasting shields while unblocked attacks breached infrastructure.
+2. **Punishing Unpaid Ransom Spikes:** In late-game rounds with aggressive Step 2A cash drains (`-$2` / `-$3`), unblocked Red ransomware cubes encountering illiquid players ($0 cash) drained `1 Secret per unpaid $1`. Incurring 3–4 Red hits simultaneously triggered sudden multi-secret decapitations, prematurely ending matches before players could experience `v3.0` Singularity.
+3. **Cascading Destruction Fallback:** When unblocked Green malware struck a player whose active production zone was already empty, the legacy Destruction Fallback permanently destroyed dice from Under Development or Ready for Release zones, triggering an irreversible death spiral on players who were already penalized by 100% loss of round income.
+
+### B. Approved Rule & Mechanical Changes
+1. **Flexible Generic Defense Grid (`INV-FLEX-SHIELD-01`):**
+   - Dice showing `Block 1 Any` assigned to the Defense Grid during Phase 1 Step 5 count against terminal mat `defense_capacity` (2 base, 3 L1, 4 L2), but are **not** pre-committed to a specific cube color.
+   - In Phase 2 Step 2B, threat resolution executes in two stages:
+     - **Stage 1 (Color-Specific):** Matching Red, Blue, and Green shields absorb matching threat cubes 1:1.
+     - **Stage 2 (Reactive Generic ANY):** Available ANY shields absorb remaining threat using a strict 4-tier strategic priority:
+       1. *Tier 1 (Critical Secrets):* Blue threat (`rem_blue > 0`) to prevent direct Corporate Secret loss.
+       2. *Tier 2 (Unfunded Ransom Shortfall):* Red threat when `player.money < rem_red` to prevent dark web leak fines.
+       3. *Tier 3 (Production Integrity):* Green threat (`rem_green > 0`) to prevent glitching active production dice.
+       4. *Tier 4 (Cash Preservation):* Red threat when `player.money >= rem_red` to preserve cash ($1/cube).
+   - **Zero Dice Wear Retained:** Shields absorb threat cleanly without demoting to Under Development.
+2. **Flat 1 Corporate Secret Unpaid Ransom Leak (`INV-RANSOM-FLAT-01`):**
+   - Defending players pay `$1` cash per unblocked Red cube up to available money.
+   - If `unpaid_ransom > 0`, the corporation suffers a **flat `1 Corporate Secret` dark web leak fine**, regardless of shortfall magnitude ($1, $2, or $5+). Multi-secret linear deductions are completely excised.
+   - If `unpaid_ransom == 0`, exactly 0 Secrets are lost.
+   - **DTO / Spook Slush Fund:** Absorbs up to 2 Secrets from the combined pool of `(1 if unpaid_ransom > 0 else 0) + unblocked_blue`.
+3. **Green Malware Fizzle (`INV-MALWARE-FIZZLE-01`):**
+   - Unblocked Green malware glitches active dice from `in_production_dice` to `glitched_dice` (or discards active White contractors).
+   - If `in_production_dice` is empty, excess malware **fizzles with ZERO penalty**: no dice destroyed from Under Development or Ready for Release, and `unfulfilled_destructions` is never tracked.
+4. **Clean Wipeout Scoring (`INV-WIPEOUT-CLEAN-01`):**
+   - On simultaneous `TOTAL_WIPEOUT`, players are ranked strictly by `net_score = -player.breach_depth = player.secrets`. Unfulfilled destructions are completely purged from scoring and tiebreakers.
+
+---
+
+### C. Multi-Pod Telemetry Summary (3,000 Matches Total; 9,000 Player-Games)
+
+#### 1. Pacing & Version Progression
+- **2-Player Pod:** Mean **8.34 rounds** (v1.0: 4.49, v2.0: 3.02, v3.0: 0.84) | Median: 9.0 | StDev: 1.45
+- **3-Player Pod:** Mean **7.19 rounds** (v1.0: 4.42, v2.0: 2.40, v3.0: 0.38) | Median: 7.0 | StDev: 1.65
+- **4-Player Pod:** Mean **8.50 rounds** (v1.0: 4.48, v2.0: 3.07, v3.0: 0.95) | Median: 9.0 | StDev: 1.37
+- **Pacing Invariance:** Match duration sits squarely within the ideal **7.2–8.5 round target window** (~45–55 minute table playtime). Early deaths ($\le$ R4) dropped to **0.79% overall** (0.00% in 4P).
+
+#### 2. Flexible Generic Shield Utilization & 4-Tier Distribution
+- **Generic Shields Committed:** 85,683 shields across 9,000 player-games.
+- **Generic Shields Absorbed:** **80,717 shields (94.2% utilization rate)**, virtually eliminating wasted defensive rolls.
+- **Reactive Tier Breakdown:**
+  - **Tier 1 (Blue Threat):** 53,281 shields (**66.0%**) — Primary line of defense safeguarding Corporate Secrets.
+  - **Tier 2 (Unfunded Red Shortfall):** 9,544 shields (**11.8%**) — Rescuing illiquid consultancies from dark web leak fines.
+  - **Tier 3 (Green Threat):** 10,889 shields (**13.5%**) — Protecting active CI/CD production dice from glitch quarantine.
+  - **Tier 4 (Funded Red Threat):** 7,003 shields (**8.7%**) — Preserving operational cash reserves.
+
+#### 3. Flat Unpaid Ransomware Evaluation
+- **Unpaid Shortfall Incidents:** 27,520 instances across 9,000 player-games.
+- **Flat 1-Secret Leaks Assessed:** 26,072 flat fines (after DTO Slush Fund absorption).
+- **Cumulative Dollar Shortfall:** $84,169.
+- **Corporate Secrets Saved vs Legacy Rule:** **56,649 Corporate Secrets saved** from sudden multi-secret elimination spikes!
+
+#### 4. Malware Fizzle Assessment
+- **Total Unblocked Green Threats:** 108,377 threats.
+- **White Contractors Sacrificed:** 10,661 (9.8%).
+- **Production Dice Glitched:** 55,346 (51.1%).
+- **Malware Fizzles (Empty Production):** **42,370 occurrences (39.1%)** cleanly fizzled with zero penalty, completely eliminating cascading die destruction and unfair kick-them-while-they-are-down penalties.
+
+#### 5. White Hat Operative Parity Matrix
+- **The Spook:** 44.3% win rate | 65.4% survival | 2.50 mean secrets (High Performer)
+- **The Cipher:** 33.4% win rate | 51.4% survival | 1.57 mean secrets (Optimal Corridor)
+- **The Acoustic:** 32.0% win rate | 55.6% survival | 1.68 mean secrets (Optimal Corridor)
+- **The Operator:** 30.8% win rate | 51.2% survival | 1.37 mean secrets (Optimal Corridor)
+- **The Prodigy:** 30.5% win rate | 54.8% survival | 1.61 mean secrets (Optimal Corridor)
+- **The Phreaker:** 29.4% win rate | 51.5% survival | 1.47 mean secrets (Optimal Corridor)
+
+---
+
+### D. Formal Design Sign-Off
+- **Baseline Adoption:** Formally approve and adopt Flexible Generic Defense Grid (`INV-FLEX-SHIELD-01`), Flat 1-Secret Unpaid Ransom Leak (`INV-RANSOM-FLAT-01`), Green Malware Fizzle (`INV-MALWARE-FIZZLE-01`), and Clean Breach Depth Wipeout Scoring (`INV-WIPEOUT-CLEAN-01`) as the official baseline for **`v0.31.0`**.
+- **Parity Synchronized:** Fully verified and synchronized across `RULES.md`, `FINDINGS.md`, `docs/findings/v310_telemetry_sweep_report.md`, `docs/specs/v310_threat_defense_spec.md`, `sim/entities.py`, `sim/config.py`, `sim/engine/`, `sim/bots/`, `web/`, and `tests/test_v310_threat_defense.py`.
+
+**Status: OFFICIALLY APPROVED (`v0.31.0` Baseline).**

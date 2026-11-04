@@ -142,7 +142,7 @@ class TestV03Rules(unittest.TestCase):
         player.secrets = 6
         player.patches = 0  # Zero patches to test direct cash-to-secret leak
 
-        # 5 unblocked Red: drains $2 to $0, remaining 3 unpaid leaks 3 secrets -> 3 secrets left
+        # 5 unblocked Red: drains $2 to $0, remaining 3 unpaid shortfall triggers flat 1 Secret leak under v0.31.0 -> 5 secrets left
         engine._resolve_player_defense_and_wear(
             player=player,
             rolled_dice=list(player.ready_dice),
@@ -153,7 +153,7 @@ class TestV03Rules(unittest.TestCase):
         )
 
         self.assertEqual(player.money, 0)
-        self.assertEqual(player.secrets, 3)
+        self.assertEqual(player.secrets, 5)
         self.assertFalse(player.is_patient_zero)
 
     # -------------------------------------------------------------------------
@@ -165,22 +165,22 @@ class TestV03Rules(unittest.TestCase):
         engine = GameEngine(config=config, bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         player.money = 1
-        player.secrets = 6
+        player.secrets = 1
         player.patches = 0  # Zero patches to test direct cash-to-secret leak
 
-        # 10 unblocked Red: drains $1 to $0, unpaid 9 damage reduces secrets to -3
+        # 10 unblocked Red + 2 unblocked Blue: drains $1 to $0, flat 1 leak + 2 Blue damage reduces secrets to -2
         engine._resolve_player_defense_and_wear(
             player=player,
             rolled_dice=list(player.ready_dice),
             commitments={},
-            attack_strengths={CubeColor.RED: 10, CubeColor.BLUE: 0, CubeColor.GREEN: 0},
-            exited_cubes={CubeColor.RED: 10, CubeColor.BLUE: 0, CubeColor.GREEN: 0},
+            attack_strengths={CubeColor.RED: 10, CubeColor.BLUE: 2, CubeColor.GREEN: 0},
+            exited_cubes={CubeColor.RED: 10, CubeColor.BLUE: 2, CubeColor.GREEN: 0},
             active_directive="NONE",
         )
 
         self.assertEqual(player.money, 0)
-        self.assertEqual(player.secrets, -3)
-        self.assertEqual(player.breach_depth, 3)
+        self.assertEqual(player.secrets, -2)
+        self.assertEqual(player.breach_depth, 2)
         self.assertTrue(player.is_patient_zero)
 
     # -------------------------------------------------------------------------
@@ -205,9 +205,9 @@ class TestV03Rules(unittest.TestCase):
         )
         self.assertFalse(player.is_patient_zero)
 
-        # Case B: $0 money, 2 secrets, takes 2 unblocked Red -> secrets drops to 0 -> Patient Zero!
+        # Case B: $0 money, 1 secret, takes 2 unblocked Red -> flat 1 secret leak drops to 0 -> Patient Zero!
         player.money = 0
-        player.secrets = 2
+        player.secrets = 1
         player.patches = 0  # Zero patches to test direct cash-to-secret leak
         engine._resolve_player_defense_and_wear(
             player=player,

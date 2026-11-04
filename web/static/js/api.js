@@ -89,9 +89,33 @@ export async function refreshState() {
   }
 }
 
-export async function startNewGame(numPlayers = 4, customPlayers = null, seed = null, randomizeCards = true) {
-  const payload = { num_players: numPlayers, randomize_cards: Boolean(randomizeCards) };
-  if (customPlayers) payload.players = customPlayers;
+export async function startNewGame(
+  numPlayers = 4,
+  customPlayers = null,
+  seed = null,
+  randomizeCards = true,
+  company = null,
+  enableCorporateAsymmetry = true
+) {
+  const payload = {
+    num_players: numPlayers,
+    randomize_cards: Boolean(randomizeCards),
+    enable_corporate_asymmetry: Boolean(enableCorporateAsymmetry),
+  };
+  if (customPlayers) {
+    payload.players = customPlayers;
+    if (company && company !== "RANDOM" && payload.players.length > 0) {
+      payload.players[0].company = payload.players[0].company || company;
+    }
+  } else if (company && company !== "RANDOM") {
+    payload.players = [
+      {
+        is_human: true,
+        name: "Player 1",
+        company: company,
+      },
+    ];
+  }
   if (seed !== null && seed !== "") payload.seed = parseInt(seed, 10);
 
   const newState = await apiCall("/api/game/new", "POST", payload);

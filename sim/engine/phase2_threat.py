@@ -234,41 +234,28 @@ def resolve_player_defense_and_wear(
     defer_green_malware: bool = False,
 ) -> None:
     active_ver = engine.state.active_version.version_str
-    # Calculate raw committed shields per color
-    raw_shields: Dict[ShieldColor, int] = {
+
+    # 1. Tally committed shields by color and generic ANY
+    color_shields: Dict[ShieldColor, int] = {
         ShieldColor.RED: 0,
         ShieldColor.BLUE: 0,
         ShieldColor.GREEN: 0,
+        ShieldColor.ANY: 0,
     }
-    color_dice_map: Dict[ShieldColor, List[Tuple[int, Die]]] = {
-        ShieldColor.RED: [],
-        ShieldColor.BLUE: [],
-        ShieldColor.GREEN: [],
-    }
-
     for idx, color in commitments.items():
         die = rolled_dice[idx]
         face = die.effective_face or die.current_face
         if face and face.is_shield:
-            raw_shields[color] += face.block_amount
-            color_dice_map[color].append((idx, die))
+            color_shields[color] += face.block_amount
 
-    effective_shields: Dict[CubeColor, int] = {
-        CubeColor.RED: raw_shields[ShieldColor.RED],
-        CubeColor.BLUE: raw_shields[ShieldColor.BLUE],
-        CubeColor.GREEN: raw_shields[ShieldColor.GREEN],
-    }
-
-    # Hook Phase 2 Step 2B: Aegis Defense Relay (Baffle Echo - v0.13.0)
-    # When resolving compiler damage, ignore 1 Attack Cube of your choice for yourself this round.
-    # Exited cubes remain in the exit tray and recycle as normal.
     player_attacks = dict(attack_strengths)
+
+    # 2. Pre-Defense Overrides: Aegis Defense Relay / Baffle Echo
     is_aegis = bool(
         (player.company and player.company.code == CompanyCode.AEGIS)
         or (player.archetype and player.archetype.code == ArchetypeCode.ACOUSTIC)
     ) and player.is_ability_available(active_ver)
     if is_aegis:
-        # Determine qualifying attack colors where threat exceeds shields (or causes unblocked damage)
         qualifying = [
             c for c in [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN]
             if player_attacks.get(c, 0) > 0 and exited_cubes.get(c, 0) > 0
@@ -286,125 +273,123 @@ def resolve_player_defense_and_wear(
                 player_attacks[chosen_color] = max(0, player_attacks[chosen_color] - 1)
                 player.mark_ability_used(active_ver)
 
-    # Passive Firewall (Level 2 Defense Track - INV-UPGRADE-TRACK-01)
+    # 3. Passive Firewall (Defense Track Level 2)
     if getattr(player, "has_passive_firewall", False):
         candidates = [c for c in [CubeColor.BLUE, CubeColor.RED, CubeColor.GREEN] if player_attacks.get(c, 0) > 0]
         if candidates:
-            best_c = max(candidates, key=lambda c: player_attacks.get(c, 0) - effective_shields.get(c, 0))
+            best_c = max(candidates, key=lambda c: player_attacks.get(c, 0) - color_shields.get(ShieldColor(c.value), 0))
             player_attacks[best_c] = max(0, player_attacks[best_c] - 1)
 
-    # Calculate blocked and unblocked attacks
-    blocked_red = min(effective_shields[CubeColor.RED], player_attacks[CubeColor.RED])
-    unblocked_red = player_attacks[CubeColor.RED] - blocked_red
+    # 4. Stage 1: Color-Specific Shield Absorption
+    rem_red = max(0, player_attacks[CubeColor.RED] - color_shields[ShieldColor.RED])
+    rem_blue = max(0, player_attacks[CubeColor.BLUE] - color_shields[ShieldColor.BLUE])
+    rem_green = max(0, player_attacks[CubeColor.GREEN] - color_shields[ShieldColor.GREEN])
 
-    blocked_blue = min(effective_shields[CubeColor.BLUE], player_attacks[CubeColor.BLUE])
-    unblocked_blue = player_attacks[CubeColor.BLUE] - blocked_blue
+    # 5. Stage 2: Reactive Generic "Block 1 Any" Absorption (INV-FLEX-SHIELD-01)
+    avail_any = color_shields[ShieldColor.ANY]
+    while avail_any > 0 and (rem_red + rem_blue + rem_green) > 0:
+        # Tier 1: Blue Threat (prevent Secret loss)
+        if rem_blue > 0:
+            rem_blue -= 1
+            avail_any -= 1
+        # Tier 2: Red Threat if Cash < Red (prevent Unpaid Ransom Flat Leak)
+        elif rem_red > 0 and player.money < rem_red:
+            rem_red -= 1
+            avail_any -= 1
+        # Tier 3: Green Threat (prevent Glitch to in_production_dice)
+        elif rem_green > 0:
+            rem_green -= 1
+            avail_any -= 1
+        # Tier 4: Red Threat if Cash >= Red (save Cash buffer)
+        elif rem_red > 0:
+            rem_red -= 1
+            avail_any -= 1
+        else:
+            break
 
-    blocked_green = min(effective_shields[CubeColor.GREEN], player_attacks[CubeColor.GREEN])
-    unblocked_green = player_attacks[CubeColor.GREEN] - blocked_green
+    unblocked_red = rem_red
+    unblocked_blue = rem_blue
+    unblocked_green = rem_green
 
-    # 1. Zero Dice Wear (v0.22.0 Canonical):
-    # Modules assigned to shields DO NOT wear down or move to Under Development when blocking!
-    # They absorb the attack cleanly and remain safely deployed in in_production_dice.
-
-    # 2. Star ability damage-dependent bonuses
+    # 6. Star face bonuses dependent on damage (R2, R3, B1)
     for die in rolled_dice:
         face = die.effective_face or die.current_face
         if not face or not face.is_star:
             continue
-        if face.star_code == "R2":
-            # Threat Bounty: Block 2 Red; if you take 0 unblocked Red damage, gain +$2
-            if unblocked_red == 0:
-                player.money += 2
-        elif face.star_code == "R3":
-            # Short Squeeze: if 3+ Red cubes exit tower, gain extra +$1
-            if exited_cubes.get(CubeColor.RED, 0) >= 3:
-                player.money += 1
-        elif face.star_code == "B1":
-            # Honeypot: Block 2 Blue; if 1+ Blue cubes exit and you take 0 Blue damage, gain +$3
-            if exited_cubes.get(CubeColor.BLUE, 0) >= 1 and unblocked_blue == 0:
-                player.money += 3
+        if face.star_code == "R2" and unblocked_red == 0:
+            player.money += 2
+        elif face.star_code == "R3" and exited_cubes.get(CubeColor.RED, 0) >= 3:
+            player.money += 1
+        elif face.star_code == "B1" and exited_cubes.get(CubeColor.BLUE, 0) >= 1 and unblocked_blue == 0:
+            player.money += 3
 
-    # Record unblocked attacks for Acoustic
-    acoustic_unblocked = {
-        CubeColor.RED: unblocked_red,
-        CubeColor.BLUE: unblocked_blue,
-        CubeColor.GREEN: unblocked_green,
-    }
-    active_ver = engine.state.active_version.version_str
-
-    # 3. Apply Unblocked Damage
-    # Red (Ransomware): Lose $1 per unblocked Red cube.
-    # v0.21.0 Baseline: Cash-Only Ransom. Unpaid ransom leaks directly to Secrets (1 Secret per unpaid $1).
-    # Emergency patch absorption is deprecated and disabled by default (config.patch_ransom_absorption=False).
-    # Money and patches are strictly non-negative (>= 0).
+    # 7. Red Ransomware Resolution (INV-RANSOM-FLAT-01)
     unpaid_ransom = 0
     if unblocked_red > 0:
         cash_paid = min(player.money, unblocked_red)
         player.money -= cash_paid
         unpaid_ransom = unblocked_red - cash_paid
 
-        if unpaid_ransom > 0 and getattr(engine.state.config, "patch_ransom_absorption", False) and player.patches > 0:
-            patches_absorbed = min(player.patches, unpaid_ransom)
-            player.patches -= patches_absorbed
-            unpaid_ransom -= patches_absorbed
+    # Legacy Patch Ransom Absorption Flag (if explicitly enabled in GameConfig)
+    if getattr(engine.state.config, "patch_ransom_absorption", False) and unpaid_ransom > 0 and player.patches > 0:
+        patch_paid = min(player.patches, unpaid_ransom)
+        player.patches -= patch_paid
+        unpaid_ransom -= patch_paid
 
-    # Hook Phase 2 Step 2B: Dept. of Telecom (DTO) (Slush Fund - v0.13.0)
-    # Absorb up to 2 Corporate Secret loss (from Blue Spyware or unpaid Red Ransom) for free without paying cash.
-    # (Any additional Secret loss may be absorbed by paying $1 per Secret as normal).
-    potential_secret_loss = unpaid_ransom + unblocked_blue
+    # Flat Secret Leak: 1 Secret if any shortfall exists, else 0
+    ransom_secret_loss = 1 if unpaid_ransom > 0 else 0
+    potential_secret_loss = ransom_secret_loss + unblocked_blue
+
+    # DTO Slush Fund Interaction
     is_dto = bool(
         (player.company and player.company.code == CompanyCode.DTO)
         or (player.archetype and player.archetype.code == ArchetypeCode.SPOOK)
     ) and player.is_ability_available(active_ver)
-    if (
-        potential_secret_loss > 0
-        and is_dto
-    ):
-        # 1. Absorb up to 2 Secrets for FREE from emergency slush reserves
+    if potential_secret_loss > 0 and is_dto:
         free_absorb = min(2, potential_secret_loss)
-        absorbed_from_ransom = min(unpaid_ransom, free_absorb)
-        unpaid_ransom -= absorbed_from_ransom
-        remaining_free = free_absorb - absorbed_from_ransom
-        unblocked_blue -= remaining_free
         potential_secret_loss -= free_absorb
         player.mark_ability_used(active_ver)
-
-        # 2. If excess secret loss remains and player has cash, allow additional cash absorption at $1/Secret
         if potential_secret_loss > 0 and player.money > 0:
-            dto_dollars = player.bot.choose_dto_override(
-                player_state=player,
-                secrets_at_risk=potential_secret_loss,
-                active_version_str=active_ver,
-                rng=engine.rng,
-                corruption_track=engine.state.corruption_track,
-            )
-            actual_dto_dollars = max(0, min(dto_dollars, player.money, potential_secret_loss))
-            if actual_dto_dollars > 0:
-                player.money -= actual_dto_dollars
-                absorbed_paid_ransom = min(unpaid_ransom, actual_dto_dollars)
-                unpaid_ransom -= absorbed_paid_ransom
-                remaining_paid = actual_dto_dollars - absorbed_paid_ransom
-                unblocked_blue -= remaining_paid
+            cash_absorb = min(player.money, potential_secret_loss)
+            player.money -= cash_absorb
+            potential_secret_loss -= cash_absorb
 
-    if unpaid_ransom > 0:
-        player.secrets -= unpaid_ransom
+    if potential_secret_loss > 0:
+        player.secrets -= potential_secret_loss
 
     player.money = max(0, player.money)
-    player.patches = max(0, player.patches)
 
-    # Blue (Spyware): Lose 1 Corporate Secret per unblocked Blue cube
-    if unblocked_blue > 0:
-        player.secrets -= unblocked_blue
-
-    # Patient Zero Check: Strictly occurs upon Total Data Breach (Secrets <= 0)
+    # Patient Zero Check
     if player.secrets <= 0:
         player.is_patient_zero = True
         player.elimination_round = engine.state.current_round
         player.elimination_reason = "Total Breach (<= 0 Secrets)"
         player.breach_depth = max(0, -player.secrets)
 
-    # Green (Malware / Logic Bombs): Move 1 active die from in_production_dice to glitched_dice per cube
+    player.last_defense_breakdown = {
+        "color_shields": {
+            "red": color_shields[ShieldColor.RED],
+            "blue": color_shields[ShieldColor.BLUE],
+            "green": color_shields[ShieldColor.GREEN],
+            "any": color_shields[ShieldColor.ANY],
+        },
+        "blocked": {
+            "red": player_attacks[CubeColor.RED] - unblocked_red,
+            "blue": player_attacks[CubeColor.BLUE] - unblocked_blue,
+            "green": player_attacks[CubeColor.GREEN] - unblocked_green,
+        },
+        "unblocked": {
+            "red": unblocked_red,
+            "blue": unblocked_blue,
+            "green": unblocked_green,
+        },
+        "unpaid_ransom": unpaid_ransom,
+        "flat_ransom_leak": bool(unpaid_ransom > 0),
+        "ransom_secret_loss": ransom_secret_loss,
+        "malware_fizzled": bool(unblocked_green > 0 and len(player.in_production_dice) == 0 and len(player.contractor_dice) == 0),
+    }
+
+    # 8. Green Malware Resolution & Malware Fizzle (INV-MALWARE-FIZZLE-01)
     player.pending_unblocked_green = unblocked_green
     if defer_green_malware:
         return
@@ -416,17 +401,16 @@ def resolve_player_defense_and_wear(
             rng=engine.rng,
         )
         if sacrifice and len(player.contractor_dice) > 0:
-            sacrificed_die = player.contractor_dice.pop(0)
+            player.contractor_dice.pop(0)
             engine.state.contractor_supply += 1
         elif len(player.in_production_dice) > 0:
-            # Defensive Shield Sacrifice / Triage:
-            # Defending consultancy prioritizes glitching a Shield die first (which already blocked) to protect Income dice
             def glitch_sort_key(d: Die) -> Tuple[int, int, int]:
                 role = getattr(d, "production_role", None)
                 is_shield = 0 if role in (
                     ProductionRole.RED_SHIELD,
                     ProductionRole.BLUE_SHIELD,
                     ProductionRole.GREEN_SHIELD,
+                    ProductionRole.ANY_SHIELD,
                 ) else 1
                 is_gray = 0 if d.color == DieColor.GRAY else 1
                 return (is_shield, is_gray, getattr(d, "cost", 0))
@@ -434,20 +418,10 @@ def resolve_player_defense_and_wear(
             target_die = min(player.in_production_dice, key=glitch_sort_key)
             player.in_production_dice.remove(target_die)
             player.glitched_dice.append(target_die)
-        elif len(player.glitched_dice) > 0 or len(player.scanned_dice) > 0:
-            # Destruction Fallback: Destroy (return to box) 1 die from Under Development
-            if player.glitched_dice:
-                player.glitched_dice.sort(key=lambda d: (0 if d.color == DieColor.GRAY else 1, getattr(d, "cost", 0)))
-                player.glitched_dice.pop(0)
-            else:
-                player.scanned_dice.sort(key=lambda d: (0 if d.color == DieColor.GRAY else 1, getattr(d, "cost", 0)))
-                player.scanned_dice.pop(0)
-        elif len(player.ready_for_release_dice) > 0:
-            player.ready_for_release_dice.sort(key=lambda d: (0 if d.color == DieColor.GRAY else 1, getattr(d, "cost", 0)))
-            player.ready_for_release_dice.pop(0)
         else:
-            # Completely wiped out; record unfulfilled die destruction
-            player.unfulfilled_destructions += 1
+            # MALWARE FIZZLE: in_production_dice is empty.
+            # ZERO dice destroyed from glitched, scanned, or ready_for_release. Zero penalty!
+            break
 
     player.pending_unblocked_green = 0
 
@@ -517,7 +491,7 @@ def return_player_colored_dice_step2a(
             if d.color != DieColor.GRAY and d.color != DieColor.WHITE
         ]
         prod_colored.sort(key=lambda d: 1 if getattr(d, "production_role", None) in (
-            ProductionRole.RED_SHIELD, ProductionRole.BLUE_SHIELD, ProductionRole.GREEN_SHIELD
+            ProductionRole.RED_SHIELD, ProductionRole.BLUE_SHIELD, ProductionRole.GREEN_SHIELD, ProductionRole.ANY_SHIELD
         ) else 0)
         for die in prod_colored:
             if returned >= count:

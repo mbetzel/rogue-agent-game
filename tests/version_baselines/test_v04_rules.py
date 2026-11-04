@@ -122,7 +122,7 @@ class TestV04Rules(unittest.TestCase):
         player.patches = 1
         player.secrets = 6
 
-        # 5 unblocked Red: drains $2 to $0, 1 patch absorbs 1 to 0, remaining 2 leaks 2 secrets -> 4 left
+        # 5 unblocked Red: drains $2 to $0, 1 patch absorbs 1 to 0, remaining 2 unpaid shortfall leaks flat 1 secret under v0.31.0 -> 5 left
         engine._resolve_player_defense_and_wear(
             player=player,
             rolled_dice=list(player.ready_dice),
@@ -134,14 +134,14 @@ class TestV04Rules(unittest.TestCase):
 
         self.assertEqual(player.money, 0)
         self.assertEqual(player.patches, 0)
-        self.assertEqual(player.secrets, 4)
+        self.assertEqual(player.secrets, 5)
         self.assertFalse(player.is_patient_zero)
 
     # -------------------------------------------------------------------------
     # 6. Red Damage: No Cash, No Patches -> Full Leak to Secrets
     # -------------------------------------------------------------------------
     def test_red_damage_no_cash_no_patches_full_secret_leak(self) -> None:
-        """With $0 cash and 0 patches, unblocked Red damage directly leaks all damage to Secrets."""
+        """With $0 cash and 0 patches, unblocked Red damage directly leaks flat 1 secret to Secrets under v0.31.0."""
         config = GameConfig(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
@@ -161,7 +161,7 @@ class TestV04Rules(unittest.TestCase):
 
         self.assertEqual(player.money, 0)
         self.assertEqual(player.patches, 0)
-        self.assertEqual(player.secrets, 2)
+        self.assertEqual(player.secrets, 5)
         self.assertFalse(player.is_patient_zero)
 
     # -------------------------------------------------------------------------
@@ -174,15 +174,15 @@ class TestV04Rules(unittest.TestCase):
         player = engine.state.players[0]
         player.money = 1
         player.patches = 1
-        player.secrets = 4
+        player.secrets = 1
 
-        # 10 unblocked Red
+        # 10 unblocked Red + 2 unblocked Blue
         engine._resolve_player_defense_and_wear(
             player=player,
             rolled_dice=list(player.ready_dice),
             commitments={},
-            attack_strengths={CubeColor.RED: 10, CubeColor.BLUE: 0, CubeColor.GREEN: 0},
-            exited_cubes={CubeColor.RED: 10, CubeColor.BLUE: 0, CubeColor.GREEN: 0},
+            attack_strengths={CubeColor.RED: 10, CubeColor.BLUE: 2, CubeColor.GREEN: 0},
+            exited_cubes={CubeColor.RED: 10, CubeColor.BLUE: 2, CubeColor.GREEN: 0},
             active_directive="NONE",
         )
 
@@ -190,9 +190,9 @@ class TestV04Rules(unittest.TestCase):
         self.assertGreaterEqual(player.patches, 0)
         self.assertEqual(player.money, 0)
         self.assertEqual(player.patches, 0)
-        self.assertEqual(player.secrets, -4)  # 4 - 8 = -4
+        self.assertEqual(player.secrets, -2)
         self.assertTrue(player.is_patient_zero)
-        self.assertEqual(player.breach_depth, 4)
+        self.assertEqual(player.breach_depth, 2)
 
     # -------------------------------------------------------------------------
     # 8. Dirty Income Execution Success (Deducts 1 Secret, +$3 Cash, +1 Black)
@@ -303,7 +303,7 @@ class TestV04Rules(unittest.TestCase):
             engine = GameEngine(config=config, bots=[bot] + [BaseBot(i) for i in range(1, 4)], seed=42)
             player = engine.state.players[0]
 
-            # 1. commit_shields assigns ANY shield to BLUE
+            # 1. commit_shields assigns ANY shield to ShieldColor.ANY (v0.31.0 INV-FLEX-SHIELD-01)
             commitments = bot.commit_shields(
                 player_state=player,
                 rolled_dice=[any_shield_die],
@@ -314,8 +314,8 @@ class TestV04Rules(unittest.TestCase):
             )
             self.assertEqual(
                 commitments.get(0),
-                ShieldColor.BLUE,
-                f"{bot.name} failed to assign generic ANY shield to ShieldColor.BLUE",
+                ShieldColor.ANY,
+                f"{bot.name} failed to assign generic ANY shield to ShieldColor.ANY",
             )
 
             # 2. Guard Dirty Income at <= 1 Secret
