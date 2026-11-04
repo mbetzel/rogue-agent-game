@@ -25,7 +25,7 @@ endobj
 << /Type /Pages /Kids [10 0 R 12 0 R 14 0 R 16 0 R 18 0 R 20 0 R] /Count 6 >>
 endobj
 9 0 obj
-<< /Length 94583 >>
+<< /Length 94590 >>
 stream
 q
 0.0588 0.0902 0.1647 RG
@@ -1975,7 +1975,7 @@ BT /F2 5.40 Tf 743.20 571.00 Td (1\)) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 6.20 Tf 276.00 554.00 Td (Phase 1: Roll Ready + Hired Contractors \($1/$2/$3\). Max 2 Free Rerolls \(Glitches lock immediately\).) Tj ET
+BT /F1 6.20 Tf 276.00 554.00 Td (Phase 1: Roll Ready + Hired Contractors \($1/$2/$3\). Max 2 Free Rerolls \(Glitched dice cannot be rerolled\).) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
@@ -4328,7 +4328,7 @@ endobj
 << /Type /Page /Parent 8 0 R /MediaBox [0 0 792.00 612.00] /Resources 7 0 R /Contents 9 0 R >>
 endobj
 11 0 obj
-<< /Length 94438 >>
+<< /Length 94445 >>
 stream
 q
 0.0588 0.0902 0.1647 RG
@@ -6270,7 +6270,7 @@ BT /F2 5.40 Tf 743.20 571.00 Td (1\)) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 6.20 Tf 276.00 554.00 Td (Phase 1: Roll Ready + Hired Contractors \($1/$2/$3\). Max 2 Free Rerolls \(Glitches lock immediately\).) Tj ET
+BT /F1 6.20 Tf 276.00 554.00 Td (Phase 1: Roll Ready + Hired Contractors \($1/$2/$3\). Max 2 Free Rerolls \(Glitched dice cannot be rerolled\).) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
@@ -8623,7 +8623,7 @@ endobj
 << /Type /Page /Parent 8 0 R /MediaBox [0 0 792.00 612.00] /Resources 7 0 R /Contents 11 0 R >>
 endobj
 13 0 obj
-<< /Length 94579 >>
+<< /Length 94586 >>
 stream
 q
 0.0588 0.0902 0.1647 RG
@@ -10573,7 +10573,7 @@ BT /F2 5.40 Tf 743.20 571.00 Td (1\)) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 6.20 Tf 276.00 554.00 Td (Phase 1: Roll Ready + Hired Contractors \($1/$2/$3\). Max 2 Free Rerolls \(Glitches lock immediately\).) Tj ET
+BT /F1 6.20 Tf 276.00 554.00 Td (Phase 1: Roll Ready + Hired Contractors \($1/$2/$3\). Max 2 Free Rerolls \(Glitched dice cannot be rerolled\).) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
@@ -12926,7 +12926,7 @@ endobj
 << /Type /Page /Parent 8 0 R /MediaBox [0 0 792.00 612.00] /Resources 7 0 R /Contents 13 0 R >>
 endobj
 15 0 obj
-<< /Length 94719 >>
+<< /Length 94726 >>
 stream
 q
 0.0588 0.0902 0.1647 RG
@@ -14884,7 +14884,7 @@ BT /F2 5.40 Tf 743.20 571.00 Td (1\)) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 6.20 Tf 276.00 554.00 Td (Phase 1: Roll Ready + Hired Contractors \($1/$2/$3\). Max 2 Free Rerolls \(Glitches lock immediately\).) Tj ET
+BT /F1 6.20 Tf 276.00 554.00 Td (Phase 1: Roll Ready + Hired Contractors \($1/$2/$3\). Max 2 Free Rerolls \(Glitched dice cannot be rerolled\).) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
@@ -17237,7 +17237,7 @@ endobj
 << /Type /Page /Parent 8 0 R /MediaBox [0 0 792.00 612.00] /Resources 7 0 R /Contents 15 0 R >>
 endobj
 17 0 obj
-<< /Length 98242 >>
+<< /Length 96944 >>
 stream
 q
 0.0588 0.0902 0.1647 RG
@@ -20331,162 +20331,107 @@ BT /F1 6.30 Tf 318.51 240.70 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 320.26 240.70 Td (rerolls) Tj ET
+BT /F1 6.30 Tf 320.26 240.70 Td (rerolls.) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 337.41 240.70 Td ( ) Tj ET
+BT /F1 6.30 Tf 339.16 240.70 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 339.16 240.70 Td (without) Tj ET
+BT /F1 6.30 Tf 340.92 240.70 Td (In) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 359.12 240.70 Td ( ) Tj ET
+BT /F1 6.30 Tf 346.17 240.70 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 360.87 240.70 Td (spending) Tj ET
+BT /F1 6.30 Tf 347.92 240.70 Td (addition,) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 386.44 240.70 Td ( ) Tj ET
-Q
-q
-1 j
-1 J
-0.4157 0.1059 0.6039 RG
-0.605 w
-1.0000 1.0000 1.0000 rg
-391.05 245.44 m 392.38 245.44 l 392.38 243.63 l 393.90 240.24 l 389.54 240.24 l 391.05 243.63 l h B
-Q
-q
-0.4157 0.1059 0.6039 RG
-0.726 w
-390.72 245.44 m 392.72 245.44 l S
-Q
-q
-1 j
-1 J
-0.4157 0.1059 0.6039 rg
-390.24 242.06 m 393.20 242.06 l 393.59 240.54 l 389.84 240.54 l h f
-Q
-q
-0.4157 0.1059 0.6039 rg
-391.36 243.31 m 391.56 243.31 391.72 243.15 391.72 242.95 c 391.72 242.75 391.56 242.58 391.36 242.58 c 391.16 242.58 390.99 242.75 390.99 242.95 c 390.99 243.15 391.16 243.31 391.36 243.31 c h f
-Q
-q
-0.4157 0.1059 0.6039 rg
-392.20 243.71 m 392.34 243.71 392.44 243.60 392.44 243.47 c 392.44 243.33 392.34 243.22 392.20 243.22 c 392.07 243.22 391.96 243.33 391.96 243.47 c 391.96 243.60 392.07 243.71 392.20 243.71 c h f
+BT /F1 6.30 Tf 371.73 240.70 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 395.25 240.70 Td ( ) Tj ET
+BT /F1 6.30 Tf 373.49 240.70 Td (turn) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 397.00 240.70 Td (tokens.) Tj ET
+BT /F1 6.30 Tf 384.34 240.70 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 417.31 240.70 Td ( ) Tj ET
+BT /F2 6.30 Tf 386.09 240.70 Td (1) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 419.06 240.70 Td (In) Tj ET
+BT /F2 6.30 Tf 389.60 240.70 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 424.31 240.70 Td ( ) Tj ET
+BT /F2 6.30 Tf 391.35 240.70 Td (rolled) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 426.07 240.70 Td (addition,) Tj ET
+BT /F2 6.30 Tf 408.50 240.70 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 449.88 240.70 Td ( ) Tj ET
+BT /F2 6.30 Tf 410.25 240.70 Td (die) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 451.63 240.70 Td (turn) Tj ET
+BT /F1 6.30 Tf 419.36 240.70 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 462.49 240.70 Td ( ) Tj ET
+BT /F1 6.30 Tf 421.11 240.70 Td (to) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 6.30 Tf 464.24 240.70 Td (1) Tj ET
+BT /F1 6.30 Tf 426.36 240.70 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 6.30 Tf 467.74 240.70 Td ( ) Tj ET
+BT /F1 6.30 Tf 428.11 240.70 Td (any) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 6.30 Tf 469.49 240.70 Td (rolled) Tj ET
+BT /F1 6.30 Tf 438.27 240.70 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 6.30 Tf 486.65 240.70 Td ( ) Tj ET
+BT /F1 6.30 Tf 440.02 240.70 Td (legal) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 6.30 Tf 488.40 240.70 Td (die) Tj ET
+BT /F1 6.30 Tf 453.33 240.70 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 497.50 240.70 Td ( ) Tj ET
+BT /F1 6.30 Tf 455.08 240.70 Td (non-Star) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 499.25 240.70 Td (to) Tj ET
+BT /F1 6.30 Tf 479.24 240.70 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 287.00 232.40 Td (any) Tj ET
+BT /F1 6.30 Tf 480.99 240.70 Td (face) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 297.16 232.40 Td ( ) Tj ET
+BT /F1 6.30 Tf 492.90 240.70 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 298.91 232.40 Td (legal) Tj ET
+BT /F1 6.30 Tf 494.65 240.70 Td (of) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 312.21 232.40 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 313.96 232.40 Td (non-Star) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 338.12 232.40 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 339.88 232.40 Td (face) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 351.78 232.40 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 353.53 232.40 Td (of) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 358.79 232.40 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.30 Tf 360.54 232.40 Td (choice.) Tj ET
+BT /F1 6.30 Tf 287.00 232.40 Td (choice.) Tj ET
 Q
 q
 0.7961 0.8353 0.8824 RG
@@ -22257,7 +22202,7 @@ endobj
 << /Type /Page /Parent 8 0 R /MediaBox [0 0 792.00 612.00] /Resources 7 0 R /Contents 17 0 R >>
 endobj
 19 0 obj
-<< /Length 68433 >>
+<< /Length 68286 >>
 stream
 q
 0.0588 0.0902 0.1647 RG
@@ -25651,15 +25596,7 @@ BT /F5 6.40 Tf 435.24 91.80 Td (Glitch) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F5 6.40 Tf 458.28 91.80 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F5 6.40 Tf 462.12 91.80 Td (\(Locked\)) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.40 Tf 492.84 91.80 Td (.) Tj ET
+BT /F1 6.40 Tf 458.28 91.80 Td (.) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
@@ -25883,20 +25820,20 @@ xref
 0000000657 00000 n 
 0000000740 00000 n 
 0000000833 00000 n 
-0000095468 00000 n 
-0000095579 00000 n 
-0000190070 00000 n 
-0000190182 00000 n 
-0000284814 00000 n 
-0000284926 00000 n 
-0000379698 00000 n 
-0000379810 00000 n 
-0000478105 00000 n 
-0000478217 00000 n 
-0000546703 00000 n 
-0000546815 00000 n 
+0000095475 00000 n 
+0000095586 00000 n 
+0000190084 00000 n 
+0000190196 00000 n 
+0000284835 00000 n 
+0000284947 00000 n 
+0000379726 00000 n 
+0000379838 00000 n 
+0000476835 00000 n 
+0000476947 00000 n 
+0000545286 00000 n 
+0000545398 00000 n 
 trailer
 << /Size 22 /Root 21 0 R /Info 1 0 R >>
 startxref
-546865
+545448
 %%EOF
