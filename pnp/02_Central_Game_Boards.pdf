@@ -67,7 +67,7 @@ BT /F5 6.50 Tf 28.00 595.00 Td (PROJECT: SETEC // CENTRAL ROGUE AGENT & COMPILER
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.29.0 // US LETTER) Tj ET
+BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.30.0 // US LETTER) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 RG
@@ -3754,7 +3754,7 @@ endobj
 << /Type /Page /Parent 8 0 R /MediaBox [0 0 792.00 612.00] /Resources 7 0 R /Contents 9 0 R >>
 endobj
 11 0 obj
-<< /Length 38780 >>
+<< /Length 38487 >>
 stream
 q
 0.0588 0.0902 0.1647 RG
@@ -3796,7 +3796,7 @@ BT /F5 6.50 Tf 28.00 595.00 Td (PROJECT: SETEC // SOFTWARE MODULE MARKET & CENTR
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.29.0 // US LETTER) Tj ET
+BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.30.0 // US LETTER) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 RG
@@ -4646,7 +4646,7 @@ BT /F1 6.20 Tf 61.44 77.50 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 63.16 77.50 Td ($4) Tj ET
+BT /F1 6.20 Tf 63.16 77.50 Td ($6) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
@@ -4686,7 +4686,7 @@ BT /F1 6.20 Tf 106.02 77.50 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 6.20 Tf 107.74 77.50 Td (2) Tj ET
+BT /F2 6.20 Tf 107.74 77.50 Td (0) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
@@ -4793,7 +4793,7 @@ BT /F1 6.20 Tf 61.44 68.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 63.16 68.80 Td ($4) Tj ET
+BT /F1 6.20 Tf 63.16 68.80 Td ($6) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
@@ -4833,7 +4833,7 @@ BT /F1 6.20 Tf 106.02 68.80 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 6.20 Tf 107.74 68.80 Td (2) Tj ET
+BT /F2 6.20 Tf 107.74 68.80 Td (0) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
@@ -4940,7 +4940,7 @@ BT /F1 6.20 Tf 61.44 60.10 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 63.16 60.10 Td ($4) Tj ET
+BT /F1 6.20 Tf 63.16 60.10 Td ($6) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
@@ -4980,7 +4980,7 @@ BT /F1 6.20 Tf 109.47 60.10 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F2 6.20 Tf 111.19 60.10 Td (2) Tj ET
+BT /F2 6.20 Tf 111.19 60.10 Td (0) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
@@ -5119,7 +5119,7 @@ BT /F1 6.20 Tf 147.57 51.40 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 149.29 51.40 Td (2) Tj ET
+BT /F1 6.20 Tf 149.29 51.40 Td (1) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
@@ -5143,147 +5143,131 @@ BT /F1 6.20 Tf 200.63 51.40 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 202.36 51.40 Td (dice) Tj ET
+BT /F1 6.20 Tf 202.36 51.40 Td (die) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 213.73 51.40 Td ( ) Tj ET
+BT /F1 6.20 Tf 210.63 51.40 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 215.45 51.40 Td (per) Tj ET
+BT /F1 6.20 Tf 212.35 51.40 Td (in) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 224.41 51.40 Td ( ) Tj ET
+BT /F1 6.20 Tf 217.17 51.40 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 226.13 51.40 Td (player) Tj ET
+BT /F1 6.20 Tf 218.90 51.40 Td (Ready) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 243.01 51.40 Td ( ) Tj ET
+BT /F1 6.20 Tf 236.81 51.40 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 244.74 51.40 Td (placed) Tj ET
+BT /F1 6.20 Tf 238.54 51.40 Td (pool) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 263.00 51.40 Td ( ) Tj ET
+BT /F1 6.20 Tf 250.26 51.40 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 264.73 51.40 Td (in) Tj ET
+BT /F1 6.20 Tf 251.98 51.40 Td (+) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 269.55 51.40 Td ( ) Tj ET
+BT /F1 6.20 Tf 255.60 51.40 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 271.27 51.40 Td (Personal) Tj ET
+BT /F1 6.20 Tf 257.32 51.40 Td (1) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 295.74 51.40 Td ( ) Tj ET
+BT /F1 6.20 Tf 260.77 51.40 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 297.46 51.40 Td (Reserves) Tj ET
+BT /F1 6.20 Tf 262.50 51.40 Td (in) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 323.65 51.40 Td ( ) Tj ET
+BT /F1 6.20 Tf 267.32 51.40 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 325.37 51.40 Td (\($4) Tj ET
+BT /F1 6.20 Tf 269.04 51.40 Td (Personal) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 334.33 51.40 Td ( ) Tj ET
+BT /F1 6.20 Tf 293.51 51.40 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 336.05 51.40 Td (per) Tj ET
+BT /F1 6.20 Tf 295.23 51.40 Td (Reserve) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 345.01 51.40 Td ( ) Tj ET
+BT /F1 6.20 Tf 318.31 51.40 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 346.73 51.40 Td (Dossier;) Tj ET
+BT /F1 6.20 Tf 320.04 51.40 Td (\($4-$6) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 369.47 51.40 Td ( ) Tj ET
+BT /F1 6.20 Tf 337.96 51.40 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 371.19 51.40 Td (not) Tj ET
+BT /F1 6.20 Tf 339.68 51.40 Td (on) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 48.00 42.70 Td (in) Tj ET
+BT /F1 6.20 Tf 346.57 51.40 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 52.82 42.70 Td ( ) Tj ET
+BT /F1 6.20 Tf 348.30 51.40 Td (Dossier\).) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 54.55 42.70 Td (central) Tj ET
+BT /F1 6.20 Tf 48.00 42.70 Td (Starting) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 73.15 42.70 Td ( ) Tj ET
+BT /F1 6.20 Tf 69.37 42.70 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 74.88 42.70 Td (market\).) Tj ET
+BT /F1 6.20 Tf 71.09 42.70 Td (bonuses) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 97.61 42.70 Td ( ) Tj ET
+BT /F1 6.20 Tf 94.52 42.70 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 99.34 42.70 Td (Starting) Tj ET
+BT /F1 6.20 Tf 96.25 42.70 Td (per) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 120.70 42.70 Td ( ) Tj ET
+BT /F1 6.20 Tf 105.21 42.70 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 122.42 42.70 Td (bonuses) Tj ET
+BT /F1 6.20 Tf 106.93 42.70 Td (Corporation) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 145.86 42.70 Td ( ) Tj ET
+BT /F1 6.20 Tf 139.32 42.70 Td ( ) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 147.58 42.70 Td (per) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 156.54 42.70 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 158.27 42.70 Td (Corporation) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 190.66 42.70 Td ( ) Tj ET
-Q
-q
-0.0588 0.0902 0.1647 rg
-BT /F1 6.20 Tf 192.38 42.70 Td (card.) Tj ET
+BT /F1 6.20 Tf 141.04 42.70 Td (card.) Tj ET
 Q
 q
 0.0588 0.0902 0.1647 RG
@@ -5746,10 +5730,10 @@ xref
 0000000788 00000 n 
 0000071919 00000 n 
 0000072030 00000 n 
-0000110863 00000 n 
-0000110975 00000 n 
+0000110570 00000 n 
+0000110682 00000 n 
 trailer
 << /Size 14 /Root 13 0 R /Info 1 0 R >>
 startxref
-111025
+110732
 %%EOF

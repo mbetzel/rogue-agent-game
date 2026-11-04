@@ -39,14 +39,14 @@ class TestV100Rules(unittest.TestCase):
         self.assertEqual(cfg_4p.get_starting_secrets(4), 12)
 
     def test_starting_patches_flat(self):
-        """Starting Patch Tokens should be 2 across all player counts."""
+        """Starting Patch Tokens should be 0 across all player counts (v0.30.0 INV-START-RES-01)."""
         cfg_2p = GameConfig(num_players=2)
         cfg_3p = GameConfig(num_players=3)
         cfg_4p = GameConfig(num_players=4)
 
-        self.assertEqual(cfg_2p.get_starting_patches(2), 2)
-        self.assertEqual(cfg_3p.get_starting_patches(3), 2)
-        self.assertEqual(cfg_4p.get_starting_patches(4), 2)
+        self.assertEqual(cfg_2p.get_starting_patches(2), 0)
+        self.assertEqual(cfg_3p.get_starting_patches(3), 0)
+        self.assertEqual(cfg_4p.get_starting_patches(4), 0)
 
     def test_version_cards_upgrade_payloads_standardized(self):
         """In v0.15.0, v2.0 and v3.0 staging_payload is empty (corruption track is sole source of new cubes) and track capacities are 4/5/6."""
@@ -78,7 +78,7 @@ class TestV100Rules(unittest.TestCase):
         self.assertEqual(eng_4p.config.corruption_track_capacity, 6)
         for player in eng_4p.state.players:
             self.assertEqual(player.secrets, 12)
-            self.assertEqual(player.patches, 2)
+            self.assertEqual(player.patches, 0)
 
         # 3-player game
         cfg_3p = GameConfig(num_players=3)
@@ -88,7 +88,7 @@ class TestV100Rules(unittest.TestCase):
         self.assertEqual(eng_3p.config.corruption_track_capacity, 5)
         for player in eng_3p.state.players:
             self.assertEqual(player.secrets, 8)
-            self.assertEqual(player.patches, 2)
+            self.assertEqual(player.patches, 0)
 
         # 2-player game
         cfg_2p = GameConfig(num_players=2)
@@ -98,7 +98,7 @@ class TestV100Rules(unittest.TestCase):
         self.assertEqual(eng_2p.config.corruption_track_capacity, 4)
         for player in eng_2p.state.players:
             self.assertEqual(player.secrets, 8)
-            self.assertEqual(player.patches, 2)
+            self.assertEqual(player.patches, 0)
 
     def test_web_serializer_reports_player_count_capacity(self):
         """Web state serializer exposes corruption_capacity matching the active version track capacity."""

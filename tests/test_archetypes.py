@@ -670,7 +670,7 @@ class TestPhreakerAndCipher(unittest.TestCase):
         controller.active_player_index = 0
         player.money = 0  # $0 cash
 
-        # Blue die costs dynamic base (B1: $6) - $2 discount = $4; fails if player has $0
+        # Blue die costs dynamic base (B1: $5) - $2 discount = $3; fails if player has $0
         with self.assertRaises(ValueError):
             controller.buy_die(player_id=0, color_str="blue", use_cipher_ability=True)
 
@@ -680,7 +680,7 @@ class TestPhreakerAndCipher(unittest.TestCase):
 
         res = controller.buy_die(player_id=0, color_str="blue", use_cipher_ability=True)
         self.assertIn("players", res)
-        self.assertEqual(player.money, 1)  # $5 - $4 = $1
+        self.assertEqual(player.money, 2)  # $5 - $3 = $2
         self.assertEqual(controller.state.market[DieColor.BLUE], initial_blue_stock - 1)
         self.assertEqual(len(player.ready_dice), initial_ready_count + 1)
         self.assertEqual(player.ready_dice[-1].color, DieColor.BLUE)

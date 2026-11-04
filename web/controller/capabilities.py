@@ -93,6 +93,10 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         (player.company and player.company.code == CompanyCode.OMNIDYNE)
         or (player.archetype and player.archetype.code == ArchetypeCode.PHREAKER)
     )
+    is_phreaker_white_hat = bool(
+        (player.white_hat and player.white_hat.code == WhiteHatCode.PHREAKER)
+        or (player.archetype and player.archetype.code == ArchetypeCode.PHREAKER)
+    )
     can_phreaker = bool(
         controller.phase == 3
         and is_active
@@ -100,6 +104,13 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         and is_phreaker
         and ability_avail
         and len(player.unpatched_dice) > 0
+    )
+    can_phreaker_diagnostics = bool(
+        controller.phase == 3
+        and is_active
+        and not is_eliminated
+        and is_phreaker_white_hat
+        and player.purple_star_available
     )
 
     is_cipher = bool(
@@ -368,6 +379,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         "can_operator": can_operator,
         "can_prodigy": can_prodigy,
         "can_phreaker": can_phreaker,
+        "can_phreaker_diagnostics": can_phreaker_diagnostics,
         "can_cipher_buy": can_cipher_buy,
         "can_cipher_dirty": can_cipher_dirty,
         "can_acoustic": can_acoustic,

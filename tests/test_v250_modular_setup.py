@@ -284,16 +284,16 @@ class TestV250ModularSetup(unittest.TestCase):
     # =========================================================================
 
     def test_mod_13_inv_purple_01_reserve_insulation(self) -> None:
-        """TEST-MOD-13: INV-PURPLE-01: Purple dice initialize to 2 in reserve and cannot be drafted by opponents."""
+        """TEST-MOD-13: INV-PURPLE-01: Purple dice initialize to 1 in reserve and cannot be drafted by opponents."""
         engine = GameEngine(config=GameConfig(num_players=2), seed=42)
         p0, p1 = engine.state.players[0], engine.state.players[1]
-        self.assertEqual(p0.personal_purple_reserve, 2)
-        self.assertEqual(p1.personal_purple_reserve, 2)
+        self.assertEqual(p0.personal_purple_reserve, 1)
+        self.assertEqual(p1.personal_purple_reserve, 1)
 
         # Procure for P0
         p0.personal_purple_reserve -= 1
-        self.assertEqual(p0.personal_purple_reserve, 1)
-        self.assertEqual(p1.personal_purple_reserve, 2, "P1 reserve must be insulated from P0 purchases")
+        self.assertEqual(p0.personal_purple_reserve, 0)
+        self.assertEqual(p1.personal_purple_reserve, 1, "P1 reserve must be insulated from P0 purchases")
 
     def test_mod_14_inv_purple_01_protocol_dispatch(self) -> None:
         """TEST-MOD-14: INV-PURPLE-01: Purple ★ triggers operative protocol, not company ability."""
@@ -560,7 +560,7 @@ class TestV250ModularSetup(unittest.TestCase):
         )
         p0 = engine.state.players[0]
         self.assertEqual(p0.company.code, CompanyCode.PROMETHEUS)
-        p0.money = 5  # Red R1 costs $6; with $2 discount, cost is $4
+        p0.money = 5  # Red R1 costs $5; with $2 discount, cost is $3
         engine.state.market[DieColor.RED] = 5
 
         class PrometheusBot(BaseBot):
@@ -575,7 +575,7 @@ class TestV250ModularSetup(unittest.TestCase):
         execute_phase_3(engine)
 
         self.assertEqual(p0.ability_v1_status, AbilityStatus.USED)
-        self.assertEqual(p0.money, 1, "Purchasing Red ($6) with $2 discount costs $4 (5 - 4 = 1)")
+        self.assertEqual(p0.money, 2, "Purchasing Red ($5) with $2 discount costs $3 (5 - 3 = 2)")
         self.assertTrue(any(d.color == DieColor.RED for d in p0.ready_for_release_dice))
 
     def test_mod_24_phase3_acoustic_protocol(self) -> None:

@@ -99,9 +99,9 @@ const WHITE_HATS_DATA = {
     name: "The Phreaker",
     role: "Hardware Tinkerer // Emergency Relays",
     flavor: "A strip of Mylar splicing tape and a 2600-Hz whistle will fix what ten grand of silicon can't.",
-    protocolName: "Packet Sniffer",
-    protocolDesc: "Phase 3 Ops: Roll 1 die in Scanned or Glitched; gain rolled cash/patches; die remains in place.",
-    passiveDesc: "Free Phase 3 diagnostic roll on 1 die in Scanned or Glitched.",
+    protocolName: "Jumper Diagnostics",
+    protocolDesc: "When Purple ★ is rolled, roll 1 offline die in Under Development (or gain +$1 Cash fallback if pipeline is empty).",
+    passiveDesc: "Free Phase 3 diagnostic roll on 1 die in Scanned or Glitched (or +$1 fallback).",
     themeColor: "#4ade80",
   },
   ACOUSTIC: {
@@ -485,7 +485,7 @@ export function renderPlayerMats() {
                       : `Phase 1 Rolling | Glitches lock immediately → Glitched Box`)
                   : (p.has_committed 
                       ? (readyCount > 0 ? 'Dice ready for next round' : 'All dice deployed to In Production | Dice return or graduate here in Phase 3')
-                      : 'Start: 4 Gray Dice | Phase 1: Roll all Ready + hired Contractors | Offline dice do not roll')}
+                      : 'Start: 3 Gray + 1 Purple Specialist Die | Phase 1: Roll all Ready + hired Contractors | Offline dice do not roll')}
               </div>
             </div>
             ${isActivelyRolling ? `
@@ -741,20 +741,20 @@ export function renderPlayerMats() {
         <div class="reserve-card purple-reserve-card ${p.can_buy_purple_reserve ? 'clickable' : ''}" id="purple_reserve_${p.player_id}" style="border-color: rgba(168, 85, 247, 0.4);">
           <div class="reserve-card-header">
             <span class="reserve-card-title" style="color: #c084fc;">▼ PURPLE RESERVE</span>
-            <span class="reserve-rate-pill" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">${p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 2}/2 DICE</span>
+            <span class="reserve-rate-pill" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">${p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 1}/1 DIE</span>
           </div>
           <div class="reserve-card-main" style="display: flex; gap: 8px; justify-content: center; padding: 4px 0;">
-            <div class="patch-token-slot ${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 2) >= 1 ? 'filled' : 'empty'}" style="border-color: #a855f7;">
+            <div class="patch-token-slot empty" style="border-color: #a855f7; opacity: 0.8;" title="Die 1: Active in Starting Pool (Purchased at Setup)">
               <span class="slot-number-lbl">DIE 1</span>
-              <span class="slot-wrench-icon" style="color: #c084fc;">${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 2) >= 1 ? `▼ $${p.purple_reserve_cost !== undefined ? p.purple_reserve_cost : 4}` : '✓'}</span>
+              <span class="slot-wrench-icon" style="color: #4ade80; font-size: 0.7rem;">SETUP</span>
             </div>
-            <div class="patch-token-slot ${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 2) >= 2 ? 'filled' : 'empty'}" style="border-color: #a855f7;">
+            <div class="patch-token-slot ${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 1) >= 1 ? 'filled' : 'empty'}" style="border-color: #a855f7;" title="${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 1) >= 1 ? 'Die 2: In Reserve (1 Available)' : 'Die 2: Procured'}">
               <span class="slot-number-lbl">DIE 2</span>
-              <span class="slot-wrench-icon" style="color: #c084fc;">${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 2) >= 2 ? `▼ $${p.purple_reserve_cost !== undefined ? p.purple_reserve_cost : 4}` : '✓'}</span>
+              <span class="slot-wrench-icon" style="color: #c084fc;">${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 1) >= 1 ? `▼ $${p.purple_reserve_cost !== undefined ? p.purple_reserve_cost : 4}` : '✓'}</span>
             </div>
           </div>
           <div class="reserve-card-footer">
-            ${p.can_buy_purple_reserve ? `<strong style="color: #c084fc;">CLICK TO PROCURE ($${p.purple_reserve_cost !== undefined ? p.purple_reserve_cost : 4})</strong>` : 'Private Reserve | Dual-Shield & Face 6 Protocol'}
+            ${p.can_buy_purple_reserve ? `<strong style="color: #c084fc;">CLICK TO PROCURE ($${p.purple_reserve_cost !== undefined ? p.purple_reserve_cost : 4})</strong>` : 'Die 1: Setup | Die 2: Reserve ($' + (p.purple_reserve_cost !== undefined ? p.purple_reserve_cost : 4) + ')'}
           </div>
         </div>
       </div>

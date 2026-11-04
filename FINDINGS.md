@@ -1401,4 +1401,83 @@ While Phase 35 (`v0.28.0`) established hardware constraints and the uncapped res
 
 **Status: OFFICIALLY APPROVED (`v0.29.0` Baseline).**
 
+---
+
+## 25. Phase 37 Baseline (`v0.30.0`): Starting Resources, Starter Purple Specialist Die, Phreaker Fallback & Market Cost Calibration
+
+### A. Context & Pre-SDLC Modeling Diagnostics
+Following Phase 36 (`v0.29.0`), which established physical hardware pipeline limits (Defense Grid Capacity 2, Triage Bandwidth 2, Release Bandwidth 4) and eliminated artificial fast-patching, pre-SDLC modeling and 1,000-match diagnostic testing identified three key friction points:
+1. **Delayed Character Identity:** Players began with 4 generic Gray dice and 0 Purple Specialist dice. Because purchasing from the Personal Reserve cost $4–$6 and competed directly with market dice, players rarely unlocked their operative's signature protocol before Round 3 or 4.
+2. **Turn 1 Liquidity & Action Paralysis:** At $4 starting cash, players rolling low cash were frequently unable to afford any die in the market, causing dead turns on Round 1.
+3. **The Phreaker Dead-Turn Dilemma:** When The Phreaker rolled Face 6 (*Jumper Diagnostics*) on early rounds with an empty Under Development pipeline, the protocol produced 0 output.
+4. **Market Pricing vs Pipeline Constraints:** Modules priced up to $7 created an artificial 2.5-round purchase gap, causing players to stall rather than actively circulating dice through the CI/CD conveyor.
+
+### B. Approved Rule & Mechanical Changes
+1. **Starter Active Pool (`INV-START-POOL-01`):**
+   - Each player begins with **3 Gray Legacy Dice + 1 Purple Proprietary Specialist Die** in their Ready for Release Zone (total 4 dice).
+   - Starter Purple die has cost $0, is bound to the player's White Hat Operative, and is immediately rollable in Round 1.
+2. **Baseline Starting Research (`INV-START-RES-01`):**
+   - Baseline starting research tokens calibrated to **`0 🔬`** (down from 2 🔬).
+   - **Helix Biomedical Consortium** asymmetry bonus (+2 🔬) is preserved: Helix starts with **`2 🔬`** (sole corporation with turn-1 research).
+3. **Baseline Starting Capital (`INV-START-CASH-01`):**
+   - Baseline starting liquid cash calibrated to **`$6`** (up from $4).
+   - **Meridian Financial Trust** asymmetry bonus (+$2 cash) is preserved: Meridian starts with **`$8`**.
+4. **Option A Personal Reserve Capacity (`INV-PURPLE-RES-01`):**
+   - Personal Reserve capacity calibrated to **1 Purple die** per player (cap of 2 Purple dice max per player lifetime).
+   - Preserves the exact **8-die physical prototype component footprint** for 4 players (4 × 2 = 8 dice total).
+5. **The Phreaker Emergency Fallback (`INV-PHREAKER-FALLBACK-01`):**
+   - When The Phreaker rolls Face 6 (*Jumper Diagnostics*), if the Under Development pipeline is empty, collect an immediate **`+$1 Cash`** fallback.
+6. **Crisp $4–$5 Market & Reserve Pricing Tier (`INV-VAR-COST-CALIB-01`):**
+   - **$4 Tier:** R3 ($4), B3 ($4), G2 ($4), G3 ($4); Reserve: Phreaker ($4), Acoustic ($4).
+   - **$5 Tier:** R1 ($5), R2 ($5), B1 ($5), G1 ($5), Y2 ($5), Y3 ($5); Reserve: Operator ($5), Prodigy ($5), Spook ($5).
+   - **$6 Tier:** B2 ($6), Y1 ($6); Reserve: Cipher ($6).
+
+---
+
+### C. Multi-Pod Telemetry Summary (3,000 Matches Total; 9,000 Player-Games)
+
+#### 1. Pacing & Version Progression
+- **2-Player Pod:** Mean **6.81 rounds** (v1.0: 4.49, v2.0: 2.22, v3.0: 0.10) | Median: 7.0 | StDev: 1.28
+- **3-Player Pod:** Mean **6.32 rounds** (v1.0: 4.41, v2.0: 1.86, v3.0: 0.05) | Median: 6.0 | StDev: 1.35
+- **4-Player Pod:** Mean **7.42 rounds** (v1.0: 4.47, v2.0: 2.75, v3.0: 0.21) | Median: 7.0 | StDev: 1.16
+- **Pacing Invariance:** Match duration tightens into a crisp, high-tension **6.3–7.4 round window** (ideal 40–50 minute table playtime). Active engine startup eliminates early stalling while compiler pressure maintains acute survival stakes.
+
+#### 2. Turn 1 Purchase & Strict Double-Buy Invariant
+- **Turn 1 Purchase Rate ($\ge 1$ Die):** **25.8% overall** (2P: 23.3%, 3P: 26.1%, 4P: 26.8%).
+- **Turn 1 Double-Buy Rate ($\ge 2$ Dice):** **Strictly 0.00%** across all 9,000 player-games, confirming `INV-MARKET-DOUBLE-01`.
+- **Mean Turn 1 Cash Spent:** $2.18 across buyers.
+
+#### 3. Purple Specialist Die & Operative Face 6 Dynamics
+- **Round 1 Purple Face 6 Trigger Rate:** **13.3%** across all player-games (~1 in 7.5 rolls), confirming immediate operative protocol differentiation from turn 1.
+- **Match Face 6 Triggers:** Mean **2.04 triggers per match** (0.63 per player-game).
+- **Operative Activity:** All 6 operatives triggered Face 6 at consistent rates (Acoustic 0.73, Phreaker 0.71, Prodigy 0.68, Operator 0.68, Cipher 0.64, Spook 0.63 triggers/player-game).
+
+#### 4. Phreaker Jumper Diagnostics Fallback Evaluation
+- **Total Phreaker Face 6 Triggers:** 1,024 occurrences.
+- **Normal Diagnostics (Rolled Offline Die):** 646 (63.1%).
+- **Emergency Fallback Triggers (+$1 Cash):** **378 (36.9%)**.
+  - Round 1 Fallbacks: 171 (45.2% of fallbacks).
+  - Post-Round 1 Fallbacks: 207 (54.8% of fallbacks).
+- **Zero Dead Turns:** 100% of empty-pipeline triggers successfully granted +$1 Cash fallback without error or economic stall. The Phreaker win rate rose from an anemic 2.8% to a competitive 25.2%!
+
+#### 5. White Hat Operative Parity Matrix
+- **The Spook:** 35.6% win rate | 54.1% survival | 1.55 mean secrets
+- **The Cipher:** 29.7% win rate | 48.7% survival | 1.05 mean secrets
+- **The Acoustic:** 25.9% win rate | 48.2% survival | 0.94 mean secrets
+- **The Prodigy:** 25.3% win rate | 45.8% survival | 0.80 mean secrets
+- **The Phreaker:** 25.2% win rate | 44.2% survival | 0.73 mean secrets
+- **The Operator:** 22.5% win rate | 39.8% survival | 0.43 mean secrets
+
+#### 6. Hardware Tracks & Research Conversion
+- **Track Adoption:** Defense Grid Capacity (mean 0.55), Triage Bandwidth (mean 0.32), Cryptographic Patents (mean 0.24), Release Bandwidth (mean 0.20).
+- **Research Sinks:** 93.9% of players finish matches with $\le 1$ unspent research token (71.7% with 0, 22.2% with 1); only 1.1% accumulate $\ge 3$ excess tokens (mean unspent 0.36 🔬).
+
+---
+
+### D. Formal Design Sign-Off
+- **Baseline Adoption:** Formally approve and adopt 3 Gray + 1 Purple Starting Pool, $6 Starting Cash ($8 Meridian), 0 Starting Research (2 Helix), 1 Purple Die in Personal Reserve, Phreaker +$1 Cash Fallback, and Calibrated $4–$5 Market/Reserve Pricing as the official baseline for **`v0.30.0`**.
+- **Parity Synchronized:** Fully verified and synchronized across `RULES.md`, `FINDINGS.md`, `docs/findings/v300_telemetry_sweep_report.md`, `docs/specs/v300_starting_resources_spec.md`, `sim/entities.py`, `sim/config.py`, `sim/engine/`, `sim/bots/`, `web/`, and `tests/test_v300_starting_resources.py`.
+
+**Status: OFFICIALLY APPROVED (`v0.30.0` Baseline).**
+
 

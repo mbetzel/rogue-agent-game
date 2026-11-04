@@ -298,6 +298,21 @@ class VentureGreedBot(BaseBot):
             plan.use_y1_secret = True
             current_money -= 6
 
+        # Operative Protocol Selectors (Spook & Phreaker)
+        is_spook = bool(
+            (player_state.white_hat and player_state.white_hat.code == WhiteHatCode.SPOOK)
+            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.SPOOK)
+        )
+        if is_spook:
+            plan.spook_burn_die_id = self.choose_spook_burn_notice(player_state, game_state, rng)
+
+        is_phreaker = bool(
+            (player_state.white_hat and player_state.white_hat.code == WhiteHatCode.PHREAKER)
+            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.PHREAKER)
+        )
+        if is_phreaker:
+            plan.phreaker_diagnostics_die_id = self.choose_phreaker_jumper_diagnostics(player_state, game_state, rng)
+
         if not is_final_round:
             purchases = 0
             yellow_cost = game_state.get_market_die_cost(DieColor.YELLOW)

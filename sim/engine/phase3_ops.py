@@ -115,9 +115,12 @@ def resolve_phreaker_jumper_diagnostics(
 ) -> Optional[Face]:
     """Phreaker Face 6 Protocol (Jumper Diagnostics):
     Rolls 1 die currently in Under Development; harvests rolled cash/patches; die remains in place.
+    INV-PHREAKER-FALLBACK-01: If Under Development is empty, yields +$1 cash fallback immediately.
     """
     ud_dice = player.under_development_dice
     if not ud_dice:
+        # Fallback: grant +$1 cash directly to player
+        player.money += 1
         return None
 
     target_die = None
@@ -281,7 +284,7 @@ def execute_phase_3(engine: GameEngine) -> None:
                     player.p3_available = None
 
         # Operative Protocol Face 6 Resolution in Phase 3A (Spook & Phreaker)
-        has_purple_star = any(
+        has_purple_star = player.purple_star_available or any(
             (d.effective_face or d.current_face)
             and (d.effective_face or d.current_face).is_star
             and (d.effective_face or d.current_face).star_code == "PURPLE_STAR"
@@ -298,12 +301,12 @@ def execute_phase_3(engine: GameEngine) -> None:
             )
             if is_spook and plan.spook_burn_die_id is not None:
                 resolve_spook_burn_notice(engine, player, plan.spook_burn_die_id)
-            elif is_phreaker and player.under_development_dice:
+            elif is_phreaker:
                 diag_id = plan.phreaker_diagnostics_die_id
-                if diag_id is None:
+                if diag_id is None and player.under_development_dice:
                     diag_id = player.bot.choose_phreaker_jumper_diagnostics(player, engine.state, engine.rng)
-                if diag_id is not None:
-                    resolve_phreaker_jumper_diagnostics(engine, player, diag_id, engine.rng)
+                # Always resolve diagnostics even if under_development_dice is empty (triggers fallback)
+                resolve_phreaker_jumper_diagnostics(engine, player, diag_id, engine.rng)
 
         # 4. Market Purchases (Limit 2 dice per turn; deliver directly to ready_for_release_dice)
         purchased_count = 1 if prometheus_discount_applied else 0

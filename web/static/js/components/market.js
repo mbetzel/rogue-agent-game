@@ -10,7 +10,7 @@ const MARKET_BASE_SPECS = {
   red: {
     title: "RED // FINSEC",
     symbol: "◆",
-    baseCost: 4,
+    baseCost: 5,
     row1: "⚀ 1 Red Shield | ⚁-⚃ +$2",
     row2: "⚄ 🔒 Glitch | ⚅ ★ Variant",
     warning: null,
@@ -26,7 +26,7 @@ const MARKET_BASE_SPECS = {
   green: {
     title: "GREEN // ANTIVIRUS",
     symbol: "▲",
-    baseCost: 4,
+    baseCost: 5,
     row1: "⚀ 1 Green Shield | ⚁ +1 🔧 | ⚂ +2 🔧",
     row2: "⚃ 1 🔧 / +$1 | ⚄ 🔒 Glitch | ⚅ ★ Variant",
     warning: null,
@@ -34,7 +34,7 @@ const MARKET_BASE_SPECS = {
   yellow: {
     title: "YELLOW // COMM.",
     symbol: "⬡",
-    baseCost: 5,
+    baseCost: 6,
     row1: "⚀ +$3 | ⚁-⚂ +$2",
     row2: "⚃ +$1 & +1 🔧 | ⚄ 🔒 Glitch | ⚅ ★ Variant",
     warning: null,

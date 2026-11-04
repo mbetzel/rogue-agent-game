@@ -89,21 +89,21 @@ class TestV03Rules(unittest.TestCase):
     # 4. Default Starting Money
     # -------------------------------------------------------------------------
     def test_starting_money_default(self) -> None:
-        """Default starting money is $4 (or $5 under Data Scraper per v0.26.0)."""
+        """Default starting money is $6 (or $7 under Data Scraper per v0.30.0 INV-START-CASH-01)."""
         config = GameConfig(num_players=2, dirty_income_enabled=True)
-        self.assertEqual(config.starting_money, 4)
+        self.assertEqual(config.starting_money, 6)
 
         # Baseline engine with Script Kiddie
         bots = [BaseBot(0), BaseBot(1)]
         engine = GameEngine(config=config, bots=bots, seed=42)
         for p in engine.state.players:
-            self.assertEqual(p.money, 4)
+            self.assertEqual(p.money, 6)
 
         # Engine with Data Scraper (+ $1 starting money)
         data_scraper = [c for c in get_all_version_cards() if c.directive_code == "DATA_SCRAPER"][0]
         engine_ds = GameEngine(config=config, bots=bots, seed=42, version_deck=[data_scraper])
         for p in engine_ds.state.players:
-            self.assertEqual(p.money, 5)
+            self.assertEqual(p.money, 7)
 
     # -------------------------------------------------------------------------
     # 5. Unblocked Red Damage Drains Cash

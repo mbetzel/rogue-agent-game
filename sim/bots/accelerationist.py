@@ -280,6 +280,21 @@ class AccelerationistBot(BaseBot):
             plan.use_y1_secret = True
             current_money -= 6
 
+        # Operative Protocol Selectors (Spook & Phreaker)
+        is_spook = bool(
+            (player_state.white_hat and player_state.white_hat.code == WhiteHatCode.SPOOK)
+            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.SPOOK)
+        )
+        if is_spook:
+            plan.spook_burn_die_id = self.choose_spook_burn_notice(player_state, game_state, rng)
+
+        is_phreaker = bool(
+            (player_state.white_hat and player_state.white_hat.code == WhiteHatCode.PHREAKER)
+            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.PHREAKER)
+        )
+        if is_phreaker:
+            plan.phreaker_diagnostics_die_id = self.choose_phreaker_jumper_diagnostics(player_state, game_state, rng)
+
         if player_state.p1_available:
             plan.p1_cube_choice = CubeColor.RED
         if (
@@ -308,8 +323,12 @@ class AccelerationistBot(BaseBot):
                     current_money -= cost
                     purchases += 1
 
-        # Hardware Upgrades & Patents (v0.28.0)
+        # Hardware Upgrades & Patents (v0.29.0)
         res_available = player_state.research_tokens
+        rel_cost = player_state.get_track_upgrade_cost("RELEASE")
+        if rel_cost is not None and res_available >= rel_cost and player_state.release_level < 1:
+            plan.track_upgrades.append("RELEASE")
+            res_available -= rel_cost
         patent_cost = player_state.get_patent_cost()
         if res_available >= patent_cost:
             plan.patent_filings = res_available // patent_cost

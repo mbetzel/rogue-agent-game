@@ -49,18 +49,18 @@ class TestV240Rules(unittest.TestCase):
     # =========================================================================
 
     def test_personal_purple_reserve_initializes_to_two(self) -> None:
-        """INV-PURPLE-01: Each player starts the match with personal_purple_reserve == 2."""
+        """INV-PURPLE-01: Each player starts the match with personal_purple_reserve == 1 (v0.30.0 Baseline)."""
         engine = GameEngine(config=GameConfig(num_players=4), seed=42)
         self.assertEqual(len(engine.state.players), 4)
         for p in engine.state.players:
-            self.assertEqual(p.personal_purple_reserve, 2, "Each player must initialize with 2 Purple dice in reserve")
+            self.assertEqual(p.personal_purple_reserve, 1, "Each player must initialize with 1 Purple die in reserve")
 
     def test_procuring_purple_die_deducts_four_dollars_and_one_reserve(self) -> None:
         """INV-PURPLE-03: Purchasing Purple costs $4, decrements reserve by 1, and delivers die to ready."""
         engine = GameEngine(config=GameConfig(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 7
-        p0.personal_purple_reserve = 2
+        p0.personal_purple_reserve = 1
         initial_ready_count = len(p0.ready_for_release_dice)
 
         class BuyPurpleBot(BaseBot):
@@ -74,10 +74,10 @@ class TestV240Rules(unittest.TestCase):
 
         # Operator reserve cost is calibrated to $5 (7 - 5 = 2)
         self.assertEqual(p0.money, 2, "Procuring Purple die must cost operative reserve cost (7 - 5 = 2)")
-        self.assertEqual(p0.personal_purple_reserve, 1, "Reserve must decrement from 2 to 1")
+        self.assertEqual(p0.personal_purple_reserve, 0, "Reserve must decrement from 1 to 0")
         self.assertEqual(len(p0.ready_for_release_dice), initial_ready_count + 1)
         purple_dice = [d for d in p0.ready_for_release_dice if d.color == DieColor.PURPLE]
-        self.assertEqual(len(purple_dice), 1, "Exactly 1 Purple die must be delivered to ready pool")
+        self.assertEqual(len(purple_dice), 2, "Exactly 2 Purple dice must be in ready pool (1 starter + 1 purchased)")
 
     def test_cannot_procure_purple_die_when_reserve_empty(self) -> None:
         """INV-PURPLE-03: Attempting to procure a Purple die with empty reserve fails."""
@@ -514,21 +514,22 @@ class TestV240Rules(unittest.TestCase):
         """INV-PURPLE-01: Personal reserve dice are immune to corruption track Return 1 Colored Die."""
         engine = GameEngine(config=GameConfig(num_players=2), seed=42)
         p0 = engine.state.players[0]
-        p0.personal_purple_reserve = 2
+        p0.personal_purple_reserve = 1
+        p0.ready_for_release_dice = [d for d in p0.ready_for_release_dice if d.color == DieColor.GRAY]
         # No owned physical colored dice
         self.assertEqual(len(p0.colored_dice), 0)
 
         space = CorruptionSpace(index=5, label="Return 1 Colored Die", return_colored_dice=1)
         return_player_colored_dice_step2a(engine, p0, [], {}, count=space.return_colored_dice)
 
-        self.assertEqual(p0.personal_purple_reserve, 2, "Personal Reserve must remain completely untouched at 2")
+        self.assertEqual(p0.personal_purple_reserve, 1, "Personal Reserve must remain completely untouched at 1")
 
     def test_corruption_return_scraps_owned_purple_die_without_contaminating_market(self) -> None:
         """INV-PURPLE-02: Returning an owned physical Purple die scraps it and does NOT add Purple to central market."""
         engine = GameEngine(config=GameConfig(num_players=2), seed=42)
         p0 = engine.state.players[0]
         purple = create_colored_die(DieColor.PURPLE, 99)
-        p0.ready_for_release_dice.append(purple)
+        p0.ready_for_release_dice = [purple]
 
         space = CorruptionSpace(index=5, label="Return 1 Colored Die", return_colored_dice=1)
         return_player_colored_dice_step2a(engine, p0, [], {}, count=space.return_colored_dice)

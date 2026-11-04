@@ -40,20 +40,20 @@ class TestEntities(unittest.TestCase):
         variants = get_default_variant_cards()
 
         red = create_colored_die(DieColor.RED, 1, variants[DieColor.RED])
-        self.assertEqual(red.cost, 6)
+        self.assertEqual(red.cost, 5)
         self.assertEqual(red.vp, 0)
         self.assertEqual(len(red.faces), 6)
 
         blue = create_colored_die(DieColor.BLUE, 2, variants[DieColor.BLUE])
-        self.assertEqual(blue.cost, 6)
+        self.assertEqual(blue.cost, 5)
         self.assertEqual(blue.vp, 0)
 
         green = create_colored_die(DieColor.GREEN, 3, variants[DieColor.GREEN])
-        self.assertEqual(green.cost, 6)
+        self.assertEqual(green.cost, 5)
         self.assertEqual(green.vp, 0)
 
         yellow = create_colored_die(DieColor.YELLOW, 4, variants[DieColor.YELLOW])
-        self.assertEqual(yellow.cost, 7)
+        self.assertEqual(yellow.cost, 6)
         self.assertEqual(yellow.vp, 0)
 
         purple = create_colored_die(DieColor.PURPLE, 5, variants.get(DieColor.PURPLE))

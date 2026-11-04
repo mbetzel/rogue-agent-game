@@ -31,6 +31,7 @@ from sim.entities import (
     Face,
     VariantCard,
     VersionCard,
+    create_colored_die,
     create_gray_die,
     create_white_die,
     get_all_archetype_cards,
@@ -112,12 +113,24 @@ class GameEngine:
 
         for i, bot in enumerate(bots):
             ready_for_release_dice: List[Die] = []
+            # 1. Add 3 Gray Legacy Dice (INV-START-POOL-01)
             for _ in range(config.starting_gray_dice):
                 ready_for_release_dice.append(create_gray_die(next_die_id))
                 next_die_id += 1
 
-            comp = self.companies[i] if i < len(self.companies) else None
+            # 2. Add 1 Purple Proprietary Specialist Die (INV-START-POOL-01)
             wh = self.white_hats[i] if i < len(self.white_hats) else None
+            purple_reserve_cost = wh.reserve_cost if wh else 4
+            starter_purple = create_colored_die(
+                color=DieColor.PURPLE,
+                die_id=next_die_id,
+                reserve_cost=purple_reserve_cost,
+                cost=0,
+            )
+            ready_for_release_dice.append(starter_purple)
+            next_die_id += 1
+
+            comp = self.companies[i] if i < len(self.companies) else None
             use_asym = getattr(config, "enable_corporate_asymmetry", False)
             comp_cash = getattr(comp, "starting_cash_bonus", 0) if (comp and use_asym) else 0
             comp_res = getattr(comp, "starting_research_bonus", 0) if (comp and use_asym) else 0
@@ -131,6 +144,7 @@ class GameEngine:
                 ready_for_release_dice=ready_for_release_dice,
                 company=comp,
                 white_hat=wh,
+                personal_purple_reserve=getattr(config, "starting_purple_reserve", 1),
                 ability_v1_status=AbilityStatus.AVAILABLE,
                 ability_v2_status=AbilityStatus.LOCKED,
                 ability_v3_status=AbilityStatus.LOCKED,

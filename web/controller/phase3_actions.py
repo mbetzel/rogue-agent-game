@@ -422,16 +422,19 @@ def execute_bot_phase3(controller: GameController, player: PlayerState, meta: Di
                 controller.event_log.append(
                     f"{meta['name']} (Bot) executed Spook Burn Notice on die {plan.spook_burn_die_id}."
                 )
-        elif is_phreaker and player.under_development_dice:
+        elif is_phreaker:
             diag_id = plan.phreaker_diagnostics_die_id
-            if diag_id is None:
+            if diag_id is None and player.under_development_dice:
                 diag_id = player.bot.choose_phreaker_jumper_diagnostics(player, controller.state, controller.rng)
-            if diag_id is not None:
-                face = resolve_phreaker_jumper_diagnostics(controller.engine or controller, player, diag_id, controller.rng)
-                if face:
-                    controller.event_log.append(
-                        f"{meta['name']} (Bot) executed Phreaker Jumper Diagnostics: rolled '{face.name}'."
-                    )
+            face = resolve_phreaker_jumper_diagnostics(controller.engine or controller, player, diag_id, controller.rng)
+            if face:
+                controller.event_log.append(
+                    f"{meta['name']} (Bot) executed Phreaker Jumper Diagnostics: rolled '{face.name}'."
+                )
+            else:
+                controller.event_log.append(
+                    f"{meta['name']} (Bot) executed Phreaker Jumper Diagnostics on an empty pipeline, collecting +$1 Cash emergency fallback."
+                )
 
     # 4. Market Purchases
     purchases = meta.get("purchases_this_turn", 0)
@@ -657,13 +660,16 @@ def phreaker_diagnostics(
     if not has_phreaker:
         raise ValueError("Player does not have the Phreaker white hat dossier or archetype")
 
+    # INV-PHREAKER-FALLBACK-01: Does not throw ValueError if under_development_dice is empty
     face = resolve_phreaker_jumper_diagnostics(controller.engine or controller, player, die_id, controller.rng)
     if face is None:
-        raise ValueError("No dice available in Under Development for diagnostics")
-
-    controller.event_log.append(
-        f"{meta['name']} executed Phreaker Jumper Diagnostics, rolling face '{face.name}' (money: +${face.money}, patches: +{face.patches} 🔧)."
-    )
+        controller.event_log.append(
+            f"{meta['name']} executed Phreaker Jumper Diagnostics on an empty pipeline, collecting +$1 Cash emergency fallback."
+        )
+    else:
+        controller.event_log.append(
+            f"{meta['name']} executed Phreaker Jumper Diagnostics, rolling face '{face.name}' (money: +${face.money}, patches: +{face.patches} 🔬)."
+        )
     return controller.get_full_state()
 
 

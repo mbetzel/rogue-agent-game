@@ -571,14 +571,15 @@ class BaseBot:
         game_state: GameState,
         rng: random.Random,
     ) -> bool:
-        """Determines whether to purchase a Purple die from Personal Reserve using dynamic operative cost."""
+        """Evaluates whether to purchase the single reserve Purple die ($4-$6)."""
         if getattr(player_state, "personal_purple_reserve", 0) <= 0:
             return False
         reserve_cost = player_state.get_purple_reserve_cost() if hasattr(player_state, "get_purple_reserve_cost") else 4
         if player_state.money < reserve_cost:
             return False
-        # Baseline heuristic: Buy if cash reserves allow and ready dice pool is small
-        return len(player_state.ready_for_release_dice) < 5 or player_state.money >= (reserve_cost * 2)
+        # Since player already starts with 1 Purple die, purchasing the 2nd Purple die
+        # is prioritized when cash reserves exceed $8 or when facing heavy threat (>4 cubes).
+        return player_state.money >= (reserve_cost + 2)
 
     def choose_spook_burn_notice(
         self,
@@ -606,11 +607,11 @@ class BaseBot:
         game_state: GameState,
         rng: random.Random,
     ) -> Optional[int]:
-        """Selects a die in Under Development to roll for cash/patch diagnostics."""
+        """Selects an offline die to roll for diagnostics. If pipeline empty, returns None (invokes fallback)."""
         ud_dice = player_state.under_development_dice
         if not ud_dice:
-            return None
-        # Prioritize Green/Yellow dice which have highest cash/patch yield
+            return None  # Triggers +$1 cash fallback cleanly
+        # Prioritize Green/Yellow dice for higher expected yield
         best_die = max(
             ud_dice,
             key=lambda d: 2 if d.color in (DieColor.GREEN, DieColor.YELLOW) else 1,

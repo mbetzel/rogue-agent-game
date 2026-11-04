@@ -257,7 +257,7 @@ class TestV280TerminalUpgrades(unittest.TestCase):
 
         # Test Helix: +2 research grant, patent_level=1
         p_helix = engine_mer.state.players[1]
-        self.assertEqual(p_helix.research_tokens, 2 + 2, "Helix starts with +2 research tokens")
+        self.assertEqual(p_helix.research_tokens, 0 + 2, "Helix starts with +2 research tokens")
         self.assertEqual(p_helix.patent_level, 1)
 
         # Test DTO: +1 starting secret

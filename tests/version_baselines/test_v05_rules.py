@@ -128,8 +128,8 @@ class TestV05Rules(unittest.TestCase):
 
         for player in engine.state.players:
             self.assertEqual(player.secrets, 8, "2P player must start with 8 Secrets")
-            self.assertEqual(player.patches, 2, "2P player must start with 2 Patches")
-            self.assertEqual(player.money, 4)
+            self.assertEqual(player.patches, 0, "2P player must start with 0 Patches (v0.30.0)")
+            self.assertEqual(player.money, 6)
             self.assertEqual(len(player.ready_dice), 4)
             self.assertEqual(len(player.unpatched_dice), 0)
 

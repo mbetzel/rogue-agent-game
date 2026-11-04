@@ -117,8 +117,8 @@ class PlayerState:
     contractor_dice: List[Die] = field(default_factory=list)
     hired_contractor_count: int = 0
 
-    # --- Personal Reserve (v0.24.0 Canonical) ---
-    personal_purple_reserve: int = 2
+    # --- Personal Reserve (v0.30.0 Canonical) ---
+    personal_purple_reserve: int = 1  # [INV-PURPLE-RES-01: 1 reserve die remaining]
     purple_star_available: bool = False
     purple_star_count: int = 0
 
@@ -755,10 +755,10 @@ class GameState:
             return self.variant_cards[color].cost
         # Fallback default costs if variant cards not registered:
         default_costs = {
-            DieColor.RED: 6,
-            DieColor.BLUE: 6,
-            DieColor.GREEN: 6,
-            DieColor.YELLOW: 7,
+            DieColor.RED: 5,
+            DieColor.BLUE: 5,
+            DieColor.GREEN: 5,
+            DieColor.YELLOW: 6,
         }
         return default_costs.get(color, 4)
 

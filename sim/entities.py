@@ -247,7 +247,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Ransom Insurance",
             die_color=DieColor.RED,
             description="Block 1 Red + gain +$2.",
-            cost=6,
+            cost=5,
             star_face=Face(
                 name="R1: Ransom Insurance",
                 block_amount=1,
@@ -262,7 +262,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Threat Bounty",
             die_color=DieColor.RED,
             description="Block 2 Red; if you take 0 unblocked Red damage this round, gain +$2.",
-            cost=6,
+            cost=5,
             star_face=Face(
                 name="R2: Threat Bounty",
                 block_amount=2,
@@ -277,7 +277,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Short Squeeze",
             die_color=DieColor.RED,
             description="Gain +$3 (or +$4 if 3+ Red cubes exit the tower this round).",
-            cost=5,
+            cost=4,
             star_face=Face(
                 name="R3: Short Squeeze",
                 block_amount=0,
@@ -292,7 +292,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Honeypot Telemetry",
             die_color=DieColor.BLUE,
             description="Block 2 Blue; if 1+ Blue cubes exit the tower and you take 0 Blue damage, gain +$3.",
-            cost=6,
+            cost=5,
             star_face=Face(
                 name="B1: Honeypot Telemetry",
                 block_amount=2,
@@ -307,7 +307,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Deep R&D Vault",
             die_color=DieColor.BLUE,
             description="Block 1 Blue, OR pay $4 during Phase 3 to gain +1 Corporate Secret.",
-            cost=7,
+            cost=6,
             star_face=Face(
                 name="B2: Deep R&D Vault",
                 block_amount=1,
@@ -321,7 +321,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Air-Gapped Backup",
             die_color=DieColor.BLUE,
             description="Block 1 Blue; when this die actively blocks, you may move 1 other Ready die of your choice to Unpatched instead of this die (if you have no other Ready dice, this die moves to Unpatched).",
-            cost=5,
+            cost=4,
             star_face=Face(
                 name="B3: Air-Gapped Backup",
                 block_amount=1,
@@ -336,7 +336,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Self-Healing Kernel",
             die_color=DieColor.GREEN,
             description="Block 2 Green + gain +1 🔧.",
-            cost=6,
+            cost=5,
             star_face=Face(
                 name="G1: Self-Healing Kernel",
                 block_amount=2,
@@ -351,7 +351,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Universal Sandbox",
             die_color=DieColor.GREEN,
             description="Block 1 Any + gain +1 🔧.",
-            cost=5,
+            cost=4,
             star_face=Face(
                 name="G2: Universal Sandbox",
                 block_amount=1,
@@ -366,7 +366,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Live Reboot",
             die_color=DieColor.GREEN,
             description="Gain +2 🔧 + +$1.",
-            cost=5,
+            cost=4,
             star_face=Face(
                 name="G3: Live Reboot",
                 block_amount=0,
@@ -382,7 +382,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Algorithmic Trading",
             die_color=DieColor.YELLOW,
             description="Gain +$4, OR pay $2 in Phase 3 to gain +1 Corporate Secret.",
-            cost=7,
+            cost=6,
             star_face=Face(
                 name="Y1: Algorithmic Trading",
                 block_amount=0,
@@ -396,7 +396,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Cloud Monopoly",
             die_color=DieColor.YELLOW,
             description="Gain +$2, plus +$1 per different colored module die owned (max +$5).",
-            cost=6,
+            cost=5,
             star_face=Face(
                 name="Y2: Cloud Monopoly",
                 block_amount=0,
@@ -410,7 +410,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             name="Proprietary Training",
             die_color=DieColor.YELLOW,
             description="Gain +1 Corporate Secret, then move this die to Unpatched.",
-            cost=6,
+            cost=5,
             star_face=Face(
                 name="Y3: Proprietary Training",
                 block_amount=0,
@@ -1203,12 +1203,13 @@ def create_colored_die(
             die_cost = variant_card.cost
         else:
             # Fallback default costs if variant card is omitted:
-            # Red default R1: $6, Blue default B1: $6, Green default G1: $6, Yellow default Y1: $7
+            # Red default R1: $5, Blue default B1: $5, Green default G1: $5, Yellow default Y1: $6
             default_costs = {
-                DieColor.RED: 6,
-                DieColor.BLUE: 6,
-                DieColor.GREEN: 6,
-                DieColor.YELLOW: 7,
+                DieColor.RED: 5,
+                DieColor.BLUE: 5,
+                DieColor.GREEN: 5,
+                DieColor.YELLOW: 6,
+                DieColor.PURPLE: 4,
             }
             die_cost = default_costs.get(color, 4)
 

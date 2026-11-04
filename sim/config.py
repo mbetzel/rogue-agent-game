@@ -50,17 +50,19 @@ class GameConfig:
 
     # Player count & setup
     num_players: int = 4
-    starting_money: int = 4  # [TUNE: $4 baseline] [v0.26.0 Calibration: Calibrated from $7 to $4 (INV-START-CASH-01)]
+    starting_money: int = 6  # [v0.30.0 Baseline: Calibrated from $4 to $6 (INV-START-CASH-01)]
     starting_secrets_by_player_count: Dict[int, int] = field(
         default_factory=lambda: {2: 8, 3: 8, 4: 12}
     )
     starting_patches_by_player_count: Dict[int, int] = field(
-        default_factory=lambda: {2: 2, 3: 2, 4: 2}
+        default_factory=lambda: {2: 0, 3: 0, 4: 0}  # [v0.30.0 Baseline: Calibrated from 2 to 0 (INV-START-RES-01)]
     )
     starting_secrets: Optional[int] = None  # Optional scalar override for backwards compatibility
     starting_patches: Optional[int] = None  # Optional scalar override for backwards compatibility
     max_patch_tokens: int = 3  # [TUNE: 3] Maximum unspent patch tokens retained across rounds during End-of-Round Cleanup (Model C)
-    starting_gray_dice: int = 4
+    starting_gray_dice: int = 3   # [v0.30.0 Baseline: Calibrated from 4 to 3 (INV-START-POOL-01)]
+    starting_purple_dice: int = 1 # [v0.30.0 Baseline: 1 starter Purple die (INV-START-POOL-01)]
+    starting_purple_reserve: int = 1 # [v0.30.0 Baseline: Option A 1 die in reserve (INV-PURPLE-RES-01)]
     dice_per_color_multiplier: int = 2  # 2 * num_players dice per colored die type
 
     # Corruption track (v0.15.0 Per-Version Escalating Tracks)
@@ -195,7 +197,7 @@ class GameConfig:
         if self.starting_patches is not None:
             return self.starting_patches
         n = num_players if num_players is not None else self.num_players
-        fallback = self.starting_patches_by_player_count.get(4, 2)
+        fallback = self.starting_patches_by_player_count.get(4, 0)
         return self.starting_patches_by_player_count.get(n, fallback)
 
     def get_contractor_cost_for_hire(self, count: int, already_hired: int = 0) -> int:

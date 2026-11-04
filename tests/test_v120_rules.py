@@ -41,9 +41,9 @@ class TestV120Rules(unittest.TestCase):
     # Test 1: Red Die Recalibration
     # -------------------------------------------------------------------------
     def test_01_red_die_recalibration(self) -> None:
-        """1. Red die: Cost $6 (R1), 0 VP; Face 1 Block 1 Red, Faces 2-4 +$2, Face 5 Glitch, Face 6 Star."""
+        """1. Red die: Cost $5 (R1 in v0.30.0), 0 VP; Face 1 Block 1 Red, Faces 2-4 +$2, Face 5 Glitch, Face 6 Star."""
         red = create_colored_die(DieColor.RED, 1, self.variants[DieColor.RED])
-        self.assertEqual(red.cost, 6)
+        self.assertEqual(red.cost, 5)
         self.assertEqual(red.vp, 0)
         self.assertEqual(len(red.faces), 6)
 
@@ -78,9 +78,9 @@ class TestV120Rules(unittest.TestCase):
     # Test 2: Blue Die Recalibration
     # -------------------------------------------------------------------------
     def test_02_blue_die_recalibration(self) -> None:
-        """2. Blue die: Cost $6 (B1), 0 VP; Face 1 Block 1 Blue, Face 2 +1 🔧, Face 3 +$1, Face 4 Choice, Face 5 Glitch, Face 6 Star."""
+        """2. Blue die: Cost $5 (B1 in v0.30.0), 0 VP; Face 1 Block 1 Blue, Face 2 +1 🔧, Face 3 +$1, Face 4 Choice, Face 5 Glitch, Face 6 Star."""
         blue = create_colored_die(DieColor.BLUE, 2, self.variants[DieColor.BLUE])
-        self.assertEqual(blue.cost, 6)
+        self.assertEqual(blue.cost, 5)
         self.assertEqual(blue.vp, 0)
         self.assertEqual(len(blue.faces), 6)
 
@@ -117,9 +117,9 @@ class TestV120Rules(unittest.TestCase):
     # Test 3: Green Die Recalibration
     # -------------------------------------------------------------------------
     def test_03_green_die_recalibration(self) -> None:
-        """3. Green die: Cost $6 (G1), 0 VP; Face 1 Block 1 Green, Face 2 +1 🔧, Face 3 +2 🔧, Face 4 Choice, Face 5 Glitch, Face 6 Star."""
+        """3. Green die: Cost $5 (G1 in v0.30.0), 0 VP; Face 1 Block 1 Green, Face 2 +1 🔧, Face 3 +2 🔧, Face 4 Choice, Face 5 Glitch, Face 6 Star."""
         green = create_colored_die(DieColor.GREEN, 3, self.variants[DieColor.GREEN])
-        self.assertEqual(green.cost, 6)
+        self.assertEqual(green.cost, 5)
         self.assertEqual(green.vp, 0)
         self.assertEqual(len(green.faces), 6)
 
@@ -157,7 +157,7 @@ class TestV120Rules(unittest.TestCase):
     def test_04_yellow_purple_gray_white_unchanged(self) -> None:
         """4. Yellow, Purple, Gray, and White dice maintain their standard configurations (with v0.22.0 Face 5 Glitch standardization)."""
         yellow = create_colored_die(DieColor.YELLOW, 4, self.variants[DieColor.YELLOW])
-        self.assertEqual(yellow.cost, 7)
+        self.assertEqual(yellow.cost, 6)
         self.assertEqual(yellow.vp, 0)
         self.assertTrue(yellow.faces[4].is_glitch)
         self.assertTrue(yellow.faces[5].is_star)
