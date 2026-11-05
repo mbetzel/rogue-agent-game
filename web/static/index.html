@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rogue Agent — Web Playtesting Application</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
   <!-- Header Bar -->
   <header class="app-header">
     <div class="brand-section">
       <div class="app-title">ROGUE AGENT</div>
-      <div class="version-badge">v0.31.0 RULES BASELINE</div>
+      <div class="version-badge">v0.33.0 RULES BASELINE</div>
     </div>
 
     <div class="game-status-bar">
@@ -27,9 +29,13 @@
       <div class="status-badge" style="max-width: 280px;">
         <div style="display: flex; align-items: center; gap: 6px;">
           <span class="status-label">Rogue Agent Version</span>
-          <button class="info-icon-btn" onclick="openModal('versionsModal')" title="View All Rogue Agent Versions for this Match" style="width: 16px; height: 16px; font-size: 0.65rem;">📋</button>
+          <button class="info-icon-btn" onclick="openModal('versionsModal')"
+            title="View All Rogue Agent Versions for this Match"
+            style="width: 16px; height: 16px; font-size: 0.65rem;">📋</button>
         </div>
-        <span class="status-value" id="versionCardDisplay" style="font-size: 0.8rem; font-weight: normal; cursor: pointer;" onclick="openModal('versionsModal')" title="Click to view all match versions">
+        <span class="status-value" id="versionCardDisplay"
+          style="font-size: 0.8rem; font-weight: normal; cursor: pointer;" onclick="openModal('versionsModal')"
+          title="Click to view all match versions">
           Script Kiddie (v1.0)
         </span>
       </div>
@@ -37,11 +43,14 @@
         <span class="status-label">Corruption Track:</span>
         <div class="corruption-cells" id="corruptionCells"></div>
       </div>
-      <div id="singularityAlert" style="display: none; color: #ff0055; font-weight: 800; font-size: 0.85rem; animation: pulse 1.5s infinite;"></div>
+      <div id="singularityAlert"
+        style="display: none; color: #ff0055; font-weight: 800; font-size: 0.85rem; animation: pulse 1.5s infinite;">
+      </div>
     </div>
 
     <div class="header-actions">
-      <button class="action-btn" id="btnViewVersions" onclick="openModal('versionsModal')" title="View all Rogue Agent versions and upgrade roadmap for this match">Rogue Agent Versions</button>
+      <button class="action-btn" id="btnViewVersions" onclick="openModal('versionsModal')"
+        title="View all Rogue Agent versions and upgrade roadmap for this match">Rogue Agent Versions</button>
       <button class="btn-primary" onclick="openModal('newGameModal')">New Match</button>
     </div>
   </header>
@@ -50,14 +59,18 @@
   <nav class="tabletop-nav-bar">
     <div class="tabletop-nav-left">
       <span class="tabletop-nav-label">TABLETOP BOARDS:</span>
-      <button class="nav-view-btn active" id="viewBtnTabletop" onclick="setBoardView('tabletop')">🖥️ Complete Tabletop</button>
-      <button class="nav-view-btn" id="viewBtnTerminals" onclick="setBoardView('terminals')">📋 Company Terminals</button>
+      <button class="nav-view-btn active" id="viewBtnTabletop" onclick="setBoardView('tabletop')">🖥️ Complete
+        Tabletop</button>
+      <button class="nav-view-btn" id="viewBtnTerminals" onclick="setBoardView('terminals')">📋 Company
+        Terminals</button>
       <button class="nav-view-btn" id="viewBtnAgent" onclick="setBoardView('agent')">🤖 SETEC Agent Board</button>
       <button class="nav-view-btn" id="viewBtnMarket" onclick="setBoardView('market')">🛒 Software Market</button>
     </div>
     <div class="tabletop-nav-right">
-      <button class="action-btn" onclick="openModal('cubeEffectsModal')" style="font-size: 0.75rem; padding: 4px 10px;">ℹ Threat Reference</button>
-      <button class="action-btn" onclick="openModal('versionsModal')" style="font-size: 0.75rem; padding: 4px 10px;">📋 Version Roadmap</button>
+      <button class="action-btn" onclick="openModal('cubeEffectsModal')"
+        style="font-size: 0.75rem; padding: 4px 10px;">ℹ Threat Reference</button>
+      <button class="action-btn" onclick="openModal('versionsModal')" style="font-size: 0.75rem; padding: 4px 10px;">📋
+        Version Roadmap</button>
     </div>
   </nav>
 
@@ -84,7 +97,8 @@
           <div class="panel-header">
             <div class="panel-title">
               <span>NETWORK ACTIVITY LOG</span>
-              <span style="font-size: 0.7rem; color: var(--text-dim); text-transform: none; font-weight: normal;">Live System Telemetry</span>
+              <span style="font-size: 0.7rem; color: var(--text-dim); text-transform: none; font-weight: normal;">Live
+                System Telemetry</span>
             </div>
           </div>
           <div class="event-log-container" id="eventLog"></div>
@@ -96,7 +110,8 @@
   <!-- Context-Sensitive Action Dock -->
   <footer class="action-dock">
     <div style="display: flex; flex-direction: column;">
-      <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim); font-weight: 700;">Tactical Operations Dock</span>
+      <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim); font-weight: 700;">Tactical
+        Operations Dock</span>
       <span style="font-size: 0.85rem; color: #fff;">Execute active phase actions below</span>
     </div>
     <div class="action-dock-controls" id="dockControls"></div>
@@ -106,10 +121,11 @@
   <div class="modal-overlay" id="newGameModal">
     <div class="modal-content">
       <h3 style="color: #fff; font-size: 1.2rem;">Start New Rogue Agent Match</h3>
-      
+
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <label style="font-size: 0.85rem; color: var(--text-dim);">Player Count:</label>
-        <select id="modalPlayerCount" style="padding: 8px; background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); border-radius: 4px;">
+        <select id="modalPlayerCount"
+          style="padding: 8px; background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); border-radius: 4px;">
           <option value="4" selected>4 Players (1 Human vs 3 Bots — 12 Secrets)</option>
           <option value="3">3 Players (1 Human vs 2 Bots — 8 Secrets)</option>
           <option value="2">2 Players (1 Human vs 1 Bot — 8 Secrets)</option>
@@ -119,7 +135,8 @@
 
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <label style="font-size: 0.85rem; color: var(--text-dim);">Client Company (Player 1):</label>
-        <select id="modalCompany" style="padding: 8px; background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); border-radius: 4px;">
+        <select id="modalCompany"
+          style="padding: 8px; background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); border-radius: 4px;">
           <option value="RANDOM" selected>🎲 Random Deal (Standard Rules)</option>
           <option value="HELIX">Helix Biomedical Consortium (Patent Lvl 1 [3 🔬 Cost], +2 🔬 Research)</option>
           <option value="OMNIDYNE">Omnidyne Systems (Triage Lvl 1 [Bandwidth 3], Release Lvl 1 [Bandwidth 5])</option>
@@ -132,17 +149,20 @@
 
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <label style="font-size: 0.85rem; color: var(--text-dim);">RNG Master Seed (Optional):</label>
-        <input type="number" id="modalSeed" placeholder="Leave empty for random seed" style="padding: 8px; background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); border-radius: 4px;">
+        <input type="number" id="modalSeed" placeholder="Leave empty for random seed"
+          style="padding: 8px; background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); border-radius: 4px;">
       </div>
 
       <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
         <input type="checkbox" id="modalRandomizeCards" checked style="cursor: pointer; width: 16px; height: 16px;">
-        <label for="modalRandomizeCards" style="font-size: 0.85rem; color: #fff; cursor: pointer;">Randomize Variant (★) &amp; Version Cards (Standard Rules)</label>
+        <label for="modalRandomizeCards" style="font-size: 0.85rem; color: #fff; cursor: pointer;">Randomize Variant (★)
+          &amp; Version Cards (Standard Rules)</label>
       </div>
 
       <div style="display: flex; align-items: center; gap: 8px; margin-top: 2px;">
         <input type="checkbox" id="modalEnableAsym" checked style="cursor: pointer; width: 16px; height: 16px;">
-        <label for="modalEnableAsym" style="font-size: 0.85rem; color: #fff; cursor: pointer;">Enable Corporate Asymmetry &amp; Hardware Tracks (Standard Rules)</label>
+        <label for="modalEnableAsym" style="font-size: 0.85rem; color: #fff; cursor: pointer;">Enable Corporate
+          Asymmetry &amp; Hardware Tracks (Standard Rules)</label>
       </div>
 
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
@@ -167,15 +187,18 @@
   <!-- Modal: Agent Cube Effects Reference -->
   <div class="modal-overlay" id="cubeEffectsModal" onclick="if (event.target === this) closeModal('cubeEffectsModal')">
     <div class="modal-content" style="max-width: 580px;">
-      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+      <div
+        style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
         <h3 style="color: #fff; font-size: 1.15rem; margin: 0; display: flex; align-items: center; gap: 8px;">
           <span>Rogue Agent Threat Cubes</span>
         </h3>
-        <button class="action-btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="closeModal('cubeEffectsModal')">✕</button>
+        <button class="action-btn" style="padding: 4px 10px; font-size: 0.8rem;"
+          onclick="closeModal('cubeEffectsModal')">✕</button>
       </div>
 
       <p style="font-size: 0.8rem; color: var(--text-dim); margin: 0;">
-        During <strong>Phase 2: Compiler Drop &amp; Defense</strong>, cubes exit the Cube Tower into the tray. Resolve Black cubes first in Step 2A, then Red, Blue, and Green attacks simultaneously in Step 2B.
+        During <strong>Phase 2: Compiler Drop &amp; Defense</strong>, cubes exit the Cube Tower into the tray. Resolve
+        Black cubes first in Step 2A, then Red, Blue, and Green attacks simultaneously in Step 2B.
       </p>
 
       <div class="cube-effects-grid" style="grid-template-columns: 1fr;">
@@ -184,7 +207,8 @@
             <span class="cube-badge red">Red (Ransomware)</span>
             <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Red Shield or Any Shield</span>
           </div>
-          <p>Extorts <strong>$1</strong> per unblocked cube. If any unpaid ransom remains (shortfall &gt; $0), lose a <strong>flat 1 Corporate Secret</strong> dark web leak fine. Research tokens (🔬) cannot absorb ransom.</p>
+          <p>Extorts <strong>$1</strong> per unblocked cube. If any unpaid ransom remains (shortfall &gt; $0), lose a
+            <strong>flat 1 Corporate Secret</strong> dark web leak fine. Research tokens (🔬) cannot absorb ransom.</p>
         </div>
 
         <div class="cube-effect-item">
@@ -192,7 +216,8 @@
             <span class="cube-badge blue">Blue (Spyware)</span>
             <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Blue Shield or Any Shield</span>
           </div>
-          <p>Directly exfiltrates data: lose <strong>1 Corporate Secret</strong> per unblocked cube. Reaching <strong>0 (or fewer) Secrets</strong> immediately triggers a <strong>Total Data Breach (Patient Zero)</strong>!</p>
+          <p>Directly exfiltrates data: lose <strong>1 Corporate Secret</strong> per unblocked cube. Reaching <strong>0
+              (or fewer) Secrets</strong> immediately triggers a <strong>Total Data Breach (Patient Zero)</strong>!</p>
         </div>
 
         <div class="cube-effect-item">
@@ -200,7 +225,9 @@
             <span class="cube-badge green">Malware (Logic Bombs)</span>
             <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Green Shield or Any Shield</span>
           </div>
-          <p>Corrupts systems: for each unblocked cube, move <strong>1 active die from In Production</strong> (Income or Shields) to your <strong>Glitched Box</strong> in Under Development (or sacrifice a White Contractor). If In Production is empty, excess malware <strong>has 0 effect</strong> (no dice destroyed)!</p>
+          <p>Corrupts systems: for each unblocked cube, move <strong>1 active die from In Production</strong> (Income or
+            Shields) to your <strong>Glitched Box</strong> in Under Development (or sacrifice a White Contractor). If In
+            Production is empty, excess malware <strong>has 0 effect</strong> (no dice destroyed)!</p>
         </div>
 
         <div class="cube-effect-item">
@@ -208,7 +235,9 @@
             <span class="cube-badge black">Black (Corruption)</span>
             <span style="font-size: 0.72rem; color: var(--text-dim);">Step 2A: System Upgrade</span>
           </div>
-          <p>Exited Black cubes advance the active Version's <strong>Corruption Track</strong>. When the track fills, the Rogue Agent queues a Version upgrade for the start of the next round (or triggers <strong>Singularity</strong> when <strong>v3.0 fills</strong>)!</p>
+          <p>Exited Black cubes advance the active Version's <strong>Corruption Track</strong>. When the track fills,
+            the Rogue Agent queues a Version upgrade for the start of the next round (or triggers
+            <strong>Singularity</strong> when <strong>v3.0 fills</strong>)!</p>
         </div>
       </div>
 
@@ -221,26 +250,31 @@
   <!-- Modal: Rogue Agent Versions Roadmap -->
   <div class="modal-overlay" id="versionsModal" onclick="if (event.target === this) closeModal('versionsModal')">
     <div class="modal-content" style="max-width: 820px; width: 95%;">
-      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+      <div
+        style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
         <div>
           <h3 style="color: #fff; font-size: 1.25rem; margin: 0; display: flex; align-items: center; gap: 8px;">
             <span>Rogue Agent Versions Roadmap</span>
             <span class="version-badge" id="versionsModalRoundBadge">Round 1</span>
           </h3>
           <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 4px; margin-bottom: 0;">
-            All Rogue Agent version cards selected for this match. The AI compiles code and advances toward Singularity across these versions.
+            All Rogue Agent version cards selected for this match. The AI compiles code and advances toward Singularity
+            across these versions.
           </p>
         </div>
-        <button class="action-btn" style="padding: 4px 10px; font-size: 0.85rem;" onclick="closeModal('versionsModal')">✕</button>
+        <button class="action-btn" style="padding: 4px 10px; font-size: 0.85rem;"
+          onclick="closeModal('versionsModal')">✕</button>
       </div>
 
       <div class="versions-roadmap-grid" id="versionsModalDeck">
         <!-- Rendered dynamically by app.js -->
       </div>
 
-      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px; flex-wrap: wrap; gap: 10px;">
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px; flex-wrap: wrap; gap: 10px;">
         <span style="font-size: 0.8rem; color: var(--text-dim);">
-          Each Version card features <strong>4 (v1.0) / 5 (v2.0) / 6 (v3.0) Corruption Track spaces</strong>. Filling v3.0 triggers <strong>Singularity</strong>!
+          Each Version card features <strong>4 (v1.0) / 5 (v2.0) / 6 (v3.0) Corruption Track spaces</strong>. Filling
+          v3.0 triggers <strong>Singularity</strong>!
         </span>
         <button class="action-btn btn-accent" onclick="closeModal('versionsModal')">Close</button>
       </div>
@@ -249,4 +283,5 @@
 
   <script type="module" src="js/main.js"></script>
 </body>
+
 </html>

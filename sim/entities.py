@@ -599,8 +599,7 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                     CorruptionSpace(index=5, label="Return 1 Colored Die & glitch 1 die", return_colored_dice=1, demote_dice=1),
                     CorruptionSpace(
                         index=6,
-                        label="Singularity: Add 2R, 2B, 2G",
-                        add_cubes={CubeColor.RED: 2, CubeColor.BLUE: 2, CubeColor.GREEN: 2},
+                        label="Singularity",
                         is_singularity=True,
                     ),
                 ),
@@ -621,9 +620,8 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                     CorruptionSpace(index=5, label="Return 1 Colored Die & glitch 1 die", return_colored_dice=1, demote_dice=1),
                     CorruptionSpace(
                         index=6,
-                        label="Singularity: Lose 1 Secret + Add 2R, 2B, 1G",
+                        label="Singularity: Lose 1 Secret",
                         lose_secrets=1,
-                        add_cubes={CubeColor.RED: 2, CubeColor.BLUE: 2, CubeColor.GREEN: 1},
                         is_singularity=True,
                     ),
                 ),
@@ -729,8 +727,7 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                 CorruptionSpace(index=5, label="Return 1 Colored Die", return_colored_dice=1),
                 CorruptionSpace(
                     index=6,
-                    label="Singularity: Add 2R, 2B, 2G",
-                    add_cubes={CubeColor.RED: 2, CubeColor.BLUE: 2, CubeColor.GREEN: 2},
+                    label="Singularity",
                     is_singularity=True,
                 ),
             ),
@@ -751,9 +748,8 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                 CorruptionSpace(index=5, label="Return 1 Colored Die", return_colored_dice=1),
                 CorruptionSpace(
                     index=6,
-                    label="Singularity: Lose 1 Secret + Add 2R, 2B, 1G",
+                    label="Singularity: Lose 1 Secret",
                     lose_secrets=1,
-                    add_cubes={CubeColor.RED: 2, CubeColor.BLUE: 2, CubeColor.GREEN: 1},
                     is_singularity=True,
                 ),
             ),

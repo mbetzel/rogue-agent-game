@@ -424,14 +424,10 @@ class TestV03Rules(unittest.TestCase):
         engine._execute_phase_2(commitments)
 
         self.assertTrue(engine.state.singularity_triggered)
-        self.assertTrue(engine.state.is_final_round)
-        self.assertFalse(engine.state.game_over)
+        # In v0.33.0 INV-SINGULARITY-IMMEDIATE-01: Singularity triggers immediate game over (skips Phase 3)
+        self.assertFalse(engine.state.is_final_round)
+        self.assertTrue(engine.state.game_over)
         self.assertEqual(engine.state.end_reason, EndGameReason.SINGULARITY)
-
-        # Both surviving players should get their operations turn
-        engine._execute_phase_3()
-        self.assertEqual(len(p0_acted), 1)
-        self.assertEqual(len(p1_acted), 1)
 
     # -------------------------------------------------------------------------
     # 14. Total Wipeout Immediate Game Over & Overflow Scoring

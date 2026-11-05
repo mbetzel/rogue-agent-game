@@ -792,11 +792,15 @@ def run_v320_telemetry_sweep(
                 "elapsed_seconds": pod_elapsed,
             }
 
+            pz_matches = end_reasons.get("patient_zero", end_reasons.get("PATIENT_ZERO", 0))
+            wipeout_matches = end_reasons.get("total_wipeout", end_reasons.get("TOTAL_WIPEOUT", 0))
+            singularity_matches = end_reasons.get("singularity", end_reasons.get("SINGULARITY", 0))
             print(
                 f"  --> {num_players}P Done in {pod_elapsed:.2f}s | "
                 f"Mean Rounds: {mean_rounds:.2f} | "
-                f"Match PZ: {end_reasons.get('PATIENT_ZERO', 0)/num_games*100:.1f}%, "
-                f"Wipeout: {end_reasons.get('TOTAL_WIPEOUT', 0)/num_games*100:.1f}% | "
+                f"Match PZ: {pz_matches/num_games*100:.1f}%, "
+                f"Wipeout: {wipeout_matches/num_games*100:.1f}%, "
+                f"Singularity: {singularity_matches/num_games*100:.1f}% | "
                 f"Player Surv: {total_survivors_in_pod/total_player_games_in_pod*100:.1f}% vs PZ: {total_pz_in_pod/total_player_games_in_pod*100:.1f}% | "
                 f"Early Death: {early_deaths_count/total_player_games_in_pod*100:.2f}%"
             )
@@ -816,12 +820,15 @@ def run_v320_telemetry_sweep(
     tot_pz = sum(results[f"{p}P"]["patient_zeros"] for p in pod_counts)
     for p in pod_counts:
         r = results[f"{p}P"]
+        pz_pct = r['end_reasons'].get('patient_zero', r['end_reasons'].get('PATIENT_ZERO', 0)) / r['num_games'] * 100
+        wipeout_pct = r['end_reasons'].get('total_wipeout', r['end_reasons'].get('TOTAL_WIPEOUT', 0)) / r['num_games'] * 100
+        singularity_pct = r['end_reasons'].get('singularity', r['end_reasons'].get('SINGULARITY', 0)) / r['num_games'] * 100
         print(
             f"  {p}P Pod ({r['num_games']} games, {r['player_games']} player-games): "
             f"Mean Rounds={r['mean_rounds']:.2f} (v1={r['mean_v1_rounds']:.2f}, v2={r['mean_v2_rounds']:.2f}, v3={r['mean_v3_rounds']:.2f}) | "
-            f"Match End: PZ={r['end_reasons'].get('PATIENT_ZERO', 0)/r['num_games']*100:.1f}%, "
-            f"Wipeout={r['end_reasons'].get('TOTAL_WIPEOUT', 0)/r['num_games']*100:.1f}%, "
-            f"Singularity={r['end_reasons'].get('SINGULARITY', 0)/r['num_games']*100:.1f}% | "
+            f"Match End: PZ={pz_pct:.1f}%, "
+            f"Wipeout={wipeout_pct:.1f}%, "
+            f"Singularity={singularity_pct:.1f}% | "
             f"Player Survival={r['player_survival_rate']*100:.1f}% ({r['survivors']:,}) vs "
             f"Player PZ={r['player_pz_rate']*100:.1f}% ({r['patient_zeros']:,}) | "
             f"Early Death (<=R4)={r['early_death_rate']*100:.2f}% | "

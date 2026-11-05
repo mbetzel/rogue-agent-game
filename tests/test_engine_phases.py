@@ -138,8 +138,8 @@ class TestEnginePhases(unittest.TestCase):
         engine._execute_phase_2(commitments)
 
         self.assertTrue(engine.state.singularity_triggered)
-        self.assertTrue(engine.state.is_final_round)
-        self.assertFalse(engine.state.game_over)
+        self.assertFalse(engine.state.is_final_round)
+        self.assertTrue(engine.state.game_over)
         self.assertEqual(engine.state.end_reason, EndGameReason.SINGULARITY)
 
     def test_phase3_operations_and_turn_rotation(self) -> None:

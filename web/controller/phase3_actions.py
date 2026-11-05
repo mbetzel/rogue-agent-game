@@ -216,10 +216,13 @@ def confirm_income(
         if remaining_needed > 0:
             for _ in range(remaining_needed):
                 if player.contractor_dice:
-                    player.contractor_dice.pop(0)
+                    c_die = player.contractor_dice.pop(0)
+                    if c_die in player.in_production_dice:
+                        player.in_production_dice.remove(c_die)
                     controller.state.contractor_supply += 1
                 elif player.in_production_dice:
-                    def glitch_sort_key(d: Die) -> Tuple[int, int, int, int]:
+                    def glitch_sort_key(d: Die) -> Tuple[int, int, int, int, int]:
+                        is_not_white = 0 if d.color == DieColor.WHITE else 1
                         role = getattr(d, "production_role", None)
                         is_shield = 0 if role in (
                             ProductionRole.RED_SHIELD,
@@ -236,8 +239,9 @@ def confirm_income(
                                 or getattr(face, "star_code", None) in ("B3", "R1", "G1", "G2")
                             )
                         ) else 0
-                        is_gray = 0 if d.color == DieColor.GRAY else 1
-                        return (is_shield, has_phase3_output, is_gray, getattr(d, "cost", 0))
+                        is_gray = 0 if d.color in (DieColor.GRAY, DieColor.WHITE) else 1
+                        return (is_not_white, is_shield, has_phase3_output, is_gray, getattr(d, "cost", 0))
+
                     target_die = min(player.in_production_dice, key=glitch_sort_key)
                     player.in_production_dice.remove(target_die)
                     for slot_color in ["red", "blue", "green", "any"]:
@@ -247,7 +251,12 @@ def confirm_income(
                     target_die.is_locked = False
                     target_die.chosen_choice_index = None
                     target_die.current_face = None
-                    player.glitched_dice.append(target_die)
+                    if target_die.color == DieColor.WHITE:
+                        if target_die in player.contractor_dice:
+                            player.contractor_dice.remove(target_die)
+                        controller.state.contractor_supply += 1
+                    else:
+                        player.glitched_dice.append(target_die)
                 else:
                     # MALWARE FIZZLE: in_production_dice is empty. Zero penalty!
                     controller.event_log.append(

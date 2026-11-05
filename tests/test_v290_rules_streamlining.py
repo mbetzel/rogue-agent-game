@@ -140,7 +140,8 @@ class TestV290RulesStreamlining(unittest.TestCase):
 
         self.assertEqual(engine.state.corruption_track, 6)
         self.assertTrue(engine.state.singularity_triggered)
-        self.assertTrue(engine.state.is_final_round)
+        self.assertFalse(engine.state.is_final_round)
+        self.assertTrue(engine.state.game_over)
 
     def test_hash_matches_completely_removed(self) -> None:
         """TEST-V290-04 (INV-HASH-EXCISE-01): Roll 3 identical faces; verify zero corporate

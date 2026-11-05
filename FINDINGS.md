@@ -1629,3 +1629,147 @@ Following Phase 38 (`v0.31.0`), pre-SDLC mathematical modeling and Variant Card 
 
 **Status: OFFICIALLY APPROVED (`v0.32.0` Baseline).**
 
+---
+
+## 28. Phase 41 Baseline (`v0.33.0`): Step 2A Agency, White Contractor Sacrifice Enforcement & Immediate Singularity
+
+### A. Context, Pre-SDLC Modeling Diagnostics & Problem Statements
+Following Phase 39 (`v0.32.0`) and the Phase 40 canonical terminology alignment, pre-SDLC systems modeling and engine audits identified three critical design friction points in **Phase 2 Step 2A (Resolve Black Corruption Cubes, Track Spaces & Version Upgrades)** and **Step 2C (End Game Triggers)**:
+
+1. **Procedural Return Blindness on `v3.0` Space 5 (`Return 1 Colored Die`):**
+   - In legacy code prior to `v0.33.0`, `return_player_colored_dice_step2a` executed a hardcoded, non-agentic zone loop (`Glitched Box` $\to$ `In Production Income` $\to$ `In Production Shields` $\to$ `Ready for Release`).
+   - This produced severe economic self-sabotage: active, high-yield `In Production` Income dice (such as a `$6` Yellow `Y1` or `Y3` about to harvest `+1 Corporate Secret` in Phase 3A) were forcibly scrapped before a redundant `In Production` Shield die whose incoming attack color had `0` exited cubes!
+   - Per `RULES.md`, players possess full tactical agency when choosing which owned Colored Die to discard. The engine lacked a player/bot decision hook with mathematical valuation tiering.
+
+2. **White Contractor Pipeline Contamination (`INV-STEP2A-CONTRACTOR-SACRIFICE-01`):**
+   - Canonical rules establish that White Contractor dice are temporary, single-round mercenaries that must **never** enter the permanent CI/CD pipeline (`Under Development`).
+   - However, in legacy Step 2A demotions and Step 2B Green Malware resolution, a White Contractor die deployed in `In Production` that was chosen to absorb damage was inadvertently appended to `glitched_dice` or orphaned in production while popping `contractor_dice`.
+   - This caused an illegal component leak, contaminating the player's permanent hardware triage conveyor with temporary contractor dice.
+
+3. **Singularity Pacing Distortion & Dead Space 6 Payloads (`INV-SINGULARITY-IMMEDIATE-01`):**
+   - In legacy drafts, reaching `v3.0` Space 6 treated Singularity as a delayed trigger that resolved Step 2B attack damage and Phase 3 operations as a "Final Round wrap-up".
+   - This created acute design incoherence:
+     - `v3.0` Space 6 retained obsolete cube injection payloads (*Zero-Day Override* `Add 2R, 2B, 2G` and *Corrupted Kernel* `Add 2R, 2B, 1G`) that sat uselessly in the cup because no subsequent compile would ever occur.
+     - Defending operatives who successfully accelerated SETEC to cryptographic Singularity could still be eliminated mid-compile by random attack drops in Step 2B.
+     - Space 6 non-cube effects (*Corrupted Kernel* `Lose 1 Secret`) lacked complete Patient Zero breach metadata.
+
+---
+
+### B. Approved Rule & Mechanical Changes
+1. **`INV-RETURN-CHOICE-01` (Step 2A Colored Software Dice Return Agency):**
+   - When a corruption space triggers *Return X Colored Dice* (`v3.0` Space 5), the defending player chooses which owned Colored Software Dice across their mat to return to the Market supply (or scrap if Purple).
+   - In simulation bots, implemented `BaseBot.choose_colored_dice_to_return` utilizing a rigorous 7-tier mathematical valuation hierarchy:
+     - **Tier 0 (Glitched Box):** Corrupted, offline dice quarantined for repair; returning them clears damaged hardware without expending Triage Bandwidth.
+     - **Tier 1 (Scanned Box):** Remediated dice awaiting graduation; returning them preserves active deployed production modules.
+     - **Tier 2 (In Production Redundant Pure Shield):** Shields assigned to threat colors that exited `0` cubes in the current drop; returning them incurs zero defensive penalty.
+     - **Tier 3 (Ready for Release):** Staged modules not yet deployed this round.
+     - **Tier 4 (In Production Low Income):** Active revenue dice producing low expected yield ($< \$2$).
+     - **Tier 5 (In Production Star / High Income):** Premium revenue dice generating $\ge \$2$, research tokens, or `+1 Corporate Secret`.
+     - **Tier 6 (In Production Strictly Needed Shield):** Shields actively required to absorb non-zero incoming threat cubes in Step 2B; strictly preserved from return (0 returned).
+   - Within each tier, lowest replacement cost (`cost`) followed by lowest `die_id` breaks ties deterministically.
+
+2. **`INV-STEP2A-CONTRACTOR-SACRIFICE-01` (White Contractor Sacrifice Enforcement):**
+   - Any White Contractor die in `In Production` chosen to absorb a Step 2A corruption glitch or Step 2B Green Malware hit is immediately removed from *both* `in_production_dice` and `contractor_dice` and returned to `contractor_supply`.
+   - White Contractor dice are **strictly barred from entering `glitched_dice`** under all conditions (`contractor_glitched_box_violations = 0`).
+   - In `choose_dice_to_glitch`, bots prioritize sacrificing White Contractors over permanent hardware within the same tactical tier, capitalizing on the contractor's zero triage recovery debt.
+
+3. **`INV-SINGULARITY-IMMEDIATE-01` (Immediate Singularity Game Over & Clean Metadata):**
+   - When the 6th Black Cube covers `v3.0` Space 6, resolve Space 6's printed non-cube effect (e.g., *Corrupted Kernel* `Lose 1 Secret`), check for Total Data Breach with full metadata (`elimination_round`, `elimination_reason`, `breach_depth`), and **terminate the match IMMEDIATELY at the end of Step 2A**.
+   - Step 2B attack cube damage resolution and Phase 3 operations are completely skipped.
+   - All dead `add_cubes` on Space 6 are permanently excised across rules, engine, and Print-and-Play assets.
+   - Surviving non-contractor dice in `In Production` return to `Ready for Release` and are fully credited toward Hierarchical Tiebreaker #2 (Active Infrastructure).
+
+---
+
+### C. Multi-Pod Telemetry Summary (3,000 Matches Total; 9,000 Player-Games; Base Seed `42`)
+
+#### 1. Pacing, Survival & Elimination Metrics Across Pods
+
+| Metric | 2-Player Pod (`2P`) | 3-Player Pod (`3P`) | 4-Player Pod (`4P`) | Combined (`3,000` Matches) | Target Corridor |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Matches / Player-Games** | 1,000 / 2,000 | 1,000 / 3,000 | 1,000 / 4,000 | **3,000 / 9,000** | — |
+| **Mean Match Duration** | **7.98** (±1.60) rds | **7.54** (±1.61) rds | **8.72** (±1.29) rds | **8.08** (±1.50) rds | 7.0–9.0 rounds |
+| **Median Duration** | **8.0** rds | **8.0** rds | **9.0** rds | **8.0** rds | 7.0–9.0 rounds |
+| **Duration Range (Min - Max)** | 3 - 11 rds | 3 - 11 rds | 5 - 11 rds | **3 - 11** rds | Min $\ge 3$, Max $\le 12$ |
+| **`v1.0` Mean Rounds** | 4.50 rds | 4.48 rds | 4.49 rds | **4.49** rds | 3.5–4.8 rounds |
+| **`v2.0` Mean Rounds** | 2.78 rds | 2.55 rds | 3.16 rds | **2.83** rds | 2.0–3.2 rounds |
+| **`v3.0` Mean Rounds** | 0.71 rds | 0.51 rds | 1.08 rds | **0.77** rds | 0.4–1.2 rounds |
+| **Singularity Rate (%)** | **18.2%** (182) | **8.7%** (87) | **36.0%** (360) | **21.0%** (629) | 10%–40% |
+| **Patient Zero Matches (%)** | **65.3%** (653) | **85.4%** (854) | **63.2%** (632) | **71.3%** (2,139) | Primary Trigger |
+| **Total Wipeout Matches (%)** | **16.5%** (165) | **5.9%** (59) | **0.8%** (8) | **7.7%** (232) | Safe Ceilings |
+| **Player Survival Rate (%)** | **49.7%** (994) | **57.5%** (1,726) | **76.6%** (3,066) | **64.3%** (5,786) | Robust Survival Baseline |
+| **Early Deaths ($\le$ R4) (%)** | **1.05%** (21) | **1.13%** (34) | **0.00%** (0) | **0.61%** (55) | $< 2.0\%$ |
+| **Winning Secrets Mean** | **2.77** Secrets | **3.96** Secrets | **6.52** Secrets | **4.42** Secrets | Tense Victory Margins |
+| **Survivor Secrets Mean** | **3.28** Secrets | **3.55** Secrets | **4.90** Secrets | **3.91** Secrets | Razor-Thin Buffers |
+| **Round Limit Stalls (12 rds)** | **0.0%** (0) | **0.0%** (0) | **0.0%** (0) | **0.0%** (0) | Strictly 0.0% |
+
+#### 2. Step 2A Return Colored Software Dice Valuation Distribution
+Across 3,000 matches, **2,881 return events** occurred, returning **2,825 total dice** (429 returned to market supply, 2,396 Purple Specialist dice scrapped):
+- **Tier 0 (Glitched Box):** **1,001 dice (35.4%)** — Defending players cleared quarantined, damaged dice first, dodging future triage costs.
+- **Tier 1 (Scanned Box):** **1,199 dice (42.4%)** — Offline remediated dice awaiting release graduation were returned next, preserving active deployment.
+- **Tier 2 (In Production Redundant Pure Shield):** **334 dice (11.8%)** — Shields deployed against attack colors that exited 0 cubes were safely liquidated.
+- **Tier 3 (Ready for Release):** **0 dice (0.0%)** — Bypassed because damaged, offline, or redundant units were readily available.
+- **Tier 4 (In Production Low Income):** **223 dice (7.9%)** — Low-value ($1) income dice surrendered only when no non-vital units existed.
+- **Tier 5 (In Production Star / High Income):** **68 dice (2.4%)** — High-value star modules preserved in 97.6% of all scenarios.
+- **Tier 6 (In Production Strictly Needed Shield):** **0 dice (0.00%)** — Strictly needed shields were **100% preserved**, completely preventing artificial defensive blowouts in Step 2B.
+- **Tactical Agency Verdict:** **89.6%** of returned dice came from Tiers 0–2 (damaged, offline, or redundant defense). Zero defensive shields required to prevent data breaches were sacrificed.
+
+#### 3. White Contractor Pipeline Discard & Invariant Verification
+- **Total Contractor Sacrifices:** **11,576 sacrifices** (1,544 Step 2A corruption demotions + 10,032 Step 2B Green Malware hits).
+- **Glitched Box Contamination Violations:** **Strictly 0 violations** across all 9,000 player-games (`contractor_glitched_box_violations = 0`).
+- **Pipeline Integrity:** Temporary contractor dice reliably return to the central supply, preserving the CI/CD hardware triage conveyor exclusively for permanent software assets.
+
+#### 4. Immediate Singularity Execution & Metadata Audit
+- **Singularity Rate:** Triggered in **629 matches (21.0%)** (18.2% in 2P, 8.7% in 3P, 36.0% in 4P).
+- **Clean Step 2A Termination:** Step 2B attack cube damage and Phase 3 operations were skipped in **100% of Singularity games**.
+- **Corrupted Kernel Space 6 Breaches:** Caused **88 player eliminations**, with **100% valid metadata** (`elimination_round`, `elimination_reason = "CORRUPTED_KERNEL_SPACE_6"`, and `breach_depth = max(0, -secrets)`).
+
+#### 5. Bot, Client Company & White Hat Operative Balance Summary
+- **Bot Archetypes (`1,800` matches each):**
+  - `AdaptiveBalancedBot`: **61.2% win** | 85.4% survival | 4.04 mean secrets (Master generalist)
+  - `AccelerationistBot`: **44.1% win** | 76.4% survival | 3.10 mean secrets (Pushes compiler pace)
+  - `SecOpsTurtleBot`: **32.9% win** | 74.1% survival | 2.85 mean secrets (Defensive anchor)
+  - `RecklessSaboteurBot`: **23.2% win** | 60.7% survival | 1.88 mean secrets (High-risk competitor)
+  - `VentureGreedBot`: **5.3% win** | 24.9% survival | -0.07 mean secrets (Punished by illiquidity)
+- **Client Companies (`CEO`):**
+  - `DTO`: **61.7% win** | 81.0% survival | 4.01 mean secrets
+  - `HELIX`: **35.4% win** | 69.8% survival | 2.60 mean secrets
+  - `PROMETHEUS`: **32.7% win** | 64.3% survival | 2.23 mean secrets
+  - `MERIDIAN`: **30.0% win** | 64.9% survival | 2.30 mean secrets
+  - `AEGIS`: **26.3% win** | 61.5% survival | 2.08 mean secrets
+  - `OMNIDYNE`: **12.3% win** | 43.2% survival | 0.85 mean secrets
+- **White Hat Operatives:**
+  - `SPOOK`: **47.3% win** | 76.1% survival | 3.37 mean secrets
+  - `PHREAKER`: **32.1% win** | 59.8% survival | 2.14 mean secrets
+  - `CIPHER`: **32.0% win** | 63.1% survival | 2.25 mean secrets
+  - `ACOUSTIC`: **31.6% win** | 65.5% survival | 2.29 mean secrets
+  - `PRODIGY`: **29.6% win** | 62.0% survival | 2.19 mean secrets
+  - `OPERATOR`: **27.6% win** | 59.4% survival | 1.93 mean secrets
+  *(The 5 non-Spook operatives operate in an exceptionally tight **4.5% corridor** [27.6%–32.1%]).*
+
+---
+
+### D. Closure on Player Impact Management Vectors & Strategic Evaluation
+Phase 41 successfully resolves the remaining player experience and systems management vectors:
+
+1. **Restoration of Tactical Agency During Adversity:**
+   In competitive Euro games, forced discards feel punitive if the system robs the player of triage decisions. By enabling players to choose which module to return on `v3.0` Space 5—and modeling bots to prioritize offline or redundant units (89.6% of choices)—defenders maintain complete command over their CI/CD pipeline without suffering unprovoked defensive collapses.
+
+2. **Absolute Cleanliness of Temporary Mercenaries:**
+   The strict enforcement of Contractor Sacrifice eliminates rules ambiguity at the table and prevents messy edge cases where discarded White dice could accidentally linger in the Glitched Box. Temporary contractors now strictly fulfill their thematic role: expendable computational buffers that vanish when compromised.
+
+3. **Singularity as an Organic, Exciting Climax:**
+   At **21.0% trigger frequency**, Singularity operates as an authentic existential threat rather than an unreachable edge case or an unpreventable railroad. Terminating immediately upon filling `v3.0` Space 6 delivers a crisp, dramatic climax: the mainframe compile reaches critical mass, the rogue agent completes its cryptographic breakthrough, and players immediately assess corporate survival based on secured secrets.
+
+---
+
+### E. Formal Design Sign-Off (`v0.33.0` Baseline)
+All Phase 41 qualitative and quantitative design goals have been verified:
+- [x] Step 2A tactical return agency verified across 2,881 events; 0 strictly needed shields sacrificed.
+- [x] White Contractor pipeline integrity verified across 11,576 sacrifices; 0 Glitched Box violations.
+- [x] Immediate Singularity game end executed cleanly across 629 matches; 0 dead cube injections; 100% valid breach metadata.
+- [x] Match pacing invariance established at 8.08 mean rounds (median 8.0 rounds) with 0.0% stalls.
+- [x] PnP components, simulation engine, web controller, and canonical rules draft completely synchronized.
+
+**Status: OFFICIALLY APPROVED (`v0.33.0` Baseline).**
+

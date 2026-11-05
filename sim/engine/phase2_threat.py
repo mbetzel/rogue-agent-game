@@ -82,8 +82,9 @@ def execute_phase_2(
                 if engine.state.corruption_track >= engine.state.corruption_track_capacity:
                     if engine.state.current_version_index >= len(engine.state.version_deck) - 1:
                         # Singularity reached on v3.0!
-                        engine.state.singularity_triggered = True
-                        break
+                        if curr_track and len(curr_track) > 0:
+                            engine.state.singularity_triggered = True
+                            break
                     else:
                         # Mark pending advance for next round start; excess cubes spill over immediately
                         engine.state.pending_version_advance = True
@@ -101,6 +102,16 @@ def execute_phase_2(
                         player_commitments=player_commitments,
                         exited_cubes=exited_cubes,
                     )
+                if (
+                    next_ver_idx >= len(engine.state.version_deck) - 1
+                    and spill_idx >= next_ver.track_capacity
+                ):
+                    engine.state.current_version_index = next_ver_idx
+                    engine.state.corruption_track = spill_idx
+                    engine.state.pending_version_advance = False
+                    engine.state.overflow_black_cubes_on_next_track = 0
+                    engine.state.singularity_triggered = True
+                    break
 
         # Apply P2 (Chaos Profiteer) Star bonus: +$2 per exited black cube
         if black_dropped > 0:
@@ -109,104 +120,137 @@ def execute_phase_2(
                     if die.current_face and die.current_face.star_code == "P2":
                         player.money += 2 * black_dropped
 
-        # Step 2B: Resolve Attack Cubes (Red, Blue, Green)
-        red_strength = exited_cubes.get(CubeColor.RED, 0)
-        blue_strength = exited_cubes.get(CubeColor.BLUE, 0)
-        green_strength = exited_cubes.get(CubeColor.GREEN, 0)
-
-        # Apply Active Version Directives to Attack Strength
-        active_directive = engine.state.active_directive_code
-        if active_directive == "CORRUPTED_KERNEL" and not engine.state.active_version.corruption_track:
-            # Legacy Corrupted Kernel directive without corruption track
-            if black_dropped >= engine.config.corrupted_kernel_black_threshold:
-                highest_color = max(
-                    [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN],
-                    key=lambda c: (
-                        exited_cubes.get(c, 0),
-                        c == CubeColor.RED,
-                        c == CubeColor.BLUE,
-                    ),
-                )
-                bonus = engine.config.corrupted_kernel_strength_bonus
-                if highest_color == CubeColor.RED:
-                    red_strength += bonus
-                elif highest_color == CubeColor.BLUE:
-                    blue_strength += bonus
-                elif highest_color == CubeColor.GREEN:
-                    green_strength += bonus
-
-        attack_strengths = {
-            CubeColor.RED: red_strength,
-            CubeColor.BLUE: blue_strength,
-            CubeColor.GREEN: green_strength,
-        }
-
-        # Resolve each player's committed shields against attacks
-        for player, rolled_dice, commitments in player_commitments:
-            should_defer = bool(defer_green_for_pids and player.player_id in defer_green_for_pids)
-            if should_defer:
-                player._pre_step2b_snapshot = {
-                    "money": player.money,
-                    "secrets": player.secrets,
-                    "patches": player.patches,
-                    "is_patient_zero": player.is_patient_zero,
-                    "elimination_round": player.elimination_round,
-                    "elimination_reason": player.elimination_reason,
-                    "breach_depth": player.breach_depth,
-                    "ability_v1_status": player.ability_v1_status,
-                    "ability_v2_status": player.ability_v2_status,
-                    "ability_v3_status": player.ability_v3_status,
-                    "rolled_dice": list(rolled_dice),
-                    "commitments": dict(commitments),
-                    "attack_strengths": dict(attack_strengths),
-                    "exited_cubes": dict(exited_cubes),
-                    "active_directive": active_directive,
-                }
-            else:
+        if engine.state.singularity_triggered:
+            # INV-SINGULARITY-IMMEDIATE-01: Game ends IMMEDIATELY at the end of Step 2A!
+            # Step 2B (Attack Cubes) and Phase 3 are skipped completely.
+            attack_strengths = {
+                CubeColor.RED: 0,
+                CubeColor.BLUE: 0,
+                CubeColor.GREEN: 0,
+            }
+            for player in engine.state.players:
                 player._pre_step2b_snapshot = None
-            resolve_player_defense_and_wear(
-                engine=engine,
-                player=player,
-                rolled_dice=rolled_dice,
-                commitments=commitments,
-                attack_strengths=attack_strengths,
-                exited_cubes=exited_cubes,
-                active_directive=active_directive,
-                defer_green_malware=should_defer,
-            )
+                player.pending_unblocked_green = 0
+                engine.state.contractor_supply += len(player.contractor_dice)
+                player.contractor_dice.clear()
+                player.hired_contractor_count = 0
+                for d in list(player.in_production_dice):
+                    player.in_production_dice.remove(d)
+                    d.production_role = None
+                    d.is_locked = False
+                    d.chosen_choice_index = None
+                    d.current_face = None
+                    if d.color == DieColor.WHITE:
+                        engine.state.contractor_supply += 1
+                    else:
+                        player.ready_for_release_dice.append(d)
 
-        # Snowball Recycle: Exited Red, Blue, Green cubes return to Staging Cup
-        for color in [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN]:
-            engine.state.staging_cup[color] = (
-                engine.state.staging_cup.get(color, 0) + exited_cubes.get(color, 0)
-            )
-
-        # Contractor Expiration: All remaining White Contractor dice across all players return to supply
-        for player in engine.state.players:
-            if defer_green_for_pids and player.player_id in defer_green_for_pids and getattr(player, "pending_unblocked_green", 0) > 0:
-                continue
-            engine.state.contractor_supply += len(player.contractor_dice)
-            player.contractor_dice.clear()
-            player.hired_contractor_count = 0
-            white_in_prod = [d for d in player.in_production_dice if d.color == DieColor.WHITE]
-            for wd in white_in_prod:
-                player.in_production_dice.remove(wd)
-                engine.state.contractor_supply += 1
-
-        # Step 2C: Check End Game Triggers
-        any_patient_zero = any(p.is_patient_zero for p in engine.state.players)
-        all_patient_zero = all(p.is_patient_zero for p in engine.state.players)
-
-        if all_patient_zero:
+            all_patient_zero = all(p.is_patient_zero for p in engine.state.players)
             engine.state.game_over = True
             engine.state.is_final_round = False
-            engine.state.end_reason = EndGameReason.TOTAL_WIPEOUT
-        elif any_patient_zero:
-            engine.state.is_final_round = True
-            engine.state.end_reason = EndGameReason.PATIENT_ZERO
-        elif engine.state.singularity_triggered:
-            engine.state.is_final_round = True
-            engine.state.end_reason = EndGameReason.SINGULARITY
+            if all_patient_zero:
+                engine.state.end_reason = EndGameReason.TOTAL_WIPEOUT
+            else:
+                engine.state.end_reason = EndGameReason.SINGULARITY
+        else:
+            # Step 2B: Resolve Attack Cubes (Red, Blue, Green)
+            red_strength = exited_cubes.get(CubeColor.RED, 0)
+            blue_strength = exited_cubes.get(CubeColor.BLUE, 0)
+            green_strength = exited_cubes.get(CubeColor.GREEN, 0)
+
+            # Apply Active Version Directives to Attack Strength
+            active_directive = engine.state.active_directive_code
+            if active_directive == "CORRUPTED_KERNEL" and not engine.state.active_version.corruption_track:
+                # Legacy Corrupted Kernel directive without corruption track
+                if black_dropped >= engine.config.corrupted_kernel_black_threshold:
+                    highest_color = max(
+                        [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN],
+                        key=lambda c: (
+                            exited_cubes.get(c, 0),
+                            c == CubeColor.RED,
+                            c == CubeColor.BLUE,
+                        ),
+                    )
+                    bonus = engine.config.corrupted_kernel_strength_bonus
+                    if highest_color == CubeColor.RED:
+                        red_strength += bonus
+                    elif highest_color == CubeColor.BLUE:
+                        blue_strength += bonus
+                    elif highest_color == CubeColor.GREEN:
+                        green_strength += bonus
+
+            attack_strengths = {
+                CubeColor.RED: red_strength,
+                CubeColor.BLUE: blue_strength,
+                CubeColor.GREEN: green_strength,
+            }
+
+            # Resolve each player's committed shields against attacks
+            for player, rolled_dice, commitments in player_commitments:
+                should_defer = bool(defer_green_for_pids and player.player_id in defer_green_for_pids)
+                if should_defer:
+                    player._pre_step2b_snapshot = {
+                        "money": player.money,
+                        "secrets": player.secrets,
+                        "patches": player.patches,
+                        "is_patient_zero": player.is_patient_zero,
+                        "elimination_round": player.elimination_round,
+                        "elimination_reason": player.elimination_reason,
+                        "breach_depth": player.breach_depth,
+                        "ability_v1_status": player.ability_v1_status,
+                        "ability_v2_status": player.ability_v2_status,
+                        "ability_v3_status": player.ability_v3_status,
+                        "rolled_dice": list(rolled_dice),
+                        "commitments": dict(commitments),
+                        "attack_strengths": dict(attack_strengths),
+                        "exited_cubes": dict(exited_cubes),
+                        "active_directive": active_directive,
+                    }
+                else:
+                    player._pre_step2b_snapshot = None
+                resolve_player_defense_and_wear(
+                    engine=engine,
+                    player=player,
+                    rolled_dice=rolled_dice,
+                    commitments=commitments,
+                    attack_strengths=attack_strengths,
+                    exited_cubes=exited_cubes,
+                    active_directive=active_directive,
+                    defer_green_malware=should_defer,
+                )
+
+            # Snowball Recycle: Exited Red, Blue, Green cubes return to Staging Cup
+            for color in [CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN]:
+                engine.state.staging_cup[color] = (
+                    engine.state.staging_cup.get(color, 0) + exited_cubes.get(color, 0)
+                )
+
+            # Contractor Expiration: All remaining White Contractor dice across all players return to supply
+            for player in engine.state.players:
+                if defer_green_for_pids and player.player_id in defer_green_for_pids and getattr(player, "pending_unblocked_green", 0) > 0:
+                    continue
+                engine.state.contractor_supply += len(player.contractor_dice)
+                player.contractor_dice.clear()
+                player.hired_contractor_count = 0
+                white_in_prod = [d for d in player.in_production_dice if d.color == DieColor.WHITE]
+                for wd in white_in_prod:
+                    player.in_production_dice.remove(wd)
+                    engine.state.contractor_supply += 1
+
+            # Step 2C: Check End Game Triggers
+            any_patient_zero = any(p.is_patient_zero for p in engine.state.players)
+            all_patient_zero = all(p.is_patient_zero for p in engine.state.players)
+
+            if all_patient_zero:
+                engine.state.game_over = True
+                engine.state.is_final_round = False
+                engine.state.end_reason = EndGameReason.TOTAL_WIPEOUT
+            elif any_patient_zero:
+                engine.state.is_final_round = True
+                engine.state.end_reason = EndGameReason.PATIENT_ZERO
+            elif engine.state.singularity_triggered:
+                engine.state.is_final_round = True
+                engine.state.end_reason = EndGameReason.SINGULARITY
 
     # Create Round Telemetry snapshot
     snapshots = [
@@ -459,10 +503,18 @@ def resolve_player_defense_and_wear(
             rng=engine.rng,
         )
         if sacrifice and len(player.contractor_dice) > 0:
-            player.contractor_dice.pop(0)
+            c_die = player.contractor_dice.pop(0)
+            if c_die in player.in_production_dice:
+                player.in_production_dice.remove(c_die)
+            c_die.production_role = None
+            c_die.is_locked = False
+            c_die.chosen_choice_index = None
+            c_die.current_face = None
+            player.hired_contractor_count = len(player.contractor_dice)
             engine.state.contractor_supply += 1
         elif len(player.in_production_dice) > 0:
-            def glitch_sort_key(d: Die) -> Tuple[int, int, int, int]:
+            def glitch_sort_key(d: Die) -> Tuple[int, int, int, int, int]:
+                is_not_white = 0 if d.color == DieColor.WHITE else 1
                 role = getattr(d, "production_role", None)
                 is_shield = 0 if role in (
                     ProductionRole.RED_SHIELD,
@@ -479,12 +531,22 @@ def resolve_player_defense_and_wear(
                         or getattr(face, "star_code", None) in ("B3", "R1", "G1", "G2")
                     )
                 ) else 0
-                is_gray = 0 if d.color == DieColor.GRAY else 1
-                return (is_shield, has_phase3_output, is_gray, getattr(d, "cost", 0))
+                is_gray = 0 if d.color in (DieColor.GRAY, DieColor.WHITE) else 1
+                return (is_not_white, is_shield, has_phase3_output, is_gray, getattr(d, "cost", 0))
 
             target_die = min(player.in_production_dice, key=glitch_sort_key)
             player.in_production_dice.remove(target_die)
-            player.glitched_dice.append(target_die)
+            target_die.production_role = None
+            target_die.is_locked = False
+            target_die.chosen_choice_index = None
+            target_die.current_face = None
+            if target_die.color == DieColor.WHITE:
+                if target_die in player.contractor_dice:
+                    player.contractor_dice.remove(target_die)
+                player.hired_contractor_count = len(player.contractor_dice)
+                engine.state.contractor_supply += 1
+            else:
+                player.glitched_dice.append(target_die)
         else:
             # MALWARE FIZZLE: in_production_dice is empty.
             # ZERO dice destroyed from glitched, scanned, or ready_for_release. Zero penalty!
@@ -499,6 +561,7 @@ def demote_player_dice_step2a(
     commitments: Dict[int, ShieldColor],
     count: int,
     threat_strengths: Optional[Dict[CubeColor, int]] = None,
+    engine: Optional[GameEngine] = None,
 ) -> None:
     demoted = 0
     threats = threat_strengths or {}
@@ -513,11 +576,22 @@ def demote_player_dice_step2a(
                 break
             if die in player.in_production_dice:
                 player.in_production_dice.remove(die)
-                player.glitched_dice.append(die)
-                demoted += 1
                 if die in rolled_dice:
                     idx = rolled_dice.index(die)
                     commitments.pop(idx, None)
+                die.production_role = None
+                die.is_locked = False
+                die.chosen_choice_index = None
+                die.current_face = None
+                if die.color == DieColor.WHITE:
+                    if die in player.contractor_dice:
+                        player.contractor_dice.remove(die)
+                    player.hired_contractor_count = len(player.contractor_dice)
+                    if engine is not None:
+                        engine.state.contractor_supply += 1
+                else:
+                    player.glitched_dice.append(die)
+                demoted += 1
 
     # Fallback to ready_for_release_dice if in_production_dice was empty or exhausted
     if demoted < count and player.ready_for_release_dice:
@@ -527,7 +601,18 @@ def demote_player_dice_step2a(
             die = ready_pool.pop(0)
             if die in player.ready_for_release_dice:
                 player.ready_for_release_dice.remove(die)
-                player.glitched_dice.append(die)
+                die.production_role = None
+                die.is_locked = False
+                die.chosen_choice_index = None
+                die.current_face = None
+                if die.color == DieColor.WHITE:
+                    if die in player.contractor_dice:
+                        player.contractor_dice.remove(die)
+                    player.hired_contractor_count = len(player.contractor_dice)
+                    if engine is not None:
+                        engine.state.contractor_supply += 1
+                else:
+                    player.glitched_dice.append(die)
                 demoted += 1
 
 
@@ -537,55 +622,65 @@ def return_player_colored_dice_step2a(
     rolled_dice: List[Die],
     commitments: Dict[int, ShieldColor],
     count: int,
+    threat_strengths: Optional[Dict[CubeColor, int]] = None,
 ) -> None:
+    if count <= 0:
+        return
+    threats = threat_strengths or {}
+    from sim.bots.base import BaseBot
+
+    if hasattr(player.bot, "choose_colored_dice_to_return"):
+        chosen = list(player.bot.choose_colored_dice_to_return(player, count, threats))
+    else:
+        chosen = BaseBot(player.player_id).choose_colored_dice_to_return(player, count, threats)
+
     returned = 0
-    # 1. Under Development (Glitched + Scanned)
-    for zone in (player.glitched_dice, player.scanned_dice):
-        colored = [d for d in list(zone) if d.color != DieColor.GRAY and d.color != DieColor.WHITE]
-        for die in colored:
-            if returned >= count:
+    zones = (
+        player.glitched_dice,
+        player.scanned_dice,
+        player.in_production_dice,
+        player.ready_for_release_dice,
+    )
+
+    def _return_single_die(die: Die) -> bool:
+        if die.color in (DieColor.GRAY, DieColor.WHITE):
+            return False
+        removed = False
+        for z in zones:
+            if die in z:
+                z.remove(die)
+                removed = True
                 break
-            zone.remove(die)
-            if die.color in engine.state.market:
-                engine.state.market[die.color] += 1
-            # If Purple, die is scrapped and not returned to market
+        if not removed:
+            return False
+        if die in rolled_dice:
+            idx = rolled_dice.index(die)
+            commitments.pop(idx, None)
+        die.production_role = None
+        die.is_locked = False
+        die.chosen_choice_index = None
+        die.current_face = None
+        if die.color in engine.state.market:
+            engine.state.market[die.color] += 1
+        # If Purple, die is scrapped and not returned to market (INV-PURPLE-02)
+        return True
+
+    for die in chosen:
+        if returned >= count:
+            break
+        if _return_single_die(die):
             returned += 1
 
-    # 2. In Production (Income dice first, then Shield dice)
+    # Fallback if a custom bot returned fewer dice than count while player still owns Colored Dice
     if returned < count:
-        prod_colored = [
-            d for d in list(player.in_production_dice)
-            if d.color != DieColor.GRAY and d.color != DieColor.WHITE
-        ]
-        prod_colored.sort(key=lambda d: 1 if getattr(d, "production_role", None) in (
-            ProductionRole.RED_SHIELD, ProductionRole.BLUE_SHIELD, ProductionRole.GREEN_SHIELD, ProductionRole.ANY_SHIELD
-        ) else 0)
-        for die in prod_colored:
+        fallback_dice = BaseBot(player.player_id).choose_colored_dice_to_return(
+            player, count - returned, threats
+        )
+        for die in fallback_dice:
             if returned >= count:
                 break
-            player.in_production_dice.remove(die)
-            if die.color in engine.state.market:
-                engine.state.market[die.color] += 1
-            # If Purple, die is scrapped and not returned to market
-            if die in rolled_dice:
-                idx = rolled_dice.index(die)
-                commitments.pop(idx, None)
-            returned += 1
-
-    # 3. Ready for Release
-    if returned < count:
-        ready_colored = [
-            d for d in list(player.ready_for_release_dice)
-            if d.color != DieColor.GRAY and d.color != DieColor.WHITE
-        ]
-        for die in ready_colored:
-            if returned >= count:
-                break
-            player.ready_for_release_dice.remove(die)
-            if die.color in engine.state.market:
-                engine.state.market[die.color] += 1
-            # If Purple, die is scrapped and not returned to market
-            returned += 1
+            if _return_single_die(die):
+                returned += 1
 
 
 def resolve_corruption_space(
@@ -615,20 +710,25 @@ def resolve_corruption_space(
         for player in engine.state.players:
             player.patches = max(0, player.patches - space.lose_patches)
 
+    threat_strengths = {
+        CubeColor.RED: exited_cubes.get(CubeColor.RED, 0),
+        CubeColor.BLUE: exited_cubes.get(CubeColor.BLUE, 0),
+        CubeColor.GREEN: exited_cubes.get(CubeColor.GREEN, 0),
+    }
+
     # 4. Demote Dice
     if space.demote_dice > 0:
-        threat_strengths = {
-            CubeColor.RED: exited_cubes.get(CubeColor.RED, 0),
-            CubeColor.BLUE: exited_cubes.get(CubeColor.BLUE, 0),
-            CubeColor.GREEN: exited_cubes.get(CubeColor.GREEN, 0),
-        }
         for player, rolled_dice, commitments in player_commitments:
-            demote_player_dice_step2a(player, rolled_dice, commitments, space.demote_dice, threat_strengths)
+            demote_player_dice_step2a(
+                player, rolled_dice, commitments, space.demote_dice, threat_strengths, engine=engine
+            )
 
     # 5. Return Colored Dice
     if space.return_colored_dice > 0:
         for player, rolled_dice, commitments in player_commitments:
-            return_player_colored_dice_step2a(engine, player, rolled_dice, commitments, space.return_colored_dice)
+            return_player_colored_dice_step2a(
+                engine, player, rolled_dice, commitments, space.return_colored_dice, threat_strengths
+            )
 
     # 6. Lose Secrets
     if space.lose_secrets > 0:
@@ -636,6 +736,11 @@ def resolve_corruption_space(
             player.secrets -= space.lose_secrets
             if player.secrets <= 0:
                 player.is_patient_zero = True
+                if player.elimination_round is None:
+                    player.elimination_round = engine.state.current_round
+                if player.elimination_reason is None:
+                    player.elimination_reason = "Total Breach (<= 0 Secrets)"
+                player.breach_depth = max(0, -player.secrets)
 
     # 7. Next Phase Lock (Excised in v0.29.0)
     if getattr(space, "next_phase_lock", None):

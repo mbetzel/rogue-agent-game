@@ -1,4 +1,4 @@
-"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.31.0 Baseline).
+"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.33.0 Baseline).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
   - 01_Player_Boards.pdf (6 pages — 4x Company Terminal Mats with CI/CD conveyor loop + 6x Client Company Cards sheet + 6x White Hat Dossier Cards sheet)
@@ -19,7 +19,7 @@ from pnp.pdf_engine import PALETTE, Color, PDFDocument, PDFPage, measure_text
 
 
 # =============================================================================
-# Canonical Game Data (Synchronized 1:1 with RULES.md v0.31.0 & sim/entities.py)
+# Canonical Game Data (Synchronized 1:1 with RULES.md v0.33.0 & sim/entities.py)
 # =============================================================================
 
 @dataclass(frozen=True)
@@ -447,7 +447,7 @@ VERSION_TILES: List[VersionTileSpec] = [
             VersionTrackSpaceSpec(3, "+1 {RED} +1 {GREEN}"),
             VersionTrackSpaceSpec(4, "Lose 1 Secret\n+1 {BLACK}"),
             VersionTrackSpaceSpec(5, "Return 1\nColored Die"),
-            VersionTrackSpaceSpec(6, "**SINGULARITY!**", is_singularity=True),
+            VersionTrackSpaceSpec(6, "**SINGULARITY!**\nLose 1 Secret", is_singularity=True),
         ),
     ),
     VersionTileSpec(
@@ -835,7 +835,7 @@ def render_player_board(
     draw_board_outer_frame(
         page,
         left_tag=f"TOO MANY SECRETS // COMPANY TERMINAL MAT [TERM-0{idx}/4]",
-        right_tag="PNP PROTOTYPE v0.31.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.33.0 // US LETTER",
     )
 
     # -------------------------------------------------------------------------
@@ -1226,7 +1226,7 @@ def render_company_cards_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x CLIENT COMPANY CARDS [PAGE 5/6]",
-        right_tag="PNP PROTOTYPE v0.31.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.33.0 // US LETTER",
     )
 
     page.text(
@@ -1275,7 +1275,7 @@ def render_white_hat_dossiers_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x WHITE HAT DOSSIER CARDS [PAGE 6/6]",
-        right_tag="PNP PROTOTYPE v0.31.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.33.0 // US LETTER",
     )
 
     page.text(
@@ -1327,7 +1327,7 @@ def render_agent_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // CENTRAL ROGUE AGENT & COMPILER BOARD [1/2]",
-        right_tag="PNP PROTOTYPE v0.31.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.33.0 // US LETTER",
     )
 
     # Top Title Bar inside board
@@ -1519,7 +1519,7 @@ def render_market_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // SOFTWARE MODULE MARKET & CENTRAL SUPPLY [2/2]",
-        right_tag="PNP PROTOTYPE v0.31.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.33.0 // US LETTER",
     )
 
     # Top Title Bar
@@ -1669,7 +1669,7 @@ def render_master_dice_reference(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // MASTER DICE PIP & ABILITY VISUAL AID [1/4]",
-        right_tag="PNP PROTOTYPE v0.31.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.33.0 // US LETTER",
     )
 
     page.rect(40.0, 32.0, 712.0, 24.0, stroke=PALETTE["ink"], fill=PALETTE["ink"], line_width=1.0)
@@ -2176,7 +2176,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated: List[str] = []
 
     # 1. Player Terminal Mats & Split Cards (6 pages: 4x Mats with empty modular docks + 1x Company Cards + 1x White Hat Cards)
-    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.31.0)")
+    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.33.0)")
     for idx in range(1, 5):
         p = doc_players.add_page()
         render_player_board(p, idx)
@@ -2217,7 +2217,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated.append(path_versions)
 
     # 5. Combined Master Print-and-Play Pack (All 14 pages)
-    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.31.0)")
+    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.33.0)")
     for sub_doc in (doc_central, doc_players, doc_dice, doc_versions):
         for pg in sub_doc.pages:
             doc_master.pages.append(pg)

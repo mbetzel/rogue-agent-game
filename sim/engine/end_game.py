@@ -52,8 +52,14 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
                 "debt": p.debt,
                 "breach_depth": p.breach_depth,
                 "unfulfilled_destructions": p.unfulfilled_destructions,
-                "ready_dice_count": len(p.ready_for_release_dice),
-                "ready_colored_dice_count": sum(1 for d in p.ready_for_release_dice if d.color != DieColor.GRAY and d.color != DieColor.WHITE),
+                "ready_dice_count": sum(
+                    1 for d in (list(p.ready_for_release_dice) + [x for x in p.in_production_dice if x not in p.ready_for_release_dice])
+                    if d.color != DieColor.WHITE
+                ),
+                "ready_colored_dice_count": sum(
+                    1 for d in (list(p.ready_for_release_dice) + [x for x in p.in_production_dice if x not in p.ready_for_release_dice])
+                    if d.color != DieColor.GRAY and d.color != DieColor.WHITE
+                ),
                 "unpatched_dice_count": len(p.glitched_dice) + len(p.scanned_dice),
                 "glitched_dice_count": len(p.glitched_dice),
                 "scanned_dice_count": len(p.scanned_dice),

@@ -242,9 +242,10 @@ class TestV150CorruptionTracks(unittest.TestCase):
         commitments = [(p, list(p.ready_dice), {}) for p in engine.state.players]
         telemetry = engine._execute_phase_2(commitments)
 
-        # Singularity must be triggered!
+        # Singularity must be triggered immediately!
         self.assertTrue(engine.state.singularity_triggered)
-        self.assertTrue(engine.state.is_final_round)
+        self.assertFalse(engine.state.is_final_round)
+        self.assertTrue(engine.state.game_over)
 
 
 if __name__ == "__main__":

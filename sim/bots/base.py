@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Set, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
 from sim.entities import ArchetypeCode, Face
 
 if TYPE_CHECKING:
     from sim.engine import GameState, PlayerState
+    from sim.engine.state import ProductionRole
     from sim.entities import Die, Face
 
 
@@ -517,35 +518,245 @@ class BaseBot:
         count: int,
         threat_strengths: Dict[CubeColor, int],
     ) -> List[Die]:
-        """Selects count dice from In Production to glitch (INV-CORRUPT-CHOICE-01).
+        """Selects count dice from In Production to glitch (INV-CORRUPT-CHOICE-01, INV-STEP2A-CONTRACTOR-SACRIFICE-01).
         Heuristic Priority:
-        1. Redundant Shields: Shield dice where committed color threat is 0 or already over-blocked.
-        2. Low-Value Income: Gray or low-cash income dice ($1).
-        3. Essential Shields vs High Income: Preserves shields blocking lethal damage (Blue/Red),
-           sacrificing non-critical income dice if necessary.
+        0. Redundant Shields (preferring White Contractor dice first).
+        1. Low-Value Income ($1, preferring White Contractor dice first).
+        2. Valuable Income (preferring White Contractor dice first).
+        3. Essential Shields last (preferring White Contractor dice first).
         """
         if len(in_production_dice) <= count:
             return list(in_production_dice)
 
-        def sort_key(die: Die) -> Tuple[int, int]:
+        def sort_key(die: Die) -> Tuple[int, int, int, int, int]:
             face = die.effective_face or die.current_face
+            is_not_white = 0 if die.color == DieColor.WHITE else 1
+            is_colored = 0 if die.color in (DieColor.GRAY, DieColor.WHITE) else 1
+            cost = getattr(die, "cost", 0)
+            die_id = getattr(die, "die_id", 0)
+
             # Redundant shield check
             if face and face.is_shield:
                 color = face.shield_color
-                threat = threat_strengths.get(color, 0) if color else 0
+                if color == ShieldColor.ANY:
+                    threat = sum(
+                        threat_strengths.get(c, 0)
+                        for c in (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN)
+                    )
+                else:
+                    c_map = {
+                        ShieldColor.RED: CubeColor.RED,
+                        ShieldColor.BLUE: CubeColor.BLUE,
+                        ShieldColor.GREEN: CubeColor.GREEN,
+                    }
+                    threat = threat_strengths.get(c_map.get(color), 0) if color else 0
                 if threat == 0:
-                    return (0, 0)  # Redundant shield is prime sacrifice!
+                    return (0, is_not_white, is_colored, cost, die_id)
+
             # Low income next
-            if face and face.money <= 1 and face.patches == 0 and not face.is_star:
-                return (1, face.money)
+            if face and face.money <= 1 and face.patches == 0 and not face.is_star and not face.is_shield:
+                return (1, is_not_white, face.money, is_colored, cost)
+
             # Valuable income next
             if face and not face.is_shield:
-                return (2, face.money + face.patches * 2)
+                return (2, is_not_white, face.money + face.patches * 2 + face.secrets * 8, is_colored, cost)
+
             # Critical shield last
-            return (3, 0)
+            return (3, is_not_white, is_colored, cost, die_id)
 
         sorted_dice = sorted(in_production_dice, key=sort_key)
         return sorted_dice[:count]
+
+    def choose_colored_dice_to_return(
+        self,
+        player: PlayerState,
+        count: int,
+        threat_strengths: Dict[CubeColor, int],
+    ) -> List[Die]:
+        """Selects up to `count` owned Colored Module Dice to return to Market in Step 2A (INV-RETURN-CHOICE-01).
+
+        7-Tier Mathematical Valuation Hierarchy (ascending priority to return):
+        - Tier 0: Glitched Box (glitched_dice) -> (0, 0, 0, is_purple, cost, die_id)
+        - Tier 1: Scanned Box (scanned_dice) -> (1, 0, 0, is_purple, cost, die_id)
+        - Tier 2: In Production Redundant Pure Shield -> (2, 0, 0, is_purple, cost, die_id)
+        - Tier 3: Ready for Release (ready_for_release_dice) -> (3, 0, 0, is_purple, cost, die_id)
+        - Tier 4: In Production Non-Star Income face -> (4, face_economic_score, 0, is_purple, cost, die_id)
+        - Tier 5: In Production Star Income face -> (5, face_economic_score, 0, is_purple, cost, die_id)
+        - Tier 6: In Production Needed Active Shield -> (6, shield_priority, block_amount, is_purple, cost, die_id)
+        """
+        if count <= 0:
+            return []
+
+        threats = threat_strengths or {}
+        red_threat = threats.get(CubeColor.RED, 0)
+        blue_threat = threats.get(CubeColor.BLUE, 0)
+        green_threat = threats.get(CubeColor.GREEN, 0)
+
+        # Identify which In Production shield dice are actively needed vs redundant surplus
+        needed_shield_ids: Set[int] = set()
+        role_to_cube = {
+            "RED_SHIELD": CubeColor.RED,
+            "BLUE_SHIELD": CubeColor.BLUE,
+            "GREEN_SHIELD": CubeColor.GREEN,
+        }
+
+        def _has_phase3_output(face: Optional[Face]) -> bool:
+            if face is None:
+                return False
+            return bool(
+                face.money > 0
+                or face.patches > 0
+                or face.secrets > 0
+                or getattr(face, "star_code", None) in ("B3", "R1", "G1", "G2")
+            )
+
+        def _face_econ_score(face: Optional[Face]) -> int:
+            if face is None:
+                return 0
+            score = face.money + 2 * face.patches + 8 * face.secrets
+            if face.is_star:
+                sc = getattr(face, "star_code", None)
+                if sc in ("Y1", "B2"):
+                    score += 6
+                elif sc == "Y2":
+                    score += 2
+                elif sc == "B3":
+                    score += 3
+                elif sc == "PURPLE_STAR":
+                    score += 4
+            return score
+
+        # 1. Color-specific shields: allocate needed absorption to White/high-value shields first
+        rem_by_color: Dict[CubeColor, int] = {
+            CubeColor.RED: red_threat,
+            CubeColor.BLUE: blue_threat,
+            CubeColor.GREEN: green_threat,
+        }
+        for role_name, c_color in role_to_cube.items():
+            role_dice = [
+                d for d in player.in_production_dice
+                if getattr(getattr(d, "production_role", None), "value", getattr(d, "production_role", None)) == role_name
+                or (
+                    getattr(d, "production_role", None) is None
+                    and (d.effective_face or d.current_face)
+                    and (d.effective_face or d.current_face).is_shield
+                    and (d.effective_face or d.current_face).shield_color == ShieldColor(c_color.value)
+                )
+            ]
+            # Sort so White contractors and high-value/Purple shields take the "needed" slots first
+            role_dice.sort(
+                key=lambda d: (
+                    0 if d.color == DieColor.WHITE else 1,
+                    0 if _has_phase3_output(d.effective_face or d.current_face) else 1,
+                    0 if d.color == DieColor.PURPLE else 1,
+                    -getattr(d, "cost", 0),
+                    -getattr(d, "die_id", 0),
+                )
+            )
+            for d in role_dice:
+                if rem_by_color[c_color] > 0:
+                    needed_shield_ids.add(d.die_id)
+                    eff = d.effective_face or d.current_face
+                    blk = eff.block_amount if (eff and eff.block_amount > 0) else 1
+                    rem_by_color[c_color] = max(0, rem_by_color[c_color] - blk)
+
+        # 2. Generic ANY shields: needed only if remaining unblocked threat > 0
+        rem_total_after_color = sum(rem_by_color.values())
+        any_dice = [
+            d for d in player.in_production_dice
+            if getattr(getattr(d, "production_role", None), "value", getattr(d, "production_role", None)) == "ANY_SHIELD"
+            or (
+                getattr(d, "production_role", None) is None
+                and (d.effective_face or d.current_face)
+                and (d.effective_face or d.current_face).is_shield
+                and (d.effective_face or d.current_face).shield_color == ShieldColor.ANY
+            )
+        ]
+        any_dice.sort(
+            key=lambda d: (
+                0 if d.color == DieColor.WHITE else 1,
+                0 if _has_phase3_output(d.effective_face or d.current_face) else 1,
+                0 if d.color == DieColor.PURPLE else 1,
+                -getattr(d, "cost", 0),
+                -getattr(d, "die_id", 0),
+            )
+        )
+        for d in any_dice:
+            if rem_total_after_color > 0:
+                needed_shield_ids.add(d.die_id)
+                eff = d.effective_face or d.current_face
+                blk = eff.block_amount if (eff and eff.block_amount > 0) else 1
+                rem_total_after_color = max(0, rem_total_after_color - blk)
+
+        scored_candidates: List[Tuple[Tuple[int, int, int, int, int, int], Die]] = []
+
+        def _is_colored(d: Die) -> bool:
+            return d.color not in (DieColor.GRAY, DieColor.WHITE)
+
+        # Tier 0: Glitched Box
+        for d in player.glitched_dice:
+            if _is_colored(d):
+                is_purple = 1 if d.color == DieColor.PURPLE else 0
+                scored_candidates.append(((0, 0, 0, is_purple, getattr(d, "cost", 0), d.die_id), d))
+
+        # Tier 1: Scanned Box
+        for d in player.scanned_dice:
+            if _is_colored(d):
+                is_purple = 1 if d.color == DieColor.PURPLE else 0
+                scored_candidates.append(((1, 0, 0, is_purple, getattr(d, "cost", 0), d.die_id), d))
+
+        # Tier 3: Ready for Release
+        for d in player.ready_for_release_dice:
+            if _is_colored(d):
+                is_purple = 1 if d.color == DieColor.PURPLE else 0
+                scored_candidates.append(((3, 0, 0, is_purple, getattr(d, "cost", 0), d.die_id), d))
+
+        # Tiers 2, 4, 5, 6: In Production
+        for d in player.in_production_dice:
+            if not _is_colored(d):
+                continue
+            is_purple = 1 if d.color == DieColor.PURPLE else 0
+            cost = getattr(d, "cost", 0)
+            eff = d.effective_face or d.current_face
+            role = getattr(d, "production_role", None)
+            role_val = getattr(role, "value", role)
+            is_shield_role = role_val in (
+                "RED_SHIELD",
+                "BLUE_SHIELD",
+                "GREEN_SHIELD",
+                "ANY_SHIELD",
+            ) or (role is None and eff is not None and eff.is_shield)
+
+            if is_shield_role:
+                if d.die_id in needed_shield_ids:
+                    # Tier 6: Needed Active Shield
+                    if role_val == "BLUE_SHIELD" or (eff and eff.shield_color == ShieldColor.BLUE):
+                        s_prio = 5
+                    elif role_val == "RED_SHIELD" or (eff and eff.shield_color == ShieldColor.RED):
+                        s_prio = 4 if player.money < red_threat else 2
+                    elif role_val == "ANY_SHIELD" or (eff and eff.shield_color == ShieldColor.ANY):
+                        s_prio = 3
+                    else:
+                        s_prio = 1
+                    blk = eff.block_amount if (eff and eff.block_amount > 0) else 1
+                    scored_candidates.append(((6, s_prio, blk, is_purple, cost, d.die_id), d))
+                else:
+                    # Redundant shield: if it has Phase 3A output (e.g. R1, G1, G2, B3), score as Income Tier 4/5
+                    if _has_phase3_output(eff):
+                        econ = _face_econ_score(eff)
+                        tier = 5 if (eff and eff.is_star) else 4
+                        scored_candidates.append(((tier, econ, 0, is_purple, cost, d.die_id), d))
+                    else:
+                        # Tier 2: Redundant Pure Shield
+                        scored_candidates.append(((2, 0, 0, is_purple, cost, d.die_id), d))
+            else:
+                # Income role (Tier 4 Non-Star or Tier 5 Star)
+                econ = _face_econ_score(eff)
+                tier = 5 if (eff and eff.is_star) else 4
+                scored_candidates.append(((tier, econ, 0, is_purple, cost, d.die_id), d))
+
+        scored_candidates.sort(key=lambda item: item[0])
+        return [d for _, d in scored_candidates[:count]]
 
     def choose_fast_patches(
         self,

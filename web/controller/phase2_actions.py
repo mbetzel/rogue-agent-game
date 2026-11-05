@@ -179,7 +179,7 @@ def compile_drop(controller: GameController) -> Dict[str, Any]:
 
         player_candidate_glitches[pid] = candidates
 
-        if not is_human:
+        if not is_human and not controller.state.game_over:
             money_before = player.money
             patches_before = player.patches
             secrets_before = player.secrets
@@ -192,12 +192,12 @@ def compile_drop(controller: GameController) -> Dict[str, Any]:
                 "details": details,
             }
         else:
-            # Human player: income preview (actual collection happens on confirm_income after glitch choices)
+            # Human player or game over: income preview (actual collection happens on confirm_income after glitch choices)
             meta["income_collected_this_turn"] = False
             income_breakdowns[pid] = {
-                "money": sum(d["money"] for d in details),
-                "patches": sum(d["patches"] for d in details),
-                "secrets": sum(d["secrets"] for d in details),
+                "money": sum(d["money"] for d in details) if not controller.state.game_over else 0,
+                "patches": sum(d["patches"] for d in details) if not controller.state.game_over else 0,
+                "secrets": sum(d["secrets"] for d in details) if not controller.state.game_over else 0,
                 "details": details,
             }
 
@@ -332,15 +332,19 @@ def compile_drop(controller: GameController) -> Dict[str, Any]:
             f"Cube Tower Drop results: {exited['red']} Red, {exited['blue']} Blue, {exited['green']} Green, {exited['black']} Black."
         )
 
-    # Check end game triggers from Step 2C
+    # Check end game triggers from Step 2C / Singularity Step 2A
     if controller.state.game_over:
-        # Total Wipeout! Game ends immediately; Phase 3 is skipped
         controller.phase = 4
         controller.phase_name = "Game Over"
         controller.subphase = "game_over"
         end_res = controller.engine.evaluate_end_game()
         controller.final_result = controller._serialize_end_game_result(end_res)
-        controller.event_log.append("TOTAL WIPEOUT! All corporations suffered Total Breach simultaneously.")
+        if controller.state.end_reason == EndGameReason.TOTAL_WIPEOUT:
+            controller.event_log.append("TOTAL WIPEOUT! All corporations suffered Total Breach simultaneously.")
+        elif controller.state.end_reason == EndGameReason.SINGULARITY:
+            controller.event_log.append("SINGULARITY REACHED! Project: SETEC completed v3.0 compilation. Game Over!")
+        else:
+            controller.event_log.append("GAME OVER!")
         return controller.get_full_state()
 
     # Transition to Phase 3: Corporate Operations (Intermediate confirmation step)

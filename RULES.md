@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.32.0)
+# Too Many Secrets — Rules Draft (v0.33.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -205,7 +205,7 @@ Move exited **Black Cubes** from the tray onto the next empty space(s) of the ac
   3. The **active version card remains the current version** for the remainder of the current round.
   4. The current version's Institutional Override **remains usable** through Phase 2B (defensive overrides) and Phase 3 (operational overrides). The upcoming version's Institutional Override is not unlocked yet.
   5. At the **start of the subsequent round** (in Phase 1 Step 1), the version transition officially takes effect: unspent overrides from the old version are forfeited, and the new version's override unlocks to Available.
-* **Singularity (`v3.0` Track Fills):** When the final (`6th`) space of `v3.0` is covered by a Black cube, **Singularity is triggered IMMEDIATELY**! Step 2B resolves normally for this drop, and the game enters its final round wrap-up.
+* **Singularity (`v3.0` Track Fills):** When the final (`6th`) space of `v3.0` is covered by a Black cube, resolve that space's printed effect (e.g., *Corrupted Kernel* `Lose 1 Secret`), and **Singularity is triggered—the game ends IMMEDIATELY at the end of Step 2A!** Step 2B (Attack Cubes) and Phase 3 are skipped completely; all surviving non-Contractor dice in **In Production** return to **Ready for Release**, and players proceed directly to **Section 5: End Game & Victory Scoring**.
 
 #### Step 2B: Resolve Attack Cubes (Red, Blue, Green)
 Calculate the total attack strength of **Red**, **Blue**, and **Green** from exited cubes in the tray.
@@ -235,13 +235,12 @@ Each player simultaneously resolves all three colors against their committed Shi
    * The compiler's idle cycle triggers an overflow: take **`1 Red, 1 Blue, and 1 Green Cube`** from the supply and place them into the **Staging Cup** for next round's compile (in addition to the standard Phase 1 Black Cube).
 
 #### Step 2C: Check End Game Triggers
-The current round is declared the **Final Round** if **either**:
-* **Singularity** was triggered in Step 2A, **OR**
-* **One or more players suffered a Total Data Breach (`<= 0 Secrets`)** in Step 2B.
+The current round is declared the **Final Round** if:
+* **One or more (but not all) players suffered a Total Data Breach (`<= 0 Secrets`)** in Step 2A or Step 2B.
 
 If triggered, any player who became **Patient Zero** is immediately eliminated and skips Phase 3. **All surviving players proceed to Phase 3 to execute one final operations turn** before game scoring.
 
-*(Exception: If all remaining players suffer a Total Data Breach simultaneously, the game ends immediately. Phase 3 is skipped entirely, and players proceed directly to Total Wipeout Scoring.)*
+*(Exceptions: If **Singularity** was reached in Step 2A, the game ended immediately in Step 2A—skip Step 2B, Step 2C, and Phase 3. If **all remaining players** suffer a Total Data Breach simultaneously, the game ends immediately. Phase 3 is skipped entirely, and players proceed directly to Total Wipeout Scoring.)*
 
 ---
 
@@ -349,8 +348,8 @@ Each Version Card defines its Corruption Track (`4` spaces on `v1.0`, `5` spaces
 | **`v1.0`** (4) | *Data Scraper* | `1R, 2B` (`+$1` start) | Lose `1 🔬` | Lose `$1` + Add `1K` | Add `1G` | **Upgrade:** Glitch `1` die | — | — |
 | **`v2.0`** (5) | *RaaS* | — | All lose `$2` | Add `1R, 1G` + Add `1K` | All lose `$2` & Add `1R` | Lose `$3` & `1 🔬` + Add `1K` | **Upgrade:** Add `1R` | — |
 | **`v2.0`** (5) | *Polymorphic Worm* | — | Lose `2 🔬` | Add `2G` + Add `1K` | All glitch `1` die & Add `1G` | Glitch `1` die + Add `1K` | **Upgrade:** Add `1R` | — |
-| **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 1B, 1G` | Lose `$3` & `1 🔬` + Add `1K` | Add `1R, 1B` | All glitch `1` die & Add `1B, 1K` | Return `1` Colored Die | **Singularity:** Add `2R, 2B, 2G` |
-| **`v3.0`** (6) | *Corrupted Kernel* | — | Glitch `1` die + Add `1R, 1B` | Lose `$3` & `1 🔬` + Add `1K` | Add `1R, 1G` | Lose `1 Secret` + Add `1K` | Return `1` Colored Die | **Singularity:** Lose `1 Secret` + Add `2R, 2B, 1G` |
+| **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 1B, 1G` | Lose `$3` & `1 🔬` + Add `1K` | Add `1R, 1B` | All glitch `1` die & Add `1B, 1K` | Return `1` Colored Die | **Singularity** |
+| **`v3.0`** (6) | *Corrupted Kernel* | — | Glitch `1` die + Add `1R, 1B` | Lose `$3` & `1 🔬` + Add `1K` | Add `1R, 1G` | Lose `1 Secret` + Add `1K` | Return `1` Colored Die | **Singularity:** Lose `1 Secret` |
 
 #### Profile 2: Aggressive Escalation Tracks (`4 / 5 / 6` Spaces — Heightened Economic Friction)
 
@@ -360,14 +359,14 @@ Each Version Card defines its Corruption Track (`4` spaces on `v1.0`, `5` spaces
 | **`v1.0`** (4) | *Data Scraper* | `1R, 2B` (`+$1` start) | Lose `2 🔬` | Lose `$2` + Add `1K` | Add `1G` | **Upgrade:** Glitch `2` dice | — | — |
 | **`v2.0`** (5) | *RaaS* | — | All lose `$2` | Add `1R, 1G` + Add `1K` | All lose `$2` & Add `1R` | Lose `$3` & `1 🔬` + Add `1K` | **Upgrade:** Add `1R` | — |
 | **`v2.0`** (5) | *Polymorphic Worm* | — | Lose `2 🔬` | Add `2G` + Add `1K` | All glitch `1` die & Add `1G` | Glitch `2` dice + Add `1K` | **Upgrade:** Add `1R` | — |
-| **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 1B, 1G` | Lose `$3` & `1 🔬` + Add `1K` | Add `1R, 1B` | All glitch `1` die & Add `1B, 1K` | Return `1` Colored Die & glitch `1` die | **Singularity:** Add `2R, 2B, 2G` |
-| **`v3.0`** (6) | *Corrupted Kernel* | — | Glitch `2` dice + Add `1R, 1B` | Lose `$3` & `1 🔬` + Add `1K` | Add `1R, 1G` | Lose `2 Secrets` + Add `1K` | Return `1` Colored Die & glitch `1` die | **Singularity:** Lose `1 Secret` + Add `2R, 2B, 1G` |
+| **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 1B, 1G` | Lose `$3` & `1 🔬` + Add `1K` | Add `1R, 1B` | All glitch `1` die & Add `1B, 1K` | Return `1` Colored Die & glitch `1` die | **Singularity** |
+| **`v3.0`** (6) | *Corrupted Kernel* | — | Glitch `2` dice + Add `1R, 1B` | Lose `$3` & `1 🔬` + Add `1K` | Add `1R, 1G` | Lose `2 Secrets` + Add `1K` | Return `1` Colored Die & glitch `1` die | **Singularity:** Lose `1 Secret` |
 
 ---
 
 ### D. Client Companies & White Hat Dossiers Reference Appendix
 
-In `v0.31.0`, player identity combines asymmetric corporate starting hardware across 4 independent tracks on the **Company Terminal Mat** with modular Once-per-Version Institutional Overrides and White Hat Dossiers.
+In `v0.33.0`, player identity combines asymmetric corporate starting hardware across 4 independent tracks on the **Company Terminal Mat** with modular Once-per-Version Institutional Overrides and White Hat Dossiers.
 
 #### 1. The 6 Client Companies (`Company`) — Hardware Baselines & Institutional Overrides
 Each player contracts with 1 enterprise Client Company for the duration of the match. Your company defines your initial Company Terminal Mat hardware capabilities across the 4 hardware tracks and grants an Institutional Override that may be activated **once per SETEC Version** (`v1.0`, `v2.0`, `v3.0`):
@@ -503,8 +502,8 @@ Players may freely combine any Client Company with any White Hat Operative ($6 \
 | **Two-Stage Defensive Blocking** | Phase 2 Mechanic | The defense resolution sequence in **Step 2B**: **Stage 1** resolves **Color-Specific Shields** against matching Attack Cubes; **Stage 2** reactively allocates **Generic (`Any`) Shields** against remaining unblocked Attack Cubes (default strategic priority: Tier 1 Blue $\to$ Tier 2 Unfunded Red $\to$ Tier 3 Green $\to$ Tier 4 Funded Red). |
 | **Unpaid Ransom Leak** | Phase 2 Rule | If a player lacks sufficient Money (`$`) to pay all unblocked **Red Cubes** in Step 2B, they pay all Money they have (to `$0`) and lose a **flat `1 Corporate Secret`** (a single dark web leak fine), regardless of the size of the unpaid shortfall. |
 | **Defensive Shield Sacrifice** | Phase 2 Tactic | When choosing which die in **In Production** to glitch for unblocked **Green Malware** (or a Step 2A Corruption glitch), a player may freely choose to glitch a die in their **Shield Slots** (including one that already blocked this round) to protect a die in their **Income Slot**. |
-| **Contractor Sacrifice** | Phase 1 / 2 Rule | When a **White Contractor Die** rolls an unresolved Glitch in Phase 1, or is chosen to absorb `1` unblocked **Green Malware** hit in Phase 2 Step 2B, it is discarded directly to the general supply instead of entering **Under Development**. |
+| **Contractor Sacrifice** | Phase 1 / 2 Rule | When a **White Contractor Die** rolls an unresolved Glitch in Phase 1, or is chosen to absorb `1` unblocked **Green Malware** hit in Phase 2 Step 2B (or is chosen to satisfy a Step 2A Corruption glitch effect), it is discarded directly to the general supply instead of entering **Under Development**. |
 | **Total Data Breach (Patient Zero)** | Elimination / End Trigger | Triggered immediately in Phase 2 when a player's **Corporate Secrets** drop to `0` or below (`<= 0`). That player becomes **Patient Zero**, is eliminated from winning, skips Phase 3, and triggers the **Final Round**. |
-| **Singularity** | End Trigger | Triggered immediately in **Phase 2 Step 2A** when the final (`6th`) space of the `v3.0` **Corruption Track** is covered by a **Black Cube**. Resolves Step 2B and Phase 3 as the **Final Round** before victory scoring. |
+| **Singularity** | End Trigger | Triggered immediately in **Phase 2 Step 2A** when the final (`6th`) space of the `v3.0` **Corruption Track** is covered by a **Black Cube**. After resolving Space 6's printed effect, the game ends **immediately** (skipping Step 2B and Phase 3) and proceeds directly to victory scoring. |
 | **Total Wipeout Ending & Net Wipeout Score** | End Game Rule | Occurs if **all** players suffer a **Total Data Breach** (`<= 0 Secrets`) simultaneously. Phase 3 is skipped, Project: SETEC wins narratively, and human players are ranked by **Net Wipeout Score** (`player.secrets`, i.e., least negative breach depth below `0`), followed by standard tiebreakers. |
 
