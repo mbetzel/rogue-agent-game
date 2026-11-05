@@ -1560,3 +1560,72 @@ Following Phase 37 (`v0.30.0`), user investigations targeted three high-friction
 - **Parity Synchronized:** Fully verified and synchronized across `RULES.md`, `FINDINGS.md`, `docs/findings/v310_telemetry_sweep_report.md`, `docs/specs/v310_threat_defense_spec.md`, `sim/entities.py`, `sim/config.py`, `sim/engine/`, `sim/bots/`, `web/`, and `tests/test_v310_threat_defense.py`.
 
 **Status: OFFICIALLY APPROVED (`v0.31.0` Baseline).**
+
+---
+
+## 27. Phase 39 Baseline (`v0.32.0`): Blue Variant Rebalance — `B1 — Honeypot Telemetry` & `B3 — Air-Gapped Backup`
+
+### A. Context & Pre-SDLC Modeling Diagnostics
+Following Phase 38 (`v0.31.0`), pre-SDLC mathematical modeling and Variant Card parity analysis identified two balance anomalies in the Blue (`BLUE // FIREWALL`) central market variant suite:
+1. **Over-Tuned Conditional Bounty on `B1 — Honeypot Telemetry ($5)`:** At `$5` market cost, `B1` provided `Block 2 Blue` plus a conditional `+$3` cash bounty whenever `1+` Blue cubes exited the tower and the player took `0` unblocked Blue damage. Compared to its Red counterpart `R2 — Threat Bounty ($5, Block 2 Red + +$2 conditional bounty)`, `B1` defended the game's primary survival resource (Corporate Secrets) while simultaneously paying `+$1` more cash than `R2`.
+2. **Obsolete Rules Text & Engine No-Op on `B3 — Air-Gapped Backup ($4)`:** Since the `v0.22.0` CI/CD pipeline overhaul introduced **Zero-Wear Shield Blocking** (dice assigned to the Defense Grid absorb threat cleanly without wearing down to Under Development), `B3`'s legacy text (*"when this die actively blocks, you may move 1 other Ready die of your choice to Unpatched instead of this die"*) became a complete no-op in the simulation engine. Rolling Face 6 (`★`) on a `$4` `B3` Blue die produced only `Block 1 Blue`, strictly identical to Face 1 (`Block 1 Blue`).
+3. **Green Malware Shield Sacrifice Priority (`glitch_sort_key`):** When unblocked Green Malware forced a player to glitch an active die from `in_production_dice` at the end of Phase 2B, the legacy 3-tuple `glitch_sort_key` `(is_shield, is_gray, cost)` treated all shields identically—meaning a dual-output Star shield (`B3`, `R1`, `G1`, `G2`) carrying uncollected Phase 3A outputs could be sacrificed before a pure shield with `0` Phase 3A output.
+
+### B. Approved Rule & Mechanical Changes
+1. **`B1 — Honeypot Telemetry ($5)` Bounty Calibration (`INV-B1-BOUNTY-01`):**
+   - Face 6 (`★`): `[In Production — Defense] Block 2 Blue; if 1+ Blue cubes exit the tower and you take 0 Blue damage, gain +$2.`
+   - Credited in Phase 2 Step 2B prior to Red ransomware cash resolution, allowing the `+$2` bounty to immediately buffer against unblocked Red ransomware cubes in the same round.
+2. **`B3 — Air-Gapped Backup ($4)` Dual-Output Shield & Phase 3A Pipeline Recovery (`INV-B3-BACKUP-01`):**
+   - Face 6 (`★`): `[In Production — Defense] Block 1 Blue` + `[In Production — Income] move 1 die from your Glitched Box to your Scanned Box.`
+   - During Phase 3A Step 1 (`collect_player_production_income`), each surviving `B3 ★` die in `in_production_dice` inspects `player.glitched_dice` and moves the highest-value glitched die—selected deterministically via `(is_colored, cost, die_id)`—into `player.scanned_dice` (clearing transient roll/role fields), making it immediately eligible for Phase 3B Step 2 Scanned Graduation (`release_bandwidth`). If `glitched_dice` is empty, it safely no-ops.
+3. **Green Malware 4-Tuple Shield Sacrifice Priority (`INV-GLITCH-SHIELD-PRIO-01`):**
+   - Upgraded `glitch_sort_key` across `sim/engine/phase2_threat.py` and `web/controller/phase3_actions.py` to `(is_shield, has_phase3_output, is_gray, cost)`.
+   - Pure shields (`has_phase3_output = 0`) are strictly sacrificed before dual-output Star shields (`B3`, `R1`, `G1`, `G2` where `has_phase3_output = 1`).
+4. **Full-Stack & Print-and-Play Synchronization (`INV-WEB-UI-SYNC-01`):**
+   - Synchronized `web/static/js/components/action_dock.js` (`2 * humanThreat.b1_count`), `web/controller/phase2_actions.py` (`Air-Gapped Backup (1 Glitched → Scanned)` preview note), `pnp/generate_pnp.py`, and `RULES.md`.
+
+---
+
+### C. Multi-Pod Telemetry Summary (3,000 Matches Total; 9,000 Player-Games; Uniform 5-Bot Rotation)
+
+#### 1. Pacing, Survival & Elimination Metrics Across Pods
+- **2-Player Pod (`1,000` games / `2,000` PG):** Mean **7.79 rounds** (`v1.0`: 4.50, `v2.0`: 2.67, `v3.0`: 0.62) | Median: 8.0 | Player Survival: **36.6%** (732) vs PZ: **63.4%** (1,268) | Early Death ($\le$ R4): **1.10%** | Winning Secrets: **2.04** (Survivor Mean: **3.14**)
+- **3-Player Pod (`1,000` games / `3,000` PG):** Mean **7.33 rounds** (`v1.0`: 4.47, `v2.0`: 2.44, `v3.0`: 0.42) | Median: 7.0 | Player Survival: **52.4%** (1,573) vs PZ: **47.6%** (1,427) | Early Death ($\le$ R4): **1.50%** | Winning Secrets: **3.63** (Survivor Mean: **3.42**)
+- **4-Player Pod (`1,000` games / `4,000` PG):** Mean **8.60 rounds** (`v1.0`: 4.48, `v2.0`: 3.13, `v3.0`: 0.99) | Median: 9.0 | Player Survival: **62.7%** (2,507) vs PZ: **37.3%** (1,493) | Early Death ($\le$ R4): **0.00%** | Winning Secrets: **5.13** (Survivor Mean: **3.96**)
+- **Combined Overall (`3,000` games / `9,000` PG):** Mean **7.91 rounds** | Player Survival: **53.5%** (4,812) vs PZ: **46.5%** (4,188) | Early Death ($\le$ R4): **0.74%** (67 players, improved from 0.79% in `v0.31.0`) | 0.0% Round Limit stalls.
+
+#### 2. Blue Variant Card Deep Dive (`B1` vs `B2` vs `B3`)
+| Metric | `B1 — Honeypot Telemetry ($5)` | `B2 — Deep R&D Vault ($6)` | `B3 — Air-Gapped Backup ($4)` |
+| :--- | :---: | :---: | :---: |
+| **Active Games / Player-Games** | 1,033 / 3,070 | 995 / 2,987 | 972 / 2,943 |
+| **Blue Dice Bought (Share of Market)** | **394** (`25.9%` of 1,524) | **165** (`12.7%` of 1,298) | **906** (`54.7%` of 1,657) |
+| **Buyer Adoption Rate (% PG)** | **8.5%** (261 / 3,070) | **4.4%** (132 / 2,987) | **21.5%** (632 / 2,943) |
+| **Buyer Win Rate vs Non-Buyer Win Rate** | **49.8%** vs 32.1% (`+17.7%`) | **51.5%** vs 32.5% (`+19.0%`) | **40.2%** vs 31.1% (`+9.1%`) |
+| **Buyer Survival vs Non-Buyer Survival** | **69.7%** vs 51.2% (`+18.5%`) | **68.9%** vs 52.5% (`+16.4%`) | **59.5%** vs 53.1% (`+6.4%`) |
+| **Buyer Mean Secrets vs Non-Buyer** | **2.51** vs 1.32 | **2.54** vs 1.40 | **2.01** vs 1.34 |
+| **Match Winners Owning Blue Share** | **12.6%** (130 / 1,033) | **6.8%** (68 / 995) | **26.1%** (254 / 972) |
+| **Pipeline Snapshots (Ready/Scan/Glitch)** | 3.11 / 1.04 / 0.30 | 3.09 / 1.04 / 0.29 | 3.11 / **1.08** / 0.32 |
+
+#### 3. Star Activation & Triage Telemetry Highlights
+- **`B1 — Honeypot Telemetry ($5)`:**
+  - Rolled `★` **245 times** in Phase 2 and triggered the `+$2` conditional bounty **206 times (`84.1%` trigger rate)**, generating **`$412` total bounty cash** (`$1.68` expected cash per `★` roll alongside `Block 2 Blue`).
+  - Directly prevented **25 unpaid Red ransomware leaks** (`12.1%` of bounty triggers saved 1 Corporate Secret from dark web leak fines).
+- **`B3 — Air-Gapped Backup ($4)`:**
+  - Rolled `★` **704 times** in Phase 2, with **326 surviving to Phase 3A (`46.3%`)**.
+  - Triggered **180 active `Glitched -> Scanned` rescues (`55.2%` active rescue rate)** vs 146 empty-glitched no-ops, rescuing **114 Colored Module Dice (`63.3%`)** and **66 Gray Starter Dice (`36.7%`)**.
+  - **Dual-Output Shield Preservation (`INV-GLITCH-SHIELD-PRIO-01`):** Preserved dual-output Star shields over pure shields **99 times** during Phase 2B Green Malware resolution, of which **79 instances (`79.8%`) specifically protected `B3 ★`** so it could execute its Phase 3A pipeline rescue!
+
+#### 4. Bot, CEO, Operative & Patent Balance Summary (All 9,000 Player-Games)
+- **Bot Archetypes (`1,800` matches each):** `AdaptiveBalancedBot` **63.6% win** (79.1% surv), `AccelerationistBot` **41.3% win** (65.2% surv), `SecOpsTurtleBot` **34.1% win** (63.0% surv), `RecklessSaboteurBot` **21.3% win** (45.5% surv), `VentureGreedBot` **6.4% win** (14.6% surv).
+- **Client Companies (`CEO`):** `DTO` **59.5% win** (73.7% surv), `HELIX` **36.7% win** (57.6% surv), `PROMETHEUS` **32.9% win** (53.2% surv), `MERIDIAN` **28.9% win** (53.9% surv), `AEGIS` **28.7% win** (52.1% surv), `OMNIDYNE` **11.9% win** (28.9% surv).
+- **White Hat Operatives:** `SPOOK` **47.4% win** (66.8% surv), while the remaining 5 operatives sit inside a tight **3.6% corridor**: `ACOUSTIC` **32.4%**, `PHREAKER` **31.1%** (`+1.7%` boost from `B3` synergy), `CIPHER` **30.8%**, `PRODIGY` **29.7%**, `OPERATOR` **28.8%**.
+- **Patent Tiers:** Level 0 (`75.6%` of PG): **35.6% win** (56.8% surv); Level 1 (`24.4%` of PG): **26.4% win** (43.2% surv).
+
+---
+
+### D. Formal Design Sign-Off
+- **Baseline Adoption:** Formally approve and adopt `B1 — Honeypot Telemetry ($5, +$2 conditional bounty)` (`INV-B1-BOUNTY-01`), `B3 — Air-Gapped Backup ($4, Block 1 Blue + Phase 3A 1 Glitched -> Scanned)` (`INV-B3-BACKUP-01`), 4-Tuple Green Malware Shield Sacrifice Priority (`INV-GLITCH-SHIELD-PRIO-01`), and Full-Stack/PnP Synchronization (`INV-WEB-UI-SYNC-01`) as the official baseline for **`v0.32.0`**.
+- **Parity Synchronized:** Fully verified and synchronized across `RULES.md`, `PLAN.md`, `FINDINGS.md`, `docs/findings/v320_telemetry_sweep_report.md`, `docs/findings/v320_telemetry_summary.json`, `docs/specs/v320_blue_variants_spec.md`, `sim/`, `web/`, `pnp/`, and `tests/test_v320_blue_variants.py`.
+
+**Status: OFFICIALLY APPROVED (`v0.32.0` Baseline).**
+

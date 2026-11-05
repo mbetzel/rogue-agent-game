@@ -241,7 +241,7 @@ class TestGroupBVariantCardBehaviors(unittest.TestCase):
         self.assertEqual(player.money, 8)
 
     def test_b1_honeypot_telemetry_conditional_bonus(self) -> None:
-        """6. B1 blocks 2 Blue; if 1+ Blue exit and 0 Blue damage taken, gains +$3 bonus in Phase 2."""
+        """6. B1 blocks 2 Blue; if 1+ Blue exit and 0 Blue damage taken, gains +$2 bonus in Phase 2."""
         all_vars = get_all_variant_cards()
         b1_card = all_vars["B1"]
 
@@ -256,7 +256,7 @@ class TestGroupBVariantCardBehaviors(unittest.TestCase):
         b1_die.current_face = b1_card.star_face
         player.ready_dice.append(b1_die)
 
-        # 1 Blue exits and 1 Blue attacks, fully blocked by B1 (unblocked == 0) -> +$3 bonus
+        # 1 Blue exits and 1 Blue attacks, fully blocked by B1 (unblocked == 0) -> +$2 bonus
         commitments = {0: ShieldColor.BLUE}
         attack_strengths = {CubeColor.RED: 0, CubeColor.BLUE: 1, CubeColor.GREEN: 0}
         exited_cubes = {CubeColor.RED: 0, CubeColor.BLUE: 1, CubeColor.GREEN: 0, CubeColor.BLACK: 0}
@@ -270,7 +270,7 @@ class TestGroupBVariantCardBehaviors(unittest.TestCase):
             exited_cubes=exited_cubes,
             active_directive="SCRIPT_KIDDIE",
         )
-        self.assertEqual(player.money, 8)
+        self.assertEqual(player.money, 7)
 
         # If 0 Blue cubes exit -> no bonus
         player.money = 5

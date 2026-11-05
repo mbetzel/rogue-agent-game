@@ -39,6 +39,22 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
             elif eff.star_code == "Y3":
                 # Proprietary Training: move die to glitched_dice after collecting secret
                 dice_to_glitch.append(die)
+            elif eff.star_code == "B3":
+                # Air-Gapped Backup (INV-B3-BACKUP-01): Move 1 die from glitched_dice to scanned_dice
+                if player.glitched_dice:
+                    target_die = max(
+                        player.glitched_dice,
+                        key=lambda d: (1 if d.color != DieColor.GRAY else 0, getattr(d, "cost", 0), d.die_id),
+                    )
+                    player.glitched_dice.remove(target_die)
+                    target_die.production_role = None
+                    target_die.is_locked = False
+                    target_die.chosen_choice_index = None
+                    target_die.current_face = None
+                    for attr in ("rolled_face_idx", "rolled_effect", "prod_role", "overclock_face"):
+                        if hasattr(target_die, attr):
+                            setattr(target_die, attr, None)
+                    player.scanned_dice.append(target_die)
             elif eff.star_code == "PURPLE_STAR":
                 # Operative Protocol Resolution for Income Timing
                 is_acoustic = bool(

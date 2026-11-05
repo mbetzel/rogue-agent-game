@@ -219,7 +219,7 @@ def confirm_income(
                     player.contractor_dice.pop(0)
                     controller.state.contractor_supply += 1
                 elif player.in_production_dice:
-                    def glitch_sort_key(d: Die) -> Tuple[int, int, int]:
+                    def glitch_sort_key(d: Die) -> Tuple[int, int, int, int]:
                         role = getattr(d, "production_role", None)
                         is_shield = 0 if role in (
                             ProductionRole.RED_SHIELD,
@@ -227,8 +227,17 @@ def confirm_income(
                             ProductionRole.GREEN_SHIELD,
                             ProductionRole.ANY_SHIELD,
                         ) else 1
+                        face = d.effective_face or d.current_face
+                        has_phase3_output = 1 if (
+                            face is not None and (
+                                face.money > 0
+                                or face.patches > 0
+                                or face.secrets > 0
+                                or getattr(face, "star_code", None) in ("B3", "R1", "G1", "G2")
+                            )
+                        ) else 0
                         is_gray = 0 if d.color == DieColor.GRAY else 1
-                        return (is_shield, is_gray, getattr(d, "cost", 0))
+                        return (is_shield, has_phase3_output, is_gray, getattr(d, "cost", 0))
                     target_die = min(player.in_production_dice, key=glitch_sort_key)
                     player.in_production_dice.remove(target_die)
                     for slot_color in ["red", "blue", "green", "any"]:

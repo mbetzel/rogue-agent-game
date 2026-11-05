@@ -1,0 +1,465 @@
+{
+  "results": {
+    "2P": {
+      "num_games": 1000,
+      "player_games": 2000,
+      "survivors": 732,
+      "patient_zeros": 1268,
+      "player_survival_rate": 0.366,
+      "player_pz_rate": 0.634,
+      "mean_rounds": 7.785,
+      "median_rounds": 8.0,
+      "stdev_rounds": 1.6022928391347016,
+      "min_rounds": 3,
+      "max_rounds": 11,
+      "mean_v1_rounds": 4.496,
+      "mean_v2_rounds": 2.67,
+      "mean_v3_rounds": 0.619,
+      "spillover_rate": 0.616,
+      "mean_spillover_cubes": 1.2224025974025974,
+      "end_reasons": {
+        "patient_zero": 708,
+        "total_wipeout": 280,
+        "singularity": 12
+      },
+      "pz_counts": {
+        "1": 708,
+        "2": 280,
+        "0": 12
+      },
+      "early_deaths_count": 22,
+      "early_death_rate": 0.011,
+      "mean_ending_secrets": 0.45,
+      "median_ending_secrets": 0.0,
+      "stdev_ending_secrets": 2.4743809893871074,
+      "winning_secrets_mean": 2.043,
+      "winning_secrets_median": 2.0,
+      "winning_secrets_stdev": 2.4126690556253196,
+      "winning_secrets_min": -4,
+      "winning_secrets_max": 9,
+      "survivor_secrets_mean": 3.1352459016393444,
+      "survivor_secrets_median": 3.0,
+      "survivor_secrets_stdev": 1.8042398218636295,
+      "mean_triage": 0.2575,
+      "mean_release": 0.26,
+      "mean_defense": 0.4035,
+      "mean_patent": 0.2465,
+      "company_wins": {
+        "HELIX": 205,
+        "DTO": 256,
+        "MERIDIAN": 134,
+        "PROMETHEUS": 181,
+        "AEGIS": 155,
+        "OMNIDYNE": 69
+      },
+      "company_matches": {
+        "PROMETHEUS": 351,
+        "HELIX": 347,
+        "MERIDIAN": 302,
+        "DTO": 353,
+        "OMNIDYNE": 305,
+        "AEGIS": 342
+      },
+      "company_survivals": {
+        "HELIX": 152,
+        "DTO": 206,
+        "MERIDIAN": 97,
+        "PROMETHEUS": 123,
+        "OMNIDYNE": 48,
+        "AEGIS": 106
+      },
+      "op_wins": {
+        "OPERATOR": 145,
+        "SPOOK": 197,
+        "CIPHER": 151,
+        "ACOUSTIC": 194,
+        "PHREAKER": 160,
+        "PRODIGY": 153
+      },
+      "op_matches": {
+        "PHREAKER": 351,
+        "OPERATOR": 320,
+        "PRODIGY": 318,
+        "SPOOK": 321,
+        "CIPHER": 348,
+        "ACOUSTIC": 342
+      },
+      "op_survivals": {
+        "OPERATOR": 98,
+        "SPOOK": 159,
+        "CIPHER": 112,
+        "ACOUSTIC": 138,
+        "PHREAKER": 113,
+        "PRODIGY": 112
+      },
+      "bot_wins": {
+        "AdaptiveBalancedBot": 283,
+        "AccelerationistBot": 293,
+        "VentureGreedBot": 60,
+        "SecOpsTurtleBot": 228,
+        "RecklessSaboteurBot": 136
+      },
+      "bot_matches": {
+        "SecOpsTurtleBot": 400,
+        "AdaptiveBalancedBot": 400,
+        "VentureGreedBot": 400,
+        "AccelerationistBot": 400,
+        "RecklessSaboteurBot": 400
+      },
+      "bot_survivals": {
+        "AdaptiveBalancedBot": 228,
+        "AccelerationistBot": 216,
+        "VentureGreedBot": 34,
+        "SecOpsTurtleBot": 176,
+        "RecklessSaboteurBot": 78
+      },
+      "patent_matches": {
+        "0": 1507,
+        "1": 493
+      },
+      "patent_wins": {
+        "1": 220,
+        "0": 780
+      },
+      "patent_survivals": {
+        "1": 161,
+        "0": 571
+      },
+      "elapsed_seconds": 3.574035406112671
+    },
+    "3P": {
+      "num_games": 1000,
+      "player_games": 3000,
+      "survivors": 1573,
+      "patient_zeros": 1427,
+      "player_survival_rate": 0.5243333333333333,
+      "player_pz_rate": 0.4756666666666667,
+      "mean_rounds": 7.33,
+      "median_rounds": 7.0,
+      "stdev_rounds": 1.6023943546042803,
+      "min_rounds": 3,
+      "max_rounds": 11,
+      "mean_v1_rounds": 4.471,
+      "mean_v2_rounds": 2.442,
+      "mean_v3_rounds": 0.417,
+      "spillover_rate": 0.629,
+      "mean_spillover_cubes": 1.1971383147853736,
+      "end_reasons": {
+        "patient_zero": 916,
+        "total_wipeout": 82,
+        "singularity": 2
+      },
+      "pz_counts": {
+        "1": 651,
+        "2": 265,
+        "3": 82,
+        "0": 2
+      },
+      "early_deaths_count": 45,
+      "early_death_rate": 0.015,
+      "mean_ending_secrets": 1.349,
+      "median_ending_secrets": 1.0,
+      "stdev_ending_secrets": 2.6721238273296506,
+      "winning_secrets_mean": 3.625,
+      "winning_secrets_median": 4.0,
+      "winning_secrets_stdev": 2.2475378587303987,
+      "winning_secrets_min": -3,
+      "winning_secrets_max": 9,
+      "survivor_secrets_mean": 3.4221233312142405,
+      "survivor_secrets_median": 3,
+      "survivor_secrets_stdev": 1.9134767305928215,
+      "mean_triage": 0.264,
+      "mean_release": 0.26466666666666666,
+      "mean_defense": 0.38133333333333336,
+      "mean_patent": 0.24133333333333334,
+      "company_wins": {
+        "AEGIS": 152,
+        "DTO": 326,
+        "OMNIDYNE": 51,
+        "HELIX": 176,
+        "MERIDIAN": 146,
+        "PROMETHEUS": 149
+      },
+      "company_matches": {
+        "HELIX": 510,
+        "PROMETHEUS": 480,
+        "AEGIS": 474,
+        "DTO": 527,
+        "OMNIDYNE": 499,
+        "MERIDIAN": 510
+      },
+      "company_survivals": {
+        "HELIX": 285,
+        "AEGIS": 263,
+        "DTO": 400,
+        "OMNIDYNE": 114,
+        "MERIDIAN": 267,
+        "PROMETHEUS": 244
+      },
+      "op_wins": {
+        "CIPHER": 156,
+        "PRODIGY": 153,
+        "SPOOK": 249,
+        "OPERATOR": 125,
+        "PHREAKER": 157,
+        "ACOUSTIC": 160
+      },
+      "op_matches": {
+        "ACOUSTIC": 510,
+        "PRODIGY": 512,
+        "CIPHER": 482,
+        "PHREAKER": 513,
+        "SPOOK": 492,
+        "OPERATOR": 491
+      },
+      "op_survivals": {
+        "ACOUSTIC": 271,
+        "CIPHER": 260,
+        "PRODIGY": 257,
+        "SPOOK": 316,
+        "OPERATOR": 219,
+        "PHREAKER": 250
+      },
+      "bot_wins": {
+        "AdaptiveBalancedBot": 390,
+        "SecOpsTurtleBot": 192,
+        "AccelerationistBot": 253,
+        "VentureGreedBot": 40,
+        "RecklessSaboteurBot": 125
+      },
+      "bot_matches": {
+        "SecOpsTurtleBot": 600,
+        "VentureGreedBot": 600,
+        "AdaptiveBalancedBot": 600,
+        "RecklessSaboteurBot": 600,
+        "AccelerationistBot": 600
+      },
+      "bot_survivals": {
+        "SecOpsTurtleBot": 369,
+        "AdaptiveBalancedBot": 484,
+        "AccelerationistBot": 390,
+        "RecklessSaboteurBot": 241,
+        "VentureGreedBot": 89
+      },
+      "patent_matches": {
+        "1": 724,
+        "0": 2276
+      },
+      "patent_wins": {
+        "0": 815,
+        "1": 185
+      },
+      "patent_survivals": {
+        "1": 310,
+        "0": 1263
+      },
+      "elapsed_seconds": 5.379723310470581
+    },
+    "4P": {
+      "num_games": 1000,
+      "player_games": 4000,
+      "survivors": 2507,
+      "patient_zeros": 1493,
+      "player_survival_rate": 0.62675,
+      "player_pz_rate": 0.37325,
+      "mean_rounds": 8.6,
+      "median_rounds": 9.0,
+      "stdev_rounds": 1.3415661742157186,
+      "min_rounds": 5,
+      "max_rounds": 11,
+      "mean_v1_rounds": 4.482,
+      "mean_v2_rounds": 3.13,
+      "mean_v3_rounds": 0.988,
+      "spillover_rate": 0.673,
+      "mean_spillover_cubes": 1.2347696879643388,
+      "end_reasons": {
+        "patient_zero": 897,
+        "singularity": 70,
+        "total_wipeout": 33
+      },
+      "pz_counts": {
+        "1": 541,
+        "0": 70,
+        "2": 248,
+        "3": 108,
+        "4": 33
+      },
+      "early_deaths_count": 0,
+      "early_death_rate": 0.0,
+      "mean_ending_secrets": 2.03025,
+      "median_ending_secrets": 2.0,
+      "stdev_ending_secrets": 3.1950566558761624,
+      "winning_secrets_mean": 5.128,
+      "winning_secrets_median": 5.0,
+      "winning_secrets_stdev": 2.530616529626727,
+      "winning_secrets_min": -3,
+      "winning_secrets_max": 13,
+      "survivor_secrets_mean": 3.9625049860390904,
+      "survivor_secrets_median": 4,
+      "survivor_secrets_stdev": 2.331853359723989,
+      "mean_triage": 0.27325,
+      "mean_release": 0.26625,
+      "mean_defense": 0.404,
+      "mean_patent": 0.24525,
+      "company_wins": {
+        "MERIDIAN": 151,
+        "HELIX": 170,
+        "DTO": 335,
+        "AEGIS": 124,
+        "PROMETHEUS": 168,
+        "OMNIDYNE": 52
+      },
+      "company_matches": {
+        "DTO": 661,
+        "MERIDIAN": 679,
+        "HELIX": 646,
+        "PROMETHEUS": 683,
+        "OMNIDYNE": 646,
+        "AEGIS": 685
+      },
+      "company_survivals": {
+        "DTO": 529,
+        "MERIDIAN": 440,
+        "HELIX": 429,
+        "OMNIDYNE": 257,
+        "AEGIS": 413,
+        "PROMETHEUS": 439
+      },
+      "op_wins": {
+        "CIPHER": 159,
+        "PHREAKER": 154,
+        "PRODIGY": 147,
+        "OPERATOR": 147,
+        "ACOUSTIC": 143,
+        "SPOOK": 250
+      },
+      "op_matches": {
+        "ACOUSTIC": 681,
+        "CIPHER": 681,
+        "SPOOK": 655,
+        "OPERATOR": 638,
+        "PHREAKER": 652,
+        "PRODIGY": 693
+      },
+      "op_survivals": {
+        "ACOUSTIC": 416,
+        "CIPHER": 419,
+        "SPOOK": 505,
+        "OPERATOR": 352,
+        "PHREAKER": 398,
+        "PRODIGY": 417
+      },
+      "bot_wins": {
+        "AccelerationistBot": 197,
+        "AdaptiveBalancedBot": 472,
+        "RecklessSaboteurBot": 122,
+        "SecOpsTurtleBot": 193,
+        "VentureGreedBot": 16
+      },
+      "bot_matches": {
+        "AdaptiveBalancedBot": 800,
+        "AccelerationistBot": 800,
+        "SecOpsTurtleBot": 800,
+        "VentureGreedBot": 800,
+        "RecklessSaboteurBot": 800
+      },
+      "bot_survivals": {
+        "AdaptiveBalancedBot": 712,
+        "AccelerationistBot": 567,
+        "SecOpsTurtleBot": 589,
+        "VentureGreedBot": 139,
+        "RecklessSaboteurBot": 500
+      },
+      "patent_matches": {
+        "0": 3019,
+        "1": 981
+      },
+      "patent_wins": {
+        "0": 824,
+        "1": 176
+      },
+      "patent_survivals": {
+        "0": 2029,
+        "1": 478
+      },
+      "elapsed_seconds": 10.986450910568237
+    }
+  },
+  "blue_variants": {
+    "B1": {
+      "games": 1033,
+      "player_games": 3070,
+      "dice_bought": 394,
+      "total_market_dice_bought": 1524,
+      "buyer_player_games": 261,
+      "nonbuyer_player_games": 2809,
+      "buyer_wins": 130,
+      "nonbuyer_wins": 903,
+      "buyer_survivals": 182,
+      "nonbuyer_survivals": 1439,
+      "winner_owned_blue": 130,
+      "total_winners": 1033,
+      "buyer_mean_secrets": 2.5095785440613025,
+      "nonbuyer_mean_secrets": 1.319686721253115,
+      "mean_ready_snapshot": 3.1125005371492414,
+      "mean_scanned_snapshot": 1.038502857633965,
+      "mean_glitched_snapshot": 0.3035537793820635
+    },
+    "B2": {
+      "games": 995,
+      "player_games": 2987,
+      "dice_bought": 165,
+      "total_market_dice_bought": 1298,
+      "buyer_player_games": 132,
+      "nonbuyer_player_games": 2855,
+      "buyer_wins": 68,
+      "nonbuyer_wins": 927,
+      "buyer_survivals": 91,
+      "nonbuyer_survivals": 1498,
+      "winner_owned_blue": 68,
+      "total_winners": 995,
+      "buyer_mean_secrets": 2.537878787878788,
+      "nonbuyer_mean_secrets": 1.4049036777583188,
+      "mean_ready_snapshot": 3.085189236490921,
+      "mean_scanned_snapshot": 1.0413913804419164,
+      "mean_glitched_snapshot": 0.2924086633121855
+    },
+    "B3": {
+      "games": 972,
+      "player_games": 2943,
+      "dice_bought": 906,
+      "total_market_dice_bought": 1657,
+      "buyer_player_games": 632,
+      "nonbuyer_player_games": 2311,
+      "buyer_wins": 254,
+      "nonbuyer_wins": 718,
+      "buyer_survivals": 376,
+      "nonbuyer_survivals": 1226,
+      "winner_owned_blue": 254,
+      "total_winners": 972,
+      "buyer_mean_secrets": 2.0110759493670884,
+      "nonbuyer_mean_secrets": 1.3366508005192557,
+      "mean_ready_snapshot": 3.11401644645662,
+      "mean_scanned_snapshot": 1.0778434814746374,
+      "mean_glitched_snapshot": 0.32135267485909635
+    }
+  },
+  "star_telemetry": {
+    "b1_star_rolled": 245,
+    "b1_bounty_triggers": 206,
+    "b1_bounty_cash_gained": 412,
+    "b1_ransom_leaks_prevented": 25,
+    "b2_star_rolled": 88,
+    "b2_committed_as_shield": 85,
+    "b2_kept_for_income_option": 3,
+    "b2_secret_purchases": 0,
+    "b3_star_rolled_phase2": 704,
+    "b3_star_surviving_phase3a": 326,
+    "b3_triage_triggers": 180,
+    "b3_colored_dice_rescued": 114,
+    "b3_gray_dice_rescued": 66,
+    "b3_empty_glitched_noops": 146,
+    "dual_output_shield_preserved_over_pure": 99,
+    "b3_shield_preserved_over_pure": 79
+  }
+}

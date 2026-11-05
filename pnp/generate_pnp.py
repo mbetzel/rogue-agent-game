@@ -340,8 +340,8 @@ VARIANT_CARDS: List[VariantCardSpec] = [
         "B1", "blue", "BLUE // FIREWALL", "$5",
         "{PIP1} 1{BLUE} | {PIP2} +1{RESEARCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{RESEARCH} | {PIP5} Glitch | {PIP6} {STAR}",
         "Honeypot Telemetry", "P2 DEFENSE + BONUS",
-        "**Block 2 {BLUE} Blue**; if **1+ {BLUE} Blue** cubes exit and you take **0 Blue** damage, gain **+$3**.",
-        "Honeypot: Blocks 2 Blue; bonus if 0 unblocked.",
+        "**Block 2 {BLUE} Blue**; if **1+ {BLUE} Blue** cubes exit and you take **0 Blue** damage, gain **+$2**.",
+        "Honeypot: Blocks 2 Blue; +$2 if 0 unblocked.",
     ),
     VariantCardSpec(
         "B2", "blue", "BLUE // FIREWALL", "$6",
@@ -353,9 +353,9 @@ VARIANT_CARDS: List[VariantCardSpec] = [
     VariantCardSpec(
         "B3", "blue", "BLUE // FIREWALL", "$4",
         "{PIP1} 1{BLUE} | {PIP2} +1{RESEARCH} | {PIP3} +$1", "{PIP4} 1{BLUE}/1{RESEARCH} | {PIP5} Glitch | {PIP6} {STAR}",
-        "Air-Gapped Backup", "P2 DEFENSE (REDIRECT)",
-        "**Block 1 {BLUE} Blue**; when taking unblocked **Green Malware**, sacrifice **1 other Ready die** to Under Development instead of In Production.",
-        "Air-Gapped: Redirects malware hit to other die.",
+        "Air-Gapped Backup", "P2 DEFENSE + P3 TRIAGE",
+        "**Block 1 {BLUE} Blue** in Phase 2 **AND** move **1 die from Glitched to Scanned** in Phase 3A.",
+        "Air-Gapped: Blocks 1 Blue & triages 1 Glitched die.",
     ),
     # GREEN (G1-G3)
     VariantCardSpec(

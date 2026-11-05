@@ -95,6 +95,8 @@ def compile_drop(controller: GameController) -> Dict[str, Any]:
                     star_note = f"Cloud Monopoly (+${bonus} bonus)"
                 elif eff.star_code == "Y3":
                     star_note = "Proprietary Training (+1 Secret -> Glitched)"
+                elif eff.star_code == "B3":
+                    star_note = "Air-Gapped Backup (1 Glitched → Scanned)"
                 elif eff.star_code == "R1":
                     star_note = "Ransom Insurance (+$2)"
                 elif eff.star_code == "G1":

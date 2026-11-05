@@ -491,7 +491,7 @@ export function renderActionDock() {
       const preMoney = humanThreat.pre_step2b_money !== undefined ? humanThreat.pre_step2b_money : (human.money || 0);
       const r2Bonus = (humanThreat.r2_count || 0) > 0 && liveUnblockedRed === 0 ? 2 * humanThreat.r2_count : 0;
       const r3Bonus = (humanThreat.r3_count || 0) > 0 && (exited.red || 0) >= 3 ? 1 * humanThreat.r3_count : 0;
-      const b1Bonus = (humanThreat.b1_count || 0) > 0 && (exited.blue || 0) >= 1 && liveUnblockedBlue === 0 ? 3 * humanThreat.b1_count : 0;
+      const b1Bonus = (humanThreat.b1_count || 0) > 0 && (exited.blue || 0) >= 1 && liveUnblockedBlue === 0 ? 2 * humanThreat.b1_count : 0;
       const availableCashForRansom = preMoney + r2Bonus + r3Bonus + b1Bonus;
       const liveFlatLeak = anyShieldCount > 0
         ? (liveUnblockedRed > availableCashForRansom)

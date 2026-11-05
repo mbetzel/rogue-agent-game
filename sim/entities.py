@@ -291,13 +291,13 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             code="B1",
             name="Honeypot Telemetry",
             die_color=DieColor.BLUE,
-            description="Block 2 Blue; if 1+ Blue cubes exit the tower and you take 0 Blue damage, gain +$3.",
+            description="Block 2 Blue; if 1+ Blue cubes exit the tower and you take 0 Blue damage, gain +$2.",
             cost=5,
             star_face=Face(
                 name="B1: Honeypot Telemetry",
                 block_amount=2,
                 shield_color=ShieldColor.BLUE,
-                money=0,  # Bonus handled conditionally in Phase 2
+                money=0,  # Bonus (+$2) handled conditionally in Phase 2 (INV-B1-BOUNTY-01)
                 is_star=True,
                 star_code="B1",
             ),
@@ -320,7 +320,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             code="B3",
             name="Air-Gapped Backup",
             die_color=DieColor.BLUE,
-            description="Block 1 Blue; when this die actively blocks, you may move 1 other Ready die of your choice to Unpatched instead of this die (if you have no other Ready dice, this die moves to Unpatched).",
+            description="Block 1 Blue; in Phase 3A, move 1 die from your Glitched Box to your Scanned Box.",
             cost=4,
             star_face=Face(
                 name="B3: Air-Gapped Backup",
