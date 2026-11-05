@@ -540,272 +540,191 @@ def draw_board_outer_frame(page: PDFPage, left_tag: str, right_tag: str) -> None
 # 1. Individual Player Boards & Modular Cards (Pages 1-6)
 # =============================================================================
 
+# -----------------------------------------------------------------------------
+# Card & Dock Geometry (cards are printed at EXACTLY the mat dock size so the
+# full card -- name, flavor text, abilities -- sits inside the dock outline).
+# -----------------------------------------------------------------------------
+CARD_W = 232.0          # 3.22"
+COMPANY_CARD_H = 140.0  # 1.94"
+WHITE_HAT_CARD_H = 146.0  # 2.03"
+
+# Standard poker chip = 39 mm diameter (110.6 pt). Token wells are drawn at
+# 40 mm (113.4 pt) so a chip (or short chip stack) drops in with clearance.
+POKER_CHIP_WELL_D = 113.0
+
+
+def _fit_paragraph(
+    page: PDFPage, x: float, y: float, w: float, markup: str, bottom: float,
+    size: float, leading: float, min_size: float = 4.2, color: Color = PALETTE["ink"],
+    align: str = "left",
+) -> None:
+    """Render a rich paragraph, shrinking type until its last line sits above `bottom`."""
+    s, ld = size, leading
+    while s > min_size:
+        probe = PDFPage()
+        end_y = probe.rich_paragraph(x, y, w, markup, size=s, leading=ld)
+        if end_y - ld <= bottom:
+            break
+        s -= 0.2
+        ld = s * (leading / size)
+    page.rich_paragraph(x, y, w, markup, size=s, leading=ld, color=color, align=align)
+
+
 def _draw_company_card(page: PDFPage, x: float, y: float, w: float, h: float, comp: CompanyCardSpec, is_dock: bool = False) -> None:
-    """Render a single Client Company card (full-size or docked)."""
+    """Render a Client Company card. Identical layout on the cut sheet and in the mat dock."""
     page.rect(x, y, w, h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
 
-    # 1. Header Strip (y..y+16)
-    page.rect(x, y, w, 16.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
-    dock_tag = " [MODULAR DOCK]" if is_dock else ""
-    page.text(x + 6.0, y + 11.0, f"CLIENT COMPANY CARD{dock_tag}", font="mono_bold", size=5.8, color=PALETTE["ink"])
-    page.text(x + w - 6.0, y + 11.0, comp.sector.upper(), font="mono_bold", size=5.5, color=PALETTE["ink_soft"], align="right")
+    # Header strip
+    page.rect(x, y, w, 14.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
+    page.text(x + 5.0, y + 9.8, f"CLIENT COMPANY // COMP-{comp.code}", font="mono_bold", size=5.4, color=PALETTE["ink"])
+    page.text(x + w - 5.0, y + 9.8, comp.sector.upper(), font="mono_bold", size=5.2, color=PALETTE["ink_soft"], align="right")
 
-    if is_dock and h < 180.0:
-        # Compact Docked Layout for Player Mat Left Column
-        page.text(x + w / 2.0, y + 26.0, comp.name.upper(), font="bold", size=8.5, color=PALETTE["ink"], align="center")
+    # Name + flavor
+    page.text(x + w / 2.0, y + 24.5, comp.name.upper(), font="bold", size=8.6, color=PALETTE["ink"], align="center")
+    fy, fh = y + 28.0, 15.0
+    page.rect(x + 4.0, fy, w - 8.0, fh, stroke=PALETTE["guide"], fill=PALETTE["paper_tint"], line_width=0.5)
+    _fit_paragraph(page, x + 7.0, fy + 6.0, w - 14.0, f"*{comp.flavor}*", fy + fh - 2.0, size=5.0, leading=6.0, min_size=4.2, color=PALETTE["ink_soft"], align="center")
 
-        # Hardware & Bonus Strip
-        page.rect(x + 4.0, y + 31.0, w - 8.0, 16.0, stroke=PALETTE["ink"], fill=PALETTE["purple_light"], line_width=0.5)
-        page.rich_line(x + w / 2.0, y + 38.0, f"**{comp.hardware_summary}**", size=5.0, color=PALETTE["ink"], align="center")
-        page.rich_line(x + w / 2.0, y + 44.5, f"**{comp.starting_bonus}**", size=4.8, color=PALETTE["purple"], align="center")
+    # Hardware & bonus strip
+    hw_y, hw_h = y + 45.0, 16.0
+    page.rect(x + 4.0, hw_y, w - 8.0, hw_h, stroke=PALETTE["ink"], fill=PALETTE["purple_light"], line_width=0.5)
+    page.rich_line(x + w / 2.0, hw_y + 6.8, f"**{comp.hardware_summary}**", size=4.9, color=PALETTE["ink"], align="center")
+    page.rich_line(x + w / 2.0, hw_y + 13.4, f"**{comp.starting_bonus}**", size=4.6, color=PALETTE["purple"], align="center")
 
-        # Override Box
-        o_y = y + 49.0
-        o_h = h - 51.0 - 12.0
-        page.rect(x + 4.0, o_y, w - 8.0, o_h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.7)
-        page.rect(x + 4.0, o_y, w - 8.0, 13.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.5)
-        page.text(x + 7.0, o_y + 9.0, f"1x/VER: {comp.override_name.upper()}", font="bold", size=6.2, color=PALETTE["ink"])
+    # Institutional Override box
+    o_y = y + 63.0
+    o_h = h - 66.0
+    page.rect(x + 4.0, o_y, w - 8.0, o_h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.7)
+    page.rect(x + 4.0, o_y, w - 8.0, 12.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.5)
+    tw = measure_text(comp.override_timing, font="mono_bold", size=4.7) + 4.0
+    page.rounded_rect(x + w - 7.0 - tw, o_y + 1.8, tw, 8.6, r=1.5, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.5)
+    page.text(x + w - 7.0 - tw / 2.0, o_y + 7.7, comp.override_timing, font="mono_bold", size=4.7, color=PALETTE["ink"], align="center")
+    title = f"1x/VER: {comp.override_name.upper()}"
+    avail = (w - 14.0) - tw - 6.0
+    t_size = min(6.0, 6.0 * avail / max(1.0, measure_text(title, font="bold", size=6.0)))
+    page.text(x + 7.0, o_y + 8.6, title, font="bold", size=t_size, color=PALETTE["ink"])
 
-        tw = measure_text(comp.override_timing, font="mono_bold", size=4.8) + 4.0
-        page.rounded_rect(x + w - 7.0 - tw, o_y + 2.0, tw, 9.0, r=1.5, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.5)
-        page.text(x + w - 7.0 - tw / 2.0, o_y + 8.0, comp.override_timing, font="mono_bold", size=4.8, color=PALETTE["ink"], align="center")
+    ty = o_y + o_h - 15.0
+    _fit_paragraph(page, x + 7.0, o_y + 18.5, w - 14.0, comp.override_desc, ty - 1.5, size=5.3, leading=6.7, min_size=4.3)
 
-        page.rich_paragraph(x + 7.0, o_y + 19.0, w - 14.0, comp.override_desc, size=5.4, leading=7.2, color=PALETTE["ink"])
-
-        # Version Slots
-        ty = o_y + o_h - 17.0
-        page.line(x + 6.0, ty, x + w - 6.0, ty, stroke=PALETTE["rule"], width=0.5, dash=(2, 1.5))
-        page.text(x + 7.0, ty + 11.0, "ONCE / VER:", font="mono_bold", size=5.0, color=PALETTE["ink_soft"])
-        slots = ["v1.0", "v2.0", "v3.0"]
-        sx_start = x + 52.0
-        sw_box = (w - 62.0) / 3.0
-        for s_idx, ver_lbl in enumerate(slots):
-            bx = sx_start + s_idx * sw_box
-            page.rounded_rect(bx, ty + 2.0, sw_box - 3.0, 12.0, r=2.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.5)
-            page.rect(bx + 2.5, ty + 4.0, 7.5, 7.5, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.5)
-            page.text(bx + 12.0, ty + 10.0, ver_lbl, font="mono_bold", size=5.4, color=PALETTE["ink"])
-
-        page.text(x + w / 2.0, y + h - 3.5, "Unused charge forfeits upon SETEC upgrade at start of round.", font="italic", size=4.6, color=PALETTE["muted"], align="center")
-    else:
-        # Full Card Layout for Page 5 Sheet (w ~ 238, h ~ 210)
-        page.text(x + w / 2.0, y + 30.5, comp.name.upper(), font="bold", size=9.8, color=PALETTE["ink"], align="center")
-
-        fy, fh = y + 34.0, 19.0
-        page.rect(x + 6.0, fy, w - 12.0, fh, stroke=PALETTE["guide"], fill=PALETTE["paper_tint"], line_width=0.5)
-        page.rich_paragraph(x + 10.0, fy + 7.0, w - 20.0, f"*{comp.flavor}*", size=5.6, leading=7.2, color=PALETTE["ink_soft"], align="center")
-
-        hw_y, hw_h = y + 55.0, 22.0
-        page.rect(x + 6.0, hw_y, w - 12.0, hw_h, stroke=PALETTE["ink"], fill=PALETTE["purple_light"], line_width=0.6)
-        page.rich_line(x + w / 2.0, hw_y + 8.5, f"**{comp.hardware_summary}**", size=5.6, color=PALETTE["ink"], align="center")
-        page.rich_line(x + w / 2.0, hw_y + 17.5, f"**{comp.starting_bonus}**", size=5.2, color=PALETTE["purple"], align="center")
-
-        o_y, o_h = y + 79.0, 106.0
-        page.rect(x + 6.0, o_y, w - 12.0, o_h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.85)
-        page.rect(x + 6.0, o_y, w - 12.0, 15.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.6)
-        page.text(x + 10.0, o_y + 10.5, f"1x/VER: {comp.override_name.upper()}", font="bold", size=7.0, color=PALETTE["ink"])
-
-        tw = measure_text(comp.override_timing, font="mono_bold", size=5.4) + 6.0
-        page.rounded_rect(x + w - 10.0 - tw, o_y + 2.0, tw, 11.0, r=2.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.55)
-        page.text(x + w - 10.0 - tw / 2.0, o_y + 9.5, comp.override_timing, font="mono_bold", size=5.4, color=PALETTE["ink"], align="center")
-
-        page.rich_paragraph(x + 10.0, o_y + 22.0, w - 20.0, comp.override_desc, size=6.3, leading=8.3, color=PALETTE["ink"])
-
-        ty = o_y + o_h - 30.0
-        page.line(x + 10.0, ty, x + w - 10.0, ty, stroke=PALETTE["rule"], width=0.5, dash=(2, 1.5))
-        page.text(x + 10.0, ty + 11.0, "ONCE / VER:", font="mono_bold", size=5.5, color=PALETTE["ink_soft"])
-
-        slots = ["v1.0", "v2.0", "v3.0"]
-        sx_start = x + 58.0
-        sw_box = 44.0
-        for s_idx, ver_lbl in enumerate(slots):
-            bx = sx_start + s_idx * (sw_box + 4.0)
-            page.rounded_rect(bx, ty + 2.0, sw_box, 13.0, r=2.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.6)
-            page.rect(bx + 3.0, ty + 4.5, 8.0, 8.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.6)
-            page.text(bx + 14.0, ty + 11.0, ver_lbl, font="mono_bold", size=6.0, color=PALETTE["ink"])
-
-        page.text(x + w / 2.0, o_y + o_h - 4.0, "Unused charge forfeits upon SETEC upgrade at start of round.", font="italic", size=4.8, color=PALETTE["muted"], align="center")
-
-        page.line(x + 6.0, y + 192.0, x + w - 6.0, y + 192.0, stroke=PALETTE["guide"], width=0.5)
-        page.text(x + 8.0, y + 203.0, f"REF: COMP-{comp.code}", font="mono", size=5.2, color=PALETTE["muted"])
-        page.text(x + w - 8.0, y + 203.0, "SLIPS FLUSH BESIDE TERMINAL MAT", font="mono", size=4.8, color=PALETTE["muted"], align="right")
+    # Once-per-version checkboxes
+    page.line(x + 6.0, ty, x + w - 6.0, ty, stroke=PALETTE["rule"], width=0.5, dash=(2, 1.5))
+    page.text(x + 7.0, ty + 9.5, "ONCE / VER:", font="mono_bold", size=4.8, color=PALETTE["ink_soft"])
+    sx_start = x + 46.0
+    sw_box = 34.0
+    for s_idx, ver_lbl in enumerate(["v1.0", "v2.0", "v3.0"]):
+        bx = sx_start + s_idx * (sw_box + 3.0)
+        page.rounded_rect(bx, ty + 2.0, sw_box, 11.0, r=2.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.5)
+        page.rect(bx + 2.0, ty + 3.8, 7.2, 7.2, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.5)
+        page.text(bx + 11.5, ty + 9.6, ver_lbl, font="mono_bold", size=5.2, color=PALETTE["ink"])
+    page.text(x + w - 7.0, ty + 9.5, "Unused charge forfeits on upgrade.", font="italic", size=4.3, color=PALETTE["muted"], align="right")
 
 
 def _draw_white_hat_card(page: PDFPage, x: float, y: float, w: float, h: float, white_hat: WhiteHatDossierSpec, is_dock: bool = False) -> None:
-    """Render a single White Hat Operative dossier card (full-size or docked)."""
+    """Render a White Hat Dossier card. Identical layout on the cut sheet and in the mat dock."""
     page.rect(x, y, w, h, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=1.0)
 
-    # 1. Header Strip (y..y+16)
-    page.rect(x, y, w, 16.0, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.8)
-    page.rect(x, y, w, 2.5, stroke=None, fill=PALETTE["purple"])
-    page.draw_color_badge(x + 9.0, y + 9.0, 4.5, "purple")
-    dock_tag = " [MODULAR DOCK]" if is_dock else ""
-    page.text(x + 18.0, y + 11.0, f"WHITE HAT DOSSIER{dock_tag}", font="bold", size=5.8, color=PALETTE["purple"])
-    page.text(x + w - 6.0, y + 11.0, f"REF: WH-{white_hat.code}", font="mono_bold", size=5.0, color=PALETTE["purple"], align="right")
+    # Header strip
+    page.rect(x, y, w, 14.0, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.8)
+    page.rect(x, y, w, 2.2, stroke=None, fill=PALETTE["purple"])
+    page.draw_color_badge(x + 8.5, y + 8.2, 4.2, "purple")
+    page.text(x + 16.0, y + 10.0, "WHITE HAT DOSSIER", font="bold", size=5.6, color=PALETTE["purple"])
+    page.text(x + w - 5.0, y + 10.0, f"REF: WH-{white_hat.code}", font="mono_bold", size=5.0, color=PALETTE["purple"], align="right")
 
-    if is_dock and h < 180.0:
-        # Compact Docked Layout for Player Mat Left Column (includes embedded Personal Reserve!)
-        page.text(x + w / 2.0, y + 25.5, white_hat.name.upper(), font="bold", size=8.5, color=PALETTE["ink"], align="center")
-        page.text(x + w / 2.0, y + 33.5, white_hat.role.upper(), font="mono_bold", size=5.0, color=PALETTE["purple"], align="center")
+    # Name, role, flavor
+    page.text(x + w / 2.0, y + 24.0, white_hat.name.upper(), font="bold", size=8.6, color=PALETTE["ink"], align="center")
+    page.text(x + w / 2.0, y + 31.5, white_hat.role.upper(), font="mono_bold", size=4.9, color=PALETTE["purple"], align="center")
+    fy, fh = y + 34.5, 15.0
+    page.rect(x + 4.0, fy, w - 8.0, fh, stroke=PALETTE["guide"], fill=PALETTE["paper_tint"], line_width=0.5)
+    _fit_paragraph(page, x + 7.0, fy + 6.0, w - 14.0, f"*{white_hat.flavor}*", fy + fh - 2.0, size=5.0, leading=6.0, min_size=4.2, color=PALETTE["ink_soft"], align="center")
 
-        # Purple Star Protocol Box
-        s_y = y + 37.0
-        s_h = 58.0
-        page.rect(x + 4.0, s_y, w - 8.0, s_h, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.7)
-        page.rect(x + 4.0, s_y, w - 8.0, 13.0, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.5)
-        tw_s = measure_text(white_hat.protocol_timing, font="mono_bold", size=4.8) + 4.0
-        page.rounded_rect(x + w - 6.0 - tw_s, s_y + 2.0, tw_s, 9.0, r=1.5, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.5)
-        page.text(x + w - 6.0 - tw_s / 2.0, s_y + 8.0, white_hat.protocol_timing, font="mono_bold", size=4.8, color=PALETTE["purple"], align="center")
-        page.text(x + 7.0, s_y + 9.0, f"PURPLE STAR: {white_hat.protocol_name.upper()}", font="bold", size=5.8, color=PALETTE["purple"])
+    # Purple Star Signature Protocol box
+    r_h = 32.0
+    s_y = y + 52.0
+    s_h = h - 52.0 - r_h - 5.0
+    page.rect(x + 4.0, s_y, w - 8.0, s_h, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.7)
+    page.rect(x + 4.0, s_y, w - 8.0, 12.0, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.5)
+    tw_s = measure_text(white_hat.protocol_timing, font="mono_bold", size=4.7) + 4.0
+    page.rounded_rect(x + w - 7.0 - tw_s, s_y + 1.8, tw_s, 8.6, r=1.5, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.5)
+    page.text(x + w - 7.0 - tw_s / 2.0, s_y + 7.7, white_hat.protocol_timing, font="mono_bold", size=4.7, color=PALETTE["purple"], align="center")
+    title = f"PURPLE STAR: {white_hat.protocol_name.upper()}"
+    avail = (w - 14.0) - tw_s - 6.0
+    t_size = min(5.8, 5.8 * avail / max(1.0, measure_text(title, font="bold", size=5.8)))
+    page.text(x + 7.0, s_y + 8.6, title, font="bold", size=t_size, color=PALETTE["purple"])
+    note_y = s_y + s_h - 2.8
+    _fit_paragraph(page, x + 7.0, s_y + 18.5, w - 14.0, white_hat.protocol_desc, note_y - 6.5, size=5.3, leading=6.7, min_size=4.3)
+    page.rich_line(x + w / 2.0, note_y, "*Repeatable: triggers on every rolled Purple Face 6 ({STAR}).*", size=4.3, color=PALETTE["purple"], align="center")
 
-        page.rich_paragraph(x + 7.0, s_y + 18.0, w - 14.0, white_hat.protocol_desc, size=5.4, leading=7.0, color=PALETTE["ink"])
-        page.text(x + w / 2.0, s_y + s_h - 3.0, "Repeatable: Triggers whenever rolling Purple Face 6 ({STAR}).", font="italic", size=4.5, color=PALETTE["purple"], align="center")
-
-        # Dedicated Personal Reserve Box (1 Purple Die Slot)
-        r_y = y + 98.0
-        r_h = h - 100.0
-        page.rect(x + 4.0, r_y, w - 8.0, r_h, stroke=PALETTE["purple"], fill=PALETTE["paper_tint"], line_width=0.7)
-        page.rect(x + 4.0, r_y, w - 8.0, 12.0, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.5)
-        page.text(x + 7.0, r_y + 8.5, "PERSONAL RESERVE (1 PURPLE SPECIALIST DIE)", font="bold", size=5.2, color=PALETTE["purple"])
-        page.text(x + w - 7.0, r_y + 8.5, f"{white_hat.reserve_cost_str} IN P3A", font="mono_bold", size=5.0, color=PALETTE["purple"], align="right")
-
-        ds_w, ds_h = 42.0, 26.0
-        bx = x + 12.0
-        page.rounded_rect(bx, r_y + 15.0, ds_w, ds_h, r=2.5, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.6)
-        page.text(bx + ds_w / 2.0, r_y + 24.5, "RESERVE DIE", font="mono_bold", size=5.2, color=PALETTE["purple"], align="center")
-        page.text(bx + ds_w / 2.0, r_y + 35.0, white_hat.reserve_cost_str, font="bold", size=8.0, color=PALETTE["ink"], align="center")
-
-        page.rich_paragraph(
-            x + 62.0, r_y + 15.0, w - 68.0,
-            f"**Reserve Die ({white_hat.reserve_cost_str}):**\n"
-            "- Faces 1-2: Any Shld | 3: +$2\n"
-            "- Face 4: +$1 & 1{RESEARCH} | 5: Glitch\n"
-            "- Face 6: {STAR} Signature Protocol",
-            size=4.8, leading=6.5, color=PALETTE["ink_soft"],
-        )
-    else:
-        # Full Card Layout for Page 6 Sheet (w ~ 238, h ~ 210)
-        cost_pill_w = 42.0
-        cost_pill_x = x + 112.0
-        page.rounded_rect(cost_pill_x, y + 2.5, cost_pill_w, 11.0, r=2.0, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.6)
-        page.rich_line(cost_pill_x + cost_pill_w / 2.0, y + 10.0, f"**DICE: {white_hat.reserve_cost_str}**", size=5.4, color=PALETTE["purple"], align="center")
-
-        page.text(x + w / 2.0, y + 31.0, white_hat.name.upper(), font="bold", size=10.5, color=PALETTE["ink"], align="center")
-        page.text(x + w / 2.0, y + 41.5, white_hat.role.upper(), font="mono_bold", size=5.8, color=PALETTE["purple"], align="center")
-
-        s_y, s_h = y + 48.0, 124.0
-        page.rect(x + 6.0, s_y, w - 12.0, s_h, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.85)
-        page.rect(x + 6.0, s_y, w - 12.0, 16.5, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.6)
-        tw_s = measure_text(white_hat.protocol_timing, font="mono_bold", size=5.5) + 6.0
-        page.rounded_rect(x + w - 10.0 - tw_s, s_y + 2.5, tw_s, 11.5, r=2.0, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.55)
-        page.text(x + w - 10.0 - tw_s / 2.0, s_y + 10.5, white_hat.protocol_timing, font="mono_bold", size=5.5, color=PALETTE["purple"], align="center")
-
-        title_text = f"PURPLE STAR: {white_hat.protocol_name.upper()}"
-        avail_title_w = (w - 20.0) - tw_s - 8.0
-        base_tw = measure_text(title_text, font="bold", size=7.2)
-        t_size = 7.2 if base_tw <= avail_title_w else min(7.2, avail_title_w / (base_tw / 7.2))
-        page.text(x + 10.0, s_y + 11.5, title_text, font="bold", size=t_size, color=PALETTE["purple"])
-
-        page.rich_paragraph(x + 10.0, s_y + 26.0, w - 20.0, white_hat.protocol_desc, size=6.8, leading=9.2, color=PALETTE["ink"])
-        page.line(x + 10.0, s_y + s_h - 16.0, x + w - 10.0, s_y + s_h - 16.0, stroke=PALETTE["purple_light"], width=0.5)
-        page.text(x + w / 2.0, s_y + s_h - 6.0, "Repeatable: Triggers whenever rolling Purple Face 6 ({STAR}).", font="italic", size=5.4, color=PALETTE["purple"], align="center")
-
-        fy, fh = y + 176.0, 27.0
-        page.rect(x + 6.0, fy, w - 12.0, fh, stroke=PALETTE["guide"], fill=PALETTE["paper_tint"], line_width=0.5)
-        page.rich_paragraph(x + 10.0, fy + 8.5, w - 20.0, f"*{white_hat.flavor}*", size=5.9, leading=7.8, color=PALETTE["ink_soft"], align="center")
-
-        page.text(x + 8.0, y + 208.0, "SLIPS FLUSH BESIDE TERMINAL MAT", font="mono", size=4.5, color=PALETTE["muted"])
-        page.text(x + w - 8.0, y + 208.0, f"1x PURPLE SPECIALIST DIE ({white_hat.reserve_cost_str} IN RESERVE)", font="mono", size=4.5, color=PALETTE["purple"], align="right")
+    # Personal Reserve strip (the Purple Specialist Die rests on the card itself)
+    r_y = y + h - r_h - 3.0
+    page.rect(x + 4.0, r_y, w - 8.0, r_h, stroke=PALETTE["purple"], fill=PALETTE["paper_tint"], line_width=0.7)
+    ds = r_h - 4.0
+    page.rounded_rect(x + 6.0, r_y + 2.0, ds + 14.0, ds, r=2.5, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.6)
+    page.text(x + 13.0 + ds / 2.0, r_y + 11.0, "RESERVE DIE", font="mono_bold", size=4.4, color=PALETTE["purple"], align="center")
+    page.text(x + 13.0 + ds / 2.0, r_y + 22.0, white_hat.reserve_cost_str, font="bold", size=7.6, color=PALETTE["ink"], align="center")
+    page.rich_paragraph(
+        x + ds + 26.0, r_y + 7.5, w - ds - 32.0,
+        f"**PERSONAL RESERVE** (1 Purple Specialist Die, {white_hat.reserve_cost_str} in P3A)\n"
+        "Faces 1-2: Block 1 Any | 3: +$2 | 4: +$1 & +1{RESEARCH}\n"
+        "5: Glitch | 6: {STAR} Signature Protocol",
+        size=4.6, leading=6.6, color=PALETTE["ink_soft"],
+    )
 
 
 def _draw_empty_company_card_slot(page: PDFPage, x: float, y: float, w: float, h: float, idx: int = 1) -> None:
-    """Render an empty docking slot for the Client Company Card."""
-    page.rect(x, y, w, h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
-    page.rect(x, y, w, 16.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
-    page.text(x + 6.0, y + 11.0, "CLIENT COMPANY CARD [MODULAR DOCK]", font="mono_bold", size=5.8, color=PALETTE["ink"])
-    page.text(x + w - 6.0, y + 11.0, "ONCE / VER OVERRIDE", font="mono_bold", size=5.4, color=PALETTE["ink_soft"], align="right")
-
-    # Inset dashed placement guide
-    page.rect(x + 4.0, y + 18.0, w - 8.0, h - 22.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.6, dash=(3.0, 2.0))
-    page.corner_ticks(x + 4.0, y + 18.0, w - 8.0, h - 22.0, size=5.0, color=PALETTE["ink_soft"])
-
-    page.text(x + w / 2.0, y + 33.0, "SLOT CLIENT COMPANY CARD HERE", font="bold", size=7.8, color=PALETTE["ink"], align="center")
-
-    # Rules Summary Box
-    by = y + 42.0
-    bw = w - 14.0
-    bh = 58.0
-    page.rounded_rect(x + 7.0, by, bw, bh, r=2.5, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.6)
+    """Render an empty dock outline sized exactly to a Client Company card."""
+    page.rect(x, y, w, h, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=1.0, dash=(4.0, 2.5))
+    page.corner_ticks(x + 3.0, y + 3.0, w - 6.0, h - 6.0, size=6.0, color=PALETTE["ink_soft"])
+    page.text(x + w / 2.0, y + 22.0, "CLIENT COMPANY CARD", font="bold", size=8.0, color=PALETTE["ink"], align="center")
+    page.text(x + w / 2.0, y + 31.0, f"PLACE CARD HERE  //  DOCK SIZE {w / 72.0:.2f}\" x {h / 72.0:.2f}\"", font="mono_bold", size=5.0, color=PALETTE["ink_soft"], align="center")
+    by, bw, bh = y + 40.0, w - 20.0, 58.0
+    page.rounded_rect(x + 10.0, by, bw, bh, r=2.5, stroke=PALETTE["rule"], fill=PALETTE["white"], line_width=0.6)
     rules_text = (
         "**1. Contract:** Deal 1 Client Company card at setup.\n"
-        "**2. Override:** Grants 1 override per SETEC Version (**v1.0**, **v2.0**, **v3.0**).\n"
-        "**3. Round-Start Switch:** Override remains usable in P2B & P3 of upgrade round; forfeits at next round start.\n"
-        "**4. Spillover:** Excess cubes mark next track immediately; new ability unlocks at round start."
+        "**2. Override:** 1 override per SETEC Version (**v1.0**, **v2.0**, **v3.0**).\n"
+        "**3. Round-Start Switch:** Override stays usable in P2B & P3 of the upgrade round; forfeits at next round start.\n"
+        "**4. Spillover:** Excess cubes mark the next track immediately."
     )
-    page.rich_paragraph(x + 10.0, by + 9.0, bw - 6.0, rules_text, size=5.0, leading=6.8, color=PALETTE["ink"])
-
-    # Version Slots Track
-    ty = y + h - 27.0
-    page.text(x + 8.0, ty + 8.0, "ONCE / VER:", font="mono_bold", size=5.0, color=PALETTE["ink_soft"])
-    slots = ["v1.0", "v2.0", "v3.0"]
-    sx_start = x + 50.0
-    sw_box = (w - 58.0) / 3.0
-    for s_idx, ver_lbl in enumerate(slots):
-        bx = sx_start + s_idx * sw_box
-        page.rounded_rect(bx, ty + 1.0, sw_box - 3.0, 12.0, r=2.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.5)
-        page.rect(bx + 2.5, ty + 3.0, 7.5, 7.5, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.5)
-        page.text(bx + 12.0, ty + 9.0, f"{ver_lbl}", font="mono_bold", size=5.4, color=PALETTE["ink"])
-
-    page.text(x + w / 2.0, y + h - 4.0, "Slips flush beside terminal mat or slots directly into dock.", font="italic", size=4.5, color=PALETTE["muted"], align="center")
+    page.rich_paragraph(x + 14.0, by + 9.0, bw - 8.0, rules_text, size=5.0, leading=6.8, color=PALETTE["muted"])
 
 
 def _draw_empty_white_hat_slot(page: PDFPage, x: float, y: float, w: float, h: float, idx: int = 1) -> None:
-    """Render an empty docking slot for the White Hat Dossier (with embedded Personal Reserve)."""
-    page.rect(x, y, w, h, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=1.0)
-    page.rect(x, y, w, 16.0, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.8)
-    page.rect(x, y, w, 2.5, stroke=None, fill=PALETTE["purple"])
-    page.draw_color_badge(x + 9.0, y + 9.0, 4.5, "purple")
-    page.text(x + 18.0, y + 11.0, "WHITE HAT DOSSIER [MODULAR DOCK]", font="bold", size=5.8, color=PALETTE["purple"])
-    page.text(x + w - 6.0, y + 11.0, "TACTICAL ROLE & PROTOCOL", font="mono_bold", size=5.2, color=PALETTE["purple"], align="right")
-
-    # Inset dashed placement guide
-    page.rect(x + 4.0, y + 18.0, w - 8.0, h - 22.0, stroke=PALETTE["purple_light"], fill=PALETTE["paper_tint"], line_width=0.6, dash=(3.0, 2.0))
-
-    page.text(x + w / 2.0, y + 33.0, "SLOT WHITE HAT DOSSIER HERE", font="bold", size=7.8, color=PALETTE["purple"], align="center")
-
-    # Rules Summary Box
-    by = y + 42.0
-    bw = w - 14.0
-    bh = 46.0
-    page.rounded_rect(x + 7.0, by, bw, bh, r=2.5, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.6)
+    """Render an empty dock outline sized exactly to a White Hat Dossier card."""
+    page.rect(x, y, w, h, stroke=PALETTE["purple"], fill=PALETTE["paper_tint"], line_width=1.0, dash=(4.0, 2.5))
+    page.corner_ticks(x + 3.0, y + 3.0, w - 6.0, h - 6.0, size=6.0, color=PALETTE["purple"])
+    page.text(x + w / 2.0, y + 22.0, "WHITE HAT DOSSIER", font="bold", size=8.0, color=PALETTE["purple"], align="center")
+    page.text(x + w / 2.0, y + 31.0, f"PLACE CARD HERE  //  DOCK SIZE {w / 72.0:.2f}\" x {h / 72.0:.2f}\"", font="mono_bold", size=5.0, color=PALETTE["purple"], align="center")
+    by, bw, bh = y + 40.0, w - 20.0, 50.0
+    page.rounded_rect(x + 10.0, by, bw, bh, r=2.5, stroke=PALETTE["purple_light"], fill=PALETTE["white"], line_width=0.6)
     wh_rules_text = (
         "**1. Operative:** Deal 1 White Hat Dossier at setup.\n"
-        "**2. Purple Star ({STAR}):** Rolling Face 6 triggers operative protocol.\n"
-        "**3. Repeatable:** Triggers once per rolled Purple Star."
+        "**2. Personal Reserve:** Your Purple Specialist Die rests on the Dossier's reserve strip.\n"
+        "**3. Purple Star ({STAR}):** Each rolled Face 6 triggers the Signature Protocol once."
     )
-    page.rich_paragraph(x + 10.0, by + 8.5, bw - 6.0, wh_rules_text, size=5.0, leading=6.8, color=PALETTE["ink"])
+    page.rich_paragraph(x + 14.0, by + 9.0, bw - 8.0, wh_rules_text, size=5.0, leading=6.8, color=PALETTE["muted"])
 
-    # Embedded Personal Reserve Box
-    r_y = y + 92.0
-    r_h = h - 94.0
-    page.rect(x + 5.0, r_y, w - 10.0, r_h, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.7)
-    page.rect(x + 5.0, r_y, w - 10.0, 13.0, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.5)
-    page.text(x + 8.0, r_y + 9.0, "PERSONAL RESERVE (1 PURPLE DIE)", font="bold", size=5.4, color=PALETTE["purple"])
-    page.text(x + w - 8.0, r_y + 9.0, "COST ON DOSSIER", font="mono_bold", size=5.0, color=PALETTE["purple"], align="right")
 
-    ds_w, ds_h = 42.0, 26.0
-    bx = x + 12.0
-    page.rounded_rect(bx, r_y + 16.0, ds_w, ds_h, r=2.5, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.6)
-    page.text(bx + ds_w / 2.0, r_y + 25.5, "RESERVE DIE", font="mono_bold", size=5.2, color=PALETTE["purple"], align="center")
-    page.text(bx + ds_w / 2.0, r_y + 36.0, "$4-$6", font="bold", size=8.0, color=PALETTE["ink"], align="center")
-
-    page.rich_paragraph(
-        x + 62.0, r_y + 16.0, w - 68.0,
-        "**Specialist AI (d6):**\n"
-        "1-2: Any Shld | 3: +$2\n"
-        "4: +$1 & 1{RESEARCH} | 5: Glitch\n"
-        "6: {STAR} Signature Protocol (Cost on Dossier)",
-        size=4.8, leading=6.5, color=PALETTE["ink_soft"],
-    )
+def _draw_chip_well(
+    page: PDFPage, x: float, y: float, w: float, h: float, title: str, title_color: Color,
+    border: Color, tint: Color, sub_top: str, sub_bottom: str, icon: str,
+) -> None:
+    """A labelled box holding a 40 mm circular well for a standard 39 mm poker chip."""
+    page.rect(x, y, w, h, stroke=border, fill=PALETTE["white"], line_width=1.0)
+    page.rect(x, y, w, 11.0, stroke=border, fill=tint, line_width=0.7)
+    page.rich_line(x + w / 2.0, y + 8.0, title, size=5.8, color=title_color, align="center")
+    r = POKER_CHIP_WELL_D / 2.0
+    cx, cy = x + w / 2.0, y + 11.0 + (h - 11.0) / 2.0
+    page.circle(cx, cy, r, stroke=border, fill=PALETTE["paper_tint"], line_width=0.8, dash=(3.0, 2.0))
+    page.circle(cx, cy, r - 7.0, stroke=PALETTE["guide"], fill=None, line_width=0.4)
+    if icon == "secret":
+        page.draw_secret_icon(cx, cy - 8.0, 22.0, color=PALETTE["guide"])
+    elif icon == "research":
+        page.draw_research_icon(cx, cy - 8.0, 20.0, color=PALETTE["guide"])
+    else:
+        page.text(cx, cy - 1.0, "$", font="bold", size=26.0, color=PALETTE["guide"], align="center")
+    page.rich_line(cx, cy + 16.0, sub_top, size=4.9, color=PALETTE["ink_soft"], align="center")
+    page.text(cx, cy + 23.5, sub_bottom, font="regular", size=4.4, color=PALETTE["muted"], align="center")
+    page.text(cx, cy + r - 9.0, "POKER CHIP (39 mm)", font="mono", size=3.8, color=PALETTE["muted"], align="center")
 
 
 def render_player_board(
@@ -821,89 +740,69 @@ def render_player_board(
     )
 
     # -------------------------------------------------------------------------
-    # LEFT COLUMN: CORPORATE HQ (x = 38..258, w = 220)
+    # LEFT COLUMN: CORPORATE HQ (x = 32..264, w = 232)
     # -------------------------------------------------------------------------
-    lx, lw = 38.0, 220.0
+    lx, lw = 32.0, CARD_W
 
-    # 1. Top Card: Client Company Card Modular Dock (y = 30..164, h = 134)
+    # 1. Client Company Card dock -- exact card size (y = 30..170)
     if comp is not None:
-        _draw_company_card(page, lx, 30.0, lw, 134.0, comp, is_dock=True)
+        _draw_company_card(page, lx, 30.0, lw, COMPANY_CARD_H, comp, is_dock=True)
     else:
-        _draw_empty_company_card_slot(page, lx, 30.0, lw, 134.0, idx=idx)
+        _draw_empty_company_card_slot(page, lx, 30.0, lw, COMPANY_CARD_H, idx=idx)
 
-    # 2. Middle Card: White Hat Dossier Modular Dock with Personal Reserve (y = 168..316, h = 148)
+    # 2. White Hat Dossier dock -- exact card size, Personal Reserve on card (y = 174..320)
+    wh_y = 30.0 + COMPANY_CARD_H + 4.0
     if white_hat is not None:
-        _draw_white_hat_card(page, lx, 168.0, lw, 148.0, white_hat, is_dock=True)
+        _draw_white_hat_card(page, lx, wh_y, lw, WHITE_HAT_CARD_H, white_hat, is_dock=True)
     else:
-        _draw_empty_white_hat_slot(page, lx, 168.0, lw, 148.0, idx=idx)
+        _draw_empty_white_hat_slot(page, lx, wh_y, lw, WHITE_HAT_CARD_H, idx=idx)
 
-    # 3. Corporate Secrets (VP) Token Placement Area (y = 320..386, h = 66)
-    sy, sh = 320.0, 66.0
-    page.rect(lx, sy, lw, sh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
-    page.rect(lx, sy, lw, 14.0, stroke=PALETTE["ink"], fill=PALETTE["blue_light"], line_width=0.7)
-    page.rich_line(lx + 6.0, sy + 10.0, "{SECRET} **CORPORATE SECRETS (VP)**", size=6.5, color=PALETTE["blue"])
-    page.text(lx + lw - 6.0, sy + 10.0, "1 VP / SECRET", font="mono_bold", size=5.5, color=PALETTE["blue"], align="right")
+    # 3. Poker-chip token wells + Patents (2 x 2 grid, y = 324..576)
+    cell_w = (lw - 4.0) / 2.0          # 114 pt
+    cell_h = 124.0
+    g_y1 = wh_y + WHITE_HAT_CARD_H + 4.0
+    g_y2 = g_y1 + cell_h + 4.0
+    g_x2 = lx + cell_w + 4.0
 
-    # Open placeholder area for physical secret tokens
-    page.rect(lx + 5.0, sy + 17.0, lw - 10.0, 34.0, stroke=PALETTE["blue"], fill=PALETTE["paper_tint"], line_width=0.6, dash=(3.0, 2.0))
-    page.corner_ticks(lx + 5.0, sy + 17.0, lw - 10.0, 34.0, size=5.0, color=PALETTE["blue"])
-    page.text(lx + lw / 2.0, sy + 30.0, "CORPORATE SECRETS (VP) // PLACE TOKENS HERE", font="bold", size=7.2, color=PALETTE["blue"], align="center")
-    page.text(lx + lw / 2.0, sy + 43.0, "Start: 8 (2P/3P) | 12 (4P) | Uncapped (players may exceed 12)", font="mono_bold", size=5.2, color=PALETTE["ink_soft"], align="center")
+    _draw_chip_well(
+        page, lx, g_y1, cell_w, cell_h,
+        "{SECRET} **CORPORATE SECRETS (VP)**", PALETTE["blue"], PALETTE["blue"], PALETTE["blue_light"],
+        "Start: **8** (2P/3P) | **12** (4P)", "Uncapped | 1 Secret = 1 VP", "secret",
+    )
+    _draw_chip_well(
+        page, g_x2, g_y1, cell_w, cell_h,
+        "**MONEY ($)**", PALETTE["ink"], PALETTE["ink"], PALETTE["panel_tint"],
+        "Start: **$6** (Meridian: **$8**)", "Min $0 | Tiebreaker #1", "money",
+    )
+    _draw_chip_well(
+        page, lx, g_y2, cell_w, cell_h,
+        "{RESEARCH} **RESEARCH** (UNCAPPED)", PALETTE["purple"], PALETTE["purple"], PALETTE["purple_light"],
+        "Start: **0** (Helix: **2**)", "Spend in Phase 3A", "research",
+    )
 
-    # Bottom notice bar for Total Data Breach / Patient Zero
-    page.rect(lx + 5.0, sy + 52.0, lw - 10.0, 11.0, stroke=PALETTE["red"], fill=PALETTE["red_light"], line_width=0.5)
-    page.text(lx + lw / 2.0, sy + 59.5, "<= 0 SECRETS = PATIENT ZERO (TOTAL DATA BREACH / ELIMINATED)", font="mono_bold", size=4.8, color=PALETTE["red"], align="center")
-
-    # 4. Money & Research Banks (Side-by-side, y = 390..456, h = 66)
-    my, mh = 390.0, 66.0
-    bw_half = (lw - 6.0) / 2.0
-
-    # Left: Liquid Cash ($)
-    page.rect(lx, my, bw_half, mh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
-    page.rect(lx, my, bw_half, 14.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.7)
-    page.text(lx + bw_half / 2.0, my + 10.0, "MONEY ($)", font="bold", size=6.8, color=PALETTE["ink"], align="center")
-    page.text(lx + bw_half / 2.0, my + 38.0, "$", font="bold", size=22.0, color=PALETTE["guide"], align="center")
-    page.text(lx + bw_half / 2.0, my + 50.0, "Start: $6 (Meridian: $8)", font="bold", size=5.4, color=PALETTE["ink_soft"], align="center")
-    page.text(lx + bw_half / 2.0, my + 59.0, "Min: $0 | Tiebreaker #1", font="regular", size=4.8, color=PALETTE["muted"], align="center")
-
-    # Right: Research Tokens ({RESEARCH} UNCAPPED)
-    rx_bank = lx + bw_half + 6.0
-    page.rect(rx_bank, my, bw_half, mh, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=1.0)
-    page.rect(rx_bank, my, bw_half, 14.0, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.7)
-    page.rich_line(rx_bank + 5.0, my + 10.0, "{RESEARCH} **RESEARCH**", size=6.5, color=PALETTE["purple"])
-    page.text(rx_bank + bw_half - 5.0, my + 10.0, "UNCAPPED", font="mono_bold", size=5.2, color=PALETTE["purple"], align="right")
-    page.draw_research_icon(rx_bank + bw_half / 2.0, my + 33.0, 16.0, color=PALETTE["purple"])
-    page.rich_line(rx_bank + bw_half / 2.0, my + 50.0, "Start: 0 {RESEARCH} (Helix: 2 {RESEARCH})", size=5.2, color=PALETTE["ink_soft"], align="center")
-    page.text(rx_bank + bw_half / 2.0, my + 59.0, "Spend in Phase 3A Operations", font="regular", size=4.8, color=PALETTE["muted"], align="center")
-
-    # 5. Cryptographic Patents Track (y = 460..580, h = 120)
-    py, ph = 460.0, 120.0
-    page.rect(lx, py, lw, ph, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
-    page.rect(lx, py, lw, 15.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.7)
-    page.rich_line(lx + 6.0, py + 10.5, "{RESEARCH} **CRYPTOGRAPHIC PATENTS TRACK**", size=6.5, color=PALETTE["ink"])
-    page.text(lx + lw - 6.0, py + 10.5, "PHASE 3A VP", font="mono_bold", size=5.4, color=PALETTE["purple"], align="right")
-
+    # Compact Cryptographic Patents Track
+    px0, py0 = g_x2, g_y2
+    page.rect(px0, py0, cell_w, cell_h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
+    page.rect(px0, py0, cell_w, 11.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.7)
+    page.rich_line(px0 + cell_w / 2.0, py0 + 8.0, "{RESEARCH} **PATENTS TRACK** (P3A)", size=5.6, color=PALETTE["ink"], align="center")
     patents_levels = [
-        ("Level 0 (Base)", "Cost: 4 {RESEARCH} -> +1 Secret", "Default baseline filing cost", False),
-        ("Level 1 (Cost 2 {RESEARCH})", "Cost: 3 {RESEARCH} -> +1 Secret", "[ ] Upgraded R&D throughput", True),
-        ("Level 2 (Cost 3 {RESEARCH})", "Cost: 2 {RESEARCH} -> +1 Secret AND +$1 Cash", "[ ] Maximum yield + cash dividend", True),
+        ("LEVEL 0 (BASE)", "4 {RESEARCH} -> +1 Secret", False),
+        ("LEVEL 1 (UPGRADE: 2 {RESEARCH})", "3 {RESEARCH} -> +1 Secret", True),
+        ("LEVEL 2 (UPGRADE: 3 {RESEARCH})", "2 {RESEARCH} -> +1 Secret & +$1", True),
     ]
-    pl_h = 24.0
-    for pl_i, (pl_title, pl_cost, pl_sub, is_upgrade) in enumerate(patents_levels):
-        ply = py + 18.0 + pl_i * (pl_h + 3.0)
+    pl_h = 28.0
+    for pl_i, (pl_title, pl_cost, is_upgrade) in enumerate(patents_levels):
+        ply = py0 + 14.0 + pl_i * (pl_h + 3.0)
         p_bg = PALETTE["purple_light"] if is_upgrade else PALETTE["paper_tint"]
         p_border = PALETTE["purple"] if is_upgrade else PALETTE["rule"]
-        page.rounded_rect(lx + 5.0, ply, lw - 10.0, pl_h, r=2.5, stroke=p_border, fill=p_bg, line_width=0.6)
+        page.rounded_rect(px0 + 3.0, ply, cell_w - 6.0, pl_h, r=2.5, stroke=p_border, fill=p_bg, line_width=0.6)
+        tx = px0 + 7.0
         if is_upgrade:
-            page.rect(lx + 9.0, ply + 7.0, 10.0, 10.0, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.6)
-            page.text(lx + 24.0, ply + 9.5, pl_title, font="bold", size=5.8, color=PALETTE["purple"])
-            page.rich_line(lx + 24.0, ply + 17.5, f"**{pl_cost}**", size=5.4, color=PALETTE["ink"])
-        else:
-            page.text(lx + 9.0, ply + 9.5, pl_title, font="bold", size=5.8, color=PALETTE["ink"])
-            page.rich_line(lx + 9.0, ply + 17.5, f"**{pl_cost}**", size=5.4, color=PALETTE["ink_soft"])
-
-    page.text(lx + lw / 2.0, py + ph - 13.0, "File patents in Phase 3A Operations to secure uncapped Secrets.", font="regular", size=5.0, color=PALETTE["ink_soft"], align="center")
-    page.text(lx + lw / 2.0, py + ph - 4.5, "The Prometheus Foundation receives a -1 {RESEARCH} discount (min 1 {RESEARCH}).", font="italic", size=4.6, color=PALETTE["muted"], align="center")
+            page.rect(px0 + 6.0, ply + 9.0, 9.0, 9.0, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.6)
+            tx = px0 + 18.0
+        page.rich_line(tx, ply + 10.5, f"**{pl_title}**", size=4.5, color=PALETTE["purple"] if is_upgrade else PALETTE["ink"])
+        page.rich_line(tx, ply + 20.5, f"**{pl_cost}**", size=5.2, color=PALETTE["ink"])
+    page.rich_line(px0 + cell_w / 2.0, py0 + cell_h - 4.0, "Prometheus: -1 {RESEARCH} (min 1)", size=4.3, color=PALETTE["muted"], align="center")
 
     # -------------------------------------------------------------------------
     # MAIN COLUMN: CI/CD PIPELINE & DEFENSE GRID (x = 268..756, w = 488)
@@ -1053,7 +952,6 @@ def render_player_board(
     page.text(px + pw / 2.0, st_y + st_h - 4.0, "Passive Firewall (L2): Absorbs 1 Attack Cube free before resolving damage. Prometheus: -1 🔬 discount.", font="italic", size=4.6, color=PALETTE["purple"], align="center")
 
     # Arrow down from In Production to Glitched Box
-    page.text(px + pw - 12.0, py + ph + 6.0, "MALWARE / GLITCH ▼", font="mono_bold", size=5.8, color=PALETTE["red"], align="right")
 
     # =========================================================================
     # 4. ZONE 3: UNDER DEVELOPMENT (Bottom Box: x = 268..756, y = 448..580, h = 132)
@@ -1071,10 +969,10 @@ def render_player_board(
     page.rect(sc_x, sc_y, sc_w, sc_h, stroke=PALETTE["blue"], fill=PALETTE["white"], line_width=0.9)
     page.rect(sc_x, sc_y, sc_w, 14.0, stroke=PALETTE["blue"], fill=PALETTE["blue_light"], line_width=0.6)
     page.rich_line(sc_x + 6.0, sc_y + 10.0, "{BLUE} **SCANNED BOX**", size=6.8, color=PALETTE["blue"])
-    page.text(sc_x + sc_w - 6.0, sc_y + 10.0, "VALIDATED", font="mono_bold", size=5.0, color=PALETTE["blue"], align="right")
+    page.text(sc_x + sc_w - 6.0, sc_y + 10.0, "VALIDATED", font="mono_bold", size=4.2, color=PALETTE["blue"], align="right")
 
     page.rich_paragraph(
-        sc_x + 6.0, sc_y + 18.0, sc_w - 12.0,
+        sc_x + 6.0, sc_y + 24.0, sc_w - 12.0,
         "Remediated modules completing automated linting & verification.",
         size=5.2, leading=6.8, color=PALETTE["ink_soft"],
     )
@@ -1125,10 +1023,10 @@ def render_player_board(
     page.rect(gl_x, gl_y, gl_w, gl_h, stroke=PALETTE["red"], fill=PALETTE["white"], line_width=0.9)
     page.rect(gl_x, gl_y, gl_w, 14.0, stroke=PALETTE["red"], fill=PALETTE["red_light"], line_width=0.6)
     page.rich_line(gl_x + 6.0, gl_y + 10.0, "{RED} **GLITCHED BOX**", size=6.8, color=PALETTE["red"])
-    page.text(gl_x + gl_w - 6.0, gl_y + 10.0, "QUARANTINE", font="mono_bold", size=5.0, color=PALETTE["red"], align="right")
+    page.text(gl_x + gl_w - 6.0, gl_y + 10.0, "QUARANTINE", font="mono_bold", size=4.2, color=PALETTE["red"], align="right")
 
     page.rich_paragraph(
-        gl_x + 6.0, gl_y + 18.0, gl_w - 12.0,
+        gl_x + 6.0, gl_y + 24.0, gl_w - 12.0,
         "Modules quarantined for repair (Phase 1 glitches, Green malware, or corruption).",
         size=5.2, leading=6.8, color=PALETTE["ink_soft"],
     )
@@ -1147,16 +1045,16 @@ def render_company_cards_page(page: PDFPage) -> None:
 
     page.text(
         396.0, 35.0,
-        "6x CLIENT COMPANY CARDS -- CUT ALONG TICKS -- SIZED TO DOCK FLUSH (3.30\" x 2.92\") BESIDE TERMINAL MAT",
+        "6x CLIENT COMPANY CARDS -- CUT ALONG TICKS -- PRINTED AT EXACT MAT DOCK SIZE (3.22\" x 1.94\")",
         font="mono_bold", size=6.8, color=PALETTE["ink_soft"], align="center",
     )
 
-    cw = 238.0
-    ch = 210.0
-    gap_x = 2.0
-    gap_y = 6.0
-    x0 = 37.0
-    y0 = 46.0
+    cw = CARD_W
+    ch = COMPANY_CARD_H
+    gap_x = 12.0
+    gap_y = 14.0
+    x0 = (792.0 - (3 * cw + 2 * gap_x)) / 2.0
+    y0 = 60.0
 
     for idx, comp in enumerate(COMPANIES):
         col = idx % 3
@@ -1178,7 +1076,7 @@ def render_company_cards_page(page: PDFPage) -> None:
     page.text(rx + rw - 8.0, ry + 11.5, "USE-IT-OR-LOSE-IT TIMING", font="mono_bold", size=6.0, color=PALETTE["ink_soft"], align="right")
 
     rules_text = (
-        "**1. Contract Assignment:** At setup, each player is dealt 1 Client Company card (or introductory preset). Place card flush into the Company Terminal Mat top dock.\n"
+        "**1. Contract Assignment:** At setup, each player is dealt 1 Client Company card (or introductory preset). Place the card inside the matching dock outline on the Company Terminal Mat.\n"
         "**2. Once-per-Version Lifecycle:** Each company provides 1 Institutional Override per SETEC Version (**v1.0**, **v2.0**, and **v3.0**). Mark the checkbox upon activation.\n"
         "**3. Version Transition Timing:** When SETEC's corruption track fills in Phase 2 Step 2A, the active version remains current for the rest of the round. Defensive and operational overrides remain usable through P2B and P3. Excess {BLACK} cubes immediately **spill over** onto the next track.\n"
         "**4. Round-Start Switch & Unlock:** At the start of the next round (in Phase 1 Step 1), unspent overrides from the old version forfeit, and the new version's override unlocks to Available."
@@ -1196,16 +1094,16 @@ def render_white_hat_dossiers_page(page: PDFPage) -> None:
 
     page.text(
         396.0, 35.0,
-        "6x WHITE HAT DOSSIER CARDS -- CUT ALONG TICKS -- SIZED TO DOCK FLUSH (3.30\" x 2.92\") BESIDE TERMINAL MAT",
+        "6x WHITE HAT DOSSIER CARDS -- CUT ALONG TICKS -- PRINTED AT EXACT MAT DOCK SIZE (3.22\" x 2.03\")",
         font="mono_bold", size=6.8, color=PALETTE["purple"], align="center",
     )
 
-    cw = 238.0
-    ch = 210.0
-    gap_x = 2.0
-    gap_y = 6.0
-    x0 = 37.0
-    y0 = 46.0
+    cw = CARD_W
+    ch = WHITE_HAT_CARD_H
+    gap_x = 12.0
+    gap_y = 14.0
+    x0 = (792.0 - (3 * cw + 2 * gap_x)) / 2.0
+    y0 = 60.0
 
     for idx, wh in enumerate(WHITE_HATS):
         col = idx % 3
@@ -1227,8 +1125,8 @@ def render_white_hat_dossiers_page(page: PDFPage) -> None:
     page.text(rx + rw - 8.0, ry + 11.5, "REPEATABLE PER PURPLE STAR", font="mono_bold", size=6.0, color=PALETTE["rule"], align="right")
 
     wh_rules_text = (
-        "**1. Operative Assignment:** At setup, each player is dealt 1 White Hat Dossier card (or introductory preset). Place card flush into the Company Terminal Mat bottom dock.\n"
-        "**2. Personal Reserve (1 Purple Die):** Each player holds **1 Purple Specialist Die** in their private dock on the Company Terminal Mat. Procured for the **cost printed on your Dossier** ($4-$6) in Phase 3A Operations (counts to 2-dice buy limit).\n"
+        "**1. Operative Assignment:** At setup, each player is dealt 1 White Hat Dossier card (or introductory preset). Place the card inside the matching dock outline on the Company Terminal Mat.\n"
+        "**2. Personal Reserve (1 Purple Die):** Each player holds **1 Purple Specialist Die** on the Personal Reserve strip of their White Hat Dossier. Procured for the **cost printed on your Dossier** ($4-$6) in Phase 3A Operations (counts to 2-dice buy limit).\n"
         "**3. Standardized Faces 1-5:** All Purple Specialist dice feature: **Faces 1-2:** `Block 1 Any`, **Face 3:** `+$2`, **Face 4:** `+$1 & +1 {RESEARCH}`, **Face 5:** `Glitch`.\n"
         "**4. Face 6 Signature Protocol:** Rolling Face 6 ({PURPLE} {STAR}) triggers the operative's bespoke Signature Protocol. Repeatable: each rolled Star triggers the protocol once."
     )
