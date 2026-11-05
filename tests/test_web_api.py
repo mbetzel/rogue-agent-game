@@ -961,6 +961,179 @@ class TestWebAPI(unittest.TestCase):
         self.assertEqual(p0["research_tokens"], 0)
         self.assertEqual(p0["patches"], 0)
 
+    # -------------------------------------------------------------------------
+    # 25. Manual Any Shield Allocation in confirm_income (Step 2B Player Agency)
+    # -------------------------------------------------------------------------
+    def test_confirm_income_manual_any_shield_allocation_red_vs_green(self) -> None:
+        """Human player overrides default Green allocation to block Red instead, saving $1 cash and taking 1 Green glitch."""
+        self._post("/api/game/new", {"num_players": 4, "seed": 42})
+        self._post("/api/game/action/roll", {"player_id": 0})
+
+        ctrl = RogueAgentRequestHandler.controller
+        p0 = ctrl.state.players[0]
+        p0.money = 5
+        p0.secrets = 8
+
+        # Set die 0 to Block 1 Any and die 1..3 to +$1 income
+        rolled = ctrl.player_meta[0]["rolled_pool"]
+        rolled[0].current_face = Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY)
+        for d in rolled[1:]:
+            d.current_face = Face(name="+$1", money=1)
+
+        self._post("/api/game/action/commit", {
+            "player_id": 0,
+            "commitments": {"0": "any"},
+        })
+
+        # Ensure deterministic drop of 1 Red, 0 Blue, 1 Green, 0 Black
+        ctrl.state.staging_cup = {
+            CubeColor.RED: 1,
+            CubeColor.BLUE: 0,
+            CubeColor.GREEN: 1,
+            CubeColor.BLACK: 0,
+        }
+        ctrl.state.tower.stuck_cubes = {
+            CubeColor.RED: 0,
+            CubeColor.BLUE: 0,
+            CubeColor.GREEN: 0,
+            CubeColor.BLACK: 0,
+        }
+        orig_drop = ctrl.state.tower.drop
+        ctrl.state.tower.drop = lambda cup, rng: {
+            CubeColor.RED: 1,
+            CubeColor.BLUE: 0,
+            CubeColor.GREEN: 1,
+            CubeColor.BLACK: 0,
+        }
+        try:
+            res_comp = self._post("/api/game/action/compile", {})
+        finally:
+            ctrl.state.tower.drop = orig_drop
+
+        self.assertTrue(res_comp["success"])
+        comp_state = res_comp["state"]
+        human_threat = comp_state["last_compile_result"]["human_threat"]
+
+        # Default heuristic with $5 cash blocks Green (Tier 3) and pays $1 for Red
+        self.assertEqual(human_threat["any"]["shields"], 1)
+        self.assertEqual(human_threat["any"]["allocated"], {"red": 0, "blue": 0, "green": 1})
+        self.assertEqual(human_threat["green"]["unblocked"], 0)
+        self.assertEqual(comp_state["players"][0]["money"], 4)
+
+        # Now human overrides Any shield allocation to block Red instead of Green, and glitches die 0 (the shield die)
+        shield_die_id = rolled[0].die_id
+        res_conf = self._post("/api/game/action/confirm_income", {
+            "player_id": 0,
+            "glitch_die_ids": [shield_die_id],
+            "any_shield_allocations": {"red": 1, "blue": 0, "green": 0},
+        })
+        self.assertTrue(res_conf["success"])
+        conf_p0 = res_conf["state"]["players"][0]
+
+        # Player blocked Red (saved $1, so $5 pre-step2b + $3 from 3 surviving +$1 income dice = $8!)
+        self.assertEqual(conf_p0["money"], 8)
+        self.assertEqual(conf_p0["secrets"], 8)
+        glitched_ids = [d["die_id"] for d in conf_p0["glitched_dice"]]
+        self.assertIn(shield_die_id, glitched_ids)
+
+    def test_confirm_income_manual_any_shield_allocation_blue_vs_red(self) -> None:
+        """Human player overrides default Blue allocation to block Red instead (saving $1 cash and losing 1 Corporate Secret)."""
+        self._post("/api/game/new", {"num_players": 4, "seed": 42})
+        self._post("/api/game/action/roll", {"player_id": 0})
+
+        ctrl = RogueAgentRequestHandler.controller
+        p0 = ctrl.state.players[0]
+        p0.money = 5
+        p0.secrets = 8
+
+        rolled = ctrl.player_meta[0]["rolled_pool"]
+        rolled[0].current_face = Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY)
+        for d in rolled[1:]:
+            d.current_face = Face(name="+$1", money=1)
+
+        self._post("/api/game/action/commit", {
+            "player_id": 0,
+            "commitments": {"0": "any"},
+        })
+
+        orig_drop = ctrl.state.tower.drop
+        ctrl.state.tower.drop = lambda cup, rng: {
+            CubeColor.RED: 1,
+            CubeColor.BLUE: 1,
+            CubeColor.GREEN: 0,
+            CubeColor.BLACK: 0,
+        }
+        try:
+            res_comp = self._post("/api/game/action/compile", {})
+        finally:
+            ctrl.state.tower.drop = orig_drop
+
+        self.assertTrue(res_comp["success"])
+        comp_state = res_comp["state"]
+        human_threat = comp_state["last_compile_result"]["human_threat"]
+
+        # Default heuristic blocks Blue (Tier 1) and pays $1 for Red
+        self.assertEqual(human_threat["any"]["allocated"], {"red": 0, "blue": 1, "green": 0})
+        self.assertEqual(comp_state["players"][0]["money"], 4)
+        self.assertEqual(comp_state["players"][0]["secrets"], 8)
+
+        # Override to block Red instead of Blue
+        res_conf = self._post("/api/game/action/confirm_income", {
+            "player_id": 0,
+            "glitch_die_ids": [],
+            "any_shield_allocations": {"red": 1, "blue": 0, "green": 0},
+        })
+        self.assertTrue(res_conf["success"])
+        conf_p0 = res_conf["state"]["players"][0]
+
+        # Saved $1 cash ($5 + $3 income = $8), lost 1 Secret from unblocked Blue (8 - 1 = 7)
+        self.assertEqual(conf_p0["money"], 8)
+        self.assertEqual(conf_p0["secrets"], 7)
+
+    def test_confirm_income_default_any_shield_allocation_when_omitted(self) -> None:
+        """Calling confirm_income without any_shield_allocations preserves the default 4-tier heuristic."""
+        self._post("/api/game/new", {"num_players": 4, "seed": 42})
+        self._post("/api/game/action/roll", {"player_id": 0})
+
+        ctrl = RogueAgentRequestHandler.controller
+        p0 = ctrl.state.players[0]
+        p0.money = 5
+        p0.secrets = 8
+
+        rolled = ctrl.player_meta[0]["rolled_pool"]
+        rolled[0].current_face = Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY)
+        for d in rolled[1:]:
+            d.current_face = Face(name="+$1", money=1)
+
+        self._post("/api/game/action/commit", {
+            "player_id": 0,
+            "commitments": {"0": "any"},
+        })
+
+        orig_drop = ctrl.state.tower.drop
+        ctrl.state.tower.drop = lambda cup, rng: {
+            CubeColor.RED: 1,
+            CubeColor.BLUE: 1,
+            CubeColor.GREEN: 0,
+            CubeColor.BLACK: 0,
+        }
+        try:
+            res_comp = self._post("/api/game/action/compile", {})
+        finally:
+            ctrl.state.tower.drop = orig_drop
+
+        self.assertTrue(res_comp["success"])
+        res_conf = self._post("/api/game/action/confirm_income", {
+            "player_id": 0,
+            "glitch_die_ids": [],
+        })
+        self.assertTrue(res_conf["success"])
+        conf_p0 = res_conf["state"]["players"][0]
+
+        # Default heuristic kept: Blue blocked (8 secrets), paid $1 for Red ($4 + $3 income = $7)
+        self.assertEqual(conf_p0["money"], 7)
+        self.assertEqual(conf_p0["secrets"], 8)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -12,6 +12,7 @@ export let cipherDiscountSelected = false;
 export let selectedRerollIndices = new Set();
 export let selectedChoiceDeclarations = {};
 export let selectedGlitchDieIds = new Set();
+export let selectedAnyAllocations = [];
 export let activePlayerTab = "human"; // "human", player_id number, or "all"
 export let activeBoardView = "tabletop"; // "tabletop", "terminals", "agent", "market"
 
@@ -90,10 +91,25 @@ export function sanitizeSelectionState(newState) {
     selectedPhreakerDieId = unpatched.length > 0 ? unpatched[0].die_id : null;
   }
 
-  // 5. Glitch selection state
+  // 5. Glitch & Any shield allocation selection state
   if (newState.phase !== 3 || newState.subphase !== "confirm_income") {
     selectedGlitchDieIds.clear();
+    selectedAnyAllocations = [];
   }
+}
+
+export function setSelectedAnyAllocation(index, colorStr) {
+  if (index >= 0 && index < selectedAnyAllocations.length) {
+    selectedAnyAllocations[index] = colorStr;
+  }
+}
+
+export function initSelectedAnyAllocations(allocList) {
+  selectedAnyAllocations = Array.isArray(allocList) ? [...allocList] : [];
+}
+
+export function clearSelectedAnyAllocations() {
+  selectedAnyAllocations = [];
 }
 
 export function toggleSelectedGlitchDieId(dieId, maxAllowed = 1) {

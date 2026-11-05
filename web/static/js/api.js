@@ -203,11 +203,15 @@ export async function doCompile() {
   }
 }
 
-export async function doConfirmIncome(glitchDieIds = []) {
-  const newState = await apiCall("/api/game/action/confirm_income", "POST", {
+export async function doConfirmIncome(glitchDieIds = [], anyShieldAllocations = null) {
+  const payload = {
     player_id: getHumanPlayerId(),
     glitch_die_ids: glitchDieIds,
-  });
+  };
+  if (anyShieldAllocations !== null && anyShieldAllocations !== undefined) {
+    payload.any_shield_allocations = anyShieldAllocations;
+  }
+  const newState = await apiCall("/api/game/action/confirm_income", "POST", payload);
   if (newState) {
     setState(newState);
     notifyRender();

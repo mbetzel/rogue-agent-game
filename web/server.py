@@ -180,7 +180,12 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                 elif clean_path == "/api/game/action/confirm_income":
                     pid = get_target_pid(default_to_human=True)
                     glitch_die_ids = data.get("glitch_die_ids", [])
-                    state = self.controller.confirm_income(pid, glitch_die_ids=glitch_die_ids)
+                    any_shield_allocations = data.get("any_shield_allocations", None)
+                    state = self.controller.confirm_income(
+                        pid,
+                        glitch_die_ids=glitch_die_ids,
+                        any_shield_allocations=any_shield_allocations,
+                    )
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
 

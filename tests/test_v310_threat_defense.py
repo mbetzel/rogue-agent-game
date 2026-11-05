@@ -480,6 +480,46 @@ class TestV310ThreatDefense(unittest.TestCase):
         self.assertEqual(rankings[1]["net_score"], -4)
         self.assertEqual(result.winner_id, pA.player_id)
 
+    def test_15_manual_any_shield_allocation_override(self) -> None:
+        """TEST-15: Manual any_shield_allocations parameter overrides the 4-tier bot heuristic."""
+        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        p0 = engine.state.players[0]
+        p0.money = 5
+        p0.secrets = 8
+
+        d_any = create_gray_die(1)
+        d_any.production_role = ProductionRole.ANY_SHIELD
+        d_any.current_face = Face("Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY)
+
+        d_inc = create_gray_die(2)
+        d_inc.production_role = ProductionRole.INCOME
+        d_inc.current_face = Face("+$1", money=1)
+
+        p0.in_production_dice = [d_any, d_inc]
+        rolled = [d_any, d_inc]
+        commitments = {0: ShieldColor.ANY}
+
+        # With default heuristic, 1 Red + 1 Green with $5 cash blocks Green (Tier 3) and pays $1 Red.
+        # With manual override {CubeColor.RED: 1, CubeColor.GREEN: 0}, player blocks Red (saves $1) and takes 1 Green glitch!
+        resolve_player_defense_and_wear(
+            engine=engine,
+            player=p0,
+            rolled_dice=rolled,
+            commitments=commitments,
+            attack_strengths={CubeColor.RED: 1, CubeColor.BLUE: 0, CubeColor.GREEN: 1},
+            exited_cubes={CubeColor.RED: 1, CubeColor.BLUE: 0, CubeColor.GREEN: 1},
+            active_directive="NONE",
+            any_shield_allocations={CubeColor.RED: 1, CubeColor.BLUE: 0, CubeColor.GREEN: 0},
+        )
+
+        self.assertEqual(p0.money, 5, "Red was manually blocked by Any shield, saving $1")
+        self.assertEqual(p0.secrets, 8)
+        self.assertEqual(len(p0.glitched_dice), 1, "Green was left unblocked, glitching 1 die")
+        self.assertEqual(
+            p0.last_defense_breakdown["any_allocated"],
+            {"red": 1, "blue": 0, "green": 0},
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

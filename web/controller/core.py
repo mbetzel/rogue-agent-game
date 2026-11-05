@@ -442,8 +442,18 @@ class GameController:
     ) -> Dict[str, Any]:
         return phase3_actions.execute_star_action(self, player_id, action_type, cube_color)
 
-    def confirm_income(self, player_id: int, glitch_die_ids: Optional[List[int]] = None) -> Dict[str, Any]:
-        return phase3_actions.confirm_income(self, player_id, glitch_die_ids=glitch_die_ids)
+    def confirm_income(
+        self,
+        player_id: int,
+        glitch_die_ids: Optional[List[int]] = None,
+        any_shield_allocations: Optional[Dict[str, int]] = None,
+    ) -> Dict[str, Any]:
+        return phase3_actions.confirm_income(
+            self,
+            player_id,
+            glitch_die_ids=glitch_die_ids,
+            any_shield_allocations=any_shield_allocations,
+        )
 
     def end_turn(self, player_id: int) -> Dict[str, Any]:
         return phase3_actions.end_turn(self, player_id)

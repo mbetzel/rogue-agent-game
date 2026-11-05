@@ -14,6 +14,7 @@ from sim.bots import (
 )
 from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
+from sim.engine.phase2_threat import resolve_player_defense_and_wear
 from sim.engine.phase3_ops import (
     collect_player_production_income,
     resolve_phreaker_jumper_diagnostics,
@@ -41,6 +42,7 @@ def confirm_income(
     controller: GameController,
     player_id: int,
     glitch_die_ids: Optional[List[int]] = None,
+    any_shield_allocations: Optional[Dict[str, int]] = None,
 ) -> Dict[str, Any]:
     """Confirms compile results and income, resolving human green malware glitch selections, harvesting production income, and moving surviving dice to scanned_dice."""
     if controller.phase != 3:
@@ -52,6 +54,115 @@ def confirm_income(
     meta = controller.player_meta[player_id]
     if player.is_patient_zero:
         raise ValueError(f"Player {player_id} is eliminated")
+
+    snap = getattr(player, "_pre_step2b_snapshot", None)
+    if any_shield_allocations is not None and snap is not None:
+        player.money = snap["money"]
+        player.secrets = snap["secrets"]
+        player.patches = snap["patches"]
+        player.is_patient_zero = snap["is_patient_zero"]
+        player.elimination_round = snap["elimination_round"]
+        player.elimination_reason = snap["elimination_reason"]
+        player.breach_depth = snap["breach_depth"]
+        player.ability_v1_status = snap["ability_v1_status"]
+        player.ability_v2_status = snap["ability_v2_status"]
+        player.ability_v3_status = snap["ability_v3_status"]
+
+        parsed_allocs: Dict[CubeColor, int] = {
+            CubeColor.RED: int(any_shield_allocations.get("red", 0)),
+            CubeColor.BLUE: int(any_shield_allocations.get("blue", 0)),
+            CubeColor.GREEN: int(any_shield_allocations.get("green", 0)),
+        }
+
+        resolve_player_defense_and_wear(
+            engine=controller.engine,
+            player=player,
+            rolled_dice=snap["rolled_dice"],
+            commitments=snap["commitments"],
+            attack_strengths=snap["attack_strengths"],
+            exited_cubes=snap["exited_cubes"],
+            active_directive=snap["active_directive"],
+            defer_green_malware=True,
+            any_shield_allocations=parsed_allocs,
+        )
+
+        breakdown = getattr(player, "last_defense_breakdown", None)
+        if breakdown and controller.last_compile_result:
+            ts = controller.last_compile_result.get("threat_summary", {}).get(player_id)
+            if ts is not None:
+                if "any" in ts:
+                    ts["any"]["allocated"] = breakdown.get("any_allocated", {"red": 0, "blue": 0, "green": 0})
+                if "red" in ts:
+                    ts["red"]["blocked"] = breakdown["blocked"]["red"]
+                    ts["red"]["unblocked"] = breakdown["unblocked"]["red"]
+                    ts["red"]["unpaid_ransom"] = breakdown.get("unpaid_ransom", 0)
+                    ts["red"]["flat_leak"] = breakdown.get("flat_ransom_leak", False)
+                if "blue" in ts:
+                    ts["blue"]["blocked"] = breakdown["blocked"]["blue"]
+                    ts["blue"]["unblocked"] = breakdown["unblocked"]["blue"]
+                if "green" in ts:
+                    ts["green"]["blocked"] = breakdown["blocked"]["green"]
+                    ts["green"]["unblocked"] = breakdown["unblocked"]["green"]
+                    ts["green"]["fizzled"] = breakdown.get("malware_fizzled", False)
+                    ts["green"]["pending_glitches"] = getattr(player, "pending_unblocked_green", 0)
+                controller.last_compile_result["human_threat"] = ts
+            controller.last_compile_result["pending_glitches"] = getattr(player, "pending_unblocked_green", 0)
+
+        # Re-evaluate Step 2C end-game triggers
+        any_patient_zero = any(p.is_patient_zero for p in controller.state.players)
+        all_patient_zero = all(p.is_patient_zero for p in controller.state.players)
+        if all_patient_zero:
+            controller.state.game_over = True
+            controller.state.is_final_round = False
+            controller.state.end_reason = EndGameReason.TOTAL_WIPEOUT
+            controller.phase = 4
+            controller.phase_name = "Game Over"
+            controller.subphase = "game_over"
+            end_res = controller.engine.evaluate_end_game()
+            controller.final_result = controller._serialize_end_game_result(end_res)
+            controller.event_log.append("TOTAL WIPEOUT! All corporations suffered Total Breach simultaneously.")
+            player._pre_step2b_snapshot = None
+            return controller.get_full_state()
+        elif any_patient_zero:
+            controller.state.is_final_round = True
+            controller.state.end_reason = EndGameReason.PATIENT_ZERO
+        elif controller.state.singularity_triggered:
+            controller.state.is_final_round = True
+            controller.state.end_reason = EndGameReason.SINGULARITY
+        else:
+            controller.state.is_final_round = False
+            controller.state.end_reason = None
+
+        if controller.last_compile_result:
+            controller.last_compile_result["is_final_round"] = controller.state.is_final_round
+            controller.last_compile_result["game_over"] = controller.state.game_over
+
+        if player.is_patient_zero:
+            player._pre_step2b_snapshot = None
+            player.pending_unblocked_green = 0
+            controller.state.contractor_supply += len(player.contractor_dice)
+            player.contractor_dice.clear()
+            player.hired_contractor_count = 0
+            for wd in [d for d in player.in_production_dice if d.color == DieColor.WHITE]:
+                player.in_production_dice.remove(wd)
+                controller.state.contractor_supply += 1
+            for pid, p in enumerate(controller.state.players):
+                if p.is_patient_zero:
+                    continue
+                p_meta = controller.player_meta[pid]
+                p_meta["shield_slots"] = {"red": [], "blue": [], "green": [], "any": []}
+                for die in list(p.in_production_dice):
+                    die.production_role = None
+                    die.is_locked = False
+                    die.chosen_choice_index = None
+                    die.current_face = None
+                    p.scanned_dice.append(die)
+                p.in_production_dice.clear()
+            controller.subphase = "player_turn"
+            advance_phase3_turns(controller)
+            return controller.get_full_state()
+
+    player._pre_step2b_snapshot = None
 
     pending_green = getattr(player, "pending_unblocked_green", 0)
     selected_ids = list(glitch_die_ids) if glitch_die_ids is not None else []
@@ -158,7 +269,7 @@ def confirm_income(
         if p.is_patient_zero:
             continue
         p_meta = controller.player_meta[pid]
-        p_meta["shield_slots"] = {"red": [], "blue": [], "green": []}
+        p_meta["shield_slots"] = {"red": [], "blue": [], "green": [], "any": []}
 
         for die in list(p.in_production_dice):
             die.production_role = None

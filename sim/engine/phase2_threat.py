@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import random
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Set, Tuple
 
 from sim.config import CubeColor, DieColor, EndGameReason, ShieldColor
 from sim.entities import ArchetypeCode, CompanyCode, WhiteHatCode, CorruptionSpace, Die
@@ -52,6 +52,7 @@ def execute_phase_2(
 
         # Contractor Expiration: All remaining White Contractor dice across all players return to supply
         for player in engine.state.players:
+            player._pre_step2b_snapshot = None
             engine.state.contractor_supply += len(player.contractor_dice)
             player.contractor_dice.clear()
             player.hired_contractor_count = 0
@@ -143,6 +144,26 @@ def execute_phase_2(
         # Resolve each player's committed shields against attacks
         for player, rolled_dice, commitments in player_commitments:
             should_defer = bool(defer_green_for_pids and player.player_id in defer_green_for_pids)
+            if should_defer:
+                player._pre_step2b_snapshot = {
+                    "money": player.money,
+                    "secrets": player.secrets,
+                    "patches": player.patches,
+                    "is_patient_zero": player.is_patient_zero,
+                    "elimination_round": player.elimination_round,
+                    "elimination_reason": player.elimination_reason,
+                    "breach_depth": player.breach_depth,
+                    "ability_v1_status": player.ability_v1_status,
+                    "ability_v2_status": player.ability_v2_status,
+                    "ability_v3_status": player.ability_v3_status,
+                    "rolled_dice": list(rolled_dice),
+                    "commitments": dict(commitments),
+                    "attack_strengths": dict(attack_strengths),
+                    "exited_cubes": dict(exited_cubes),
+                    "active_directive": active_directive,
+                }
+            else:
+                player._pre_step2b_snapshot = None
             resolve_player_defense_and_wear(
                 engine=engine,
                 player=player,
@@ -232,6 +253,7 @@ def resolve_player_defense_and_wear(
     exited_cubes: Dict[CubeColor, int],
     active_directive: str,
     defer_green_malware: bool = False,
+    any_shield_allocations: Optional[Dict[CubeColor, int]] = None,
 ) -> None:
     active_ver = engine.state.active_version.version_str
 
@@ -274,11 +296,13 @@ def resolve_player_defense_and_wear(
                 player.mark_ability_used(active_ver)
 
     # 3. Passive Firewall (Defense Track Level 2)
+    firewall_blocked_color: Optional[CubeColor] = None
     if getattr(player, "has_passive_firewall", False):
         candidates = [c for c in [CubeColor.BLUE, CubeColor.RED, CubeColor.GREEN] if player_attacks.get(c, 0) > 0]
         if candidates:
             best_c = max(candidates, key=lambda c: player_attacks.get(c, 0) - color_shields.get(ShieldColor(c.value), 0))
             player_attacks[best_c] = max(0, player_attacks[best_c] - 1)
+            firewall_blocked_color = best_c
 
     # 4. Stage 1: Color-Specific Shield Absorption
     rem_red = max(0, player_attacks[CubeColor.RED] - color_shields[ShieldColor.RED])
@@ -287,25 +311,48 @@ def resolve_player_defense_and_wear(
 
     # 5. Stage 2: Reactive Generic "Block 1 Any" Absorption (INV-FLEX-SHIELD-01)
     avail_any = color_shields[ShieldColor.ANY]
-    while avail_any > 0 and (rem_red + rem_blue + rem_green) > 0:
-        # Tier 1: Blue Threat (prevent Secret loss)
-        if rem_blue > 0:
-            rem_blue -= 1
-            avail_any -= 1
-        # Tier 2: Red Threat if Cash < Red (prevent Unpaid Ransom Flat Leak)
-        elif rem_red > 0 and player.money < rem_red:
-            rem_red -= 1
-            avail_any -= 1
-        # Tier 3: Green Threat (prevent Glitch to in_production_dice)
-        elif rem_green > 0:
-            rem_green -= 1
-            avail_any -= 1
-        # Tier 4: Red Threat if Cash >= Red (save Cash buffer)
-        elif rem_red > 0:
-            rem_red -= 1
-            avail_any -= 1
-        else:
-            break
+    any_allocated: Dict[CubeColor, int] = {
+        CubeColor.RED: 0,
+        CubeColor.BLUE: 0,
+        CubeColor.GREEN: 0,
+    }
+    if any_shield_allocations is not None:
+        for c_color in (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN):
+            req = max(0, int(any_shield_allocations.get(c_color, 0)))
+            if req > 0 and avail_any > 0:
+                used = min(avail_any, req)
+                avail_any -= used
+                any_allocated[c_color] += used
+                if c_color == CubeColor.RED:
+                    rem_red = max(0, rem_red - used)
+                elif c_color == CubeColor.BLUE:
+                    rem_blue = max(0, rem_blue - used)
+                elif c_color == CubeColor.GREEN:
+                    rem_green = max(0, rem_green - used)
+    else:
+        while avail_any > 0 and (rem_red + rem_blue + rem_green) > 0:
+            # Tier 1: Blue Threat (prevent Secret loss)
+            if rem_blue > 0:
+                rem_blue -= 1
+                avail_any -= 1
+                any_allocated[CubeColor.BLUE] += 1
+            # Tier 2: Red Threat if Cash < Red (prevent Unpaid Ransom Flat Leak)
+            elif rem_red > 0 and player.money < rem_red:
+                rem_red -= 1
+                avail_any -= 1
+                any_allocated[CubeColor.RED] += 1
+            # Tier 3: Green Threat (prevent Glitch to in_production_dice)
+            elif rem_green > 0:
+                rem_green -= 1
+                avail_any -= 1
+                any_allocated[CubeColor.GREEN] += 1
+            # Tier 4: Red Threat if Cash >= Red (save Cash buffer)
+            elif rem_red > 0:
+                rem_red -= 1
+                avail_any -= 1
+                any_allocated[CubeColor.RED] += 1
+            else:
+                break
 
     unblocked_red = rem_red
     unblocked_blue = rem_blue
@@ -372,6 +419,17 @@ def resolve_player_defense_and_wear(
             "blue": color_shields[ShieldColor.BLUE],
             "green": color_shields[ShieldColor.GREEN],
             "any": color_shields[ShieldColor.ANY],
+        },
+        "any_allocated": {
+            "red": any_allocated[CubeColor.RED],
+            "blue": any_allocated[CubeColor.BLUE],
+            "green": any_allocated[CubeColor.GREEN],
+        },
+        "firewall_blocked": firewall_blocked_color.value if firewall_blocked_color else None,
+        "effective_attacks": {
+            "red": player_attacks[CubeColor.RED],
+            "blue": player_attacks[CubeColor.BLUE],
+            "green": player_attacks[CubeColor.GREEN],
         },
         "blocked": {
             "red": player_attacks[CubeColor.RED] - unblocked_red,

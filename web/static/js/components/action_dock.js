@@ -22,6 +22,10 @@ import {
   selectedGlitchDieIds,
   toggleSelectedGlitchDieId,
   clearSelectedGlitchDieIds,
+  selectedAnyAllocations,
+  setSelectedAnyAllocation,
+  initSelectedAnyAllocations,
+  clearSelectedAnyAllocations,
 } from "../state.js";
 import {
   doHireContractors,
@@ -401,7 +405,99 @@ export function renderActionDock() {
       const greenInfo = humanThreat.green || { cubes: exited.green || 0, shields: 0, unblocked: exited.green || 0 };
       const blackCubes = exited.black || 0;
 
-      const unblockedGreen = greenInfo.unblocked || 0;
+      const anyShieldCount = (humanThreat.any && humanThreat.any.shields) || 0;
+      const anyDice = (humanThreat.any && humanThreat.any.dice) || [];
+
+      // Build expanded list of individual Any-shield units (1 per shield point)
+      const anyShieldUnits = [];
+      if (anyDice.length > 0) {
+        anyDice.forEach((d, dIdx) => {
+          const amt = d.block_amount || 1;
+          for (let k = 0; k < amt; k++) {
+            anyShieldUnits.push({
+              unit_idx: anyShieldUnits.length,
+              die_id: d.die_id,
+              color: d.color || "gray",
+              face_name: d.face_name || "Block 1 Any",
+              label: amt > 1 ? `${(d.color || "gray").toUpperCase()} Die (${k + 1}/${amt})` : `${(d.color || "gray").toUpperCase()} Die`,
+            });
+          }
+        });
+      }
+      while (anyShieldUnits.length < anyShieldCount) {
+        anyShieldUnits.push({
+          unit_idx: anyShieldUnits.length,
+          die_id: null,
+          color: "gray",
+          face_name: "Block 1 Any",
+          label: `Flexible Shield #${anyShieldUnits.length + 1}`,
+        });
+      }
+
+      // Initialize selectedAnyAllocations from server default if not yet initialized
+      if (anyShieldCount > 0 && selectedAnyAllocations.length !== anyShieldCount) {
+        const defaultAllocObj = (humanThreat.any && humanThreat.any.allocated) || { red: 0, blue: 0, green: 0 };
+        const initialList = [];
+        for (let i = 0; i < (defaultAllocObj.blue || 0); i++) initialList.push("blue");
+        for (let i = 0; i < (defaultAllocObj.red || 0); i++) initialList.push("red");
+        for (let i = 0; i < (defaultAllocObj.green || 0); i++) initialList.push("green");
+        const fallbackColor = (exited.blue > 0) ? "blue" : (exited.green > 0 ? "green" : (exited.red > 0 ? "red" : "blue"));
+        while (initialList.length < anyShieldCount) {
+          initialList.push(fallbackColor);
+        }
+        initSelectedAnyAllocations(initialList.slice(0, anyShieldCount));
+      }
+
+      // Tally current user-selected Any shield allocations
+      const userAnyAlloc = { red: 0, blue: 0, green: 0 };
+      if (anyShieldCount > 0) {
+        selectedAnyAllocations.forEach((col) => {
+          if (col === "red" || col === "blue" || col === "green") {
+            userAnyAlloc[col] += 1;
+          }
+        });
+      }
+
+      // Compute live blocked / unblocked counts based on userAnyAlloc
+      const effAtk = humanThreat.effective_attacks || {
+        red: redInfo.attack !== undefined ? redInfo.attack : (exited.red || 0),
+        blue: blueInfo.attack !== undefined ? blueInfo.attack : (exited.blue || 0),
+        green: greenInfo.attack !== undefined ? greenInfo.attack : (exited.green || 0),
+      };
+
+      const fixedRedShields = redInfo.shields || 0;
+      const fixedBlueShields = blueInfo.shields || 0;
+      const fixedGreenShields = greenInfo.shields || 0;
+
+      const remRedStage1 = Math.max(0, (effAtk.red || 0) - fixedRedShields);
+      const remBlueStage1 = Math.max(0, (effAtk.blue || 0) - fixedBlueShields);
+      const remGreenStage1 = Math.max(0, (effAtk.green || 0) - fixedGreenShields);
+
+      const liveUnblockedRed = anyShieldCount > 0
+        ? Math.max(0, remRedStage1 - userAnyAlloc.red)
+        : (redInfo.unblocked || 0);
+      const liveUnblockedBlue = anyShieldCount > 0
+        ? Math.max(0, remBlueStage1 - userAnyAlloc.blue)
+        : (blueInfo.unblocked || 0);
+      const liveUnblockedGreen = anyShieldCount > 0
+        ? Math.max(0, remGreenStage1 - userAnyAlloc.green)
+        : (greenInfo.unblocked || 0);
+
+      const liveBlockedRed = (effAtk.red || 0) - liveUnblockedRed;
+      const liveBlockedBlue = (effAtk.blue || 0) - liveUnblockedBlue;
+      const liveBlockedGreen = (effAtk.green || 0) - liveUnblockedGreen;
+
+      // Pre-step2b cash + star bonuses to determine live flat leak
+      const preMoney = humanThreat.pre_step2b_money !== undefined ? humanThreat.pre_step2b_money : (human.money || 0);
+      const r2Bonus = (humanThreat.r2_count || 0) > 0 && liveUnblockedRed === 0 ? 2 * humanThreat.r2_count : 0;
+      const r3Bonus = (humanThreat.r3_count || 0) > 0 && (exited.red || 0) >= 3 ? 1 * humanThreat.r3_count : 0;
+      const b1Bonus = (humanThreat.b1_count || 0) > 0 && (exited.blue || 0) >= 1 && liveUnblockedBlue === 0 ? 3 * humanThreat.b1_count : 0;
+      const availableCashForRansom = preMoney + r2Bonus + r3Bonus + b1Bonus;
+      const liveFlatLeak = anyShieldCount > 0
+        ? (liveUnblockedRed > availableCashForRansom)
+        : Boolean(redInfo.flat_leak);
+
+      const unblockedGreen = liveUnblockedGreen;
       let candidates = compileRes.candidate_glitch_dice || (greenInfo.candidate_dice) || [];
       if (!candidates || candidates.length === 0) {
         const fallbackCandidates = [];
@@ -441,12 +537,16 @@ export function renderActionDock() {
 
       const actualRequired = Math.min(unblockedGreen, candidates.length);
 
-      // Clean up stale selections
+      // Clean up stale or excess selections
       const validCandidateIds = new Set(candidates.map((c) => c.die_id));
       for (const id of Array.from(selectedGlitchDieIds)) {
         if (!validCandidateIds.has(id)) {
           selectedGlitchDieIds.delete(id);
         }
+      }
+      while (selectedGlitchDieIds.size > actualRequired) {
+        const lastId = Array.from(selectedGlitchDieIds).pop();
+        selectedGlitchDieIds.delete(lastId);
       }
 
       // If only 1 candidate die exists and 1 is required, auto-select it for convenience
@@ -487,6 +587,51 @@ export function renderActionDock() {
 
       const panel = document.createElement("div");
       panel.className = "confirm-income-panel";
+
+      // Build Interactive Any Shield Assignment section if player has Block 1 Any dice
+      let anyShieldSelectorHtml = "";
+      if (anyShieldCount > 0) {
+        anyShieldSelectorHtml = `
+          <div class="confirm-any-shield-panel" style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.45); border-radius: 6px; padding: 10px 12px; margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="background: rgba(168, 85, 247, 0.25); color: #d8b4fe; border: 1px solid #a855f7; font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">🛡️ ANY SHIELD ASSIGNMENT</span>
+                <span style="font-size: 0.8rem; font-weight: 700; color: #f3e8ff;">CHOOSE TARGET THREAT COLOR FOR ${anyShieldCount} FLEXIBLE SHIELD${anyShieldCount > 1 ? 'S' : ''}</span>
+              </div>
+              <span style="font-size: 0.72rem; color: #cbd5e1;">
+                Unblocked before Any: <strong>${remRedStage1}R</strong> · <strong>${remBlueStage1}B</strong> · <strong>${remGreenStage1}G</strong>
+              </span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              ${anyShieldUnits.map((unit, uIdx) => {
+                const curCol = selectedAnyAllocations[uIdx] || "blue";
+                const btnStyle = (col, hex, bgRgba) => {
+                  const active = curCol === col;
+                  return `padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; cursor: pointer; border: 1px solid ${active ? hex : 'rgba(255,255,255,0.18)'}; background: ${active ? bgRgba : 'rgba(15, 23, 42, 0.7)'}; color: ${active ? '#fff' : '#94a3b8'}; box-shadow: ${active ? '0 0 8px ' + bgRgba : 'none'};`;
+                };
+                return `
+                  <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(15, 23, 42, 0.55); padding: 6px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap; gap: 8px;">
+                    <span style="font-size: 0.78rem; font-weight: 700; color: #e2e8f0;">
+                      🎲 ${unit.label}: <span style="color: #c084fc;">${unit.face_name}</span>
+                    </span>
+                    <div style="display: inline-flex; gap: 6px; align-items: center;">
+                      <button type="button" class="any-alloc-btn" data-unit-idx="${uIdx}" data-target-color="red" style="${btnStyle('red', '#f43f5e', 'rgba(244, 63, 94, 0.35)')}">
+                        ◆ Block Red (${remRedStage1} atk)
+                      </button>
+                      <button type="button" class="any-alloc-btn" data-unit-idx="${uIdx}" data-target-color="blue" style="${btnStyle('blue', '#38bdf8', 'rgba(56, 189, 248, 0.35)')}">
+                        ● Block Blue (${remBlueStage1} atk)
+                      </button>
+                      <button type="button" class="any-alloc-btn" data-unit-idx="${uIdx}" data-target-color="green" style="${btnStyle('green', '#4ade80', 'rgba(74, 222, 128, 0.35)')}">
+                        ▲ Block Green (${remGreenStage1} atk)
+                      </button>
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      }
 
       let malwareHtml = "";
       if (actualRequired > 0) {
@@ -557,6 +702,8 @@ export function renderActionDock() {
           </span>
         </div>
 
+        ${anyShieldSelectorHtml}
+
         <div class="confirm-income-grid">
           <!-- Card 1: Threat Resolution -->
           <div class="confirm-income-card">
@@ -564,10 +711,10 @@ export function renderActionDock() {
               <span>CUBE TOWER OUTPUT & DEFENSES</span>
               <span style="color: var(--text-highlight);">${exited.red || 0}R · ${exited.blue || 0}B · ${exited.green || 0}G · ${exited.black || 0}K</span>
             </div>
-            ${(humanThreat.any && (humanThreat.any.shields || 0) > 0) ? `
+            ${anyShieldCount > 0 ? `
               <div class="confirm-threat-row" style="background: rgba(168, 85, 247, 0.1); border-left: 3px solid #a855f7; padding-left: 6px;">
                 <span style="color: #c084fc; font-weight: 700;">🛡️ ANY // FLEXIBLE</span>
-                <span>${humanThreat.any.shields} shields committed -> Dynamically absorbed threats in P2B</span>
+                <span>${anyShieldCount} shield${anyShieldCount > 1 ? 's' : ''} -> Blocking <strong>${userAnyAlloc.red}R · ${userAnyAlloc.blue}B · ${userAnyAlloc.green}G</strong></span>
               </div>
             ` : ''}
             <div class="confirm-threat-row">
@@ -576,15 +723,15 @@ export function renderActionDock() {
             </div>
             <div class="confirm-threat-row">
               <span style="color: var(--color-red); font-weight: 700;">◆ RED // RANSOMWARE</span>
-              <span>${redInfo.cubes} exited vs ${redInfo.blocked !== undefined ? redInfo.blocked : redInfo.shields} blocked -> ${redInfo.unblocked > 0 ? (redInfo.flat_leak ? `<strong style="color: #f43f5e;">-${redInfo.unblocked} Cash (Flat -1 Secret Leak!)</strong>` : `<strong style="color: #f43f5e;">-${redInfo.unblocked} Cash</strong>`) : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
+              <span>${redInfo.cubes} exited vs ${liveBlockedRed} blocked -> ${liveUnblockedRed > 0 ? (liveFlatLeak ? `<strong style="color: #f43f5e;">-${liveUnblockedRed} Cash (Flat -1 Secret Leak!)</strong>` : `<strong style="color: #f43f5e;">-${liveUnblockedRed} Cash</strong>`) : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
             </div>
             <div class="confirm-threat-row">
               <span style="color: var(--color-blue); font-weight: 700;">● BLUE // SPYWARE</span>
-              <span>${blueInfo.cubes} exited vs ${blueInfo.blocked !== undefined ? blueInfo.blocked : blueInfo.shields} blocked -> ${blueInfo.unblocked > 0 ? `<strong style="color: #f43f5e;">-${blueInfo.unblocked} Secrets</strong>` : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
+              <span>${blueInfo.cubes} exited vs ${liveBlockedBlue} blocked -> ${liveUnblockedBlue > 0 ? `<strong style="color: #f43f5e;">-${liveUnblockedBlue} Secrets</strong>` : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
             </div>
             <div class="confirm-threat-row">
               <span style="color: var(--color-green); font-weight: 700;">▲ GREEN // MALWARE</span>
-              <span>${greenInfo.cubes} exited vs ${greenInfo.blocked !== undefined ? greenInfo.blocked : greenInfo.shields} blocked -> ${greenInfo.unblocked > 0 ? (greenInfo.fizzled || actualRequired === 0 ? '<strong style="color: #4ade80;">Fizzled (0 penalty)</strong>' : `<strong style="color: #f43f5e;">${greenInfo.unblocked} Unblocked Malware</strong>`) : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
+              <span>${greenInfo.cubes} exited vs ${liveBlockedGreen} blocked -> ${liveUnblockedGreen > 0 ? (actualRequired === 0 ? '<strong style="color: #4ade80;">Fizzled (0 penalty)</strong>' : `<strong style="color: #f43f5e;">${liveUnblockedGreen} Unblocked Malware</strong>`) : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
             </div>
           </div>
 
@@ -623,6 +770,15 @@ export function renderActionDock() {
         </div>
       `;
 
+      panel.querySelectorAll(".any-alloc-btn").forEach((btn) => {
+        btn.onclick = () => {
+          const uIdx = parseInt(btn.getAttribute("data-unit-idx"), 10);
+          const chosenColor = btn.getAttribute("data-target-color");
+          setSelectedAnyAllocation(uIdx, chosenColor);
+          renderActionDock();
+        };
+      });
+
       panel.querySelectorAll(".malware-die-card").forEach((card) => {
         card.onclick = () => {
           const dId = parseInt(card.getAttribute("data-die-id"), 10);
@@ -636,8 +792,14 @@ export function renderActionDock() {
         confirmBtn.onclick = () => {
           if (!hasEnoughSelections && actualRequired > 0) return;
           const toGlitch = Array.from(selectedGlitchDieIds);
+          const allocPayload = anyShieldCount > 0 ? {
+            red: userAnyAlloc.red,
+            blue: userAnyAlloc.blue,
+            green: userAnyAlloc.green,
+          } : null;
           clearSelectedGlitchDieIds();
-          doConfirmIncome(toGlitch);
+          clearSelectedAnyAllocations();
+          doConfirmIncome(toGlitch, allocPayload);
         };
       }
 

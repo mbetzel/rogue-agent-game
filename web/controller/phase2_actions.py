@@ -233,10 +233,33 @@ def compile_drop(controller: GameController) -> Dict[str, Any]:
             fizzled = False
             any_shields_count = shields.get("any", 0)
 
+        any_dice_info = []
+        meta_p = controller.player_meta[pid]
+        for idx, c_val in meta_p.get("commitments", {}).items():
+            if c_val == "any" and int(idx) < len(meta_p.get("rolled_pool", [])):
+                d = meta_p["rolled_pool"][int(idx)]
+                eff = d.effective_face or d.current_face
+                any_dice_info.append({
+                    "die_id": d.die_id,
+                    "color": d.color.value,
+                    "face_name": eff.name if eff else "Block 1 Any",
+                    "block_amount": eff.block_amount if eff else 1,
+                })
+
+        snap_p = getattr(player, "_pre_step2b_snapshot", None)
         threat_summaries[pid] = {
             "any": {
                 "shields": any_shields_count,
+                "allocated": breakdown.get("any_allocated", {"red": 0, "blue": 0, "green": 0}) if breakdown else {"red": 0, "blue": 0, "green": 0},
+                "dice": any_dice_info,
             },
+            "effective_attacks": breakdown.get("effective_attacks", {"red": red_atk, "blue": blue_atk, "green": green_atk}) if breakdown else {"red": red_atk, "blue": blue_atk, "green": green_atk},
+            "firewall_blocked": breakdown.get("firewall_blocked") if breakdown else None,
+            "pre_step2b_money": snap_p.get("money", player.money) if snap_p else player.money,
+            "pre_step2b_secrets": snap_p.get("secrets", player.secrets) if snap_p else player.secrets,
+            "r2_count": sum(1 for d in meta_p.get("rolled_pool", []) if (d.effective_face or d.current_face) and (d.effective_face or d.current_face).star_code == "R2"),
+            "r3_count": sum(1 for d in meta_p.get("rolled_pool", []) if (d.effective_face or d.current_face) and (d.effective_face or d.current_face).star_code == "R3"),
+            "b1_count": sum(1 for d in meta_p.get("rolled_pool", []) if (d.effective_face or d.current_face) and (d.effective_face or d.current_face).star_code == "B1"),
             "red": {
                 "cubes": exited_dict.get("red", 0),
                 "attack": red_atk,
