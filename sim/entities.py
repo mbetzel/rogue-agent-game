@@ -335,7 +335,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             code="G1",
             name="Self-Healing Kernel",
             die_color=DieColor.GREEN,
-            description="Block 2 Green + gain +1 🔧.",
+            description="Block 2 Green + gain +1 🔬.",
             cost=5,
             star_face=Face(
                 name="G1: Self-Healing Kernel",
@@ -350,7 +350,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             code="G2",
             name="Universal Sandbox",
             die_color=DieColor.GREEN,
-            description="Block 1 Any + gain +1 🔧.",
+            description="Block 1 Any + gain +1 🔬.",
             cost=4,
             star_face=Face(
                 name="G2: Universal Sandbox",
@@ -365,7 +365,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             code="G3",
             name="Live Reboot",
             die_color=DieColor.GREEN,
-            description="Gain +2 🔧 + +$1.",
+            description="Gain +2 🔬 + +$1.",
             cost=4,
             star_face=Face(
                 name="G3: Live Reboot",
@@ -409,7 +409,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             code="Y3",
             name="Proprietary Training",
             die_color=DieColor.YELLOW,
-            description="Gain +1 Corporate Secret, then move this die to Unpatched.",
+            description="Gain +1 Corporate Secret, then move this die to Under Development (Glitched).",
             cost=5,
             star_face=Face(
                 name="Y3: Proprietary Training",
@@ -512,10 +512,10 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                 corruption_track=(
                     CorruptionSpace(index=1, label="Add 1R", add_cubes={CubeColor.RED: 1}),
                     CorruptionSpace(index=2, label="All lose $3 + Add 1K", lose_money=3, add_cubes={CubeColor.BLACK: 1}),
-                    CorruptionSpace(index=3, label="Demote 1 die", demote_dice=1),
+                    CorruptionSpace(index=3, label="Glitch 1 die", demote_dice=1),
                     CorruptionSpace(
                         index=4,
-                        label="Upgrade: Lose 1 🔧",
+                        label="Upgrade: Lose 1 🔬",
                         lose_patches=1,
                         is_upgrade=True,
                     ),
@@ -530,12 +530,12 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                 directive_code="DATA_SCRAPER",
                 starting_cash_bonus=1,
                 corruption_track=(
-                    CorruptionSpace(index=1, label="Lose 2 🔧", lose_patches=2),
+                    CorruptionSpace(index=1, label="Lose 2 🔬", lose_patches=2),
                     CorruptionSpace(index=2, label="Lose $2 + Add 1K", lose_money=2, add_cubes={CubeColor.BLACK: 1}),
                     CorruptionSpace(index=3, label="Add 1G", add_cubes={CubeColor.GREEN: 1}),
                     CorruptionSpace(
                         index=4,
-                        label="Upgrade: Demote 2 dice",
+                        label="Upgrade: Glitch 2 dice",
                         demote_dice=2,
                         is_upgrade=True,
                     ),
@@ -553,7 +553,7 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                     CorruptionSpace(index=1, label="All lose $2", lose_money=2),
                     CorruptionSpace(index=2, label="Add 1R, 1G + Add 1K", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1, CubeColor.BLACK: 1}),
                     CorruptionSpace(index=3, label="All lose $2 & Add 1R", lose_money=2, add_cubes={CubeColor.RED: 1}),
-                    CorruptionSpace(index=4, label="Lose $3 & 1 🔧 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=4, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
                     CorruptionSpace(
                         index=5,
                         label="Upgrade: Add 1R",
@@ -571,10 +571,10 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                 directive_code="POLYMORPHIC_WORM",
                 staging_payload_2p={},
                 corruption_track=(
-                    CorruptionSpace(index=1, label="Lose 2 🔧", lose_patches=2),
+                    CorruptionSpace(index=1, label="Lose 2 🔬", lose_patches=2),
                     CorruptionSpace(index=2, label="Add 2G + Add 1K", add_cubes={CubeColor.GREEN: 2, CubeColor.BLACK: 1}),
                     CorruptionSpace(index=3, label="All glitch 1 die & Add 1G", demote_dice=1, add_cubes={CubeColor.GREEN: 1}),
-                    CorruptionSpace(index=4, label="Demote 2 dice + Add 1K", demote_dice=2, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=4, label="Glitch 2 dice + Add 1K", demote_dice=2, add_cubes={CubeColor.BLACK: 1}),
                     CorruptionSpace(
                         index=5,
                         label="Upgrade: Add 1R",
@@ -593,10 +593,10 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                 staging_payload_2p={},
                 corruption_track=(
                     CorruptionSpace(index=1, label="Add 1R, 1B, 1G", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1}),
-                    CorruptionSpace(index=2, label="Lose $3 & 1 🔧 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=2, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
                     CorruptionSpace(index=3, label="Add 1R, 1B", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}),
                     CorruptionSpace(index=4, label="All glitch 1 die & Add 1B, 1K", demote_dice=1, add_cubes={CubeColor.BLUE: 1, CubeColor.BLACK: 1}),
-                    CorruptionSpace(index=5, label="Return 1 Colored Die & demote 1 die", return_colored_dice=1, demote_dice=1),
+                    CorruptionSpace(index=5, label="Return 1 Colored Die & glitch 1 die", return_colored_dice=1, demote_dice=1),
                     CorruptionSpace(
                         index=6,
                         label="Singularity: Add 2R, 2B, 2G",
@@ -614,11 +614,11 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                 directive_code="CORRUPTED_KERNEL",
                 staging_payload_2p={},
                 corruption_track=(
-                    CorruptionSpace(index=1, label="Demote 2 dice + Add 1R, 1B", demote_dice=2, add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}),
-                    CorruptionSpace(index=2, label="Lose $3 & 1 🔧 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=1, label="Glitch 2 dice + Add 1R, 1B", demote_dice=2, add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}),
+                    CorruptionSpace(index=2, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
                     CorruptionSpace(index=3, label="Add 1R, 1G", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1}),
                     CorruptionSpace(index=4, label="Lose 2 Secrets + Add 1K", lose_secrets=2, add_cubes={CubeColor.BLACK: 1}),
-                    CorruptionSpace(index=5, label="Return 1 Colored Die & demote 1 die", return_colored_dice=1, demote_dice=1),
+                    CorruptionSpace(index=5, label="Return 1 Colored Die & glitch 1 die", return_colored_dice=1, demote_dice=1),
                     CorruptionSpace(
                         index=6,
                         label="Singularity: Lose 1 Secret + Add 2R, 2B, 1G",
@@ -642,10 +642,10 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
             corruption_track=(
                 CorruptionSpace(index=1, label="Add 1R", add_cubes={CubeColor.RED: 1}),
                 CorruptionSpace(index=2, label="All lose $2 + Add 1K", lose_money=2, add_cubes={CubeColor.BLACK: 1}),
-                CorruptionSpace(index=3, label="Lose 1 🔧", lose_patches=1),
+                CorruptionSpace(index=3, label="Lose 1 🔬", lose_patches=1),
                 CorruptionSpace(
                     index=4,
-                    label="Upgrade: Lose 1 🔧",
+                    label="Upgrade: Lose 1 🔬",
                     lose_patches=1,
                     is_upgrade=True,
                 ),
@@ -660,12 +660,12 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
             directive_code="DATA_SCRAPER",
             starting_cash_bonus=1,
             corruption_track=(
-                CorruptionSpace(index=1, label="Lose 1 🔧", lose_patches=1),
+                CorruptionSpace(index=1, label="Lose 1 🔬", lose_patches=1),
                 CorruptionSpace(index=2, label="Lose $1 + Add 1K", lose_money=1, add_cubes={CubeColor.BLACK: 1}),
                 CorruptionSpace(index=3, label="Add 1G", add_cubes={CubeColor.GREEN: 1}),
                 CorruptionSpace(
                     index=4,
-                    label="Upgrade: Demote 1 die",
+                    label="Upgrade: Glitch 1 die",
                     demote_dice=1,
                     is_upgrade=True,
                 ),
@@ -683,7 +683,7 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                 CorruptionSpace(index=1, label="All lose $2", lose_money=2),
                 CorruptionSpace(index=2, label="Add 1R, 1G + Add 1K", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1, CubeColor.BLACK: 1}),
                 CorruptionSpace(index=3, label="All lose $2 & Add 1R", lose_money=2, add_cubes={CubeColor.RED: 1}),
-                CorruptionSpace(index=4, label="Lose $3 & 1 🔧 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+                CorruptionSpace(index=4, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
                 CorruptionSpace(
                     index=5,
                     label="Upgrade: Add 1R",
@@ -701,10 +701,10 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
             directive_code="POLYMORPHIC_WORM",
             staging_payload_2p={},
             corruption_track=(
-                CorruptionSpace(index=1, label="Lose 2 🔧", lose_patches=2),
+                CorruptionSpace(index=1, label="Lose 2 🔬", lose_patches=2),
                 CorruptionSpace(index=2, label="Add 2G + Add 1K", add_cubes={CubeColor.GREEN: 2, CubeColor.BLACK: 1}),
                 CorruptionSpace(index=3, label="All glitch 1 die & Add 1G", demote_dice=1, add_cubes={CubeColor.GREEN: 1}),
-                CorruptionSpace(index=4, label="Demote 1 die + Add 1K", demote_dice=1, add_cubes={CubeColor.BLACK: 1}),
+                CorruptionSpace(index=4, label="Glitch 1 die + Add 1K", demote_dice=1, add_cubes={CubeColor.BLACK: 1}),
                 CorruptionSpace(
                     index=5,
                     label="Upgrade: Add 1R",
@@ -723,7 +723,7 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
             staging_payload_2p={},
             corruption_track=(
                 CorruptionSpace(index=1, label="Add 1R, 1B, 1G", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1}),
-                CorruptionSpace(index=2, label="Lose $3 & 1 🔧 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+                CorruptionSpace(index=2, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
                 CorruptionSpace(index=3, label="Add 1R, 1B", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}),
                 CorruptionSpace(index=4, label="All glitch 1 die & Add 1B, 1K", demote_dice=1, add_cubes={CubeColor.BLUE: 1, CubeColor.BLACK: 1}),
                 CorruptionSpace(index=5, label="Return 1 Colored Die", return_colored_dice=1),
@@ -744,8 +744,8 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
             directive_code="CORRUPTED_KERNEL",
             staging_payload_2p={},
             corruption_track=(
-                CorruptionSpace(index=1, label="Demote 1 die + Add 1R, 1B", demote_dice=1, add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}),
-                CorruptionSpace(index=2, label="Lose $3 & 1 🔧 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+                CorruptionSpace(index=1, label="Glitch 1 die + Add 1R, 1B", demote_dice=1, add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}),
+                CorruptionSpace(index=2, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
                 CorruptionSpace(index=3, label="Add 1R, 1G", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1}),
                 CorruptionSpace(index=4, label="Lose 1 Secret + Add 1K", lose_secrets=1, add_cubes={CubeColor.BLACK: 1}),
                 CorruptionSpace(index=5, label="Return 1 Colored Die", return_colored_dice=1),
@@ -909,7 +909,7 @@ COMPANIES: Dict[CompanyCode, Company] = {
         sector="Tech Giant",
         override_name="Magnetic Splice",
         timing_window="Phase 3: Pipeline Prep",
-        description="Move 1 die from your Glitched Box directly to your Ready for Release Zone for free (bypassing Scanned and saving 1 🔧).",
+        description="Move 1 die from your Glitched Box directly to your Ready for Release Zone for free (bypassing Scanned and saving 1 🔬).",
         flavor="Proprietary hardware backplanes allow instantaneous hot-swapping under live load.",
         starting_defense_capacity=1,
         starting_triage_bandwidth=3,
@@ -958,7 +958,7 @@ COMPANIES: Dict[CompanyCode, Company] = {
         sector="Medical Research",
         override_name="Brute-Force Bypass",
         timing_window="Phase 1: Step 4 Rerolls",
-        description="During your rerolls this phase, you may include any number of Locked dice in your free rerolls without spending 🔧 tokens. In addition, you may turn 1 of your rolled dice to any non-Star face of your choice.",
+        description="During your rerolls this phase, you may include any number of Glitched dice in your free rerolls. In addition, you may turn 1 of your rolled dice to any legal non-Star face of your choice.",
         flavor="Massively parallel quantum sequencing breaks deterministic encryption gates.",
         starting_defense_capacity=2,
         starting_triage_bandwidth=2,
@@ -1005,7 +1005,7 @@ WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
         role="Hardware Intrusion Specialist",
         protocol_name="Jumper Diagnostics",
         timing_window="Phase 3: Operations Turn",
-        description="When Purple ★ is rolled, roll 1 offline die in your Under Development pipeline (Glitched or Scanned). Collect rolled cash/patches; die remains in place.",
+        description="When Purple ★ is rolled, roll 1 offline die in Under Development (Glitched or Scanned); if Under Development is empty, collect +$1 cash (shields/glitches produce 0; die remains in place).",
         flavor="Raw voltage pulses extract signal from dormant silicon.",
         reserve_cost=4,
     ),

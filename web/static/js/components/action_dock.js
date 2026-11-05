@@ -104,7 +104,7 @@ export function renderActionDock() {
           opBtn.className = "action-btn";
           opBtn.style.borderColor = "#38bdf8";
           opBtn.style.color = "#38bdf8";
-          opBtn.innerText = "⚡ Operator: Redundant Crew (2 Free Contractors)";
+          opBtn.innerText = "⚡ Meridian: Overtime Sprint (2 Free Contractors)";
           opBtn.onclick = () => doHireContractors(2, true);
           hireWrap.appendChild(opBtn);
         }
@@ -199,13 +199,13 @@ export function renderActionDock() {
           select.style.borderRadius = "4px";
 
           if (face.has_shield_option) {
-            // Blue Face 4: Block 1 Blue vs +1 🔧
+            // Blue Face 4: Block 1 Blue vs +1 🔬
             const optShield = document.createElement("option");
             optShield.value = "shield";
             optShield.innerText = "Commit Block 1 Blue";
             const optPatch = document.createElement("option");
             optPatch.value = "patch";
-            optPatch.innerText = "Gain +1 🔧 (Resource)";
+            optPatch.innerText = "Gain +1 🔬 (Research)";
             select.appendChild(optShield);
             select.appendChild(optPatch);
 
@@ -656,7 +656,7 @@ export function renderActionDock() {
                 } else if (c.is_shield) {
                   consequenceText = "Shield Sacrifice: Already blocked attack; moves to Glitched Box (protects income!)";
                 } else {
-                  consequenceText = `Income Forfeiture: Moves to Glitched Box (-$${c.money || 0}${c.patches ? ', -' + c.patches + '🔧' : ''})`;
+                  consequenceText = `Income Forfeiture: Moves to Glitched Box (-$${c.money || 0}${c.patches ? ', -' + c.patches + '🔬' : ''})`;
                 }
                 return `
                   <div class="malware-die-card ${c.color} ${isSel ? 'selected' : ''}" data-die-id="${c.die_id}">
@@ -680,11 +680,11 @@ export function renderActionDock() {
           <div class="confirm-malware-panel" style="border-color: rgba(74, 222, 128, 0.4); background: rgba(74, 222, 128, 0.05);">
             <div class="confirm-malware-hdr">
               <div class="confirm-malware-title-row">
-                <span class="confirm-malware-badge" style="background: rgba(74, 222, 128, 0.2); color: #4ade80;">🛡️ MALWARE FIZZLE</span>
+                <span class="confirm-malware-badge" style="background: rgba(74, 222, 128, 0.2); color: #4ade80;">🛡️ 0 MALWARE EFFECT</span>
                 <span class="confirm-malware-title" style="color: #4ade80;">ZERO ACTIVE PRODUCTION EXPLOITS</span>
               </div>
               <span class="confirm-malware-sub" style="color: #86efac;">
-                ${unblockedGreen} unblocked Green Malware cube${unblockedGreen > 1 ? 's' : ''} struck your corporate network, but your In Production zone is completely empty! In v0.31.0, excess malware cleanly fizzles with 0 penalty (Destruction Fallback removed).
+                ${unblockedGreen} unblocked Green Malware cube${unblockedGreen > 1 ? 's' : ''} struck your corporate network, but your In Production zone is completely empty! Excess malware has 0 effect (no dice destroyed).
               </span>
             </div>
           </div>
@@ -731,7 +731,7 @@ export function renderActionDock() {
             </div>
             <div class="confirm-threat-row">
               <span style="color: var(--color-green); font-weight: 700;">▲ GREEN // MALWARE</span>
-              <span>${greenInfo.cubes} exited vs ${liveBlockedGreen} blocked -> ${liveUnblockedGreen > 0 ? (actualRequired === 0 ? '<strong style="color: #4ade80;">Fizzled (0 penalty)</strong>' : `<strong style="color: #f43f5e;">${liveUnblockedGreen} Unblocked Malware</strong>`) : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
+              <span>${greenInfo.cubes} exited vs ${liveBlockedGreen} blocked -> ${liveUnblockedGreen > 0 ? (actualRequired === 0 ? '<strong style="color: #4ade80;">0 effect (Empty Production)</strong>' : `<strong style="color: #f43f5e;">${liveUnblockedGreen} Unblocked Malware</strong>`) : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
             </div>
           </div>
 
@@ -743,7 +743,7 @@ export function renderActionDock() {
             </div>
             <div class="confirm-pills-row">
               <span class="income-pill money">+$${effectiveMoney} Cash</span>
-              <span class="income-pill patches">+${effectivePatches} 🔧 Patches</span>
+              <span class="income-pill patches">+${effectivePatches} 🔬 Research</span>
               ${effectiveSecrets > 0 ? `<span class="income-pill secrets">+${effectiveSecrets} Secrets</span>` : ''}
             </div>
             <div class="confirm-dice-chips">

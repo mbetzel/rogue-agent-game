@@ -249,37 +249,37 @@ export function renderCompiler() {
           <div class="cube-threat-row black-row">
             <span class="threat-pill black">■ BLACK // CORRUPTION</span>
             <div class="threat-row-text">
-              <strong>Step 2A (First):</strong> Advance Corruption Track 1 space per exited Black. Fills at capacity: advance Version & add payload. <strong>v3.0 fill = SINGULARITY!</strong>
+              <strong>Step 2A (First):</strong> Advance Corruption Track 1 space per exited Black. Fills at capacity: queue Version upgrade for next round. <strong>v3.0 fill = SINGULARITY!</strong>
             </div>
           </div>
           <div class="cube-threat-row red-row">
             <span class="threat-pill red">◆ RED // RANSOMWARE</span>
             <div class="threat-row-text">
-              <strong>Blocks: Red Shield.</strong> Lose $1 per unblocked Red. At $0, held 🔧 tokens auto-absorb $1 each. <em>Ransom Leak: unpaid $1 loses 1 Secret each!</em>
+              <strong>Blocks: Red / Any Shield.</strong> Lose $1 per unblocked Red. <em>Flat Leak Penalty: if any unpaid ransom remains (shortfall &gt; $0), lose a flat 1 Corporate Secret!</em>
             </div>
           </div>
           <div class="cube-threat-row blue-row">
             <span class="threat-pill blue">● BLUE // SPYWARE</span>
             <div class="threat-row-text">
-              <strong>Blocks: Blue Shield.</strong> Lose 1 Corporate Secret per unblocked Blue. <strong>Reaching ≤ 0 Secrets triggers Total Data Breach (Patient Zero)!</strong>
+              <strong>Blocks: Blue / Any Shield.</strong> Lose 1 Corporate Secret per unblocked Blue. <strong>Reaching ≤ 0 Secrets triggers Total Data Breach (Patient Zero)!</strong>
             </div>
           </div>
           <div class="cube-threat-row green-row">
             <span class="threat-pill green">▲ GREEN // MALWARE</span>
             <div class="threat-row-text">
-              <strong>Blocks: Green Shield.</strong> Move 1 Ready die → Unpatched per unblocked Green. Ready Yellow dice MUST be demoted first! If 0 Ready/Contractor: <em>Destroy 1 Unpatched die!</em>
+              <strong>Blocks: Green / Any Shield.</strong> Move 1 active die from In Production → Glitched Box per unblocked Green (or sacrifice White Contractor). <em>Empty In Production = 0 effect!</em>
             </div>
           </div>
         </div>
 
         <div class="wear-recycle-summary-box">
-          <strong>WEAR:</strong> Permanent Shields blocking ≥ 1 cube move to Unpatched Zone. 0 blocked = stay Ready. Contractors return to supply.<br>
+          <strong>SHIELD PERSISTENCE:</strong> Permanent Shields blocking attacks remain in In Production (unless glitched by unblocked Green Malware). Contractors return to supply.<br>
           <strong>RECYCLE:</strong> Exited Red, Blue, and Green cubes recycle back into the Staging Cup.
         </div>
       </div>
 
       <!-- ========================================================= -->
-      <!-- COLUMN 3 (Right): Game Sequence Reference & Portfolio     -->
+      <!-- COLUMN 3 (Right): Game Sequence Reference & Victory       -->
       <!-- ========================================================= -->
       <div class="agent-board-col sequence-col">
         <div class="col-title-bar">
@@ -289,24 +289,23 @@ export function renderCompiler() {
         <div class="sequence-cards-stack">
           <!-- Phase 1 -->
           <div class="seq-card">
-            <div class="seq-card-header">PHASE 1: BOOT & CONFIGURE (Simultaneous)</div>
+            <div class="seq-card-header">PHASE 1: ROLL & DEPLOY (Simultaneous)</div>
             <div class="seq-card-body">
+              <strong>0. Version Transition:</strong> Apply queued Version upgrade at start of round.<br>
               <strong>1. Pulse:</strong> Add +1 Black → Staging Cup.<br>
               <strong>2. Staffing:</strong> Hire White Contractors ($1 / $2 / $3, max 3).<br>
-              <strong>3. Roll Pool:</strong> Roll Ready Zone + hired Contractors.<br>
-              <strong>4. Rerolls:</strong> Up to 2 free rerolls of unlocked dice. Spend 1 🔧 to Unlock 1 🔒 die.<br>
-              <strong>5. Assign:</strong> Commit Shields & declare ( / ) choice faces.<br>
-              <strong>6. Outputs:</strong> Unassigned dice collect $, 🔧 (max 3), & Boot ★.
+              <strong>3. Roll & Rerolls:</strong> Roll Ready for Release + Contractors. Up to 2 free rerolls of unlocked dice (⚠️ Glitches lock immediately).<br>
+              <strong>4. Triage & Deploy:</strong> Glitched dice → Glitched Box. Deploy Shields (up to Defense Capacity) & Income dice to In Production.
             </div>
           </div>
 
           <!-- Phase 2 -->
           <div class="seq-card">
-            <div class="seq-card-header">PHASE 2: SETEC COMPILE (Simultaneous)</div>
+            <div class="seq-card-header">PHASE 2: COMPILER DROP & DEFENSE (Simultaneous)</div>
             <div class="seq-card-body">
               <strong>Drop</strong> entire Staging Cup into Cube Tower.<br>
               <strong>2A.</strong> Resolve Black cubes on Corruption Track.<br>
-              <strong>2B.</strong> Resolve Red/Blue/Green attacks; apply Wear & damage; recycle exited R/B/G → Staging Cup.<br>
+              <strong>2B.</strong> Resolve Red/Blue/Green attacks; recycle exited R/B/G → Staging Cup.<br>
               <strong>Buffer Overflow:</strong> If 0 cubes exit, idle cycle injects +1 R, +1 B, +1 G into cup for next round.<br>
               <strong>2C. End Check:</strong> Singularity OR any player ≤ 0 Secrets triggers Final Round.
             </div>
@@ -317,25 +316,24 @@ export function renderCompiler() {
             <div class="seq-card-header">PHASE 3: OPERATIONS & PIPELINE PREP</div>
             <div class="seq-card-body">
               <strong>3A. Operations Turns (Clockwise):</strong><br>
-              1. <strong>Collect Income & Outputs:</strong> $ & 🔧 from surviving Production dice.<br>
-              2. <strong>Buy Software Dice (max 2):</strong> Pay $ → place into Ready for Release.<br>
+              1. <strong>Harvest Income:</strong> Collect $, 🔬, &amp; ★ from surviving Production dice.<br>
+              2. <strong>Operations:</strong> Buy Dice (max 2), Upgrade Tracks (🔬), File Patents (🔬), or Dirty Income (+$3, -1 Secret, Glitch 1 die).<br>
               <strong>3B. Pipeline Prep (Simultaneous):</strong><br>
-              3. <strong>Fast-Patching:</strong> Spend 1 🔧 per die: Glitched → Scanned.<br>
-              4. <strong>CI/CD Graduation:</strong> Scanned & surviving Production → Ready for Release.<br>
-              5. <strong>Conveyor Shift:</strong> Glitched → Scanned for next round; pass First Player.
+              3. <strong>Graduation:</strong> Scanned Box → Ready for Release (Release Bandwidth).<br>
+              4. <strong>Conveyor Shift:</strong> Glitched Box → Scanned Box (Triage Bandwidth); surviving Production → Scanned Box; pass First Player.
             </div>
           </div>
 
           <!-- Scoring -->
           <div class="seq-card portfolio-scoring-card">
-            <div class="seq-card-header">END-GAME PORTFOLIO SCORING</div>
+            <div class="seq-card-header">SECRETS VICTORY &amp; TIEBREAKERS</div>
             <div class="seq-card-body">
-              <strong>Surviving Firms Only</strong> (Patient Zero eliminated):<br>
-              <strong>4 VP</strong> / Corporate Secret<br>
-              <strong>4 VP</strong> / Ready Blue or Yellow Die<br>
-              <strong>3 VP</strong> / Ready Red, Green, or Purple Die<br>
-              <strong>1 VP</strong> / $2 Cash | <strong>0 VP</strong> / 🔧 Patches<br>
-              <em>Ties: 1. Secrets, 2. Cash. (Wipeout: overflow penalties).</em>
+              <strong>Surviving White Hat Operatives Only</strong> (Patient Zero eliminated):<br>
+              <strong>Primary Victory Goal:</strong> Most <strong>Corporate Secrets</strong> held.<br>
+              <strong>Tiebreaker 1:</strong> Most remaining <strong>Money ($)</strong>.<br>
+              <strong>Tiebreaker 2:</strong> Most owned <strong>Colored Dice</strong> (all zones).<br>
+              <strong>Tiebreaker 3:</strong> Most remaining <strong>Research Tokens (🔬)</strong>.<br>
+              <em>(Total Wipeout: shallowest Breach Depth wins).</em>
             </div>
           </div>
         </div>

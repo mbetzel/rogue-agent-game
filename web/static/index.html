@@ -22,7 +22,7 @@
       </div>
       <div class="status-badge">
         <span class="status-label">Phase</span>
-        <span class="status-value" id="phaseDisplay">Phase 1: Boot & Configure</span>
+        <span class="status-value" id="phaseDisplay">Phase 1: Roll & Deploy</span>
       </div>
       <div class="status-badge" style="max-width: 280px;">
         <div style="display: flex; align-items: center; gap: 6px;">
@@ -51,7 +51,7 @@
     <div class="tabletop-nav-left">
       <span class="tabletop-nav-label">TABLETOP BOARDS:</span>
       <button class="nav-view-btn active" id="viewBtnTabletop" onclick="setBoardView('tabletop')">🖥️ Complete Tabletop</button>
-      <button class="nav-view-btn" id="viewBtnTerminals" onclick="setBoardView('terminals')">📋 Consultancy Terminals</button>
+      <button class="nav-view-btn" id="viewBtnTerminals" onclick="setBoardView('terminals')">📋 Company Terminals</button>
       <button class="nav-view-btn" id="viewBtnAgent" onclick="setBoardView('agent')">🤖 SETEC Agent Board</button>
       <button class="nav-view-btn" id="viewBtnMarket" onclick="setBoardView('market')">🛒 Software Market</button>
     </div>
@@ -68,7 +68,7 @@
       <div id="centralAgentBoard"></div>
     </section>
 
-    <!-- Row 2: Consultancy Terminals (Player Mats) -->
+    <!-- Row 2: Company Terminal Mats (Player Mats) -->
     <section class="board-section terminals-board-section" id="terminalsBoardSection">
       <div id="playersContainer"></div>
     </section>
@@ -110,9 +110,9 @@
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <label style="font-size: 0.85rem; color: var(--text-dim);">Player Count:</label>
         <select id="modalPlayerCount" style="padding: 8px; background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); border-radius: 4px;">
-          <option value="4" selected>4 Players (1 Human vs 3 Bots)</option>
-          <option value="3">3 Players (1 Human vs 2 Bots)</option>
-          <option value="2">2 Players (1 Human vs 1 Bot - Resilience Buffer: 8 Secrets, 2 🔧)</option>
+          <option value="4" selected>4 Players (1 Human vs 3 Bots — 12 Secrets)</option>
+          <option value="3">3 Players (1 Human vs 2 Bots — 8 Secrets)</option>
+          <option value="2">2 Players (1 Human vs 1 Bot — 8 Secrets)</option>
           <option value="1">1 Player (Solo Survival Practice)</option>
         </select>
       </div>
@@ -175,7 +175,7 @@
       </div>
 
       <p style="font-size: 0.8rem; color: var(--text-dim); margin: 0;">
-        During <strong>Phase 2 (Compile)</strong>, cubes exit the Cube Tower into the tray. Resolve Black cubes first in Step 2A, then Red, Blue, and Green attacks simultaneously in Step 2B.
+        During <strong>Phase 2: Compiler Drop &amp; Defense</strong>, cubes exit the Cube Tower into the tray. Resolve Black cubes first in Step 2A, then Red, Blue, and Green attacks simultaneously in Step 2B.
       </p>
 
       <div class="cube-effects-grid" style="grid-template-columns: 1fr;">
@@ -184,7 +184,7 @@
             <span class="cube-badge red">Red (Ransomware)</span>
             <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Red Shield or Any Shield</span>
           </div>
-          <p>Extorts <strong>$1</strong> per unblocked cube. If any unpaid ransom remains (shortfall > $0), lose a <strong>flat 1 Corporate Secret</strong> dark web leak fine. Patches cannot absorb ransom.</p>
+          <p>Extorts <strong>$1</strong> per unblocked cube. If any unpaid ransom remains (shortfall &gt; $0), lose a <strong>flat 1 Corporate Secret</strong> dark web leak fine. Research tokens (🔬) cannot absorb ransom.</p>
         </div>
 
         <div class="cube-effect-item">
@@ -200,7 +200,7 @@
             <span class="cube-badge green">Malware (Logic Bombs)</span>
             <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Green Shield or Any Shield</span>
           </div>
-          <p>Corrupts systems: for each unblocked cube, move <strong>1 active die from In Production</strong> (Income or Shields) to your <strong>Glitched Box</strong> in Under Development (or sacrifice a White Contractor). If In Production is empty, excess malware <strong>fizzles with 0 penalty</strong> (no dice destroyed)!</p>
+          <p>Corrupts systems: for each unblocked cube, move <strong>1 active die from In Production</strong> (Income or Shields) to your <strong>Glitched Box</strong> in Under Development (or sacrifice a White Contractor). If In Production is empty, excess malware <strong>has 0 effect</strong> (no dice destroyed)!</p>
         </div>
 
         <div class="cube-effect-item">
@@ -208,7 +208,7 @@
             <span class="cube-badge black">Black (Corruption)</span>
             <span style="font-size: 0.72rem; color: var(--text-dim);">Step 2A: System Upgrade</span>
           </div>
-          <p>Exited Black cubes advance the active Version's <strong>Corruption Track</strong>. When the 4th cell fills, the Rogue Agent upgrades to the next Version card, adding its Upgrade Payload into the Staging Cup. If <strong>v3.0 fills</strong>, <strong>Singularity</strong> is triggered!</p>
+          <p>Exited Black cubes advance the active Version's <strong>Corruption Track</strong>. When the track fills, the Rogue Agent queues a Version upgrade for the start of the next round (or triggers <strong>Singularity</strong> when <strong>v3.0 fills</strong>)!</p>
         </div>
       </div>
 
@@ -240,7 +240,7 @@
 
       <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px; flex-wrap: wrap; gap: 10px;">
         <span style="font-size: 0.8rem; color: var(--text-dim);">
-          Each Version card requires <strong>4 (2P) / 5 (3P) / 6 (4P) Black Cubes</strong> on its Corruption Track before upgrading. Filling v3.0 triggers <strong>Singularity</strong>!
+          Each Version card features <strong>4 (v1.0) / 5 (v2.0) / 6 (v3.0) Corruption Track spaces</strong>. Filling v3.0 triggers <strong>Singularity</strong>!
         </span>
         <button class="action-btn btn-accent" onclick="closeModal('versionsModal')">Close</button>
       </div>

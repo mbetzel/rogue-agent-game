@@ -32,34 +32,34 @@ class TestV270CorruptionTrackRecalibration(unittest.TestCase):
         self.assertEqual(sp1.add_cubes, {})
 
     def test_standard_raas_space_4(self) -> None:
-        """INV-TRACK-CALIB-01: v2.0 RaaS Space 4 deals $3 & 1 wrench + 1K (recalibrated from $2)."""
+        """INV-TRACK-CALIB-01: v2.0 RaaS Space 4 deals $3 & 1 research + 1K (recalibrated from $2)."""
         standard_cards = {c.directive_code: c for c in get_all_version_cards("STANDARD")}
         raas = standard_cards["RAAS"]
         sp4 = raas.corruption_track[3]
         self.assertEqual(sp4.index, 4)
-        self.assertEqual(sp4.label, "Lose $3 & 1 🔧 + Add 1K")
+        self.assertEqual(sp4.label, "Lose $3 & 1 🔬 + Add 1K")
         self.assertEqual(sp4.lose_money, 3)
         self.assertEqual(sp4.lose_patches, 1)
         self.assertEqual(sp4.add_cubes, {CubeColor.BLACK: 1})
 
     def test_standard_zeroday_space_2(self) -> None:
-        """INV-TRACK-CALIB-01: v3.0 Zero-Day Space 2 deals $3 & 1 wrench + 1K (recalibrated from $2)."""
+        """INV-TRACK-CALIB-01: v3.0 Zero-Day Space 2 deals $3 & 1 research + 1K (recalibrated from $2)."""
         standard_cards = {c.directive_code: c for c in get_all_version_cards("STANDARD")}
         zd = standard_cards["ZERO_DAY_OVERRIDE"]
         sp2 = zd.corruption_track[1]
         self.assertEqual(sp2.index, 2)
-        self.assertEqual(sp2.label, "Lose $3 & 1 🔧 + Add 1K")
+        self.assertEqual(sp2.label, "Lose $3 & 1 🔬 + Add 1K")
         self.assertEqual(sp2.lose_money, 3)
         self.assertEqual(sp2.lose_patches, 1)
         self.assertEqual(sp2.add_cubes, {CubeColor.BLACK: 1})
 
     def test_standard_kernel_space_2(self) -> None:
-        """INV-TRACK-CALIB-01: v3.0 Corrupted Kernel Space 2 deals $3 & 1 wrench + 1K (recalibrated from $2)."""
+        """INV-TRACK-CALIB-01: v3.0 Corrupted Kernel Space 2 deals $3 & 1 research + 1K (recalibrated from $2)."""
         standard_cards = {c.directive_code: c for c in get_all_version_cards("STANDARD")}
         ck = standard_cards["CORRUPTED_KERNEL"]
         sp2 = ck.corruption_track[1]
         self.assertEqual(sp2.index, 2)
-        self.assertEqual(sp2.label, "Lose $3 & 1 🔧 + Add 1K")
+        self.assertEqual(sp2.label, "Lose $3 & 1 🔬 + Add 1K")
         self.assertEqual(sp2.lose_money, 3)
         self.assertEqual(sp2.lose_patches, 1)
         self.assertEqual(sp2.add_cubes, {CubeColor.BLACK: 1})

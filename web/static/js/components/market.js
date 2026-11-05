@@ -12,23 +12,23 @@ const MARKET_BASE_SPECS = {
     symbol: "◆",
     baseCost: 5,
     row1: "⚀ 1 Red Shield | ⚁-⚃ +$2",
-    row2: "⚄ 🔒 Glitch | ⚅ ★ Variant",
+    row2: "⚄ ⚠️ Glitch | ⚅ ★ Variant",
     warning: null,
   },
   blue: {
     title: "BLUE // FIREWALL",
     symbol: "●",
     baseCost: 5,
-    row1: "⚀ 1 Blue Shield | ⚁ +1 🔧 | ⚂ +$1",
-    row2: "⚃ 1 Blue / 1 🔧 | ⚄ 🔒 Glitch | ⚅ ★ Variant",
+    row1: "⚀ 1 Blue Shield | ⚁ +1 🔬 | ⚂ +$1",
+    row2: "⚃ 1 Blue / 1 🔬 | ⚄ ⚠️ Glitch | ⚅ ★ Variant",
     warning: null,
   },
   green: {
     title: "GREEN // ANTIVIRUS",
     symbol: "▲",
     baseCost: 5,
-    row1: "⚀ 1 Green Shield | ⚁ +1 🔧 | ⚂ +2 🔧",
-    row2: "⚃ 1 🔧 / +$1 | ⚄ 🔒 Glitch | ⚅ ★ Variant",
+    row1: "⚀ 1 Green Shield | ⚁ +1 🔬 | ⚂ +2 🔬",
+    row2: "⚃ 1 🔬 / +$1 | ⚄ ⚠️ Glitch | ⚅ ★ Variant",
     warning: null,
   },
   yellow: {
@@ -36,7 +36,7 @@ const MARKET_BASE_SPECS = {
     symbol: "⬡",
     baseCost: 6,
     row1: "⚀ +$3 | ⚁-⚂ +$2",
-    row2: "⚃ +$1 & +1 🔧 | ⚄ 🔒 Glitch | ⚅ ★ Variant",
+    row2: "⚃ +$1 & +1 🔬 | ⚄ ⚠️ Glitch | ⚅ ★ Variant",
     warning: null,
   },
   purple: {
@@ -44,7 +44,7 @@ const MARKET_BASE_SPECS = {
     symbol: "▼",
     baseCost: 4,
     row1: "⚀-⚁ Block 1 Any | ⚂ +$2",
-    row2: "⚃ +$1 & +1 🔧 | ⚄ 🔒 Glitch | ⚅ ★ Variant",
+    row2: "⚃ +$1 & +1 🔬 | ⚄ ⚠️ Glitch | ⚅ ★ Variant",
     warning: null,
   },
 };
@@ -85,7 +85,7 @@ export function renderMarket() {
         <span>WHITE CONTRACTOR SUPPLY (12 DICE TOTAL — ${state.contractor_supply || 0} IN POOL)</span>
       </div>
       <div class="contractor-rules-note">
-        Phase 1 Staffing | Max 3/Round | Returns to supply after Phase 2 | Never wears to Unpatched
+        Phase 1 Staffing | Max 3/Round | Returns to supply after Phase 2 | Never enters Under Development
       </div>
     </div>
     <div class="contractor-cost-tiers">
@@ -102,7 +102,7 @@ export function renderMarket() {
         <span class="tier-cost">$3</span>
       </div>
       <div class="contractor-faces-summary">
-        <strong>Faces:</strong> ⚀⚁⚂ Block 1 Any &nbsp;|&nbsp; ⚃ +$1 &nbsp;|&nbsp; ⚄⚅ 🔒 Glitch (0 output)
+        <strong>Faces:</strong> ⚀⚁⚂ Block 1 Any &nbsp;|&nbsp; ⚃ +$1 &nbsp;|&nbsp; ⚄⚅ ⚠️ Glitch (0 output, discarded to supply)
       </div>
     </div>
   `;

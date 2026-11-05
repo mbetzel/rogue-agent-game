@@ -38,7 +38,13 @@ export function renderHeader() {
   if (roundEl) roundEl.innerText = `Round ${state.current_round}`;
 
   const phaseEl = document.getElementById("phaseDisplay");
-  if (phaseEl) phaseEl.innerText = `Phase ${state.phase}: ${state.phase_name}`;
+  if (phaseEl) {
+    let displayPhaseName = state.phase_name;
+    if (state.phase === 1) displayPhaseName = "Roll & Deploy";
+    else if (state.phase === 2) displayPhaseName = "Compiler Drop & Defense";
+    else if (state.phase === 3) displayPhaseName = "Operations & Pipeline Prep";
+    phaseEl.innerText = `Phase ${state.phase}: ${displayPhaseName}`;
+  }
 
   // Active Version Card
   const ver = state.active_version;

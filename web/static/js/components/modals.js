@@ -48,7 +48,7 @@ export function renderGameOverModal() {
       <thead>
         <tr style="color: var(--text-dim); border-bottom: 1px solid var(--border-color); text-align: left;">
           <th style="padding: 6px;">Rank</th>
-          <th style="padding: 6px;">Corporation</th>
+          <th style="padding: 6px;">White Hat Operative</th>
           <th style="padding: 6px;">Secrets</th>
           <th style="padding: 6px;">Overflow</th>
           <th style="padding: 6px;">Net Score</th>

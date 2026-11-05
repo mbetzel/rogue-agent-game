@@ -100,11 +100,11 @@ def compile_drop(controller: GameController) -> Dict[str, Any]:
                 elif eff.star_code == "R1":
                     star_note = "Ransom Insurance (+$2)"
                 elif eff.star_code == "G1":
-                    star_note = "Self-Healing Kernel (+1 🔧)"
+                    star_note = "Self-Healing Kernel (+1 🔬)"
                 elif eff.star_code == "G2":
-                    star_note = "Universal Sandbox (+1 🔧)"
+                    star_note = "Universal Sandbox (+1 🔬)"
                 elif eff.star_code == "G3":
-                    star_note = "Live Reboot (+$1, +2 🔧)"
+                    star_note = "Live Reboot (+$1, +2 🔬)"
             role_val = getattr(die, "production_role", None)
             details.append({
                 "die_id": die.die_id,

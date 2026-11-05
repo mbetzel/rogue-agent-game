@@ -1,6 +1,6 @@
 /**
- * Rogue Agent — Player Mats & Consultancy Terminal Component
- * Structured faithfully after Print-and-Play US Letter Consultancy Terminal (01_Player_Boards.pdf)
+ * Rogue Agent — Player Mats & Company Terminal Mat Component
+ * Structured faithfully after Print-and-Play US Letter Company Terminal Mat (01_Player_Boards.pdf)
  */
 
 import {
@@ -29,11 +29,11 @@ function requestRender() {
 const COMPANIES_DATA = {
   MERIDIAN: {
     code: "MERIDIAN",
-    name: "Meridian Global Logistics",
-    sector: "Defense & Logistics",
-    overrideName: "Contingent Staffing",
+    name: "Meridian Financial Trust",
+    sector: "Banking Infrastructure",
+    overrideName: "Overtime Sprint",
     timing: "P1: STAFFING",
-    description: "Roll 1 additional Contractor die without paying cash cost during Phase 1 Boot.",
+    description: "Once per Rogue Agent Version, hire up to 2 White Contractor dice for free during Phase 1 Staffing.",
     themeColor: "#f59e0b",
     startingSetupDesc: "Def Cap 2, Triage 2, Release 4, +$2 Starting Cash ($8 total).",
   },
@@ -43,47 +43,47 @@ const COMPANIES_DATA = {
     sector: "Industrial Automation",
     overrideName: "Magnetic Splice",
     timing: "P3: OPERATIONS",
-    description: "Move 1 die from your Glitched Box directly to Ready for Release for free (bypassing Scanned and saving 1 🔧).",
+    description: "Once per Rogue Agent Version, move 1 die from your Glitched Box directly to Ready for Release for free (bypassing Scanned Box).",
     themeColor: "#4ade80",
     startingSetupDesc: "Def Cap 1, Triage Lvl 1 (Bandwidth 3), Release Lvl 1 (Bandwidth 5).",
   },
   AEGIS: {
     code: "AEGIS",
-    name: "Aegis Security Group",
-    sector: "Physical & Cyber Defense",
+    name: "Aegis Defense Relay",
+    sector: "Telecommunications",
     overrideName: "Baffle Echo",
     timing: "P2: STEP 2B DMG",
-    description: "Ignore 1 attack cube (Red, Blue, or Green) when resolving compiler damage for yourself this round.",
+    description: "Once per Rogue Agent Version, ignore 1 attack cube (Red, Blue, or Green) when resolving compiler damage for yourself this round.",
     themeColor: "#38bdf8",
     startingSetupDesc: "Defense Lvl 1 (3 Shields Cap), Triage 1, Release 3.",
   },
   DTO: {
     code: "DTO",
-    name: "DTO Sovereign Trust",
-    sector: "Offshore Banking & Intelligence",
+    name: "Dept. of Telecom Oversight [DTO]",
+    sector: "Federal Agency",
     overrideName: "Slush Fund",
     timing: "P2: STEP 2B DMG",
-    description: "Absorb up to 2 Corporate Secret loss (from Blue Spyware or Red Ransom) for free without paying cash.",
+    description: "Once per Rogue Agent Version, absorb up to 2 Corporate Secret loss (from Blue Spyware or Red Ransom) for free without paying cash.",
     themeColor: "#a855f7",
     startingSetupDesc: "Def Cap 2, Triage 2, Release 4, +1 Corporate Secret.",
   },
   HELIX: {
     code: "HELIX",
-    name: "Helix Bio-Informatics",
-    sector: "Genomic Computation",
+    name: "Helix Biomedical Consortium",
+    sector: "Genomic R&D",
     overrideName: "Brute-Force Bypass",
     timing: "P1: REROLLS",
-    description: "During Phase 1 rerolls, include locked dice for free, and turn 1 rolled die to any legal non-Star face.",
+    description: "Once per Rogue Agent Version, during Phase 1 rerolls, include locked dice for free and turn 1 rolled die to any legal non-Star face.",
     themeColor: "#f43f5e",
     startingSetupDesc: "Starts at Patent Lvl 1 (3 🔬 cost), +2 🔬 Starting Research (2 🔬 total).",
   },
   PROMETHEUS: {
     code: "PROMETHEUS",
-    name: "Prometheus Quantitative",
-    sector: "High-Frequency Arbitrage",
+    name: "The Prometheus Foundation",
+    sector: "Think Tank",
     overrideName: "Algorithmic Arbitrage",
     timing: "P3: OPERATIONS",
-    description: "Mode A: $2 discount on purchasing 1 Colored or Purple Specialist Die; Mode B: Gain +$3 cash payout directly.",
+    description: "Once per Rogue Agent Version: Mode A: $2 discount on purchasing 1 Colored or Purple Specialist Die; Mode B: Gain +$3 cash payout directly.",
     themeColor: "#00d4ff",
     startingSetupDesc: "Def Cap 2, Triage 2, Release 4, -1 🔬 Track Upgrade Discount.",
   },
@@ -95,9 +95,9 @@ const WHITE_HATS_DATA = {
     name: "The Operator",
     role: "Master Strategist // Contractor Dispatch",
     flavor: "Never burn internal hardware when three night-shift phreakers are waiting by a payphone.",
-    protocolName: "Overtime Sprint",
-    protocolDesc: "Phase 1 Staffing: hire up to 2 White Contractors for free.",
-    passiveDesc: "Gray die with [1 $, 1 🔧] yields +$1 extra.",
+    protocolName: "Contingent Staffing",
+    protocolDesc: "When rolled on Purple ★, immediately pull 1 White Contractor die from supply for free and roll it into your active pool.",
+    passiveDesc: "White Contractor dice are immune to permanent malware lock.",
     themeColor: "#f59e0b",
   },
   PHREAKER: {
@@ -106,8 +106,8 @@ const WHITE_HATS_DATA = {
     role: "Hardware Tinkerer // Emergency Relays",
     flavor: "A strip of Mylar splicing tape and a 2600-Hz whistle will fix what ten grand of silicon can't.",
     protocolName: "Jumper Diagnostics",
-    protocolDesc: "When Purple ★ is rolled, roll 1 offline die in Under Development (or gain +$1 Cash fallback if pipeline is empty).",
-    passiveDesc: "Free Phase 3 diagnostic roll on 1 die in Scanned or Glitched (or +$1 fallback).",
+    protocolDesc: "When rolled on Purple ★, immediately roll 1 offline die in Under Development and apply its Cash/Research/Secret yield (or gain +$1 Cash fallback if pipeline is empty).",
+    passiveDesc: "Diagnostic jumper triggers on any offline die in Glitched or Scanned Box.",
     themeColor: "#4ade80",
   },
   ACOUSTIC: {
@@ -115,9 +115,9 @@ const WHITE_HATS_DATA = {
     name: "The Acoustic",
     role: "Pattern Genius // Mainframe Resonance",
     flavor: "Every mainframe hums before it strikes. Listen to the baffles -- you can hear which packet drops next.",
-    protocolName: "Decoy Route",
-    protocolDesc: "Phase 3 Income: +$1 for each distinct attack cube color in Exit Tray (Red, Blue, Green, Black; max +$4).",
-    passiveDesc: "Production dice produce +1 🔧 each time they generate patches.",
+    protocolName: "Harmonic Tap",
+    protocolDesc: "Phase 3 Income: Gain +$1 for each distinct attack cube color in Exit Tray (Red, Blue, Green, Black; max +$4).",
+    passiveDesc: "Converts compiler telemetry diversity directly into liquid capital.",
     themeColor: "#38bdf8",
   },
   SPOOK: {
@@ -135,9 +135,9 @@ const WHITE_HATS_DATA = {
     name: "The Prodigy",
     role: "Reckless Hacker // Lock Bypassing",
     flavor: "Locked memory is just a polite suggestion from someone who left debug interrupts enabled.",
-    protocolName: "Exploit Payload",
+    protocolName: "Zero-Day Override",
     protocolDesc: "Phase 1 Rerolls: Turn any 1 other rolled die to any legal non-Star face of choice.",
-    passiveDesc: "If Gray die has only 🔧, generate +1 extra 🔧.",
+    passiveDesc: "Deterministic face manipulation during Phase 1 Roll & Deploy.",
     themeColor: "#f43f5e",
   },
   CIPHER: {
@@ -147,7 +147,7 @@ const WHITE_HATS_DATA = {
     flavor: "Why pay retail for entropy when SETEC's own arbitrage equations subsidize the upgrade?",
     protocolName: "Algorithmic Parity",
     protocolDesc: "Phase 3 Income: Collect +$2 cash and +1 🔬 Research Token.",
-    passiveDesc: "Purple Specialist Die faces yield optimized cryptographic yield.",
+    passiveDesc: "Purple Specialist Die faces yield optimized cryptographic output.",
     themeColor: "#00d4ff",
   },
 };
@@ -287,7 +287,7 @@ export function renderPlayerMats() {
 
   const switcherTitle = document.createElement("div");
   switcherTitle.className = "switcher-title";
-  switcherTitle.innerHTML = `<span class="switcher-dot">●</span> CONSULTANCY TERMINALS:`;
+  switcherTitle.innerHTML = `<span class="switcher-dot">●</span> COMPANY TERMINALS:`;
   switcherBar.appendChild(switcherTitle);
 
   const tabsWrap = document.createElement("div");
@@ -297,14 +297,14 @@ export function renderPlayerMats() {
     const isSelected = (currentTab !== "all" && Number(currentTab) === p.player_id);
     const isHuman = Boolean(p.is_human);
     const isTurn = (p.player_id === state.active_player_index && state.phase === 3);
-    const isCISO = (p.player_id === state.first_player_index);
+    const isFirstPlayer = (p.player_id === state.first_player_index);
 
     const tabBtn = document.createElement("button");
     tabBtn.className = `terminal-tab-btn ${isSelected ? "active" : ""} ${isTurn ? "turn-active" : ""}`;
     tabBtn.innerHTML = `
       <span class="tab-player-icon">${isHuman ? "👤" : "🤖"}</span>
       <span class="tab-player-name">${p.name}</span>
-      ${isCISO ? '<span class="tab-ciso-tag">CISO</span>' : ''}
+      ${isFirstPlayer ? '<span class="tab-ciso-tag">1ST PLAYER</span>' : ''}
       <span class="tab-vp-badge">${p.secrets} Secrets</span>
     `;
     tabBtn.onclick = () => {
@@ -397,12 +397,12 @@ export function renderPlayerMats() {
       <!-- Terminal Frame Header Strip -->
       <div class="terminal-banner">
         <div class="terminal-banner-left">
-          <span class="terminal-tag">TOO MANY SECRETS // CONSULTANCY TERMINAL</span>
+          <span class="terminal-tag">TOO MANY SECRETS // COMPANY TERMINAL MAT</span>
           <span class="terminal-id">[TERM-0${p.player_id + 1}]</span>
           ${p.is_human ? '<span class="terminal-human-badge">HUMAN</span>' : `<span class="terminal-bot-badge">${p.bot_archetype || 'BOT'}</span>`}
         </div>
         <div class="terminal-banner-right">
-          ${isCISO ? '<span class="ciso-pill">★ LEAD CONSULTANT (CISO)</span>' : ''}
+          ${isCISO ? '<span class="ciso-pill">★ FIRST PLAYER</span>' : ''}
           ${p.is_patient_zero ? '<span class="breach-pill">TOTAL DATA BREACH</span>' : ''}
           <span class="vp-pill">${p.secrets} Secrets</span>
         </div>
@@ -591,14 +591,14 @@ export function renderPlayerMats() {
                   </div>
                 </div>
                 <div class="shield-desc-sub1">Blocks Malware</div>
-                <div class="shield-desc-sub2">Unblocked: Glitches 1 die (Empty: Fizzles)</div>
+                <div class="shield-desc-sub2">Unblocked: Glitches 1 die (Empty: 0 effect)</div>
                 <div class="shield-slots-tray" id="shields_green_${p.player_id}"></div>
               </div>
             </div>
 
-            <!-- Zero Dice Wear Note -->
+            <!-- Shield Persistence Note -->
             <div class="wear-transition-caption" style="margin-top: 8px;">
-              <span style="color: #4ade80;">ZERO DICE WEAR: Permanent shields blocking attacks DO NOT wear down! They remain deployed in In Production.</span>
+              <span style="color: #4ade80;">Permanent shields blocking attacks remain deployed in In Production (unless glitched by unblocked Green Malware).</span>
             </div>
           </div>
 
@@ -732,7 +732,7 @@ export function renderPlayerMats() {
             <span class="reserve-currency-value">${p.money}</span>
           </div>
           <div class="reserve-card-footer">
-            Start: $4 | Never drops below $0
+            Start: $6 (Meridian: $8) | Never drops below $0
           </div>
         </div>
 
