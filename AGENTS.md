@@ -11,6 +11,7 @@ Follow this workflow across sessions:
    - Never introduce new game terms or resurrect deprecated terminology (e.g., *Consultancy*, *Consultancy Terminal Mat*, *Lead Consultant*, *CISO*, *Patches / 🔧*, *Unpatched Zone*, *Demote*, *Zero Wear Retention*, *Malware Fizzle*, *Phase 1: Boot & Configure*, *Phase 2: SETEC Compile*) without explicit user approval.
    - If a new term appears necessary, **ask and confirm with the user first** before adding it to the glossary and introducing the terminology into the codebase.
 4. **Enforce Multi-Agent SDLC:** Once pre-SDLC design analysis and the implementation plan are signed off by the user, route engineering work through the specialized subagents defined in `PLAN.md` (`principal-engineer` → `senior-engineer` ↔ `staff-engineer` → `product-owner` ↔ `game-designer` + `graphic-designer`), preserving strict separation between design, implementation, code review, scenario execution, game-balance validation, and physical asset design.
+   - At the start of an engineering cycle or session requiring delegated work, register any subagents not already registered using `define_subagent` per their specs in `PLAN.md` Section 2, and delegate tasks using `invoke_subagent`.
 5. **Keep Documentation Synchronized:**
    - Update `RULES.md` whenever game mechanics or `[TUNE]` baselines change.
    - Update `PLAN.md` (status checkboxes & upcoming experiments) before and after implementation milestones.
