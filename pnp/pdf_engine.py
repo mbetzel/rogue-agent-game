@@ -97,8 +97,8 @@ _HELV_BOLD_WIDTHS: Dict[str, int] = {
 def _sanitize_winansi(text: str) -> str:
     """Ensure text uses clean WinAnsi characters for Type 1 fonts."""
     replacements = {
-        "\u2014": "--",   # em-dash -> clean double hyphen or WinAnsi \x97
-        "\u2013": "-",
+        "\u2014": "--",   # em-dash -> clean double hyphen
+        "\u2013": "-",    # en-dash -> hyphen
         "\u2018": "'",
         "\u2019": "'",
         "\u201c": '"',
@@ -107,8 +107,19 @@ def _sanitize_winansi(text: str) -> str:
         "\u00b7": "\xb7",
         "\u00d7": "x",
         "\u2192": "->",
+        "\u2190": "<-",
+        "\u2191": "^",
+        "\u2193": "v",
+        "\u25b2": "^",    # ▲ black up-pointing triangle
+        "\u25bc": "v",    # ▼ black down-pointing triangle
+        "\u25c4": "<-",   # ◄ black left-pointing pointer
+        "\u25ba": "->",   # ► black right-pointing pointer
+        "\u2605": "*",    # ★ black star
         "\u2264": "<=",
         "\u2265": ">=",
+        "\u26a1": "!",    # ⚡ high voltage sign
+        "\U0001f52c": "[RES]", # 🔬 microscope emoji
+        "\U0001f6e1": "[SHIELD]", # 🛡 shield emoji
     }
     for k, v in replacements.items():
         text = text.replace(k, v)

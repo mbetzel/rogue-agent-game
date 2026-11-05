@@ -1283,7 +1283,13 @@ button.btn-primary:hover {
   opacity: 0.75;
 }
 
-/* Shield Matrix Row (3 Columns: Red, Blue, Green) */
+/* Production & Shield Matrix Row */
+.production-matrix-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 8px;
+}
+
 .shield-matrix-row {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -1298,6 +1304,19 @@ button.btn-primary:hover {
   display: flex;
   flex-direction: column;
   gap: 3px;
+}
+
+.shield-box.defense-grid-box {
+  border-color: rgba(56, 189, 248, 0.5);
+  background: rgba(56, 189, 248, 0.05);
+}
+
+.defense-grid-unified-tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 36px;
+  align-items: center;
 }
 
 .shield-box.red-shield-box { border-color: var(--color-red-dim); }

@@ -728,16 +728,7 @@ def _draw_empty_company_card_slot(page: PDFPage, x: float, y: float, w: float, h
     page.rect(x + 4.0, y + 18.0, w - 8.0, h - 22.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.6, dash=(3.0, 2.0))
     page.corner_ticks(x + 4.0, y + 18.0, w - 8.0, h - 22.0, size=5.0, color=PALETTE["ink_soft"])
 
-    intro_comps = [
-        "Meridian Financial Trust (COMP-01)",
-        "Omnidyne Systems (COMP-02)",
-        "Aegis Defense Relay (COMP-03)",
-        "Dept of Telecom Oversight (COMP-04)",
-    ]
-    comp_preset = intro_comps[idx - 1] if 1 <= idx <= len(intro_comps) else "Open Assignment"
-
-    page.text(x + w / 2.0, y + 29.0, "SLOT CLIENT COMPANY CARD HERE", font="bold", size=7.5, color=PALETTE["ink"], align="center")
-    page.rich_line(x + w / 2.0, y + 37.0, f"**Preset:** {comp_preset}", size=5.2, color=PALETTE["ink_soft"], align="center")
+    page.text(x + w / 2.0, y + 33.0, "SLOT CLIENT COMPANY CARD HERE", font="bold", size=7.8, color=PALETTE["ink"], align="center")
 
     # Rules Summary Box
     by = y + 42.0
@@ -779,16 +770,7 @@ def _draw_empty_white_hat_slot(page: PDFPage, x: float, y: float, w: float, h: f
     # Inset dashed placement guide
     page.rect(x + 4.0, y + 18.0, w - 8.0, h - 22.0, stroke=PALETTE["purple_light"], fill=PALETTE["paper_tint"], line_width=0.6, dash=(3.0, 2.0))
 
-    intro_wh = [
-        "The Operator (WH-01)",
-        "The Phreaker (WH-02)",
-        "The Acoustic (WH-03)",
-        "The Spook (WH-04)",
-    ]
-    wh_preset = intro_wh[idx - 1] if 1 <= idx <= len(intro_wh) else "Open Assignment"
-
-    page.text(x + w / 2.0, y + 29.0, "SLOT WHITE HAT DOSSIER HERE", font="bold", size=7.5, color=PALETTE["purple"], align="center")
-    page.rich_line(x + w / 2.0, y + 37.0, f"**Preset:** {wh_preset}", size=5.2, color=PALETTE["purple"], align="center")
+    page.text(x + w / 2.0, y + 33.0, "SLOT WHITE HAT DOSSIER HERE", font="bold", size=7.8, color=PALETTE["purple"], align="center")
 
     # Rules Summary Box
     by = y + 42.0
@@ -855,39 +837,22 @@ def render_player_board(
     else:
         _draw_empty_white_hat_slot(page, lx, 168.0, lw, 148.0, idx=idx)
 
-    # 3. Corporate Secrets Track (VP) (y = 320..386, h = 66)
+    # 3. Corporate Secrets (VP) Token Placement Area (y = 320..386, h = 66)
     sy, sh = 320.0, 66.0
     page.rect(lx, sy, lw, sh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
     page.rect(lx, sy, lw, 14.0, stroke=PALETTE["ink"], fill=PALETTE["blue_light"], line_width=0.7)
-    page.rich_line(lx + 6.0, sy + 10.0, "{SECRET} **CORPORATE SECRETS TRACK (VP)**", size=6.5, color=PALETTE["blue"])
+    page.rich_line(lx + 6.0, sy + 10.0, "{SECRET} **CORPORATE SECRETS (VP)**", size=6.5, color=PALETTE["blue"])
     page.text(lx + lw - 6.0, sy + 10.0, "1 VP / SECRET", font="mono_bold", size=5.5, color=PALETTE["blue"], align="right")
 
-    # Track boxes: Row 1 (12..5, 8 boxes) and Row 2 (4..0, 5 boxes)
-    r1_boxes = [("12", True, "4P"), ("11", False, ""), ("10", False, ""), ("9", False, ""),
-                ("8", True, "2P/3P"), ("7", False, ""), ("6", False, ""), ("5", False, "")]
-    cell_w1 = (lw - 10.0) / 8.0
-    for b_idx, (b_num, is_start, start_tag) in enumerate(r1_boxes):
-        bx = lx + 5.0 + b_idx * cell_w1
-        page.rect(bx, sy + 16.5, cell_w1 - 1.5, 18.0, stroke=PALETTE["blue"], fill=PALETTE["blue_light"] if is_start else PALETTE["white"], line_width=0.55)
-        page.text(bx + (cell_w1 - 1.5) / 2.0, sy + 28.5, b_num, font="bold", size=7.2, color=PALETTE["ink"], align="center")
-        if start_tag:
-            page.text(bx + (cell_w1 - 1.5) / 2.0, sy + 33.5, start_tag, font="mono_bold", size=4.2, color=PALETTE["blue"], align="center")
+    # Open placeholder area for physical secret tokens
+    page.rect(lx + 5.0, sy + 17.0, lw - 10.0, 34.0, stroke=PALETTE["blue"], fill=PALETTE["paper_tint"], line_width=0.6, dash=(3.0, 2.0))
+    page.corner_ticks(lx + 5.0, sy + 17.0, lw - 10.0, 34.0, size=5.0, color=PALETTE["blue"])
+    page.text(lx + lw / 2.0, sy + 30.0, "CORPORATE SECRETS (VP) // PLACE TOKENS HERE", font="bold", size=7.2, color=PALETTE["blue"], align="center")
+    page.text(lx + lw / 2.0, sy + 43.0, "Start: 8 (2P/3P) | 12 (4P) | Uncapped (players may exceed 12)", font="mono_bold", size=5.2, color=PALETTE["ink_soft"], align="center")
 
-    # Row 2 (4, 3, 2, 1, and wide 0: BREACH)
-    r2_boxes = ["4", "3", "2", "1"]
-    for b_idx, b_num in enumerate(r2_boxes):
-        bx = lx + 5.0 + b_idx * cell_w1
-        page.rect(bx, sy + 36.5, cell_w1 - 1.5, 18.0, stroke=PALETTE["blue"], fill=PALETTE["white"], line_width=0.55)
-        page.text(bx + (cell_w1 - 1.5) / 2.0, sy + 49.5, b_num, font="bold", size=7.5, color=PALETTE["ink"], align="center")
-
-    # Wide 0: TOTAL BREACH Box
-    b0_x = lx + 5.0 + 4 * cell_w1
-    b0_w = lw - 10.0 - 4 * cell_w1 - 1.5
-    page.rect(b0_x, sy + 36.5, b0_w, 18.0, stroke=PALETTE["red"], fill=PALETTE["red_light"], line_width=0.8)
-    page.text(b0_x + b0_w / 2.0, sy + 46.5, "0: TOTAL BREACH!", font="bold", size=6.8, color=PALETTE["red"], align="center")
-    page.text(b0_x + b0_w / 2.0, sy + 52.8, "<= 0 SECRETS = PATIENT ZERO (ELIMINATED)", font="mono_bold", size=4.4, color=PALETTE["red"], align="center")
-
-    page.text(lx + lw / 2.0, sy + sh - 2.5, "Start: 8 (2P/3P) | 12 (4P) | DTO: +1 Corporate Secret Bonus", font="italic", size=4.8, color=PALETTE["muted"], align="center")
+    # Bottom notice bar for Total Data Breach / Patient Zero
+    page.rect(lx + 5.0, sy + 52.0, lw - 10.0, 11.0, stroke=PALETTE["red"], fill=PALETTE["red_light"], line_width=0.5)
+    page.text(lx + lw / 2.0, sy + 59.5, "<= 0 SECRETS = PATIENT ZERO (TOTAL DATA BREACH / ELIMINATED)", font="mono_bold", size=4.8, color=PALETTE["red"], align="center")
 
     # 4. Money & Research Banks (Side-by-side, y = 390..456, h = 66)
     my, mh = 390.0, 66.0
@@ -901,14 +866,14 @@ def render_player_board(
     page.text(lx + bw_half / 2.0, my + 50.0, "Start: $6 (Meridian: $8)", font="bold", size=5.4, color=PALETTE["ink_soft"], align="center")
     page.text(lx + bw_half / 2.0, my + 59.0, "Min: $0 | Tiebreaker #1", font="regular", size=4.8, color=PALETTE["muted"], align="center")
 
-    # Right: Research Tokens (🔬 UNCAPPED)
+    # Right: Research Tokens ({RESEARCH} UNCAPPED)
     rx_bank = lx + bw_half + 6.0
     page.rect(rx_bank, my, bw_half, mh, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=1.0)
     page.rect(rx_bank, my, bw_half, 14.0, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.7)
-    page.rich_line(rx_bank + 5.0, my + 10.0, "{RESEARCH} **RESEARCH (🔬)**", size=6.5, color=PALETTE["purple"])
+    page.rich_line(rx_bank + 5.0, my + 10.0, "{RESEARCH} **RESEARCH**", size=6.5, color=PALETTE["purple"])
     page.text(rx_bank + bw_half - 5.0, my + 10.0, "UNCAPPED", font="mono_bold", size=5.2, color=PALETTE["purple"], align="right")
     page.draw_research_icon(rx_bank + bw_half / 2.0, my + 33.0, 16.0, color=PALETTE["purple"])
-    page.text(rx_bank + bw_half / 2.0, my + 50.0, "Start: 0 {RESEARCH} (Helix: 2 🔬)", font="bold", size=5.2, color=PALETTE["ink_soft"], align="center")
+    page.rich_line(rx_bank + bw_half / 2.0, my + 50.0, "Start: 0 {RESEARCH} (Helix: 2 {RESEARCH})", size=5.2, color=PALETTE["ink_soft"], align="center")
     page.text(rx_bank + bw_half / 2.0, my + 59.0, "Spend in Phase 3A Operations", font="regular", size=4.8, color=PALETTE["muted"], align="center")
 
     # 5. Cryptographic Patents Track (y = 460..580, h = 120)
@@ -961,27 +926,9 @@ def render_player_board(
     page.text(rx + 8.0, r1_y + 28.0, "Phase 1: Roll Ready + Hired Contractors ($1/$2/$3). Max 2 Free Rerolls (Glitched dice cannot be rerolled).", font="regular", size=6.2, color=PALETTE["ink_soft"])
     page.text(rx + 8.0, r1_y + 39.0, "Assign surviving dice to In Production (Color & Any Shields up to Defense Capacity; remainder to Income).", font="regular", size=6.0, color=PALETTE["muted"])
 
-    # 8 rounded dice staging guide slots
-    ds_rw = 22.0
-    ds_gap = 6.0
-    ds_x0 = rx + 8.0
-    ds_y = r1_y + 46.0
-    for d_i in range(8):
-        bx = ds_x0 + d_i * (ds_rw + ds_gap)
-        page.rounded_rect(bx, ds_y, ds_rw, ds_rw, r=2.5, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.55, dash=(2, 1.5))
-        if d_i < 3:
-            slot_lbl = "{GRAY}"
-        elif d_i == 3:
-            slot_lbl = "{PURPLE}"
-        else:
-            slot_lbl = "[ ]"
-        page.rich_line(bx + ds_rw / 2.0, ds_y + 13.5, slot_lbl, size=4.8, color=PALETTE["muted"], align="center")
-
     # Directional Arrows on Ready for Release
     # Entry from Release Bridge at left
-    page.text(rx + 236.0, r1_y + 58.0, "▲ SCANNED GRADUATION CONVEYOR (4 / 5 / 6)", font="mono_bold", size=5.5, color=PALETTE["blue"])
-    # Exit to In Production at right
-    page.text(rx + rw - 8.0, r1_y + 58.0, "DEPLOY TO IN PRODUCTION ▼", font="mono_bold", size=6.0, color=PALETTE["ink"], align="right")
+    page.text(rx + 236.0, r1_y + 58.0, "^ SCANNED GRADUATION CONVEYOR (4 / 5 / 6)", font="mono_bold", size=5.5, color=PALETTE["blue"])
 
     # =========================================================================
     # 2. VERTICAL RELEASE UPGRADE TRACK BRIDGE (Left Bridge: x = 268..342, y = 110..442, h = 332)
@@ -992,19 +939,19 @@ def render_player_board(
 
     # Header strip
     page.rect(vx, vy, vw, 24.0, stroke=PALETTE["blue"], fill=PALETTE["blue"], line_width=0.7)
-    page.text(vx + vw / 2.0, vy + 9.5, "▲ RELEASE BRIDGE ▲", font="bold", size=5.8, color=PALETTE["white"], align="center")
+    page.text(vx + vw / 2.0, vy + 9.5, "^ RELEASE BRIDGE ^", font="bold", size=5.8, color=PALETTE["white"], align="center")
     page.text(vx + vw / 2.0, vy + 19.0, "SCANNED -> READY (P3B)", font="mono_bold", size=4.8, color=PALETTE["white"], align="center")
 
     # Upward graduation flow arrows
-    page.text(vx + vw / 2.0, vy + 38.0, "▲ ▲ ▲", font="bold", size=8.0, color=PALETTE["blue"], align="center")
+    page.text(vx + vw / 2.0, vy + 38.0, "^ ^ ^", font="bold", size=8.0, color=PALETTE["blue"], align="center")
     page.text(vx + vw / 2.0, vy + 48.0, "GRADUATION", font="mono_bold", size=5.2, color=PALETTE["ink"], align="center")
     page.text(vx + vw / 2.0, vy + 56.0, "THROUGHPUT", font="mono_bold", size=5.0, color=PALETTE["ink_soft"], align="center")
 
     # 3 Progression Cards stacked vertically along the bridge
     rel_cards = [
         ("LEVEL 0 (BASE)", "4 DICE", "Default Release Bandwidth", False),
-        ("LEVEL 1 (2 🔬)", "5 DICE", "Cost: 2 {RESEARCH}", True),
-        ("LEVEL 2 (3 🔬)", "6 DICE", "Cost: 3 {RESEARCH}", True),
+        ("LEVEL 1 (2 [RES])", "5 DICE", "Cost: 2 {RESEARCH}", True),
+        ("LEVEL 2 (3 [RES])", "6 DICE", "Cost: 3 {RESEARCH}", True),
     ]
     rc_h = 62.0
     rc_y0 = vy + 68.0
@@ -1023,9 +970,9 @@ def render_player_board(
         page.rich_line(vx + vw / 2.0, rc_y + 36.0, f"**{rc_cost}**", size=4.8, color=PALETTE["purple"] if is_up else PALETTE["muted"], align="center")
         page.text(vx + vw / 2.0, rc_y + 45.0, "Graduates to", font="regular", size=4.6, color=PALETTE["muted"], align="center")
         page.text(vx + vw / 2.0, rc_y + 53.0, "Ready Zone", font="regular", size=4.6, color=PALETTE["muted"], align="center")
-        page.text(vx + vw / 2.0, rc_y + 60.0, "▲", font="bold", size=6.0, color=PALETTE["blue"], align="center")
+        page.text(vx + vw / 2.0, rc_y + 60.0, "^", font="bold", size=6.0, color=PALETTE["blue"], align="center")
 
-    page.text(vx + vw / 2.0, vy + vh - 6.0, "Prometheus: -1 🔬", font="italic", size=4.6, color=PALETTE["purple"], align="center")
+    page.text(vx + vw / 2.0, vy + vh - 6.0, "Prometheus: -1 [RES]", font="italic", size=4.6, color=PALETTE["purple"], align="center")
 
     # =========================================================================
     # 3. ZONE 2: IN PRODUCTION (Middle-Right Box: x = 346..756, y = 110..442, h = 332)
@@ -1040,58 +987,39 @@ def render_player_board(
     # --- 3A: Income Bays (Money, Research, Special) (y = 130..222, h = 92) ---
     page.rect(px + 6.0, py + 20.0, pw - 12.0, 92.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.8)
     page.rect(px + 6.0, py + 20.0, pw - 12.0, 13.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.5)
-    page.rich_line(px + 10.0, py + 29.0, "**INCOME BAYS** (Collect $, 🔬 & Non-Shield Star Outputs in Phase 3A)", size=6.5, color=PALETTE["ink"])
+    page.rich_line(px + 10.0, py + 29.0, "**INCOME BAYS**", size=6.5, color=PALETTE["ink"])
     page.text(px + pw - 16.0, py + 29.0, "PHASE 3A INCOME", font="mono_bold", size=5.2, color=PALETTE["muted"], align="right")
 
     income_bays = [
-        ("MONEY ($)", "Cash Yields", "+$1, +$2, +$3", "$"),
-        ("RESEARCH (🔬)", "Research Yields", "+1 {RESEARCH}, +2 {RESEARCH}", "{RESEARCH}"),
-        ("SPECIAL (★)", "Non-Shield Stars", "Yellow ★ / Red ★ / Purple ★", "{STAR}"),
+        "MONEY ($)",
+        "RESEARCH ({RESEARCH})",
+        "SPECIAL ({STAR})",
     ]
     ib_w = (pw - 24.0) / 3.0
-    for ib_i, (ib_title, ib_sub1, ib_sub2, ib_icon) in enumerate(income_bays):
+    for ib_i, ib_title in enumerate(income_bays):
         ib_x = px + 9.0 + ib_i * (ib_w + 3.0)
         page.rounded_rect(ib_x, py + 36.0, ib_w - 3.0, 72.0, r=2.5, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.6)
-        page.text(ib_x + (ib_w - 3.0) / 2.0, py + 46.5, ib_title, font="bold", size=6.4, color=PALETTE["ink"], align="center")
-        page.rich_line(ib_x + (ib_w - 3.0) / 2.0, py + 56.5, ib_sub1, size=5.2, color=PALETTE["ink_soft"], align="center")
-        page.rich_line(ib_x + (ib_w - 3.0) / 2.0, py + 66.0, f"**{ib_sub2}**", size=5.0, color=PALETTE["purple"] if "{" in ib_sub2 else PALETTE["ink"], align="center")
-
-        # Dice slots in each bay
-        for d_j in range(2):
-            dx_slot = ib_x + 14.0 + d_j * 26.0
-            page.rounded_rect(dx_slot, py + 74.0, 22.0, 20.0, r=2.0, stroke=PALETTE["rule"], fill=PALETTE["white"], line_width=0.5)
+        page.rich_line(ib_x + (ib_w - 3.0) / 2.0, py + 52.0, f"**{ib_title}**", size=7.2, color=PALETTE["ink"], align="center")
 
     # --- 3B: Defense Grid (Color & Any Shields) (y = 226..358, h = 132) ---
     page.rect(px + 6.0, py + 116.0, pw - 12.0, 134.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.85)
     page.rect(px + 6.0, py + 116.0, pw - 12.0, 14.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.6)
-    page.rich_line(px + 10.0, py + 126.0, "**DEFENSE GRID** (Color & Any Shields — Committed up to Defense Capacity)", size=6.8, color=PALETTE["ink"])
+    page.rich_line(px + 10.0, py + 126.0, "**DEFENSE GRID** (Color & Any Shields -- Committed up to Defense Capacity)", size=6.8, color=PALETTE["ink"])
     page.text(px + pw - 16.0, py + 126.0, "DEFENSE CAPACITY ENFORCED", font="mono_bold", size=5.4, color=PALETTE["ink_soft"], align="right")
 
-    shield_bays = [
-        ("red", "{RED} RED SHIELDS", "Blocks Ransomware", "-$1 Cash per unblocked", "Shortfall: -1 Secret flat"),
-        ("blue", "{BLUE} BLUE SHIELDS", "Blocks Spyware", "**-1 Corporate Secret**", "per unblocked cube"),
-        ("green", "{GREEN} GREEN SHIELDS", "Blocks Malware", "Glitch 1 Die / unblocked", "Empty Prod: 0 effect"),
-    ]
-    sb_w = (pw - 24.0) / 3.0
-    for sb_i, (ckey, sb_title, sb_sub1, sb_sub2, sb_sub3) in enumerate(shield_bays):
-        sb_x = px + 9.0 + sb_i * (sb_w + 3.0)
-        fg, bg = _color_pair(ckey)
-        page.rounded_rect(sb_x, py + 133.0, sb_w - 3.0, 114.0, r=2.5, stroke=fg, fill=PALETTE["white"], line_width=0.8)
-        page.rect(sb_x, py + 133.0, sb_w - 3.0, 14.0, stroke=fg, fill=bg, line_width=0.5)
-        page.rich_line(sb_x + (sb_w - 3.0) / 2.0, py + 143.0, f"**{sb_title}**", size=6.8, color=fg, align="center")
+    # Single unified box for defense dice
+    d_box_x = px + 9.0
+    d_box_w = pw - 18.0
+    page.rounded_rect(d_box_x, py + 133.0, d_box_w, 114.0, r=2.5, stroke=PALETTE["border"], fill=PALETTE["white"], line_width=0.8)
+    page.rect(d_box_x, py + 133.0, d_box_w, 14.0, stroke=PALETTE["border"], fill=PALETTE["panel_tint"], line_width=0.5)
+    page.rich_line(d_box_x + d_box_w / 2.0, py + 143.0, "**ACTIVE DEFENSE DICE ({RED} RED / {BLUE} BLUE / {GREEN} GREEN / ANY)**", size=6.8, color=PALETTE["ink"], align="center")
 
-        page.text(sb_x + (sb_w - 3.0) / 2.0, py + 158.0, sb_sub1, font="bold", size=6.4, color=PALETTE["ink"], align="center")
-        page.rich_line(sb_x + (sb_w - 3.0) / 2.0, py + 170.0, sb_sub2, size=5.8, color=fg, align="center")
-        page.rich_line(sb_x + (sb_w - 3.0) / 2.0, py + 181.0, sb_sub3, size=5.2, color=PALETTE["muted"], align="center")
-
-        # Shield dice staging guide slots
-        for d_j in range(2):
-            dx_slot = sb_x + 14.0 + d_j * 26.0
-            page.rounded_rect(dx_slot, py + 190.0, 22.0, 22.0, r=2.5, stroke=fg, fill=bg, line_width=0.55)
-            page.draw_color_badge(dx_slot + 11.0, py + 201.0, 5.0, ckey)
-
-        page.text(sb_x + (sb_w - 3.0) / 2.0, py + 221.0, "Absorbs cleanly", font="italic", size=4.8, color=PALETTE["muted"], align="center")
-        page.text(sb_x + (sb_w - 3.0) / 2.0, py + 228.0, "Stays in Production", font="italic", size=4.8, color=PALETTE["muted"], align="center")
+    # Threat summaries
+    page.text(d_box_x + 10.0, py + 160.0, "- Red Shields block Red Ransomware (-$1 Cash per unblocked cube; flat -1 Secret on shortfall).", font="regular", size=5.8, color=PALETTE["red"])
+    page.text(d_box_x + 10.0, py + 172.0, "- Blue Shields block Blue Spyware (-1 Corporate Secret per unblocked cube).", font="regular", size=5.8, color=PALETTE["blue"])
+    page.text(d_box_x + 10.0, py + 184.0, "- Green Shields block Green Malware (glitches 1 die from In Production per unblocked cube; 0 effect if empty).", font="regular", size=5.8, color=PALETTE["green"])
+    page.text(d_box_x + 10.0, py + 196.0, "- Any Shields flexibly block any Attack Cube color of your choice.", font="regular", size=5.8, color=PALETTE["ink_soft"])
+    page.text(d_box_x + d_box_w / 2.0, py + 216.0, "Place committed defense dice here (up to current Defense Capacity). Dice absorb cleanly & remain in In Production.", font="italic", size=5.2, color=PALETTE["muted"], align="center")
 
     # --- 3C: Embedded Shield Upgrade Track (Bottom of In Production, y = 254..326) ---
     st_y = py + 254.0
@@ -1151,13 +1079,7 @@ def render_player_board(
         size=5.2, leading=6.8, color=PALETTE["ink_soft"],
     )
 
-    # 4 dice slots for Scanned dice
-    for s_i in range(4):
-        sx_d = sc_x + 8.0 + (s_i % 2) * 26.0
-        sy_d = sc_y + 44.0 + (s_i // 2) * 22.0
-        page.rounded_rect(sx_d, sy_d, 22.0, 18.0, r=2.0, stroke=PALETTE["blue"], fill=PALETTE["blue_light"], line_width=0.55)
-
-    page.text(sc_x + sc_w / 2.0, sc_y + sc_h - 14.0, "▲ GRADUATES UP ▲", font="mono_bold", size=5.5, color=PALETTE["blue"], align="center")
+    page.text(sc_x + sc_w / 2.0, sc_y + sc_h - 14.0, "^ GRADUATES UP ^", font="mono_bold", size=5.5, color=PALETTE["blue"], align="center")
     page.text(sc_x + sc_w / 2.0, sc_y + sc_h - 5.0, "to Ready (Release Bandwidth: 4/5/6)", font="italic", size=4.5, color=PALETTE["ink_soft"], align="center")
 
     # --- 4B: Embedded Triage Upgrade Track (Center Conveyor: x = 394..630, w = 236, y = 466..576, h = 110) ---
@@ -1170,7 +1092,7 @@ def render_player_board(
 
     # Prominent Left-Pointing Conveyor Arrow Banner
     page.rect(tt_x + 4.0, tt_y + 17.0, tt_w - 8.0, 14.0, stroke=PALETTE["rule"], fill=PALETTE["white"], line_width=0.6)
-    page.rich_line(tt_x + (tt_w - 8.0) / 2.0 + 4.0, tt_y + 26.5, "◄────── **CONVEYOR TRIAGE: GLITCHED TO SCANNED** ──────◄", size=5.6, color=PALETTE["purple"], align="center")
+    page.rich_line(tt_x + (tt_w - 8.0) / 2.0 + 4.0, tt_y + 26.5, "<------ **CONVEYOR TRIAGE: GLITCHED TO SCANNED** ------<", size=5.6, color=PALETTE["purple"], align="center")
 
     # 3 Triage Progression Cards
     triage_levels = [
@@ -1194,7 +1116,7 @@ def render_player_board(
 
         page.rich_paragraph(tc_x + 4.0, tt_y + 64.0, tc_w - 8.0, tc_sub, size=4.5, leading=5.8, color=PALETTE["muted"], align="center")
 
-    page.text(tt_x + tt_w / 2.0, tt_y + tt_h - 13.0, "⚡ Emergency Hotfix (L2): Move 1 die Glitched -> Ready free in P3B Step 1! Prometheus: -1 🔬 discount.", font="italic", size=4.6, color=PALETTE["purple"], align="center")
+    page.text(tt_x + tt_w / 2.0, tt_y + tt_h - 13.0, "! Emergency Hotfix (L2): Move 1 die Glitched -> Ready free in P3B Step 1! Prometheus: -1 [RES] discount.", font="italic", size=4.6, color=PALETTE["purple"], align="center")
     page.text(tt_x + tt_w / 2.0, tt_y + tt_h - 4.5, "Throughput limit: excess glitched dice remain quarantined in Glitched Box.", font="italic", size=4.4, color=PALETTE["muted"], align="center")
 
     # --- 4C: Glitched Box (Bottom Right: x = 636..752, w = 116, y = 466..576, h = 110) ---
@@ -1211,13 +1133,7 @@ def render_player_board(
         size=5.2, leading=6.8, color=PALETTE["ink_soft"],
     )
 
-    # 4 dice slots for Glitched dice
-    for g_i in range(4):
-        gx_d = gl_x + 8.0 + (g_i % 2) * 26.0
-        gy_d = gl_y + 44.0 + (g_i // 2) * 22.0
-        page.rounded_rect(gx_d, gy_d, 22.0, 18.0, r=2.0, stroke=PALETTE["red"], fill=PALETTE["red_light"], line_width=0.55)
-
-    page.text(gl_x + gl_w / 2.0, gl_y + gl_h - 14.0, "◄ SHIFTS LEFT ◄", font="mono_bold", size=5.5, color=PALETTE["red"], align="center")
+    page.text(gl_x + gl_w / 2.0, gl_y + gl_h - 14.0, "< SHIFTS LEFT <", font="mono_bold", size=5.5, color=PALETTE["red"], align="center")
     page.text(gl_x + gl_w / 2.0, gl_y + gl_h - 5.0, "to Scanned (Triage Bandwidth: 2/3/4)", font="italic", size=4.5, color=PALETTE["ink_soft"], align="center")
 
 
@@ -1873,42 +1789,42 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
 
 
 def _draw_single_variant_card(page: PDFPage, x: float, y: float, w: float, h: float, card: VariantCardSpec) -> None:
-    """Draw a single 120 x 182 pt Software Module Variant (★) Market Card."""
+    """Draw a single 126 x 194 pt Software Module Variant (★) Market Card."""
     fg, bg = _color_pair(card.color_key)
     page.crop_marks(x, y, w, h, length=4.5, offset=2.0)
     page.rounded_rect(x, y, w, h, r=4.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
 
     # Top Color Banner
-    page.rect(x, y, w, 22.0, stroke=PALETTE["ink"], fill=bg, line_width=0.8)
+    page.rect(x, y, w, 24.0, stroke=PALETTE["ink"], fill=bg, line_width=0.8)
     page.rect(x, y, w, 3.5, stroke=None, fill=fg)
-    page.draw_color_badge(x + 10.5, y + 12.8, 8.5, card.color_key)
-    page.text(x + 19.0, y + 15.2, card.die_label, font="bold", size=6.9, color=fg)
+    page.draw_color_badge(x + 11.0, y + 13.8, 9.0, card.color_key)
+    page.text(x + 20.0, y + 16.5, card.die_label, font="bold", size=7.2, color=fg)
     # Code pill on right
-    page.rounded_rect(x + w - 24.0, y + 5.5, 19.0, 12.0, r=2.0, stroke=fg, fill=PALETTE["white"], line_width=0.7)
-    page.text(x + w - 14.5, y + 13.8, card.code, font="mono_bold", size=6.8, color=fg, align="center")
+    page.rounded_rect(x + w - 26.0, y + 6.0, 20.0, 13.0, r=2.0, stroke=fg, fill=PALETTE["white"], line_width=0.7)
+    page.text(x + w - 16.0, y + 15.0, card.code, font="mono_bold", size=7.0, color=fg, align="center")
 
     # Cost Sub-bar
-    page.rect(x, y + 22.0, w, 15.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.6)
-    page.text(x + w / 2.0, y + 32.5, f"Cost: {card.cost_str}", font="bold", size=7.5, color=PALETTE["ink"], align="center")
+    page.rect(x, y + 24.0, w, 16.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.6)
+    page.text(x + w / 2.0, y + 35.0, f"Cost: {card.cost_str}", font="bold", size=8.0, color=PALETTE["ink"], align="center")
 
-    # Prominent Face 6 (★) Variant Box (starts higher up now that base faces are removed)
-    sy = y + 41.0
-    sh = h - 41.0 - 18.0  # 123 pt tall (expanded from 98 pt)
+    # Prominent Face 6 (★) Variant Box
+    sy = y + 44.0
+    sh = h - 44.0 - 20.0  # 130 pt tall
     page.rect(x + 5.0, sy, w - 10.0, sh, stroke=fg, fill=PALETTE["white"], line_width=0.9)
-    page.rect(x + 5.0, sy, w - 10.0, 17.5, stroke=fg, fill=bg, line_width=0.6)
-    page.draw_pip_die(x + 16.0, sy + 8.8, 11.0, 6)
-    page.rich_line(x + w - 9.0, sy + 11.8, "{STAR} **FACE 6 VARIANT**", size=6.8, color=fg, align="right")
+    page.rect(x + 5.0, sy, w - 10.0, 18.5, stroke=fg, fill=bg, line_width=0.6)
+    page.draw_pip_die(x + 16.0, sy + 9.2, 12.0, 6)
+    page.rich_line(x + w - 9.0, sy + 12.5, "{STAR} **FACE 6 VARIANT**", size=7.0, color=fg, align="right")
 
     # Variant Title & Timing
-    page.text(x + w / 2.0, sy + 32.0, card.name.upper(), font="bold", size=7.8, color=PALETTE["ink"], align="center")
-    page.text(x + w / 2.0, sy + 42.0, card.timing, font="mono_bold", size=5.8, color=fg, align="center")
-    page.line(x + 10.0, sy + 46.5, x + w - 10.0, sy + 46.5, stroke=PALETTE["rule"], width=0.5)
+    page.text(x + w / 2.0, sy + 34.0, card.name.upper(), font="bold", size=8.2, color=PALETTE["ink"], align="center")
+    page.text(x + w / 2.0, sy + 44.5, card.timing, font="mono_bold", size=6.0, color=fg, align="center")
+    page.line(x + 10.0, sy + 49.0, x + w - 10.0, sy + 49.0, stroke=PALETTE["rule"], width=0.5)
 
     # Variant Effect Body
-    page.rich_paragraph(x + 9.0, sy + 58.0, w - 18.0, card.effect, size=6.8, leading=9.5, color=PALETTE["ink"])
+    page.rich_paragraph(x + 9.0, sy + 62.0, w - 18.0, card.effect, size=7.0, leading=10.0, color=PALETTE["ink"])
 
     # Bottom Footer Note
-    page.text(x + w / 2.0, y + h - 6.5, card.footer_note, font="italic", size=5.7, color=PALETTE["muted"], align="center")
+    page.text(x + w / 2.0, y + h - 7.0, card.footer_note, font="italic", size=5.8, color=PALETTE["muted"], align="center")
 
 
 def _draw_color_divider_card(page: PDFPage, x: float, y: float, w: float, h: float, dspec: DieSpec, variants: Sequence[VariantCardSpec]) -> None:
@@ -1916,20 +1832,20 @@ def _draw_color_divider_card(page: PDFPage, x: float, y: float, w: float, h: flo
     fg, bg = _color_pair(dspec.color_key)
     page.crop_marks(x, y, w, h, length=4.5, offset=2.0)
     page.rounded_rect(x, y, w, h, r=4.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=1.0)
-    page.rect(x, y, w, 22.0, stroke=PALETTE["ink"], fill=fg, line_width=0.8)
-    page.text(x + w / 2.0, y + 14.5, f"{dspec.title} // ALL VARIANTS", font="bold", size=7.2, color=PALETTE["white"], align="center")
-    page.text(x + w / 2.0, y + 33.0, f"Market Cost: {dspec.cost_str}", font="bold", size=5.8, color=PALETTE["ink_soft"], align="center")
+    page.rect(x, y, w, 24.0, stroke=PALETTE["ink"], fill=fg, line_width=0.8)
+    page.text(x + w / 2.0, y + 15.5, f"{dspec.title} // ALL VARIANTS", font="bold", size=7.5, color=PALETTE["white"], align="center")
+    page.text(x + w / 2.0, y + 36.0, f"Market Cost: {dspec.cost_str}", font="bold", size=6.2, color=PALETTE["ink_soft"], align="center")
 
-    cy = y + 46.0
+    cy = y + 49.0
     for v in variants:
-        page.rounded_rect(x + 5.0, cy - 8.5, w - 10.0, 40.0, r=2.5, stroke=PALETTE["rule"], fill=PALETTE["white"], line_width=0.6)
-        page.text(x + 9.0, cy + 1.0, f"[{v.code}] {v.name}", font="bold", size=6.4, color=fg)
-        page.rich_paragraph(x + 9.0, cy + 10.5, w - 18.0, v.effect, size=5.6, leading=7.5, color=PALETTE["ink"])
-        cy += 44.0
+        page.rounded_rect(x + 5.0, cy - 8.5, w - 10.0, 43.0, r=2.5, stroke=PALETTE["rule"], fill=PALETTE["white"], line_width=0.6)
+        page.text(x + 9.0, cy + 1.0, f"[{v.code}] {v.name}", font="bold", size=6.6, color=fg)
+        page.rich_paragraph(x + 9.0, cy + 11.0, w - 18.0, v.effect, size=5.8, leading=7.8, color=PALETTE["ink"])
+        cy += 47.0
 
 
 def render_variant_market_cards_pages(page3: PDFPage, page4: PDFPage) -> None:
-    """Pages 3 & 4 of Dice Aids: All 12 Printable Variant (★) Market Cards (120 x 182 pt) + 4 Deck Summary Cards."""
+    """Pages 3 & 4 of Dice Aids: All 12 Printable Variant (★) Market Cards (126 x 194 pt) + 4 Deck Summary Cards."""
     # Organize by Color Column (Red, Blue, Green, Yellow) so cutting & sorting is effortless!
     by_color: Dict[str, List[VariantCardSpec]] = {"red": [], "blue": [], "green": [], "yellow": []}
     for vc in VARIANT_CARDS:
@@ -1937,16 +1853,16 @@ def render_variant_market_cards_pages(page3: PDFPage, page4: PDFPage) -> None:
             by_color[vc.color_key].append(vc)
     order = ["red", "blue", "green", "yellow"]
 
-    cw, ch = 120.0, 182.0  # 1.67" x 2.53" — fits inside 124 x 190 pt Market Board slots!
-    gap_x = 40.0
-    gap_y = 28.0
-    total_w = 4 * cw + 3 * gap_x  # 600 pt
-    x0 = (792.0 - total_w) / 2.0  # 96.0 pt
-    y0 = 48.0
+    cw, ch = 126.0, 194.0  # Matches exact 126 x 194 pt Market Board slot size!
+    gap_x = 36.0
+    gap_y = 24.0
+    total_w = 4 * cw + 3 * gap_x  # 504 + 108 = 612 pt
+    x0 = (792.0 - total_w) / 2.0  # 90.0 pt
+    y0 = 42.0
 
     # Page 3: Row 0 = Set 1 (R1..Y1 Baseline), Row 1 = Set 2 (R2..Y2)
-    page3.text(52.0, 26.0, "TOO MANY SECRETS // SOFTWARE MODULE VARIANT (STAR) MARKET CARDS — SHEET 1 (SETS 1 & 2) [3/4]", font="mono_bold", size=6.8, color=PALETTE["ink_soft"])
-    page3.text(740.0, 26.0, "SIZE: 1.67\" x 2.53\" (FITS MARKET BOARD)", font="mono", size=6.5, color=PALETTE["muted"], align="right")
+    page3.text(52.0, 24.0, "TOO MANY SECRETS // SOFTWARE MODULE VARIANT (STAR) MARKET CARDS -- SHEET 1 (SETS 1 & 2) [3/4]", font="mono_bold", size=6.8, color=PALETTE["ink_soft"])
+    page3.text(740.0, 24.0, "SIZE: 1.75\" x 2.69\" (126 x 194 pt -- MATCHES MARKET BOARD)", font="mono", size=6.5, color=PALETTE["muted"], align="right")
 
     for col_idx, ckey in enumerate(order):
         cx = x0 + col_idx * (cw + gap_x)
@@ -1956,8 +1872,8 @@ def render_variant_market_cards_pages(page3: PDFPage, page4: PDFPage) -> None:
     page3.text(396.0, 594.0, "Setup: Shuffle the 3 Variant (STAR) cards of each market color (R/B/G/Y) and place 1 face-up in each Market slot (Row 1 = Default Baseline R1-Y1).", font="italic", size=6.8, color=PALETTE["muted"], align="center")
 
     # Page 4: Row 0 = Set 3 (R3..Y3), Row 1 = 4 Color Reference / Divider Cards
-    page4.text(52.0, 26.0, "TOO MANY SECRETS // SOFTWARE MODULE VARIANT (STAR) MARKET CARDS — SHEET 2 (SET 3 + DIVIDERS) [4/4]", font="mono_bold", size=6.8, color=PALETTE["ink_soft"])
-    page4.text(740.0, 26.0, "SIZE: 1.67\" x 2.53\" (FITS MARKET BOARD)", font="mono", size=6.5, color=PALETTE["muted"], align="right")
+    page4.text(52.0, 24.0, "TOO MANY SECRETS // SOFTWARE MODULE VARIANT (STAR) MARKET CARDS -- SHEET 2 (SET 3 + DIVIDERS) [4/4]", font="mono_bold", size=6.8, color=PALETTE["ink_soft"])
+    page4.text(740.0, 24.0, "SIZE: 1.75\" x 2.69\" (126 x 194 pt -- MATCHES MARKET BOARD)", font="mono", size=6.5, color=PALETTE["muted"], align="right")
 
     spec_map = {d.color_key: d for d in DICE_SPECS}
     for col_idx, ckey in enumerate(order):

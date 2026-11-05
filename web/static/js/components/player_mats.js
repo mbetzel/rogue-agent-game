@@ -523,8 +523,8 @@ export function renderPlayerMats() {
               </div>
             </div>
 
-            <!-- In Production Grid (Income + Any/Red/Blue/Green Shield Slots) -->
-            <div class="shield-matrix-row" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 8px;">
+            <!-- In Production Grid: Income Slot + Unified Defense Grid -->
+            <div class="production-matrix-row" style="display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-top: 8px;">
               <!-- Income Slot -->
               <div class="shield-box" style="border-color: #eab308; background: rgba(234, 179, 8, 0.08);">
                 <div class="shield-header-bar">
@@ -539,60 +539,21 @@ export function renderPlayerMats() {
                 <div class="shield-slots-tray" id="income_tray_${p.player_id}"></div>
               </div>
 
-              <!-- Any Shields -->
-              <div class="shield-box any-shield-box" style="border-color: #38bdf8; background: rgba(56, 189, 248, 0.08);">
-                <div class="shield-header-bar">
+              <!-- Unified Defense Grid -->
+              <div class="shield-box defense-grid-box" style="border-color: #38bdf8; background: rgba(56, 189, 248, 0.06);">
+                <div class="shield-header-bar" style="display: flex; justify-content: space-between; align-items: center;">
                   <div class="shield-title">
                     <span class="shield-symbol" style="color: #38bdf8;">🛡️</span>
-                    <span style="color: #38bdf8;">ANY SHIELD</span>
-                    <span class="shield-count">(${anyShieldDice.length})</span>
+                    <span style="color: #38bdf8;">DEFENSE GRID</span>
+                    <span class="shield-count">(${redShieldDice.length + blueShieldDice.length + greenShieldDice.length + anyShieldDice.length}/${p.defense_capacity || 2} CAP)</span>
+                  </div>
+                  <div style="font-size: 0.65rem; color: var(--text-dim);">
+                    Red (Ransom) | Blue (Spyware) | Green (Malware) | Any
                   </div>
                 </div>
-                <div class="shield-desc-sub1">Flexible Defense</div>
-                <div class="shield-desc-sub2">Absorbs in P2B</div>
-                <div class="shield-slots-tray" id="shields_any_${p.player_id}"></div>
-              </div>
-
-              <!-- Red Shields -->
-              <div class="shield-box red-shield-box">
-                <div class="shield-header-bar">
-                  <div class="shield-title">
-                    <span class="shield-symbol">◆</span>
-                    <span>RED SHIELDS</span>
-                    <span class="shield-count">(${redShieldDice.length})</span>
-                  </div>
-                </div>
-                <div class="shield-desc-sub1">Blocks Ransomware</div>
-                <div class="shield-desc-sub2">Unblocked: -$1 (Flat -1 Sec if unpaid)</div>
-                <div class="shield-slots-tray" id="shields_red_${p.player_id}"></div>
-              </div>
-
-              <!-- Blue Shields -->
-              <div class="shield-box blue-shield-box">
-                <div class="shield-header-bar">
-                  <div class="shield-title">
-                    <span class="shield-symbol">●</span>
-                    <span>BLUE SHIELDS</span>
-                    <span class="shield-count">(${blueShieldDice.length})</span>
-                  </div>
-                </div>
-                <div class="shield-desc-sub1">Blocks Spyware</div>
-                <div class="shield-desc-sub2">Unblocked: -1 Secret</div>
-                <div class="shield-slots-tray" id="shields_blue_${p.player_id}"></div>
-              </div>
-
-              <!-- Green Shields -->
-              <div class="shield-box green-shield-box">
-                <div class="shield-header-bar">
-                  <div class="shield-title">
-                    <span class="shield-symbol">▲</span>
-                    <span>GREEN SHIELDS</span>
-                    <span class="shield-count">(${greenShieldDice.length})</span>
-                  </div>
-                </div>
-                <div class="shield-desc-sub1">Blocks Malware</div>
-                <div class="shield-desc-sub2">Unblocked: Glitches 1 die (Empty: 0 effect)</div>
-                <div class="shield-slots-tray" id="shields_green_${p.player_id}"></div>
+                <div class="shield-desc-sub1">Active Shields Committed Against Compiler Threats</div>
+                <div class="shield-desc-sub2">Absorbs cleanly in P2B; unblocked attacks inflict penalties.</div>
+                <div class="shield-slots-tray defense-grid-unified-tray" id="defense_grid_${p.player_id}" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 36px; padding: 4px; background: rgba(0,0,0,0.2); border-radius: 4px;"></div>
               </div>
             </div>
 
@@ -922,21 +883,33 @@ export function renderPlayerMats() {
       });
     }
 
-    // Shield Slots
-    ["any", "red", "blue", "green"].forEach((c) => {
-      const slotEl = terminalMat.querySelector(`#shields_${c}_${p.player_id}`);
-      if (slotEl) {
+    // Unified Defense Grid Tray
+    const defenseGridTray = terminalMat.querySelector(`#defense_grid_${p.player_id}`);
+    if (defenseGridTray) {
+      let totalShieldDice = 0;
+      ["any", "red", "blue", "green"].forEach((c) => {
         const slotDice = (p.shield_slots && p.shield_slots[c] && p.shield_slots[c].length)
           ? p.shield_slots[c]
           : ((p.production_slots && p.production_slots[`${c}_shield`]) || []);
         slotDice.forEach((d) => {
+          totalShieldDice++;
           const item = document.createElement("div");
           item.className = `shield-die-chip ${d.color}`;
           item.innerText = `${d.color.toUpperCase()}: ${d.current_face ? d.current_face.name : 'Shield'}`;
-          slotEl.appendChild(item);
+          defenseGridTray.appendChild(item);
         });
+      });
+      if (totalShieldDice === 0) {
+        const emptyMsg = document.createElement("div");
+        emptyMsg.className = "empty-tray-msg";
+        emptyMsg.style.fontSize = "0.68rem";
+        emptyMsg.style.color = "var(--text-muted)";
+        emptyMsg.style.fontStyle = "italic";
+        emptyMsg.style.padding = "4px 8px";
+        emptyMsg.innerText = "No defense dice deployed";
+        defenseGridTray.appendChild(emptyMsg);
       }
-    });
+    }
 
     // Glitched Box Tray
     const glitchedTray = terminalMat.querySelector(`#glitched_tray_${p.player_id}`);
