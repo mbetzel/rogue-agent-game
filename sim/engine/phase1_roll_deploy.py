@@ -9,6 +9,8 @@ from sim.config import CubeColor, DieColor, ShieldColor
 from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
 from sim.entities import ArchetypeCode, CompanyCode, WhiteHatCode, Die, Face, create_white_die
 from sim.engine.state import ProductionRole
+from sim.engine import research_tracks
+from sim.bots import research_policy
 
 if TYPE_CHECKING:
     from sim.engine.core import GameEngine
@@ -304,7 +306,9 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
 
         # 4. Lock Evaluation & Yahtzee Rerolls Loop
         active_directive = engine.state.active_directive_code
-        max_free_rerolls = engine.config.default_free_rerolls
+        base_free_rerolls = engine.config.default_free_rerolls
+        # v0.35.0 Release L4: +1 free reroll (applied after any throttle, OQ-7)
+        max_free_rerolls = research_tracks.free_rerolls_for(engine.config, player, base_free_rerolls)
 
         def _evaluate_locks(dice_list: List[Die]) -> None:
             for d in dice_list:
@@ -380,6 +384,8 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
 
             player.total_rerolls_used += 1
             rerolls_remaining -= 1
+            if max_free_rerolls - rerolls_remaining > base_free_rerolls:
+                player.l4_payouts["release_rerolls_used"] = player.l4_payouts.get("release_rerolls_used", 0) + 1
 
         # Prodigy Face 6 protocol check after rerolls (Arbitrary Code Execution)
         if is_prodigy_operative:
@@ -414,6 +420,9 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
             stuck_cubes=stuck_copy,
             directive_code=active_directive,
             rng=engine.rng,
+        )
+        declared_choices = research_policy.adjust_declared_choices(
+            player.bot, player, active_dice, declared_choices, engine.config
         )
         shield_commitments = player.bot.commit_shields(
             player_state=player,
@@ -558,7 +567,7 @@ def apply_single_die_immediate_output(engine: GameEngine, player: PlayerState, d
 
     # Basic money and patches
     player.money += eff.money
-    player.patches += eff.patches
+    player.gain_research(eff.patches, "star" if eff.is_star else "income")
     player.secrets += eff.secrets
 
     # Star faces

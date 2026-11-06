@@ -369,7 +369,7 @@ class TestV310ThreatDefense(unittest.TestCase):
         Unblocked Red = 3, Cash = $0 (shortfall $3 -> 1 Secret), Unblocked Blue = 0.
         Potential secret loss = 1. Slush Fund absorbs 1 Secret completely. Net secret loss = 0.
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v034(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 0
         p0.secrets = 8

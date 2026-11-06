@@ -295,7 +295,7 @@ class TestPhase20Sync(unittest.TestCase):
     def test_spook_zero_dollar_capability_and_execution(self) -> None:
         """Spook ability is enabled at $0 cash after a compile drop and absorbs 2 free secrets."""
         ctrl = RogueAgentRequestHandler.controller
-        ctrl.new_game(num_players=4, seed=42)
+        ctrl.new_game(num_players=4, seed=42, research_track_model="V034_THREE_LEVEL")
         p0 = ctrl.state.players[0]
         p0.archetype = get_archetype_by_code(ArchetypeCode.SPOOK)
         p0.ability_v1_status = AbilityStatus.AVAILABLE

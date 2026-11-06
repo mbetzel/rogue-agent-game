@@ -57,7 +57,7 @@ class TestV240Rules(unittest.TestCase):
 
     def test_procuring_purple_die_deducts_four_dollars_and_one_reserve(self) -> None:
         """INV-PURPLE-03: Purchasing Purple costs $4, decrements reserve by 1, and delivers die to ready."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v034(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 7
         p0.personal_purple_reserve = 1
@@ -99,7 +99,7 @@ class TestV240Rules(unittest.TestCase):
     def test_procuring_purple_die_respects_per_turn_purchase_limit(self) -> None:
         """INV-PURPLE-03: Purple reserve purchases count towards max_market_purchases_per_turn (2)."""
         gc = GameController()
-        gc.new_game(num_players=2, seed=42)
+        gc.new_game(research_track_model="V034_THREE_LEVEL", num_players=2, seed=42)
         gc.phase = 6
         gc.subphase = "operations_turn"
         gc.active_player_index = 0
@@ -151,8 +151,8 @@ class TestV240Rules(unittest.TestCase):
         self.assertEqual(purple.faces[2].name, "+$2")
         self.assertEqual(purple.faces[2].money, 2)
 
-        # Face 4: +$1 & +1 🔧
-        self.assertEqual(purple.faces[3].name, "+$1 & +1 🔧")
+        # Face 4: +$1 & +1 🔬
+        self.assertEqual(purple.faces[3].name, "+$1 & +1 🔬")
         self.assertEqual(purple.faces[3].money, 1)
         self.assertEqual(purple.faces[3].patches, 1)
 
@@ -213,7 +213,7 @@ class TestV240Rules(unittest.TestCase):
         self.assertEqual(p0.secrets, 8, "Block 1 Any assigned to Red must block 1 Red attack cube")
 
     def test_purple_die_face3_and_face4_income_harvesting(self) -> None:
-        """INV-PURPLE-04: Faces 3 (+$2) and 4 (+$1 & +1 🔧) harvest resources accurately in Phase 3A."""
+        """INV-PURPLE-04: Faces 3 (+$2) and 4 (+$1 & +1 🔬) harvest resources accurately in Phase 3A."""
         engine = GameEngine(config=GameConfig(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 0
@@ -224,14 +224,14 @@ class TestV240Rules(unittest.TestCase):
         p_die1.production_role = ProductionRole.INCOME
 
         p_die2 = create_colored_die(DieColor.PURPLE, 2)
-        p_die2.current_face = p_die2.faces[3]  # +$1 & +1 🔧
+        p_die2.current_face = p_die2.faces[3]  # +$1 & +1 🔬
         p_die2.production_role = ProductionRole.INCOME
 
         p0.in_production_dice = [p_die1, p_die2]
         collect_player_production_income(engine, p0, Phase3ActionPlan())
 
         self.assertEqual(p0.money, 3, "Face 3 (+$2) + Face 4 (+$1) = +$3 cash")
-        self.assertEqual(p0.patches, 1, "Face 4 must award exact +1 🔧")
+        self.assertEqual(p0.patches, 1, "Face 4 must award exact +1 🔬")
 
     # =========================================================================
     # Category 3: Archetype Face 6 Signature Protocols (6 tests - 1 per archetype)
@@ -338,16 +338,16 @@ class TestV240Rules(unittest.TestCase):
 
     def test_cipher_algorithmic_parity_wildcard_triplet_and_income(self) -> None:
         """INV-PURPLE-05: The Cipher uses Purple Star as a wildcard for pairs and gains +$2 Phase 3 Income."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v034(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.archetype = get_archetype_by_code(ArchetypeCode.CIPHER)
         p0.money = 0
         p0.secrets = 8
 
         # Create two dice showing identical faces (a pair)
-        d1 = create_gray_die(1)
+        d1 = create_gray_die(1, "V034")
         d1.current_face = d1.faces[2]  # +$1
-        d2 = create_gray_die(2)
+        d2 = create_gray_die(2, "V034")
         d2.current_face = d2.faces[3]  # +$1
 
         purple = create_colored_die(DieColor.PURPLE, 3)
@@ -388,7 +388,7 @@ class TestV240Rules(unittest.TestCase):
         """BaseBot.choose_purple_reserve_purchase evaluates capital and pool size."""
         bot = BaseBot(0)
         p0 = PlayerState(0, bot, money=8, secrets=8, patches=2, personal_purple_reserve=2)
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v034(num_players=2), seed=42)
 
         # Money >= 8: should buy
         self.assertTrue(bot.choose_purple_reserve_purchase(p0, engine.state, random.Random(42)))
@@ -450,7 +450,7 @@ class TestV240Rules(unittest.TestCase):
         """SecOpsTurtleBot prioritizes Purple reserve and restricts Spook burn unless at 12+ Secrets."""
         bot = SecOpsTurtleBot(0)
         p0 = PlayerState(0, bot, money=4, secrets=6, patches=2, personal_purple_reserve=1)
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v034(num_players=2), seed=42)
 
         # High priority on Purple reserve
         self.assertTrue(bot.choose_purple_reserve_purchase(p0, engine.state, random.Random(42)))
@@ -470,7 +470,7 @@ class TestV240Rules(unittest.TestCase):
     def test_web_serializer_includes_personal_purple_reserve(self) -> None:
         """GameStateSerializer exposes personal_purple_reserve and can_buy_purple_reserve."""
         p0 = PlayerState(0, BaseBot(0), money=5, secrets=8, patches=2, personal_purple_reserve=2)
-        data = GameStateSerializer.serialize_player(p0, GameConfig(), is_human=True, name="TestPlayer")
+        data = GameStateSerializer.serialize_player(p0, GameConfig.legacy_v034(), is_human=True, name="TestPlayer")
         self.assertIn("personal_purple_reserve", data)
         self.assertEqual(data["personal_purple_reserve"], 2)
         self.assertIn("can_buy_purple_reserve", data)
@@ -479,7 +479,7 @@ class TestV240Rules(unittest.TestCase):
     def test_web_buy_endpoint_procures_from_personal_reserve(self) -> None:
         """POST /api/game/action/buy with color='purple' procures from personal reserve."""
         gc = GameController()
-        gc.new_game(num_players=2, seed=42)
+        gc.new_game(research_track_model="V034_THREE_LEVEL", num_players=2, seed=42)
         gc.phase = 6
         gc.subphase = "operations_turn"
         gc.active_player_index = 0
@@ -496,7 +496,7 @@ class TestV240Rules(unittest.TestCase):
     def test_cipher_discount_applies_to_personal_purple_reserve(self) -> None:
         """Cipher Algorithmic Arbitrage discount applies to Personal Reserve purchase ($6 - $2 = $4)."""
         gc = GameController()
-        gc.new_game(num_players=2, seed=42)
+        gc.new_game(research_track_model="V034_THREE_LEVEL", num_players=2, seed=42)
         gc.phase = 6
         gc.subphase = "operations_turn"
         gc.active_player_index = 0
@@ -539,7 +539,7 @@ class TestV240Rules(unittest.TestCase):
 
     def test_multiple_players_cannot_interfere_with_opponents_reserve(self) -> None:
         """INV-PURPLE-01: Player A procuring a Purple die does NOT affect Player B's personal reserve."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v034(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p1 = engine.state.players[1]
         p0.money = 10

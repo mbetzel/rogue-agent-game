@@ -78,7 +78,7 @@ class TestV120Rules(unittest.TestCase):
     # Test 2: Blue Die Recalibration
     # -------------------------------------------------------------------------
     def test_02_blue_die_recalibration(self) -> None:
-        """2. Blue die: Cost $5 (B1 in v0.30.0), 0 VP; Face 1 Block 1 Blue, Face 2 +1 🔧, Face 3 +$1, Face 4 Choice, Face 5 Glitch, Face 6 Star."""
+        """2. Blue die: Cost $5 (B1 in v0.30.0), 0 VP; Face 1 Block 1 Blue, Face 2 +1 🔬, Face 3 +$1, Face 4 Choice, Face 5 Glitch, Face 6 Star."""
         blue = create_colored_die(DieColor.BLUE, 2, self.variants[DieColor.BLUE])
         self.assertEqual(blue.cost, 5)
         self.assertEqual(blue.vp, 0)
@@ -89,15 +89,15 @@ class TestV120Rules(unittest.TestCase):
         self.assertEqual(blue.faces[0].block_amount, 1)
         self.assertEqual(blue.faces[0].shield_color, ShieldColor.BLUE)
 
-        # Face 2 (idx 1): +1 🔧
-        self.assertEqual(blue.faces[1].name, "+1 🔧")
+        # Face 2 (idx 1): +1 🔬
+        self.assertEqual(blue.faces[1].name, "+1 🔬")
         self.assertEqual(blue.faces[1].patches, 1)
 
         # Face 3 (idx 2): +$1
         self.assertEqual(blue.faces[2].name, "+$1")
         self.assertEqual(blue.faces[2].money, 1)
 
-        # Face 4 (idx 3): Choice (Block 1 Blue / +1 🔧)
+        # Face 4 (idx 3): Choice (Block 1 Blue / +1 🔬)
         f4 = blue.faces[3]
         self.assertTrue(f4.is_choice)
         self.assertEqual(len(f4.choices), 2)
@@ -117,7 +117,7 @@ class TestV120Rules(unittest.TestCase):
     # Test 3: Green Die Recalibration
     # -------------------------------------------------------------------------
     def test_03_green_die_recalibration(self) -> None:
-        """3. Green die: Cost $5 (G1 in v0.30.0), 0 VP; Face 1 Block 1 Green, Face 2 +1 🔧, Face 3 +2 🔧, Face 4 Choice, Face 5 Glitch, Face 6 Star."""
+        """3. Green die: Cost $5 (G1 in v0.30.0), 0 VP; Face 1 Block 1 Green, Face 2 +1 🔬, Face 3 +2 🔬, Face 4 Choice, Face 5 Glitch, Face 6 Star."""
         green = create_colored_die(DieColor.GREEN, 3, self.variants[DieColor.GREEN])
         self.assertEqual(green.cost, 5)
         self.assertEqual(green.vp, 0)
@@ -128,15 +128,15 @@ class TestV120Rules(unittest.TestCase):
         self.assertEqual(green.faces[0].block_amount, 1)
         self.assertEqual(green.faces[0].shield_color, ShieldColor.GREEN)
 
-        # Face 2 (idx 1): +1 🔧
-        self.assertEqual(green.faces[1].name, "+1 🔧")
+        # Face 2 (idx 1): +1 🔬
+        self.assertEqual(green.faces[1].name, "+1 🔬")
         self.assertEqual(green.faces[1].patches, 1)
 
-        # Face 3 (idx 2): +2 🔧
-        self.assertEqual(green.faces[2].name, "+2 🔧")
+        # Face 3 (idx 2): +2 🔬
+        self.assertEqual(green.faces[2].name, "+2 🔬")
         self.assertEqual(green.faces[2].patches, 2)
 
-        # Face 4 (idx 3): Choice (+1 🔧 / +$1)
+        # Face 4 (idx 3): Choice (+1 🔬 / +$1)
         f4 = green.faces[3]
         self.assertTrue(f4.is_choice)
         self.assertEqual(len(f4.choices), 2)
@@ -211,7 +211,7 @@ class TestV120Rules(unittest.TestCase):
     # Test 6: Debug Unlock Glitch Die with Patch Token
     # -------------------------------------------------------------------------
     def test_06_glitch_die_debug_unlock_spending_patch(self) -> None:
-        """6. A locked glitch die can be unlocked by spending 1 🔧 token via choose_debug_unlocks."""
+        """6. A locked glitch die can be unlocked by spending 1 🔬 token via choose_debug_unlocks."""
         bot = AdaptiveBalancedBot(0)
         red_die = create_colored_die(DieColor.RED, 10)
         red_die.current_face = red_die.faces[4]  # Glitch
@@ -255,7 +255,7 @@ class TestV120Rules(unittest.TestCase):
     # Test 8: Prodigy Brute-Force Bypass Rerolls Locked Glitch Without Patches
     # -------------------------------------------------------------------------
     def test_08_prodigy_brute_force_bypass_rerolls_locked_glitch_without_patches(self) -> None:
-        """8. The Prodigy can reroll locked glitch dice without spending 🔧 tokens."""
+        """8. The Prodigy can reroll locked glitch dice without spending 🔬 tokens."""
         prodigy_card = get_archetype_by_code(ArchetypeCode.PRODIGY)
         bot0 = AdaptiveBalancedBot(0)
         bot1 = AdaptiveBalancedBot(1)

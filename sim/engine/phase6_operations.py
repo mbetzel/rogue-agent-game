@@ -25,6 +25,14 @@ def resolve_operations_plan(bot: BaseBot, player_state: PlayerState, state: Game
     and the deprecated v0.33 name (``take_phase3_actions``): instance monkeypatches first, then the
     most-derived class that defines either name."""
     inst = vars(bot) if hasattr(bot, "__dict__") else {}
+    plan = _resolve_raw_operations_plan(bot, player_state, state, rng)
+    from sim.bots.research_policy import apply_research_policy
+
+    return apply_research_policy(bot, plan, player_state, state, rng)
+
+
+def _resolve_raw_operations_plan(bot: BaseBot, player_state: PlayerState, state: GameState, rng: random.Random) -> Phase3ActionPlan:
+    inst = vars(bot) if hasattr(bot, "__dict__") else {}
     if "take_operations_actions" in inst:
         return inst["take_operations_actions"](player_state, state, rng)
     if "take_phase3_actions" in inst:
@@ -54,6 +62,14 @@ def execute_player_operations_turn(
     )
 
     active_ver = engine.state.active_version.version_str
+    v035 = bool(getattr(engine.config, "is_v035_tracks", False))
+    purple_ok = bool(getattr(engine.config, "purple_purchasable", True))
+
+    # v0.35.0: research first - track upgrades step by step, each Breakthrough resolving immediately
+    # (INV-RT-BT-IMMEDIATE-01 / INV-RT-BT-ORDER-01), then Patent filings at the post-upgrade rate.
+    if v035:
+        execute_track_upgrades(engine, player, plan)
+        execute_patent_filings(player, getattr(plan, "patent_filings", 0))
 
     # 1. Collect Income from ALL surviving dice in in_production_dice (legacy v0.33 only)
     if collect_income:
@@ -88,6 +104,9 @@ def execute_player_operations_turn(
     prom_mode = getattr(plan, "prometheus_mode", None) or getattr(plan, "cipher_mode", None)
     prom_color = getattr(plan, "prometheus_discount_die_color", None) or getattr(plan, "cipher_free_die_color", None)
 
+    if prom_color == DieColor.PURPLE and not purple_ok:
+        _log_rejected_purple(player)
+        prom_color = None  # v0.35.0: Algorithmic Arbitrage discounts Central Market dice only
     if (
         use_prom
         and prom_mode in ("BUY_FREE_DIE", "DISCOUNT", 1)
@@ -198,6 +217,11 @@ def execute_player_operations_turn(
     purchases_list = list(plan.market_purchases)
     if plan.buy_purple_reserve and DieColor.PURPLE not in purchases_list:
         purchases_list.append(DieColor.PURPLE)
+    if not purple_ok and DieColor.PURPLE in purchases_list:
+        # v0.35.0 (INV-RT-NO-PURPLE-BUY-01): Purple is not purchasable; ignored, purchase limit untouched.
+        for _ in range(purchases_list.count(DieColor.PURPLE)):
+            _log_rejected_purple(player)
+        purchases_list = [c for c in purchases_list if c != DieColor.PURPLE]
 
     for color in purchases_list:
         if purchased_count >= engine.state.config.max_market_purchases_per_turn:
@@ -230,6 +254,9 @@ def execute_player_operations_turn(
                 engine.state.next_die_id += 1
                 player.ready_for_release_dice.append(new_die)
 
+    if v035:
+        return
+
     # 5. Terminal Mat Track Upgrades (INV-UPGRADE-TRACK-01)
     upgrades = getattr(plan, "track_upgrades", [])
     for track in upgrades:
@@ -246,6 +273,41 @@ def execute_player_operations_turn(
             patent_filings -= 1
         else:
             break
+
+
+def _log_rejected_purple(player: PlayerState) -> None:
+    player.rejected_purple_purchases = getattr(player, "rejected_purple_purchases", 0) + 1
+
+
+def execute_track_upgrades(engine: GameEngine, player: PlayerState, plan: Any) -> list:
+    """v0.35.0 Step 1: pay each planned step in plan order; its Breakthrough resolves before the next step
+    is paid. A step that can't be paid stops the sequence (later steps are skipped, not reordered)."""
+    from sim.engine import research_tracks
+
+    choices = getattr(plan, "breakthrough_choices", None) or {}
+    done = []
+    for track in list(getattr(plan, "track_upgrades", []) or []):
+        t = research_tracks.normalize_track(track)
+        if t not in research_tracks.LEVEL_ATTR:
+            continue
+        if not player.upgrade_track(t, round_number=engine.state.current_round):
+            break
+        lvl = research_tracks.level_of(player, t)
+        done.append((t, lvl))
+        if lvl in research_tracks.BREAKTHROUGH_LEVELS:
+            choice = research_tracks.ask_breakthrough_choice(engine, player, t, lvl, choices)
+            research_tracks.resolve_breakthrough(engine, player, t, lvl, choice)
+    player.track_upgrades_this_round = getattr(player, "track_upgrades_this_round", []) + done
+    return done
+
+
+def execute_patent_filings(player: PlayerState, filings: int) -> int:
+    filed = 0
+    while filings > 0 and player.research_tokens >= player.get_patent_cost():
+        player.file_patent()
+        filings -= 1
+        filed += 1
+    return filed
 
 
 def pass_first_player_marker(engine: GameEngine) -> None:

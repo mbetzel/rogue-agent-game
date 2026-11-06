@@ -268,7 +268,7 @@ class TestV260VariableDiceCosts(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_phase3_purple_purchase_deducts_operative_cost(self) -> None:
         """Player with The Prodigy ($5) has $5; procure purple; assert player.money == 0, reserve == 0."""
-        engine = GameEngine(GameConfig(num_players=2), seed=42)
+        engine = GameEngine(GameConfig.legacy_v034(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.white_hat = WHITE_HATS[WhiteHatCode.PRODIGY]
         p0.money = 5
@@ -378,7 +378,7 @@ class TestV260VariableDiceCosts(unittest.TestCase):
     def test_prometheus_discount_on_purple_reserve(self) -> None:
         """Player with Prometheus + The Cipher ($6); procure Purple; assert cost is max(0, 6 - 2) = $4."""
         engine = GameEngine(
-            GameConfig(num_players=2),
+            GameConfig.legacy_v034(num_players=2),
             companies=[COMPANIES[CompanyCode.PROMETHEUS], COMPANIES[CompanyCode.AEGIS]],
             white_hats=[WHITE_HATS[WhiteHatCode.CIPHER], WHITE_HATS[WhiteHatCode.ACOUSTIC]],
             seed=42,
@@ -407,7 +407,7 @@ class TestV260VariableDiceCosts(unittest.TestCase):
     def test_prometheus_discount_on_budget_purple_reserve(self) -> None:
         """Player with Prometheus + The Acoustic ($4); procure Purple; assert cost is max(0, 4 - 2) = $2."""
         engine = GameEngine(
-            GameConfig(num_players=2),
+            GameConfig.legacy_v034(num_players=2),
             companies=[COMPANIES[CompanyCode.PROMETHEUS], COMPANIES[CompanyCode.AEGIS]],
             white_hats=[WHITE_HATS[WhiteHatCode.ACOUSTIC], WHITE_HATS[WhiteHatCode.OPERATOR]],
             seed=42,
@@ -437,7 +437,7 @@ class TestV260VariableDiceCosts(unittest.TestCase):
         """Assert choose_purple_reserve_purchase returns False if cash < reserve_cost + 2 for BaseBot and SecOpsTurtleBot (v0.30.0)."""
         bot = BaseBot(0)
         secops = SecOpsTurtleBot(1)
-        engine = GameEngine(GameConfig(num_players=2), seed=42)
+        engine = GameEngine(GameConfig.legacy_v034(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.white_hat = WHITE_HATS[WhiteHatCode.CIPHER]  # reserve_cost = 6
         p0.personal_purple_reserve = 1
@@ -507,7 +507,7 @@ class TestV260VariableDiceCosts(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_web_serializer_player_purple_reserve_cost(self) -> None:
         """Call serialize_player; assert purple_reserve_cost matches operative and can_buy_purple_reserve checks dynamic cost."""
-        engine = GameEngine(GameConfig(num_players=2), seed=42)
+        engine = GameEngine(GameConfig.legacy_v034(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.white_hat = WHITE_HATS[WhiteHatCode.CIPHER]  # reserve_cost = 6
         p0.personal_purple_reserve = 1
@@ -545,7 +545,7 @@ class TestV260VariableDiceCosts(unittest.TestCase):
     def test_web_controller_purple_buy_action_dynamic_cost(self) -> None:
         """Execute /api/game/action/buy with purple under The Spook ($5); verify $5 deducted."""
         gc = GameController()
-        gc.new_game(num_players=2, seed=42)
+        gc.new_game(research_track_model="V034_THREE_LEVEL", num_players=2, seed=42)
         p0 = gc.state.players[0]
         p0.white_hat = WHITE_HATS[WhiteHatCode.SPOOK]  # reserve_cost: 5
         p0.money = 10

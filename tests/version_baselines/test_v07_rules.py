@@ -2,7 +2,7 @@
 
 Covers all 18 technical test cases from the Principal Engineer specification:
 1. test_config_parameters_v07: GameConfig progressive contractor pricing (1, 2, 3), cost helper methods, Yellow die VP=4.
-2. test_white_contractor_die_faces_v07: 3x Block 1 Any, 1x +$1, 2x Glitch (Locked), zero +1 🔧 faces.
+2. test_white_contractor_die_faces_v07: 3x Block 1 Any, 1x +$1, 2x Glitch (Locked), zero +1 🔬 faces.
 3. test_yellow_die_faces_and_vp_v07: Yellow die face 2 is +$2, vp is 4.
 4. test_version_cards_2p_payloads: 2P staging payloads configured for RaaS, Polymorphic Worm, Zero-Day Override, Corrupted Kernel.
 5. test_staging_cup_initialization_2p_and_4p: Engine initializes staging cup using card.get_staging_payload(config.num_players).
@@ -87,7 +87,7 @@ class TestV07Rules(unittest.TestCase):
     # 2. White Contractor Die Faces (v0.7)
     # -------------------------------------------------------------------------
     def test_white_contractor_die_faces_v07(self) -> None:
-        """White contractor die has 3x Block 1 Any, 1x +$1, 2x Glitch (Locked), zero +1 🔧 faces."""
+        """White contractor die has 3x Block 1 Any, 1x +$1, 2x Glitch (Locked), zero +1 🔬 faces."""
         white_die = create_white_die(die_id=101)
         self.assertEqual(white_die.color, DieColor.WHITE)
         self.assertEqual(len(white_die.faces), 6)
@@ -130,7 +130,7 @@ class TestV07Rules(unittest.TestCase):
         self.assertEqual(yellow_die.cost, 6)
         self.assertEqual(len(yellow_die.faces), 6)
 
-        # Faces: [+$3, +$2, +$2, +$1 & +1 🔧, star, star]
+        # Faces: [+$3, +$2, +$2, +$1 & +1 🔬, star, star]
         self.assertEqual(yellow_die.faces[0].name, "+$3")
         self.assertEqual(yellow_die.faces[0].money, 3)
 

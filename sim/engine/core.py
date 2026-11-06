@@ -140,7 +140,7 @@ class GameEngine:
             ready_for_release_dice: List[Die] = []
             # 1. Add 3 Gray Legacy Dice (INV-START-POOL-01)
             for _ in range(config.starting_gray_dice):
-                ready_for_release_dice.append(create_gray_die(next_die_id))
+                ready_for_release_dice.append(create_gray_die(next_die_id, config.gray_face_profile))
                 next_die_id += 1
 
             # 2. Add 1 Purple Proprietary Specialist Die (INV-START-POOL-01)
@@ -156,7 +156,8 @@ class GameEngine:
             next_die_id += 1
 
             comp = self.companies[i] if i < len(self.companies) else None
-            use_asym = getattr(config, "enable_corporate_asymmetry", False)
+            # v0.35.0: Client Company setup bonuses are removed (INV-RT-FLAT-SETUP-01)
+            use_asym = getattr(config, "enable_corporate_asymmetry", False) and getattr(config, "company_setup_bonuses", True)
             comp_cash = getattr(comp, "starting_cash_bonus", 0) if (comp and use_asym) else 0
             comp_res = getattr(comp, "starting_research_bonus", 0) if (comp and use_asym) else 0
             comp_sec = getattr(comp, "starting_secrets_bonus", 0) if (comp and use_asym) else 0
@@ -182,6 +183,7 @@ class GameEngine:
                 defense_level=comp.starting_defense_level if (comp and use_asym) else 0,
                 patent_level=comp.starting_patent_level if (comp and use_asym) else 0,
                 upgrade_discount=comp.upgrade_discount if (comp and use_asym) else 0,
+                config=config,
             )
             players.append(player)
 
@@ -322,7 +324,27 @@ class GameEngine:
             phases_executed=[1, 2],
         )
 
+    def _begin_research_telemetry(self) -> None:
+        self._research_round_start = {
+            p.player_id: (p.research_earned_total, len(p.breakthroughs), getattr(p, "rejected_purple_purchases", 0))
+            for p in self.state.players
+        }
+        for p in self.state.players:
+            p.track_upgrades_this_round = []
+
+    def _record_research_telemetry(self, tel: RoundTelemetry) -> None:
+        start = getattr(self, "_research_round_start", None)
+        if start is None:
+            return
+        for p in self.state.players:
+            earned0, bt0, rej0 = start.get(p.player_id, (0, 0, 0))
+            tel.research_gained_by_player[p.player_id] = p.research_earned_total - earned0
+            tel.track_upgrades_by_player[p.player_id] = list(getattr(p, "track_upgrades_this_round", []))
+            tel.breakthroughs_by_player[p.player_id] = [b.as_dict() for b in p.breakthroughs[bt0:]]
+            tel.rejected_purple_purchases_by_player[p.player_id] = getattr(p, "rejected_purple_purchases", 0) - rej0
+
     def _finalize_telemetry(self, tel: RoundTelemetry, end_phase: Optional[int]) -> RoundTelemetry:
+        self._record_research_telemetry(tel)
         tel.final_round_trigger_phase = self.state.final_round_trigger_phase
         tel.end_phase = end_phase
         self.telemetry_history.append(tel)  # exactly once per round (INV-SEQ-TELEMETRY-01)
@@ -338,6 +360,7 @@ class GameEngine:
 
     def _run_round_six_phase(self) -> RoundTelemetry:
         s = self.state
+        self._begin_research_telemetry()
 
         # Phase 1: Roll & Deploy
         commitments = self._execute_phase_1()

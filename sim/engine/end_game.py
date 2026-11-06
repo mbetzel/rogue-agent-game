@@ -23,8 +23,20 @@ def _wipeout_key_v033(r: Dict) -> Tuple:
     return (r["net_score"], r["secrets"], r["money"], r["ready_colored_dice_count"], r["patches"], -r["unpatched_dice_count"])
 
 
+def _return_held_contractors(engine: GameEngine) -> None:
+    """End-of-game cleanup: unexpired White Contractor dice (e.g. Triage L1 Breakthrough contractors gained in
+    the Final Round's Phase 6) return to the supply, keeping ``contractor_supply`` conserved."""
+    for p in engine.state.players:
+        whites = [d for d in p.contractor_dice if d.color == DieColor.WHITE]
+        if whites:
+            engine.state.contractor_supply += len(whites)
+            p.contractor_dice.clear()
+            p.hired_contractor_count = 0
+
+
 def evaluate_end_game(engine: GameEngine) -> EndGameResult:
     cfg = engine.config
+    _return_held_contractors(engine)
     all_patient_zero = all(p.is_patient_zero for p in engine.state.players)
 
     rankings: List[Dict] = []
@@ -78,6 +90,24 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
                 "under_development_dice_count": len(p.glitched_dice) + len(p.scanned_dice),
                 "unpatched_colored_dice_count": unpatched_colored_dice_count,
                 "unpatched_dice_vp_lost": unpatched_dice_vp_lost,
+                # v0.35.0 research telemetry (spec §4.6)
+                "research_earned_total": getattr(p, "research_earned_total", 0),
+                "research_earned_by_source": dict(getattr(p, "research_earned_by_source", {})),
+                "research_lost_total": getattr(p, "research_lost_total", 0),
+                "research_spent_tracks": dict(getattr(p, "research_spent_tracks", {})),
+                "research_spent_patents": getattr(p, "research_spent_patents", 0),
+                "patent_secrets_gained": getattr(p, "patent_secrets_gained", 0),
+                "final_track_levels": {
+                    "DEFENSE": p.defense_level, "TRIAGE": p.triage_level,
+                    "RELEASE": p.release_level, "PATENT": p.patent_level,
+                },
+                "level_reached_round": {t: dict(v) for t, v in getattr(p, "level_reached_round", {}).items()},
+                "breakthroughs": [b.as_dict() for b in getattr(p, "breakthroughs", [])],
+                "l4_payouts": dict(getattr(p, "l4_payouts", {})),
+                "purple_dice_owned_final": sum(1 for d in p.total_dice if d.color == DieColor.PURPLE),
+                "gray_dice_owned_final": sum(1 for d in p.total_dice if d.color == DieColor.GRAY),
+                "triage_l3_upgrade_color": getattr(p, "triage_l3_upgrade_color", None),
+                "slush_fund_used_game": getattr(p, "slush_fund_used_game", False),
                 "total_dirty_income": p.total_dirty_income_taken,
                 "total_contractors_hired": p.total_contractors_hired,
                 "total_rerolls_used": p.total_rerolls_used,

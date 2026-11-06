@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 from sim.config import CubeColor, DieColor, ShieldColor
 from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
 from sim.entities import ArchetypeCode, CompanyCode, WhiteHatCode
-from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index, plan_final_round_repairs, is_six_phase_state
+from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index, plan_final_round_repairs, is_six_phase_state, purple_purchasable
 
 if TYPE_CHECKING:
     from sim.engine import GameState, PlayerState
@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 
 class AccelerationistBot(BaseBot):
     """Rushes corruption and Singularity by weaponizing the Cube Tower and taking Dirty Income."""
+
+    research_focus = ('RELEASE', 'PATENT', 'TRIAGE', 'DEFENSE')  # v0.35.0 research-aware policy
 
     def __init__(self, bot_id: int) -> None:
         super().__init__(bot_id, name="AccelerationistBot")
@@ -158,10 +160,10 @@ class AccelerationistBot(BaseBot):
                 continue
             if face.has_shield_option:
                 declarations[idx] = 0 if blue_threat > 0 else 1
-            elif face.name == "+$1 / +1 🔧":
+            elif face.name == "+$1 / +1 🔬":
                 need_patch = (len(player_state.unpatched_dice) >= 2 or player_state.patches == 0)
                 declarations[idx] = 1 if need_patch else 0
-            elif face.name == "+1 🔧 / +$1":
+            elif face.name == "+1 🔬 / +$1":
                 need_patch = (len(player_state.unpatched_dice) >= 2 or player_state.patches == 0)
                 declarations[idx] = 0 if need_patch else 1
             else:
@@ -226,7 +228,7 @@ class AccelerationistBot(BaseBot):
                 plan.prometheus_mode = "DIRTY_INCOME"
             elif not is_final_round:
                 candidates = []
-                if getattr(player_state, "personal_purple_reserve", 0) > 0:
+                if (purple_purchasable(game_state) and getattr(player_state, "personal_purple_reserve", 0) > 0):
                     base_purple_cost = player_state.get_purple_reserve_cost()
                     disc_purple_cost = max(0, base_purple_cost - game_state.config.cipher_market_discount)
                     if current_money >= disc_purple_cost:
@@ -300,7 +302,7 @@ class AccelerationistBot(BaseBot):
                     break
                 if color == DieColor.PURPLE:
                     cost = player_state.get_purple_reserve_cost()
-                    has_stock = getattr(player_state, "personal_purple_reserve", 0) > 0
+                    has_stock = (purple_purchasable(game_state) and getattr(player_state, "personal_purple_reserve", 0) > 0)
                 else:
                     cost = game_state.get_market_die_cost(color)
                     has_stock = game_state.market.get(color, 0) > 0

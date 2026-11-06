@@ -166,7 +166,7 @@ class TestV220Rules(unittest.TestCase):
         self.assertIn(red, p0.glitched_dice)
 
     def test_phase1_debug_action_unlock(self) -> None:
-        """Verify spending 1 🔧 unlocks a glitched die for subsequent rerolls."""
+        """Verify spending 1 🔬 unlocks a glitched die for subsequent rerolls."""
         engine = GameEngine(config=GameConfig(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.patches = 2
@@ -255,7 +255,7 @@ class TestV220Rules(unittest.TestCase):
 
         # Give player dice with pure income faces
         f_money = Face(name="+$2", money=2)
-        f_patch = Face(name="+2 🔧", patches=2)
+        f_patch = Face(name="+2 🔬", patches=2)
         d1 = Die(1, DieColor.RED, 4, faces=[f_money] * 6)
         d2 = Die(2, DieColor.GREEN, 4, faces=[f_patch] * 6)
         p0.ready_for_release_dice = [d1, d2]
@@ -442,7 +442,7 @@ class TestV220Rules(unittest.TestCase):
         self.assertEqual(p0.money, 3)
 
     def test_phase3_fast_patching(self) -> None:
-        """Verify spending 1 🔧 moves a die from glitched_dice to scanned_dice."""
+        """Verify spending 1 🔬 moves a die from glitched_dice to scanned_dice."""
         engine = GameEngine(config=GameConfig(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.patches = 2
@@ -535,8 +535,8 @@ class TestV220Rules(unittest.TestCase):
         self.assertEqual(len(p0.scanned_dice), 0)
 
     def test_patch_token_cap_cleanup(self) -> None:
-        """Verify patch tokens in excess of 3 🔧 are discarded at round end."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        """Verify patch tokens in excess of 3 🔬 are discarded at round end."""
+        engine = GameEngine(config=GameConfig.legacy_v034(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.patches = 5
 

@@ -31,6 +31,7 @@ import {
   toggleSelectedGraduateId,
 } from "../state.js";
 import {
+  doResolveBreakthrough,
   doHireContractors,
   doRoll,
   doReroll,
@@ -580,7 +581,7 @@ export function renderActionDock() {
         is_glitched: selectedGlitchDieIds.has(det.die_id),
       }));
       const effectiveMoney = rawIncome.money || 0;
-      const effectivePatches = rawIncome.research !== undefined ? rawIncome.research : (rawIncome.patches || 0);
+      const effectiveResearch = rawIncome.research || 0;
       const effectiveSecrets = rawIncome.secrets || 0;
 
       const hasEnoughSelections = (actualRequired === 0) || (selectedGlitchDieIds.size === actualRequired);
@@ -753,7 +754,7 @@ export function renderActionDock() {
             </div>
             <div class="confirm-pills-row">
               <span class="income-pill money">+$${effectiveMoney} Cash</span>
-              <span class="income-pill patches">+${effectivePatches} 🔬 Research</span>
+              <span class="income-pill research">+${effectiveResearch} 🔬 Research</span>
               ${effectiveSecrets > 0 ? `<span class="income-pill secrets">+${effectiveSecrets} Secrets</span>` : ''}
             </div>
             <div class="confirm-dice-chips">
@@ -779,6 +780,10 @@ export function renderActionDock() {
               <option value="none">Aegis Baffle Echo: do not use</option>
               ${(humanThreat.aegis.qualifying_colors || []).map((c) => `<option value="${c}">Aegis Baffle Echo: ignore 1 ${c.toUpperCase()}</option>`).join("")}
             </select>` : ''}
+          ${(humanThreat.slush_fund && humanThreat.slush_fund.available) ? `
+            <label style="font-size: 0.75rem;" title="DTO Slush Fund (Institutional Override, once per game)">
+              <input type="checkbox" id="slushFundCheck"> Use DTO Slush Fund (absorb up to 2 Secret loss; once per game)
+            </label>` : ''}
           <button class="action-btn btn-confirm-income ${hasEnoughSelections ? '' : 'disabled'}" id="btnConfirmIncome" ${hasEnoughSelections ? '' : 'disabled'}>
             ${btnText}
           </button>
@@ -815,7 +820,8 @@ export function renderActionDock() {
           clearSelectedGlitchDieIds();
           clearSelectedAnyAllocations();
           const aegisSel = panel.querySelector("#aegisEchoSelect");
-          doConfirmAttacks(toGlitch, allocPayload, aegisSel ? aegisSel.value : null);
+          const slushChk = panel.querySelector("#slushFundCheck");
+          doConfirmAttacks(toGlitch, allocPayload, aegisSel ? aegisSel.value : null, slushChk ? slushChk.checked : null);
         };
       }
 
@@ -1095,17 +1101,52 @@ export function renderActionDock() {
     patBtn.className = "action-btn";
     patBtn.style.borderColor = "#c084fc";
     patBtn.style.color = "#c084fc";
-    patBtn.innerText = `📜 File Patent (${patCost} 🔬 → +1 Sec${(human.patent_level || 0) >= 2 ? ', +$1' : ''})`;
+const patGain = caps.patent_gain || 1;
+    const legacyPatCash = (caps.max_track_level || 2) === 2 && (human.patent_level || 0) >= 2;
+    patBtn.innerText = `📜 File Patent (${patCost} 🔬 → +${patGain} Sec${legacyPatCash ? ', +$1' : ''})`;
     patBtn.disabled = !canPat;
-    patBtn.title = canPat ? `Spend ${patCost} 🔬 to gain +1 Corporate Secret` : `Requires ${patCost} 🔬 to file patent`;
+    patBtn.title = canPat ? `Spend ${patCost} 🔬 to gain +${patGain} Corporate Secret${patGain === 1 ? '' : 's'}` : `Requires ${patCost} 🔬 to file patent`;
     patBtn.onclick = () => doFilePatent();
     controls.appendChild(patBtn);
 
     // Terminal Hardware Upgrade Tracks (INV-UPGRADE-TRACK-01)
     const upgradeCosts = caps.upgrade_track_costs || {};
     const canUp = caps.can_upgrade_track || {};
+    const maxTrackLevel = caps.max_track_level || 2;
+    const btPreview = caps.breakthrough_preview || {};
+    const btNote = (key) => (btPreview[key] && btPreview[key].breakthrough ? ` — Breakthrough: ${btPreview[key].breakthrough}` : "");
 
-    if ((human.triage_level || 0) < 2 && upgradeCosts.triage !== null && upgradeCosts.triage !== undefined) {
+    // Triage Level 3 Breakthrough prompt (pay $3 to replace a Gray Legacy die; resolves before other operations)
+    if (caps.pending_breakthrough) {
+      const opts = caps.pending_breakthrough.options || {};
+      const box = document.createElement("div");
+      box.className = "breakthrough-prompt";
+      box.style.cssText = "border: 1px solid #38bdf8; border-radius: 4px; padding: 6px; margin: 4px 0; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;";
+      const label = document.createElement("span");
+      label.style.color = "#38bdf8";
+      label.innerText = `⚙️ Triage L3 Breakthrough: pay $${opts.cost || 3} to replace 1 Gray Legacy die with a Central Market die`;
+      box.appendChild(label);
+      const graySel = document.createElement("select");
+      graySel.innerHTML = (opts.gray_die_ids || []).map((id) => `<option value="${id}">Gray #${id}</option>`).join("");
+      box.appendChild(graySel);
+      const colorSel = document.createElement("select");
+      colorSel.innerHTML = (opts.colors || []).map((c) => `<option value="${c}">${c.toUpperCase()}</option>`).join("");
+      box.appendChild(colorSel);
+      const okBtn = document.createElement("button");
+      okBtn.className = "action-btn btn-accent";
+      okBtn.innerText = `Confirm ($${opts.cost || 3})`;
+      okBtn.disabled = !opts.possible;
+      okBtn.onclick = () => doResolveBreakthrough(true, parseInt(graySel.value, 10), colorSel.value);
+      box.appendChild(okBtn);
+      const noBtn = document.createElement("button");
+      noBtn.className = "action-btn";
+      noBtn.innerText = "Decline";
+      noBtn.onclick = () => doResolveBreakthrough(false, null, null);
+      box.appendChild(noBtn);
+      controls.appendChild(box);
+    }
+
+    if ((human.triage_level || 0) < maxTrackLevel && upgradeCosts.triage !== null && upgradeCosts.triage !== undefined) {
       const triageCost = upgradeCosts.triage;
       const triageBtn = document.createElement("button");
       triageBtn.className = "action-btn";
@@ -1114,11 +1155,12 @@ export function renderActionDock() {
       triageBtn.innerText = `⚙️ Upgr Triage [L${(human.triage_level || 0) + 1}] (${triageCost} 🔬)`;
       triageBtn.disabled = !canUp.triage;
       triageBtn.title = canUp.triage ? `Upgrade Triage to Level ${(human.triage_level || 0) + 1} (${triageCost} 🔬)` : `Requires ${triageCost} 🔬`;
+      triageBtn.title += btNote("triage");
       triageBtn.onclick = () => doUpgradeTrack("triage");
       controls.appendChild(triageBtn);
     }
 
-    if ((human.release_level || 0) < 2 && upgradeCosts.release !== null && upgradeCosts.release !== undefined) {
+    if ((human.release_level || 0) < maxTrackLevel && upgradeCosts.release !== null && upgradeCosts.release !== undefined) {
       const relCost = upgradeCosts.release;
       const relBtn = document.createElement("button");
       relBtn.className = "action-btn";
@@ -1127,11 +1169,12 @@ export function renderActionDock() {
       relBtn.innerText = `🚀 Upgr Release [L${(human.release_level || 0) + 1}] (${relCost} 🔬)`;
       relBtn.disabled = !canUp.release;
       relBtn.title = canUp.release ? `Upgrade Release to Level ${(human.release_level || 0) + 1} (${relCost} 🔬)` : `Requires ${relCost} 🔬`;
+      relBtn.title += btNote("release");
       relBtn.onclick = () => doUpgradeTrack("release");
       controls.appendChild(relBtn);
     }
 
-    if ((human.defense_level || 0) < 2 && upgradeCosts.defense !== null && upgradeCosts.defense !== undefined) {
+    if ((human.defense_level || 0) < maxTrackLevel && upgradeCosts.defense !== null && upgradeCosts.defense !== undefined) {
       const defCost = upgradeCosts.defense;
       const defBtn = document.createElement("button");
       defBtn.className = "action-btn";
@@ -1140,11 +1183,12 @@ export function renderActionDock() {
       defBtn.innerText = `🛡️ Upgr Defense [L${(human.defense_level || 0) + 1}] (${defCost} 🔬)`;
       defBtn.disabled = !canUp.defense;
       defBtn.title = canUp.defense ? `Upgrade Defense Grid to Level ${(human.defense_level || 0) + 1} (${defCost} 🔬)` : `Requires ${defCost} 🔬`;
+      defBtn.title += btNote("defense");
       defBtn.onclick = () => doUpgradeTrack("defense");
       controls.appendChild(defBtn);
     }
 
-    if ((human.patent_level || 0) < 2 && upgradeCosts.patent !== null && upgradeCosts.patent !== undefined) {
+    if ((human.patent_level || 0) < maxTrackLevel && upgradeCosts.patent !== null && upgradeCosts.patent !== undefined) {
       const patentTrackCost = upgradeCosts.patent;
       const patUpBtn = document.createElement("button");
       patUpBtn.className = "action-btn";
@@ -1153,6 +1197,7 @@ export function renderActionDock() {
       patUpBtn.innerText = `🔬 Upgr Patents [L${(human.patent_level || 0) + 1}] (${patentTrackCost} 🔬)`;
       patUpBtn.disabled = !canUp.patent;
       patUpBtn.title = canUp.patent ? `Upgrade Patent R&D to Level ${(human.patent_level || 0) + 1} (${patentTrackCost} 🔬)` : `Requires ${patentTrackCost} 🔬`;
+      patUpBtn.title += btNote("patent");
       patUpBtn.onclick = () => doUpgradeTrack("patent");
       controls.appendChild(patUpBtn);
     }
@@ -1205,7 +1250,7 @@ function renderIncomePanel(controls, human, caps) {
       </div>
       <div class="confirm-pills-row">
         <span class="income-pill money">+$${inc.money || 0} Cash</span>
-        <span class="income-pill patches">+${inc.research !== undefined ? inc.research : (inc.patches || 0)} 🔬 Research</span>
+        <span class="income-pill research">+${inc.research || 0} 🔬 Research</span>
         ${(inc.secrets || 0) > 0 ? `<span class="income-pill secrets">+${inc.secrets} Secrets</span>` : ""}
       </div>
       <div class="confirm-dice-chips">
@@ -1260,7 +1305,7 @@ function renderIncomePanel(controls, human, caps) {
 }
 
 // ---------------------------------------------------------------------------
-// Phase 5: CI/CD Pipeline Shift — Emergency Hotfix & Magnetic Splice, Scanned Graduation choice
+// Phase 5: CI/CD Pipeline Shift — Magnetic Splice, Scanned Graduation choice
 // ---------------------------------------------------------------------------
 function renderGraduationPanel(controls, human, caps) {
   const pendMap = state.pending_graduation || {};
@@ -1286,7 +1331,7 @@ function renderGraduationPanel(controls, human, caps) {
         <span class="confirm-income-title">SCANNED GRADUATION (${chosen.size} / ${pend.n} — Release Bandwidth ${pend.release_bandwidth})</span>
       </div>
       <span style="font-size: 0.72rem; color: var(--text-dim);">
-        Emergency Hotfix &amp; Magnetic Splice → In Production → Scanned Box → Ready for Release (≤ Release Bandwidth, your choice; fewer is allowed) → Glitched → Scanned (≤ Triage Bandwidth)
+        Magnetic Splice → In Production → Scanned Box → Ready for Release (≤ Release Bandwidth, your choice; fewer is allowed) → Glitched → Scanned (≤ Triage Bandwidth)
       </span>
     </div>
     <div class="confirm-malware-grid">

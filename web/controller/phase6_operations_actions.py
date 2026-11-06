@@ -17,6 +17,7 @@ from sim.bots import (
 from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
 from sim.config import ROUND_PHASE_NAMES, RoundPhase
+from sim.engine import research_tracks
 from sim.engine.phase6_operations import resolve_operations_plan
 from sim.engine.state import ProductionRole
 from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
@@ -86,6 +87,10 @@ def execute_bot_operations(controller: GameController, player: PlayerState, meta
     """Executes the Phase 6 Operations plan for a single bot player (income, Signature Protocols and
     the Omnidyne override already resolved in Phases 3 and 5)."""
     plan: Phase3ActionPlan = resolve_operations_plan(player.bot, player, controller.state, controller.engine.rng)
+
+    if controller.state.config.is_v035_tracks:
+        _execute_bot_operations_v035(controller, player, meta, plan)
+        return
 
     # Corporate Override: Prometheus (Algorithmic Arbitrage) - same semantics as
     # sim.engine.phase6_operations.execute_player_operations_turn (Variant Card / reserve costs, active version)
@@ -282,6 +287,72 @@ def execute_bot_operations(controller: GameController, player: PlayerState, meta
 execute_bot_phase3 = execute_bot_operations  # deprecated v0.33 name
 
 
+def _execute_bot_operations_v035(controller: GameController, player: PlayerState, meta: Dict[str, Any], plan: Phase3ActionPlan) -> None:
+    """v0.35.0: bot Operations Turns run through the engine (same fixed order as the simulation)."""
+    from sim.engine.phase6_operations import execute_player_operations_turn
+
+    money0, secrets0, research0 = player.money, player.secrets, player.research_tokens
+    bt0 = len(player.breakthroughs)
+    dice0 = {d.die_id for d in player.ready_for_release_dice}
+    lv0 = {t: getattr(player, a) for t, a in research_tracks.LEVEL_ATTR.items()}
+    execute_player_operations_turn(controller.engine, player, plan)
+    for t, a in research_tracks.LEVEL_ATTR.items():
+        if getattr(player, a) != lv0[t]:
+            controller.event_log.append(
+                f"{meta['name']} upgraded {t.capitalize()} Track to Level {getattr(player, a)}."
+            )
+    for b in player.breakthroughs[bt0:]:
+        controller.event_log.append(f"{meta['name']} Breakthrough ({b.track.capitalize()} L{b.level}): {_breakthrough_log(b)}.")
+    new_dice = [d for d in player.ready_for_release_dice if d.die_id not in dice0]
+    if new_dice:
+        controller.event_log.append(
+            f"{meta['name']} added {', '.join(d.color.value.capitalize() for d in new_dice)} to Ready for Release."
+        )
+    controller.event_log.append(
+        f"{meta['name']} finished Operations (${player.money - money0:+d}, {player.secrets - secrets0:+d} Secrets, "
+        f"{player.research_tokens - research0:+d} 🔬)."
+    )
+
+
+def _breakthrough_log(b: Any) -> str:
+    text = research_tracks.BREAKTHROUGH_TEXT.get((b.track, b.level), "")
+    if b.outcome == "TAKEN":
+        if b.track == "TRIAGE" and b.level == 3:
+            return f"replaced a Gray Legacy die with a {b.detail.get('new_color', '').capitalize()} die for ${b.detail.get('paid', 0)}"
+        return text
+    return f"{text} - {b.outcome.lower()}"
+
+
+def _require_no_pending_breakthrough(controller: GameController, player_id: int) -> None:
+    pending = getattr(controller, "pending_breakthrough", {}) or {}
+    if player_id in pending:
+        raise ValueError("Resolve the pending Breakthrough before taking another operation")
+
+
+def resolve_pending_breakthrough(
+    controller: GameController,
+    player_id: int,
+    accept: bool = True,
+    gray_die_id: Optional[int] = None,
+    color: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Human action: answers the Triage Level 3 Breakthrough prompt (pay $3 to replace a Gray Legacy die)."""
+    pending = getattr(controller, "pending_breakthrough", {}) or {}
+    if player_id not in pending:
+        raise ValueError("No Breakthrough is pending for this player")
+    info = pending.pop(player_id)
+    player = controller.state.players[player_id]
+    meta = controller.player_meta[player_id]
+    die_color = DieColor(str(color).lower()) if color else None
+    choice = research_tracks.BreakthroughChoice(accept=bool(accept), gray_die_id=gray_die_id, color=die_color)
+    rec = research_tracks.resolve_breakthrough(controller.engine, player, info["track"], info["level"], choice)
+    if rec is not None:
+        controller.event_log.append(
+            f"{meta['name']} Breakthrough ({rec.track.capitalize()} L{rec.level}): {_breakthrough_log(rec)}."
+        )
+    return controller.get_full_state()
+
+
 def buy_die(
     controller: GameController,
     player_id: int,
@@ -302,7 +373,10 @@ def buy_die(
     if meta["purchases_this_turn"] >= controller.state.config.max_market_purchases_per_turn:
         raise ValueError(f"Purchase limit reached ({controller.state.config.max_market_purchases_per_turn} dice per turn)")
 
+    _require_no_pending_breakthrough(controller, player_id)
     color = DieColor(color_str.lower())
+    if color == DieColor.PURPLE and not controller.state.config.purple_purchasable:
+        raise ValueError("Purple dice cannot be purchased; your 2nd Purple die comes from the Patents Level 3 Breakthrough")
     if color == DieColor.PURPLE:
         base_cost = player.get_purple_reserve_cost() if hasattr(player, "get_purple_reserve_cost") else (
             getattr(player.white_hat, "reserve_cost", 4) if getattr(player, "white_hat", None) else 4
@@ -411,12 +485,12 @@ def patch_die(controller: GameController, player_id: int, die_index: int, use_ca
         raise ValueError(f"Invalid die_index {die_index} in unpatched zone (size: {len(player.unpatched_dice)})")
 
     if use_cash:
-        raise ValueError("Cash patching has been abolished in v0.22.0. Use Fast-Patch with 1 🔧.")
+        raise ValueError("Cash patching has been abolished in v0.22.0. Use Fast-Patch with 1 🔬.")
 
     if player.patches < controller.state.config.patch_token_cost:
-        raise ValueError(f"Insufficient patch tokens: costs {controller.state.config.patch_token_cost} 🔧, player has {player.patches} 🔧")
+        raise ValueError(f"Insufficient patch tokens: costs {controller.state.config.patch_token_cost} 🔬, player has {player.patches} 🔬")
     player.patches -= controller.state.config.patch_token_cost
-    cost_desc = "1 🔧 token"
+    cost_desc = "1 🔬 token"
 
     patched_die = player.unpatched_dice.pop(die_index)
     player.ready_dice.append(patched_die)
@@ -560,7 +634,7 @@ def fast_patch(
     die_ids: Optional[List[int]] = None,
     die_indices: Optional[List[int]] = None,
 ) -> Dict[str, Any]:
-    """Human action: spends 1 🔧 per die to accelerate dice from glitched_dice to scanned_dice."""
+    """Human action: spends 1 🔬 per die to accelerate dice from glitched_dice to scanned_dice."""
     if controller.phase != int(RoundPhase.OPERATIONS):
         raise ValueError(f"Cannot fast-patch in phase {controller.phase}")
     player = controller.state.players[player_id]
@@ -596,7 +670,7 @@ def fast_patch(
         player.patches -= 1
 
     controller.event_log.append(
-        f"{meta['name']} fast-patched {len(targets)} die/dice from Glitched to Scanned for {len(targets)} 🔧."
+        f"{meta['name']} fast-patched {len(targets)} die/dice from Glitched to Scanned for {len(targets)} 🔬."
     )
     return controller.get_full_state()
 
@@ -656,7 +730,9 @@ def use_spook_ability(controller: GameController, player_id: int, dollars: int =
     has_dto = has_company_override(player, CompanyCode.DTO, legacy_bridge_enabled(controller))
     if not has_dto:
         raise ValueError("Player does not have the DTO company override or Spook archetype")
-    if not player.is_ability_available(controller.state.active_version.version_str):
+    if controller.state.config.slush_fund_once_per_game:
+        raise ValueError("Slush Fund is chosen when confirming Phase 4: Attack Resolution (use_slush_fund)")
+    if not player.is_slush_fund_available(controller.state.active_version.version_str):
         raise ValueError("DTO/Spook ability is not available")
     if dollars < 0:
         raise ValueError("dollars must be non-negative")
@@ -668,6 +744,8 @@ def use_spook_ability(controller: GameController, player_id: int, dollars: int =
     total_secrets_absorbed = free_secrets + cash_spent
     player.secrets = min(10, player.secrets + total_secrets_absorbed)
     player.mark_ability_used(controller.state.active_version.version_str)
+    if controller.state.config.slush_fund_once_per_game:
+        player.slush_fund_used_game = True
     controller.event_log.append(
         f"{meta['name']} activated DTO Slush Fund: absorbed {total_secrets_absorbed} secrets ({free_secrets} free, ${cash_spent} cash)."
     )
@@ -763,6 +841,9 @@ def end_turn(controller: GameController, player_id: int) -> Dict[str, Any]:
         raise ValueError(f"Not player {player_id}'s turn (current: {controller.active_player_index})")
 
     meta = controller.player_meta[player_id]
+    pending = getattr(controller, "pending_breakthrough", {}) or {}
+    if player_id in pending:  # an unanswered Triage L3 prompt is declined (forfeited, OQ-1)
+        resolve_pending_breakthrough(controller, player_id, accept=False)
     controller.event_log.append(f"{meta['name']} ended operations turn.")
 
     if controller.operations_turn_queue and controller.operations_turn_queue[0] == player_id:
@@ -797,7 +878,8 @@ def upgrade_hardware_track(
     if player.research_tokens < cost:
         raise ValueError(f"Insufficient research tokens: need {cost} 🔬, have {player.research_tokens} 🔬")
 
-    success = player.upgrade_track(t)
+    _require_no_pending_breakthrough(controller, player_id)
+    success = player.upgrade_track(t, round_number=controller.state.current_round) if controller.state.config.is_v035_tracks else player.upgrade_track(t)
     if not success:
         raise ValueError(f"Failed to upgrade track {track_type}")
 
@@ -805,6 +887,22 @@ def upgrade_hardware_track(
     controller.event_log.append(
         f"{meta['name']} upgraded {t.capitalize()} Track to Level {new_level} for {cost} 🔬."
     )
+    if controller.state.config.is_v035_tracks and new_level in research_tracks.BREAKTHROUGH_LEVELS:
+        if t == "TRIAGE" and new_level == 3 and meta.get("is_human"):
+            # The only optional, paid Breakthrough: ask the player (resolves before any other operation)
+            if not hasattr(controller, "pending_breakthrough") or controller.pending_breakthrough is None:
+                controller.pending_breakthrough = {}
+            controller.pending_breakthrough[player_id] = {
+                "track": t,
+                "level": new_level,
+                "options": research_tracks.triage_l3_options(controller.engine, player).as_dict(),
+            }
+        else:
+            rec = research_tracks.resolve_breakthrough(controller.engine, player, t, new_level, None)
+            if rec is not None:
+                controller.event_log.append(
+                    f"{meta['name']} Breakthrough ({rec.track.capitalize()} L{rec.level}): {_breakthrough_log(rec)}."
+                )
     return controller.get_full_state()
 
 
@@ -824,7 +922,9 @@ def file_cryptographic_patent(
     if player.is_patient_zero:
         raise ValueError("Eliminated players cannot file cryptographic patents")
 
+    _require_no_pending_breakthrough(controller, player_id)
     cost = player.get_patent_cost()
+    gain = player.get_patent_gain()
     if player.research_tokens < cost:
         raise ValueError(f"Insufficient research tokens: need {cost} 🔬, have {player.research_tokens} 🔬")
 
@@ -832,10 +932,15 @@ def file_cryptographic_patent(
     if not success:
         raise ValueError("Failed to file cryptographic patent")
 
-    cash_note = " and +$1 cash" if player.patent_level >= 2 else ""
-    controller.event_log.append(
-        f"{meta['name']} filed Cryptographic Patent (+1 Secret{cash_note}) for {cost} 🔬."
-    )
+    if controller.state.config.is_v035_tracks:
+        controller.event_log.append(
+            f"{meta['name']} filed Cryptographic Patent (+{gain} Secret{'s' if gain != 1 else ''}) for {cost} 🔬."
+        )
+    else:
+        cash_note = " and +$1 cash" if player.patent_level >= 2 else ""
+        controller.event_log.append(
+            f"{meta['name']} filed Cryptographic Patent (+1 Secret{cash_note}) for {cost} 🔬."
+        )
     return controller.get_full_state()
 
 

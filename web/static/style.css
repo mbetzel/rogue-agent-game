@@ -839,10 +839,10 @@ button.btn-primary:hover {
 }
 
 /* =============================================================================
-   4. CONSULTANCY TERMINAL (Player Mat - PnP Page 1 Layout)
+   4. COMPANY TERMINAL MAT (Player Mat - PnP Page 1 Layout)
    ============================================================================= */
 
-.consultancy-switcher-bar {
+.terminal-switcher-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -908,7 +908,7 @@ button.btn-primary:hover {
   border-color: var(--accent-gold);
 }
 
-.tab-ciso-tag {
+.tab-first-player-tag {
   background: var(--accent-gold);
   color: #000;
   font-size: 0.58rem;
@@ -944,7 +944,7 @@ button.btn-primary:hover {
   }
 }
 
-/* Individual PnP Consultancy Terminal Mat */
+/* Individual PnP Company Terminal Mat */
 .pnp-terminal-mat {
   background: var(--bg-panel);
   border: 2px solid var(--border-color);
@@ -1025,7 +1025,7 @@ button.btn-primary:hover {
   gap: 8px;
 }
 
-.ciso-pill {
+.first-player-pill {
   background: var(--accent-gold);
   color: #000;
   font-size: 0.65rem;
@@ -2496,7 +2496,7 @@ button.btn-compile:disabled {
   color: #facc15;
 }
 
-.income-pill.patches {
+.income-pill.research {
   background: rgba(56, 189, 248, 0.2);
   border: 1px solid #38bdf8;
   color: #38bdf8;

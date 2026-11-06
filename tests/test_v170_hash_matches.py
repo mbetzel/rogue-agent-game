@@ -20,7 +20,7 @@ class TestHashMatchesAndScoring(unittest.TestCase):
             Die(die_id=1, color=DieColor.GRAY, cost=0, vp=0, faces=[], current_face=Face("+$1", money=1)),
             Die(die_id=2, color=DieColor.GRAY, cost=0, vp=0, faces=[], current_face=Face("+$1", money=1)),
             Die(die_id=3, color=DieColor.WHITE, cost=1, vp=0, faces=[], current_face=Face("+$1", money=1)),
-            Die(die_id=4, color=DieColor.GRAY, cost=0, vp=0, faces=[], current_face=Face("+1 🔧", patches=1)),
+            Die(die_id=4, color=DieColor.GRAY, cost=0, vp=0, faces=[], current_face=Face("+1 🔬", patches=1)),
         ]
         self.assertEqual(detect_hash_matches(dice), 1)
 
@@ -57,9 +57,9 @@ class TestHashMatchesAndScoring(unittest.TestCase):
     def test_choice_faces_match_declared_option(self):
         """Verify a choice face matches when resolved to an identical option."""
         choice_face = Face(
-            name="+$1 / +1 🔧",
+            name="+$1 / +1 🔬",
             is_choice=True,
-            choices=(Face("+$1", money=1), Face("+1 🔧", patches=1)),
+            choices=(Face("+$1", money=1), Face("+1 🔬", patches=1)),
         )
         # Die 1 has choice face resolved to index 0 (+$1)
         die1 = Die(die_id=1, color=DieColor.GRAY, cost=0, vp=0, faces=[], current_face=choice_face, chosen_choice_index=0)
@@ -68,7 +68,7 @@ class TestHashMatchesAndScoring(unittest.TestCase):
 
         self.assertEqual(detect_hash_matches([die1, die2, die3]), 1)
 
-        # If die 1 is resolved to index 1 (+1 🔧), it no longer forms a triplet with the two +$1 dice
+        # If die 1 is resolved to index 1 (+1 🔬), it no longer forms a triplet with the two +$1 dice
         die1.chosen_choice_index = 1
         self.assertEqual(detect_hash_matches([die1, die2, die3]), 0)
 

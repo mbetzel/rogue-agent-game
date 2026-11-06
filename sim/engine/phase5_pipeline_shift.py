@@ -230,7 +230,19 @@ def execute_player_pipeline_shift(
     rec.graduated_ids = [d.die_id for d in graduate_scanned(engine, player, graduate_die_ids)]
     rec.held_in_scanned = len(player.scanned_dice)
     rec.triaged_ids = [d.die_id for d in conveyor_triage(player)]
+    pay_triage_l4(engine, player, len(rec.triaged_ids))
     return rec
+
+
+def pay_triage_l4(engine: GameEngine, player: PlayerState, moved_count: int) -> int:
+    """v0.35.0 Triage L4: +1 research per die moved in Conveyor Triage beyond the 2nd (INV-RT-TRIAGE-L4-01)."""
+    from sim.engine import research_tracks
+
+    gain = research_tracks.triage_l4_research(engine.config, player, moved_count)
+    if gain > 0:
+        player.gain_research(gain, "triage_l4")
+        player.l4_payouts["triage_research"] = player.l4_payouts.get("triage_research", 0) + gain
+    return gain
 
 
 def execute_pipeline_shift(engine: GameEngine) -> Dict[int, PipelineShiftRecord]:

@@ -14,8 +14,9 @@ from sim.bots import (
     SecOpsTurtleBot,
     VentureGreedBot,
 )
-from sim.config import ROUND_PHASE_NAMES, CubeColor, DieColor, EndGameReason, GameConfig, RoundPhase, RoundSequence, ShieldColor
+from sim.config import ROUND_PHASE_NAMES, CubeColor, DieColor, EndGameReason, GameConfig, RoundPhase, ResearchTrackModel, RoundSequence, ShieldColor
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
+from sim.engine import research_tracks
 from sim.engine.phase1_roll_deploy import check_and_execute_start_of_round_version_transition
 from sim.entities import (
     AbilityStatus,
@@ -121,6 +122,7 @@ class GameController:
         companies: Optional[List[Company]] = None,
         white_hats: Optional[List[WhiteHat]] = None,
         enable_corporate_asymmetry: bool = True,
+        research_track_model: Any = None,
     ) -> Dict[str, Any]:
         """Creates and initializes a new game match."""
         if not (1 <= num_players <= 4):
@@ -130,6 +132,8 @@ class GameController:
             num_players=num_players,
             enable_corporate_asymmetry=enable_corporate_asymmetry,
             round_sequence=RoundSequence.SIX_PHASE,  # the web is SIX_PHASE only (OQ-7)
+            # v0.35.0 tracks by default; V034_THREE_LEVEL kept for comparison
+            research_track_model=research_track_model or ResearchTrackModel.V035_FIVE_LEVEL,
         )
         rng = random.Random(seed)
 
@@ -270,6 +274,12 @@ class GameController:
             p_name = self.player_meta[p.player_id]["name"]
             if p.company:
                 bonuses = []
+                if not config.company_setup_bonuses:
+                    wh_str = f" / {p.white_hat.name}" if p.white_hat else ""
+                    self.event_log.append(
+                        f"{p_name} contracted with {p.company.name} ({p.company.override_name}){wh_str}."
+                    )
+                    continue
                 starting_cash_bonus = 1 if self.state.active_directive_code == "DATA_SCRAPER" else 0
                 if p.money > config.starting_money + starting_cash_bonus:
                     bonuses.append(f"+${p.company.starting_cash_bonus} Cash")
@@ -299,6 +309,7 @@ class GameController:
         self.last_attack_result = None
         self.last_pipeline_result = {}
         self.pending_graduation = {}
+        self.pending_breakthrough = {}
         self.final_result = None
 
         # Start Round 1 Phase 1
@@ -336,9 +347,8 @@ class GameController:
             )
 
         # Reset per-round metadata for all players
-        max_rerolls = self.state.config.default_free_rerolls
-
         for i, p in enumerate(self.state.players):
+            max_rerolls = research_tracks.free_rerolls_for(self.state.config, p, self.state.config.default_free_rerolls)
             meta = self.player_meta[i]
             meta["rolled_pool"] = []
             meta["shield_slots"] = {"red": [], "blue": [], "green": []}
@@ -353,7 +363,8 @@ class GameController:
             meta["prodigy_active"] = False
             meta["rerolls_remaining"] = max_rerolls
             meta["max_rerolls"] = max_rerolls
-            p.contractor_dice.clear()
+            # Contractors expired at the end of Phase 4; any still held are Triage L1 Breakthrough
+            # contractors gained in Phase 6, which roll this round (v0.35.0).
             p.hired_contractor_count = 0
 
             # Reset star ability eligibility
@@ -504,11 +515,12 @@ class GameController:
         any_shield_allocations: Optional[Dict[str, int]] = None,
         glitch_die_ids: Optional[List[int]] = None,
         aegis_color: Optional[str] = None,
+        use_slush_fund: Optional[bool] = None,
     ) -> Dict[str, Any]:
         """Phase 4: Attack Resolution."""
         return phase4_attack_actions.confirm_attacks(
             self, player_id, any_shield_allocations=any_shield_allocations,
-            glitch_die_ids=glitch_die_ids, aegis_color=aegis_color,
+            glitch_die_ids=glitch_die_ids, aegis_color=aegis_color, use_slush_fund=use_slush_fund,
         )
 
     def choose_graduates(
@@ -539,6 +551,17 @@ class GameController:
 
     def file_patent(self, player_id: int) -> Dict[str, Any]:
         return phase6_operations_actions.file_cryptographic_patent(self, player_id)
+
+    def resolve_breakthrough(
+        self,
+        player_id: int,
+        accept: bool = True,
+        gray_die_id: Optional[int] = None,
+        color: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        return phase6_operations_actions.resolve_pending_breakthrough(
+            self, player_id, accept=accept, gray_die_id=gray_die_id, color=color
+        )
 
     def system_reboot(self, player_id: int) -> Dict[str, Any]:
         return phase6_operations_actions.system_reboot(self, player_id)

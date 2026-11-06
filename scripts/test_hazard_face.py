@@ -2,7 +2,7 @@
 
 Comparing:
 1. Baseline: Lean Diversity (Face 5 & 6 are Star)
-2. Option 1: Face 5 is Choice Face (+$1 / +1 🔧), Face 6 is Star
+2. Option 1: Face 5 is Choice Face (+$1 / +1 🔬), Face 6 is Star
 3. Option 2: Face 5 is Locked Hazard (+1 Color Cube to Staging Cup, Locked), Face 6 is Star
 
 Runs N=1,000 matches per player count (2P, 3P, 4P) with randomized setups and base seed 42.
@@ -37,7 +37,7 @@ def create_colored_die_opt1_choice(
     die_id: int,
     variant_card: Optional[VariantCard] = None,
 ) -> Die:
-    """Option 1: Face 5 is +$1 / +1 🔧 choice face, Face 6 is Star."""
+    """Option 1: Face 5 is +$1 / +1 🔬 choice face, Face 6 is Star."""
     if color == DieColor.GRAY:
         return create_gray_die(die_id)
     if color == DieColor.WHITE:
@@ -46,9 +46,9 @@ def create_colored_die_opt1_choice(
     star_face = variant_card.star_face if variant_card else Face(name=f"{color.value} ★", is_star=True)
     var_code = variant_card.code if variant_card else None
     choice_face = Face(
-        name="+$1 / +1 🔧",
+        name="+$1 / +1 🔬",
         is_choice=True,
-        choices=(Face("+$1", money=1), Face("+1 🔧", patches=1)),
+        choices=(Face("+$1", money=1), Face("+1 🔬", patches=1)),
     )
 
     if color == DieColor.RED:
@@ -65,14 +65,14 @@ def create_colored_die_opt1_choice(
     elif color == DieColor.BLUE:
         faces = [
             Face(name="Block 1 Blue", block_amount=1, shield_color=ShieldColor.BLUE),
-            Face(name="+1 🔧", patches=1),
+            Face(name="+1 🔬", patches=1),
             Face(name="+$1", money=1),
             Face(
-                name="Block 1 Blue / +1 🔧",
+                name="Block 1 Blue / +1 🔬",
                 is_choice=True,
                 choices=(
                     Face("Block 1 Blue", block_amount=1, shield_color=ShieldColor.BLUE),
-                    Face("+1 🔧", patches=1),
+                    Face("+1 🔬", patches=1),
                 ),
             ),
             choice_face,
@@ -83,13 +83,13 @@ def create_colored_die_opt1_choice(
     elif color == DieColor.GREEN:
         faces = [
             Face(name="Block 1 Green", block_amount=1, shield_color=ShieldColor.GREEN),
-            Face(name="+1 🔧", patches=1),
-            Face(name="+2 🔧", patches=2),
+            Face(name="+1 🔬", patches=1),
+            Face(name="+2 🔬", patches=2),
             Face(
-                name="+1 🔧 / +$1",
+                name="+1 🔬 / +$1",
                 is_choice=True,
                 choices=(
-                    Face("+1 🔧", patches=1),
+                    Face("+1 🔬", patches=1),
                     Face("+$1", money=1),
                 ),
             ),
@@ -103,7 +103,7 @@ def create_colored_die_opt1_choice(
             Face(name="+$3", money=3),
             Face(name="+$2", money=2),
             Face(name="+$2", money=2),
-            Face(name="+$1 & +1 🔧", money=1, patches=1),
+            Face(name="+$1 & +1 🔬", money=1, patches=1),
             star_face,
             star_face,
         ]
@@ -114,7 +114,7 @@ def create_colored_die_opt1_choice(
             Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
             Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
             Face(name="+$2", money=2),
-            Face(name="+$1 & +1 🔧", money=1, patches=1),
+            Face(name="+$1 & +1 🔬", money=1, patches=1),
             star_face,
             star_face,
         ]
@@ -151,14 +151,14 @@ def create_colored_die_opt2_hazard(
     elif color == DieColor.BLUE:
         faces = [
             Face(name="Block 1 Blue", block_amount=1, shield_color=ShieldColor.BLUE),
-            Face(name="+1 🔧", patches=1),
+            Face(name="+1 🔬", patches=1),
             Face(name="+$1", money=1),
             Face(
-                name="Block 1 Blue / +1 🔧",
+                name="Block 1 Blue / +1 🔬",
                 is_choice=True,
                 choices=(
                     Face("Block 1 Blue", block_amount=1, shield_color=ShieldColor.BLUE),
-                    Face("+1 🔧", patches=1),
+                    Face("+1 🔬", patches=1),
                 ),
             ),
             Face(name="Leak: +1 Blue Cube (Locked)", is_glitch=True),
@@ -169,13 +169,13 @@ def create_colored_die_opt2_hazard(
     elif color == DieColor.GREEN:
         faces = [
             Face(name="Block 1 Green", block_amount=1, shield_color=ShieldColor.GREEN),
-            Face(name="+1 🔧", patches=1),
-            Face(name="+2 🔧", patches=2),
+            Face(name="+1 🔬", patches=1),
+            Face(name="+2 🔬", patches=2),
             Face(
-                name="+1 🔧 / +$1",
+                name="+1 🔬 / +$1",
                 is_choice=True,
                 choices=(
-                    Face("+1 🔧", patches=1),
+                    Face("+1 🔬", patches=1),
                     Face("+$1", money=1),
                 ),
             ),
@@ -189,7 +189,7 @@ def create_colored_die_opt2_hazard(
             Face(name="+$3", money=3),
             Face(name="+$2", money=2),
             Face(name="+$2", money=2),
-            Face(name="+$1 & +1 🔧", money=1, patches=1),
+            Face(name="+$1 & +1 🔬", money=1, patches=1),
             star_face,
             star_face,
         ]
@@ -200,7 +200,7 @@ def create_colored_die_opt2_hazard(
             Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
             Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
             Face(name="+$2", money=2),
-            Face(name="+$1 & +1 🔧", money=1, patches=1),
+            Face(name="+$1 & +1 🔬", money=1, patches=1),
             star_face,
             star_face,
         ]
@@ -326,8 +326,8 @@ def main():
     base_seed = 42
     num_runs = 1000
 
-    # 1. Option 1: Choice Face (+$1 / +1 🔧 on Face 5, 1x Star on Face 6)
-    print("\nSimulating Option 1: Choice Face (+$1 / +1 🔧)...")
+    # 1. Option 1: Choice Face (+$1 / +1 🔬 on Face 5, 1x Star on Face 6)
+    print("\nSimulating Option 1: Choice Face (+$1 / +1 🔬)...")
     sim.entities.create_colored_die = create_colored_die_opt1_choice
     sim.engine.phase3_ops.create_colored_die = sim.engine.phase6_operations.create_colored_die = create_colored_die_opt1_choice
     opt1 = {p: run_pod_sweep(p, num_runs=num_runs, base_seed=base_seed, is_hazard=False) for p in [4, 3, 2]}

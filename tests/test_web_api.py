@@ -5,13 +5,13 @@ Covers all technical verification tests specified by the Principal Engineer and 
 2. test_new_game_custom_player_counts: 2P resilience buffer (8 Secrets, 2 Patches), 3P (7 Secrets, 1 Patch), custom bots.
 3. test_get_state: Complete schema validation (header, compiler/tower, market, player mats, action dock).
 4. test_phase1_roll_action: Human rolls ready pool; rolled pool populated, has_rolled set, capabilities updated.
-5. test_phase1_hotfix_reroll: Spending 1 🔧 token successfully rerolls the specified die; patch token deducted.
-6. test_phase1_hotfix_validation: Rejects hotfix with 0 🔧 tokens or out-of-range die index (400 Bad Request).
+5. test_phase1_hotfix_reroll: Spending 1 🔬 token successfully rerolls the specified die; patch token deducted.
+6. test_phase1_hotfix_validation: Rejects hotfix with 0 🔬 tokens or out-of-range die index (400 Bad Request).
 7. test_phase1_commit_shields: Commits shields, validates Any assignment, triggers bot Phase 1, advances to Phase 2.
 8. test_phase2_compile_drop: Tower drop empties staging cup, resolves corruption & attack damage, recycles cubes.
 9. test_phase3_buy_die: Market purchase pays cash ($4/$5), decrements stock, adds to ready pool, increments count.
 10. test_phase3_buy_limit_and_funds: Enforces 2-purchase limit and rejects purchases if cash is insufficient.
-11. test_phase3_patch_die_tokens_and_cash: Tests patching using 🔧 token and using cash; moves die from unpatched to ready.
+11. test_phase3_patch_die_tokens_and_cash: Tests patching using 🔬 token and using cash; moves die from unpatched to ready.
 12. test_phase3_dirty_income_success: Preconditions met: pays 1 Secret, gains +$3, adds 1 Black Cube, demotes ready die.
 13. test_phase3_dirty_income_precondition_blocks: Rejects dirty income when player has <= 1 Secret or 0 Ready dice.
 14. test_phase3_star_actions: Tests B2, Y1, P1, and P3 star ability execution and validation.
@@ -207,7 +207,7 @@ class TestWebAPI(unittest.TestCase):
     # 5. Phase 1: Hotfix Reroll Action
     # -------------------------------------------------------------------------
     def test_phase1_hotfix_reroll(self) -> None:
-        """POST /api/game/action/hotfix spends 1 🔧 token to reroll a die."""
+        """POST /api/game/action/hotfix spends 1 🔬 token to reroll a die."""
         self._post("/api/game/new", {"num_players": 4, "seed": 42})
         self._post("/api/game/action/roll", {"player_id": 0})
 
@@ -580,7 +580,7 @@ class TestWebAPI(unittest.TestCase):
     # 11. Phase 3: Patching Dice (Token & Cash)
     # -------------------------------------------------------------------------
     def test_phase3_patch_die_tokens_and_cash(self) -> None:
-        """Tests patching using 🔧 tokens and cash ($2)."""
+        """Tests patching using 🔬 tokens and cash ($2)."""
         ctrl = RogueAgentRequestHandler.controller
         ctrl.new_game(num_players=4, seed=42)
         ctrl.phase = 6
@@ -776,9 +776,9 @@ class TestWebAPI(unittest.TestCase):
         p0 = ctrl.state.players[0]
         p0.patches = 0  # 0 held patch tokens
 
-        # Die 0: Money (+$1), Die 1: Patch (+1 🔧)
+        # Die 0: Money (+$1), Die 1: Patch (+1 🔬)
         p0.ready_dice[0].current_face = Face(name="+$1", money=1)
-        p0.ready_dice[1].current_face = Face(name="+1 🔧", patches=1)
+        p0.ready_dice[1].current_face = Face(name="+1 🔬", patches=1)
         p0.ready_dice[2].current_face = Face(name="+$1", money=1)
         p0.ready_dice[3].current_face = Face(name="+$1", money=1)
 
@@ -904,7 +904,7 @@ class TestWebAPI(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_v280_upgrade_track_api(self) -> None:
         """POST /api/game/action/upgrade_track upgrades hardware tracks using research tokens."""
-        self._post("/api/game/new", {"num_players": 4, "seed": 42})
+        self._post("/api/game/new", {"research_track_model": "V034_THREE_LEVEL", "num_players": 4, "seed": 42})
         self._post("/api/game/action/roll", {"player_id": 0})
         self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
         self._advance_to_phase(6)
@@ -939,7 +939,7 @@ class TestWebAPI(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_v280_patent_api(self) -> None:
         """POST /api/game/action/patent converts research tokens to Corporate Secrets."""
-        self._post("/api/game/new", {"num_players": 4, "seed": 42})
+        self._post("/api/game/new", {"research_track_model": "V034_THREE_LEVEL", "num_players": 4, "seed": 42})
         self._post("/api/game/action/roll", {"player_id": 0})
         self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
         self._advance_to_phase(6)
@@ -963,7 +963,7 @@ class TestWebAPI(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_new_game_company_setup_helix(self) -> None:
         """POST /api/game/new with Helix assigns Patent Level 1 and +2 🔬 Research Tokens."""
-        res = self._post("/api/game/new", {
+        res = self._post("/api/game/new", {"research_track_model": "V034_THREE_LEVEL", 
             "num_players": 4,
             "seed": 42,
             "players": [{"is_human": True, "name": "BioHacker", "company": "HELIX"}],
@@ -992,7 +992,7 @@ class TestWebAPI(unittest.TestCase):
 
     def test_new_game_company_setup_omnidyne(self) -> None:
         """POST /api/game/new with Omnidyne assigns Triage L1, Release L1, and Def Cap 1."""
-        res = self._post("/api/game/new", {
+        res = self._post("/api/game/new", {"research_track_model": "V034_THREE_LEVEL", 
             "num_players": 4,
             "seed": 42,
             "players": [{"is_human": True, "name": "SysAdmin", "company": "OMNIDYNE"}],
@@ -1011,7 +1011,7 @@ class TestWebAPI(unittest.TestCase):
 
     def test_new_game_company_setup_aegis(self) -> None:
         """POST /api/game/new with Aegis assigns Defense Level 1 and Defense Cap 3."""
-        res = self._post("/api/game/new", {
+        res = self._post("/api/game/new", {"research_track_model": "V034_THREE_LEVEL", 
             "num_players": 4,
             "seed": 42,
             "players": [{"is_human": True, "name": "SecLead", "company": "AEGIS"}],
@@ -1028,7 +1028,7 @@ class TestWebAPI(unittest.TestCase):
 
     def test_new_game_company_setup_meridian(self) -> None:
         """POST /api/game/new with Meridian assigns +$2 Starting Cash ($8 start)."""
-        res = self._post("/api/game/new", {
+        res = self._post("/api/game/new", {"research_track_model": "V034_THREE_LEVEL", 
             "num_players": 4,
             "seed": 42,
             "players": [{"is_human": True, "name": "Banker", "company": "MERIDIAN"}],
@@ -1043,7 +1043,7 @@ class TestWebAPI(unittest.TestCase):
 
     def test_new_game_company_setup_dto(self) -> None:
         """POST /api/game/new with DTO assigns +1 Corporate Secret."""
-        res = self._post("/api/game/new", {
+        res = self._post("/api/game/new", {"research_track_model": "V034_THREE_LEVEL", 
             "num_players": 4,
             "seed": 42,
             "players": [{"is_human": True, "name": "Agent", "company": "DTO"}],
@@ -1056,7 +1056,7 @@ class TestWebAPI(unittest.TestCase):
 
     def test_new_game_company_setup_prometheus(self) -> None:
         """POST /api/game/new with Prometheus assigns -1 🔬 Upgrade Discount."""
-        res = self._post("/api/game/new", {
+        res = self._post("/api/game/new", {"research_track_model": "V034_THREE_LEVEL", 
             "num_players": 4,
             "seed": 42,
             "players": [{"is_human": True, "name": "Dev", "company": "PROMETHEUS"}],

@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from sim.config import ROUND_PHASE_NAMES, CubeColor, DieColor, EndGameReason, ShieldColor
 from sim.engine import EndGameResult, GameState, PlayerState, RoundTelemetry
-from sim.entities import AbilityStatus, ArchetypeCard, Company, Die, Face, VariantCard, VersionCard, WhiteHat
+from sim.entities import AbilityStatus, ArchetypeCard, Company, Die, effective_company, Face, VariantCard, VersionCard, WhiteHat
 
 
 ARCHETYPE_FLAVOR: Dict[str, Dict[str, str]] = {
@@ -298,7 +298,7 @@ class GameStateSerializer:
             "name": name,
             "is_human": is_human,
             "bot_archetype": bot_archetype,
-            "company": cls.serialize_company(getattr(player, "company", None)),
+            "company": cls.serialize_company(effective_company(getattr(player, "company", None), config)),
             "white_hat": cls.serialize_white_hat(getattr(player, "white_hat", None)),
             "archetype": cls.serialize_archetype_card(getattr(player, "archetype", None)),
             "ability_v1_status": (
@@ -335,6 +335,16 @@ class GameStateSerializer:
             "patent_level": getattr(player, "patent_level", 0),
             "has_emergency_hotfix": getattr(player, "has_emergency_hotfix", False),
             "has_passive_firewall": getattr(player, "has_passive_firewall", False),
+            # v0.35.0 research tracks (levels 0..4)
+            "research_track_model": getattr(getattr(config, "research_track_model", None), "value", "V034_THREE_LEVEL"),
+            "max_track_level": 4 if getattr(config, "is_v035_tracks", False) else 2,
+            "research_earned_total": getattr(player, "research_earned_total", 0),
+            "breakthroughs": [b.as_dict() for b in getattr(player, "breakthroughs", [])],
+            "l4_payouts": dict(getattr(player, "l4_payouts", {})),
+            "patent_cost": player.get_patent_cost() if hasattr(player, "get_patent_cost") else 4,
+            "patent_gain": player.get_patent_gain() if hasattr(player, "get_patent_gain") else 1,
+            "slush_fund_used_game": bool(getattr(player, "slush_fund_used_game", False)),
+            "purple_purchasable": bool(getattr(config, "purple_purchasable", True)),
             "is_patient_zero": player.is_patient_zero,
             "elimination_round": player.elimination_round,
             "elimination_reason": player.elimination_reason,
@@ -380,7 +390,8 @@ class GameStateSerializer:
             "personal_purple_reserve": getattr(player, "personal_purple_reserve", 2),
             "purple_reserve_cost": purple_reserve_cost,
             "can_buy_purple_reserve": (
-                getattr(player, "personal_purple_reserve", 2) > 0
+                bool(getattr(config, "purple_purchasable", True))
+                and getattr(player, "personal_purple_reserve", 2) > 0
                 and player.money >= purple_reserve_cost
                 and purchases_this_turn < getattr(config, "max_market_purchases_per_turn", 2)
             ),
@@ -461,6 +472,7 @@ class GameStateSerializer:
             "phase_name": controller_meta.get("phase_name", ROUND_PHASE_NAMES[1]),
             "phase_names": controller_meta.get("phase_names", dict(ROUND_PHASE_NAMES)),
             "round_sequence": controller_meta.get("round_sequence", state.config.round_sequence.value),
+            "research_track_model": state.config.research_track_model.value,
             "subphase": controller_meta.get("subphase", "waiting_for_roll"),
             "active_player_index": controller_meta.get("active_player_index", 0),
             "first_player_index": state.first_player_index,

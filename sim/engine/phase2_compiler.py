@@ -193,7 +193,7 @@ def resolve_corruption_space(
     # 3. Lose Patches
     if space.lose_patches > 0:
         for player in engine.state.players:
-            player.patches = max(0, player.patches - space.lose_patches)
+            player.lose_research(space.lose_patches, "corruption")
 
     threat_strengths = {
         CubeColor.RED: exited_cubes.get(CubeColor.RED, 0),

@@ -372,7 +372,7 @@ class TestOperatorAndProdigy(unittest.TestCase):
         # Prodigy Brute-Force Bypass succeeds
         res = controller.perform_reroll(0, [0], use_prodigy_ability=True)
         self.assertIn("players", res)
-        self.assertEqual(player.patches, initial_patches)  # No 🔧 spent!
+        self.assertEqual(player.patches, initial_patches)  # No 🔬 spent!
         self.assertEqual(player.ability_v1_status, AbilityStatus.USED)
 
     def test_prodigy_persistence_across_multiple_rerolls(self) -> None:

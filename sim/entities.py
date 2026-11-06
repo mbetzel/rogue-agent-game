@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import random
+import dataclasses
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
@@ -824,14 +825,14 @@ def get_all_archetype_cards() -> List[ArchetypeCard]:
             name="The Phreaker",
             timing_window="Phase 5: Emergency Hotfix & Magnetic Splice",
             ability_name="Magnetic Splice",
-            description="Move 1 die from your Glitched Box directly to your Ready for Release Zone for free (bypassing Scanned and saving 1 🔧).",
+            description="Move 1 die from your Glitched Box directly to your Ready for Release Zone for free (bypassing Scanned and saving 1 🔬).",
         ),
         ArchetypeCard(
             code=ArchetypeCode.PRODIGY,
             name="The Prodigy",
             timing_window="Phase 1: Step 4 Rerolls",
             ability_name="Brute-Force Bypass",
-            description="During your rerolls this phase, you may include any number of Locked dice in your free rerolls without spending 🔧 tokens. In addition, you may turn 1 of your rolled dice to any non-Star face of your choice.",
+            description="During your rerolls this phase, you may include any number of Locked dice in your free rerolls without spending 🔬 tokens. In addition, you may turn 1 of your rolled dice to any non-Star face of your choice.",
         ),
         ArchetypeCard(
             code=ArchetypeCode.SPOOK,
@@ -1128,26 +1129,70 @@ def get_random_white_hats(num_players: int, rng: random.Random) -> List[WhiteHat
     return rng.sample(all_wh, num_players)
 
 
-def create_gray_die(die_id: int) -> Die:
-    """Creates a Gray (Legacy Code) starter die."""
-    faces = [
-        Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
-        Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
-        Face(name="+$1", money=1),
-        Face(name="+$1", money=1),
-        Face(
-            name="+$1 / +1 🔧",
+GRAY_FACE_PROFILES = ("V034", "V035_D1")
+
+
+def create_gray_die(die_id: int, profile: Optional[str] = "V035_D1") -> Die:
+    """Creates a Gray (Legacy Code) die.
+
+    ``profile``: ``"V035_D1"`` (v0.35.0 canonical) or ``"V034"`` (legacy ``B, B, $1, $1, $1/🔬, 🔬``).
+    """
+    profile = profile or "V035_D1"
+
+    def choice() -> Face:
+        return Face(
+            name="+$1 / +1 🔬",
             is_choice=True,
-            choices=(Face("+$1", money=1), Face("+1 🔧", patches=1)),
-        ),
-        Face(name="+1 🔧", patches=1),
-    ]
+            choices=(Face("+$1", money=1), Face("+1 🔬", patches=1)),
+        )
+
+    if profile == "V034":
+        faces = [
+            Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
+            Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
+            Face(name="+$1", money=1),
+            Face(name="+$1", money=1),
+            choice(),
+            Face(name="+1 🔬", patches=1),
+        ]
+    elif profile == "V035_D1":
+        faces = [
+            Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
+            Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
+            Face(name="+$1 & +1 🔬", money=1, patches=1),
+            choice(),
+            choice(),
+            Face(name="+1 🔬", patches=1),
+        ]
+    else:
+        raise ValueError(f"Unknown Gray face profile: {profile}")
     return Die(
         die_id=die_id,
         color=DieColor.GRAY,
         cost=0,
         vp=0,
         faces=faces,
+    )
+
+
+def effective_company(company: Optional[Company], config: Any = None) -> Optional[Company]:
+    """v0.35.0 (INV-RT-FLAT-SETUP-01): with ``company_setup_bonuses=False`` every Client Company starts
+    from the flat baseline (capacity 2 / 2 / 4, all levels 0, no cash / research / Secret bonus, no discount)."""
+    if company is None or config is None or getattr(config, "company_setup_bonuses", True):
+        return company
+    return dataclasses.replace(
+        company,
+        starting_defense_capacity=2,
+        starting_triage_bandwidth=2,
+        starting_release_bandwidth=4,
+        starting_triage_level=0,
+        starting_release_level=0,
+        starting_defense_level=0,
+        starting_patent_level=0,
+        starting_cash_bonus=0,
+        starting_research_bonus=0,
+        starting_secrets_bonus=0,
+        upgrade_discount=0,
     )
 
 
@@ -1176,10 +1221,11 @@ def create_colored_die(
     variant_card: Optional[VariantCard] = None,
     reserve_cost: Optional[int] = None,
     cost: Optional[int] = None,
+    gray_profile: Optional[str] = "V035_D1",
 ) -> Die:
     """Creates a colored die of the specified color with dynamic cost (v0.26.0 Baseline)."""
     if color == DieColor.GRAY:
-        return create_gray_die(die_id)
+        return create_gray_die(die_id, gray_profile)
     if color == DieColor.WHITE:
         return create_white_die(die_id)
 
@@ -1223,14 +1269,14 @@ def create_colored_die(
     elif color == DieColor.BLUE:
         faces = [
             Face(name="Block 1 Blue", block_amount=1, shield_color=ShieldColor.BLUE),
-            Face(name="+1 🔧", patches=1),
+            Face(name="+1 🔬", patches=1),
             Face(name="+$1", money=1),
             Face(
-                name="Block 1 Blue / +1 🔧",
+                name="Block 1 Blue / +1 🔬",
                 is_choice=True,
                 choices=(
                     Face("Block 1 Blue", block_amount=1, shield_color=ShieldColor.BLUE),
-                    Face("+1 🔧", patches=1),
+                    Face("+1 🔬", patches=1),
                 ),
             ),
             glitch_face,
@@ -1241,13 +1287,13 @@ def create_colored_die(
     elif color == DieColor.GREEN:
         faces = [
             Face(name="Block 1 Green", block_amount=1, shield_color=ShieldColor.GREEN),
-            Face(name="+1 🔧", patches=1),
-            Face(name="+2 🔧", patches=2),
+            Face(name="+1 🔬", patches=1),
+            Face(name="+2 🔬", patches=2),
             Face(
-                name="+1 🔧 / +$1",
+                name="+1 🔬 / +$1",
                 is_choice=True,
                 choices=(
-                    Face("+1 🔧", patches=1),
+                    Face("+1 🔬", patches=1),
                     Face("+$1", money=1),
                 ),
             ),
@@ -1261,7 +1307,7 @@ def create_colored_die(
             Face(name="+$3", money=3),
             Face(name="+$2", money=2),
             Face(name="+$2", money=2),
-            Face(name="+$1 & +1 🔧", money=1, patches=1),
+            Face(name="+$1 & +1 🔬", money=1, patches=1),
             glitch_face,
             star_face,
         ]
@@ -1277,7 +1323,7 @@ def create_colored_die(
             Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
             Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
             Face(name="+$2", money=2),
-            Face(name="+$1 & +1 🔧", money=1, patches=1),
+            Face(name="+$1 & +1 🔬", money=1, patches=1),
             glitch_face,
             star_face,
         ]

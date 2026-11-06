@@ -226,7 +226,7 @@ class TestV280TerminalUpgrades(unittest.TestCase):
 
     def test_corporate_asymmetry_initialization(self) -> None:
         """INV-ASYM-COMPANY-01: When enable_corporate_asymmetry=True, all companies apply distinct hardware and starting assets."""
-        cfg = GameConfig(num_players=2, enable_corporate_asymmetry=True)
+        cfg = GameConfig.legacy_v034(num_players=2, enable_corporate_asymmetry=True)
         # Test Omnidyne
         engine_omni = GameEngine(
             cfg,
@@ -276,7 +276,7 @@ class TestV280TerminalUpgrades(unittest.TestCase):
 
     def test_emergency_hotfix_in_phase_3b(self) -> None:
         """INV-UPGRADE-TRACK-01: Level 2 Pipeline hotfixes 1 die directly from Glitched to Ready."""
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v034(num_players=2)
         engine = GameEngine(cfg, seed=42)
         p0 = engine.state.players[0]
         p0.pipeline_level = 2

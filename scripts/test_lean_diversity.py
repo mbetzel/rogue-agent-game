@@ -9,16 +9,16 @@ Red:
 
 Blue:
 - Face 1: Block 1 Blue
-- Face 2: +1 🔧 (was Block 2)
+- Face 2: +1 🔬 (was Block 2)
 - Face 3: +$1
-- Face 4: Block 1 Blue / +1 🔧
+- Face 4: Block 1 Blue / +1 🔬
 - Faces 5-6: Blue ★
 
 Green:
 - Face 1: Block 1 Green
-- Face 2: +1 🔧 (was Block 2)
-- Face 3: +2 🔧
-- Face 4: +1 🔧 / +$1
+- Face 2: +1 🔬 (was Block 2)
+- Face 3: +2 🔬
+- Face 4: +1 🔬 / +$1
 - Faces 5-6: Green ★
 """
 
@@ -72,14 +72,14 @@ def create_colored_die_lean_diversity(
     elif color == DieColor.BLUE:
         faces = [
             Face(name="Block 1 Blue", block_amount=1, shield_color=ShieldColor.BLUE),
-            Face(name="+1 🔧", patches=1),
+            Face(name="+1 🔬", patches=1),
             Face(name="+$1", money=1),
             Face(
-                name="Block 1 Blue / +1 🔧",
+                name="Block 1 Blue / +1 🔬",
                 is_choice=True,
                 choices=(
                     Face("Block 1 Blue", block_amount=1, shield_color=ShieldColor.BLUE),
-                    Face("+1 🔧", patches=1),
+                    Face("+1 🔬", patches=1),
                 ),
             ),
             star_face,
@@ -90,13 +90,13 @@ def create_colored_die_lean_diversity(
     elif color == DieColor.GREEN:
         faces = [
             Face(name="Block 1 Green", block_amount=1, shield_color=ShieldColor.GREEN),
-            Face(name="+1 🔧", patches=1),
-            Face(name="+2 🔧", patches=2),
+            Face(name="+1 🔬", patches=1),
+            Face(name="+2 🔬", patches=2),
             Face(
-                name="+1 🔧 / +$1",
+                name="+1 🔬 / +$1",
                 is_choice=True,
                 choices=(
-                    Face("+1 🔧", patches=1),
+                    Face("+1 🔬", patches=1),
                     Face("+$1", money=1),
                 ),
             ),
@@ -110,7 +110,7 @@ def create_colored_die_lean_diversity(
             Face(name="+$3", money=3),
             Face(name="+$2", money=2),
             Face(name="+$2", money=2),
-            Face(name="+$1 & +1 🔧", money=1, patches=1),
+            Face(name="+$1 & +1 🔬", money=1, patches=1),
             star_face,
             star_face,
         ]
@@ -121,7 +121,7 @@ def create_colored_die_lean_diversity(
             Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
             Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
             Face(name="+$2", money=2),
-            Face(name="+$1 & +1 🔧", money=1, patches=1),
+            Face(name="+$1 & +1 🔬", money=1, patches=1),
             star_face,
             star_face,
         ]

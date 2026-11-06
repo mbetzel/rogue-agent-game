@@ -69,8 +69,8 @@ class TestV03Rules(unittest.TestCase):
     # 3. Gray Starter Die Faces
     # -------------------------------------------------------------------------
     def test_gray_starter_die_faces(self) -> None:
-        """Gray die has exactly 2x Block 1 Any, 2x +$1, 1x +$1 / +1 🔧, 1x +1 🔧, and 0 Idle (0) faces."""
-        die = create_gray_die(1)
+        """Gray die has exactly 2x Block 1 Any, 2x +$1, 1x +$1 / +1 🔬, 1x +1 🔬, and 0 Idle (0) faces."""
+        die = create_gray_die(1, "V034")
         self.assertEqual(len(die.faces), 6)
 
         any_shields = [f for f in die.faces if f.shield_color == ShieldColor.ANY and f.block_amount == 1]

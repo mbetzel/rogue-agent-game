@@ -55,6 +55,18 @@ class RoundSequence(str, Enum):
     SIX_PHASE = "SIX_PHASE"
 
 
+class ResearchTrackModel(str, Enum):
+    """Research track / company setup ruleset selector (v0.35.0).
+
+    V034_THREE_LEVEL: v0.34.0 tracks (L0-L2, Emergency Hotfix / Passive Firewall, purchasable Purple,
+    Client Company setup bonuses, old Gray faces, Slush Fund once per version). Kept for regression and parity.
+    V035_FIVE_LEVEL: canonical v0.35.0 (L0-L4 tracks with Breakthroughs at L1 / L3).
+    """
+
+    V034_THREE_LEVEL = "V034_THREE_LEVEL"
+    V035_FIVE_LEVEL = "V035_FIVE_LEVEL"
+
+
 class RoundPhase(IntEnum):
     """Canonical six-phase round (v0.34.0). GAME_OVER is used by the web state machine only."""
 
@@ -204,8 +216,49 @@ class GameConfig:
     # Override (and companies the paired Signature Protocol). True only via GameConfig.legacy_v033().
     legacy_archetype_override_bridge: bool = False
 
+    # --- v0.35.0 Research Tracks (INV-RT-*) ---
+    research_track_model: ResearchTrackModel = ResearchTrackModel.V035_FIVE_LEVEL
+    track_step_costs: Tuple[int, int, int, int] = (1, 2, 2, 3)  # [TUNE] cost to reach L1..L4
+    track_capacity_by_level: Dict[str, Tuple[int, ...]] = field(
+        default_factory=lambda: {
+            "DEFENSE": (2, 2, 3, 3, 4),
+            "TRIAGE": (2, 2, 3, 3, 4),
+            "RELEASE": (4, 4, 5, 5, 6),
+        }
+    )
+    # Patents level -> (research cost, Secrets gained) per filing
+    patent_rate_by_level: Dict[int, Tuple[int, int]] = field(
+        default_factory=lambda: {0: (2, 1), 1: (2, 1), 2: (3, 2), 3: (3, 2), 4: (1, 1)}
+    )
+    patent_l1_cash: int = 3
+    triage_l1_contractors: int = 2
+    triage_l3_upgrade_cost: int = 3  # [TUNE]
+    defense_l4_cash_per_block: int = 1  # [TUNE]
+    defense_l4_cash_cap: int = 3  # [TUNE]
+    triage_l4_free_moves: int = 2
+    release_l4_extra_rerolls: int = 1
+    # Lever sub-flags: None resolves once in __post_init__ from research_track_model.
+    gray_face_profile: Optional[str] = None  # "V035_D1" | "V034"
+    purple_purchasable: Optional[bool] = None
+    company_setup_bonuses: Optional[bool] = None
+    slush_fund_once_per_game: Optional[bool] = None
+    level2_perks_enabled: Optional[bool] = None  # Emergency Hotfix + Passive Firewall (v0.34 only)
+
     def __post_init__(self) -> None:
         self.round_sequence = RoundSequence(self.round_sequence)
+        self.research_track_model = ResearchTrackModel(self.research_track_model)
+        v035 = self.research_track_model == ResearchTrackModel.V035_FIVE_LEVEL
+        # NOTE: resolved once at construction; re-assigning research_track_model later does NOT re-resolve.
+        if self.gray_face_profile is None:
+            self.gray_face_profile = "V035_D1" if v035 else "V034"
+        if self.purple_purchasable is None:
+            self.purple_purchasable = not v035
+        if self.company_setup_bonuses is None:
+            self.company_setup_bonuses = not v035
+        if self.slush_fund_once_per_game is None:
+            self.slush_fund_once_per_game = v035
+        if self.level2_perks_enabled is None:
+            self.level2_perks_enabled = not v035
         if self.starting_secrets_by_player_count is None:
             # NOTE: resolved once at construction. Re-assigning round_sequence later does NOT
             # re-resolve this dict; use GameConfig.legacy_v033() or pass round_sequence to __init__.
@@ -219,7 +272,18 @@ class GameConfig:
     def legacy_v033(cls, **overrides) -> "GameConfig":
         """v0.33.0 baseline: three-phase round + 4P = 12 Secrets."""
         overrides.setdefault("legacy_archetype_override_bridge", True)
+        overrides.setdefault("research_track_model", ResearchTrackModel.V034_THREE_LEVEL)
         return cls(round_sequence=RoundSequence.V033_THREE_PHASE, **overrides)
+
+    @classmethod
+    def legacy_v034(cls, **overrides) -> "GameConfig":
+        """v0.34.0 baseline: six-phase round with the v0.34 three-level research tracks."""
+        overrides.setdefault("research_track_model", ResearchTrackModel.V034_THREE_LEVEL)
+        return cls(**overrides)
+
+    @property
+    def is_v035_tracks(self) -> bool:
+        return self.research_track_model == ResearchTrackModel.V035_FIVE_LEVEL
 
     @property
     def is_six_phase(self) -> bool:

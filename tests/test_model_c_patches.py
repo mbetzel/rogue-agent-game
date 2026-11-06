@@ -47,8 +47,8 @@ class TestModelCPatches(unittest.TestCase):
 
         player.bot = PassiveBot(bot_id=0)
 
-        # Give player 4 gray dice all showing +1 🔧 face on all 6 faces
-        patch_face = Face("+1 🔧", patches=1)
+        # Give player 4 gray dice all showing +1 🔬 face on all 6 faces
+        patch_face = Face("+1 🔬", patches=1)
         player.ready_dice = [
             Die(die_id=i, color=DieColor.GRAY, cost=0, vp=0, faces=[patch_face] * 6)
             for i in range(4)

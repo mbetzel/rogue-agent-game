@@ -16,7 +16,7 @@ from sim.entities import (
 
 class TestEntities(unittest.TestCase):
     def test_gray_starter_die(self) -> None:
-        die = create_gray_die(1)
+        die = create_gray_die(1, "V034")
         self.assertEqual(die.die_id, 1)
         self.assertEqual(die.color, DieColor.GRAY)
         self.assertEqual(die.cost, 0)

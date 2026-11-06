@@ -1,0 +1,1821 @@
+{
+  "metadata": {
+    "version": "v0.35.0",
+    "baseline": "GameConfig.legacy_v034 (same seeds)",
+    "base_seed": 42,
+    "seed_formula": "base_seed + num_players*100000 + match_idx",
+    "games_per_pod": 3000,
+    "elapsed_seconds": 64.39573335647583
+  },
+  "guardrails": {
+    "V035": {
+      "2P": {
+        "rounds_8_11": "PASS",
+        "singularity_le_45": "PASS",
+        "wipeout_le_15": "FAIL",
+        "bot_spread_le_45": "PASS",
+        "research_12_14": "FAIL",
+        "no_seat_maxes_all": "PASS",
+        "max_track_share_le_50": "FAIL"
+      },
+      "3P": {
+        "rounds_8_11": "PASS",
+        "singularity_le_45": "PASS",
+        "wipeout_le_15": "PASS",
+        "bot_spread_le_45": "PASS",
+        "research_12_14": "FAIL",
+        "no_seat_maxes_all": "PASS",
+        "max_track_share_le_50": "FAIL"
+      },
+      "4P": {
+        "rounds_8_11": "PASS",
+        "singularity_le_45": "PASS",
+        "wipeout_le_15": "PASS",
+        "bot_spread_le_45": "PASS",
+        "research_12_14": "FAIL",
+        "no_seat_maxes_all": "PASS",
+        "max_track_share_le_50": "FAIL"
+      }
+    },
+    "V034": {
+      "2P": {
+        "rounds_8_11": "PASS",
+        "singularity_le_45": "PASS",
+        "wipeout_le_15": "FAIL",
+        "bot_spread_le_45": "PASS",
+        "research_12_14": "FAIL",
+        "no_seat_maxes_all": "PASS",
+        "max_track_share_le_50": "PASS"
+      },
+      "3P": {
+        "rounds_8_11": "FAIL",
+        "singularity_le_45": "PASS",
+        "wipeout_le_15": "PASS",
+        "bot_spread_le_45": "PASS",
+        "research_12_14": "FAIL",
+        "no_seat_maxes_all": "PASS",
+        "max_track_share_le_50": "PASS"
+      },
+      "4P": {
+        "rounds_8_11": "FAIL",
+        "singularity_le_45": "PASS",
+        "wipeout_le_15": "PASS",
+        "bot_spread_le_45": "PASS",
+        "research_12_14": "FAIL",
+        "no_seat_maxes_all": "PASS",
+        "max_track_share_le_50": "PASS"
+      }
+    }
+  },
+  "results": {
+    "V035": {
+      "2P": {
+        "config": "V035",
+        "num_players": 2,
+        "games": 3000,
+        "player_games": 6000,
+        "seed_range": [
+          200042,
+          203041
+        ],
+        "mean_rounds": 8.871333333333334,
+        "median_rounds": 9.0,
+        "min_rounds": 4,
+        "max_rounds": 11,
+        "round_hist": {
+          "4": 7,
+          "5": 60,
+          "6": 119,
+          "7": 248,
+          "8": 524,
+          "9": 965,
+          "10": 888,
+          "11": 189
+        },
+        "end_reasons": {
+          "total_wipeout": 0.16033333333333333,
+          "patient_zero": 0.423,
+          "singularity": 0.4166666666666667
+        },
+        "patient_zero_game_rate": 0.6093333333333333,
+        "player_survival": 0.6151666666666666,
+        "mean_final_secrets": 2.216666666666667,
+        "mean_survivor_secrets": 4.093741533459767,
+        "mean_winner_secrets": 3.603216278306531,
+        "max_final_secrets": 21,
+        "research_mean": 11.978666666666667,
+        "research_median": 11.0,
+        "research_p10_p90": [
+          5,
+          21
+        ],
+        "research_by_source_per_seat": {
+          "income": 11.691166666666666,
+          "signature_protocol": 0.15633333333333332,
+          "triage_l4": 0.09716666666666667,
+          "star": 0.034
+        },
+        "research_unspent_end": 0.7733333333333333,
+        "track_level_dist": {
+          "DEFENSE": {
+            "0": 0.447,
+            "1": 0.385,
+            "2": 0.07983333333333334,
+            "3": 0.07333333333333333,
+            "4": 0.014833333333333334
+          },
+          "TRIAGE": {
+            "0": 0.423,
+            "1": 0.3416666666666667,
+            "2": 0.09083333333333334,
+            "3": 0.109,
+            "4": 0.0355
+          },
+          "RELEASE": {
+            "0": 0.5186666666666667,
+            "1": 0.17033333333333334,
+            "2": 0.12183333333333334,
+            "3": 0.035666666666666666,
+            "4": 0.1535
+          },
+          "PATENT": {
+            "0": 0.43633333333333335,
+            "1": 0.08366666666666667,
+            "2": 0.09433333333333334,
+            "3": 0.08866666666666667,
+            "4": 0.297
+          }
+        },
+        "mean_track_steps": 4.677666666666667,
+        "l4_tracks_per_seat_dist": {
+          "0": 0.49916666666666665,
+          "1": 0.5008333333333334
+        },
+        "seats_maxing_any_track": 0.5008333333333334,
+        "maxed_track_share": {
+          "DEFENSE": 0.02961730449251248,
+          "TRIAGE": 0.07088186356073212,
+          "RELEASE": 0.30648918469217973,
+          "PATENT": 0.5930116472545757
+        },
+        "all_tracks_maxed_seats": 0,
+        "breakthroughs": {
+          "DEFENSE_L1": {
+            "TAKEN": 3318,
+            "per_seat": 0.553
+          },
+          "DEFENSE_L3": {
+            "TAKEN": 529,
+            "per_seat": 0.08816666666666667
+          },
+          "PATENT_L1": {
+            "TAKEN": 3382,
+            "per_seat": 0.5636666666666666
+          },
+          "PATENT_L3": {
+            "TAKEN": 2314,
+            "per_seat": 0.38566666666666666
+          },
+          "RELEASE_L1": {
+            "TAKEN": 2888,
+            "per_seat": 0.48133333333333334
+          },
+          "RELEASE_L3": {
+            "TAKEN": 1135,
+            "per_seat": 0.18916666666666668
+          },
+          "TRIAGE_L1": {
+            "TAKEN": 3462,
+            "per_seat": 0.577
+          },
+          "TRIAGE_L3": {
+            "FORFEITED": 551,
+            "TAKEN": 316,
+            "per_seat": 0.1445
+          }
+        },
+        "triage_l3": {
+          "resolutions": 867,
+          "take_rate": 0.3644752018454441,
+          "declined_rate": 0.0,
+          "forfeit_rate": 0.635524798154556,
+          "forfeit_reasons": {
+            "unaffordable": 551
+          },
+          "colors": {
+            "yellow": 316
+          }
+        },
+        "l4_payouts_total": {
+          "defense_cash": 655,
+          "triage_research": 583,
+          "release_rerolls_used": 60,
+          "patent_secrets": 8005
+        },
+        "l4_payouts_per_holder": {
+          "defense_cash": 7.359550561797753,
+          "triage_research": 2.7370892018779345,
+          "release_rerolls_used": 0.06514657980456026,
+          "patent_secrets_at_L4": 4.492143658810326
+        },
+        "l4_holders": {
+          "TRIAGE": 213,
+          "RELEASE": 921,
+          "PATENT": 1782,
+          "DEFENSE": 89
+        },
+        "patent_secrets_per_seat": 1.8576666666666666,
+        "purple_lost_total": 1856,
+        "purple_lost_per_seat": 0.30933333333333335,
+        "games_with_purple_lost": 0.4533333333333333,
+        "purple_owned_end_mean": 1.0763333333333334,
+        "dto": {
+          "seats": 958,
+          "slush_used": 907,
+          "slush_versions_used": 907,
+          "slush_used_rate": 0.9467640918580376,
+          "slush_versions_used_per_seat": 0.9467640918580376
+        },
+        "bots": {
+          "AccelerationistBot": {
+            "seats": 1200,
+            "win_rate": 0.6175,
+            "survival_rate": 0.7733333333333333
+          },
+          "AdaptiveBalancedBot": {
+            "seats": 1200,
+            "win_rate": 0.4175,
+            "survival_rate": 0.5066666666666667
+          },
+          "RecklessSaboteurBot": {
+            "seats": 1200,
+            "win_rate": 0.49625,
+            "survival_rate": 0.5808333333333333
+          },
+          "SecOpsTurtleBot": {
+            "seats": 1200,
+            "win_rate": 0.42,
+            "survival_rate": 0.5991666666666666
+          },
+          "VentureGreedBot": {
+            "seats": 1200,
+            "win_rate": 0.54875,
+            "survival_rate": 0.6158333333333333
+          }
+        },
+        "companies": {
+          "AEGIS": {
+            "seats": 1015,
+            "win_rate": 0.5349753694581281,
+            "survival_rate": 0.6551724137931034
+          },
+          "DTO": {
+            "seats": 958,
+            "win_rate": 0.5829853862212944,
+            "survival_rate": 0.7004175365344467
+          },
+          "HELIX": {
+            "seats": 1035,
+            "win_rate": 0.45893719806763283,
+            "survival_rate": 0.5565217391304348
+          },
+          "MERIDIAN": {
+            "seats": 991,
+            "win_rate": 0.49596367305751765,
+            "survival_rate": 0.6024217961654894
+          },
+          "OMNIDYNE": {
+            "seats": 972,
+            "win_rate": 0.4876543209876543,
+            "survival_rate": 0.6131687242798354
+          },
+          "PROMETHEUS": {
+            "seats": 1029,
+            "win_rate": 0.44509232264334303,
+            "survival_rate": 0.5694849368318756
+          }
+        },
+        "operatives": {
+          "ACOUSTIC": {
+            "seats": 984,
+            "win_rate": 0.4994918699186992,
+            "survival_rate": 0.6117886178861789
+          },
+          "CIPHER": {
+            "seats": 984,
+            "win_rate": 0.5116869918699187,
+            "survival_rate": 0.6280487804878049
+          },
+          "OPERATOR": {
+            "seats": 1024,
+            "win_rate": 0.4990234375,
+            "survival_rate": 0.60546875
+          },
+          "PHREAKER": {
+            "seats": 1003,
+            "win_rate": 0.4980059820538385,
+            "survival_rate": 0.6191425722831505
+          },
+          "PRODIGY": {
+            "seats": 984,
+            "win_rate": 0.5142276422764228,
+            "survival_rate": 0.6321138211382114
+          },
+          "SPOOK": {
+            "seats": 1021,
+            "win_rate": 0.47845249755142016,
+            "survival_rate": 0.5954946131243879
+          }
+        },
+        "bot_win_spread_pts": 20.000000000000007,
+        "company_win_spread_pts": 13.789306357795134,
+        "white_hat_win_spread_pts": 3.577514472500265,
+        "outliers": {
+          "round_le_2_wipeout": [],
+          "rounds_le_3": [],
+          "rounds_ge_20": [],
+          "rounds_ge_14": [],
+          "round_limit": []
+        },
+        "seconds": 9.123974084854126
+      },
+      "3P": {
+        "config": "V035",
+        "num_players": 3,
+        "games": 3000,
+        "player_games": 9000,
+        "seed_range": [
+          300042,
+          303041
+        ],
+        "mean_rounds": 8.712,
+        "median_rounds": 9.0,
+        "min_rounds": 4,
+        "max_rounds": 11,
+        "round_hist": {
+          "4": 20,
+          "5": 56,
+          "6": 160,
+          "7": 342,
+          "8": 540,
+          "9": 898,
+          "10": 804,
+          "11": 180
+        },
+        "end_reasons": {
+          "patient_zero": 0.5856666666666667,
+          "singularity": 0.3566666666666667,
+          "total_wipeout": 0.057666666666666665
+        },
+        "patient_zero_game_rate": 0.6783333333333333,
+        "player_survival": 0.6791111111111111,
+        "mean_final_secrets": 2.6501111111111113,
+        "mean_survivor_secrets": 4.24541884816754,
+        "mean_winner_secrets": 5.047933884297521,
+        "max_final_secrets": 25,
+        "research_mean": 11.84088888888889,
+        "research_median": 11.0,
+        "research_p10_p90": [
+          5,
+          21
+        ],
+        "research_by_source_per_seat": {
+          "income": 11.567666666666666,
+          "signature_protocol": 0.1451111111111111,
+          "triage_l4": 0.08866666666666667,
+          "star": 0.03944444444444444
+        },
+        "research_unspent_end": 0.6836666666666666,
+        "track_level_dist": {
+          "DEFENSE": {
+            "0": 0.4707777777777778,
+            "1": 0.36777777777777776,
+            "2": 0.07777777777777778,
+            "3": 0.06944444444444445,
+            "4": 0.014222222222222223
+          },
+          "TRIAGE": {
+            "0": 0.4408888888888889,
+            "1": 0.3337777777777778,
+            "2": 0.08977777777777778,
+            "3": 0.103,
+            "4": 0.03255555555555555
+          },
+          "RELEASE": {
+            "0": 0.537,
+            "1": 0.15633333333333332,
+            "2": 0.11844444444444445,
+            "3": 0.03855555555555556,
+            "4": 0.14966666666666667
+          },
+          "PATENT": {
+            "0": 0.44366666666666665,
+            "1": 0.08611111111111111,
+            "2": 0.08833333333333333,
+            "3": 0.0898888888888889,
+            "4": 0.292
+          }
+        },
+        "mean_track_steps": 4.549111111111111,
+        "l4_tracks_per_seat_dist": {
+          "0": 0.5115555555555555,
+          "1": 0.48844444444444446
+        },
+        "seats_maxing_any_track": 0.48844444444444446,
+        "maxed_track_share": {
+          "DEFENSE": 0.029117379435850774,
+          "TRIAGE": 0.06665150136487716,
+          "RELEASE": 0.30641492265696085,
+          "PATENT": 0.5978161965423112
+        },
+        "all_tracks_maxed_seats": 0,
+        "breakthroughs": {
+          "DEFENSE_L1": {
+            "TAKEN": 4763,
+            "per_seat": 0.5292222222222223
+          },
+          "DEFENSE_L3": {
+            "TAKEN": 753,
+            "per_seat": 0.08366666666666667
+          },
+          "PATENT_L1": {
+            "TAKEN": 5007,
+            "per_seat": 0.5563333333333333
+          },
+          "PATENT_L3": {
+            "TAKEN": 3437,
+            "per_seat": 0.3818888888888889
+          },
+          "RELEASE_L1": {
+            "TAKEN": 4167,
+            "per_seat": 0.463
+          },
+          "RELEASE_L3": {
+            "TAKEN": 1694,
+            "per_seat": 0.18822222222222224
+          },
+          "TRIAGE_L1": {
+            "TAKEN": 5032,
+            "per_seat": 0.5591111111111111
+          },
+          "TRIAGE_L3": {
+            "FORFEITED": 791,
+            "TAKEN": 429,
+            "per_seat": 0.13555555555555557
+          }
+        },
+        "triage_l3": {
+          "resolutions": 1220,
+          "take_rate": 0.3516393442622951,
+          "declined_rate": 0.0,
+          "forfeit_rate": 0.648360655737705,
+          "forfeit_reasons": {
+            "unaffordable": 791
+          },
+          "colors": {
+            "yellow": 429
+          }
+        },
+        "l4_payouts_total": {
+          "defense_cash": 902,
+          "triage_research": 798,
+          "release_rerolls_used": 110,
+          "patent_secrets": 12001
+        },
+        "l4_payouts_per_holder": {
+          "defense_cash": 7.046875,
+          "triage_research": 2.7235494880546076,
+          "release_rerolls_used": 0.08166295471417966,
+          "patent_secrets_at_L4": 4.566590563165906
+        },
+        "l4_holders": {
+          "PATENT": 2628,
+          "DEFENSE": 128,
+          "RELEASE": 1347,
+          "TRIAGE": 293
+        },
+        "patent_secrets_per_seat": 1.9382222222222223,
+        "purple_lost_total": 2523,
+        "purple_lost_per_seat": 0.2803333333333333,
+        "games_with_purple_lost": 0.45,
+        "purple_owned_end_mean": 1.1015555555555556,
+        "dto": {
+          "seats": 1525,
+          "slush_used": 1421,
+          "slush_versions_used": 1421,
+          "slush_used_rate": 0.9318032786885246,
+          "slush_versions_used_per_seat": 0.9318032786885246
+        },
+        "bots": {
+          "AccelerationistBot": {
+            "seats": 1800,
+            "win_rate": 0.49583333333333335,
+            "survival_rate": 0.8538888888888889
+          },
+          "AdaptiveBalancedBot": {
+            "seats": 1800,
+            "win_rate": 0.18046296296296296,
+            "survival_rate": 0.5572222222222222
+          },
+          "RecklessSaboteurBot": {
+            "seats": 1800,
+            "win_rate": 0.32657407407407407,
+            "survival_rate": 0.6666666666666666
+          },
+          "SecOpsTurtleBot": {
+            "seats": 1800,
+            "win_rate": 0.19212962962962962,
+            "survival_rate": 0.6655555555555556
+          },
+          "VentureGreedBot": {
+            "seats": 1800,
+            "win_rate": 0.4716666666666667,
+            "survival_rate": 0.6522222222222223
+          }
+        },
+        "companies": {
+          "AEGIS": {
+            "seats": 1437,
+            "win_rate": 0.34887497100440734,
+            "survival_rate": 0.7098121085594989
+          },
+          "DTO": {
+            "seats": 1525,
+            "win_rate": 0.4287431693989071,
+            "survival_rate": 0.778360655737705
+          },
+          "HELIX": {
+            "seats": 1570,
+            "win_rate": 0.3092356687898089,
+            "survival_rate": 0.6445859872611465
+          },
+          "MERIDIAN": {
+            "seats": 1524,
+            "win_rate": 0.32217847769028873,
+            "survival_rate": 0.6633858267716536
+          },
+          "OMNIDYNE": {
+            "seats": 1480,
+            "win_rate": 0.32297297297297295,
+            "survival_rate": 0.6466216216216216
+          },
+          "PROMETHEUS": {
+            "seats": 1464,
+            "win_rate": 0.26662112932604737,
+            "survival_rate": 0.6318306010928961
+          }
+        },
+        "operatives": {
+          "ACOUSTIC": {
+            "seats": 1543,
+            "win_rate": 0.3239360553035213,
+            "survival_rate": 0.6675307841866494
+          },
+          "CIPHER": {
+            "seats": 1491,
+            "win_rate": 0.37089201877934275,
+            "survival_rate": 0.7028839704896043
+          },
+          "OPERATOR": {
+            "seats": 1496,
+            "win_rate": 0.3342245989304813,
+            "survival_rate": 0.6838235294117647
+          },
+          "PHREAKER": {
+            "seats": 1456,
+            "win_rate": 0.3075778388278388,
+            "survival_rate": 0.6428571428571429
+          },
+          "PRODIGY": {
+            "seats": 1529,
+            "win_rate": 0.33965554828864175,
+            "survival_rate": 0.6873773708306082
+          },
+          "SPOOK": {
+            "seats": 1485,
+            "win_rate": 0.32323232323232326,
+            "survival_rate": 0.6895622895622896
+          }
+        },
+        "bot_win_spread_pts": 31.53703703703704,
+        "company_win_spread_pts": 16.212204007285973,
+        "white_hat_win_spread_pts": 6.331417995150396,
+        "outliers": {
+          "round_le_2_wipeout": [],
+          "rounds_le_3": [],
+          "rounds_ge_20": [],
+          "rounds_ge_14": [],
+          "round_limit": []
+        },
+        "seconds": 12.4615318775177
+      },
+      "4P": {
+        "config": "V035",
+        "num_players": 4,
+        "games": 3000,
+        "player_games": 12000,
+        "seed_range": [
+          400042,
+          403041
+        ],
+        "mean_rounds": 8.591333333333333,
+        "median_rounds": 9.0,
+        "min_rounds": 3,
+        "max_rounds": 11,
+        "round_hist": {
+          "3": 1,
+          "4": 18,
+          "5": 87,
+          "6": 182,
+          "7": 365,
+          "8": 553,
+          "9": 893,
+          "10": 755,
+          "11": 146
+        },
+        "end_reasons": {
+          "patient_zero": 0.6663333333333333,
+          "singularity": 0.31466666666666665,
+          "total_wipeout": 0.019
+        },
+        "patient_zero_game_rate": 0.7163333333333334,
+        "player_survival": 0.7236666666666667,
+        "mean_final_secrets": 2.999416666666667,
+        "mean_survivor_secrets": 4.3992399815753105,
+        "mean_winner_secrets": 6.083830351225977,
+        "max_final_secrets": 20,
+        "research_mean": 11.818333333333333,
+        "research_median": 11.0,
+        "research_p10_p90": [
+          5,
+          21
+        ],
+        "research_by_source_per_seat": {
+          "income": 11.542833333333334,
+          "signature_protocol": 0.13858333333333334,
+          "triage_l4": 0.09316666666666666,
+          "star": 0.04375
+        },
+        "research_unspent_end": 0.6549166666666667,
+        "track_level_dist": {
+          "DEFENSE": {
+            "0": 0.48091666666666666,
+            "1": 0.35683333333333334,
+            "2": 0.08075,
+            "3": 0.0665,
+            "4": 0.015
+          },
+          "TRIAGE": {
+            "0": 0.4575,
+            "1": 0.32058333333333333,
+            "2": 0.08791666666666667,
+            "3": 0.10016666666666667,
+            "4": 0.03383333333333333
+          },
+          "RELEASE": {
+            "0": 0.544,
+            "1": 0.15291666666666667,
+            "2": 0.11558333333333333,
+            "3": 0.043833333333333335,
+            "4": 0.14366666666666666
+          },
+          "PATENT": {
+            "0": 0.45066666666666666,
+            "1": 0.086,
+            "2": 0.08591666666666667,
+            "3": 0.098,
+            "4": 0.27941666666666665
+          }
+        },
+        "mean_track_steps": 4.469833333333334,
+        "l4_tracks_per_seat_dist": {
+          "0": 0.5280833333333333,
+          "1": 0.47191666666666665
+        },
+        "seats_maxing_any_track": 0.47191666666666665,
+        "maxed_track_share": {
+          "DEFENSE": 0.03178527282359173,
+          "TRIAGE": 0.07169344870210136,
+          "RELEASE": 0.3044322797104008,
+          "PATENT": 0.5920889987639061
+        },
+        "all_tracks_maxed_seats": 0,
+        "breakthroughs": {
+          "DEFENSE_L1": {
+            "TAKEN": 6229,
+            "per_seat": 0.5190833333333333
+          },
+          "DEFENSE_L3": {
+            "TAKEN": 978,
+            "per_seat": 0.0815
+          },
+          "PATENT_L1": {
+            "TAKEN": 6592,
+            "per_seat": 0.5493333333333333
+          },
+          "PATENT_L3": {
+            "TAKEN": 4529,
+            "per_seat": 0.3774166666666667
+          },
+          "RELEASE_L1": {
+            "TAKEN": 5472,
+            "per_seat": 0.456
+          },
+          "RELEASE_L3": {
+            "TAKEN": 2250,
+            "per_seat": 0.1875
+          },
+          "TRIAGE_L1": {
+            "TAKEN": 6510,
+            "per_seat": 0.5425
+          },
+          "TRIAGE_L3": {
+            "FORFEITED": 999,
+            "TAKEN": 609,
+            "per_seat": 0.134
+          }
+        },
+        "triage_l3": {
+          "resolutions": 1608,
+          "take_rate": 0.3787313432835821,
+          "declined_rate": 0.0,
+          "forfeit_rate": 0.621268656716418,
+          "forfeit_reasons": {
+            "unaffordable": 999
+          },
+          "colors": {
+            "yellow": 609
+          }
+        },
+        "l4_payouts_total": {
+          "defense_cash": 1281,
+          "triage_research": 1118,
+          "release_rerolls_used": 137,
+          "patent_secrets": 16267
+        },
+        "l4_payouts_per_holder": {
+          "defense_cash": 7.116666666666666,
+          "triage_research": 2.7536945812807883,
+          "release_rerolls_used": 0.07946635730858469,
+          "patent_secrets_at_L4": 4.851476289889651
+        },
+        "l4_holders": {
+          "RELEASE": 1724,
+          "PATENT": 3353,
+          "TRIAGE": 406,
+          "DEFENSE": 180
+        },
+        "patent_secrets_per_seat": 2.0399166666666666,
+        "purple_lost_total": 2957,
+        "purple_lost_per_seat": 0.24641666666666667,
+        "games_with_purple_lost": 0.422,
+        "purple_owned_end_mean": 1.131,
+        "dto": {
+          "seats": 1966,
+          "slush_used": 1834,
+          "slush_versions_used": 1834,
+          "slush_used_rate": 0.9328585961342828,
+          "slush_versions_used_per_seat": 0.9328585961342828
+        },
+        "bots": {
+          "AccelerationistBot": {
+            "seats": 2400,
+            "win_rate": 0.44145833333333334,
+            "survival_rate": 0.88875
+          },
+          "AdaptiveBalancedBot": {
+            "seats": 2400,
+            "win_rate": 0.08041666666666666,
+            "survival_rate": 0.63625
+          },
+          "RecklessSaboteurBot": {
+            "seats": 2400,
+            "win_rate": 0.2240972222222222,
+            "survival_rate": 0.73125
+          },
+          "SecOpsTurtleBot": {
+            "seats": 2400,
+            "win_rate": 0.0913888888888889,
+            "survival_rate": 0.7029166666666666
+          },
+          "VentureGreedBot": {
+            "seats": 2400,
+            "win_rate": 0.4126388888888889,
+            "survival_rate": 0.6591666666666667
+          }
+        },
+        "companies": {
+          "AEGIS": {
+            "seats": 2022,
+            "win_rate": 0.27909660402242004,
+            "survival_rate": 0.7621167161226509
+          },
+          "DTO": {
+            "seats": 1966,
+            "win_rate": 0.34791454730417093,
+            "survival_rate": 0.8168870803662258
+          },
+          "HELIX": {
+            "seats": 1990,
+            "win_rate": 0.21231155778894473,
+            "survival_rate": 0.6758793969849246
+          },
+          "MERIDIAN": {
+            "seats": 1990,
+            "win_rate": 0.21876046901172527,
+            "survival_rate": 0.7241206030150754
+          },
+          "OMNIDYNE": {
+            "seats": 1992,
+            "win_rate": 0.23887215528781794,
+            "survival_rate": 0.6882530120481928
+          },
+          "PROMETHEUS": {
+            "seats": 2040,
+            "win_rate": 0.20490196078431372,
+            "survival_rate": 0.6764705882352942
+          }
+        },
+        "operatives": {
+          "ACOUSTIC": {
+            "seats": 2014,
+            "win_rate": 0.23485600794438927,
+            "survival_rate": 0.7214498510427011
+          },
+          "CIPHER": {
+            "seats": 2013,
+            "win_rate": 0.27984765689683716,
+            "survival_rate": 0.7347242921013413
+          },
+          "OPERATOR": {
+            "seats": 1971,
+            "win_rate": 0.25536952477591746,
+            "survival_rate": 0.7463216641298833
+          },
+          "PHREAKER": {
+            "seats": 1999,
+            "win_rate": 0.23353343338335833,
+            "survival_rate": 0.7023511755877939
+          },
+          "PRODIGY": {
+            "seats": 2007,
+            "win_rate": 0.2399103139013453,
+            "survival_rate": 0.7144992526158446
+          },
+          "SPOOK": {
+            "seats": 1996,
+            "win_rate": 0.2565130260521042,
+            "survival_rate": 0.7229458917835672
+          }
+        },
+        "bot_win_spread_pts": 36.10416666666667,
+        "company_win_spread_pts": 14.301258651985721,
+        "white_hat_win_spread_pts": 4.631422351347883,
+        "outliers": {
+          "round_le_2_wipeout": [],
+          "rounds_le_3": [
+            {
+              "seed": 402281,
+              "match_idx": 2239,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            }
+          ],
+          "rounds_ge_20": [],
+          "rounds_ge_14": [],
+          "round_limit": []
+        },
+        "seconds": 15.199960470199585
+      }
+    },
+    "V034": {
+      "2P": {
+        "config": "V034",
+        "num_players": 2,
+        "games": 3000,
+        "player_games": 6000,
+        "seed_range": [
+          200042,
+          203041
+        ],
+        "mean_rounds": 8.213,
+        "median_rounds": 9.0,
+        "min_rounds": 3,
+        "max_rounds": 11,
+        "round_hist": {
+          "3": 9,
+          "4": 61,
+          "5": 128,
+          "6": 271,
+          "7": 427,
+          "8": 588,
+          "9": 856,
+          "10": 555,
+          "11": 105
+        },
+        "end_reasons": {
+          "patient_zero": 0.5966666666666667,
+          "singularity": 0.23833333333333334,
+          "total_wipeout": 0.165
+        },
+        "patient_zero_game_rate": 0.7936666666666666,
+        "player_survival": 0.5206666666666667,
+        "mean_final_secrets": 1.3365,
+        "mean_survivor_secrets": 3.2784891165172856,
+        "mean_winner_secrets": 2.721750489875898,
+        "max_final_secrets": 10,
+        "research_mean": 3.857,
+        "research_median": 4.0,
+        "research_p10_p90": [
+          1,
+          7
+        ],
+        "research_by_source_per_seat": {
+          "income": 3.6895,
+          "signature_protocol": 0.13866666666666666,
+          "star": 0.028833333333333332
+        },
+        "research_unspent_end": 0.673,
+        "track_level_dist": {
+          "DEFENSE": {
+            "0": 0.5725,
+            "1": 0.4125,
+            "2": 0.015
+          },
+          "TRIAGE": {
+            "0": 0.7816666666666666,
+            "1": 0.21833333333333332
+          },
+          "RELEASE": {
+            "0": 0.4095,
+            "1": 0.48233333333333334,
+            "2": 0.10816666666666666
+          },
+          "PATENT": {
+            "0": 0.7331666666666666,
+            "1": 0.2668333333333333
+          }
+        },
+        "mean_track_steps": 1.6263333333333334,
+        "l4_tracks_per_seat_dist": {
+          "0": 1.0
+        },
+        "seats_maxing_any_track": 0.0,
+        "maxed_track_share": {
+          "DEFENSE": 0.0,
+          "TRIAGE": 0.0,
+          "RELEASE": 0.0,
+          "PATENT": 0.0
+        },
+        "all_tracks_maxed_seats": 0,
+        "breakthroughs": {},
+        "triage_l3": {
+          "resolutions": 0,
+          "take_rate": 0.0,
+          "declined_rate": 0.0,
+          "forfeit_rate": 0.0,
+          "forfeit_reasons": {},
+          "colors": {}
+        },
+        "l4_payouts_total": {
+          "defense_cash": 0,
+          "triage_research": 0,
+          "release_rerolls_used": 0,
+          "patent_secrets": 0
+        },
+        "l4_payouts_per_holder": {
+          "defense_cash": 0.0,
+          "triage_research": 0.0,
+          "release_rerolls_used": 0.0,
+          "patent_secrets_at_L4": 0.0
+        },
+        "l4_holders": {},
+        "patent_secrets_per_seat": 0.08483333333333333,
+        "purple_lost_total": 1440,
+        "purple_lost_per_seat": 0.24,
+        "games_with_purple_lost": 0.319,
+        "purple_owned_end_mean": 1.1471666666666667,
+        "dto": {
+          "seats": 958,
+          "slush_used": 0,
+          "slush_versions_used": 2243,
+          "slush_used_rate": 0.0,
+          "slush_versions_used_per_seat": 2.3413361169102296
+        },
+        "bots": {
+          "AccelerationistBot": {
+            "seats": 1200,
+            "win_rate": 0.6383333333333333,
+            "survival_rate": 0.6525
+          },
+          "AdaptiveBalancedBot": {
+            "seats": 1200,
+            "win_rate": 0.6254166666666666,
+            "survival_rate": 0.6816666666666666
+          },
+          "RecklessSaboteurBot": {
+            "seats": 1200,
+            "win_rate": 0.445,
+            "survival_rate": 0.4558333333333333
+          },
+          "SecOpsTurtleBot": {
+            "seats": 1200,
+            "win_rate": 0.48083333333333333,
+            "survival_rate": 0.5325
+          },
+          "VentureGreedBot": {
+            "seats": 1200,
+            "win_rate": 0.3104166666666667,
+            "survival_rate": 0.2808333333333333
+          }
+        },
+        "companies": {
+          "AEGIS": {
+            "seats": 1015,
+            "win_rate": 0.28866995073891627,
+            "survival_rate": 0.3586206896551724
+          },
+          "DTO": {
+            "seats": 958,
+            "win_rate": 0.8830897703549061,
+            "survival_rate": 0.872651356993737
+          },
+          "HELIX": {
+            "seats": 1035,
+            "win_rate": 0.5420289855072464,
+            "survival_rate": 0.5420289855072464
+          },
+          "MERIDIAN": {
+            "seats": 991,
+            "win_rate": 0.5423814328960646,
+            "survival_rate": 0.5549949545913219
+          },
+          "OMNIDYNE": {
+            "seats": 972,
+            "win_rate": 0.25205761316872427,
+            "survival_rate": 0.26954732510288065
+          },
+          "PROMETHEUS": {
+            "seats": 1029,
+            "win_rate": 0.5029154518950437,
+            "survival_rate": 0.5354713313896987
+          }
+        },
+        "operatives": {
+          "ACOUSTIC": {
+            "seats": 984,
+            "win_rate": 0.5264227642276422,
+            "survival_rate": 0.5711382113821138
+          },
+          "CIPHER": {
+            "seats": 984,
+            "win_rate": 0.4974593495934959,
+            "survival_rate": 0.5091463414634146
+          },
+          "OPERATOR": {
+            "seats": 1024,
+            "win_rate": 0.515625,
+            "survival_rate": 0.498046875
+          },
+          "PHREAKER": {
+            "seats": 1003,
+            "win_rate": 0.47507477567298106,
+            "survival_rate": 0.48953140578265203
+          },
+          "PRODIGY": {
+            "seats": 984,
+            "win_rate": 0.4679878048780488,
+            "survival_rate": 0.5152439024390244
+          },
+          "SPOOK": {
+            "seats": 1021,
+            "win_rate": 0.5166503428011753,
+            "survival_rate": 0.5416258570029383
+          }
+        },
+        "bot_win_spread_pts": 32.791666666666664,
+        "company_win_spread_pts": 63.10321571861819,
+        "white_hat_win_spread_pts": 5.843495934959342,
+        "outliers": {
+          "round_le_2_wipeout": [],
+          "rounds_le_3": [
+            {
+              "seed": 200295,
+              "match_idx": 253,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 201050,
+              "match_idx": 1008,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 201068,
+              "match_idx": 1026,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 201447,
+              "match_idx": 1405,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 201605,
+              "match_idx": 1563,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 201745,
+              "match_idx": 1703,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 202225,
+              "match_idx": 2183,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 202655,
+              "match_idx": 2613,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 202985,
+              "match_idx": 2943,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            }
+          ],
+          "rounds_ge_20": [],
+          "rounds_ge_14": [],
+          "round_limit": []
+        },
+        "seconds": 7.094430446624756
+      },
+      "3P": {
+        "config": "V034",
+        "num_players": 3,
+        "games": 3000,
+        "player_games": 9000,
+        "seed_range": [
+          300042,
+          303041
+        ],
+        "mean_rounds": 7.854666666666667,
+        "median_rounds": 8.0,
+        "min_rounds": 3,
+        "max_rounds": 11,
+        "round_hist": {
+          "3": 13,
+          "4": 95,
+          "5": 204,
+          "6": 388,
+          "7": 445,
+          "8": 582,
+          "9": 748,
+          "10": 481,
+          "11": 44
+        },
+        "end_reasons": {
+          "patient_zero": 0.7633333333333333,
+          "singularity": 0.17866666666666667,
+          "total_wipeout": 0.058
+        },
+        "patient_zero_game_rate": 0.852,
+        "player_survival": 0.6151111111111112,
+        "mean_final_secrets": 1.9536666666666667,
+        "mean_survivor_secrets": 3.608742774566474,
+        "mean_winner_secrets": 4.120065789473684,
+        "max_final_secrets": 11,
+        "research_mean": 3.772,
+        "research_median": 3.0,
+        "research_p10_p90": [
+          1,
+          7
+        ],
+        "research_by_source_per_seat": {
+          "income": 3.612111111111111,
+          "signature_protocol": 0.12788888888888889,
+          "star": 0.032
+        },
+        "research_unspent_end": 0.7041111111111111,
+        "track_level_dist": {
+          "DEFENSE": {
+            "0": 0.5835555555555556,
+            "1": 0.4037777777777778,
+            "2": 0.012666666666666666
+          },
+          "TRIAGE": {
+            "0": 0.7832222222222223,
+            "1": 0.2167777777777778
+          },
+          "RELEASE": {
+            "0": 0.4235555555555556,
+            "1": 0.4726666666666667,
+            "2": 0.10377777777777777
+          },
+          "PATENT": {
+            "0": 0.7297777777777777,
+            "1": 0.2702222222222222
+          }
+        },
+        "mean_track_steps": 1.5963333333333334,
+        "l4_tracks_per_seat_dist": {
+          "0": 1.0
+        },
+        "seats_maxing_any_track": 0.0,
+        "maxed_track_share": {
+          "DEFENSE": 0.0,
+          "TRIAGE": 0.0,
+          "RELEASE": 0.0,
+          "PATENT": 0.0
+        },
+        "all_tracks_maxed_seats": 0,
+        "breakthroughs": {},
+        "triage_l3": {
+          "resolutions": 0,
+          "take_rate": 0.0,
+          "declined_rate": 0.0,
+          "forfeit_rate": 0.0,
+          "forfeit_reasons": {},
+          "colors": {}
+        },
+        "l4_payouts_total": {
+          "defense_cash": 0,
+          "triage_research": 0,
+          "release_rerolls_used": 0,
+          "patent_secrets": 0
+        },
+        "l4_payouts_per_holder": {
+          "defense_cash": 0.0,
+          "triage_research": 0.0,
+          "release_rerolls_used": 0.0,
+          "patent_secrets_at_L4": 0.0
+        },
+        "l4_holders": {},
+        "patent_secrets_per_seat": 0.08055555555555556,
+        "purple_lost_total": 1757,
+        "purple_lost_per_seat": 0.1952222222222222,
+        "games_with_purple_lost": 0.2836666666666667,
+        "purple_owned_end_mean": 1.1856666666666666,
+        "dto": {
+          "seats": 1525,
+          "slush_used": 0,
+          "slush_versions_used": 3344,
+          "slush_used_rate": 0.0,
+          "slush_versions_used_per_seat": 2.192786885245902
+        },
+        "bots": {
+          "AccelerationistBot": {
+            "seats": 1800,
+            "win_rate": 0.41740740740740745,
+            "survival_rate": 0.7261111111111112
+          },
+          "AdaptiveBalancedBot": {
+            "seats": 1800,
+            "win_rate": 0.47324074074074085,
+            "survival_rate": 0.7661111111111111
+          },
+          "RecklessSaboteurBot": {
+            "seats": 1800,
+            "win_rate": 0.31546296296296295,
+            "survival_rate": 0.6161111111111112
+          },
+          "SecOpsTurtleBot": {
+            "seats": 1800,
+            "win_rate": 0.309537037037037,
+            "survival_rate": 0.6622222222222223
+          },
+          "VentureGreedBot": {
+            "seats": 1800,
+            "win_rate": 0.1510185185185185,
+            "survival_rate": 0.305
+          }
+        },
+        "companies": {
+          "AEGIS": {
+            "seats": 1437,
+            "win_rate": 0.1452099280909302,
+            "survival_rate": 0.4906054279749478
+          },
+          "DTO": {
+            "seats": 1525,
+            "win_rate": 0.7995628415300546,
+            "survival_rate": 0.9101639344262296
+          },
+          "HELIX": {
+            "seats": 1570,
+            "win_rate": 0.29883227176220806,
+            "survival_rate": 0.6503184713375796
+          },
+          "MERIDIAN": {
+            "seats": 1524,
+            "win_rate": 0.3206474190726159,
+            "survival_rate": 0.65748031496063
+          },
+          "OMNIDYNE": {
+            "seats": 1480,
+            "win_rate": 0.10889639639639641,
+            "survival_rate": 0.3418918918918919
+          },
+          "PROMETHEUS": {
+            "seats": 1464,
+            "win_rate": 0.3094262295081967,
+            "survival_rate": 0.6243169398907104
+          }
+        },
+        "operatives": {
+          "ACOUSTIC": {
+            "seats": 1543,
+            "win_rate": 0.35677252106286456,
+            "survival_rate": 0.6331821127673364
+          },
+          "CIPHER": {
+            "seats": 1491,
+            "win_rate": 0.3222669349429913,
+            "survival_rate": 0.6123407109322603
+          },
+          "OPERATOR": {
+            "seats": 1496,
+            "win_rate": 0.33333333333333337,
+            "survival_rate": 0.6183155080213903
+          },
+          "PHREAKER": {
+            "seats": 1456,
+            "win_rate": 0.2928113553113553,
+            "survival_rate": 0.5975274725274725
+          },
+          "PRODIGY": {
+            "seats": 1529,
+            "win_rate": 0.32581207761063874,
+            "survival_rate": 0.5925441465009811
+          },
+          "SPOOK": {
+            "seats": 1485,
+            "win_rate": 0.36756453423120083,
+            "survival_rate": 0.6363636363636364
+          }
+        },
+        "bot_win_spread_pts": 32.222222222222236,
+        "company_win_spread_pts": 69.06664451336583,
+        "white_hat_win_spread_pts": 7.475317891984551,
+        "outliers": {
+          "round_le_2_wipeout": [],
+          "rounds_le_3": [
+            {
+              "seed": 300076,
+              "match_idx": 34,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 300732,
+              "match_idx": 690,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 300741,
+              "match_idx": 699,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 300917,
+              "match_idx": 875,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 301044,
+              "match_idx": 1002,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 301056,
+              "match_idx": 1014,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 301346,
+              "match_idx": 1304,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 301641,
+              "match_idx": 1599,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 302009,
+              "match_idx": 1967,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 302262,
+              "match_idx": 2220,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 302292,
+              "match_idx": 2250,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 302472,
+              "match_idx": 2430,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 302994,
+              "match_idx": 2952,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            }
+          ],
+          "rounds_ge_20": [],
+          "rounds_ge_14": [],
+          "round_limit": []
+        },
+        "seconds": 9.222442865371704
+      },
+      "4P": {
+        "config": "V034",
+        "num_players": 4,
+        "games": 3000,
+        "player_games": 12000,
+        "seed_range": [
+          400042,
+          403041
+        ],
+        "mean_rounds": 7.660666666666667,
+        "median_rounds": 8.0,
+        "min_rounds": 3,
+        "max_rounds": 11,
+        "round_hist": {
+          "3": 24,
+          "4": 116,
+          "5": 254,
+          "6": 394,
+          "7": 493,
+          "8": 590,
+          "9": 689,
+          "10": 400,
+          "11": 40
+        },
+        "end_reasons": {
+          "patient_zero": 0.8276666666666667,
+          "singularity": 0.14933333333333335,
+          "total_wipeout": 0.023
+        },
+        "patient_zero_game_rate": 0.878,
+        "player_survival": 0.6765833333333333,
+        "mean_final_secrets": 2.33825,
+        "mean_survivor_secrets": 3.78716590713142,
+        "mean_winner_secrets": 4.982473544973545,
+        "max_final_secrets": 11,
+        "research_mean": 3.79425,
+        "research_median": 3.0,
+        "research_p10_p90": [
+          1,
+          7
+        ],
+        "research_by_source_per_seat": {
+          "income": 3.639,
+          "signature_protocol": 0.12975,
+          "star": 0.0255
+        },
+        "research_unspent_end": 0.7196666666666667,
+        "track_level_dist": {
+          "DEFENSE": {
+            "0": 0.5780833333333333,
+            "1": 0.4071666666666667,
+            "2": 0.01475
+          },
+          "TRIAGE": {
+            "0": 0.782,
+            "1": 0.218
+          },
+          "RELEASE": {
+            "0": 0.4156666666666667,
+            "1": 0.48075,
+            "2": 0.10358333333333333
+          },
+          "PATENT": {
+            "0": 0.7325,
+            "1": 0.2675
+          }
+        },
+        "mean_track_steps": 1.6100833333333333,
+        "l4_tracks_per_seat_dist": {
+          "0": 1.0
+        },
+        "seats_maxing_any_track": 0.0,
+        "maxed_track_share": {
+          "DEFENSE": 0.0,
+          "TRIAGE": 0.0,
+          "RELEASE": 0.0,
+          "PATENT": 0.0
+        },
+        "all_tracks_maxed_seats": 0,
+        "breakthroughs": {},
+        "triage_l3": {
+          "resolutions": 0,
+          "take_rate": 0.0,
+          "declined_rate": 0.0,
+          "forfeit_rate": 0.0,
+          "forfeit_reasons": {},
+          "colors": {}
+        },
+        "l4_payouts_total": {
+          "defense_cash": 0,
+          "triage_research": 0,
+          "release_rerolls_used": 0,
+          "patent_secrets": 0
+        },
+        "l4_payouts_per_holder": {
+          "defense_cash": 0.0,
+          "triage_research": 0.0,
+          "release_rerolls_used": 0.0,
+          "patent_secrets_at_L4": 0.0
+        },
+        "l4_holders": {},
+        "patent_secrets_per_seat": 0.08641666666666667,
+        "purple_lost_total": 1978,
+        "purple_lost_per_seat": 0.16483333333333333,
+        "games_with_purple_lost": 0.24766666666666667,
+        "purple_owned_end_mean": 1.21925,
+        "dto": {
+          "seats": 1966,
+          "slush_used": 0,
+          "slush_versions_used": 4187,
+          "slush_used_rate": 0.0,
+          "slush_versions_used_per_seat": 2.1297049847405902
+        },
+        "bots": {
+          "AccelerationistBot": {
+            "seats": 2400,
+            "win_rate": 0.299375,
+            "survival_rate": 0.7620833333333333
+          },
+          "AdaptiveBalancedBot": {
+            "seats": 2400,
+            "win_rate": 0.37083333333333335,
+            "survival_rate": 0.8383333333333334
+          },
+          "RecklessSaboteurBot": {
+            "seats": 2400,
+            "win_rate": 0.2608333333333333,
+            "survival_rate": 0.7283333333333334
+          },
+          "SecOpsTurtleBot": {
+            "seats": 2400,
+            "win_rate": 0.20291666666666666,
+            "survival_rate": 0.70875
+          },
+          "VentureGreedBot": {
+            "seats": 2400,
+            "win_rate": 0.11604166666666667,
+            "survival_rate": 0.34541666666666665
+          }
+        },
+        "companies": {
+          "AEGIS": {
+            "seats": 2022,
+            "win_rate": 0.08382789317507418,
+            "survival_rate": 0.5657764589515332
+          },
+          "DTO": {
+            "seats": 1966,
+            "win_rate": 0.754323499491353,
+            "survival_rate": 0.9491353001017294
+          },
+          "HELIX": {
+            "seats": 1990,
+            "win_rate": 0.1977386934673367,
+            "survival_rate": 0.7120603015075377
+          },
+          "MERIDIAN": {
+            "seats": 1990,
+            "win_rate": 0.21482412060301506,
+            "survival_rate": 0.7241206030150754
+          },
+          "OMNIDYNE": {
+            "seats": 1992,
+            "win_rate": 0.05271084337349398,
+            "survival_rate": 0.42620481927710846
+          },
+          "PROMETHEUS": {
+            "seats": 2040,
+            "win_rate": 0.20661764705882352,
+            "survival_rate": 0.6872549019607843
+          }
+        },
+        "operatives": {
+          "ACOUSTIC": {
+            "seats": 2014,
+            "win_rate": 0.26812313803376364,
+            "survival_rate": 0.692154915590864
+          },
+          "CIPHER": {
+            "seats": 2013,
+            "win_rate": 0.250869349230005,
+            "survival_rate": 0.6810730253353204
+          },
+          "OPERATOR": {
+            "seats": 1971,
+            "win_rate": 0.2676306443429731,
+            "survival_rate": 0.6839167935058346
+          },
+          "PHREAKER": {
+            "seats": 1999,
+            "win_rate": 0.24712356178089045,
+            "survival_rate": 0.6543271635817909
+          },
+          "PRODIGY": {
+            "seats": 2007,
+            "win_rate": 0.22521175884404585,
+            "survival_rate": 0.6681614349775785
+          },
+          "SPOOK": {
+            "seats": 1996,
+            "win_rate": 0.24123246492985972,
+            "survival_rate": 0.6798597194388778
+          }
+        },
+        "bot_win_spread_pts": 25.479166666666668,
+        "company_win_spread_pts": 70.16126561178591,
+        "white_hat_win_spread_pts": 4.2911379189717795,
+        "outliers": {
+          "round_le_2_wipeout": [],
+          "rounds_le_3": [
+            {
+              "seed": 400242,
+              "match_idx": 200,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 400407,
+              "match_idx": 365,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 400488,
+              "match_idx": 446,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 400832,
+              "match_idx": 790,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 400884,
+              "match_idx": 842,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 401295,
+              "match_idx": 1253,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 401336,
+              "match_idx": 1294,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 401467,
+              "match_idx": 1425,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 401472,
+              "match_idx": 1430,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 401817,
+              "match_idx": 1775,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 401855,
+              "match_idx": 1813,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 401896,
+              "match_idx": 1854,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 401976,
+              "match_idx": 1934,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 402051,
+              "match_idx": 2009,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 402167,
+              "match_idx": 2125,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 402191,
+              "match_idx": 2149,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 402212,
+              "match_idx": 2170,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 402313,
+              "match_idx": 2271,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 402421,
+              "match_idx": 2379,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 402498,
+              "match_idx": 2456,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 402598,
+              "match_idx": 2556,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 402715,
+              "match_idx": 2673,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 402881,
+              "match_idx": 2839,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            },
+            {
+              "seed": 402982,
+              "match_idx": 2940,
+              "rounds": 3,
+              "end_reason": "patient_zero"
+            }
+          ],
+          "rounds_ge_20": [],
+          "rounds_ge_14": [],
+          "round_limit": []
+        },
+        "seconds": 11.293025970458984
+      }
+    }
+  }
+}

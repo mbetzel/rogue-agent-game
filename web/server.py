@@ -108,6 +108,7 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                         seed = int(seed)
                     randomize_cards = bool(data.get("randomize_cards", False))
                     enable_corporate_asymmetry = bool(data.get("enable_corporate_asymmetry", True))
+                    research_track_model = data.get("research_track_model") or data.get("ruleset")
 
                     state = self.controller.new_game(
                         num_players=num_players,
@@ -115,6 +116,7 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                         seed=seed,
                         randomize_cards=randomize_cards,
                         enable_corporate_asymmetry=enable_corporate_asymmetry,
+                        research_track_model=research_track_model,
                     )
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
@@ -214,7 +216,8 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                         self._send_json_response(payload, code)
                         return
                     state = self.controller.confirm_attacks(
-                        pid, any_shield_allocations=allocs, glitch_die_ids=glitch_ids, aegis_color=aegis_color
+                        pid, any_shield_allocations=allocs, glitch_die_ids=glitch_ids, aegis_color=aegis_color,
+                        use_slush_fund=(bool(data["use_slush_fund"]) if data.get("use_slush_fund") is not None else None)
                     )
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
@@ -347,6 +350,18 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     pid = get_target_pid(default_to_human=False)
                     track_type = str(data.get("track_type", ""))
                     state = self.controller.upgrade_track(pid, track_type)
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
+                elif clean_path == "/api/game/action/breakthrough":
+                    pid = get_target_pid(default_to_human=False)
+                    gray_id = data.get("gray_die_id")
+                    state = self.controller.resolve_breakthrough(
+                        pid,
+                        accept=bool(data.get("accept", True)),
+                        gray_die_id=int(gray_id) if gray_id is not None else None,
+                        color=data.get("color"),
+                    )
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
 

@@ -312,7 +312,7 @@ class TestV230Rules(unittest.TestCase):
     # =========================================================================
 
     def test_fast_patch_spends_exact_one_wrench_per_die(self) -> None:
-        """Fast-patching costs exactly 1 🔧 per die."""
+        """Fast-patching costs exactly 1 🔬 per die."""
         engine = GameEngine(config=GameConfig(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.patches = 2
@@ -384,7 +384,7 @@ class TestV230Rules(unittest.TestCase):
         self.assertEqual(p0.patches, 0)
 
     def test_patch_token_cap_enforced_at_three(self) -> None:
-        """Patches exceeding 3 🔧 are discarded at round end cleanup (uncapped in v0.28.0+)."""
+        """Patches exceeding 3 🔬 are discarded at round end cleanup (uncapped in v0.28.0+)."""
         engine = GameEngine(config=GameConfig(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.bot = BaseBot(0)

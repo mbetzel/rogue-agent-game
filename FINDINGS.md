@@ -1773,3 +1773,42 @@ All Phase 41 qualitative and quantitative design goals have been verified:
 
 **Status: OFFICIALLY APPROVED (`v0.33.0` Baseline).**
 
+
+## 29. Phase 42 Baseline (`v0.34.0`): Six-Phase Round Sequence — Accepted As-Is
+
+Source: [docs/findings/v340_balance_assessment.md](docs/findings/v340_balance_assessment.md) and [docs/findings/v340_telemetry_sweep_report.md](docs/findings/v340_telemetry_sweep_report.md).
+
+- **Decision (User, 2026-11-05):** accept v0.34.0 with no tuning package. The proposed changes were not adopted: Aegis Release Bandwidth 4 (moot under Phase 43's flat L0 setup), a 5-space v1.0 Corruption Track, and a once-per-game Slush Fund.
+- **Engine:** the White Hat → Institutional Override bridge is off by default (`legacy_archetype_override_bridge = False`) and on only for `GameConfig.legacy_v033()`.
+- **Results with the bridge off (2P / 3P / 4P):**
+  - mean rounds 8.21 / 7.85 / 7.66;
+  - Singularity 23.9 / 17.7 / 14.9%;
+  - Total Wipeout 16.6 / 5.7 / 2.2%;
+  - White Hat win-rate spread 4–7 pts;
+  - bot spread 33 / 32 / 26.
+- **Known issues carried forward:**
+  1. 3P/4P games run under the 8-round target. This is mostly VentureGreedBot dying early, so the follow-up is to retune the bot.
+  2. 2P Total Wipeout of about 17% is structural, because 2P players face the same cubes and breach together. Treat it as a property of the 2P format.
+  3. DTO is the top company, winning 88 / 80 / 75%. Its free Slush Fund absorb saves about 2.6–3.1 Secrets per game. Revisit alongside the Phase 43 company rebalance.
+
+## 30. Phase 43 Baseline (`v0.35.0`): Research Track Rebalance — Signed Off As-Is
+
+Sources: [docs/findings/v350_research_income_sweep.md](docs/findings/v350_research_income_sweep.md), [docs/findings/v350_telemetry_sweep_report.md](docs/findings/v350_telemetry_sweep_report.md), [docs/findings/v350_balance_assessment.md](docs/findings/v350_balance_assessment.md). Design decisions: [plan doc §6](docs/explorations/2026_11_research_track_rebalance_plan.md); spec resolutions: [v350 spec](docs/specs/v350_research_track_rebalance_spec.md).
+
+- **Decision (User, 2026-11-06):** accept v0.35.0 with no rules `[TUNE]` package.
+- **Design:** 5-level tracks (1/2/2/3 🔬), Breakthroughs at L1/L3, L4 capstones, new Gray Legacy faces, Purple dice not purchasable (2nd Purple from Patents L3), all Client Company setup bonuses removed, Slush Fund once per game (optional), Defense L4 `+$1` per blocked cube (max `$3`), Triage L3 `$3` Gray → colored die upgrade.
+- **Results (2P / 3P / 4P, 3,000 games per pod):**
+  - mean rounds 8.87 / 8.71 / 8.59 (v0.34: 8.21 / 7.85 / 7.66 — short-game issue fixed);
+  - 🔬 per player ~11.9 (v0.34: ~3.8);
+  - Singularity 41.7 / 35.7 / 31.5%;
+  - Total Wipeout 16.0 / 5.8 / 1.9%;
+  - company win-rate spread ~15 pts (v0.34: ~65).
+- **Accepted:**
+  1. Patents at ~60% of maxed tracks is a bot-roster artifact (random-focus slice: ~22%). Fallback if playtests show over-picking: Patents L4 rate 1 → 2 🔬 per Secret.
+  2. 2P Total Wipeout ~16% is structural (see §29).
+  3. Research income 11.8–12.0 🔬, at the bottom edge of the 12–14 target.
+- **Watch items carried forward:** DTO still top company (56 / 43 / 34%; company rebalance deferred); permanent Purple loss 0.22–0.31 per seat; Triage L3 `$3` affordability.
+- **Bot notes (not rules):** the bot files Patents only when its focus track is at L4 **and** it holds ≥ 4 🔬 (spec §7.1 said "or"). Triage L3 color choice and Release L4 reroll usage are bot artifacts. Possible bot follow-ups (not yet approved): cap Patents-first bots, Triage L3 color heuristic, AND vs OR filing rule.
+- **Open low-priority check:** same-seed `legacy_v034()` runs do not exactly match the v340 report (2P DTO 88% vs 76%); untraced, does not affect the v0.35 verdict.
+
+**Status: OFFICIALLY APPROVED (`v0.35.0` Baseline).**

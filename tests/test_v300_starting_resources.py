@@ -79,7 +79,7 @@ class TestV300StartingResources(unittest.TestCase):
         """TEST-V300-04 (INV-START-RES-01): Verify Helix Biomedical Consortium starts with
         exactly 2 🔬 research tokens (0 baseline + 2 corporate bonus).
         """
-        config = GameConfig(num_players=2, enable_corporate_asymmetry=True)
+        config = GameConfig.legacy_v034(num_players=2, enable_corporate_asymmetry=True)
         helix_comp = COMPANIES[CompanyCode.HELIX]
         other_comp = COMPANIES[CompanyCode.OMNIDYNE]
         wh1 = WHITE_HATS[WhiteHatCode.PRODIGY]
@@ -108,7 +108,7 @@ class TestV300StartingResources(unittest.TestCase):
         """TEST-V300-06 (INV-START-CASH-01): Verify Meridian Financial Trust starts with
         exactly $8 cash ($6 baseline + $2 corporate bonus).
         """
-        config = GameConfig(num_players=2, enable_corporate_asymmetry=True)
+        config = GameConfig.legacy_v034(num_players=2, enable_corporate_asymmetry=True)
         meridian_comp = COMPANIES[CompanyCode.MERIDIAN]
         other_comp = COMPANIES[CompanyCode.OMNIDYNE]
         wh1 = WHITE_HATS[WhiteHatCode.OPERATOR]

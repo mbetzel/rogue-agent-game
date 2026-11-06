@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 from sim.config import CubeColor, DieColor, ShieldColor
 from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
 from sim.entities import ArchetypeCode, CompanyCode, WhiteHatCode
-from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index, plan_final_round_repairs, is_six_phase_state
+from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index, plan_final_round_repairs, is_six_phase_state, purple_purchasable
 
 if TYPE_CHECKING:
     from sim.engine import GameState, PlayerState
@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 
 class SecOpsTurtleBot(BaseBot):
     """Paranoid defensive turtle: focuses on shields, heavy patching, and avoiding Dirty Income."""
+
+    research_focus = ('DEFENSE', 'TRIAGE', 'RELEASE', 'PATENT')  # v0.35.0 research-aware policy
 
     def __init__(self, bot_id: int) -> None:
         super().__init__(bot_id, name="SecOpsTurtleBot")
@@ -184,9 +186,9 @@ class SecOpsTurtleBot(BaseBot):
                 continue
             if face.has_shield_option:
                 declarations[idx] = 0 if blue_threat > 0 else 1
-            elif face.name == "+$1 / +1 🔧":
+            elif face.name == "+$1 / +1 🔬":
                 declarations[idx] = 1 if player_state.patches < 3 else 0
-            elif face.name == "+1 🔧 / +$1":
+            elif face.name == "+1 🔬 / +$1":
                 declarations[idx] = 0 if player_state.patches < 3 else 1
             else:
                 declarations[idx] = 0
@@ -225,7 +227,7 @@ class SecOpsTurtleBot(BaseBot):
         rng: random.Random,
     ) -> bool:
         """SecOpsTurtleBot places high priority on Purple reserve using dynamic operative reserve cost."""
-        if getattr(player_state, "personal_purple_reserve", 0) <= 0:
+        if not purple_purchasable(game_state) or getattr(player_state, "personal_purple_reserve", 0) <= 0:
             return False
         reserve_cost = (
             player_state.get_purple_reserve_cost()
@@ -287,7 +289,7 @@ class SecOpsTurtleBot(BaseBot):
                         plan.prometheus_discount_die_color = c
                         current_money -= cost
                         break
-                if not plan.use_cipher_ability and getattr(player_state, "personal_purple_reserve", 0) > 0:
+                if not plan.use_cipher_ability and (purple_purchasable(game_state) and getattr(player_state, "personal_purple_reserve", 0) > 0):
                     base_purple_cost = player_state.get_purple_reserve_cost()
                     disc_purple_cost = max(0, base_purple_cost - game_state.config.cipher_market_discount)
                     if current_money - disc_purple_cost >= cash_cushion:

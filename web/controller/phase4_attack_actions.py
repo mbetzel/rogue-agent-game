@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from sim.config import ROUND_PHASE_NAMES, CubeColor, DieColor, RoundPhase, ShieldColor
 from sim.engine import phase4_attack_resolution as p4
 from sim.engine.state import ProductionRole
-from sim.entities import ArchetypeCode, CompanyCode
+from sim.entities import ArchetypeCode, CompanyCode, has_company_override, legacy_bridge_enabled
 
 if TYPE_CHECKING:
     from web.controller.core import GameController
@@ -101,6 +101,10 @@ def _threat_summary(controller: GameController, pid: int, attack: Dict[CubeColor
     return {
         "resolved": resolved,
         "aegis": {"available": bool(qualifying), "qualifying_colors": qualifying},
+        "slush_fund": {"available": bool(
+            has_company_override(player, CompanyCode.DTO, legacy_bridge_enabled(controller))
+            and player.is_slush_fund_available(controller.state.active_version.version_str)
+        )},
         "any": {
             "shields": shields["any"],
             "allocated": bd.get("any_allocated", {"red": 0, "blue": 0, "green": 0}) if bd else {"red": 0, "blue": 0, "green": 0},
@@ -217,6 +221,7 @@ def confirm_attacks(
     any_shield_allocations: Optional[Dict[str, int]] = None,
     glitch_die_ids: Optional[List[int]] = None,
     aegis_color: Optional[str] = None,
+    use_slush_fund: Optional[bool] = None,
 ) -> Dict[str, Any]:
     if controller.phase != int(RoundPhase.ATTACK_RESOLUTION) or controller.subphase != "confirm_attacks":
         raise ValueError(f"Cannot confirm attacks in phase {controller.phase}")
@@ -272,6 +277,8 @@ def confirm_attacks(
     p4.resolve_player_attack(
         controller.engine, player, rolled, commits, controller.attack_strengths, controller.compile_result,
         any_shield_allocations=allocs, malware_target_selector=selector, aegis_color_override=aegis_override,
+        # v0.35 Slush Fund is optional and once per game: a human uses it only by explicit choice (OQ-5)
+        slush_fund_override=(bool(use_slush_fund) if controller.state.config.slush_fund_once_per_game else None),
     )
     controller.attack_resolved_pids.add(player_id)
     meta["attacks_confirmed"] = True

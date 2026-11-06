@@ -51,6 +51,7 @@ def _die_income_row(state: GameState, player: PlayerState, die: Die) -> Optional
     money = eff.money
     research = eff.patches
     secrets = eff.secrets
+    protocol_research = 0
     star_note: Optional[str] = None
     if eff.is_star:
         code = eff.star_code
@@ -69,6 +70,7 @@ def _die_income_row(state: GameState, player: PlayerState, die: Die) -> Optional
             elif _is_operative(player, WhiteHatCode.CIPHER, legacy_bridge_enabled(state)):
                 money += 2
                 research += 1
+                protocol_research = 1
                 star_note = "Algorithmic Parity (+$2, +1 🔬)"
             elif _is_operative(player, WhiteHatCode.SPOOK, legacy_bridge_enabled(state)):
                 money += 2
@@ -83,6 +85,8 @@ def _die_income_row(state: GameState, player: PlayerState, die: Die) -> Optional
         "money": money,
         "patches": research,
         "research": research,
+        "research_source": "star" if eff.is_star and eff.star_code != "PURPLE_STAR" else "income",
+        "protocol_research": protocol_research,
         "secrets": secrets,
         "star_note": star_note,
         "role": role.value if hasattr(role, "value") else (role or "INCOME"),
@@ -102,7 +106,9 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
         if row is None:
             continue
         player.money += row["money"]
-        player.patches += row["research"]
+        base_research = row["research"] - row.get("protocol_research", 0)
+        player.gain_research(base_research, row.get("research_source", "income"))
+        player.gain_research(row.get("protocol_research", 0), "signature_protocol")
         player.secrets += row["secrets"]
         record.money += row["money"]
         record.research += row["research"]
@@ -222,7 +228,7 @@ def resolve_phreaker_jumper_diagnostics(
 
     if face and not face.is_glitch and not face.is_star:
         player.money += face.money
-        player.patches += face.patches
+        player.gain_research(face.patches, "signature_protocol")
     return face
 
 

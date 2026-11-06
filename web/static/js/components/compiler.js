@@ -322,7 +322,7 @@ export function renderCompiler() {
           <div class="seq-card">
             <div class="seq-card-header">PHASE 4: ATTACK RESOLUTION (Simultaneous)</div>
             <div class="seq-card-body">
-              Passive Firewall → Two-Stage Defensive Blocking → Red / Blue / Green damage.<br>
+              Two-Stage Defensive Blocking → Red / Blue / Green damage → Defense L4 payout.<br>
               <strong>Snowball Recycle</strong> exited R/B/G → Staging Cup; <strong>Contractor Expiration</strong>; End Check.
             </div>
           </div>
@@ -331,7 +331,7 @@ export function renderCompiler() {
           <div class="seq-card">
             <div class="seq-card-header">PHASE 5: CI/CD PIPELINE SHIFT (Simultaneous)</div>
             <div class="seq-card-body">
-              1. <strong>Emergency Hotfix &amp; Magnetic Splice:</strong> Glitched → Ready.<br>
+              1. <strong>Magnetic Splice:</strong> Glitched → Ready (Omnidyne).<br>
               2. <strong>Production Return:</strong> In Production → Scanned Box.<br>
               3. <strong>Scanned Graduation:</strong> Scanned → Ready (≤ Release Bandwidth, your choice).<br>
               4. <strong>Conveyor Triage:</strong> Glitched → Scanned (≤ Triage Bandwidth).

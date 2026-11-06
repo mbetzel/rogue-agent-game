@@ -49,6 +49,8 @@ class Phase3ActionPlan:
     # Phase 3 Hardware Upgrades & Patents (v0.28.0)
     track_upgrades: List[str] = field(default_factory=list)
     patent_filings: int = 0
+    # v0.35.0: {(track, level): BreakthroughChoice}; missing entries ask bot.choose_breakthrough
+    breakthrough_choices: Dict[Any, Any] = field(default_factory=dict)
     # Phase 3 Part 3B Fast-patching (v0.22.0)
     fast_patch_indices: List[int] = field(default_factory=list)
 
@@ -126,8 +128,21 @@ def plan_final_round_repairs(
     return current_money, current_patches
 
 
+def purple_purchasable(game_state: Any) -> bool:
+    """False under v0.35.0 (Purple dice are gained only from the Patents L3 Breakthrough)."""
+    cfg = getattr(game_state, "config", None)
+    return True if cfg is None else bool(getattr(cfg, "purple_purchasable", True))
+
+
 class BaseBot:
     """Abstract base class for Rogue Agent bot archetypes."""
+
+    # v0.35.0 research-aware policy (sim/bots/research_policy.py)
+    research_focus: Tuple[str, str, str, str] = ("TRIAGE", "DEFENSE", "RELEASE", "PATENT")
+    research_focus_mode: str = "fixed"  # "fixed" | "random" (seeded from the engine rng)
+    research_aware: bool = True
+    # Preferred Central Market colours for the Triage L3 Breakthrough (falls back to Yellow > Green > Red > Blue)
+    market_color_preference: Tuple[DieColor, ...] = ()
 
     def __init__(self, bot_id: int, name: str = "BaseBot") -> None:
         self.bot_id = bot_id
@@ -430,9 +445,9 @@ class BaseBot:
         """Maps die indices with choice faces to chosen option index (0 or 1).
 
         Default heuristics:
-        - Gray Face 5 (+$1 / +1 🔧): if patches < 2, choose 1 (+1 🔧), else choose 0 (+$1).
-        - Green Face 4 (+1 🔧 / +$1): if patches < 2, choose 0 (+1 🔧), else choose 1 (+$1).
-        - Blue Face 4 (Block 1 Blue / +1 🔧): if Blue threat > 0, choose 0 (Block 1 Blue), else choose 1 (+1 🔧).
+        - Gray Face 5 (+$1 / +1 🔬): if patches < 2, choose 1 (+1 🔬), else choose 0 (+$1).
+        - Green Face 4 (+1 🔬 / +$1): if patches < 2, choose 0 (+1 🔬), else choose 1 (+$1).
+        - Blue Face 4 (Block 1 Blue / +1 🔬): if Blue threat > 0, choose 0 (Block 1 Blue), else choose 1 (+1 🔬).
         """
         dice = active_dice if active_dice is not None else (rolled_dice or [])
         staging = staging_cubes or {}
@@ -446,9 +461,9 @@ class BaseBot:
                 continue
             if face.has_shield_option:
                 declarations[idx] = 0 if blue_threat > 0 else 1
-            elif face.name == "+$1 / +1 🔧":
+            elif face.name == "+$1 / +1 🔬":
                 declarations[idx] = 1 if player_state.patches < 2 else 0
-            elif face.name == "+1 🔧 / +$1":
+            elif face.name == "+1 🔬 / +$1":
                 declarations[idx] = 0 if player_state.patches < 2 else 1
             else:
                 declarations[idx] = 0
@@ -894,7 +909,9 @@ class BaseBot:
         game_state: GameState,
         rng: random.Random,
     ) -> bool:
-        """Evaluates whether to purchase the single reserve Purple die ($4-$6)."""
+        """Evaluates whether to purchase the single reserve Purple die ($4-$6) (v0.34 only)."""
+        if not purple_purchasable(game_state):
+            return False
         if getattr(player_state, "personal_purple_reserve", 0) <= 0:
             return False
         reserve_cost = player_state.get_purple_reserve_cost() if hasattr(player_state, "get_purple_reserve_cost") else 4
@@ -903,6 +920,34 @@ class BaseBot:
         # Since player already starts with 1 Purple die, purchasing the 2nd Purple die
         # is prioritized when cash reserves exceed $8 or when facing heavy threat (>4 cubes).
         return player_state.money >= (reserve_cost + 2)
+
+    def choose_breakthrough(
+        self,
+        player_state: PlayerState,
+        game_state: GameState,
+        track: str,
+        level: int,
+        options: Any,
+    ) -> Any:
+        """v0.35.0 Breakthrough choice (only Triage L3 is optional). Default: accept if possible; Gray die
+        Glitched > Scanned > Ready (lowest die_id within zone); colour by ``market_color_preference`` then
+        Yellow > Green > Red > Blue."""
+        from sim.engine.research_tracks import TRIAGE_L3_COLOR_FALLBACK, BreakthroughChoice
+
+        if options is None:
+            return BreakthroughChoice()
+        if not getattr(options, "possible", False):
+            return BreakthroughChoice(accept=False)
+        color = None
+        for c in tuple(self.market_color_preference) + TRIAGE_L3_COLOR_FALLBACK:
+            if c in options.colors:
+                color = c
+                break
+        return BreakthroughChoice(accept=True, gray_die_id=options.gray_die_ids[0], color=color)
+
+    def choose_slush_fund(self, player_state: PlayerState, game_state: GameState, potential_secret_loss: int) -> bool:
+        """v0.35.0 DTO Slush Fund (once per game, optional): use on a 2+ Secret loss or to avoid a Total Data Breach."""
+        return potential_secret_loss >= 2 or player_state.secrets - potential_secret_loss <= 0
 
     def choose_spook_burn_notice(
         self,

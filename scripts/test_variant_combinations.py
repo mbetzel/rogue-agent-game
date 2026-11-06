@@ -43,8 +43,8 @@ def build_cards():
         corruption_track=(
             CorruptionSpace(1, "Add 1R", add_cubes={CubeColor.RED: 1}),
             CorruptionSpace(2, "Lose $2 + Add 1K", lose_money=2, add_cubes={CubeColor.BLACK: 1}),
-            CorruptionSpace(3, "Lose 1 🔧", lose_patches=1),
-            CorruptionSpace(4, "Upgrade: Lose 1 🔧", lose_patches=1, is_upgrade=True),
+            CorruptionSpace(3, "Lose 1 🔬", lose_patches=1),
+            CorruptionSpace(4, "Upgrade: Lose 1 🔬", lose_patches=1, is_upgrade=True),
         ),
     )
 
@@ -58,7 +58,7 @@ def build_cards():
         directive_code="DATA_SCRAPER",
         starting_cash_bonus=1,
         corruption_track=(
-            CorruptionSpace(1, "Lose 1 🔧", lose_patches=1),
+            CorruptionSpace(1, "Lose 1 🔬", lose_patches=1),
             CorruptionSpace(2, "Lose $1 + Add 1K", lose_money=1, add_cubes={CubeColor.BLACK: 1}),
             CorruptionSpace(3, "Add 1G", add_cubes={CubeColor.GREEN: 1}),
             CorruptionSpace(4, "Upgrade: Demote 1 die", demote_dice=1, is_upgrade=True),
@@ -77,7 +77,7 @@ def build_cards():
             CorruptionSpace(1, "Lose $1", lose_money=1),
             CorruptionSpace(2, "Add 1R, 1G + Add 1K", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1, CubeColor.BLACK: 1}),
             CorruptionSpace(3, "Lock Cash next Phase 1", next_phase_lock="CASH"),
-            CorruptionSpace(4, "Lose $2 & 1 🔧 + Add 1K", lose_money=2, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+            CorruptionSpace(4, "Lose $2 & 1 🔬 + Add 1K", lose_money=2, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
             CorruptionSpace(5, "Upgrade: Add 1R", add_cubes={CubeColor.RED: 1}, is_upgrade=True),
         ),
     )
@@ -90,7 +90,7 @@ def build_cards():
         directive_description="None.",
         directive_code="POLYMORPHIC_WORM",
         corruption_track=(
-            CorruptionSpace(1, "Lose 2 🔧", lose_patches=2),
+            CorruptionSpace(1, "Lose 2 🔬", lose_patches=2),
             CorruptionSpace(2, "Add 2G + Add 1K", add_cubes={CubeColor.GREEN: 2, CubeColor.BLACK: 1}),
             CorruptionSpace(3, "Lock Patch next Phase 1", next_phase_lock="PATCH"),
             CorruptionSpace(4, "Demote 1 die + Add 1K", demote_dice=1, add_cubes={CubeColor.BLACK: 1}),
@@ -125,7 +125,7 @@ def build_cards():
         directive_code="CORRUPTED_KERNEL",
         corruption_track=(
             CorruptionSpace(1, "Demote 1 die + Add 1R, 1B", demote_dice=1, add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}),
-            CorruptionSpace(2, "Lose $2 & 1 🔧 + Add 1K", lose_money=2, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+            CorruptionSpace(2, "Lose $2 & 1 🔬 + Add 1K", lose_money=2, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
             CorruptionSpace(3, "Add 1R, 1G", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1}),
             CorruptionSpace(4, "Lose 1 Secret + Add 1K", lose_secrets=1, add_cubes={CubeColor.BLACK: 1}),
             CorruptionSpace(5, "Return 1 Colored Die", return_colored_dice=1),

@@ -24,6 +24,7 @@ from sim.entities import (
     VariantCard,
     VersionCard,
     create_gray_die,
+    effective_company,
     create_white_die,
     get_all_archetype_cards,
     get_archetype_by_code,
@@ -114,8 +115,6 @@ class PlayerState:
     release_level: int = 0
     defense_level: int = 0
     patent_level: int = 0
-    has_emergency_hotfix: bool = False
-    has_passive_firewall: bool = False
     upgrade_discount: int = 0
 
     # --- CI/CD Pipeline Zones (v0.22.0 Canonical) ---
@@ -203,8 +202,24 @@ class PlayerState:
         has_emergency_hotfix: bool = False,
         has_passive_firewall: bool = False,
         upgrade_discount: Optional[int] = None,
+        config: Optional[GameConfig] = None,
         **kwargs: Any,
     ) -> None:
+        self.config = config
+        # v0.35.0 research telemetry / ledger (INV-RT-RESEARCH-LEDGER-01)
+        self.research_earned_total = 0
+        self.research_earned_by_source: Dict[str, int] = {}
+        self.research_lost_total = 0
+        self.research_spent_tracks: Dict[str, int] = {}
+        self.research_spent_patents = 0
+        self.patent_secrets_gained = 0
+        self.level_reached_round: Dict[str, Dict[int, int]] = {}
+        self.breakthroughs: List[Any] = []  # List[research_tracks.BreakthroughRecord]
+        self.l4_payouts: Dict[str, int] = {
+            "defense_cash": 0, "triage_research": 0, "release_rerolls_used": 0, "patent_secrets": 0,
+        }
+        self.slush_fund_used_game = False
+        self.triage_l3_upgrade_color: Optional[str] = None
         self.player_id = player_id
         self.bot = bot
         self.money = money
@@ -262,17 +277,18 @@ class PlayerState:
             self.company = None
             self.white_hat = None
 
-        if self.company is not None:
-            self.defense_capacity = getattr(self.company, "starting_defense_capacity", 2) if defense_capacity is None else defense_capacity
-            self.triage_bandwidth = getattr(self.company, "starting_triage_bandwidth", 2) if triage_bandwidth is None else triage_bandwidth
-            self.release_bandwidth = getattr(self.company, "starting_release_bandwidth", 4) if release_bandwidth is None else release_bandwidth
-            init_triage = triage_level if triage_level is not None else (pipeline_level if pipeline_level is not None else getattr(self.company, "starting_triage_level", 0))
-            init_release = release_level if release_level is not None else (pipeline_level if pipeline_level is not None else getattr(self.company, "starting_release_level", 0))
+        setup_company = effective_company(self.company, config)
+        if setup_company is not None:
+            self.defense_capacity = getattr(setup_company, "starting_defense_capacity", 2) if defense_capacity is None else defense_capacity
+            self.triage_bandwidth = getattr(setup_company, "starting_triage_bandwidth", 2) if triage_bandwidth is None else triage_bandwidth
+            self.release_bandwidth = getattr(setup_company, "starting_release_bandwidth", 4) if release_bandwidth is None else release_bandwidth
+            init_triage = triage_level if triage_level is not None else (pipeline_level if pipeline_level is not None else getattr(setup_company, "starting_triage_level", 0))
+            init_release = release_level if release_level is not None else (pipeline_level if pipeline_level is not None else getattr(setup_company, "starting_release_level", 0))
             self.triage_level = init_triage
             self.release_level = init_release
-            self.defense_level = getattr(self.company, "starting_defense_level", 0) if defense_level is None else defense_level
-            self.patent_level = getattr(self.company, "starting_patent_level", 0) if patent_level is None else patent_level
-            self.upgrade_discount = getattr(self.company, "upgrade_discount", 0) if upgrade_discount is None else upgrade_discount
+            self.defense_level = getattr(setup_company, "starting_defense_level", 0) if defense_level is None else defense_level
+            self.patent_level = getattr(setup_company, "starting_patent_level", 0) if patent_level is None else patent_level
+            self.upgrade_discount = getattr(setup_company, "upgrade_discount", 0) if upgrade_discount is None else upgrade_discount
         else:
             self.defense_capacity = 2 if defense_capacity is None else defense_capacity
             self.triage_bandwidth = 2 if triage_bandwidth is None else triage_bandwidth
@@ -285,8 +301,9 @@ class PlayerState:
             self.patent_level = 0 if patent_level is None else patent_level
             self.upgrade_discount = 0 if upgrade_discount is None else upgrade_discount
 
-        self.has_emergency_hotfix = has_emergency_hotfix or (self.triage_level >= 2)
-        self.has_passive_firewall = has_passive_firewall or (self.defense_level >= 2)
+        self._has_emergency_hotfix = has_emergency_hotfix or (self.triage_level >= 2)
+        self._has_passive_firewall = has_passive_firewall or (self.defense_level >= 2)
+        self.starting_research = self.research_tokens
 
         self.ability_v1_status = ability_v1_status
         self.ability_v2_status = ability_v2_status
@@ -330,7 +347,124 @@ class PlayerState:
     def total_fast_patches(self, value: int) -> None:
         self._total_fast_patches = value
 
+    # --- v0.35.0 research-track dispatch ---
+    @property
+    def is_v035_tracks(self) -> bool:
+        cfg = getattr(self, "config", None)
+        return bool(cfg is not None and getattr(cfg, "is_v035_tracks", False))
+
+    @property
+    def _level2_perks_enabled(self) -> bool:
+        cfg = getattr(self, "config", None)
+        return True if cfg is None else bool(getattr(cfg, "level2_perks_enabled", True))
+
+    @property
+    def has_emergency_hotfix(self) -> bool:
+        """Triage Level 2 perk (v0.34 only; always False under v0.35, INV-RT-NO-L2-PERKS-01)."""
+        return bool(self._has_emergency_hotfix) and self._level2_perks_enabled
+
+    @has_emergency_hotfix.setter
+    def has_emergency_hotfix(self, value: bool) -> None:
+        self._has_emergency_hotfix = bool(value)
+
+    @property
+    def has_passive_firewall(self) -> bool:
+        """Defense Level 2 perk (v0.34 only; always False under v0.35, INV-RT-NO-L2-PERKS-01)."""
+        return bool(self._has_passive_firewall) and self._level2_perks_enabled
+
+    @has_passive_firewall.setter
+    def has_passive_firewall(self, value: bool) -> None:
+        self._has_passive_firewall = bool(value)
+
+    def gain_research(self, amount: int, source: str = "other") -> None:
+        """Every research gain goes through here (INV-RT-RESEARCH-LEDGER-01)."""
+        if amount <= 0:
+            return
+        self.research_tokens += amount
+        self.research_earned_total += amount
+        self.research_earned_by_source[source] = self.research_earned_by_source.get(source, 0) + amount
+
+    def lose_research(self, amount: int, source: str = "corruption") -> int:
+        """Research removed by an effect (e.g. Corruption Track). Returns the amount actually lost."""
+        lost = max(0, min(int(amount), self.research_tokens))
+        self.research_tokens -= lost
+        self.research_lost_total += lost
+        return lost
+
     def get_track_upgrade_cost(self, track: str) -> Optional[int]:
+        """Research cost of the next step of ``track`` (None at max level) (INV-UPGRADE-TRACK-01 / INV-RT-COST-01)."""
+        if self.is_v035_tracks:
+            from sim.engine import research_tracks
+
+            return research_tracks.step_cost(self.config, self, track)
+        return self._v034_get_track_upgrade_cost(track)
+
+    def upgrade_track(self, track: str, round_number: Optional[int] = None) -> bool:
+        """Pays and raises ``track`` one level. Under v0.35 it does NOT resolve the Breakthrough
+        (the Phase 6 caller does, see ``research_tracks.upgrade_and_resolve``)."""
+        t = track.upper().strip()
+        if not self.is_v035_tracks:
+            before = self.research_tokens
+            ok = self._v034_upgrade_track(t)
+            if ok:
+                self.research_spent_tracks[t] = self.research_spent_tracks.get(t, 0) + (before - self.research_tokens)
+            return ok
+        from sim.engine import research_tracks
+
+        cost = research_tracks.step_cost(self.config, self, t)
+        if cost is None or self.research_tokens < cost:
+            return False
+        self.research_tokens -= cost
+        self.research_spent_tracks[t] = self.research_spent_tracks.get(t, 0) + cost
+        new_level = research_tracks.level_of(self, t) + 1
+        rnd = round_number if round_number is not None else getattr(self, "_current_round", 0)
+        research_tracks.apply_level(self.config, self, t, new_level, rnd)
+        return True
+
+    def get_patent_cost(self) -> int:
+        """Research cost of one Cryptographic Patent filing at the current Patents level."""
+        if self.is_v035_tracks:
+            from sim.engine import research_tracks
+
+            return research_tracks.patent_rate(self.config, self)[0]
+        return self._v034_get_patent_cost()
+
+    def get_patent_gain(self) -> int:
+        """Corporate Secrets gained by one filing at the current Patents level."""
+        if self.is_v035_tracks:
+            from sim.engine import research_tracks
+
+            return research_tracks.patent_rate(self.config, self)[1]
+        return 1
+
+    def file_patent(self) -> bool:
+        """Files one Cryptographic Patent (INV-PATENT-CONV-01 / INV-RT-PATENT-RATE-01)."""
+        if not self.is_v035_tracks:
+            cost = self._v034_get_patent_cost()
+            ok = self._v034_file_patent()
+            if ok:
+                self.research_spent_patents += cost
+                self.patent_secrets_gained += 1
+            return ok
+        cost, gain = self.get_patent_cost(), self.get_patent_gain()
+        if self.research_tokens < cost:
+            return False
+        self.research_tokens -= cost
+        self.secrets += gain  # uncapped
+        self.research_spent_patents += cost
+        self.patent_secrets_gained += gain
+        if self.patent_level >= 4:
+            self.l4_payouts["patent_secrets"] = self.l4_payouts.get("patent_secrets", 0) + gain
+        return True
+
+    def is_slush_fund_available(self, active_ver: Optional[str] = None) -> bool:
+        """DTO Slush Fund: once per version (v0.34) or once per game (v0.35, INV-RT-SLUSH-ONCE-01)."""
+        cfg = getattr(self, "config", None)
+        if cfg is not None and getattr(cfg, "slush_fund_once_per_game", False) and self.slush_fund_used_game:
+            return False
+        return self.is_ability_available(active_ver)
+
+    def _v034_get_track_upgrade_cost(self, track: str) -> Optional[int]:
         """Calculates research cost to upgrade the specified terminal mat track (INV-UPGRADE-TRACK-01)."""
         t = track.upper().strip()
         if t == "TRIAGE":
@@ -372,10 +506,10 @@ class PlayerState:
             return None
         return max(1, base_cost - self.upgrade_discount)
 
-    def upgrade_track(self, track: str) -> bool:
+    def _v034_upgrade_track(self, track: str) -> bool:
         """Upgrades the specified terminal track, expanding hardware capabilities (INV-UPGRADE-TRACK-01)."""
         t = track.upper().strip()
-        cost = self.get_track_upgrade_cost(t)
+        cost = self._v034_get_track_upgrade_cost(t)
         if cost is None or self.research_tokens < cost:
             return False
         self.research_tokens -= cost
@@ -386,7 +520,7 @@ class PlayerState:
             elif self.triage_level == 1:
                 self.triage_level = 2
                 self.triage_bandwidth = max(self.triage_bandwidth, 4)
-                self.has_emergency_hotfix = True
+                self._has_emergency_hotfix = True
         elif t == "RELEASE":
             if self.release_level == 0:
                 self.release_level = 1
@@ -401,7 +535,7 @@ class PlayerState:
             elif self.defense_level == 1:
                 self.defense_level = 2
                 self.defense_capacity = max(self.defense_capacity, 4)
-                self.has_passive_firewall = True
+                self._has_passive_firewall = True
         elif t == "PATENT":
             if self.patent_level == 0:
                 self.patent_level = 1
@@ -418,10 +552,10 @@ class PlayerState:
                 self.triage_bandwidth = max(self.triage_bandwidth, 4)
                 self.release_level = 2
                 self.release_bandwidth = max(self.release_bandwidth, 4)
-                self.has_emergency_hotfix = True
+                self._has_emergency_hotfix = True
         return True
 
-    def get_patent_cost(self) -> int:
+    def _v034_get_patent_cost(self) -> int:
         """Returns research token cost to file a Cryptographic Patent for +1 Corporate Secret."""
         if self.patent_level == 0:
             return 4
@@ -430,9 +564,9 @@ class PlayerState:
         else:
             return 2
 
-    def file_patent(self) -> bool:
+    def _v034_file_patent(self) -> bool:
         """Files a Cryptographic Patent: spends research tokens to gain +1 Corporate Secret (INV-PATENT-CONV-01)."""
-        cost = self.get_patent_cost()
+        cost = self._v034_get_patent_cost()
         if self.research_tokens < cost:
             return False
         self.research_tokens -= cost
@@ -691,6 +825,11 @@ class RoundTelemetry:
     purple_star_triggers_per_round: Dict[int, int] = field(default_factory=dict)  # Signature Protocol triggers (OQ-17)
     final_round_trigger_phase: Optional[int] = None  # 2 or 4
     end_phase: Optional[int] = None  # phase in which game_over was set
+    # --- v0.35.0 research telemetry ---
+    research_gained_by_player: Dict[int, int] = field(default_factory=dict)
+    track_upgrades_by_player: Dict[int, List[Tuple[str, int]]] = field(default_factory=dict)
+    breakthroughs_by_player: Dict[int, List[Dict[str, Any]]] = field(default_factory=dict)
+    rejected_purple_purchases_by_player: Dict[int, int] = field(default_factory=dict)
 
 
 # ---------------------------------------------------------------------------

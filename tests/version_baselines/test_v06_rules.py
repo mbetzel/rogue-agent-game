@@ -2,7 +2,7 @@
 
 Covers all 16 technical test cases from the Principal Engineer specification:
 1. GameConfig parameters: contractor cost ($1), max hire (3), supply (12), rerolls (2/1), White die 0 VP.
-2. White Contractor Die faces: 3x Block 1 Any, 1x +$2, 1x +1 🔧, 1x Glitch (Locked).
+2. White Contractor Die faces: 3x Block 1 Any, 1x +$2, 1x +1 🔬, 1x Glitch (Locked).
 3. Schema fields: Face.is_glitch, Die.is_locked, Die.is_contractor serialization.
 4. Version card directives: RAAS Encrypted Memory, Polymorphic Worm Subroutine Throttling, Zero-Day Override Kernel Lock.
 5. Contractor hiring deduction and supply: cash deducted, supply decremented, contractor_dice populated.
@@ -13,7 +13,7 @@ Covers all 16 technical test cases from the Principal Engineer specification:
 10. ZERO_DAY_OVERRIDE Kernel Lock directive: rolling shield locks die immediately.
 11. POLYMORPHIC_WORM Subroutine Throttling directive: limits free rerolls to 1.
 12. Yahtzee rerolls cannot reroll locked dice.
-13. Debug Unlock action: spends 1 🔧 to unlock locked die.
+13. Debug Unlock action: spends 1 🔬 to unlock locked die.
 14. Immediate outputs collection: Glitch produces 0; locked cash grants cash; locked shields remain shields.
 15. White Contractor Die wear immunity: blocking attack does not move White die to unpatched zone.
 16. Green malware contractor sacrifice and round-end contractor expiration back to supply.
@@ -384,7 +384,7 @@ class TestV06Rules(unittest.TestCase):
     # 13. Debug Unlock Action
     # -------------------------------------------------------------------------
     def test_debug_unlock_action(self) -> None:
-        """Debug unlock spends 1 🔧 token to unlock a locked die."""
+        """Debug unlock spends 1 🔬 token to unlock a locked die."""
         ctrl = GameController()
         ctrl.new_game(num_players=2, seed=42)
         ctrl.state.players[0].patches = 2

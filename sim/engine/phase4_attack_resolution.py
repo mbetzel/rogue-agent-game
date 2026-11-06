@@ -13,6 +13,7 @@ from sim.config import CubeColor, DieColor, EndGameReason, ShieldColor
 from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
 from sim.entities import ArchetypeCode, CompanyCode, Die
 from sim.engine.state import ProductionRole
+from sim.engine import research_tracks
 
 if TYPE_CHECKING:
     from sim.engine.core import GameEngine
@@ -144,6 +145,20 @@ def _resolve_green_six_phase(
             player.glitched_dice.append(target_die)
 
 
+def _pay_defense_l4(engine: GameEngine, player: PlayerState) -> int:
+    """v0.35.0 Defense L4: +$1 per Red / Blue / Green Attack Cube blocked this Phase 4 (max $3), paid after
+    damage resolution so it cannot fund this round's Red ransom (OQ-9, INV-RT-DEF-L4-01)."""
+    if player.is_patient_zero:
+        return 0
+    blocked = (getattr(player, "last_defense_breakdown", None) or {}).get("blocked", {})
+    cash = research_tracks.defense_l4_cash(engine.config, player, sum(int(v) for v in blocked.values()))
+    if cash > 0:
+        player.money += cash
+        player.l4_payouts["defense_cash"] = player.l4_payouts.get("defense_cash", 0) + cash
+        player.last_defense_breakdown["defense_l4_cash"] = cash
+    return cash
+
+
 def resolve_player_defense_and_wear(
     engine: GameEngine,
     player: PlayerState,
@@ -157,6 +172,7 @@ def resolve_player_defense_and_wear(
     malware_target_policy: str = MALWARE_POLICY_V033,
     malware_target_selector: Optional[MalwareTargetSelector] = None,
     aegis_color_override: Optional[CubeColor] = None,
+    slush_fund_override: Optional[bool] = None,
 ) -> None:
     """Resolves one player's shields against the attack.
 
@@ -307,8 +323,21 @@ def resolve_player_defense_and_wear(
     potential_secret_loss = ransom_secret_loss + unblocked_blue
 
     # DTO Slush Fund Interaction
-    is_dto = has_company_override(player, CompanyCode.DTO, legacy_bridge_enabled(engine)) and player.is_ability_available(active_ver)
+    cfg = engine.config
+    once_per_game = bool(getattr(cfg, "slush_fund_once_per_game", False))
+    is_dto = has_company_override(player, CompanyCode.DTO, legacy_bridge_enabled(engine)) and (
+        player.is_slush_fund_available(active_ver) if once_per_game else player.is_ability_available(active_ver)
+    )
+    if potential_secret_loss > 0 and is_dto and once_per_game:
+        # v0.35.0: Slush Fund is once per game and optional when it triggers (OQ-5)
+        if slush_fund_override is not None:  # web human accept / decline
+            is_dto = bool(slush_fund_override)
+        else:
+            hook = getattr(player.bot, "choose_slush_fund", None)
+            is_dto = bool(hook(player, engine.state, potential_secret_loss)) if hook is not None else True
     if potential_secret_loss > 0 and is_dto:
+        if once_per_game:
+            player.slush_fund_used_game = True
         free_absorb = min(2, potential_secret_loss)
         potential_secret_loss -= free_absorb
         player.mark_ability_used(active_ver)
@@ -367,6 +396,7 @@ def resolve_player_defense_and_wear(
     if six_phase:
         # Six-phase: bot/human-chosen targets; never sets pending_unblocked_green (INV-SEQ-NO-SNAPSHOT-01)
         _resolve_green_six_phase(engine, player, unblocked_green, malware_target_selector)
+        _pay_defense_l4(engine, player)
         return
 
     player.pending_unblocked_green = unblocked_green
@@ -532,6 +562,7 @@ def resolve_player_attack(
     any_shield_allocations: Optional[Dict[CubeColor, int]] = None,
     malware_target_selector: Optional[MalwareTargetSelector] = None,
     aegis_color_override: Optional[CubeColor] = None,
+    slush_fund_override: Optional[bool] = None,
 ) -> None:
     """One survivor's Phase 4 damage (six-phase policy)."""
     sync_commitments_with_production(player, rolled_dice, commitments)
@@ -547,6 +578,7 @@ def resolve_player_attack(
         malware_target_policy=MALWARE_POLICY_SIX_PHASE,
         malware_target_selector=malware_target_selector,
         aegis_color_override=aegis_color_override,
+        slush_fund_override=slush_fund_override,
     )
 
 

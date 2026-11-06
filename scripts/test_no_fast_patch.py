@@ -1,8 +1,8 @@
 """Monte Carlo simulation comparing v0.22.0 Baseline vs No-Fast-Patching Variant.
 
 In No-Fast-Patching:
-- Players CANNOT spend 1 🔧 to accelerate dice from Glitched to Scanned in Phase 3 Part 3B.
-- Players CAN still spend 1 🔧 in Phase 1 Step 4 for Debug Unlocks (unlocking locked/glitched dice for rerolls).
+- Players CANNOT spend 1 🔬 to accelerate dice from Glitched to Scanned in Phase 3 Part 3B.
+- Players CAN still spend 1 🔬 in Phase 1 Step 4 for Debug Unlocks (unlocking locked/glitched dice for rerolls).
 - All glitched dice must undergo the full 1-round latency in the Scanned box.
 """
 
@@ -160,13 +160,13 @@ def run_comparison(num_games: int = 1000, player_counts: List[int] = [4, 2]):
             print(f"    Avg Glitched Box:  {mean_glitched:.2f} dice")
             print(f"    Avg Scanned Box:   {mean_scanned:.2f} dice")
             print(f"  Patch Economy (per player-round):")
-            print(f"    Debug Unlocks:     {mean_dbg:.2f} 🔧 / pl-rd")
-            print(f"    Fast-Patches:      {mean_fp:.2f} 🔧 / pl-rd")
-            print(f"    Total Spent:       {(mean_dbg + mean_fp):.2f} 🔧 / pl-rd")
+            print(f"    Debug Unlocks:     {mean_dbg:.2f} 🔬 / pl-rd")
+            print(f"    Fast-Patches:      {mean_fp:.2f} 🔬 / pl-rd")
+            print(f"    Total Spent:       {(mean_dbg + mean_fp):.2f} 🔬 / pl-rd")
             print(f"  Player End-Game State:")
             print(f"    Ending Secrets:    {mean_sec:.2f} Secrets")
             print(f"    Ending Money:      ${mean_mon:.2f}")
-            print(f"    Ending Patches:    {mean_pat:.2f} 🔧")
+            print(f"    Ending Patches:    {mean_pat:.2f} 🔬")
             print()
 
 

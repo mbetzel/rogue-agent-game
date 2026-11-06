@@ -244,7 +244,7 @@ def run_experiment(num_games: int = 1000, player_counts: List[int] = [2, 3, 4], 
                         m_dbg = statistics.mean(debug_patches_by_v[v])
                         m_fp = statistics.mean(fast_patches_by_v[v])
                         m_tot = statistics.mean(total_patches_by_v[v])
-                        print(f"     {v}: Debug Unlocks = {m_dbg:.2f} 🔧 | Fast-Patches = {m_fp:.2f} 🔧 | Total = {m_tot:.2f} 🔧/pl-rd")
+                        print(f"     {v}: Debug Unlocks = {m_dbg:.2f} 🔬 | Fast-Patches = {m_fp:.2f} 🔬 | Total = {m_tot:.2f} 🔬/pl-rd")
             print()
 
 

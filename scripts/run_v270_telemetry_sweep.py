@@ -395,9 +395,9 @@ def generate_v270_telemetry_report(results: Dict[str, Any], path: str) -> None:
 
     spaces = [
         ("RAAS_space_1", "v2.0 RaaS Space 1 (All lose $2)"),
-        ("RAAS_space_4", "v2.0 RaaS Space 4 (Lose $3 & 1 🔧 + 1K)"),
-        ("ZERO_DAY_OVERRIDE_space_2", "v3.0 Zero-Day Space 2 (Lose $3 & 1 🔧 + 1K)"),
-        ("CORRUPTED_KERNEL_space_2", "v3.0 Kernel Space 2 (Lose $3 & 1 🔧 + 1K)"),
+        ("RAAS_space_4", "v2.0 RaaS Space 4 (Lose $3 & 1 🔬 + 1K)"),
+        ("ZERO_DAY_OVERRIDE_space_2", "v3.0 Zero-Day Space 2 (Lose $3 & 1 🔬 + 1K)"),
+        ("CORRUPTED_KERNEL_space_2", "v3.0 Kernel Space 2 (Lose $3 & 1 🔬 + 1K)"),
     ]
 
     for key, desc in spaces:
@@ -440,7 +440,7 @@ def generate_v270_telemetry_report(results: Dict[str, Any], path: str) -> None:
     lines.append("")
     lines.append("| Invariant | Specification | Verification Result | Status |")
     lines.append("| :--- | :--- | :--- | :---: |")
-    lines.append("| **INV-TRACK-CALIB-01** | Standard Profile Track Calibration | Verified: RaaS sp1 ($2), RaaS sp4 ($3 & 1 🔧), ZD sp2 ($3 & 1 🔧), CK sp2 ($3 & 1 🔧) | **VERIFIED** |")
+    lines.append("| **INV-TRACK-CALIB-01** | Standard Profile Track Calibration | Verified: RaaS sp1 ($2), RaaS sp4 ($3 & 1 🔬), ZD sp2 ($3 & 1 🔬), CK sp2 ($3 & 1 🔬) | **VERIFIED** |")
     lines.append("| **INV-TRACK-AGGR-01** | Aggressive Profile Parity | Verified: All 6 Aggressive profile tracks match or exceed calibrated thresholds | **VERIFIED** |")
     lines.append("| **INV-TRACK-CAPACITY-01** | Track Capacities Invariance | Strictly 4 spaces (v1.0), 5 spaces (v2.0), 6 spaces (v3.0) across all profiles | **VERIFIED** |")
     lines.append("| **INV-STEP2A-DEDUCTION-01** | Sequential Step 2A Deduction | Verified: Cash & patch deductions apply prior to Step 2B attack calculations | **VERIFIED** |")

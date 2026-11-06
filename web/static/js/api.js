@@ -220,7 +220,7 @@ export async function doConfirmIncome(spookBurnDieId = null, phreakerDieId = nul
 }
 
 // Phase 4: Attack Resolution (Generic Any shield allocation, Green Malware targets, Aegis color)
-export async function doConfirmAttacks(glitchDieIds = [], anyShieldAllocations = null, aegisColor = null) {
+export async function doConfirmAttacks(glitchDieIds = [], anyShieldAllocations = null, aegisColor = null, useSlushFund = null) {
   const payload = {
     player_id: getHumanPlayerId(),
     glitch_die_ids: glitchDieIds,
@@ -230,6 +230,9 @@ export async function doConfirmAttacks(glitchDieIds = [], anyShieldAllocations =
   }
   if (aegisColor) {
     payload.aegis_color = aegisColor;
+  }
+  if (useSlushFund !== null && useSlushFund !== undefined) {
+    payload.use_slush_fund = !!useSlushFund;
   }
   const newState = await apiCall("/api/game/action/confirm_attacks", "POST", payload);
   if (newState) {
@@ -356,6 +359,19 @@ export async function doUpgradeTrack(trackType) {
   const newState = await apiCall("/api/game/action/upgrade_track", "POST", {
     player_id: getHumanPlayerId(),
     track_type: trackType,
+  });
+  if (newState) {
+    setState(newState);
+    notifyRender();
+  }
+}
+
+export async function doResolveBreakthrough(accept, grayDieId, color) {
+  const newState = await apiCall("/api/game/action/breakthrough", "POST", {
+    player_id: getHumanPlayerId(),
+    accept: !!accept,
+    gray_die_id: grayDieId,
+    color: color,
   });
   if (newState) {
     setState(newState);

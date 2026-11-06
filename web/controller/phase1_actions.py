@@ -13,6 +13,8 @@ from sim.bots import (
     VentureGreedBot,
 )
 from sim.config import ROUND_PHASE_NAMES, CubeColor, DieColor, EndGameReason, GameConfig, RoundPhase, ShieldColor
+from sim.bots import research_policy
+from sim.engine import research_tracks
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
 from sim.engine.phase1_boot import (
     check_operator_contingent_staffing,
@@ -260,7 +262,7 @@ def debug_unlock_die(controller: GameController, player_id: int, die_index: int)
 
 
 def hotfix_reroll(controller: GameController, player_id: int, die_index: int) -> Dict[str, Any]:
-    """Spends 1 🔧 token to reroll any 1 rolled die before committing defenses."""
+    """Spends 1 🔬 token to reroll any 1 rolled die before committing defenses."""
     if controller.phase != 1:
         raise ValueError(f"Cannot hotfix reroll in phase {controller.phase}")
     if player_id not in controller.player_meta:
@@ -295,7 +297,7 @@ def hotfix_reroll(controller: GameController, player_id: int, die_index: int) ->
     total_available = player.patches + available_kept
 
     if total_available < 1:
-        raise ValueError(f"Not enough patch tokens (🔧). Available: {total_available}")
+        raise ValueError(f"Not enough patch tokens (🔬). Available: {total_available}")
 
     # Spend 1 patch: prefer spending from held tokens first
     if player.patches > 0:
@@ -315,7 +317,7 @@ def hotfix_reroll(controller: GameController, player_id: int, die_index: int) ->
     new_face = die_to_reroll.roll(controller.engine.rng)
 
     controller.event_log.append(
-        f"{meta['name']} spent 1 🔧 to hotfix reroll die #{die_index + 1} ({die_to_reroll.color.value.capitalize()}) -> rolled '{new_face.name}'."
+        f"{meta['name']} spent 1 🔬 to hotfix reroll die #{die_index + 1} ({die_to_reroll.color.value.capitalize()}) -> rolled '{new_face.name}'."
     )
     return controller.get_full_state()
 
@@ -625,7 +627,9 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
 
         # 3. Yahtzee Rerolls & Lock Resolution
         active_directive = controller.state.active_directive_code
-        max_free_rerolls = controller.state.config.default_free_rerolls
+        max_free_rerolls = research_tracks.free_rerolls_for(
+            controller.state.config, player, controller.state.config.default_free_rerolls
+        )
 
         is_helix = has_company_override(player, CompanyCode.HELIX, legacy_bridge_enabled(controller)) and player.is_ability_available(active_ver)
         prodigy_active = False
@@ -701,6 +705,9 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
             stuck_cubes=stuck_copy,
             directive_code=active_directive,
             rng=controller.engine.rng,
+        )
+        declared_choices = research_policy.adjust_declared_choices(
+            player.bot, player, active_dice, declared_choices, controller.state.config
         )
         commitments = player.bot.commit_shields(
             player_state=player,

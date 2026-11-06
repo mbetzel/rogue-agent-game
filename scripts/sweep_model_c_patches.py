@@ -124,7 +124,7 @@ def run_sweep(num_runs: int = 1000, base_seed: int = 42):
     print("==========================================================================================")
     header = (
         f"| {'Pod':<4} | {'Mean Rounds':<15} | {'Sing %':<8} | {'PZ %':<8} | {'Wipeout %':<10} | "
-        f"{'Win Sec':<8} | {'Surv Sec':<8} | {'Win 🔧':<7} | {'Surv 🔧':<7} | {'TB %':<7} | "
+        f"{'Win Sec':<8} | {'Surv Sec':<8} | {'Win 🔬':<7} | {'Surv 🔬':<7} | {'TB %':<7} | "
         f"{'Lead Bot':<30} |"
     )
     sep = "|" + "-+-".join(["-" * len(c) for c in header.split("|")[1:-1]]) + "|"

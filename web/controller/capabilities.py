@@ -12,6 +12,7 @@ from sim.bots import (
     SecOpsTurtleBot,
     VentureGreedBot,
 )
+from sim.engine import research_tracks
 from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
 from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
@@ -113,6 +114,11 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     is_spook_white_hat = has_signature_protocol(player, WhiteHatCode.SPOOK, legacy_bridge_enabled(controller))
     can_spook_burn = bool(in_income and is_spook_white_hat and purple_in_prod)
 
+    v035 = bool(getattr(controller.state.config, "is_v035_tracks", False))
+    purple_ok = bool(getattr(controller.state.config, "purple_purchasable", True))
+    max_track_level = research_tracks.MAX_LEVEL if v035 else 2
+    pending_bt = (getattr(controller, "pending_breakthrough", {}) or {}).get(player_id)
+
     is_cipher = has_company_override(player, CompanyCode.PROMETHEUS, legacy_bridge_enabled(controller))
     can_cipher_buy = {}
     for color in [DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW, DieColor.PURPLE]:
@@ -120,7 +126,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             base_cost = player.get_purple_reserve_cost() if hasattr(player, "get_purple_reserve_cost") else (
                 getattr(player.white_hat, "reserve_cost", 4) if getattr(player, "white_hat", None) else 4
             )
-            has_stock = getattr(player, "personal_purple_reserve", 0) > 0
+            has_stock = purple_ok and getattr(player, "personal_purple_reserve", 0) > 0
         else:
             base_cost = controller.state.get_market_die_cost(color) if hasattr(controller.state, "get_market_die_cost") else (
                 4 if color in (DieColor.RED, DieColor.GREEN) else 5
@@ -160,10 +166,12 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     )
 
     is_spook = has_company_override(player, CompanyCode.DTO, legacy_bridge_enabled(controller))
+    slush_avail = player.is_slush_fund_available(active_ver) if active_ver else ability_avail
     can_spook = bool(
         not is_eliminated
+        and not controller.state.config.slush_fund_once_per_game  # v0.35: chosen at Phase 4 confirm only
         and is_spook
-        and ability_avail
+        and slush_avail
         and controller.last_compile_result is not None
     )
 
@@ -231,7 +239,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             cost = player.get_purple_reserve_cost() if hasattr(player, "get_purple_reserve_cost") else (
                 getattr(player.white_hat, "reserve_cost", 4) if getattr(player, "white_hat", None) else 4
             )
-            has_stock = getattr(player, "personal_purple_reserve", 0) > 0
+            has_stock = purple_ok and getattr(player, "personal_purple_reserve", 0) > 0
         else:
             cost = controller.state.get_market_die_cost(color) if hasattr(controller.state, "get_market_die_cost") else (
                 4 if color in (DieColor.RED, DieColor.GREEN) else 5
@@ -288,7 +296,8 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             and not can_confirm_income
             and is_active
             and not is_eliminated
-            and getattr(player, "triage_level", 0) < 2
+            and getattr(player, "triage_level", 0) < max_track_level
+            and pending_bt is None
             and triage_cost is not None
             and research_avail >= triage_cost
         ),
@@ -297,7 +306,8 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             and not can_confirm_income
             and is_active
             and not is_eliminated
-            and getattr(player, "release_level", 0) < 2
+            and getattr(player, "release_level", 0) < max_track_level
+            and pending_bt is None
             and release_cost is not None
             and research_avail >= release_cost
         ),
@@ -306,7 +316,8 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             and not can_confirm_income
             and is_active
             and not is_eliminated
-            and getattr(player, "pipeline_level", 0) < 2
+            and getattr(player, "pipeline_level", 0) < max_track_level
+            and pending_bt is None
             and pipeline_cost is not None
             and research_avail >= pipeline_cost
         ),
@@ -315,7 +326,8 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             and not can_confirm_income
             and is_active
             and not is_eliminated
-            and getattr(player, "defense_level", 0) < 2
+            and getattr(player, "defense_level", 0) < max_track_level
+            and pending_bt is None
             and defense_cost is not None
             and research_avail >= defense_cost
         ),
@@ -324,7 +336,8 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             and not can_confirm_income
             and is_active
             and not is_eliminated
-            and getattr(player, "patent_level", 0) < 2
+            and getattr(player, "patent_level", 0) < max_track_level
+            and pending_bt is None
             and patent_track_cost is not None
             and research_avail >= patent_track_cost
         ),
@@ -336,6 +349,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         and is_active
         and not is_eliminated
         and research_avail >= patent_cost
+        and pending_bt is None
     )
 
     upgrade_track_costs = {
@@ -351,7 +365,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         can_cipher_buy = {color.value: False for color in [DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW, DieColor.PURPLE]}
         can_cipher_dirty = False
 
-    return {
+    caps: Dict[str, Any] = {
         "can_roll": can_roll,
         "can_hire_contractors": can_hire_contractors,
         "next_contractor_cost": next_contractor_cost,
@@ -392,5 +406,20 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         "can_cipher_dirty": can_cipher_dirty,
         "can_acoustic": can_acoustic,
         "can_spook": can_spook,
+        # v0.35.0 research tracks
+        "patent_gain": player.get_patent_gain() if hasattr(player, "get_patent_gain") else 1,
+        "max_track_level": max_track_level,
+        "slush_fund_used_game": bool(getattr(player, "slush_fund_used_game", False)),
+        "next_upgrade_cost": {t.lower(): player.get_track_upgrade_cost(t) for t in research_tracks.TRACKS},
+        "breakthrough_preview": {t.lower(): v for t, v in research_tracks.breakthrough_preview(player).items()} if v035 else {},
+        "pending_breakthrough": pending_bt,
+        "can_resolve_breakthrough": bool(pending_bt is not None and is_active and controller.phase == 6),
     }
+    if not v035:
+        caps["can_buy_purple_reserve"] = can_buy_purple_reserve
+    else:
+        caps.pop("can_buy_purple_reserve", None)
+        caps["can_buy"].pop("purple", None)
+        caps["can_cipher_buy"].pop("purple", None)
+    return caps
 

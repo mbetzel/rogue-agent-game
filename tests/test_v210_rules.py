@@ -107,7 +107,7 @@ class TestV210Rules(unittest.TestCase):
 
     def test_spook_slush_fund_absorbs_unpaid_ransom_without_patches(self) -> None:
         """Spook Slush Fund absorbs up to 2 Secrets from unpaid Red ransom without using patches."""
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v034(num_players=2)
         eng = GameEngine(config=cfg, bots=[BaseBot(0), BaseBot(1)], seed=42)
         p0 = eng.state.players[0]
         p0.money = 0

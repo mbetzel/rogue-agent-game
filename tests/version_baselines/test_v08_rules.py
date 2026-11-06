@@ -4,18 +4,18 @@ Covers all 18 technical test cases from the Principal Engineer specification:
 1. test_face_dataclass_choice_fields_and_properties: Face dataclass supports is_choice, choices, has_cash_option, has_shield_option, has_patch_option.
 2. test_face_shield_choice_properties: Face with shield choices reflects has_shield_option=True while is_shield=False on parent.
 3. test_die_dataclass_effective_face_and_roll_reset: Die effective_face evaluates chosen_choice_index, and roll() resets chosen_choice_index to None.
-4. test_gray_die_faces_v08: Gray die Face 5 is +$1 / +1 🔧 choice face; exactly 3 faces with cash option, 2 with patch option.
-5. test_blue_die_faces_v08: Blue die Face 4 is Block 1 Blue / +1 🔧 choice face; offers Blue shield or +1 🔧.
-6. test_green_die_faces_v08: Green die Face 4 is +1 🔧 / +$1 choice face; offers +1 🔧 or +$1.
+4. test_gray_die_faces_v08: Gray die Face 5 is +$1 / +1 🔬 choice face; exactly 3 faces with cash option, 2 with patch option.
+5. test_blue_die_faces_v08: Blue die Face 4 is Block 1 Blue / +1 🔬 choice face; offers Blue shield or +1 🔬.
+6. test_green_die_faces_v08: Green die Face 4 is +1 🔬 / +$1 choice face; offers +1 🔬 or +$1.
 7. test_directive_raas_locks_cash_choice_faces: Under RaaS, choice faces with cash options (Gray Face 5, Green Face 4) are locked.
 8. test_directive_zero_day_locks_shield_choice_faces: Under Zero-Day Override, choice faces with shield options (Blue Face 4) are locked.
 9. test_phase1_sequence_assign_before_collect: Step 5 (Assign Defenses & Choices) precedes Step 6 (Gain Resource Outputs).
 10. test_blue_choice_face_committed_to_shield_produces_no_patch: Committed Blue Face 4 blocks Blue damage and produces 0 patches in Step 6.
-11. test_blue_choice_face_unassigned_produces_patch: Unassigned Blue Face 4 syncs choice 1 and grants +1 🔧 in Step 6.
+11. test_blue_choice_face_unassigned_produces_patch: Unassigned Blue Face 4 syncs choice 1 and grants +1 🔬 in Step 6.
 12. test_gray_choice_face_money_declaration: Declaring Choice 0 on Gray Face 5 grants +$1 in Step 6 without altering patches.
-13. test_gray_choice_face_patch_declaration: Declaring Choice 1 on Gray Face 5 grants +1 🔧 in Step 6 without altering cash.
-14. test_green_choice_face_declarations: Declaring Choice 0 on Green Face 4 grants +1 🔧; Choice 1 grants +$1.
-15. test_hybrid_star_boot_outputs_collected_when_assigned_to_defense: R1 grants +$2 and G1 grants +1 🔧 in Step 6 even when committed to defense.
+13. test_gray_choice_face_patch_declaration: Declaring Choice 1 on Gray Face 5 grants +1 🔬 in Step 6 without altering cash.
+14. test_green_choice_face_declarations: Declaring Choice 0 on Green Face 4 grants +1 🔬; Choice 1 grants +$1.
+15. test_hybrid_star_boot_outputs_collected_when_assigned_to_defense: R1 grants +$2 and G1 grants +1 🔬 in Step 6 even when committed to defense.
 16. test_bot_declare_choices_and_commit_heuristics: Bot archetypes declare choices and commit shields according to strategic profiles.
 17. test_web_schemas_serialization_choice_faces: GameStateSerializer exports is_choice, choices, has_*_option, chosen_choice_index, and effective_face.
 18. test_web_controller_commit_defenses_choice_declarations: GameController.commit_defenses processes choice_declarations and applies Step 6 outputs.
@@ -61,8 +61,8 @@ class TestV08Rules(unittest.TestCase):
     def test_face_dataclass_choice_fields_and_properties(self) -> None:
         """Face dataclass supports is_choice, choices, has_cash_option, has_shield_option, has_patch_option."""
         c0 = Face("+$1", money=1)
-        c1 = Face("+1 🔧", patches=1)
-        choice_face = Face("+$1 / +1 🔧", is_choice=True, choices=(c0, c1))
+        c1 = Face("+1 🔬", patches=1)
+        choice_face = Face("+$1 / +1 🔬", is_choice=True, choices=(c0, c1))
 
         self.assertTrue(choice_face.is_choice)
         self.assertEqual(len(choice_face.choices), 2)
@@ -87,8 +87,8 @@ class TestV08Rules(unittest.TestCase):
     def test_face_shield_choice_properties(self) -> None:
         """Face with shield choice reflects has_shield_option=True while is_shield=False on parent."""
         c0 = Face("Block 1 Blue", block_amount=1, shield_color=ShieldColor.BLUE)
-        c1 = Face("+1 🔧", patches=1)
-        choice_face = Face("Block 1 Blue / +1 🔧", is_choice=True, choices=(c0, c1))
+        c1 = Face("+1 🔬", patches=1)
+        choice_face = Face("Block 1 Blue / +1 🔬", is_choice=True, choices=(c0, c1))
 
         self.assertTrue(choice_face.has_shield_option)
         self.assertTrue(choice_face.has_patch_option)
@@ -106,8 +106,8 @@ class TestV08Rules(unittest.TestCase):
     def test_die_dataclass_effective_face_and_roll_reset(self) -> None:
         """Die effective_face evaluates chosen_choice_index, and roll() resets chosen_choice_index to None."""
         c0 = Face("+$1", money=1)
-        c1 = Face("+1 🔧", patches=1)
-        choice_face = Face("+$1 / +1 🔧", is_choice=True, choices=(c0, c1))
+        c1 = Face("+1 🔬", patches=1)
+        choice_face = Face("+$1 / +1 🔬", is_choice=True, choices=(c0, c1))
 
         die = Die(die_id=1, color=DieColor.GRAY, cost=0, vp=0, faces=[choice_face] * 6)
         die.current_face = choice_face
@@ -136,17 +136,17 @@ class TestV08Rules(unittest.TestCase):
     # 4. Gray Die Faces (v0.8)
     # -------------------------------------------------------------------------
     def test_gray_die_faces_v08(self) -> None:
-        """Gray die Face 5 is +$1 / +1 🔧 choice face; exactly 3 faces with cash option, 2 with patch option."""
-        die = create_gray_die(1)
+        """Gray die Face 5 is +$1 / +1 🔬 choice face; exactly 3 faces with cash option, 2 with patch option."""
+        die = create_gray_die(1, "V034")
         self.assertEqual(len(die.faces), 6)
 
         face5 = die.faces[4]
-        self.assertEqual(face5.name, "+$1 / +1 🔧")
+        self.assertEqual(face5.name, "+$1 / +1 🔬")
         self.assertTrue(face5.is_choice)
         self.assertEqual(len(face5.choices), 2)
         self.assertEqual(face5.choices[0].name, "+$1")
         self.assertEqual(face5.choices[0].money, 1)
-        self.assertEqual(face5.choices[1].name, "+1 🔧")
+        self.assertEqual(face5.choices[1].name, "+1 🔬")
         self.assertEqual(face5.choices[1].patches, 1)
 
         cash_option_faces = [f for f in die.faces if f.has_cash_option]
@@ -154,20 +154,20 @@ class TestV08Rules(unittest.TestCase):
         shield_faces = [f for f in die.faces if f.is_shield]
 
         self.assertEqual(len(cash_option_faces), 3)  # 2x +$1, 1x choice face
-        self.assertEqual(len(patch_option_faces), 2)  # 1x choice face, 1x +1 🔧
+        self.assertEqual(len(patch_option_faces), 2)  # 1x choice face, 1x +1 🔬
         self.assertEqual(len(shield_faces), 2)  # 2x Block 1 Any
 
     # -------------------------------------------------------------------------
     # 5. Blue Die Faces (v0.8)
     # -------------------------------------------------------------------------
     def test_blue_die_faces_v08(self) -> None:
-        """Blue die Face 4 is Block 1 Blue / +1 🔧 choice face; offers Blue shield or +1 🔧."""
+        """Blue die Face 4 is Block 1 Blue / +1 🔬 choice face; offers Blue shield or +1 🔬."""
         variants = get_default_variant_cards()
         blue = create_colored_die(DieColor.BLUE, 2, variants[DieColor.BLUE])
         self.assertEqual(len(blue.faces), 6)
 
         face4 = blue.faces[3]
-        self.assertEqual(face4.name, "Block 1 Blue / +1 🔧")
+        self.assertEqual(face4.name, "Block 1 Blue / +1 🔬")
         self.assertTrue(face4.is_choice)
         self.assertEqual(len(face4.choices), 2)
         self.assertTrue(face4.has_shield_option)
@@ -180,20 +180,20 @@ class TestV08Rules(unittest.TestCase):
         self.assertEqual(c0.shield_color, ShieldColor.BLUE)
 
         c1 = face4.choices[1]
-        self.assertEqual(c1.name, "+1 🔧")
+        self.assertEqual(c1.name, "+1 🔬")
         self.assertEqual(c1.patches, 1)
 
     # -------------------------------------------------------------------------
     # 6. Green Die Faces (v0.8)
     # -------------------------------------------------------------------------
     def test_green_die_faces_v08(self) -> None:
-        """Green die Face 4 is +1 🔧 / +$1 choice face; offers +1 🔧 or +$1."""
+        """Green die Face 4 is +1 🔬 / +$1 choice face; offers +1 🔬 or +$1."""
         variants = get_default_variant_cards()
         green = create_colored_die(DieColor.GREEN, 3, variants[DieColor.GREEN])
         self.assertEqual(len(green.faces), 6)
 
         face4 = green.faces[3]
-        self.assertEqual(face4.name, "+1 🔧 / +$1")
+        self.assertEqual(face4.name, "+1 🔬 / +$1")
         self.assertTrue(face4.is_choice)
         self.assertEqual(len(face4.choices), 2)
         self.assertTrue(face4.has_patch_option)
@@ -201,7 +201,7 @@ class TestV08Rules(unittest.TestCase):
         self.assertFalse(face4.has_shield_option)
 
         c0 = face4.choices[0]
-        self.assertEqual(c0.name, "+1 🔧")
+        self.assertEqual(c0.name, "+1 🔬")
         self.assertEqual(c0.patches, 1)
 
         c1 = face4.choices[1]
@@ -224,13 +224,13 @@ class TestV08Rules(unittest.TestCase):
         )
 
         gray_die = create_gray_die(1)
-        gray_die.current_face = gray_die.faces[4]  # +$1 / +1 🔧
+        gray_die.current_face = gray_die.faces[4]  # +$1 / +1 🔬
 
         green_die = create_colored_die(DieColor.GREEN, 2)
-        green_die.current_face = green_die.faces[3]  # +1 🔧 / +$1
+        green_die.current_face = green_die.faces[3]  # +1 🔬 / +$1
 
         blue_die = create_colored_die(DieColor.BLUE, 3)
-        blue_die.current_face = blue_die.faces[3]  # Block 1 Blue / +1 🔧
+        blue_die.current_face = blue_die.faces[3]  # Block 1 Blue / +1 🔬
 
         player = engine.state.players[0]
         player.ready_dice = [gray_die, green_die, blue_die]
@@ -262,13 +262,13 @@ class TestV08Rules(unittest.TestCase):
         )
 
         blue_die = create_colored_die(DieColor.BLUE, 1)
-        blue_die.current_face = blue_die.faces[3]  # Block 1 Blue / +1 🔧
+        blue_die.current_face = blue_die.faces[3]  # Block 1 Blue / +1 🔬
 
         gray_die = create_gray_die(2)
-        gray_die.current_face = gray_die.faces[4]  # +$1 / +1 🔧
+        gray_die.current_face = gray_die.faces[4]  # +$1 / +1 🔬
 
         green_die = create_colored_die(DieColor.GREEN, 3)
-        green_die.current_face = green_die.faces[3]  # +1 🔧 / +$1
+        green_die.current_face = green_die.faces[3]  # +1 🔬 / +$1
 
         for d in [blue_die, gray_die, green_die]:
             d.is_locked = False
@@ -291,7 +291,7 @@ class TestV08Rules(unittest.TestCase):
         )
         player = engine.state.players[0]
         blue_die = create_colored_die(DieColor.BLUE, 10)
-        blue_face = blue_die.faces[3]  # Block 1 Blue / +1 🔧
+        blue_face = blue_die.faces[3]  # Block 1 Blue / +1 🔬
         blue_die.faces = [blue_face] * 6
         blue_die.current_face = blue_face
 
@@ -323,7 +323,7 @@ class TestV08Rules(unittest.TestCase):
         engine = GameEngine(config=GameConfig(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         blue_die = create_colored_die(DieColor.BLUE, 10)
-        blue_face = blue_die.faces[3]  # Block 1 Blue / +1 🔧
+        blue_face = blue_die.faces[3]  # Block 1 Blue / +1 🔬
         blue_die.faces = [blue_face] * 6
         blue_die.current_face = blue_face
         player.ready_dice = [blue_die]
@@ -346,11 +346,11 @@ class TestV08Rules(unittest.TestCase):
     # 11. Blue Choice Face Unassigned Produces Patch
     # -------------------------------------------------------------------------
     def test_blue_choice_face_unassigned_produces_patch(self) -> None:
-        """Unassigned Blue Face 4 syncs choice 1 and grants +1 🔧 in Step 6."""
+        """Unassigned Blue Face 4 syncs choice 1 and grants +1 🔬 in Step 6."""
         engine = GameEngine(config=GameConfig(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         blue_die = create_colored_die(DieColor.BLUE, 10)
-        blue_face = blue_die.faces[3]  # Block 1 Blue / +1 🔧
+        blue_face = blue_die.faces[3]  # Block 1 Blue / +1 🔬
         blue_die.faces = [blue_face] * 6
         blue_die.current_face = blue_face
         player.ready_dice = [blue_die]
@@ -375,10 +375,10 @@ class TestV08Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_gray_choice_face_money_declaration(self) -> None:
         """Declaring Choice 0 on Gray Face 5 grants +$1 in Step 6 without altering patches."""
-        engine = GameEngine(config=GameConfig(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v034(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         gray_die = create_gray_die(10)
-        gray_face = gray_die.faces[4]  # +$1 / +1 🔧
+        gray_face = gray_die.faces[4]  # +$1 / +1 🔬
         gray_die.faces = [gray_face] * 6
         gray_die.current_face = gray_face
         player.ready_dice = [gray_die]
@@ -401,11 +401,11 @@ class TestV08Rules(unittest.TestCase):
     # 13. Gray Choice Face Patch Declaration
     # -------------------------------------------------------------------------
     def test_gray_choice_face_patch_declaration(self) -> None:
-        """Declaring Choice 1 on Gray Face 5 grants +1 🔧 in Step 6 without altering cash."""
+        """Declaring Choice 1 on Gray Face 5 grants +1 🔬 in Step 6 without altering cash."""
         engine = GameEngine(config=GameConfig(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         gray_die = create_gray_die(10)
-        gray_face = gray_die.faces[4]  # +$1 / +1 🔧
+        gray_face = gray_die.faces[4]  # +$1 / +1 🔬
         gray_die.faces = [gray_face] * 6
         gray_die.current_face = gray_face
         player.ready_dice = [gray_die]
@@ -422,24 +422,24 @@ class TestV08Rules(unittest.TestCase):
         self.assertEqual(gray_die.chosen_choice_index, 1)
         collect_player_production_income(engine, player, None)
         self.assertEqual(player.money, 7)  # unchanged
-        self.assertEqual(player.patches, 2)  # +1 🔧
+        self.assertEqual(player.patches, 2)  # +1 🔬
 
     # -------------------------------------------------------------------------
     # 14. Green Choice Face Declarations
     # -------------------------------------------------------------------------
     def test_green_choice_face_declarations(self) -> None:
-        """Declaring Choice 0 on Green Face 4 grants +1 🔧; Choice 1 grants +$1."""
-        engine = GameEngine(config=GameConfig(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
+        """Declaring Choice 0 on Green Face 4 grants +1 🔬; Choice 1 grants +$1."""
+        engine = GameEngine(config=GameConfig.legacy_v034(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         green_die = create_colored_die(DieColor.GREEN, 10)
-        green_face = green_die.faces[3]  # +1 🔧 / +$1
+        green_face = green_die.faces[3]  # +1 🔬 / +$1
         green_die.faces = [green_face] * 6
         green_die.current_face = green_face
         player.ready_dice = [green_die]
         player.money = 7
         player.patches = 0
 
-        # Choice 0: +1 🔧
+        # Choice 0: +1 🔬
         class Choice0Bot(BaseBot):
             def declare_choices(self, *args, **kwargs) -> Dict[int, int]:
                 return {0: 0}
@@ -472,10 +472,10 @@ class TestV08Rules(unittest.TestCase):
     # 15. Hybrid Star Boot Outputs Collected When Assigned to Defense
     # -------------------------------------------------------------------------
     def test_hybrid_star_boot_outputs_collected_when_assigned_to_defense(self) -> None:
-        """R1 grants +$2 and G1 grants +1 🔧 in Step 6 even when committed to defense."""
+        """R1 grants +$2 and G1 grants +1 🔬 in Step 6 even when committed to defense."""
         variants = get_default_variant_cards()
         r1_card = variants[DieColor.RED]  # R1: Ransom Insurance: Block 1 Red + gain +$2
-        g1_card = variants[DieColor.GREEN]  # G1: Self-Healing Kernel: Block 2 Green + gain +1 🔧
+        g1_card = variants[DieColor.GREEN]  # G1: Self-Healing Kernel: Block 2 Green + gain +1 🔬
 
         engine = GameEngine(
             config=GameConfig(num_players=2),
@@ -503,7 +503,7 @@ class TestV08Rules(unittest.TestCase):
         self.assertIn(0, p0_commit)
         self.assertIn(1, p0_commit)
 
-        # Step 6 collected boot outputs: +$2 from R1, +1 🔧 from G1 (at Phase 3 start)
+        # Step 6 collected boot outputs: +$2 from R1, +1 🔬 from G1 (at Phase 3 start)
         collect_player_production_income(engine, player, None)
         self.assertEqual(player.money, 9)
         self.assertEqual(player.patches, 1)
@@ -516,21 +516,21 @@ class TestV08Rules(unittest.TestCase):
         p_state = PlayerState(player_id=0, bot=BaseBot(0), money=5, secrets=5, patches=1)
 
         gray = create_gray_die(1)
-        gray.current_face = gray.faces[4]  # +$1 / +1 🔧
+        gray.current_face = gray.faces[4]  # +$1 / +1 🔬
 
         green = create_colored_die(DieColor.GREEN, 2)
-        green.current_face = green.faces[3]  # +1 🔧 / +$1
+        green.current_face = green.faces[3]  # +1 🔬 / +$1
 
         blue = create_colored_die(DieColor.BLUE, 3)
-        blue.current_face = blue.faces[3]  # Block 1 Blue / +1 🔧
+        blue.current_face = blue.faces[3]  # Block 1 Blue / +1 🔬
 
         dice = [gray, green, blue]
 
         # SecOpsTurtleBot: prefers patches and Blue shielding
         turtle = SecOpsTurtleBot(0)
         turtle_decls = turtle.declare_choices(p_state, active_dice=dice, staging_cubes={CubeColor.BLUE: 1})
-        self.assertEqual(turtle_decls[0], 1)  # Gray: prefers +1 🔧 (1)
-        self.assertEqual(turtle_decls[1], 0)  # Green: prefers +1 🔧 (0)
+        self.assertEqual(turtle_decls[0], 1)  # Gray: prefers +1 🔬 (1)
+        self.assertEqual(turtle_decls[1], 0)  # Green: prefers +1 🔬 (0)
         self.assertEqual(turtle_decls[2], 0)  # Blue: threat > 0 -> Block 1 Blue (0)
         turtle_commits = turtle.commit_shields(p_state, rolled_dice=dice, staging_cubes={CubeColor.BLUE: 1}, stuck_cubes={}, directive_code="", rng=random.Random(1))
         self.assertEqual(turtle_commits.get(2), ShieldColor.BLUE)
@@ -544,8 +544,8 @@ class TestV08Rules(unittest.TestCase):
         # AdaptiveBalancedBot: patches < 2 -> needs patch
         balanced = AdaptiveBalancedBot(2)
         bal_decls = balanced.declare_choices(p_state, active_dice=dice, staging_cubes={CubeColor.BLUE: 2})
-        self.assertEqual(bal_decls[0], 1)  # patches < 2 -> +1 🔧
-        self.assertEqual(bal_decls[1], 0)  # patches < 2 -> +1 🔧
+        self.assertEqual(bal_decls[0], 1)  # patches < 2 -> +1 🔬
+        self.assertEqual(bal_decls[1], 0)  # patches < 2 -> +1 🔬
         self.assertEqual(bal_decls[2], 0)  # Blue threat > 0 -> Block 1 Blue
 
     # -------------------------------------------------------------------------
@@ -554,7 +554,7 @@ class TestV08Rules(unittest.TestCase):
     def test_web_schemas_serialization_choice_faces(self) -> None:
         """GameStateSerializer exports is_choice, choices, has_*_option, chosen_choice_index, and effective_face."""
         gray = create_gray_die(1)
-        gray.current_face = gray.faces[4]  # +$1 / +1 🔧
+        gray.current_face = gray.faces[4]  # +$1 / +1 🔬
         gray.chosen_choice_index = 1
 
         face_data = GameStateSerializer.serialize_face(gray.current_face)
@@ -567,7 +567,7 @@ class TestV08Rules(unittest.TestCase):
         die_data = GameStateSerializer.serialize_die(gray)
         self.assertEqual(die_data["chosen_choice_index"], 1)
         self.assertIsNotNone(die_data["effective_face"])
-        self.assertEqual(die_data["effective_face"]["name"], "+1 🔧")
+        self.assertEqual(die_data["effective_face"]["name"], "+1 🔬")
         self.assertEqual(die_data["effective_face"]["patches"], 1)
 
     # -------------------------------------------------------------------------
@@ -583,20 +583,20 @@ class TestV08Rules(unittest.TestCase):
         meta0 = ctrl.player_meta[0]
 
         gray = create_gray_die(1)
-        gray.current_face = gray.faces[4]  # +$1 / +1 🔧
+        gray.current_face = gray.faces[4]  # +$1 / +1 🔬
 
         green = create_colored_die(DieColor.GREEN, 2)
-        green.current_face = green.faces[3]  # +1 🔧 / +$1
+        green.current_face = green.faces[3]  # +1 🔬 / +$1
 
         blue = create_colored_die(DieColor.BLUE, 3)
-        blue.current_face = blue.faces[3]  # Block 1 Blue / +1 🔧
+        blue.current_face = blue.faces[3]  # Block 1 Blue / +1 🔬
 
         meta0["rolled_pool"] = [gray, green, blue]
         meta0["has_rolled"] = True
         p0.patches = 0
         p0.money = 7
 
-        # Commit Blue die to defense, declare Gray choice 0 (+$1) and Green choice 0 (+1 🔧)
+        # Commit Blue die to defense, declare Gray choice 0 (+$1) and Green choice 0 (+1 🔬)
         res = ctrl.commit_defenses(
             player_id=0,
             commitments={2: "blue"},
@@ -610,7 +610,7 @@ class TestV08Rules(unittest.TestCase):
 
         # Outputs applied in Phase 3 turn:
         # Gray choice 0: +$1 -> money 8
-        # Green choice 0: +1 🔧 -> patches 1
+        # Green choice 0: +1 🔬 -> patches 1
         # Blue choice 0: committed to defense -> 0 patches
         collect_player_production_income(ctrl.engine, p0, None)
         self.assertEqual(p0.money, 8)
@@ -626,7 +626,7 @@ class TestV08Rules(unittest.TestCase):
         engine = GameEngine(config=GameConfig(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         blue_die = create_colored_die(DieColor.BLUE, 10)
-        blue_face = blue_die.faces[3]  # Block 1 Blue / +1 🔧
+        blue_face = blue_die.faces[3]  # Block 1 Blue / +1 🔬
         blue_die.faces = [blue_face] * 6
         blue_die.current_face = blue_face
         blue_die.chosen_choice_index = 0  # Committed to Blue defense (Block 1 Blue)

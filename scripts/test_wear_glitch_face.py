@@ -2,7 +2,7 @@
 
 Face 5 on Red, Blue, Green:
 - Glitch: Wear 1 Active Die (Locked)
-- Auto-locks when rolled (can be unlocked with 1 🔧 Debug action, or Prodigy).
+- Auto-locks when rolled (can be unlocked with 1 🔬 Debug action, or Prodigy).
 - In Step 6, each unresolved Glitch face demotes 1 other Active die to Unpatched
   (or sacrifices a White Contractor die to supply).
 - Face 6 is the single Star (★) face.
@@ -63,14 +63,14 @@ def create_colored_die_wear_glitch(
     elif color == DieColor.BLUE:
         faces = [
             Face(name="Block 1 Blue", block_amount=1, shield_color=ShieldColor.BLUE),
-            Face(name="+1 🔧", patches=1),
+            Face(name="+1 🔬", patches=1),
             Face(name="+$1", money=1),
             Face(
-                name="Block 1 Blue / +1 🔧",
+                name="Block 1 Blue / +1 🔬",
                 is_choice=True,
                 choices=(
                     Face("Block 1 Blue", block_amount=1, shield_color=ShieldColor.BLUE),
-                    Face("+1 🔧", patches=1),
+                    Face("+1 🔬", patches=1),
                 ),
             ),
             glitch_face,
@@ -81,13 +81,13 @@ def create_colored_die_wear_glitch(
     elif color == DieColor.GREEN:
         faces = [
             Face(name="Block 1 Green", block_amount=1, shield_color=ShieldColor.GREEN),
-            Face(name="+1 🔧", patches=1),
-            Face(name="+2 🔧", patches=2),
+            Face(name="+1 🔬", patches=1),
+            Face(name="+2 🔬", patches=2),
             Face(
-                name="+1 🔧 / +$1",
+                name="+1 🔬 / +$1",
                 is_choice=True,
                 choices=(
-                    Face("+1 🔧", patches=1),
+                    Face("+1 🔬", patches=1),
                     Face("+$1", money=1),
                 ),
             ),
@@ -101,7 +101,7 @@ def create_colored_die_wear_glitch(
             Face(name="+$3", money=3),
             Face(name="+$2", money=2),
             Face(name="+$2", money=2),
-            Face(name="+$1 & +1 🔧", money=1, patches=1),
+            Face(name="+$1 & +1 🔬", money=1, patches=1),
             star_face,
             star_face,
         ]
@@ -112,7 +112,7 @@ def create_colored_die_wear_glitch(
             Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
             Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
             Face(name="+$2", money=2),
-            Face(name="+$1 & +1 🔧", money=1, patches=1),
+            Face(name="+$1 & +1 🔬", money=1, patches=1),
             star_face,
             star_face,
         ]

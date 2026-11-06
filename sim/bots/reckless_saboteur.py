@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 from sim.config import CubeColor, DieColor, ShieldColor
 from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
 from sim.entities import ArchetypeCode, CompanyCode, WhiteHatCode
-from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index, plan_final_round_repairs, is_six_phase_state
+from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index, plan_final_round_repairs, is_six_phase_state, purple_purchasable
 
 if TYPE_CHECKING:
     from sim.engine import GameState, PlayerState
@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 
 class RecklessSaboteurBot(BaseBot):
     """Chaos bot: forces extreme threat escalations and pushes for simultaneous total wipeout."""
+
+    research_focus = ('PATENT', 'TRIAGE', 'RELEASE', 'DEFENSE')  # v0.35.0 research-aware policy
 
     def __init__(self, bot_id: int) -> None:
         super().__init__(bot_id, name="RecklessSaboteurBot")
@@ -195,7 +197,7 @@ class RecklessSaboteurBot(BaseBot):
         ):
             if not is_final_round and player_state.secrets > 1:
                 candidates = []
-                if getattr(player_state, "personal_purple_reserve", 0) > 0:
+                if (purple_purchasable(game_state) and getattr(player_state, "personal_purple_reserve", 0) > 0):
                     base_purple_cost = player_state.get_purple_reserve_cost()
                     disc_purple_cost = max(0, base_purple_cost - game_state.config.cipher_market_discount)
                     if current_money >= disc_purple_cost:
@@ -259,7 +261,7 @@ class RecklessSaboteurBot(BaseBot):
                     break
                 if color == DieColor.PURPLE:
                     cost = player_state.get_purple_reserve_cost()
-                    has_stock = getattr(player_state, "personal_purple_reserve", 0) > 0
+                    has_stock = (purple_purchasable(game_state) and getattr(player_state, "personal_purple_reserve", 0) > 0)
                 else:
                     cost = game_state.get_market_die_cost(color)
                     has_stock = game_state.market.get(color, 0) > 0

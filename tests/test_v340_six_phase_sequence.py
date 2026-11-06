@@ -16,6 +16,7 @@ from unittest import mock
 
 from sim.bots import AdaptiveBalancedBot, BaseBot, Phase3ActionPlan
 from sim.config import (
+    ResearchTrackModel,
     ROUND_PHASE_NAMES,
     CubeColor,
     DieColor,
@@ -414,7 +415,7 @@ class TestSixPhaseEndTriggers(SixPhaseHarness):
 
 class TestSixPhasePipeline(SixPhaseHarness):
     def test_phase5_order_and_production_routes_through_scanned(self):  # S-12
-        e = self.make_engine()
+        e = self.make_engine(research_track_model=ResearchTrackModel.V034_THREE_LEVEL)
         p0 = e.state.players[0]
         p0.has_emergency_hotfix = True
         g_col = self.die(DieColor.RED, Face(name="x"), cost=5)
@@ -623,13 +624,13 @@ class TestSixPhaseProtocols(SixPhaseHarness):
 class TestSixPhaseBotsAndSetup(SixPhaseHarness):
     def test_flat_8_starting_secrets_all_counts_dto_9(self):  # S-17
         for n in (2, 3, 4):
-            cfg = GameConfig(num_players=n)
+            cfg = GameConfig.legacy_v034(num_players=n)
             self.assertEqual(cfg.round_sequence, RoundSequence.SIX_PHASE)
             self.assertEqual(cfg.get_starting_secrets(n), 8)
             e = GameEngine(cfg, [BaseBot(i) for i in range(n)], seed=1)
             self.assertTrue(all(p.secrets == 8 for p in e.state.players))
         comps = [COMPANIES[CompanyCode.DTO], COMPANIES[CompanyCode.AEGIS], COMPANIES[CompanyCode.HELIX], COMPANIES[CompanyCode.MERIDIAN]]
-        e = GameEngine(GameConfig(num_players=4, enable_corporate_asymmetry=True), [BaseBot(i) for i in range(4)],
+        e = GameEngine(GameConfig.legacy_v034(num_players=4, enable_corporate_asymmetry=True), [BaseBot(i) for i in range(4)],
                        seed=1, companies=comps)
         self.assertEqual(e.state.players[0].secrets, 9)
 
@@ -745,7 +746,7 @@ class TestSixPhaseBotsAndSetup(SixPhaseHarness):
             p.research_tokens, p.money, p.defense_level = 10, 0, 1
             return AdaptiveBalancedBot(0).take_operations_actions(p, e.state, e.rng).track_upgrades
 
-        six = plan_for(GameConfig(num_players=2))
+        six = plan_for(GameConfig.legacy_v034(num_players=2))
         self.assertIn("RELEASE", six)
         self.assertLess(six.index("RELEASE"), six.index("TRIAGE"))
         legacy = plan_for(GameConfig.legacy_v033(num_players=2))
@@ -753,7 +754,7 @@ class TestSixPhaseBotsAndSetup(SixPhaseHarness):
         self.assertIn("TRIAGE", legacy)
         # Level 2 is also valued
         bot = BaseBot(0)
-        e = self.make_engine()
+        e = self.make_engine(research_track_model=ResearchTrackModel.V034_THREE_LEVEL)
         p = e.state.players[0]
         p.ready_for_release_dice[:] = [create_gray_die(920 + i) for i in range(6)]
         p.release_level, p.release_bandwidth = 1, 5
@@ -898,7 +899,7 @@ class TestStaffReviewFollowUps(SixPhaseHarness):
 
     def test_release_level_2_gives_bandwidth_6_next_phase5(self):
         plan = Phase3ActionPlan(track_upgrades=["RELEASE"])
-        e = self.make_engine(bots=[StubBot(0, plan), StubBot(1)])
+        e = self.make_engine(bots=[StubBot(0, plan), StubBot(1)], research_track_model=ResearchTrackModel.V034_THREE_LEVEL)
         p0, p1 = e.state.players
         p0.release_level, p0.release_bandwidth, p0.research_tokens = 1, 5, 3
         dice = [self.die(DieColor.GRAY, INCOME_1) for _ in range(7)]
@@ -1093,6 +1094,7 @@ class TestIdentitySeparationNoBridge(SixPhaseHarness):
 
     def _setup(self, company, white_hat, legacy=False, plan=None):
         kw = {"round_sequence": RoundSequence.V033_THREE_PHASE, "legacy_archetype_override_bridge": True} if legacy else {}
+        kw["research_track_model"] = ResearchTrackModel.V034_THREE_LEVEL  # v0.34 Slush Fund (auto, per version)
         e = self.make_engine(bots=[OverrideSpyBot(0, plan), OverrideSpyBot(1)], **kw)
         p0 = e.state.players[0]
         p0.company = COMPANIES[company] if company else None
@@ -1218,7 +1220,7 @@ class TestIdentitySeparationNoBridge(SixPhaseHarness):
     # --- Legacy parity: the bridge is still present under legacy_v033 ---
     def test_legacy_v033_config_keeps_the_bridge(self):
         self.assertTrue(GameConfig.legacy_v033().legacy_archetype_override_bridge)
-        self.assertFalse(GameConfig().legacy_archetype_override_bridge)
+        self.assertFalse(GameConfig.legacy_v034().legacy_archetype_override_bridge)
         e, p0, p1 = self._setup(CompanyCode.MERIDIAN, WhiteHatCode.SPOOK, legacy=True)
         p0.secrets = 3
         self._attack(e, p0, p1, {CubeColor.BLUE: 1})

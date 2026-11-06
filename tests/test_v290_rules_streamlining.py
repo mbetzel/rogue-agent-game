@@ -402,7 +402,7 @@ class TestV290RulesStreamlining(unittest.TestCase):
         'triage' and 'release' independently.
         """
         ctrl = GameController()
-        ctrl.new_game(num_players=2, seed=42)
+        ctrl.new_game(research_track_model="V034_THREE_LEVEL", num_players=2, seed=42)
         ctrl.phase = 6
         ctrl.subphase = "operations"
         ctrl.active_player_index = 0

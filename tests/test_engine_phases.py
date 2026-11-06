@@ -54,7 +54,7 @@ class TestEnginePhases(unittest.TestCase):
         # Force specific faces on player 0's dice
         p0 = engine.state.players[0]
         p0.ready_dice[0].current_face = Face("+$1", money=1)
-        p0.ready_dice[1].current_face = Face("+1 🔧", patches=1)
+        p0.ready_dice[1].current_face = Face("+1 🔬", patches=1)
         p0.ready_dice[2].current_face = Face("Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY)
         p0.ready_dice[3].current_face = Face("Idle (0)")
 
@@ -64,7 +64,7 @@ class TestEnginePhases(unittest.TestCase):
         self.assertEqual(p0.patches, 2)  # 1 + 1
 
     def test_hotfix_reroll_costs_patch_token(self) -> None:
-        """In v0.6, unlocking a locked die via debug unlock costs 1 🔧 token."""
+        """In v0.6, unlocking a locked die via debug unlock costs 1 🔬 token."""
         cfg = GameConfig(num_players=2, starting_patches=2)
         bot0 = DummyControlledBot(0)
         bot1 = DummyControlledBot(1)
