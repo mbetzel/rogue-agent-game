@@ -11,6 +11,18 @@ if TYPE_CHECKING:
     from sim.engine.core import GameEngine
 
 
+def _standard_key(r: Dict) -> Tuple:
+    return (r["secrets"], r["money"], r["ready_colored_dice_count"], r["patches"], -r["unpatched_dice_count"])
+
+
+def _wipeout_key_six_phase(r: Dict) -> Tuple:
+    return (r["money"], r["ready_colored_dice_count"], r["patches"], -r["unpatched_dice_count"])
+
+
+def _wipeout_key_v033(r: Dict) -> Tuple:
+    return (r["net_score"], r["secrets"], r["money"], r["ready_colored_dice_count"], r["patches"], -r["unpatched_dice_count"])
+
+
 def evaluate_end_game(engine: GameEngine) -> EndGameResult:
     cfg = engine.config
     all_patient_zero = all(p.is_patient_zero for p in engine.state.players)
@@ -110,8 +122,28 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
 
         winner_id = sorted_rankings[0]["player_id"] if sorted_rankings else None
         final_rankings = sorted_rankings
+        win_pool, win_key = survivors, _standard_key
+    elif getattr(cfg, "is_six_phase", False):
+        # v0.34 Total Wipeout (OQ-4): breach depth is ignored; rank ONLY by the standard hierarchical
+        # tiebreakers: Money > Active Colored dice in Ready > Research > fewest Under Development.
+        # breach_depth / net_score stay recorded for telemetry only. Python's stable sort keeps
+        # player-index order for fully shared ranks.
+        rankings.sort(
+            key=lambda r: (
+                r["money"],
+                r["ready_colored_dice_count"],
+                r["patches"],
+                -r["unpatched_dice_count"],
+            ),
+            reverse=True,
+        )
+        for rank_idx, r in enumerate(rankings):
+            r["rank"] = rank_idx + 1
+        winner_id = rankings[0]["player_id"] if rankings else None
+        final_rankings = rankings
+        win_pool, win_key = rankings, _wipeout_key_six_phase
     else:
-        # Total Wipeout: Ranked by Net Score, Secrets, Money, Ready Colored Dice, Patches, fewest unpatched dice
+        # Legacy v0.33 Total Wipeout: Ranked by Net Wipeout Score, Secrets, Money, Ready Colored Dice, Patches, fewest unpatched dice
         rankings.sort(
             key=lambda r: (
                 r["net_score"],
@@ -129,11 +161,32 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
         # In total wipeout, narrative victory belongs to Rogue Agent, but top human takes 1st rank
         winner_id = rankings[0]["player_id"] if rankings else None
         final_rankings = rankings
+        win_pool, win_key = rankings, _wipeout_key_v033
+
+    # Shared victory (RULES §5: "If still tied, victory is shared"): every player tied for first on the
+    # full ranking key wins. Reporting only; gameplay is unaffected.
+    winner_ids = [r["player_id"] for r in win_pool if win_key(r) == win_key(win_pool[0])] if win_pool else []
+    is_shared_victory = len(winner_ids) > 1
+    for r in final_rankings:
+        r["is_winner"] = r["player_id"] in winner_ids
+    if getattr(cfg, "is_six_phase", False):
+        winner_id = None if is_shared_victory else (winner_ids[0] if winner_ids else None)
+        # Competition ranking: fully tied players share a rank (survivors before Patient Zeros).
+        prev = None
+        for idx, r in enumerate(final_rankings):
+            k = (not r["is_patient_zero"] or all_patient_zero, win_key(r))
+            if k != prev:
+                rank = idx + 1
+                prev = k
+            r["rank"] = rank
+    # Legacy v0.33 path keeps winner_id = first in seat-stable sort order and sequential ranks (parity).
 
     return EndGameResult(
         end_reason=engine.state.end_reason,
         total_rounds=engine.state.current_round,
         winner_id=winner_id,
+        winner_ids=winner_ids,
+        is_shared_victory=is_shared_victory,
         is_total_wipeout=all_patient_zero,
         singularity_reached=engine.state.singularity_triggered,
         rankings=final_rankings,

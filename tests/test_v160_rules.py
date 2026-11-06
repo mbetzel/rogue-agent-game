@@ -126,7 +126,7 @@ class TestV160Rules(unittest.TestCase):
         ctrl = GameController()
         cipher_card = get_archetype_by_code(ArchetypeCode.CIPHER)
         ctrl.new_game(num_players=4, seed=42, archetypes=[cipher_card, None, None, None])
-        ctrl.phase = 3
+        ctrl.phase = 6
         ctrl.active_player_index = 0
 
         # Attempt dirty income without cipher -> ValueError (eliminated in v0.16.0)

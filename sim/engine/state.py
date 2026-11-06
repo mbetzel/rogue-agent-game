@@ -681,6 +681,73 @@ class RoundTelemetry:
     attack_strengths: Dict[CubeColor, int]
     player_snapshots: List[Dict]
     buffer_overflow: bool = False
+    # --- v0.34.0 Six-Phase telemetry (defaults keep legacy constructors valid) ---
+    round_sequence: str = "V033_THREE_PHASE"
+    phases_executed: List[int] = field(default_factory=list)  # e.g. [1,2,3,4,5,6] or [1,2]
+    phase_snapshots: Dict[int, List[Dict]] = field(default_factory=dict)  # key = phase that just ended
+    income_by_player: Dict[int, Dict[str, int]] = field(default_factory=dict)  # {"money","research","secrets"}
+    scanned_held_by_player: Dict[int, int] = field(default_factory=dict)  # Scanned count after Phase 5 step 3
+    graduated_by_player: Dict[int, int] = field(default_factory=dict)
+    purple_star_triggers_per_round: Dict[int, int] = field(default_factory=dict)  # Signature Protocol triggers (OQ-17)
+    final_round_trigger_phase: Optional[int] = None  # 2 or 4
+    end_phase: Optional[int] = None  # phase in which game_over was set
+
+
+# ---------------------------------------------------------------------------
+# v0.34.0 Six-Phase shared types
+# ---------------------------------------------------------------------------
+# As returned by Phase 1 (Roll & Deploy): (player, rolled dice, {rolled-index: shield color})
+Commitments = List[Tuple["PlayerState", List[Die], Dict[int, ShieldColor]]]
+
+
+@dataclass
+class CompileResult:
+    """Phase 2 (Compiler Drop & Corruption) output, consumed by Phase 4 and telemetry."""
+
+    staged_before: Dict[CubeColor, int]
+    stuck_before: Dict[CubeColor, int]
+    exited_cubes: Dict[CubeColor, int]  # mutable: Mode-B corruption cube adds land here
+    stuck_after: Dict[CubeColor, int]
+    buffer_overflow: bool = False
+    black_dropped: int = 0
+    breached_pids: Set[int] = field(default_factory=set)  # players who became Patient Zero during Phase 2
+
+
+@dataclass
+class IncomeRecord:
+    """Phase 3 (Income) result for one player (deltas plus per-die detail rows)."""
+
+    money: int = 0
+    research: int = 0
+    secrets: int = 0
+    details: List[Dict[str, Any]] = field(default_factory=list)
+    burned_die_id: Optional[int] = None
+    burned_die_ids: List[int] = field(default_factory=list)
+    diagnostics_face: Optional[str] = None
+    purple_star_triggers: int = 0
+
+    def as_dict(self) -> Dict[str, Any]:
+        return {
+            "money": self.money,
+            "research": self.research,
+            "secrets": self.secrets,
+            "details": list(self.details),
+            "burned_die_id": self.burned_die_id,
+            "burned_die_ids": list(self.burned_die_ids),
+            "diagnostics_face": self.diagnostics_face,
+            "purple_star_triggers": self.purple_star_triggers,
+        }
+
+
+@dataclass
+class PipelineShiftRecord:
+    """Phase 5 (CI/CD Pipeline Shift) result for one player."""
+
+    hotfixed_ids: List[int] = field(default_factory=list)
+    returned_to_scanned_ids: List[int] = field(default_factory=list)
+    graduated_ids: List[int] = field(default_factory=list)
+    triaged_ids: List[int] = field(default_factory=list)
+    held_in_scanned: int = 0
 
 
 @dataclass
@@ -695,6 +762,10 @@ class EndGameResult:
     rankings: List[Dict]
     telemetry_history: List[RoundTelemetry]
     total_buffer_overflows: int = 0
+    # v0.34: every player tied for first after all tiebreakers (RULES §5 shared victory). On the six-phase
+    # path winner_id is None when the victory is shared; the legacy path keeps v0.33 winner_id.
+    winner_ids: List[int] = field(default_factory=list)
+    is_shared_victory: bool = False
 
 
 @dataclass
@@ -742,6 +813,7 @@ class GameState:
     current_round: int = 1
     game_over: bool = False
     is_final_round: bool = False
+    final_round_trigger_phase: Optional[int] = None  # v0.34.0: 2 or 4 (six-phase path only)
     end_reason: EndGameReason = EndGameReason.NONE
     singularity_triggered: bool = False
     contractor_supply: int = 12

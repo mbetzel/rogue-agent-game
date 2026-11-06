@@ -530,7 +530,7 @@ class TestV260VariableDiceCosts(unittest.TestCase):
         gc = GameController()
         gc.new_game(num_players=2, seed=42)
         gc.state.variant_cards[DieColor.BLUE] = self.variants["B2"]  # Cost: $6
-        gc.phase = 3
+        gc.phase = 6
         gc.subphase = "operations_turn"
         gc.active_player_index = 0
         p0 = gc.state.players[0]
@@ -550,7 +550,7 @@ class TestV260VariableDiceCosts(unittest.TestCase):
         p0.white_hat = WHITE_HATS[WhiteHatCode.SPOOK]  # reserve_cost: 5
         p0.money = 10
         p0.personal_purple_reserve = 1
-        gc.phase = 3
+        gc.phase = 6
         gc.subphase = "operations_turn"
         gc.active_player_index = 0
 

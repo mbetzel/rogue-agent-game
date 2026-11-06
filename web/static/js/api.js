@@ -157,7 +157,7 @@ export async function doReroll(useProdigy = false) {
 }
 
 export async function doDebugUnlock(dieIndex) {
-  console.warn("Debug unlocks deprecated in v0.23.0. Use Phase 3 Fast-Patching.");
+  console.warn("Debug unlocks deprecated in v0.23.0.");
 }
 
 export async function doRoll() {
@@ -203,7 +203,24 @@ export async function doCompile() {
   }
 }
 
-export async function doConfirmIncome(glitchDieIds = [], anyShieldAllocations = null) {
+// Phase 3: Income (optional Spook Burn Notice / Phreaker Jumper Diagnostics targets)
+export async function doConfirmIncome(spookBurnDieId = null, phreakerDieId = null) {
+  const payload = { player_id: getHumanPlayerId() };
+  if (spookBurnDieId !== null && spookBurnDieId !== undefined) {
+    payload.spook_burn_die_id = spookBurnDieId;
+  }
+  if (phreakerDieId !== null && phreakerDieId !== undefined) {
+    payload.phreaker_die_id = phreakerDieId;
+  }
+  const newState = await apiCall("/api/game/action/confirm_income", "POST", payload);
+  if (newState) {
+    setState(newState);
+    notifyRender();
+  }
+}
+
+// Phase 4: Attack Resolution (Generic Any shield allocation, Green Malware targets, Aegis color)
+export async function doConfirmAttacks(glitchDieIds = [], anyShieldAllocations = null, aegisColor = null) {
   const payload = {
     player_id: getHumanPlayerId(),
     glitch_die_ids: glitchDieIds,
@@ -211,7 +228,29 @@ export async function doConfirmIncome(glitchDieIds = [], anyShieldAllocations = 
   if (anyShieldAllocations !== null && anyShieldAllocations !== undefined) {
     payload.any_shield_allocations = anyShieldAllocations;
   }
-  const newState = await apiCall("/api/game/action/confirm_income", "POST", payload);
+  if (aegisColor) {
+    payload.aegis_color = aegisColor;
+  }
+  const newState = await apiCall("/api/game/action/confirm_attacks", "POST", payload);
+  if (newState) {
+    setState(newState);
+    notifyRender();
+  }
+}
+
+// Phase 5: CI/CD Pipeline Shift (Scanned Graduation <= Release Bandwidth; Hotfix / Splice targets)
+export async function doChooseGraduates(graduateDieIds = [], spliceDieId = null, hotfixDieId = null) {
+  const payload = {
+    player_id: getHumanPlayerId(),
+    graduate_die_ids: graduateDieIds,
+  };
+  if (spliceDieId !== null && spliceDieId !== undefined) {
+    payload.splice_die_id = spliceDieId;
+  }
+  if (hotfixDieId !== null && hotfixDieId !== undefined) {
+    payload.hotfix_die_id = hotfixDieId;
+  }
+  const newState = await apiCall("/api/game/action/choose_graduates", "POST", payload);
   if (newState) {
     setState(newState);
     notifyRender();

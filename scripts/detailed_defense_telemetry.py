@@ -23,6 +23,7 @@ from sim.engine import GameEngine
 from sim.entities import Die, Face, VariantCard, create_gray_die, create_white_die, get_random_setup
 import sim.entities
 import sim.engine.phase3_ops
+import sim.engine.phase6_operations  # v0.34: purchases bind create_colored_die here
 
 from scripts.compare_block1_vs_block2 import create_colored_die_block1, _ORIGINAL_CREATE_COLORED_DIE
 
@@ -30,10 +31,10 @@ from scripts.compare_block1_vs_block2 import create_colored_die_block1, _ORIGINA
 def run_detailed_telemetry(num_players: int = 4, num_runs: int = 500, candidate: bool = False):
     if candidate:
         sim.entities.create_colored_die = create_colored_die_block1
-        sim.engine.phase3_ops.create_colored_die = create_colored_die_block1
+        sim.engine.phase3_ops.create_colored_die = sim.engine.phase6_operations.create_colored_die = create_colored_die_block1
     else:
         sim.entities.create_colored_die = _ORIGINAL_CREATE_COLORED_DIE
-        sim.engine.phase3_ops.create_colored_die = _ORIGINAL_CREATE_COLORED_DIE
+        sim.engine.phase3_ops.create_colored_die = sim.engine.phase6_operations.create_colored_die = _ORIGINAL_CREATE_COLORED_DIE
 
     # Track metrics
     match_durations: List[int] = []
@@ -134,7 +135,7 @@ def run_detailed_telemetry(num_players: int = 4, num_runs: int = 500, candidate:
 
     # Restore original
     sim.entities.create_colored_die = _ORIGINAL_CREATE_COLORED_DIE
-    sim.engine.phase3_ops.create_colored_die = _ORIGINAL_CREATE_COLORED_DIE
+    sim.engine.phase3_ops.create_colored_die = sim.engine.phase6_operations.create_colored_die = _ORIGINAL_CREATE_COLORED_DIE
 
     return {
         "avg_duration": round(statistics.mean(match_durations), 2),

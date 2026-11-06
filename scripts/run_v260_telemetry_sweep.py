@@ -33,7 +33,7 @@ from sim.bots import (
     VentureGreedBot,
 )
 from sim.config import CubeColor, DieColor, EndGameReason, GameConfig
-from sim.engine import phase1_boot, phase2_threat, phase3_ops
+from sim.engine import phase1_boot, phase2_threat, phase3_ops, phase6_operations
 from sim.engine.core import GameEngine
 from sim.entities import (
     AbilityStatus,
@@ -226,7 +226,7 @@ class TelemetrySweepEngineV260(GameEngine):
 
             phase3_ops.resolve_phreaker_jumper_diagnostics = hooked_phreaker_diag
             phase3_ops.resolve_spook_burn_notice = hooked_spook_burn
-            phase3_ops.create_colored_die = hooked_create_colored_die
+            phase3_ops.create_colored_die = phase6_operations.create_colored_die = hooked_create_colored_die
 
             # Snapshot ready pool before Phase 3 to track per-player Turn 1 purchases
             if current_round_num == 1:
@@ -237,7 +237,7 @@ class TelemetrySweepEngineV260(GameEngine):
             finally:
                 phase3_ops.resolve_phreaker_jumper_diagnostics = orig_phreaker_diag
                 phase3_ops.resolve_spook_burn_notice = orig_spook_burn
-                phase3_ops.create_colored_die = orig_create_colored_die
+                phase3_ops.create_colored_die = phase6_operations.create_colored_die = orig_create_colored_die
 
             if current_round_num == 1:
                 for p in self.state.players:

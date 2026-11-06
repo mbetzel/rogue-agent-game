@@ -4,8 +4,9 @@ import random
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
+from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
 from sim.entities import ArchetypeCode, CompanyCode, WhiteHatCode
-from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index, plan_final_round_repairs
+from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index, plan_final_round_repairs, is_six_phase_state
 
 if TYPE_CHECKING:
     from sim.engine import GameState, PlayerState
@@ -219,7 +220,7 @@ class VentureGreedBot(BaseBot):
                 assignments[idx] = ShieldColor.BLUE
         return assignments
 
-    def take_phase3_actions(
+    def take_operations_actions(
         self,
         player_state: PlayerState,
         game_state: GameState,
@@ -231,10 +232,7 @@ class VentureGreedBot(BaseBot):
         cash_cushion = 0 if is_final_round else 2
 
         active_ver = game_state.active_version.version_str
-        is_omnidyne = bool(
-            (player_state.company and player_state.company.code == CompanyCode.OMNIDYNE)
-            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.PHREAKER)
-        )
+        is_omnidyne = has_company_override(player_state, CompanyCode.OMNIDYNE, legacy_bridge_enabled(game_state))
         if (
             is_omnidyne
             and player_state.is_ability_available(active_ver)
@@ -243,10 +241,7 @@ class VentureGreedBot(BaseBot):
             plan.use_omnidyne_override = True
             plan.use_phreaker_ability = True
 
-        is_prometheus = bool(
-            (player_state.company and player_state.company.code == CompanyCode.PROMETHEUS)
-            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.CIPHER)
-        )
+        is_prometheus = has_company_override(player_state, CompanyCode.PROMETHEUS, legacy_bridge_enabled(game_state))
         if (
             is_prometheus
             and player_state.is_ability_available(active_ver)
@@ -299,17 +294,11 @@ class VentureGreedBot(BaseBot):
             current_money -= 6
 
         # Operative Protocol Selectors (Spook & Phreaker)
-        is_spook = bool(
-            (player_state.white_hat and player_state.white_hat.code == WhiteHatCode.SPOOK)
-            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.SPOOK)
-        )
+        is_spook = has_signature_protocol(player_state, WhiteHatCode.SPOOK, legacy_bridge_enabled(game_state))
         if is_spook:
             plan.spook_burn_die_id = self.choose_spook_burn_notice(player_state, game_state, rng)
 
-        is_phreaker = bool(
-            (player_state.white_hat and player_state.white_hat.code == WhiteHatCode.PHREAKER)
-            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.PHREAKER)
-        )
+        is_phreaker = has_signature_protocol(player_state, WhiteHatCode.PHREAKER, legacy_bridge_enabled(game_state))
         if is_phreaker:
             plan.phreaker_diagnostics_die_id = self.choose_phreaker_jumper_diagnostics(player_state, game_state, rng)
 
@@ -329,6 +318,9 @@ class VentureGreedBot(BaseBot):
 
         # Hardware Upgrades & Patents (v0.28.0)
         res_available = player_state.research_tokens
+        if is_six_phase_state(game_state):
+            # v0.34: value RELEASE (L1-L2) before Patent Filings when owned dice exceed Release Bandwidth.
+            res_available = self.plan_release_upgrade(player_state, plan, res_available, min_pressure=1)
         pat_cost = player_state.get_track_upgrade_cost("PATENT")
         if pat_cost is not None and res_available >= pat_cost and player_state.patent_level < 1:
             plan.track_upgrades.append("PATENT")

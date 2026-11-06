@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, IntEnum
 from typing import Dict, Optional, Tuple
 
 
@@ -44,6 +44,41 @@ class EndGameReason(str, Enum):
     ROUND_LIMIT = "round_limit"
 
 
+class RoundSequence(str, Enum):
+    """Round structure selector (v0.34.0).
+
+    V033_THREE_PHASE: legacy v0.33 round (Roll & Deploy / Compiler Drop & Defense / Operations & Pipeline Prep),
+    kept for regression and parity tests. SIX_PHASE: the canonical v0.34 six-phase round.
+    """
+
+    V033_THREE_PHASE = "V033_THREE_PHASE"
+    SIX_PHASE = "SIX_PHASE"
+
+
+class RoundPhase(IntEnum):
+    """Canonical six-phase round (v0.34.0). GAME_OVER is used by the web state machine only."""
+
+    ROLL_AND_DEPLOY = 1
+    COMPILER_DROP_AND_CORRUPTION = 2
+    INCOME = 3
+    ATTACK_RESOLUTION = 4
+    CICD_PIPELINE_SHIFT = 5
+    OPERATIONS = 6
+    GAME_OVER = 7
+
+
+# Single source of truth for phase display names (web controller, PnP aid).
+ROUND_PHASE_NAMES: Dict[int, str] = {
+    1: "Roll & Deploy",
+    2: "Compiler Drop & Corruption",
+    3: "Income",
+    4: "Attack Resolution",
+    5: "CI/CD Pipeline Shift",
+    6: "Operations",
+    7: "Game Over",
+}
+
+
 @dataclass
 class GameConfig:
     """Tunable game parameters with baselines from RULES.md."""
@@ -51,9 +86,9 @@ class GameConfig:
     # Player count & setup
     num_players: int = 4
     starting_money: int = 6  # [v0.30.0 Baseline: Calibrated from $4 to $6 (INV-START-CASH-01)]
-    starting_secrets_by_player_count: Dict[int, int] = field(
-        default_factory=lambda: {2: 8, 3: 8, 4: 12}
-    )
+    # [v0.34.0 Baseline: Flat 8 Secrets at every player count (INV-START-SECRETS-FLAT-01).
+    #  None resolves in __post_init__: SIX_PHASE -> {2: 8, 3: 8, 4: 8}; V033_THREE_PHASE -> {2: 8, 3: 8, 4: 12}]
+    starting_secrets_by_player_count: Optional[Dict[int, int]] = None
     starting_patches_by_player_count: Dict[int, int] = field(
         default_factory=lambda: {2: 0, 3: 0, 4: 0}  # [v0.30.0 Baseline: Calibrated from 2 to 0 (INV-START-RES-01)]
     )
@@ -162,6 +197,33 @@ class GameConfig:
     overflow_penalty_per_secret_debt: int = -1  # -1 VP per Secret breach depth below 0
     overflow_penalty_per_cash_debt: int = 0  # Obsolete in v0.3 (cash >= 0)
     overflow_penalty_per_unfulfilled_destroyed_die: int = 0  # Deprecated in v0.31.0 (INV-MALWARE-FIZZLE-01)
+
+    # Round structure (v0.34.0): SIX_PHASE (canonical) or V033_THREE_PHASE (legacy regression path)
+    round_sequence: RoundSequence = RoundSequence.SIX_PHASE
+    # v0.33 bug kept only for legacy parity: White Hats also granted their paired company's Institutional
+    # Override (and companies the paired Signature Protocol). True only via GameConfig.legacy_v033().
+    legacy_archetype_override_bridge: bool = False
+
+    def __post_init__(self) -> None:
+        self.round_sequence = RoundSequence(self.round_sequence)
+        if self.starting_secrets_by_player_count is None:
+            # NOTE: resolved once at construction. Re-assigning round_sequence later does NOT
+            # re-resolve this dict; use GameConfig.legacy_v033() or pass round_sequence to __init__.
+            self.starting_secrets_by_player_count = (
+                {2: 8, 3: 8, 4: 12}
+                if self.round_sequence == RoundSequence.V033_THREE_PHASE
+                else {2: 8, 3: 8, 4: 8}
+            )
+
+    @classmethod
+    def legacy_v033(cls, **overrides) -> "GameConfig":
+        """v0.33.0 baseline: three-phase round + 4P = 12 Secrets."""
+        overrides.setdefault("legacy_archetype_override_bridge", True)
+        return cls(round_sequence=RoundSequence.V033_THREE_PHASE, **overrides)
+
+    @property
+    def is_six_phase(self) -> bool:
+        return self.round_sequence == RoundSequence.SIX_PHASE
 
     @property
     def corruption_track_capacity(self) -> int:

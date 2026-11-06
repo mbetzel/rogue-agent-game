@@ -142,7 +142,7 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
 
                 elif clean_path == "/api/game/action/debug_unlock":
                     payload, code = error_response(
-                        "Debug unlocks deprecated in v0.23.0. Use Phase 3 Fast-Patching.",
+                        "Debug unlocks deprecated in v0.23.0.",
                         400,
                     )
                     self._send_json_response(payload, code)
@@ -178,13 +178,62 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     self._send_json_response(payload, code)
 
                 elif clean_path == "/api/game/action/confirm_income":
+                    # Phase 3: Income
                     pid = get_target_pid(default_to_human=True)
-                    glitch_die_ids = data.get("glitch_die_ids", [])
-                    any_shield_allocations = data.get("any_shield_allocations", None)
+                    if "glitch_die_ids" in data or "any_shield_allocations" in data:
+                        payload, code = error_response(
+                            "glitch_die_ids / any_shield_allocations moved to /api/game/action/confirm_attacks (Phase 4: Attack Resolution)",
+                            400,
+                        )
+                        self._send_json_response(payload, code)
+                        return
                     state = self.controller.confirm_income(
                         pid,
-                        glitch_die_ids=glitch_die_ids,
-                        any_shield_allocations=any_shield_allocations,
+                        spook_burn_die_id=data.get("spook_burn_die_id"),
+                        phreaker_die_id=data.get("phreaker_die_id"),
+                    )
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
+                elif clean_path == "/api/game/action/confirm_attacks":
+                    # Phase 4: Attack Resolution
+                    pid = get_target_pid(default_to_human=True)
+                    allocs = data.get("any_shield_allocations")
+                    if allocs is not None and not isinstance(allocs, dict):
+                        payload, code = error_response("any_shield_allocations must be an object {red, blue, green}", 400)
+                        self._send_json_response(payload, code)
+                        return
+                    glitch_ids = data.get("glitch_die_ids")
+                    if glitch_ids is not None and not isinstance(glitch_ids, list):
+                        payload, code = error_response("glitch_die_ids must be a list of die ids", 400)
+                        self._send_json_response(payload, code)
+                        return
+                    aegis_color = data.get("aegis_color")
+                    if aegis_color is not None and str(aegis_color).lower() not in ("red", "blue", "green", "none"):
+                        payload, code = error_response("aegis_color must be one of red, blue, green, none", 400)
+                        self._send_json_response(payload, code)
+                        return
+                    state = self.controller.confirm_attacks(
+                        pid, any_shield_allocations=allocs, glitch_die_ids=glitch_ids, aegis_color=aegis_color
+                    )
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
+                elif clean_path == "/api/game/action/choose_graduates":
+                    # Phase 5: CI/CD Pipeline Shift (Scanned Graduation, <= Release Bandwidth)
+                    pid = get_target_pid(default_to_human=True)
+                    grads = data.get("graduate_die_ids")
+                    if not isinstance(grads, list):
+                        payload, code = error_response("Missing required list field 'graduate_die_ids'", 400)
+                        self._send_json_response(payload, code)
+                        return
+                    splice = data.get("splice_die_id")
+                    hotfix = data.get("hotfix_die_id")
+                    state = self.controller.choose_graduates(
+                        pid,
+                        [int(x) for x in grads],
+                        splice_die_id=int(splice) if splice is not None else None,
+                        hotfix_die_id=int(hotfix) if hotfix is not None else None,
                     )
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)

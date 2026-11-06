@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import random
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
 from sim.bots.base import BaseBot
 from sim.bots.adaptive_balanced import AdaptiveBalancedBot
@@ -43,8 +43,22 @@ from sim.entities import (
     get_random_white_hats,
 )
 from sim.tower import CubeTower
-from sim.engine.state import EndGameResult, GameState, PlayerState, RoundTelemetry
-from sim.engine import phase1_boot, phase2_threat, phase3_ops, end_game
+from sim.engine.state import CompileResult, EndGameResult, GameState, PlayerState, RoundTelemetry
+from sim.engine import (
+    end_game,
+    legacy_v033,
+    phase1_roll_deploy,
+    phase2_compiler,
+    phase3_income,
+    phase4_attack_resolution,
+    phase5_pipeline_shift,
+    phase6_operations,
+)
+
+from sim.engine import phase2_threat, phase3_ops  # noqa: F401,E402  (v0.33 shim modules, kept importable)
+
+# Backward-compatible module aliases (v0.33 names)
+phase1_boot = phase1_roll_deploy
 
 
 class GameEngine:
@@ -220,20 +234,21 @@ class GameEngine:
         self.state.priming_stuck_cubes = self.state.tower.get_stuck_copy()
 
     def _execute_phase_1(self) -> List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]]:
-        return phase1_boot.execute_phase_1(self)
+        return phase1_roll_deploy.execute_phase_1(self)
 
     def _apply_single_die_immediate_output(self, player: PlayerState, die: Die) -> None:
-        phase1_boot.apply_single_die_immediate_output(self, player, die)
+        phase1_roll_deploy.apply_single_die_immediate_output(self, player, die)
 
     def _apply_immediate_face_outputs(self, player: PlayerState) -> None:
-        phase1_boot.apply_immediate_face_outputs(self, player)
+        phase1_roll_deploy.apply_immediate_face_outputs(self, player)
 
     def _execute_phase_2(
         self,
         player_commitments: List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]],
-        defer_green_for_pids: Optional[Set[int]] = None,
+        defer_green_for_pids: Optional[Set[int]] = None,  # Deprecated v0.34; remove in v0.35
     ) -> RoundTelemetry:
-        return phase2_threat.execute_phase_2(self, player_commitments, defer_green_for_pids=defer_green_for_pids)
+        """Legacy v0.33 façade (INV-SEQ-SHIM-LEGACY-01): always v0.33 semantics."""
+        return legacy_v033.execute_phase_2_v033(self, player_commitments, defer_green_for_pids=defer_green_for_pids)
 
     def _resolve_player_defense_and_wear(
         self,
@@ -244,36 +259,136 @@ class GameEngine:
         exited_cubes: Dict[CubeColor, int],
         active_directive: str,
     ) -> None:
-        phase2_threat.resolve_player_defense_and_wear(
+        phase4_attack_resolution.resolve_player_defense_and_wear(
             self, player, rolled_dice, commitments, attack_strengths, exited_cubes, active_directive
         )
 
     def _execute_phase_3(self) -> None:
-        phase3_ops.execute_phase_3(self)
+        """Legacy v0.33 façade (INV-SEQ-SHIM-LEGACY-01): always v0.33 semantics."""
+        legacy_v033.execute_phase_3_v033(self)
+
+    # ------------------------------------------------------------------
+    # v0.34.0 Six-Phase steps
+    # ------------------------------------------------------------------
+    def _run_phase_2_compiler(self, commitments) -> CompileResult:
+        cr = phase2_compiler.execute_compiler_drop(self, commitments)
+        phase2_compiler.check_end_triggers_after_compiler(self, cr)
+        return cr
+
+    def _run_phase_3_income(self, commitments):
+        return phase3_income.execute_income(self, commitments)
+
+    def _run_phase_4_attack_resolution(self, commitments, cr: CompileResult) -> Dict[CubeColor, int]:
+        return phase4_attack_resolution.execute_attack_resolution(self, commitments, cr)
+
+    def _run_phase_5_pipeline_shift(self):
+        return phase5_pipeline_shift.execute_pipeline_shift(self)
+
+    def _run_phase_6_operations(self) -> None:
+        phase6_operations.execute_operations(self)
+
+    def _snapshot_players(self) -> List[Dict]:
+        return [
+            {
+                "player_id": p.player_id,
+                "bot_name": p.bot.name,
+                "money": p.money,
+                "secrets": p.secrets,
+                "patches": p.patches,
+                "ready_dice_count": len(p.ready_for_release_dice),
+                "in_production_dice_count": len(p.in_production_dice),
+                "glitched_dice_count": len(p.glitched_dice),
+                "scanned_dice_count": len(p.scanned_dice),
+                "unpatched_dice_count": len(p.glitched_dice) + len(p.scanned_dice),
+                "contractor_dice_count": len(p.contractor_dice),
+                "is_patient_zero": p.is_patient_zero,
+            }
+            for p in self.state.players
+        ]
+
+    def _begin_telemetry(self, cr: CompileResult) -> RoundTelemetry:
+        return RoundTelemetry(
+            round_number=self.state.current_round,
+            active_version_name=self.state.active_version.name,
+            corruption_track=self.state.corruption_track,
+            staged_cubes=cr.staged_before,
+            stuck_cubes_before=cr.stuck_before,
+            exited_cubes=cr.exited_cubes,
+            stuck_cubes_after=cr.stuck_after,
+            attack_strengths={CubeColor.RED: 0, CubeColor.BLUE: 0, CubeColor.GREEN: 0},
+            player_snapshots=[],
+            buffer_overflow=cr.buffer_overflow,
+            round_sequence=self.config.round_sequence.value,
+            phases_executed=[1, 2],
+        )
+
+    def _finalize_telemetry(self, tel: RoundTelemetry, end_phase: Optional[int]) -> RoundTelemetry:
+        tel.final_round_trigger_phase = self.state.final_round_trigger_phase
+        tel.end_phase = end_phase
+        self.telemetry_history.append(tel)  # exactly once per round (INV-SEQ-TELEMETRY-01)
+        return tel
 
     def run_round(self) -> RoundTelemetry:
-        """Runs a single round of Rogue Agent."""
+        """Runs a single round of Rogue Agent (six-phase by default; legacy v0.33 behind the flag)."""
         if self.state.game_over:
             raise RuntimeError("Cannot run round on an already finished game")
+        if not self.config.is_six_phase:
+            return legacy_v033.run_round_v033(self)
+        return self._run_round_six_phase()
 
-        # Phase 1
+    def _run_round_six_phase(self) -> RoundTelemetry:
+        s = self.state
+
+        # Phase 1: Roll & Deploy
         commitments = self._execute_phase_1()
+        p1_snap = self._snapshot_players()
 
-        # Phase 2
-        telemetry = self._execute_phase_2(commitments)
+        # Phase 2: Compiler Drop & Corruption (+ end-trigger check)
+        cr = self._run_phase_2_compiler(commitments)
+        tel = self._begin_telemetry(cr)
+        tel.phase_snapshots[1] = p1_snap
+        tel.phase_snapshots[2] = self._snapshot_players()
+        if s.game_over:
+            tel.player_snapshots = tel.phase_snapshots[2]
+            return self._finalize_telemetry(tel, end_phase=2)
 
-        # Phase 3 (skipped if game over triggered in Phase 2)
-        if not self.state.game_over:
-            self._execute_phase_3()
-            if self.state.is_final_round:
-                self.state.game_over = True
-            else:
-                self.state.current_round += 1
-                if self.state.current_round > self.state.config.max_rounds:
-                    self.state.game_over = True
-                    self.state.end_reason = EndGameReason.ROUND_LIMIT
+        # Phase 3: Income (survivors only)
+        incomes = self._run_phase_3_income(commitments)
+        tel.income_by_player = {
+            pid: {"money": r.money, "research": r.research, "secrets": r.secrets} for pid, r in incomes.items()
+        }
+        tel.purple_star_triggers_per_round = {pid: r.purple_star_triggers for pid, r in incomes.items()}
+        tel.phases_executed.append(3)
+        tel.phase_snapshots[3] = self._snapshot_players()
 
-        return telemetry
+        # Phase 4: Attack Resolution (damage, Snowball Recycle, Contractor Expiration, end check)
+        tel.attack_strengths = self._run_phase_4_attack_resolution(commitments, cr)
+        tel.phases_executed.append(4)
+        tel.phase_snapshots[4] = self._snapshot_players()
+        tel.player_snapshots = tel.phase_snapshots[4]
+        if s.game_over:
+            return self._finalize_telemetry(tel, end_phase=4)
+
+        # Phase 5: CI/CD Pipeline Shift
+        shifts = self._run_phase_5_pipeline_shift()
+        tel.scanned_held_by_player = {pid: r.held_in_scanned for pid, r in shifts.items()}
+        tel.graduated_by_player = {pid: len(r.graduated_ids) for pid, r in shifts.items()}
+        tel.phases_executed.append(5)
+        tel.phase_snapshots[5] = self._snapshot_players()
+
+        # Phase 6: Operations (clockwise; passes the First Player Marker)
+        self._run_phase_6_operations()
+        tel.phases_executed.append(6)
+        tel.phase_snapshots[6] = self._snapshot_players()
+
+        if s.is_final_round:
+            s.game_over = True
+        else:
+            s.current_round += 1
+            if s.current_round > s.config.max_rounds:
+                s.game_over = True
+                s.end_reason = EndGameReason.ROUND_LIMIT
+        return self._finalize_telemetry(tel, end_phase=6 if s.game_over else None)
 
     def run_game(self) -> EndGameResult:
         """Runs the game to completion and returns the final scoring and standings."""

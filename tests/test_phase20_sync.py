@@ -23,6 +23,15 @@ from sim.entities import (
 from web.server import RogueAgentRequestHandler, create_server
 
 
+
+def _pause_in_phase5(controller, pid):
+    """v0.34: Omnidyne Magnetic Splice resolves in Phase 5 step 1; park the controller in choose_graduates."""
+    from web.controller.phase5_pipeline_actions import _needs_choice
+
+    controller.phase = 5
+    controller.subphase = "choose_graduates"
+    controller.pending_graduation = {pid: _needs_choice(controller, controller.state.players[pid])}
+
 class TestPhase20Sync(unittest.TestCase):
     """Tests for Phase 20 state synchronization, player selection agency, and rule ordering fixes."""
 
@@ -71,7 +80,7 @@ class TestPhase20Sync(unittest.TestCase):
         self._post("/api/game/action/compile", {})
 
         # Force Phase 3 active turn on human player 0
-        ctrl.phase = 3
+        ctrl.phase = 6
         ctrl.active_player_index = 0
         p0 = ctrl.state.players[0]
         meta0 = ctrl.player_meta[0]
@@ -133,7 +142,6 @@ class TestPhase20Sync(unittest.TestCase):
         """Phreaker Magnetic Splice repairs exactly 1 chosen die by die_id or die_index."""
         ctrl = RogueAgentRequestHandler.controller
         ctrl.new_game(num_players=4, seed=42)
-        ctrl.phase = 3
         ctrl.active_player_index = 0
         p0 = ctrl.state.players[0]
         p0.archetype = get_archetype_by_code(ArchetypeCode.PHREAKER)
@@ -144,12 +152,15 @@ class TestPhase20Sync(unittest.TestCase):
         yellow_die = create_colored_die(DieColor.YELLOW, die_id=777)
         p0.unpatched_dice = [gray_die, yellow_die]
 
-        # Repair specifically the Yellow die using die_id=777
+        # v0.34: Magnetic Splice is chosen in Phase 5 (step 1) and resolves with the Scanned Graduation choice
+        _pause_in_phase5(ctrl, 0)
         res = self._post("/api/game/action/phreaker", {
             "player_id": 0,
             "count": 1,
             "die_id": 777,
         })
+        self.assertTrue(res["success"])
+        res = self._post("/api/game/action/choose_graduates", {"player_id": 0, "graduate_die_ids": []})
         self.assertTrue(res["success"])
         p0_state = res["state"]["players"][0]
         unpatched_ids = [d["die_id"] for d in p0_state["unpatched_dice"]]
@@ -166,7 +177,7 @@ class TestPhase20Sync(unittest.TestCase):
         """Bot Phreaker repairs 1 die (not 2) and prioritizes colored/high-VP die over starter Gray."""
         ctrl = RogueAgentRequestHandler.controller
         ctrl.new_game(num_players=4, seed=42)
-        ctrl.phase = 3
+        ctrl.phase = 6
         bot_player = ctrl.state.players[1]
         bot_meta = ctrl.player_meta[1]
         bot_player.archetype = get_archetype_by_code(ArchetypeCode.PHREAKER)
@@ -179,7 +190,10 @@ class TestPhase20Sync(unittest.TestCase):
         bot_player.patches = 0
         bot_player.secrets = 1
 
-        ctrl._execute_bot_phase3(bot_player, bot_meta)
+        # v0.34: the bot's Magnetic Splice resolves in Phase 5 step 1 (engine helper used by the web)
+        from sim.engine.phase5_pipeline_shift import apply_hotfix_bypass
+
+        apply_hotfix_bypass(ctrl.engine, bot_player)
         # Bot should have repaired purple_die (888) and left gray_die in unpatched_dice
         self.assertIn(purple_die, bot_player.ready_dice)
         self.assertIn(gray_die, bot_player.unpatched_dice)
@@ -340,8 +354,13 @@ class TestPhase20Sync(unittest.TestCase):
             dock_js = f.read()
         self.assertIn("phreakerDieSelect", dock_js)
         self.assertIn("getEligibleBacklashDice", dock_js)
-        self.assertIn("Repair 1 Die Free", dock_js)
+        self.assertIn("Magnetic Splice", dock_js)
         self.assertIn("Ignore 1", dock_js)
+        # v0.34 six-phase panels
+        self.assertIn("doConfirmAttacks", dock_js)
+        self.assertIn("doChooseGraduates", dock_js)
+        self.assertIn("confirm_attacks", api_js)
+        self.assertIn("choose_graduates", api_js)
 
         with open(os.path.join(js_dir, "components", "player_mats.js"), "r", encoding="utf-8") as f:
             mats_js = f.read()

@@ -27,6 +27,7 @@ from sim.engine import EndGameResult, GameEngine
 from sim.entities import Die, Face, VariantCard, create_gray_die, create_white_die, get_random_setup
 import sim.entities
 import sim.engine.phase3_ops
+import sim.engine.phase6_operations  # v0.34: purchases bind create_colored_die here
 
 # Save original create_colored_die
 _ORIGINAL_CREATE_COLORED_DIE = sim.entities.create_colored_die
@@ -228,7 +229,7 @@ def main():
     # 1. Run Baseline (Block 2)
     print("\n>>> RUNNING BASELINE (Block 2 on Red, Blue, Green)...")
     sim.entities.create_colored_die = _ORIGINAL_CREATE_COLORED_DIE
-    sim.engine.phase3_ops.create_colored_die = _ORIGINAL_CREATE_COLORED_DIE
+    sim.engine.phase3_ops.create_colored_die = sim.engine.phase6_operations.create_colored_die = _ORIGINAL_CREATE_COLORED_DIE
 
     t0 = time.time()
     baseline_results = {}
@@ -241,7 +242,7 @@ def main():
     # 2. Run Candidate (Block 1)
     print("\n>>> RUNNING CANDIDATE (Block 1 on Red, Blue, Green)...")
     sim.entities.create_colored_die = create_colored_die_block1
-    sim.engine.phase3_ops.create_colored_die = create_colored_die_block1
+    sim.engine.phase3_ops.create_colored_die = sim.engine.phase6_operations.create_colored_die = create_colored_die_block1
 
     t0 = time.time()
     candidate_results = {}
@@ -253,7 +254,7 @@ def main():
 
     # Restore original
     sim.entities.create_colored_die = _ORIGINAL_CREATE_COLORED_DIE
-    sim.engine.phase3_ops.create_colored_die = _ORIGINAL_CREATE_COLORED_DIE
+    sim.engine.phase3_ops.create_colored_die = sim.engine.phase6_operations.create_colored_die = _ORIGINAL_CREATE_COLORED_DIE
 
     # Save to JSON
     summary = {

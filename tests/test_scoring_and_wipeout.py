@@ -101,7 +101,8 @@ class TestScoringAndWipeout(unittest.TestCase):
         )
         # Net score = -3 (overflow penalties only)
 
-        engine = GameEngine(self.config, [self.bot0, self.bot1], seed=42)
+        # v0.34: Net Wipeout Score ranking is legacy-only (OQ-4); pin to the v0.33 sequence.
+        engine = GameEngine(GameConfig.legacy_v033(num_players=2), [self.bot0, self.bot1], seed=42)
         engine.state.players = [p0, p1]
 
         res = engine.evaluate_end_game()

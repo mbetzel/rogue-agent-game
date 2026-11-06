@@ -42,7 +42,7 @@ const COMPANIES_DATA = {
     name: "Omnidyne Systems",
     sector: "Industrial Automation",
     overrideName: "Magnetic Splice",
-    timing: "P3: OPERATIONS",
+    timing: "P5: PIPELINE SHIFT",
     description: "Once per Rogue Agent Version, move 1 die from your Glitched Box directly to Ready for Release for free (bypassing Scanned Box).",
     themeColor: "#4ade80",
     startingSetupDesc: "Def Cap 1, Triage Lvl 1 (Bandwidth 3), Release Lvl 1 (Bandwidth 5).",
@@ -52,7 +52,7 @@ const COMPANIES_DATA = {
     name: "Aegis Defense Relay",
     sector: "Telecommunications",
     overrideName: "Baffle Echo",
-    timing: "P2: STEP 2B DMG",
+    timing: "P4: ATTACK RESOLUTION",
     description: "Once per Rogue Agent Version, ignore 1 attack cube (Red, Blue, or Green) when resolving compiler damage for yourself this round.",
     themeColor: "#38bdf8",
     startingSetupDesc: "Defense Lvl 1 (3 Shields Cap), Triage 1, Release 3.",
@@ -62,7 +62,7 @@ const COMPANIES_DATA = {
     name: "Dept. of Telecom Oversight [DTO]",
     sector: "Federal Agency",
     overrideName: "Slush Fund",
-    timing: "P2: STEP 2B DMG",
+    timing: "P4: ATTACK RESOLUTION",
     description: "Once per Rogue Agent Version, absorb up to 2 Corporate Secret loss (from Blue Spyware or Red Ransom) for free without paying cash.",
     themeColor: "#a855f7",
     startingSetupDesc: "Def Cap 2, Triage 2, Release 4, +1 Corporate Secret.",
@@ -82,7 +82,7 @@ const COMPANIES_DATA = {
     name: "The Prometheus Foundation",
     sector: "Think Tank",
     overrideName: "Algorithmic Arbitrage",
-    timing: "P3: OPERATIONS",
+    timing: "P6: OPERATIONS",
     description: "Once per Rogue Agent Version: Mode A: $2 discount on purchasing 1 Colored or Purple Specialist Die; Mode B: Gain +$3 cash payout directly.",
     themeColor: "#00d4ff",
     startingSetupDesc: "Def Cap 2, Triage 2, Release 4, -1 🔬 Track Upgrade Discount.",
@@ -126,8 +126,8 @@ const WHITE_HATS_DATA = {
     role: "Ex-Intelligence // OpSec & Slush Funds",
     flavor: "Every breach has a price tag. That's what non-attributable slush accounts are for.",
     protocolName: "Burn Notice",
-    protocolDesc: "Phase 3 Ops: Gain +$2; optional: permanently return 1 owned colored die to market for +1 Corporate Secret.",
-    passiveDesc: "Once per turn in Phase 3, burn 1 owned colored die for +1 Secret.",
+    protocolDesc: "Phase 3 Income: Gain +$2; optional: permanently return 1 owned colored die to market for +1 Corporate Secret.",
+    passiveDesc: "Once per Purple ★ die in Phase 3, burn 1 owned colored die for +1 Secret.",
     themeColor: "#a855f7",
   },
   PRODIGY: {
@@ -296,7 +296,7 @@ export function renderPlayerMats() {
   state.players.forEach((p) => {
     const isSelected = (currentTab !== "all" && Number(currentTab) === p.player_id);
     const isHuman = Boolean(p.is_human);
-    const isTurn = (p.player_id === state.active_player_index && state.phase === 3);
+    const isTurn = (p.player_id === state.active_player_index && state.phase === 6);
     const isFirstPlayer = (p.player_id === state.first_player_index);
 
     const tabBtn = document.createElement("button");
@@ -340,7 +340,7 @@ export function renderPlayerMats() {
   terminalsGrid.className = `terminals-display-grid ${currentTab === "all" ? "view-all-mode" : "single-terminal-mode"}`;
 
   targetList.forEach((p) => {
-    const isTurn = (p.player_id === state.active_player_index && state.phase === 3);
+    const isTurn = (p.player_id === state.active_player_index && state.phase === 6);
     const isCISO = (p.player_id === state.first_player_index);
 
     // Resolve modular Client Company and White Hat Dossier (with backward compatibility)
@@ -499,7 +499,7 @@ export function renderPlayerMats() {
                       ? `Free Rerolls: <strong>${p.rerolls_remaining || 0}</strong>/2 | Click unlocked dice to reroll | Glitches lock immediately` 
                       : `Phase 1 Rolling | Glitches lock immediately → Glitched Box`)
                   : (p.has_committed 
-                      ? (readyCount > 0 ? 'Dice ready for next round' : 'All dice deployed to In Production | Dice return or graduate here in Phase 3')
+                      ? (readyCount > 0 ? 'Dice ready for next round' : 'All dice deployed to In Production | Scanned dice graduate here in Phase 5 (≤ Release Bandwidth)')
                       : 'Start: 3 Gray + 1 Purple Specialist Die | Phase 1: Roll all Ready + hired Contractors | Offline dice do not roll')}
               </div>
             </div>
@@ -519,7 +519,7 @@ export function renderPlayerMats() {
                 <span class="zone-count-badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-size: 0.7rem;">SHIELDS: ${redShieldDice.length + blueShieldDice.length + greenShieldDice.length + anyShieldDice.length}/${p.defense_capacity || 2} CAP</span>
               </div>
               <div class="zone-subtext">
-                Delayed Income: Collect $, 🔬, ★ in Phase 3 | Defense Capacity: max ${p.defense_capacity || 2} shields (Flexible Firewall Ready)${p.has_passive_firewall ? ' | 🛡️ Passive Firewall Active (Absorbs 1 cube free in P2B)' : ''}
+                Income: Collect $, 🔬, ★ in Phase 3 | Defense Capacity: max ${p.defense_capacity || 2} shields (Flexible Firewall Ready)${p.has_passive_firewall ? ' | 🛡️ Passive Firewall Active (Absorbs 1 cube free in Phase 4)' : ''}
               </div>
             </div>
 
@@ -535,7 +535,7 @@ export function renderPlayerMats() {
                   </div>
                 </div>
                 <div class="shield-desc-sub1">Delayed Yield</div>
-                <div class="shield-desc-sub2">$, 🔬, ★ in P3</div>
+                <div class="shield-desc-sub2">$, 🔬, ★ in Phase 3</div>
                 <div class="shield-slots-tray" id="income_tray_${p.player_id}"></div>
               </div>
 
@@ -552,7 +552,7 @@ export function renderPlayerMats() {
                   </div>
                 </div>
                 <div class="shield-desc-sub1">Active Shields Committed Against Compiler Threats</div>
-                <div class="shield-desc-sub2">Absorbs cleanly in P2B; unblocked attacks inflict penalties.</div>
+                <div class="shield-desc-sub2">Absorbs cleanly in Phase 4; unblocked attacks inflict penalties.</div>
                 <div class="shield-slots-tray defense-grid-unified-tray" id="defense_grid_${p.player_id}" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 36px; padding: 4px; background: rgba(0,0,0,0.2); border-radius: 4px;"></div>
               </div>
             </div>
@@ -572,7 +572,7 @@ export function renderPlayerMats() {
                 <span class="zone-count-badge" style="background: rgba(244, 63, 94, 0.2); color: #f43f5e; font-size: 0.7rem;">TRIAGE: ${p.triage_bandwidth || 2}/RND | RELEASE: ${p.release_bandwidth || 4}/RND</span>
               </div>
               <div class="zone-subtext">
-                Two-Stage Conveyor: Glitched Box → Scanned Box → Ready for Release${p.has_emergency_hotfix ? ' | ⚡ Emergency Hotfix Active (1 die Glitched -> Ready in P3B)' : ''}
+                Two-Stage Conveyor: Glitched Box → Scanned Box → Ready for Release${p.has_emergency_hotfix ? ' | ⚡ Emergency Hotfix Active (1 die Glitched -> Ready in Phase 5)' : ''}
               </div>
             </div>
 
@@ -593,10 +593,10 @@ export function renderPlayerMats() {
               <div style="border: 1px solid rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.08); border-radius: 6px; padding: 8px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                   <span style="font-weight: 600; color: #38bdf8; font-size: 0.85rem;">✓ SCANNED BOX (${(p.scanned_dice || []).length})</span>
-                  <span style="font-size: 0.75rem; color: #4ade80;">Ready next round!</span>
+                  <span style="font-size: 0.75rem; color: ${(p.scanned_over_release || 0) > 0 ? '#f59e0b' : '#4ade80'};">Release Bandwidth: ${Math.min((p.scanned_dice || []).length, p.release_bandwidth || 4)} / ${p.release_bandwidth || 4}${(p.scanned_over_release || 0) > 0 ? ` (${p.scanned_over_release} over)` : ''}</span>
                 </div>
                 <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 6px;">
-                  Graduates to Ready for Release at round end (Release Bandwidth: ${p.release_bandwidth || 4})
+                  In Production → Scanned Box → Ready for Release in Phase 5 (≤ Release Bandwidth, your choice)
                 </div>
                 <div class="dice-tray" id="scanned_tray_${p.player_id}" style="min-height: 48px;"></div>
               </div>
@@ -612,7 +612,7 @@ export function renderPlayerMats() {
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <div>
             <span style="font-weight: 700; color: #c084fc; font-size: 0.8rem; letter-spacing: 0.5px;">TERMINAL HARDWARE & R&D UPGRADE TRACKS</span>
-            <span style="font-size: 0.65rem; color: var(--text-dim); margin-left: 8px;">Spend 🔬 in Phase 3A Operations</span>
+            <span style="font-size: 0.65rem; color: var(--text-dim); margin-left: 8px;">Spend 🔬 in Phase 6: Operations</span>
           </div>
           <div style="font-size: 0.7rem; color: #a855f7;">
             ${p.upgrade_discount ? `<span style="background: rgba(168,85,247,0.2); padding: 2px 6px; border-radius: 4px;">-${p.upgrade_discount} 🔬 Track Upgrade Discount</span>` : ''}

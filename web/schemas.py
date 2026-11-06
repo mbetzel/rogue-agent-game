@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from typing import Any, Dict, List, Optional, Tuple
 
-from sim.config import CubeColor, DieColor, EndGameReason, ShieldColor
+from sim.config import ROUND_PHASE_NAMES, CubeColor, DieColor, EndGameReason, ShieldColor
 from sim.engine import EndGameResult, GameState, PlayerState, RoundTelemetry
 from sim.entities import AbilityStatus, ArchetypeCard, Company, Die, Face, VariantCard, VersionCard, WhiteHat
 
@@ -209,7 +209,7 @@ class GameStateSerializer:
             return None
         code_str = card.code.value if hasattr(card.code, "value") else str(card.code)
         flavor_info = ARCHETYPE_FLAVOR.get(code_str.upper(), {
-            "role": "Consultancy Specialist",
+            "role": "White Hat Operative",
             "flavor": '"Information is the only true currency in the network."',
         })
         return {
@@ -248,6 +248,7 @@ class GameStateSerializer:
         rerolls_remaining: int = 0,
         max_rerolls: int = 2,
         rank: Optional[int] = None,
+        income_this_round: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         vp = cls.calculate_player_vp(player, config)
 
@@ -325,6 +326,8 @@ class GameStateSerializer:
             "defense_capacity": getattr(player, "defense_capacity", 2),
             "triage_bandwidth": getattr(player, "triage_bandwidth", 2),
             "release_bandwidth": getattr(player, "release_bandwidth", 4),
+            "scanned_over_release": max(0, len(player.scanned_dice) - getattr(player, "release_bandwidth", 4)),
+            "income_this_round": income_this_round,
             "triage_level": getattr(player, "triage_level", 0),
             "release_level": getattr(player, "release_level", 0),
             "pipeline_level": getattr(player, "pipeline_level", 0),
@@ -443,6 +446,7 @@ class GameStateSerializer:
                 rerolls_remaining=p_meta.get("rerolls_remaining", 0),
                 max_rerolls=p_meta.get("max_rerolls", 2),
                 rank=player_ranks.get(p.player_id),
+                income_this_round=(controller_meta.get("last_income_result") or {}).get(p.player_id),
             )
             players_serialized.append(p_data)
 
@@ -454,7 +458,9 @@ class GameStateSerializer:
             "game_id": controller_meta.get("game_id", "default"),
             "current_round": state.current_round,
             "phase": controller_meta.get("phase", 1),
-            "phase_name": controller_meta.get("phase_name", "Boot & Configure"),
+            "phase_name": controller_meta.get("phase_name", ROUND_PHASE_NAMES[1]),
+            "phase_names": controller_meta.get("phase_names", dict(ROUND_PHASE_NAMES)),
+            "round_sequence": controller_meta.get("round_sequence", state.config.round_sequence.value),
             "subphase": controller_meta.get("subphase", "waiting_for_roll"),
             "active_player_index": controller_meta.get("active_player_index", 0),
             "first_player_index": state.first_player_index,
@@ -485,6 +491,11 @@ class GameStateSerializer:
             "active_version": active_version,
             "version_deck": version_deck_serialized,
             "last_compile_result": controller_meta.get("last_compile_result"),
+            # v0.34 six-phase results (Phase 3 Income / Phase 4 Attack Resolution / Phase 5 Pipeline Shift)
+            "last_income_result": controller_meta.get("last_income_result", {}),
+            "last_attack_result": controller_meta.get("last_attack_result"),
+            "last_pipeline_result": controller_meta.get("last_pipeline_result", {}),
+            "pending_graduation": controller_meta.get("pending_graduation", {}),
             # Market
             "market": market_serialized,
             # Players

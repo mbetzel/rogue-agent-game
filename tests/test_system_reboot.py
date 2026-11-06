@@ -188,7 +188,7 @@ class TestSystemReboot(unittest.TestCase):
         ctrl = RogueAgentRequestHandler.controller
         ctrl.new_game(num_players=2, seed=123)
 
-        ctrl.phase = 3
+        ctrl.phase = 6
         ctrl.active_player_index = 0
         with self.assertRaises(ValueError):
             ctrl.system_reboot(0)

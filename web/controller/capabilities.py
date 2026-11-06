@@ -14,6 +14,7 @@ from sim.bots import (
 )
 from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
+from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
 from sim.entities import (
     AbilityStatus,
     ArchetypeCard,
@@ -71,10 +72,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     ability_avail = player.is_ability_available(active_ver) if active_ver else player.is_ability_available()
 
     # Company Institutional Overrides & Operative Protocol Capabilities
-    is_operator = bool(
-        (player.company and player.company.code == CompanyCode.MERIDIAN)
-        or (player.archetype and player.archetype.code == ArchetypeCode.OPERATOR)
-    )
+    is_operator = has_company_override(player, CompanyCode.MERIDIAN, legacy_bridge_enabled(controller))
     can_operator = bool(
         controller.phase == 1
         and not meta["has_rolled"]
@@ -85,38 +83,37 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         and controller.state.contractor_supply > 0
     )
 
-    is_prodigy = bool(
-        (player.company and player.company.code == CompanyCode.HELIX)
-        or (player.archetype and player.archetype.code == ArchetypeCode.PRODIGY)
-    )
-    is_phreaker = bool(
-        (player.company and player.company.code == CompanyCode.OMNIDYNE)
-        or (player.archetype and player.archetype.code == ArchetypeCode.PHREAKER)
-    )
-    is_phreaker_white_hat = bool(
-        (player.white_hat and player.white_hat.code == WhiteHatCode.PHREAKER)
-        or (player.archetype and player.archetype.code == ArchetypeCode.PHREAKER)
-    )
+    is_prodigy = has_company_override(player, CompanyCode.HELIX, legacy_bridge_enabled(controller))
+    is_phreaker = has_company_override(player, CompanyCode.OMNIDYNE, legacy_bridge_enabled(controller))
+    is_phreaker_white_hat = has_signature_protocol(player, WhiteHatCode.PHREAKER, legacy_bridge_enabled(controller))
+    pending_grad = (getattr(controller, "pending_graduation", {}) or {}).get(player_id)
+    # Omnidyne Magnetic Splice: Phase 5 step 1 (Emergency Hotfix & Magnetic Splice)
     can_phreaker = bool(
-        controller.phase == 3
-        and is_active
+        controller.phase == 5
+        and pending_grad is not None
         and not is_eliminated
         and is_phreaker
-        and ability_avail
-        and len(player.unpatched_dice) > 0
+        and pending_grad.get("splice_available", False)
     )
-    can_phreaker_diagnostics = bool(
-        controller.phase == 3
-        and is_active
-        and not is_eliminated
-        and is_phreaker_white_hat
-        and player.purple_star_available
+    can_splice = can_phreaker
+    can_hotfix_bypass = bool(controller.phase == 5 and pending_grad is not None and pending_grad.get("hotfix_available", False))
+    can_choose_graduates = bool(controller.phase == 5 and controller.subphase == "choose_graduates" and pending_grad is not None)
+    in_income = bool(
+        controller.phase == 3 and controller.subphase == "confirm_income"
+        and not meta.get("income_confirmed", False) and not is_eliminated
     )
+    purple_in_prod = any(
+        (d.effective_face or d.current_face) is not None
+        and (d.effective_face or d.current_face).is_star
+        and (d.effective_face or d.current_face).star_code == "PURPLE_STAR"
+        for d in player.in_production_dice
+    )
+    # Phreaker Jumper Diagnostics / Spook Burn Notice: Phase 3 Income (Purple ★ still In Production, OQ-2)
+    can_phreaker_diagnostics = bool(in_income and is_phreaker_white_hat and purple_in_prod)
+    is_spook_white_hat = has_signature_protocol(player, WhiteHatCode.SPOOK, legacy_bridge_enabled(controller))
+    can_spook_burn = bool(in_income and is_spook_white_hat and purple_in_prod)
 
-    is_cipher = bool(
-        (player.company and player.company.code == CompanyCode.PROMETHEUS)
-        or (player.archetype and player.archetype.code == ArchetypeCode.CIPHER)
-    )
+    is_cipher = has_company_override(player, CompanyCode.PROMETHEUS, legacy_bridge_enabled(controller))
     can_cipher_buy = {}
     for color in [DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW, DieColor.PURPLE]:
         if color == DieColor.PURPLE:
@@ -132,7 +129,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
 
         disc_cost = max(0, base_cost - controller.state.config.cipher_market_discount)
         can_cipher_buy[color.value] = bool(
-            controller.phase == 3
+            controller.phase == 6
             and is_active
             and not is_eliminated
             and is_cipher
@@ -142,7 +139,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             and player.money >= disc_cost
         )
     can_cipher_cash = bool(
-        controller.phase == 3
+        controller.phase == 6
         and is_active
         and not is_eliminated
         and is_cipher
@@ -150,10 +147,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     )
     can_cipher_dirty = can_cipher_cash
 
-    is_acoustic = bool(
-        (player.company and player.company.code == CompanyCode.AEGIS)
-        or (player.archetype and player.archetype.code == ArchetypeCode.ACOUSTIC)
-    )
+    is_acoustic = has_company_override(player, CompanyCode.AEGIS, legacy_bridge_enabled(controller))
     can_acoustic = bool(
         not is_eliminated
         and is_acoustic
@@ -165,10 +159,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         )
     )
 
-    is_spook = bool(
-        (player.company and player.company.code == CompanyCode.DTO)
-        or (player.archetype and player.archetype.code == ArchetypeCode.SPOOK)
-    )
+    is_spook = has_company_override(player, CompanyCode.DTO, legacy_bridge_enabled(controller))
     can_spook = bool(
         not is_eliminated
         and is_spook
@@ -202,10 +193,17 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     can_commit = (controller.phase == 1 and meta["has_rolled"] and not meta["has_committed"] and not is_eliminated)
     can_compile = (controller.phase == 2 and controller.subphase == "ready_for_compile")
 
-    can_confirm_income = bool(controller.phase == 3 and controller.subphase == "confirm_income")
+    can_confirm_income = bool(
+        controller.phase == 3 and controller.subphase == "confirm_income"
+        and not meta.get("income_confirmed", False) and not is_eliminated
+    )
+    can_confirm_attacks = bool(
+        controller.phase == 4 and controller.subphase == "confirm_attacks" and not is_eliminated
+        and player_id not in (getattr(controller, "attack_resolved_pids", set()) or set())
+    )
     can_patch_cash = False
     can_patch_token = (
-        controller.phase == 3
+        controller.phase == 6
         and not can_confirm_income
         and is_active
         and not is_eliminated
@@ -214,7 +212,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     )
     can_dirty = bool(
         controller.state.config.dirty_income_enabled
-        and controller.phase == 3
+        and controller.phase == 6
         and not can_confirm_income
         and is_active
         and not is_eliminated
@@ -224,7 +222,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     )
     can_system_reboot = False
     can_fast_patch = False
-    can_end_turn = (controller.phase == 3 and not can_confirm_income and is_active and not is_eliminated)
+    can_end_turn = (controller.phase == 6 and not can_confirm_income and is_active and not is_eliminated)
 
     # Market purchase availability per color
     can_buy = {}
@@ -241,7 +239,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             has_stock = controller.state.market.get(color, 0) > 0
 
         can_buy[color.value] = bool(
-            controller.phase == 3
+            controller.phase == 6
             and not can_confirm_income
             and is_active
             and not is_eliminated
@@ -254,7 +252,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     # Star actions
     can_star = {
         "B2": bool(
-            controller.phase == 3
+            controller.phase == 6
             and not can_confirm_income
             and is_active
             and player.b2_available
@@ -264,10 +262,10 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
                 or player.secrets < controller.state.config.b2_secret_cap
             )
         ),
-        "Y1": bool(controller.phase == 3 and not can_confirm_income and is_active and player.y1_available and player.money >= 6),
-        "P1": bool(controller.phase == 3 and not can_confirm_income and is_active and player.p1_available),
+        "Y1": bool(controller.phase == 6 and not can_confirm_income and is_active and player.y1_available and player.money >= 6),
+        "P1": bool(controller.phase == 6 and not can_confirm_income and is_active and player.p1_available),
         "P3": bool(
-            controller.phase == 3
+            controller.phase == 6
             and not can_confirm_income
             and is_active
             and player.p3_available is not None
@@ -286,7 +284,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
 
     can_upgrade_track = {
         "triage": bool(
-            controller.phase == 3
+            controller.phase == 6
             and not can_confirm_income
             and is_active
             and not is_eliminated
@@ -295,7 +293,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             and research_avail >= triage_cost
         ),
         "release": bool(
-            controller.phase == 3
+            controller.phase == 6
             and not can_confirm_income
             and is_active
             and not is_eliminated
@@ -304,7 +302,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             and research_avail >= release_cost
         ),
         "pipeline": bool(
-            controller.phase == 3
+            controller.phase == 6
             and not can_confirm_income
             and is_active
             and not is_eliminated
@@ -313,7 +311,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             and research_avail >= pipeline_cost
         ),
         "defense": bool(
-            controller.phase == 3
+            controller.phase == 6
             and not can_confirm_income
             and is_active
             and not is_eliminated
@@ -322,7 +320,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             and research_avail >= defense_cost
         ),
         "patent": bool(
-            controller.phase == 3
+            controller.phase == 6
             and not can_confirm_income
             and is_active
             and not is_eliminated
@@ -333,7 +331,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     }
 
     can_file_patent = bool(
-        controller.phase == 3
+        controller.phase == 6
         and not can_confirm_income
         and is_active
         and not is_eliminated
@@ -362,6 +360,16 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         "can_commit": can_commit,
         "can_compile": can_compile,
         "can_confirm_income": can_confirm_income,
+        "can_confirm_attacks": can_confirm_attacks,
+        "can_aegis_echo": bool(
+            can_confirm_attacks
+            and ((((getattr(controller, "last_attack_result", None) or {}).get("threat_summary") or {}).get(player_id) or {})
+                 .get("aegis", {}).get("available", False))
+        ),
+        "can_choose_graduates": can_choose_graduates,
+        "can_splice": can_splice,
+        "can_hotfix_bypass": can_hotfix_bypass,
+        "can_spook_burn": can_spook_burn,
         "can_buy": can_buy,
         "can_buy_purple_reserve": can_buy_purple_reserve,
         "can_patch_cash": can_patch_cash,

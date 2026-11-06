@@ -66,6 +66,27 @@ class TestWebAPI(unittest.TestCase):
         with urllib.request.urlopen(req) as resp:
             return json.loads(resp.read().decode("utf-8"))
 
+    def _advance_to_phase(self, target: int, player_id: int = 0) -> Dict[str, Any]:
+        """Drives the v0.34 six-phase web state machine with default human choices until `target` phase."""
+        state = self._get("/api/game/state")["state"]
+        for _ in range(12):
+            phase = state["phase"]
+            if phase >= target or phase == 7:
+                return state
+            if phase == 2:
+                state = self._post("/api/game/action/compile", {})["state"]
+            elif phase == 3:
+                state = self._post("/api/game/action/confirm_income", {"player_id": player_id})["state"]
+            elif phase == 4:
+                state = self._post("/api/game/action/confirm_attacks", {"player_id": player_id})["state"]
+            elif phase == 5:
+                pend = state["pending_graduation"].get(str(player_id)) or state["pending_graduation"].get(player_id)
+                state = self._post("/api/game/action/choose_graduates", {
+                    "player_id": player_id, "graduate_die_ids": pend["default_graduate_ids"]})["state"]
+            else:
+                return state
+        return state
+
     def _get(self, path: str) -> Dict[str, Any]:
         """Helper to send HTTP GET requests and parse JSON responses."""
         url = f"{self.base_url}{path}"
@@ -84,7 +105,7 @@ class TestWebAPI(unittest.TestCase):
 
         self.assertEqual(state["current_round"], 1)
         self.assertEqual(state["phase"], 1)
-        self.assertEqual(state["phase_name"], "Boot & Configure")
+        self.assertEqual(state["phase_name"], "Roll & Deploy")
         self.assertEqual(state["subphase"], "waiting_for_roll")
         self.assertEqual(len(state["players"]), 4)
 
@@ -126,7 +147,7 @@ class TestWebAPI(unittest.TestCase):
         state4p = res4p["state"]
         self.assertEqual(len(state4p["players"]), 4)
         p0_4p = state4p["players"][0]
-        self.assertEqual(p0_4p["secrets"], 12)
+        self.assertEqual(p0_4p["secrets"], 8)  # v0.34 flat 8 Secrets at every player count
         self.assertEqual(p0_4p["patches"], 0)
 
     # -------------------------------------------------------------------------
@@ -251,7 +272,7 @@ class TestWebAPI(unittest.TestCase):
 
         # Advanced to Phase 2
         self.assertEqual(state["phase"], 2)
-        self.assertEqual(state["phase_name"], "Rogue Agent Compile")
+        self.assertEqual(state["phase_name"], "Compiler Drop & Corruption")
         self.assertEqual(state["subphase"], "ready_for_compile")
 
         # Bot players also rolled and committed
@@ -264,22 +285,21 @@ class TestWebAPI(unittest.TestCase):
     # 8. Phase 2: Compile Drop
     # -------------------------------------------------------------------------
     def test_phase2_compile_drop(self) -> None:
-        """POST /api/game/action/compile executes tower drop, resolves damage, advances to Phase 3."""
+        """POST /api/game/action/compile resolves Phase 2 (drop + corruption) and enters Phase 3: Income."""
         self._post("/api/game/new", {"num_players": 4, "seed": 42})
         self._post("/api/game/action/roll", {"player_id": 0})
         self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
 
-        # Call compile
         res = self._post("/api/game/action/compile", {})
         self.assertTrue(res["success"])
         state = res["state"]
 
         self.assertIsNotNone(state["last_compile_result"])
-        # Phase advanced to Phase 3
+        self.assertNotIn("threat_summary", state["last_compile_result"])  # attacks resolve in Phase 4
         self.assertEqual(state["phase"], 3)
-        self.assertEqual(state["phase_name"], "Corporate Operations")
+        self.assertEqual(state["phase_name"], "Income")
+        self.assertEqual(state["phase_names"]["4"] if "4" in state["phase_names"] else state["phase_names"][4], "Attack Resolution")
 
-        # Verify dice zones live update: no dice in unpatched appear in rolled_pool or ready_dice
         for p in state["players"]:
             unpatched_ids = {d["die_id"] for d in p["unpatched_dice"]}
             rolled_ids = {d["die_id"] for d in p["rolled_pool"]}
@@ -288,22 +308,25 @@ class TestWebAPI(unittest.TestCase):
             self.assertEqual(len(unpatched_ids.intersection(ready_ids)), 0)
             self.assertEqual(len(rolled_ids.intersection(ready_ids)), 0)
 
-        # Verify intermediate confirm_income state
         self.assertEqual(state["subphase"], "confirm_income")
         self.assertTrue(state["action_capabilities"]["can_confirm_income"])
         self.assertFalse(state["action_capabilities"]["can_end_turn"])
+        self.assertTrue(state["last_income_result"]["0"]["preview"] if "0" in state["last_income_result"] else state["last_income_result"][0]["preview"])
 
-        # Call confirm_income
-        res_conf = self._post("/api/game/action/confirm_income", {"player_id": 0})
-        self.assertTrue(res_conf["success"])
-        conf_state = res_conf["state"]
-        self.assertEqual(conf_state["subphase"], "player_turn")
+        # Phase 3 -> Phase 4 (Attack Resolution) unless the round overflowed
+        conf_state = self._post("/api/game/action/confirm_income", {"player_id": 0})["state"]
         self.assertFalse(conf_state["action_capabilities"]["can_confirm_income"])
-        self.assertTrue(conf_state["action_capabilities"]["can_end_turn"])
-        p0 = conf_state["players"][0]
-        # In Production is now cleared; surviving dice moved to scanned_dice
-        self.assertEqual(len(p0["in_production_dice"]), 0)
-        self.assertGreater(len(p0["scanned_dice"]), 0)
+        if not state["last_compile_result"]["buffer_overflow"]:
+            self.assertEqual(conf_state["phase"], 4)
+            self.assertEqual(conf_state["subphase"], "confirm_attacks")
+            self.assertTrue(conf_state["action_capabilities"]["can_confirm_attacks"])
+
+        final_state = self._advance_to_phase(6)
+        self.assertEqual(final_state["phase"], 6)
+        self.assertEqual(final_state["subphase"], "player_turn")
+        p0 = final_state["players"][0]
+        self.assertEqual(len(p0["in_production_dice"]), 0)  # Phase 5 routed In Production -> Scanned Box
+        self.assertLessEqual(len(p0["ready_for_release_dice"]), p0["release_bandwidth"] + 2)
 
     def test_confirm_income_invalid_phase(self) -> None:
         """POST /api/game/action/confirm_income rejects call outside Phase 3."""
@@ -315,88 +338,189 @@ class TestWebAPI(unittest.TestCase):
             urllib.request.urlopen(req)
         self.assertEqual(ctx.exception.code, 400)
 
-    def test_confirm_income_with_green_malware_glitch_choice(self) -> None:
-        """Unblocked Green malware allows user to choose which die to move to glitched_dice."""
+    def test_confirm_attacks_with_green_malware_glitch_choice(self) -> None:
+        """Phase 4: unblocked Green malware lets the human choose which In Production die is glitched."""
         self._post("/api/game/new", {"num_players": 4, "seed": 42})
         ctrl = RogueAgentRequestHandler.controller
-        # Force green cubes in staging cup to guarantee unblocked green malware
-        ctrl.state.staging_cup[CubeColor.GREEN] = 3
         self._post("/api/game/action/roll", {"player_id": 0})
-        # Commit 0 green shields
         self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
+        orig_drop = ctrl.state.tower.drop
+        ctrl.state.tower.drop = lambda cup, rng: {CubeColor.RED: 0, CubeColor.BLUE: 0, CubeColor.GREEN: 1, CubeColor.BLACK: 0}
+        try:
+            self._post("/api/game/action/compile", {})
+        finally:
+            ctrl.state.tower.drop = orig_drop
+        state = self._post("/api/game/action/confirm_income", {"player_id": 0})["state"]
+        self.assertEqual(state["phase"], 4)
+        attack_res = state["last_attack_result"]
+        self.assertEqual(attack_res["human_threat"]["green"]["unblocked"], 1)
+        candidates = attack_res["candidate_glitch_dice"]
+        self.assertGreater(len(candidates), 0)
+        chosen_die_id = candidates[-1]["die_id"]
+        self.assertEqual(len(state["players"][0]["glitched_dice"]), 0)  # nothing glitched before confirm
 
-        res_comp = self._post("/api/game/action/compile", {})
-        self.assertTrue(res_comp["success"])
-        state = res_comp["state"]
-        p0 = state["players"][0]
-        compile_res = state["last_compile_result"]
+        conf_state = self._post("/api/game/action/confirm_attacks", {
+            "player_id": 0, "glitch_die_ids": [chosen_die_id],
+            "any_shield_allocations": {"red": 0, "blue": 0, "green": 0},  # leave the Green cube unblocked
+        })["state"]
+        conf_p0 = conf_state["players"][0]
+        self.assertEqual(ctrl.last_attack_result["threat_summary"][0]["green"]["unblocked"], 1)
+        p0_dice = ctrl.state.players[0]
+        self.assertIn(chosen_die_id, [d.die_id for d in p0_dice.glitched_dice + p0_dice.scanned_dice])
+        self.assertNotIn(chosen_die_id, [d["die_id"] for d in conf_p0["ready_for_release_dice"]])
+        self.assertEqual(len(conf_p0["in_production_dice"]), 0)
 
-        # If tower drop resulted in unblocked green malware:
-        unblocked_green = compile_res["human_threat"]["green"]["unblocked"]
-        if unblocked_green > 0:
-            candidates = compile_res["candidate_glitch_dice"]
-            self.assertGreater(len(candidates), 0)
-            chosen_die = candidates[0]
-            chosen_die_id = chosen_die["die_id"]
+    def test_confirm_income_rejects_attack_payload(self) -> None:
+        """v0.34: glitch_die_ids / any_shield_allocations belong to confirm_attacks (Phase 4)."""
+        self._post("/api/game/new", {"num_players": 4, "seed": 42})
+        self._post("/api/game/action/roll", {"player_id": 0})
+        self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
+        self._post("/api/game/action/compile", {})
+        url = f"{self.base_url}/api/game/action/confirm_income"
+        body = json.dumps({"player_id": 0, "glitch_die_ids": []}).encode("utf-8")
+        req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"}, method="POST")
+        with self.assertRaises(urllib.error.HTTPError) as ctx:
+            urllib.request.urlopen(req)
+        self.assertEqual(ctx.exception.code, 400)
 
-            # Before confirmation, dice in in_production_dice are not glitched yet
-            self.assertEqual(len(p0["glitched_dice"]), 0)
-
-            # Confirm income with chosen die
-            res_conf = self._post("/api/game/action/confirm_income", {
-                "player_id": 0,
-                "glitch_die_ids": [chosen_die_id],
-            })
-            self.assertTrue(res_conf["success"])
-            conf_state = res_conf["state"]
-            conf_p0 = conf_state["players"][0]
-
-            # The chosen die is now in glitched_dice!
-            glitched_ids = [d["die_id"] for d in conf_p0["glitched_dice"]]
-            self.assertIn(chosen_die_id, glitched_ids)
-
-            # In production is cleared; surviving dice moved to scanned_dice
-            self.assertEqual(len(conf_p0["in_production_dice"]), 0)
-            scanned_ids = [d["die_id"] for d in conf_p0["scanned_dice"]]
-            self.assertNotIn(chosen_die_id, scanned_ids)
-
-    def test_confirm_income_with_contractor_sacrifice(self) -> None:
-        """Unblocked Green malware can be absorbed by sacrificing an active White Contractor."""
+    def test_confirm_attacks_with_contractor_sacrifice(self) -> None:
+        """Phase 4: unblocked Green malware can be absorbed by sacrificing an active White Contractor."""
         self._post("/api/game/new", {"num_players": 4, "seed": 42})
         ctrl = RogueAgentRequestHandler.controller
-        ctrl.state.staging_cup[CubeColor.GREEN] = 4
-        ctrl.state.staging_cup[CubeColor.RED] = 0
-        ctrl.state.staging_cup[CubeColor.BLUE] = 0
-        ctrl.state.staging_cup[CubeColor.BLACK] = 0
-
-        # Hire 1 contractor
         self._post("/api/game/action/hire_contractors", {"player_id": 0, "count": 1})
         self._post("/api/game/action/roll", {"player_id": 0})
+        rolled = ctrl.player_meta[0]["rolled_pool"]
+        white = next(d for d in rolled if d.color == DieColor.WHITE)
+        white.current_face = Face(name="+$1", money=1)
         self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
-
-        res_comp = self._post("/api/game/action/compile", {})
-        state = res_comp["state"]
-        compile_res = state["last_compile_result"]
-
-        unblocked_green = compile_res["human_threat"]["green"]["unblocked"]
-        self.assertEqual(unblocked_green, 1)
-        candidates = compile_res["candidate_glitch_dice"]
+        orig_drop = ctrl.state.tower.drop
+        ctrl.state.tower.drop = lambda cup, rng: {CubeColor.RED: 0, CubeColor.BLUE: 0, CubeColor.GREEN: 1, CubeColor.BLACK: 0}
+        try:
+            self._post("/api/game/action/compile", {})
+        finally:
+            ctrl.state.tower.drop = orig_drop
+        money_before = ctrl.state.players[0].money
+        state = self._post("/api/game/action/confirm_income", {"player_id": 0})["state"]
+        self.assertGreaterEqual(state["players"][0]["money"], money_before + 1)  # contractor +$1 paid in Phase 3
+        candidates = state["last_attack_result"]["candidate_glitch_dice"]
         contractor_candidate = next((c for c in candidates if c.get("is_contractor")), None)
         self.assertIsNotNone(contractor_candidate)
         contractor_id = contractor_candidate["die_id"]
 
-        res_conf = self._post("/api/game/action/confirm_income", {
-            "player_id": 0,
-            "glitch_die_ids": [contractor_id],
-        })
+        res_conf = self._post("/api/game/action/confirm_attacks", {"player_id": 0, "glitch_die_ids": [contractor_id]})
         self.assertTrue(res_conf["success"])
-        conf_p0 = res_conf["state"]["players"][0]
+        p0 = ctrl.state.players[0]
+        all_ids = [d.die_id for d in p0.ready_for_release_dice + p0.glitched_dice + p0.scanned_dice + p0.in_production_dice]
+        self.assertNotIn(contractor_id, all_ids)  # Contractor Sacrifice: returned to supply
+        self.assertEqual(len(p0.glitched_dice), 0)
 
-        # Contractor is discarded to supply, NOT placed in glitched_dice
-        glitched_ids = [d["die_id"] for d in conf_p0["glitched_dice"]]
-        self.assertNotIn(contractor_id, glitched_ids)
-        # None of the permanent dice were forced to glitch
-        self.assertEqual(len(conf_p0["glitched_dice"]), 0)
+    def _spook_in_phase3(self):
+        from sim.entities import WHITE_HATS, WhiteHatCode, create_colored_die
+
+        self._post("/api/game/new", {"num_players": 2, "seed": 3})
+        ctrl = RogueAgentRequestHandler.controller
+        ctrl.state.tower.drop = lambda cup, rng: {CubeColor.RED: 1, CubeColor.BLUE: 0, CubeColor.GREEN: 0, CubeColor.BLACK: 0}
+        self._post("/api/game/action/roll", {"player_id": 0})
+        self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
+        self._post("/api/game/action/compile", {})
+        self.assertEqual(ctrl.phase, 3)
+        p0 = ctrl.state.players[0]
+        p0.white_hat = WHITE_HATS[WhiteHatCode.SPOOK]
+        star = Face(name="Purple ★", is_star=True, star_code="PURPLE_STAR")
+        for i in range(2):
+            d = create_colored_die(DieColor.PURPLE, 7800 + i, cost=0)
+            d.current_face = star
+            p0.in_production_dice.append(d)
+        p0.glitched_dice.append(create_colored_die(DieColor.RED, 5))
+        return ctrl, p0
+
+    def test_confirm_income_burn_list_with_null_entry(self) -> None:
+        """[null, 5]: the null trigger is declined and die 5 is burned."""
+        ctrl, p0 = self._spook_in_phase3()
+        secrets = p0.secrets
+        res = self._post("/api/game/action/confirm_income", {"player_id": 0, "spook_burn_die_id": [None, 5]})
+        self.assertTrue(res["success"])
+        self.assertEqual(ctrl.last_income_result[0]["burned_die_ids"], [5])
+        self.assertEqual(p0.secrets, secrets + 1)
+
+    def test_confirm_income_burn_non_integer_is_400(self) -> None:
+        ctrl, p0 = self._spook_in_phase3()
+        url = f"{self.base_url}/api/game/action/confirm_income"
+        req = urllib.request.Request(url, data=json.dumps({"player_id": 0, "spook_burn_die_id": ["abc"]}).encode("utf-8"),
+                                     headers={"Content-Type": "application/json"}, method="POST")
+        with self.assertRaises(urllib.error.HTTPError) as ctx:
+            urllib.request.urlopen(req)
+        self.assertEqual(ctx.exception.code, 400)
+        self.assertEqual(ctrl.phase, 3)  # nothing resolved
+
+    def test_confirm_income_burn_bare_null_is_noop(self) -> None:
+        ctrl, p0 = self._spook_in_phase3()
+        secrets = p0.secrets
+        res = self._post("/api/game/action/confirm_income", {"player_id": 0, "spook_burn_die_id": None})
+        self.assertTrue(res["success"])
+        self.assertEqual(ctrl.last_income_result[0]["burned_die_ids"], [])
+        self.assertEqual(p0.secrets, secrets)
+
+    def test_confirm_attacks_aegis_color_validation(self) -> None:
+        """Phase 4: aegis_color must be a qualifying Baffle Echo color (400 otherwise); "none" declines."""
+        from sim.entities import COMPANIES, CompanyCode, AbilityStatus
+
+        self._post("/api/game/new", {"num_players": 2, "seed": 9})
+        ctrl = RogueAgentRequestHandler.controller
+        p0 = ctrl.state.players[0]
+        p0.company = COMPANIES[CompanyCode.AEGIS]
+        p0.ability_v1_status = AbilityStatus.AVAILABLE
+        self._post("/api/game/action/roll", {"player_id": 0})
+        self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
+        ctrl.state.tower.drop = lambda cup, rng: {CubeColor.RED: 1, CubeColor.BLUE: 0, CubeColor.GREEN: 0, CubeColor.BLACK: 0}
+        self._post("/api/game/action/compile", {})
+        state = self._post("/api/game/action/confirm_income", {"player_id": 0})["state"]
+        self.assertEqual(state["phase"], 4)
+        self.assertEqual(state["last_attack_result"]["human_threat"]["aegis"]["qualifying_colors"], ["red"])
+        self.assertTrue(state["action_capabilities"]["can_aegis_echo"])
+        url = f"{self.base_url}/api/game/action/confirm_attacks"
+        for bad in ("green", "teal"):
+            req = urllib.request.Request(url, data=json.dumps({"player_id": 0, "aegis_color": bad}).encode("utf-8"),
+                                         headers={"Content-Type": "application/json"}, method="POST")
+            with self.assertRaises(urllib.error.HTTPError) as ctx:
+                urllib.request.urlopen(req)
+            self.assertEqual(ctx.exception.code, 400)
+        self.assertEqual(ctrl.phase, 4)  # rejected payloads did not resolve damage
+        res = self._post("/api/game/action/confirm_attacks", {"player_id": 0, "aegis_color": "red"})
+        self.assertTrue(res["success"])
+        self.assertEqual(p0.ability_v1_status, AbilityStatus.USED)
+        self.assertEqual(ctrl.last_attack_result["threat_summary"][0]["red"]["unblocked"], 0)
+
+    def test_choose_graduates_validates_payload(self) -> None:
+        """Phase 5: choose_graduates rejects ids outside the Scanned Box or above Release Bandwidth; fewer is allowed."""
+        self._post("/api/game/new", {"num_players": 2, "seed": 7})
+        ctrl = RogueAgentRequestHandler.controller
+        self._post("/api/game/action/roll", {"player_id": 0})
+        self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
+        ctrl.state.tower.drop = lambda cup, rng: {CubeColor.RED: 1, CubeColor.BLUE: 0, CubeColor.GREEN: 0, CubeColor.BLACK: 0}
+        p0 = ctrl.state.players[0]
+        for i in range(3):  # overflow the Scanned Box beyond Release Bandwidth
+            p0.scanned_dice.append(Die(die_id=9000 + i, color=DieColor.GRAY, cost=0, faces=[Face(name="+$1", money=1)]))
+        state = self._advance_to_phase(5)
+        self.assertEqual(state["phase"], 5)
+        self.assertEqual(state["subphase"], "choose_graduates")
+        self.assertTrue(state["action_capabilities"]["can_choose_graduates"])
+        pend = state["pending_graduation"].get("0") or state["pending_graduation"].get(0)
+        n = pend["n"]
+        url = f"{self.base_url}/api/game/action/choose_graduates"
+        for bad in ({"player_id": 0, "graduate_die_ids": [123456]},
+                    {"player_id": 0, "graduate_die_ids": [c["die_id"] for c in pend["candidates"]]},
+                    {"player_id": 0}):
+            req = urllib.request.Request(url, data=json.dumps(bad).encode("utf-8"),
+                                         headers={"Content-Type": "application/json"}, method="POST")
+            with self.assertRaises(urllib.error.HTTPError) as ctx:
+                urllib.request.urlopen(req)
+            self.assertEqual(ctx.exception.code, 400)
+        keep = pend["default_graduate_ids"][:1]  # graduate fewer than allowed (OQ-1)
+        state = self._post("/api/game/action/choose_graduates", {"player_id": 0, "graduate_die_ids": keep})["state"]
+        self.assertEqual(state["phase"], 6)
+        self.assertEqual(ctrl.last_pipeline_result[0]["graduated_ids"], keep)
+        self.assertGreaterEqual(len(p0.scanned_dice), len(pend["candidates"]) - 1 - p0.triage_bandwidth + 0)
 
     # -------------------------------------------------------------------------
     # 9. Phase 3: Market Purchase
@@ -405,7 +529,7 @@ class TestWebAPI(unittest.TestCase):
         """POST /api/game/action/buy purchases a colored die and updates market stock."""
         ctrl = RogueAgentRequestHandler.controller
         ctrl.new_game(num_players=4, seed=42)
-        ctrl.phase = 3
+        ctrl.phase = 6
         ctrl.phase_name = "Corporate Operations"
         ctrl.active_player_index = 0
         p0 = ctrl.state.players[0]
@@ -428,7 +552,7 @@ class TestWebAPI(unittest.TestCase):
         """Enforces max 2 purchases per turn and checks funds."""
         ctrl = RogueAgentRequestHandler.controller
         ctrl.new_game(num_players=4, seed=42)
-        ctrl.phase = 3
+        ctrl.phase = 6
         ctrl.active_player_index = 0
         p0 = ctrl.state.players[0]
         p0.money = 20
@@ -459,7 +583,7 @@ class TestWebAPI(unittest.TestCase):
         """Tests patching using 🔧 tokens and cash ($2)."""
         ctrl = RogueAgentRequestHandler.controller
         ctrl.new_game(num_players=4, seed=42)
-        ctrl.phase = 3
+        ctrl.phase = 6
         ctrl.active_player_index = 0
         p0 = ctrl.state.players[0]
 
@@ -494,7 +618,7 @@ class TestWebAPI(unittest.TestCase):
         ctrl = RogueAgentRequestHandler.controller
         ctrl.new_game(num_players=4, seed=42)
         ctrl.state.config.dirty_income_enabled = True
-        ctrl.phase = 3
+        ctrl.phase = 6
         ctrl.active_player_index = 0
         p0 = ctrl.state.players[0]
         p0.secrets = 7
@@ -519,7 +643,7 @@ class TestWebAPI(unittest.TestCase):
         ctrl = RogueAgentRequestHandler.controller
         ctrl.new_game(num_players=4, seed=42)
         ctrl.state.config.dirty_income_enabled = True
-        ctrl.phase = 3
+        ctrl.phase = 6
         ctrl.active_player_index = 0
         p0 = ctrl.state.players[0]
 
@@ -564,7 +688,7 @@ class TestWebAPI(unittest.TestCase):
         """Tests B2 and P1 star action execution."""
         ctrl = RogueAgentRequestHandler.controller
         ctrl.new_game(num_players=4, seed=42)
-        ctrl.phase = 3
+        ctrl.phase = 6
         ctrl.active_player_index = 0
         p0 = ctrl.state.players[0]
 
@@ -627,7 +751,7 @@ class TestWebAPI(unittest.TestCase):
         self.assertTrue(p0_state["b2_available"])
 
         # Advance to Phase 3
-        ctrl.phase = 3
+        ctrl.phase = 6
         ctrl.active_player_index = 0
         p0.money = 5
         p0.secrets = 4
@@ -692,7 +816,7 @@ class TestWebAPI(unittest.TestCase):
         """Ending turn advances through bot turns and starts Round 2."""
         ctrl = RogueAgentRequestHandler.controller
         ctrl.new_game(num_players=4, seed=42)
-        ctrl.phase = 3
+        ctrl.phase = 6
         ctrl.active_player_index = 0
         ctrl.phase3_turn_queue = [0, 1, 2, 3]
 
@@ -703,7 +827,7 @@ class TestWebAPI(unittest.TestCase):
         # Round completed and advanced to Round 2 Phase 1
         self.assertEqual(state["current_round"], 2)
         self.assertEqual(state["phase"], 1)
-        self.assertEqual(state["phase_name"], "Boot & Configure")
+        self.assertEqual(state["phase_name"], "Roll & Deploy")
 
 
     # -------------------------------------------------------------------------
@@ -783,8 +907,7 @@ class TestWebAPI(unittest.TestCase):
         self._post("/api/game/new", {"num_players": 4, "seed": 42})
         self._post("/api/game/action/roll", {"player_id": 0})
         self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
-        self._post("/api/game/action/compile", {})
-        self._post("/api/game/action/confirm_income", {"player_id": 0, "glitch_die_ids": []})
+        self._advance_to_phase(6)
 
         # Advance to human player 0's turn in Phase 3
         ctrl = RogueAgentRequestHandler.controller
@@ -819,8 +942,7 @@ class TestWebAPI(unittest.TestCase):
         self._post("/api/game/new", {"num_players": 4, "seed": 42})
         self._post("/api/game/action/roll", {"player_id": 0})
         self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
-        self._post("/api/game/action/compile", {})
-        self._post("/api/game/action/confirm_income", {"player_id": 0, "glitch_die_ids": []})
+        self._advance_to_phase(6)
 
         ctrl = RogueAgentRequestHandler.controller
         ctrl.active_player_index = 0
@@ -930,7 +1052,7 @@ class TestWebAPI(unittest.TestCase):
         p0 = res["state"]["players"][0]
 
         self.assertEqual(p0["company"]["code"], "DTO")
-        self.assertEqual(p0["secrets"], 13)  # 12 baseline in 4P + 1
+        self.assertEqual(p0["secrets"], 9)  # v0.34 flat 8 baseline + 1 (DTO)
 
     def test_new_game_company_setup_prometheus(self) -> None:
         """POST /api/game/new with Prometheus assigns -1 🔬 Upgrade Discount."""
@@ -962,7 +1084,7 @@ class TestWebAPI(unittest.TestCase):
         self.assertEqual(p0["patches"], 0)
 
     # -------------------------------------------------------------------------
-    # 25. Manual Any Shield Allocation in confirm_income (Step 2B Player Agency)
+    # 25. Manual Any Shield Allocation in confirm_attacks (Phase 4 Player Agency)
     # -------------------------------------------------------------------------
     def test_confirm_income_manual_any_shield_allocation_red_vs_green(self) -> None:
         """Human player overrides default Green allocation to block Red instead, saving $1 cash and taking 1 Green glitch."""
@@ -1011,18 +1133,16 @@ class TestWebAPI(unittest.TestCase):
             ctrl.state.tower.drop = orig_drop
 
         self.assertTrue(res_comp["success"])
-        comp_state = res_comp["state"]
-        human_threat = comp_state["last_compile_result"]["human_threat"]
-
-        # Default heuristic with $5 cash blocks Green (Tier 3) and pays $1 for Red
+        inc_state = self._post("/api/game/action/confirm_income", {"player_id": 0})["state"]
+        self.assertEqual(inc_state["players"][0]["money"], 8)  # $5 + $3 Phase 3 income (before attacks)
+        human_threat = inc_state["last_attack_result"]["human_threat"]
+        self.assertEqual(inc_state["phase"], 4)
         self.assertEqual(human_threat["any"]["shields"], 1)
-        self.assertEqual(human_threat["any"]["allocated"], {"red": 0, "blue": 0, "green": 1})
-        self.assertEqual(human_threat["green"]["unblocked"], 0)
-        self.assertEqual(comp_state["players"][0]["money"], 4)
+        self.assertFalse(human_threat["resolved"])
 
-        # Now human overrides Any shield allocation to block Red instead of Green, and glitches die 0 (the shield die)
+        # Human allocates the Any shield to Red instead of Green, and glitches die 0 (the shield die)
         shield_die_id = rolled[0].die_id
-        res_conf = self._post("/api/game/action/confirm_income", {
+        res_conf = self._post("/api/game/action/confirm_attacks", {
             "player_id": 0,
             "glitch_die_ids": [shield_die_id],
             "any_shield_allocations": {"red": 1, "blue": 0, "green": 0},
@@ -1030,11 +1150,13 @@ class TestWebAPI(unittest.TestCase):
         self.assertTrue(res_conf["success"])
         conf_p0 = res_conf["state"]["players"][0]
 
-        # Player blocked Red (saved $1, so $5 pre-step2b + $3 from 3 surviving +$1 income dice = $8!)
+        # Red blocked (no ransom), Green glitched the chosen shield die; income already banked in Phase 3
         self.assertEqual(conf_p0["money"], 8)
         self.assertEqual(conf_p0["secrets"], 8)
-        glitched_ids = [d["die_id"] for d in conf_p0["glitched_dice"]]
-        self.assertIn(shield_die_id, glitched_ids)
+        self.assertEqual(ctrl.last_attack_result["threat_summary"][0]["any"]["allocated"], {"red": 1, "blue": 0, "green": 0})
+        p0_dice = ctrl.state.players[0]
+        self.assertIn(shield_die_id, [d.die_id for d in p0_dice.glitched_dice + p0_dice.scanned_dice])
+        self.assertNotIn(shield_die_id, [d.die_id for d in p0_dice.ready_for_release_dice])
 
     def test_confirm_income_manual_any_shield_allocation_blue_vs_red(self) -> None:
         """Human player overrides default Blue allocation to block Red instead (saving $1 cash and losing 1 Corporate Secret)."""
@@ -1069,16 +1191,12 @@ class TestWebAPI(unittest.TestCase):
             ctrl.state.tower.drop = orig_drop
 
         self.assertTrue(res_comp["success"])
-        comp_state = res_comp["state"]
-        human_threat = comp_state["last_compile_result"]["human_threat"]
+        inc_state = self._post("/api/game/action/confirm_income", {"player_id": 0})["state"]
+        self.assertEqual(inc_state["players"][0]["money"], 8)
+        self.assertEqual(inc_state["players"][0]["secrets"], 8)
 
-        # Default heuristic blocks Blue (Tier 1) and pays $1 for Red
-        self.assertEqual(human_threat["any"]["allocated"], {"red": 0, "blue": 1, "green": 0})
-        self.assertEqual(comp_state["players"][0]["money"], 4)
-        self.assertEqual(comp_state["players"][0]["secrets"], 8)
-
-        # Override to block Red instead of Blue
-        res_conf = self._post("/api/game/action/confirm_income", {
+        # Allocate the Any shield to Red instead of Blue
+        res_conf = self._post("/api/game/action/confirm_attacks", {
             "player_id": 0,
             "glitch_die_ids": [],
             "any_shield_allocations": {"red": 1, "blue": 0, "green": 0},
@@ -1086,12 +1204,12 @@ class TestWebAPI(unittest.TestCase):
         self.assertTrue(res_conf["success"])
         conf_p0 = res_conf["state"]["players"][0]
 
-        # Saved $1 cash ($5 + $3 income = $8), lost 1 Secret from unblocked Blue (8 - 1 = 7)
+        # No ransom ($5 + $3 Phase 3 income = $8), lost 1 Secret from unblocked Blue (8 - 1 = 7)
         self.assertEqual(conf_p0["money"], 8)
         self.assertEqual(conf_p0["secrets"], 7)
 
     def test_confirm_income_default_any_shield_allocation_when_omitted(self) -> None:
-        """Calling confirm_income without any_shield_allocations preserves the default 4-tier heuristic."""
+        """Calling confirm_attacks without any_shield_allocations preserves the default 4-tier heuristic."""
         self._post("/api/game/new", {"num_players": 4, "seed": 42})
         self._post("/api/game/action/roll", {"player_id": 0})
 
@@ -1123,14 +1241,12 @@ class TestWebAPI(unittest.TestCase):
             ctrl.state.tower.drop = orig_drop
 
         self.assertTrue(res_comp["success"])
-        res_conf = self._post("/api/game/action/confirm_income", {
-            "player_id": 0,
-            "glitch_die_ids": [],
-        })
+        self._post("/api/game/action/confirm_income", {"player_id": 0})
+        res_conf = self._post("/api/game/action/confirm_attacks", {"player_id": 0})
         self.assertTrue(res_conf["success"])
         conf_p0 = res_conf["state"]["players"][0]
 
-        # Default heuristic kept: Blue blocked (8 secrets), paid $1 for Red ($4 + $3 income = $7)
+        # Default heuristic kept: Blue blocked (8 secrets), paid $1 for Red ($5 + $3 Phase 3 income - $1 = $7)
         self.assertEqual(conf_p0["money"], 7)
         self.assertEqual(conf_p0["secrets"], 8)
 

@@ -442,7 +442,7 @@ class TestGroupBVariantCardBehaviors(unittest.TestCase):
         """B2 costs $4 to gain +1 Secret; rejects activation when cash < $4 or secrets >= 10."""
         gc = GameController()
         gc.new_game(num_players=2, randomize_cards=False)
-        gc.phase = 3
+        gc.phase = 6
         gc.phase_name = "Market & Operations"
         gc.active_player_index = 0
         p0 = gc.state.players[0]
@@ -476,7 +476,7 @@ class TestGroupBVariantCardBehaviors(unittest.TestCase):
         """P3 requires $1 cash to deflect a cube of the blocked color; rejects activation when cash < $1."""
         gc = GameController()
         gc.new_game(num_players=2, randomize_cards=False)
-        gc.phase = 3
+        gc.phase = 6
         gc.phase_name = "Market & Operations"
         gc.active_player_index = 0
         p0 = gc.state.players[0]
@@ -661,7 +661,7 @@ class TestGroupDWebGameController(unittest.TestCase):
         self.assertEqual(gc.player_meta[0]["rerolls_remaining"], 2)
 
         # 2. Setup Phase 3 state for human player 0
-        gc.phase = 3
+        gc.phase = 6
         gc.phase_name = "Market & Operations"
         gc.active_player_index = 0
 

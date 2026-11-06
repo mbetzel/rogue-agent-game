@@ -14,9 +14,9 @@ from sim.bots import (
     SecOpsTurtleBot,
     VentureGreedBot,
 )
-from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
+from sim.config import ROUND_PHASE_NAMES, CubeColor, DieColor, EndGameReason, GameConfig, RoundPhase, RoundSequence, ShieldColor
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
-from sim.engine.phase1_boot import check_and_execute_start_of_round_version_transition
+from sim.engine.phase1_roll_deploy import check_and_execute_start_of_round_version_transition
 from sim.entities import (
     AbilityStatus,
     ArchetypeCard,
@@ -50,26 +50,57 @@ from web.controller import (
     capabilities,
     phase1_actions,
     phase2_actions,
-    phase3_actions,
+    phase3_income_actions,
+    phase4_attack_actions,
+    phase5_pipeline_actions,
+    phase6_operations_actions,
     serializer,
 )
 
+# Deprecated v0.33 module alias (kept one release)
+from web.controller import phase3_actions  # noqa: E402,F401
+
 
 class GameController:
-    """Manages the full game lifecycle and turn execution state machine."""
+    """Manages the full game lifecycle and the v0.34 six-phase turn state machine.
+
+    Phases (``RoundPhase``): 1 Roll & Deploy, 2 Compiler Drop & Corruption, 3 Income,
+    4 Attack Resolution, 5 CI/CD Pipeline Shift, 6 Operations, 7 Game Over. The web is SIX_PHASE only.
+    """
 
     def __init__(self) -> None:
         self.engine: Optional[GameEngine] = None
         self.game_id: str = "match_1"
-        self.phase: int = 1  # 1: Boot, 2: Compile, 3: Operations, 4: Game Over
-        self.phase_name: str = "Boot & Configure"
+        self.phase: int = int(RoundPhase.ROLL_AND_DEPLOY)
+        self.phase_name: str = ROUND_PHASE_NAMES[1]
         self.subphase: str = "waiting_for_roll"
         self.active_player_index: int = 0
         self.player_meta: Dict[int, Dict[str, Any]] = {}
         self.event_log: List[str] = []
         self.last_compile_result: Optional[Dict[str, Any]] = None
+        self.last_income_result: Dict[int, Dict[str, Any]] = {}
+        self.last_attack_result: Optional[Dict[str, Any]] = None
+        self.last_pipeline_result: Dict[int, Dict[str, Any]] = {}
+        self.pending_graduation: Dict[int, Dict[str, Any]] = {}
         self.final_result: Optional[Dict[str, Any]] = None
-        self.phase3_turn_queue: List[int] = []
+        self.operations_turn_queue: List[int] = []
+        self.round_commitments: List[Any] = []
+        self.compile_result: Any = None
+        self.attack_strengths: Dict[CubeColor, int] = {}
+        self.attack_resolved_pids: set = set()
+
+    @property
+    def phase3_turn_queue(self) -> List[int]:
+        """Deprecated v0.33 alias of operations_turn_queue."""
+        return self.operations_turn_queue
+
+    @phase3_turn_queue.setter
+    def phase3_turn_queue(self, value: List[int]) -> None:
+        self.operations_turn_queue = value
+
+    @property
+    def rng(self) -> random.Random:
+        return self.engine.rng
 
     @property
     def state(self) -> GameState:
@@ -98,6 +129,7 @@ class GameController:
         config = GameConfig(
             num_players=num_players,
             enable_corporate_asymmetry=enable_corporate_asymmetry,
+            round_sequence=RoundSequence.SIX_PHASE,  # the web is SIX_PHASE only (OQ-7)
         )
         rng = random.Random(seed)
 
@@ -260,9 +292,13 @@ class GameController:
                 )
             elif p.archetype:
                 self.event_log.append(
-                    f"{p_name} assigned Consultancy Archetype: {p.archetype.name} ({p.archetype.ability_name})."
+                    f"{p_name} assigned White Hat Operative: {p.archetype.name} ({p.archetype.ability_name})."
                 )
         self.last_compile_result = None
+        self.last_income_result = {}
+        self.last_attack_result = None
+        self.last_pipeline_result = {}
+        self.pending_graduation = {}
         self.final_result = None
 
         # Start Round 1 Phase 1
@@ -270,20 +306,25 @@ class GameController:
         return self.get_full_state()
 
     def _start_phase_1(self) -> None:
-        """Initializes Phase 1: Autonomous AI Corruption Pulse and resets player roll states."""
-        self.phase = 1
-        self.phase_name = "Boot & Configure"
+        """Initializes Phase 1 (Roll & Deploy): Autonomous AI Corruption Pulse and resets player roll states."""
+        self.phase = int(RoundPhase.ROLL_AND_DEPLOY)
+        self.phase_name = ROUND_PHASE_NAMES[self.phase]
         self.subphase = "waiting_for_roll"
+        self.round_commitments = []
+        self.compile_result = None
+        self.attack_resolved_pids = set()
 
         # Start-of-round version switch execution (INV-VER-SWITCH-01)
         check_and_execute_start_of_round_version_transition(self.engine)
 
-        # 1. Autonomous AI Corruption Pulse per RULES.md Section 4 Phase 1 Step 1
+        # 1. Autonomous AI Corruption Pulse per RULES.md Section 4 Phase 1 Step 1 (engine baseline per version)
+        active_ver = self.state.active_version.version_str
+        pulse = self.state.config.autonomous_pulse_by_version.get(active_ver, 1)
         self.state.staging_cup[CubeColor.BLACK] = (
-            self.state.staging_cup.get(CubeColor.BLACK, 0) + 1
+            self.state.staging_cup.get(CubeColor.BLACK, 0) + pulse
         )
         self.event_log.append(
-            f"Round {self.state.current_round} Phase 1: Autonomous AI Pulse added 1 Black Cube to Staging Cup."
+            f"Round {self.state.current_round} Phase 1: Autonomous AI Pulse added {pulse} Black Cube to Staging Cup."
         )
 
         # Promote pending next phase locks
@@ -324,12 +365,12 @@ class GameController:
         # If no human players exist, automatically resolve Phase 1
         if not any(meta["is_human"] for meta in self.player_meta.values()):
             self._auto_execute_bots_phase_1()
-            self.phase = 2
-            self.phase_name = "Rogue Agent Compile"
+            self.phase = int(RoundPhase.COMPILER_DROP_AND_CORRUPTION)
+            self.phase_name = ROUND_PHASE_NAMES[self.phase]
             self.subphase = "ready_for_compile"
 
     # =========================================================================
-    # Phase 1: Boot & Configure (Interactive)
+    # Phase 1: Roll & Deploy (Interactive)
     # =========================================================================
 
     def hire_contractors(
@@ -372,11 +413,15 @@ class GameController:
     def compile_drop(self) -> Dict[str, Any]:
         return phase2_actions.compile_drop(self)
 
-    def _advance_phase3_turns(self) -> None:
-        phase3_actions.advance_phase3_turns(self)
+    def _advance_operations_turns(self) -> None:
+        phase6_operations_actions.advance_operations_turns(self)
 
-    def _execute_bot_phase3(self, player: PlayerState, meta: Dict[str, Any]) -> None:
-        phase3_actions.execute_bot_phase3(self, player, meta)
+    _advance_phase3_turns = _advance_operations_turns  # deprecated v0.33 name
+
+    def _execute_bot_operations(self, player: PlayerState, meta: Dict[str, Any]) -> None:
+        phase6_operations_actions.execute_bot_operations(self, player, meta)
+
+    _execute_bot_phase3 = _execute_bot_operations  # deprecated v0.33 name
 
     def buy_die(
         self,
@@ -384,10 +429,10 @@ class GameController:
         color_str: str,
         use_cipher_ability: bool = False,
     ) -> Dict[str, Any]:
-        return phase3_actions.buy_die(self, player_id, color_str, use_cipher_ability)
+        return phase6_operations_actions.buy_die(self, player_id, color_str, use_cipher_ability)
 
     def patch_die(self, player_id: int, die_index: int, use_cash: bool) -> Dict[str, Any]:
-        return phase3_actions.patch_die(self, player_id, die_index, use_cash)
+        return phase6_operations_actions.patch_die(self, player_id, die_index, use_cash)
 
     def take_dirty_income(
         self,
@@ -396,7 +441,7 @@ class GameController:
         use_cipher_ability: bool = False,
         backlash_die_id: Optional[int] = None,
     ) -> Dict[str, Any]:
-        return phase3_actions.take_dirty_income(
+        return phase6_operations_actions.take_dirty_income(
             self,
             player_id,
             backlash_die_index,
@@ -405,7 +450,7 @@ class GameController:
         )
 
     def use_cipher_ability(self, player_id: int) -> Dict[str, Any]:
-        return phase3_actions.take_cipher_arbitrage(self, player_id)
+        return phase6_operations_actions.take_cipher_arbitrage(self, player_id)
 
     def use_phreaker_ability(
         self,
@@ -414,7 +459,7 @@ class GameController:
         die_index: int = 0,
         die_id: Optional[int] = None,
     ) -> Dict[str, Any]:
-        return phase3_actions.use_phreaker_ability(
+        return phase6_operations_actions.use_phreaker_ability(
             self,
             player_id,
             count=count,
@@ -423,16 +468,16 @@ class GameController:
         )
 
     def use_acoustic_ability(self, player_id: int, chosen_color_str: str) -> Dict[str, Any]:
-        return phase3_actions.use_acoustic_ability(self, player_id, chosen_color_str)
+        return phase6_operations_actions.use_acoustic_ability(self, player_id, chosen_color_str)
 
     def use_spook_ability(self, player_id: int, dollars: int) -> Dict[str, Any]:
-        return phase3_actions.use_spook_ability(self, player_id, dollars)
+        return phase6_operations_actions.use_spook_ability(self, player_id, dollars)
 
     def spook_burn(self, player_id: int, die_id: int) -> Dict[str, Any]:
-        return phase3_actions.spook_burn(self, player_id, die_id)
+        return phase6_operations_actions.spook_burn(self, player_id, die_id)
 
     def phreaker_diagnostics(self, player_id: int, die_id: Optional[int] = None) -> Dict[str, Any]:
-        return phase3_actions.phreaker_diagnostics(self, player_id, die_id)
+        return phase6_operations_actions.phreaker_diagnostics(self, player_id, die_id)
 
     def execute_star_action(
         self,
@@ -440,23 +485,46 @@ class GameController:
         action_type: str,
         cube_color: Optional[str] = None,
     ) -> Dict[str, Any]:
-        return phase3_actions.execute_star_action(self, player_id, action_type, cube_color)
+        return phase6_operations_actions.execute_star_action(self, player_id, action_type, cube_color)
 
     def confirm_income(
         self,
         player_id: int,
-        glitch_die_ids: Optional[List[int]] = None,
-        any_shield_allocations: Optional[Dict[str, int]] = None,
+        spook_burn_die_id: Optional[Any] = None,
+        phreaker_die_id: Optional[int] = None,
     ) -> Dict[str, Any]:
-        return phase3_actions.confirm_income(
-            self,
-            player_id,
-            glitch_die_ids=glitch_die_ids,
-            any_shield_allocations=any_shield_allocations,
+        """Phase 3: Income."""
+        return phase3_income_actions.confirm_income(
+            self, player_id, spook_burn_die_id=spook_burn_die_id, phreaker_die_id=phreaker_die_id
+        )
+
+    def confirm_attacks(
+        self,
+        player_id: int,
+        any_shield_allocations: Optional[Dict[str, int]] = None,
+        glitch_die_ids: Optional[List[int]] = None,
+        aegis_color: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Phase 4: Attack Resolution."""
+        return phase4_attack_actions.confirm_attacks(
+            self, player_id, any_shield_allocations=any_shield_allocations,
+            glitch_die_ids=glitch_die_ids, aegis_color=aegis_color,
+        )
+
+    def choose_graduates(
+        self,
+        player_id: int,
+        graduate_die_ids: Optional[List[int]] = None,
+        splice_die_id: Optional[int] = None,
+        hotfix_die_id: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """Phase 5: CI/CD Pipeline Shift (Scanned Graduation choice)."""
+        return phase5_pipeline_actions.choose_graduates(
+            self, player_id, graduate_die_ids, splice_die_id=splice_die_id, hotfix_die_id=hotfix_die_id
         )
 
     def end_turn(self, player_id: int) -> Dict[str, Any]:
-        return phase3_actions.end_turn(self, player_id)
+        return phase6_operations_actions.end_turn(self, player_id)
 
     def fast_patch(
         self,
@@ -464,16 +532,16 @@ class GameController:
         die_ids: Optional[List[int]] = None,
         die_indices: Optional[List[int]] = None,
     ) -> Dict[str, Any]:
-        return phase3_actions.fast_patch(self, player_id, die_ids=die_ids, die_indices=die_indices)
+        return phase6_operations_actions.fast_patch(self, player_id, die_ids=die_ids, die_indices=die_indices)
 
     def upgrade_track(self, player_id: int, track_type: str) -> Dict[str, Any]:
-        return phase3_actions.upgrade_hardware_track(self, player_id, track_type)
+        return phase6_operations_actions.upgrade_hardware_track(self, player_id, track_type)
 
     def file_patent(self, player_id: int) -> Dict[str, Any]:
-        return phase3_actions.file_cryptographic_patent(self, player_id)
+        return phase6_operations_actions.file_cryptographic_patent(self, player_id)
 
     def system_reboot(self, player_id: int) -> Dict[str, Any]:
-        return phase3_actions.system_reboot(self, player_id)
+        return phase6_operations_actions.system_reboot(self, player_id)
 
     def _complete_round(self) -> None:
         serializer.complete_round(self)

@@ -83,7 +83,7 @@ class TestV240Rules(unittest.TestCase):
         """INV-PURPLE-03: Attempting to procure a Purple die with empty reserve fails."""
         gc = GameController()
         gc.new_game(num_players=2, seed=42)
-        gc.phase = 3
+        gc.phase = 6
         gc.subphase = "operations_turn"
         gc.active_player_index = 0
         p0 = gc.state.players[0]
@@ -100,7 +100,7 @@ class TestV240Rules(unittest.TestCase):
         """INV-PURPLE-03: Purple reserve purchases count towards max_market_purchases_per_turn (2)."""
         gc = GameController()
         gc.new_game(num_players=2, seed=42)
-        gc.phase = 3
+        gc.phase = 6
         gc.subphase = "operations_turn"
         gc.active_player_index = 0
         p0 = gc.state.players[0]
@@ -480,7 +480,7 @@ class TestV240Rules(unittest.TestCase):
         """POST /api/game/action/buy with color='purple' procures from personal reserve."""
         gc = GameController()
         gc.new_game(num_players=2, seed=42)
-        gc.phase = 3
+        gc.phase = 6
         gc.subphase = "operations_turn"
         gc.active_player_index = 0
         p0 = gc.state.players[0]
@@ -497,7 +497,7 @@ class TestV240Rules(unittest.TestCase):
         """Cipher Algorithmic Arbitrage discount applies to Personal Reserve purchase ($6 - $2 = $4)."""
         gc = GameController()
         gc.new_game(num_players=2, seed=42)
-        gc.phase = 3
+        gc.phase = 6
         gc.subphase = "operations_turn"
         gc.active_player_index = 0
         p0 = gc.state.players[0]

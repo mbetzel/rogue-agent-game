@@ -12,7 +12,7 @@ from sim.bots import (
     SecOpsTurtleBot,
     VentureGreedBot,
 )
-from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
+from sim.config import ROUND_PHASE_NAMES, CubeColor, DieColor, EndGameReason, GameConfig, RoundPhase, ShieldColor
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
 from sim.engine.phase1_boot import (
     check_operator_contingent_staffing,
@@ -20,6 +20,7 @@ from sim.engine.phase1_boot import (
     resolve_prodigy_purple_star_override,
 )
 from sim.engine.state import ProductionRole
+from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
 from sim.entities import (
     AbilityStatus,
     ArchetypeCard,
@@ -66,10 +67,7 @@ def hire_contractors(
 
     active_ver = controller.state.active_version.version_str
     if use_operator_ability:
-        is_operator_corp = bool(
-            (player.company and player.company.code == CompanyCode.MERIDIAN)
-            or (player.archetype and player.archetype.code == ArchetypeCode.OPERATOR)
-        )
+        is_operator_corp = has_company_override(player, CompanyCode.MERIDIAN, legacy_bridge_enabled(controller))
         if not is_operator_corp:
             raise ValueError("Player is not The Operator")
         if not player.is_ability_available(active_ver):
@@ -147,10 +145,7 @@ def roll_pool(controller: GameController, player_id: int) -> Dict[str, Any]:
         die.roll(controller.engine.rng)
 
     # Operator Contingent Staffing Face 6 Protocol
-    is_operator_op = bool(
-        (player.white_hat and player.white_hat.code == WhiteHatCode.OPERATOR)
-        or (player.archetype and player.archetype.code == ArchetypeCode.OPERATOR)
-    )
+    is_operator_op = has_signature_protocol(player, WhiteHatCode.OPERATOR, legacy_bridge_enabled(controller))
     if is_operator_op:
         c_die = check_operator_contingent_staffing(controller.engine or controller, player, active_dice)
         if c_die:
@@ -203,10 +198,7 @@ def perform_reroll(
         raise ValueError("reroll_indices must be a non-empty list of integers")
 
     if use_prodigy_ability:
-        is_helix = bool(
-            (player.company and player.company.code == CompanyCode.HELIX)
-            or (player.archetype and player.archetype.code == ArchetypeCode.PRODIGY)
-        )
+        is_helix = has_company_override(player, CompanyCode.HELIX, legacy_bridge_enabled(controller))
         if not is_helix:
             raise ValueError("Player does not have the Prodigy archetype")
         if not meta.get("prodigy_active", False) and not player.is_ability_available():
@@ -246,10 +238,7 @@ def perform_reroll(
             d.is_locked = True
 
     # Operator Contingent Staffing Face 6 Protocol (if not triggered yet)
-    is_operator_op = bool(
-        (player.white_hat and player.white_hat.code == WhiteHatCode.OPERATOR)
-        or (player.archetype and player.archetype.code == ArchetypeCode.OPERATOR)
-    )
+    is_operator_op = has_signature_protocol(player, WhiteHatCode.OPERATOR, legacy_bridge_enabled(controller))
     if is_operator_op:
         c_die = check_operator_contingent_staffing(controller.engine or controller, player, rolled)
         if c_die:
@@ -266,7 +255,7 @@ def perform_reroll(
 
 def debug_unlock_die(controller: GameController, player_id: int, die_index: int) -> Dict[str, Any]:
     """DEPRECATED in v0.23.0. Debug unlocks have been removed."""
-    raise ValueError("Debug unlocks deprecated in v0.23.0. Use Phase 3 Fast-Patching.")
+    raise ValueError("Debug unlocks deprecated in v0.23.0. Fast-Patching is also deprecated (v0.29.0).")
 
 
 
@@ -495,7 +484,7 @@ def commit_defenses(
         else:
             die.production_role = ProductionRole.INCOME
 
-        # Star Special eligibility tracking for Phase 3
+        # Star Special eligibility tracking for Phase 6 (paid ★ actions)
         if face and face.is_star:
             if face.star_code == "B2":
                 if idx not in new_commitments:
@@ -534,8 +523,8 @@ def commit_defenses(
         auto_execute_bots_phase_1(controller)
 
         # Advance to Phase 2
-        controller.phase = 2
-        controller.phase_name = "Rogue Agent Compile"
+        controller.phase = int(RoundPhase.COMPILER_DROP_AND_CORRUPTION)
+        controller.phase_name = ROUND_PHASE_NAMES[controller.phase]
         controller.subphase = "ready_for_compile"
         controller.event_log.append("All corporations have committed defenses. Ready for Compile Drop.")
 
@@ -556,10 +545,7 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
         # 1. Temp Staffing (Contractor Hiring)
         active_ver = controller.state.active_version.version_str
         used_operator = False
-        is_meridian = bool(
-            (player.company and player.company.code == CompanyCode.MERIDIAN)
-            or (player.archetype and player.archetype.code == ArchetypeCode.OPERATOR)
-        ) and player.is_ability_available(active_ver)
+        is_meridian = has_company_override(player, CompanyCode.MERIDIAN, legacy_bridge_enabled(controller)) and player.is_ability_available(active_ver)
         if is_meridian:
             use_op = player.bot.choose_operator_ability(
                 player_state=player,
@@ -641,10 +627,7 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
         active_directive = controller.state.active_directive_code
         max_free_rerolls = controller.state.config.default_free_rerolls
 
-        is_helix = bool(
-            (player.company and player.company.code == CompanyCode.HELIX)
-            or (player.archetype and player.archetype.code == ArchetypeCode.PRODIGY)
-        ) and player.is_ability_available(active_ver)
+        is_helix = has_company_override(player, CompanyCode.HELIX, legacy_bridge_enabled(controller)) and player.is_ability_available(active_ver)
         prodigy_active = False
         if is_helix:
             use_prodigy = player.bot.choose_prodigy_ability(
@@ -829,7 +812,7 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
             else:
                 die.production_role = ProductionRole.INCOME
 
-            # Star Special eligibility tracking for Phase 3
+            # Star Special eligibility tracking for Phase 6 (paid ★ actions)
             if face and face.is_star:
                 if face.star_code == "B2":
                     if idx not in new_commitments:
@@ -853,6 +836,6 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
         meta["shield_slots"] = slots
 
 # =========================================================================
-# Phase 2: Rogue Agent Compile (The Cube Tower Drop)
+# Phase 2: Compiler Drop & Corruption (The Cube Tower Drop)
 # =========================================================================
 

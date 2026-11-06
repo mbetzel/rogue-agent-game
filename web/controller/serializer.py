@@ -12,7 +12,7 @@ from sim.bots import (
     SecOpsTurtleBot,
     VentureGreedBot,
 )
-from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
+from sim.config import ROUND_PHASE_NAMES, CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
 from sim.entities import (
     AbilityStatus,
@@ -36,7 +36,14 @@ def serialize_end_game_result(controller: GameController, res: EndGameResult) ->
         "end_reason": res.end_reason.value if isinstance(res.end_reason, EndGameReason) else str(res.end_reason),
         "total_rounds": res.total_rounds,
         "winner_id": res.winner_id,
-        "winner_name": controller.player_meta[res.winner_id]["name"] if res.winner_id is not None else "None",
+        "winner_ids": list(getattr(res, "winner_ids", []) or []),
+        "is_shared_victory": bool(getattr(res, "is_shared_victory", False)),
+        "winner_names": [controller.player_meta[w]["name"] for w in (getattr(res, "winner_ids", []) or [])],
+        "winner_name": (
+            " & ".join(controller.player_meta[w]["name"] for w in res.winner_ids) + " (shared victory)"
+            if getattr(res, "is_shared_victory", False)
+            else (controller.player_meta[res.winner_id]["name"] if res.winner_id is not None else "None")
+        ),
         "is_total_wipeout": res.is_total_wipeout,
         "singularity_reached": res.singularity_reached,
         "rankings": res.rankings,
@@ -46,84 +53,30 @@ def serialize_end_game_result(controller: GameController, res: EndGameResult) ->
 
 
 def complete_round(controller: GameController) -> None:
-    """Executes round cleanup and either starts the next round or concludes the game."""
+    """End of Phase 6: Final Round -> Game Over; else pass the First Player Marker and start the next round.
+
+    The CI/CD Pipeline Shift already ran in Phase 5 (web/controller/phase5_pipeline_actions.py).
+    """
+    from web.controller.phase2_actions import enter_game_over
+
     num_players = len(controller.state.players)
 
-    # Part 3B: Pipeline Prep (v0.28.0 Canonical)
-    for p in controller.state.players:
-        if p.is_patient_zero:
-            continue
-
-        # Emergency Hotfix (Level 2 Pipeline Track)
-        if getattr(p, "has_emergency_hotfix", False) and p.glitched_dice:
-            h_die = p.glitched_dice.pop(0)
-            h_die.production_role = None
-            h_die.is_locked = False
-            h_die.chosen_choice_index = None
-            h_die.current_face = None
-            p.ready_for_release_dice.append(h_die)
-
-        # 1. Scanned Graduation (Release Bandwidth - INV-PIPE-GRAD-01)
-        grad_count = min(len(p.scanned_dice), p.release_bandwidth)
-        for _ in range(grad_count):
-            d = p.scanned_dice.pop(0)
-            d.production_role = None
-            d.is_locked = False
-            d.chosen_choice_index = None
-            d.current_face = None
-            p.ready_for_release_dice.append(d)
-
-        # 2. Conveyor Shift / Triage (Triage Bandwidth - INV-PIPE-TRIAGE-01)
-        triage_count = min(len(p.glitched_dice), p.triage_bandwidth)
-        for _ in range(triage_count):
-            d = p.glitched_dice.pop(0)
-            d.production_role = None
-            d.is_locked = False
-            d.chosen_choice_index = None
-            d.current_face = None
-            p.scanned_dice.append(d)
-
-        # 3. Production Return
-        for d in p.in_production_dice:
-            d.production_role = None
-            d.is_locked = False
-            d.chosen_choice_index = None
-            d.current_face = None
-            p.ready_for_release_dice.append(d)
-        p.in_production_dice.clear()
-
-        # 4. Uncapped Research: patch cap eliminated (INV-RESEARCH-UNCAPPED-01)
-
-    # Check Final Round condition
     if controller.state.is_final_round:
         controller.state.game_over = True
-        controller.phase = 4
-        controller.phase_name = "Game Over"
-        controller.subphase = "game_over"
-        end_res = controller.engine.evaluate_end_game()
-        controller.final_result = controller._serialize_end_game_result(end_res)
-        controller.event_log.append(
-            f"MATCH CONCLUDED! Winner: {controller.player_meta[end_res.winner_id]['name'] if end_res.winner_id is not None else 'None'}."
-        )
+        enter_game_over(controller)
         return
 
-    # Advance First Player marker clockwise
+    # Pass the First Player Marker clockwise (end of Phase 6)
     controller.state.first_player_index = (controller.state.first_player_index + 1) % num_players
 
-    # Increment round counter
     controller.state.current_round += 1
     if controller.state.current_round > controller.state.config.max_rounds:
         controller.state.game_over = True
         controller.state.end_reason = EndGameReason.ROUND_LIMIT
-        controller.phase = 4
-        controller.phase_name = "Game Over"
-        controller.subphase = "game_over"
-        end_res = controller.engine.evaluate_end_game()
-        controller.final_result = controller._serialize_end_game_result(end_res)
+        enter_game_over(controller)
         controller.event_log.append("Match reached round limit.")
         return
 
-    # Start next round Phase 1
     controller._start_phase_1()
 
 # =========================================================================
@@ -152,6 +105,12 @@ def get_full_state(controller: GameController) -> Dict[str, Any]:
         "players": controller.player_meta,
         "player_ranks": player_ranks,
         "last_compile_result": controller.last_compile_result,
+        "last_income_result": getattr(controller, "last_income_result", {}) or {},
+        "last_attack_result": getattr(controller, "last_attack_result", None),
+        "last_pipeline_result": getattr(controller, "last_pipeline_result", {}) or {},
+        "pending_graduation": getattr(controller, "pending_graduation", {}) or {},
+        "round_sequence": controller.state.config.round_sequence.value,
+        "phase_names": dict(ROUND_PHASE_NAMES),
         "action_capabilities": controller.get_action_capabilities(primary_human),
         "event_log": list(reversed(controller.event_log[-50:])),  # Most recent first
         "final_result": controller.final_result,

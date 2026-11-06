@@ -29,10 +29,10 @@ class TestV100Rules(unittest.TestCase):
         self.assertEqual(cfg.corruption_track_capacity, 4)
 
     def test_starting_secrets_scaling(self):
-        """Starting Secrets should be 8 for 2P, 8 for 3P, and 12 for 4P (v0.21.0)."""
-        cfg_2p = GameConfig(num_players=2)
-        cfg_3p = GameConfig(num_players=3)
-        cfg_4p = GameConfig(num_players=4)
+        """Starting Secrets should be 8 for 2P, 8 for 3P, and 12 for 4P (v0.21.0; legacy v0.33 sequence only)."""
+        cfg_2p = GameConfig.legacy_v033(num_players=2)
+        cfg_3p = GameConfig.legacy_v033(num_players=3)
+        cfg_4p = GameConfig.legacy_v033(num_players=4)
 
         self.assertEqual(cfg_2p.get_starting_secrets(2), 8)
         self.assertEqual(cfg_3p.get_starting_secrets(3), 8)
@@ -70,8 +70,8 @@ class TestV100Rules(unittest.TestCase):
 
     def test_game_engine_initializes_with_v100_defaults(self):
         """GameEngine initializes players with correct v0.10.0 resources per player count."""
-        # 4-player game
-        cfg_4p = GameConfig(num_players=4)
+        # 4-player game (4P = 12 Secrets is the legacy v0.33 baseline; v0.34 is flat 8)
+        cfg_4p = GameConfig.legacy_v033(num_players=4)
         bots_4p = [AdaptiveBalancedBot(i) for i in range(4)]
         eng_4p = GameEngine(cfg_4p, bots_4p, seed=42)
 

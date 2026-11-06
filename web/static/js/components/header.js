@@ -39,11 +39,9 @@ export function renderHeader() {
 
   const phaseEl = document.getElementById("phaseDisplay");
   if (phaseEl) {
-    let displayPhaseName = state.phase_name;
-    if (state.phase === 1) displayPhaseName = "Roll & Deploy";
-    else if (state.phase === 2) displayPhaseName = "Compiler Drop & Defense";
-    else if (state.phase === 3) displayPhaseName = "Operations & Pipeline Prep";
-    phaseEl.innerText = `Phase ${state.phase}: ${displayPhaseName}`;
+    const names = state.phase_names || {};
+    const displayPhaseName = names[state.phase] || names[String(state.phase)] || state.phase_name;
+    phaseEl.innerText = state.phase === 7 ? displayPhaseName : `Phase ${state.phase}: ${displayPhaseName}`;
   }
 
   // Active Version Card

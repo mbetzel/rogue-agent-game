@@ -1,0 +1,2141 @@
+{
+ "11": {
+  "end_reason": "patient_zero",
+  "is_total_wipeout": false,
+  "rankings": [
+   {
+    "ability_v1_status": "FORFEITED",
+    "ability_v2_status": "USED",
+    "ability_v3_status": "LOCKED",
+    "archetype_code": "SPOOK",
+    "bot_name": "SecOpsTurtleBot",
+    "breach_depth": 0,
+    "elimination_reason": null,
+    "is_patient_zero": false,
+    "money": 0,
+    "net_score": 7,
+    "overflow_penalties": 0,
+    "patches": 1,
+    "player_id": 0,
+    "portfolio_value": 7,
+    "rank": 1,
+    "ready_colored_dice_count": 1,
+    "ready_dice_count": 3,
+    "secrets": 7,
+    "total_contractors_hired": 2,
+    "total_rerolls_used": 12,
+    "unpatched_dice_count": 1
+   },
+   {
+    "ability_v1_status": "USED",
+    "ability_v2_status": "USED",
+    "ability_v3_status": "LOCKED",
+    "archetype_code": "OPERATOR",
+    "bot_name": "AccelerationistBot",
+    "breach_depth": 0,
+    "elimination_reason": null,
+    "is_patient_zero": false,
+    "money": 0,
+    "net_score": 4,
+    "overflow_penalties": 0,
+    "patches": 1,
+    "player_id": 2,
+    "portfolio_value": 4,
+    "rank": 2,
+    "ready_colored_dice_count": 1,
+    "ready_dice_count": 3,
+    "secrets": 4,
+    "total_contractors_hired": 5,
+    "total_rerolls_used": 1,
+    "unpatched_dice_count": 1
+   },
+   {
+    "ability_v1_status": "USED",
+    "ability_v2_status": "USED",
+    "ability_v3_status": "LOCKED",
+    "archetype_code": "CIPHER",
+    "bot_name": "VentureGreedBot",
+    "breach_depth": 0,
+    "elimination_reason": "Total Breach (<= 0 Secrets)",
+    "is_patient_zero": true,
+    "money": 1,
+    "net_score": 0,
+    "overflow_penalties": 0,
+    "patches": 0,
+    "player_id": 1,
+    "portfolio_value": 0,
+    "rank": 3,
+    "ready_colored_dice_count": 3,
+    "ready_dice_count": 3,
+    "secrets": 0,
+    "total_contractors_hired": 3,
+    "total_rerolls_used": 11,
+    "unpatched_dice_count": 3
+   }
+  ],
+  "singularity_reached": false,
+  "telemetry": [
+   {
+    "active_version_name": "Script Kiddie",
+    "attack": {
+     "blue": 1,
+     "green": 1,
+     "red": 1
+    },
+    "buffer_overflow": false,
+    "corruption_track": 1,
+    "exited": {
+     "black": 1,
+     "blue": 1,
+     "green": 1,
+     "red": 1
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 0,
+      "in_production_dice_count": 4,
+      "is_patient_zero": false,
+      "money": 2,
+      "patches": 0,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 8,
+      "unpatched_dice_count": 0
+     },
+     {
+      "bot_name": "VentureGreedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 3,
+      "is_patient_zero": false,
+      "money": 4,
+      "patches": 0,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 7,
+      "unpatched_dice_count": 1
+     },
+     {
+      "bot_name": "AccelerationistBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 3,
+      "is_patient_zero": false,
+      "money": 2,
+      "patches": 0,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 8,
+      "unpatched_dice_count": 1
+     }
+    ],
+    "round_number": 1,
+    "staged": {
+     "black": 1,
+     "blue": 1,
+     "green": 1,
+     "red": 1
+    },
+    "stuck_after": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 0
+    },
+    "stuck_before": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 0
+    }
+   },
+   {
+    "active_version_name": "Script Kiddie",
+    "attack": {
+     "blue": 1,
+     "green": 1,
+     "red": 2
+    },
+    "buffer_overflow": false,
+    "corruption_track": 1,
+    "exited": {
+     "black": 0,
+     "blue": 1,
+     "green": 1,
+     "red": 2
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 3,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 8,
+      "unpatched_dice_count": 1
+     },
+     {
+      "bot_name": "VentureGreedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 3,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 1,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 6,
+      "unpatched_dice_count": 2
+     },
+     {
+      "bot_name": "AccelerationistBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 2,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 1,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 8,
+      "unpatched_dice_count": 2
+     }
+    ],
+    "round_number": 2,
+    "staged": {
+     "black": 1,
+     "blue": 1,
+     "green": 1,
+     "red": 2
+    },
+    "stuck_after": {
+     "black": 1,
+     "blue": 0,
+     "green": 0,
+     "red": 0
+    },
+    "stuck_before": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 0
+    }
+   },
+   {
+    "active_version_name": "Script Kiddie",
+    "attack": {
+     "blue": 0,
+     "green": 1,
+     "red": 2
+    },
+    "buffer_overflow": false,
+    "corruption_track": 3,
+    "exited": {
+     "black": 2,
+     "blue": 0,
+     "green": 1,
+     "red": 2
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 2,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 8,
+      "unpatched_dice_count": 2
+     },
+     {
+      "bot_name": "VentureGreedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 3,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 1,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 5,
+      "unpatched_dice_count": 2
+     },
+     {
+      "bot_name": "AccelerationistBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 0,
+      "in_production_dice_count": 3,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 7,
+      "unpatched_dice_count": 1
+     }
+    ],
+    "round_number": 3,
+    "staged": {
+     "black": 1,
+     "blue": 1,
+     "green": 1,
+     "red": 2
+    },
+    "stuck_after": {
+     "black": 0,
+     "blue": 1,
+     "green": 0,
+     "red": 0
+    },
+    "stuck_before": {
+     "black": 1,
+     "blue": 0,
+     "green": 0,
+     "red": 0
+    }
+   },
+   {
+    "active_version_name": "Script Kiddie",
+    "attack": {
+     "blue": 1,
+     "green": 1,
+     "red": 1
+    },
+    "buffer_overflow": false,
+    "corruption_track": 4,
+    "exited": {
+     "black": 2,
+     "blue": 1,
+     "green": 1,
+     "red": 1
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 2,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 8,
+      "unpatched_dice_count": 2
+     },
+     {
+      "bot_name": "VentureGreedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 3,
+      "is_patient_zero": false,
+      "money": 2,
+      "patches": 0,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 4,
+      "unpatched_dice_count": 2
+     },
+     {
+      "bot_name": "AccelerationistBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 3,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 6,
+      "unpatched_dice_count": 1
+     }
+    ],
+    "round_number": 4,
+    "staged": {
+     "black": 2,
+     "blue": 0,
+     "green": 1,
+     "red": 2
+    },
+    "stuck_after": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 1
+    },
+    "stuck_before": {
+     "black": 0,
+     "blue": 1,
+     "green": 0,
+     "red": 0
+    }
+   },
+   {
+    "active_version_name": "Ransomware-as-a-Service",
+    "attack": {
+     "blue": 1,
+     "green": 1,
+     "red": 1
+    },
+    "buffer_overflow": false,
+    "corruption_track": 2,
+    "exited": {
+     "black": 1,
+     "blue": 1,
+     "green": 1,
+     "red": 1
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 2,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 8,
+      "unpatched_dice_count": 2
+     },
+     {
+      "bot_name": "VentureGreedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 3,
+      "is_patient_zero": false,
+      "money": 4,
+      "patches": 1,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 3,
+      "unpatched_dice_count": 2
+     },
+     {
+      "bot_name": "AccelerationistBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 0,
+      "in_production_dice_count": 3,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 2,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 6,
+      "unpatched_dice_count": 1
+     }
+    ],
+    "round_number": 5,
+    "staged": {
+     "black": 1,
+     "blue": 1,
+     "green": 1,
+     "red": 1
+    },
+    "stuck_after": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 1
+    },
+    "stuck_before": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 1
+    }
+   },
+   {
+    "active_version_name": "Ransomware-as-a-Service",
+    "attack": {
+     "blue": 1,
+     "green": 2,
+     "red": 2
+    },
+    "buffer_overflow": false,
+    "corruption_track": 4,
+    "exited": {
+     "black": 2,
+     "blue": 1,
+     "green": 2,
+     "red": 2
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 1,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 8,
+      "unpatched_dice_count": 3
+     },
+     {
+      "bot_name": "VentureGreedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 3,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 1,
+      "unpatched_dice_count": 3
+     },
+     {
+      "bot_name": "AccelerationistBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 2,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 5,
+      "unpatched_dice_count": 2
+     }
+    ],
+    "round_number": 6,
+    "staged": {
+     "black": 2,
+     "blue": 1,
+     "green": 2,
+     "red": 2
+    },
+    "stuck_after": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 1
+    },
+    "stuck_before": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 1
+    }
+   },
+   {
+    "active_version_name": "Ransomware-as-a-Service",
+    "attack": {
+     "blue": 1,
+     "green": 1,
+     "red": 4
+    },
+    "buffer_overflow": false,
+    "corruption_track": 5,
+    "exited": {
+     "black": 2,
+     "blue": 1,
+     "green": 1,
+     "red": 4
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 1,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 2,
+      "secrets": 7,
+      "unpatched_dice_count": 3
+     },
+     {
+      "bot_name": "VentureGreedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 3,
+      "is_patient_zero": true,
+      "money": 1,
+      "patches": 0,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 2,
+      "secrets": 0,
+      "unpatched_dice_count": 3
+     },
+     {
+      "bot_name": "AccelerationistBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 1,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 1,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 2,
+      "secrets": 4,
+      "unpatched_dice_count": 3
+     }
+    ],
+    "round_number": 7,
+    "staged": {
+     "black": 2,
+     "blue": 1,
+     "green": 2,
+     "red": 3
+    },
+    "stuck_after": {
+     "black": 0,
+     "blue": 0,
+     "green": 1,
+     "red": 0
+    },
+    "stuck_before": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 1
+    }
+   }
+  ],
+  "total_buffer_overflows": 0,
+  "total_rounds": 7,
+  "winner_id": 0
+ },
+ "2024": {
+  "end_reason": "patient_zero",
+  "is_total_wipeout": false,
+  "rankings": [
+   {
+    "ability_v1_status": "FORFEITED",
+    "ability_v2_status": "USED",
+    "ability_v3_status": "USED",
+    "archetype_code": "SPOOK",
+    "bot_name": "RecklessSaboteurBot",
+    "breach_depth": 0,
+    "elimination_reason": null,
+    "is_patient_zero": false,
+    "money": 0,
+    "net_score": 1,
+    "overflow_penalties": 0,
+    "patches": 0,
+    "player_id": 0,
+    "portfolio_value": 1,
+    "rank": 1,
+    "ready_colored_dice_count": 0,
+    "ready_dice_count": 2,
+    "secrets": 1,
+    "total_contractors_hired": 5,
+    "total_rerolls_used": 7,
+    "unpatched_dice_count": 1
+   },
+   {
+    "ability_v1_status": "USED",
+    "ability_v2_status": "USED",
+    "ability_v3_status": "AVAILABLE",
+    "archetype_code": "PRODIGY",
+    "bot_name": "SecOpsTurtleBot",
+    "breach_depth": 1,
+    "elimination_reason": "Total Breach (<= 0 Secrets)",
+    "is_patient_zero": true,
+    "money": 0,
+    "net_score": 0,
+    "overflow_penalties": 0,
+    "patches": 0,
+    "player_id": 2,
+    "portfolio_value": 0,
+    "rank": 2,
+    "ready_colored_dice_count": 0,
+    "ready_dice_count": 0,
+    "secrets": -1,
+    "total_contractors_hired": 3,
+    "total_rerolls_used": 14,
+    "unpatched_dice_count": 3
+   },
+   {
+    "ability_v1_status": "USED",
+    "ability_v2_status": "USED",
+    "ability_v3_status": "USED",
+    "archetype_code": "PHREAKER",
+    "bot_name": "AdaptiveBalancedBot",
+    "breach_depth": 2,
+    "elimination_reason": "Total Breach (<= 0 Secrets)",
+    "is_patient_zero": true,
+    "money": 0,
+    "net_score": 0,
+    "overflow_penalties": 0,
+    "patches": 0,
+    "player_id": 1,
+    "portfolio_value": 0,
+    "rank": 3,
+    "ready_colored_dice_count": 0,
+    "ready_dice_count": 0,
+    "secrets": -2,
+    "total_contractors_hired": 3,
+    "total_rerolls_used": 14,
+    "unpatched_dice_count": 3
+   }
+  ],
+  "singularity_reached": false,
+  "telemetry": [
+   {
+    "active_version_name": "Script Kiddie",
+    "attack": {
+     "blue": 0,
+     "green": 1,
+     "red": 1
+    },
+    "buffer_overflow": false,
+    "corruption_track": 1,
+    "exited": {
+     "black": 1,
+     "blue": 0,
+     "green": 1,
+     "red": 1
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "RecklessSaboteurBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 0,
+      "in_production_dice_count": 4,
+      "is_patient_zero": false,
+      "money": 3,
+      "patches": 0,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 8,
+      "unpatched_dice_count": 0
+     },
+     {
+      "bot_name": "AdaptiveBalancedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 0,
+      "in_production_dice_count": 4,
+      "is_patient_zero": false,
+      "money": 5,
+      "patches": 0,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 8,
+      "unpatched_dice_count": 0
+     },
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 0,
+      "in_production_dice_count": 4,
+      "is_patient_zero": false,
+      "money": 3,
+      "patches": 0,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 8,
+      "unpatched_dice_count": 0
+     }
+    ],
+    "round_number": 1,
+    "staged": {
+     "black": 1,
+     "blue": 1,
+     "green": 1,
+     "red": 1
+    },
+    "stuck_after": {
+     "black": 0,
+     "blue": 1,
+     "green": 1,
+     "red": 1
+    },
+    "stuck_before": {
+     "black": 0,
+     "blue": 0,
+     "green": 1,
+     "red": 1
+    }
+   },
+   {
+    "active_version_name": "Script Kiddie",
+    "attack": {
+     "blue": 1,
+     "green": 1,
+     "red": 1
+    },
+    "buffer_overflow": false,
+    "corruption_track": 2,
+    "exited": {
+     "black": 1,
+     "blue": 1,
+     "green": 1,
+     "red": 1
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "RecklessSaboteurBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 0,
+      "in_production_dice_count": 4,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 3,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 8,
+      "unpatched_dice_count": 0
+     },
+     {
+      "bot_name": "AdaptiveBalancedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 0,
+      "in_production_dice_count": 4,
+      "is_patient_zero": false,
+      "money": 1,
+      "patches": 1,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 8,
+      "unpatched_dice_count": 0
+     },
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 0,
+      "in_production_dice_count": 4,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 1,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 8,
+      "unpatched_dice_count": 0
+     }
+    ],
+    "round_number": 2,
+    "staged": {
+     "black": 1,
+     "blue": 0,
+     "green": 1,
+     "red": 2
+    },
+    "stuck_after": {
+     "black": 0,
+     "blue": 0,
+     "green": 1,
+     "red": 2
+    },
+    "stuck_before": {
+     "black": 0,
+     "blue": 1,
+     "green": 1,
+     "red": 1
+    }
+   },
+   {
+    "active_version_name": "Script Kiddie",
+    "attack": {
+     "blue": 1,
+     "green": 1,
+     "red": 3
+    },
+    "buffer_overflow": false,
+    "corruption_track": 4,
+    "exited": {
+     "black": 2,
+     "blue": 1,
+     "green": 1,
+     "red": 3
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "RecklessSaboteurBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 0,
+      "in_production_dice_count": 4,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 1,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 8,
+      "unpatched_dice_count": 0
+     },
+     {
+      "bot_name": "AdaptiveBalancedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 2,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 8,
+      "unpatched_dice_count": 2
+     },
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 3,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 7,
+      "unpatched_dice_count": 1
+     }
+    ],
+    "round_number": 3,
+    "staged": {
+     "black": 2,
+     "blue": 1,
+     "green": 1,
+     "red": 1
+    },
+    "stuck_after": {
+     "black": 0,
+     "blue": 0,
+     "green": 1,
+     "red": 0
+    },
+    "stuck_before": {
+     "black": 0,
+     "blue": 0,
+     "green": 1,
+     "red": 2
+    }
+   },
+   {
+    "active_version_name": "Ransomware-as-a-Service",
+    "attack": {
+     "blue": 1,
+     "green": 1,
+     "red": 2
+    },
+    "buffer_overflow": false,
+    "corruption_track": 0,
+    "exited": {
+     "black": 0,
+     "blue": 1,
+     "green": 1,
+     "red": 2
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "RecklessSaboteurBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 0,
+      "in_production_dice_count": 4,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 1,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 8,
+      "unpatched_dice_count": 0
+     },
+     {
+      "bot_name": "AdaptiveBalancedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 2,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 7,
+      "unpatched_dice_count": 2
+     },
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 2,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 2,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 6,
+      "unpatched_dice_count": 2
+     }
+    ],
+    "round_number": 4,
+    "staged": {
+     "black": 1,
+     "blue": 1,
+     "green": 1,
+     "red": 3
+    },
+    "stuck_after": {
+     "black": 1,
+     "blue": 0,
+     "green": 1,
+     "red": 1
+    },
+    "stuck_before": {
+     "black": 0,
+     "blue": 0,
+     "green": 1,
+     "red": 0
+    }
+   },
+   {
+    "active_version_name": "Ransomware-as-a-Service",
+    "attack": {
+     "blue": 0,
+     "green": 2,
+     "red": 2
+    },
+    "buffer_overflow": false,
+    "corruption_track": 2,
+    "exited": {
+     "black": 2,
+     "blue": 0,
+     "green": 2,
+     "red": 2
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "RecklessSaboteurBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 2,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 1,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 8,
+      "unpatched_dice_count": 2
+     },
+     {
+      "bot_name": "AdaptiveBalancedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 2,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 1,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 6,
+      "unpatched_dice_count": 2
+     },
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 2,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 6,
+      "unpatched_dice_count": 2
+     }
+    ],
+    "round_number": 5,
+    "staged": {
+     "black": 1,
+     "blue": 1,
+     "green": 1,
+     "red": 2
+    },
+    "stuck_after": {
+     "black": 0,
+     "blue": 1,
+     "green": 0,
+     "red": 1
+    },
+    "stuck_before": {
+     "black": 1,
+     "blue": 0,
+     "green": 1,
+     "red": 1
+    }
+   },
+   {
+    "active_version_name": "Ransomware-as-a-Service",
+    "attack": {
+     "blue": 1,
+     "green": 3,
+     "red": 4
+    },
+    "buffer_overflow": false,
+    "corruption_track": 4,
+    "exited": {
+     "black": 2,
+     "blue": 1,
+     "green": 3,
+     "red": 4
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "RecklessSaboteurBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 0,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 1,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 2,
+      "secrets": 8,
+      "unpatched_dice_count": 4
+     },
+     {
+      "bot_name": "AdaptiveBalancedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 0,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 2,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 2,
+      "secrets": 5,
+      "unpatched_dice_count": 4
+     },
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 3,
+      "in_production_dice_count": 0,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 5,
+      "unpatched_dice_count": 4
+     }
+    ],
+    "round_number": 6,
+    "staged": {
+     "black": 2,
+     "blue": 0,
+     "green": 3,
+     "red": 3
+    },
+    "stuck_after": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 0
+    },
+    "stuck_before": {
+     "black": 0,
+     "blue": 1,
+     "green": 0,
+     "red": 1
+    }
+   },
+   {
+    "active_version_name": "Ransomware-as-a-Service",
+    "attack": {
+     "blue": 1,
+     "green": 3,
+     "red": 5
+    },
+    "buffer_overflow": false,
+    "corruption_track": 5,
+    "exited": {
+     "black": 2,
+     "blue": 1,
+     "green": 3,
+     "red": 5
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "RecklessSaboteurBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 0,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 1,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 2,
+      "secrets": 7,
+      "unpatched_dice_count": 4
+     },
+     {
+      "bot_name": "AdaptiveBalancedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 0,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 2,
+      "secrets": 4,
+      "unpatched_dice_count": 4
+     },
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 0,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 2,
+      "secrets": 4,
+      "unpatched_dice_count": 4
+     }
+    ],
+    "round_number": 7,
+    "staged": {
+     "black": 2,
+     "blue": 1,
+     "green": 3,
+     "red": 5
+    },
+    "stuck_after": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 0
+    },
+    "stuck_before": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 0
+    }
+   },
+   {
+    "active_version_name": "Zero-Day Override",
+    "attack": {
+     "blue": 2,
+     "green": 4,
+     "red": 7
+    },
+    "buffer_overflow": false,
+    "corruption_track": 2,
+    "exited": {
+     "black": 1,
+     "blue": 2,
+     "green": 4,
+     "red": 7
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "RecklessSaboteurBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 0,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 2,
+      "secrets": 7,
+      "unpatched_dice_count": 4
+     },
+     {
+      "bot_name": "AdaptiveBalancedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 0,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 2,
+      "secrets": 3,
+      "unpatched_dice_count": 4
+     },
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 0,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 2,
+      "secrets": 3,
+      "unpatched_dice_count": 4
+     }
+    ],
+    "round_number": 8,
+    "staged": {
+     "black": 1,
+     "blue": 2,
+     "green": 4,
+     "red": 7
+    },
+    "stuck_after": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 0
+    },
+    "stuck_before": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 0
+    }
+   },
+   {
+    "active_version_name": "Zero-Day Override",
+    "attack": {
+     "blue": 2,
+     "green": 4,
+     "red": 7
+    },
+    "buffer_overflow": false,
+    "corruption_track": 3,
+    "exited": {
+     "black": 1,
+     "blue": 2,
+     "green": 4,
+     "red": 7
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "RecklessSaboteurBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 0,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 2,
+      "secrets": 5,
+      "unpatched_dice_count": 4
+     },
+     {
+      "bot_name": "AdaptiveBalancedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 3,
+      "in_production_dice_count": 0,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 2,
+      "unpatched_dice_count": 4
+     },
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 0,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 2,
+      "secrets": 2,
+      "unpatched_dice_count": 4
+     }
+    ],
+    "round_number": 9,
+    "staged": {
+     "black": 2,
+     "blue": 2,
+     "green": 4,
+     "red": 7
+    },
+    "stuck_after": {
+     "black": 1,
+     "blue": 0,
+     "green": 0,
+     "red": 0
+    },
+    "stuck_before": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 0
+    }
+   },
+   {
+    "active_version_name": "Zero-Day Override",
+    "attack": {
+     "blue": 3,
+     "green": 4,
+     "red": 8
+    },
+    "buffer_overflow": false,
+    "corruption_track": 5,
+    "exited": {
+     "black": 2,
+     "blue": 3,
+     "green": 4,
+     "red": 8
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "RecklessSaboteurBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 0,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 2,
+      "secrets": 1,
+      "unpatched_dice_count": 3
+     },
+     {
+      "bot_name": "AdaptiveBalancedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 0,
+      "is_patient_zero": true,
+      "money": 0,
+      "patches": 0,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 2,
+      "secrets": -2,
+      "unpatched_dice_count": 3
+     },
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 0,
+      "is_patient_zero": true,
+      "money": 0,
+      "patches": 0,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": -1,
+      "unpatched_dice_count": 3
+     }
+    ],
+    "round_number": 10,
+    "staged": {
+     "black": 1,
+     "blue": 3,
+     "green": 4,
+     "red": 8
+    },
+    "stuck_after": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 0
+    },
+    "stuck_before": {
+     "black": 1,
+     "blue": 0,
+     "green": 0,
+     "red": 0
+    }
+   }
+  ],
+  "total_buffer_overflows": 0,
+  "total_rounds": 10,
+  "winner_id": 0
+ },
+ "90210": {
+  "end_reason": "patient_zero",
+  "is_total_wipeout": false,
+  "rankings": [
+   {
+    "ability_v1_status": "USED",
+    "ability_v2_status": "USED",
+    "ability_v3_status": "LOCKED",
+    "archetype_code": "CIPHER",
+    "bot_name": "AdaptiveBalancedBot",
+    "breach_depth": 0,
+    "elimination_reason": null,
+    "is_patient_zero": false,
+    "money": 0,
+    "net_score": 6,
+    "overflow_penalties": 0,
+    "patches": 1,
+    "player_id": 0,
+    "portfolio_value": 6,
+    "rank": 1,
+    "ready_colored_dice_count": 1,
+    "ready_dice_count": 3,
+    "secrets": 6,
+    "total_contractors_hired": 3,
+    "total_rerolls_used": 6,
+    "unpatched_dice_count": 1
+   },
+   {
+    "ability_v1_status": "USED",
+    "ability_v2_status": "USED",
+    "ability_v3_status": "LOCKED",
+    "archetype_code": "ACOUSTIC",
+    "bot_name": "SecOpsTurtleBot",
+    "breach_depth": 0,
+    "elimination_reason": null,
+    "is_patient_zero": false,
+    "money": 1,
+    "net_score": 5,
+    "overflow_penalties": 0,
+    "patches": 0,
+    "player_id": 1,
+    "portfolio_value": 5,
+    "rank": 2,
+    "ready_colored_dice_count": 1,
+    "ready_dice_count": 3,
+    "secrets": 5,
+    "total_contractors_hired": 3,
+    "total_rerolls_used": 12,
+    "unpatched_dice_count": 1
+   },
+   {
+    "ability_v1_status": "USED",
+    "ability_v2_status": "USED",
+    "ability_v3_status": "LOCKED",
+    "archetype_code": "PHREAKER",
+    "bot_name": "VentureGreedBot",
+    "breach_depth": 0,
+    "elimination_reason": "Total Breach (<= 0 Secrets)",
+    "is_patient_zero": true,
+    "money": 0,
+    "net_score": 0,
+    "overflow_penalties": 0,
+    "patches": 1,
+    "player_id": 2,
+    "portfolio_value": 0,
+    "rank": 3,
+    "ready_colored_dice_count": 0,
+    "ready_dice_count": 2,
+    "secrets": 0,
+    "total_contractors_hired": 3,
+    "total_rerolls_used": 11,
+    "unpatched_dice_count": 2
+   }
+  ],
+  "singularity_reached": false,
+  "telemetry": [
+   {
+    "active_version_name": "Script Kiddie",
+    "attack": {
+     "blue": 1,
+     "green": 1,
+     "red": 1
+    },
+    "buffer_overflow": false,
+    "corruption_track": 1,
+    "exited": {
+     "black": 1,
+     "blue": 1,
+     "green": 1,
+     "red": 1
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "AdaptiveBalancedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 0,
+      "in_production_dice_count": 4,
+      "is_patient_zero": false,
+      "money": 4,
+      "patches": 0,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 8,
+      "unpatched_dice_count": 0
+     },
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 0,
+      "in_production_dice_count": 4,
+      "is_patient_zero": false,
+      "money": 3,
+      "patches": 0,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 8,
+      "unpatched_dice_count": 0
+     },
+     {
+      "bot_name": "VentureGreedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 0,
+      "in_production_dice_count": 4,
+      "is_patient_zero": false,
+      "money": 4,
+      "patches": 0,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 7,
+      "unpatched_dice_count": 0
+     }
+    ],
+    "round_number": 1,
+    "staged": {
+     "black": 1,
+     "blue": 1,
+     "green": 1,
+     "red": 1
+    },
+    "stuck_after": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 1
+    },
+    "stuck_before": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 1
+    }
+   },
+   {
+    "active_version_name": "Script Kiddie",
+    "attack": {
+     "blue": 1,
+     "green": 1,
+     "red": 3
+    },
+    "buffer_overflow": false,
+    "corruption_track": 1,
+    "exited": {
+     "black": 0,
+     "blue": 1,
+     "green": 1,
+     "red": 3
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "AdaptiveBalancedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 0,
+      "in_production_dice_count": 4,
+      "is_patient_zero": false,
+      "money": 2,
+      "patches": 1,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 8,
+      "unpatched_dice_count": 0
+     },
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 3,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 8,
+      "unpatched_dice_count": 1
+     },
+     {
+      "bot_name": "VentureGreedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 3,
+      "is_patient_zero": false,
+      "money": 2,
+      "patches": 1,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 6,
+      "unpatched_dice_count": 1
+     }
+    ],
+    "round_number": 2,
+    "staged": {
+     "black": 1,
+     "blue": 1,
+     "green": 1,
+     "red": 2
+    },
+    "stuck_after": {
+     "black": 1,
+     "blue": 0,
+     "green": 0,
+     "red": 0
+    },
+    "stuck_before": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 1
+    }
+   },
+   {
+    "active_version_name": "Script Kiddie",
+    "attack": {
+     "blue": 1,
+     "green": 1,
+     "red": 2
+    },
+    "buffer_overflow": false,
+    "corruption_track": 2,
+    "exited": {
+     "black": 1,
+     "blue": 1,
+     "green": 1,
+     "red": 2
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "AdaptiveBalancedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 0,
+      "in_production_dice_count": 4,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 1,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 8,
+      "unpatched_dice_count": 0
+     },
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 1,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 7,
+      "unpatched_dice_count": 3
+     },
+     {
+      "bot_name": "VentureGreedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 2,
+      "is_patient_zero": false,
+      "money": 1,
+      "patches": 1,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 5,
+      "unpatched_dice_count": 2
+     }
+    ],
+    "round_number": 3,
+    "staged": {
+     "black": 1,
+     "blue": 1,
+     "green": 1,
+     "red": 3
+    },
+    "stuck_after": {
+     "black": 1,
+     "blue": 0,
+     "green": 0,
+     "red": 1
+    },
+    "stuck_before": {
+     "black": 1,
+     "blue": 0,
+     "green": 0,
+     "red": 0
+    }
+   },
+   {
+    "active_version_name": "Script Kiddie",
+    "attack": {
+     "blue": 0,
+     "green": 1,
+     "red": 2
+    },
+    "buffer_overflow": false,
+    "corruption_track": 4,
+    "exited": {
+     "black": 3,
+     "blue": 0,
+     "green": 1,
+     "red": 2
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "AdaptiveBalancedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 3,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 8,
+      "unpatched_dice_count": 1
+     },
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 1,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 2,
+      "secrets": 7,
+      "unpatched_dice_count": 3
+     },
+     {
+      "bot_name": "VentureGreedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 1,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 2,
+      "secrets": 4,
+      "unpatched_dice_count": 3
+     }
+    ],
+    "round_number": 4,
+    "staged": {
+     "black": 2,
+     "blue": 1,
+     "green": 1,
+     "red": 2
+    },
+    "stuck_after": {
+     "black": 0,
+     "blue": 1,
+     "green": 0,
+     "red": 1
+    },
+    "stuck_before": {
+     "black": 1,
+     "blue": 0,
+     "green": 0,
+     "red": 1
+    }
+   },
+   {
+    "active_version_name": "Ransomware-as-a-Service",
+    "attack": {
+     "blue": 0,
+     "green": 0,
+     "red": 2
+    },
+    "buffer_overflow": false,
+    "corruption_track": 2,
+    "exited": {
+     "black": 1,
+     "blue": 0,
+     "green": 0,
+     "red": 2
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "AdaptiveBalancedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 0,
+      "in_production_dice_count": 3,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 2,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 8,
+      "unpatched_dice_count": 1
+     },
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 0,
+      "in_production_dice_count": 3,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 7,
+      "unpatched_dice_count": 1
+     },
+     {
+      "bot_name": "VentureGreedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 0,
+      "in_production_dice_count": 3,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 3,
+      "unpatched_dice_count": 1
+     }
+    ],
+    "round_number": 5,
+    "staged": {
+     "black": 1,
+     "blue": 0,
+     "green": 1,
+     "red": 2
+    },
+    "stuck_after": {
+     "black": 0,
+     "blue": 1,
+     "green": 1,
+     "red": 1
+    },
+    "stuck_before": {
+     "black": 0,
+     "blue": 1,
+     "green": 0,
+     "red": 1
+    }
+   },
+   {
+    "active_version_name": "Ransomware-as-a-Service",
+    "attack": {
+     "blue": 1,
+     "green": 2,
+     "red": 3
+    },
+    "buffer_overflow": false,
+    "corruption_track": 4,
+    "exited": {
+     "black": 2,
+     "blue": 1,
+     "green": 2,
+     "red": 3
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "AdaptiveBalancedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 2,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 7,
+      "unpatched_dice_count": 2
+     },
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 2,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 6,
+      "unpatched_dice_count": 2
+     },
+     {
+      "bot_name": "VentureGreedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 2,
+      "in_production_dice_count": 2,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 0,
+      "secrets": 1,
+      "unpatched_dice_count": 2
+     }
+    ],
+    "round_number": 6,
+    "staged": {
+     "black": 2,
+     "blue": 0,
+     "green": 1,
+     "red": 3
+    },
+    "stuck_after": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 1
+    },
+    "stuck_before": {
+     "black": 0,
+     "blue": 1,
+     "green": 1,
+     "red": 1
+    }
+   },
+   {
+    "active_version_name": "Ransomware-as-a-Service",
+    "attack": {
+     "blue": 1,
+     "green": 1,
+     "red": 5
+    },
+    "buffer_overflow": false,
+    "corruption_track": 5,
+    "exited": {
+     "black": 2,
+     "blue": 1,
+     "green": 1,
+     "red": 5
+    },
+    "player_snapshots": [
+     {
+      "bot_name": "AdaptiveBalancedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 1,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 1,
+      "player_id": 0,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 2,
+      "secrets": 6,
+      "unpatched_dice_count": 3
+     },
+     {
+      "bot_name": "SecOpsTurtleBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 1,
+      "is_patient_zero": false,
+      "money": 0,
+      "patches": 0,
+      "player_id": 1,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 2,
+      "secrets": 5,
+      "unpatched_dice_count": 3
+     },
+     {
+      "bot_name": "VentureGreedBot",
+      "contractor_dice_count": 0,
+      "glitched_dice_count": 1,
+      "in_production_dice_count": 2,
+      "is_patient_zero": true,
+      "money": 0,
+      "patches": 1,
+      "player_id": 2,
+      "ready_dice_count": 0,
+      "scanned_dice_count": 1,
+      "secrets": 0,
+      "unpatched_dice_count": 2
+     }
+    ],
+    "round_number": 7,
+    "staged": {
+     "black": 2,
+     "blue": 1,
+     "green": 2,
+     "red": 4
+    },
+    "stuck_after": {
+     "black": 0,
+     "blue": 0,
+     "green": 1,
+     "red": 0
+    },
+    "stuck_before": {
+     "black": 0,
+     "blue": 0,
+     "green": 0,
+     "red": 1
+    }
+   }
+  ],
+  "total_buffer_overflows": 0,
+  "total_rounds": 7,
+  "winner_id": 0
+ }
+}

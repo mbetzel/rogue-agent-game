@@ -5,7 +5,7 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
 
@@ -261,13 +261,13 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             code="R2",
             name="Threat Bounty",
             die_color=DieColor.RED,
-            description="Block 2 Red; if you take 0 unblocked Red damage this round, gain +$2.",
+            description="Block 2 Red; if you take 0 unblocked Red damage in Phase 4 this round, gain +$2 (this die must still be In Production in Phase 4).",
             cost=5,
             star_face=Face(
                 name="R2: Threat Bounty",
                 block_amount=2,
                 shield_color=ShieldColor.RED,
-                money=0,  # Bonus handled conditionally in Phase 2
+                money=0,  # Bonus handled conditionally in Phase 4: Attack Resolution
                 is_star=True,
                 star_code="R2",
             ),
@@ -276,12 +276,12 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             code="R3",
             name="Short Squeeze",
             die_color=DieColor.RED,
-            description="Gain +$3 (or +$4 if 3+ Red cubes exit the tower this round).",
+            description="Gain +$3 in Phase 3 (plus +$1 in Phase 4 if 3+ Red cubes exit the tower this round and this die is still In Production).",
             cost=4,
             star_face=Face(
                 name="R3: Short Squeeze",
                 block_amount=0,
-                money=3,  # Base $3 in P1, +$1 bonus checked in Phase 2 if exited Red >= 3
+                money=3,  # Base $3 in P1, +$1 bonus checked in Phase 4 if exited Red >= 3
                 is_star=True,
                 star_code="R3",
             ),
@@ -291,13 +291,13 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             code="B1",
             name="Honeypot Telemetry",
             die_color=DieColor.BLUE,
-            description="Block 2 Blue; if 1+ Blue cubes exit the tower and you take 0 Blue damage, gain +$2.",
+            description="Block 2 Blue; if 1+ Blue cubes exit the tower and you take 0 Blue damage in Phase 4, gain +$2 (this die must still be In Production in Phase 4).",
             cost=5,
             star_face=Face(
                 name="B1: Honeypot Telemetry",
                 block_amount=2,
                 shield_color=ShieldColor.BLUE,
-                money=0,  # Bonus (+$2) handled conditionally in Phase 2 (INV-B1-BOUNTY-01)
+                money=0,  # Bonus (+$2) handled conditionally in Phase 4 (INV-B1-BOUNTY-01)
                 is_star=True,
                 star_code="B1",
             ),
@@ -306,7 +306,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             code="B2",
             name="Deep R&D Vault",
             die_color=DieColor.BLUE,
-            description="Block 1 Blue, OR pay $4 during Phase 3 to gain +1 Corporate Secret.",
+            description="Block 1 Blue, OR pay $4 during Phase 6: Operations to gain +1 Corporate Secret.",
             cost=6,
             star_face=Face(
                 name="B2: Deep R&D Vault",
@@ -320,7 +320,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             code="B3",
             name="Air-Gapped Backup",
             die_color=DieColor.BLUE,
-            description="Block 1 Blue; in Phase 3A, move 1 die from your Glitched Box to your Scanned Box.",
+            description="Block 1 Blue; in Phase 3: Income, move 1 die from your Glitched Box to your Scanned Box.",
             cost=4,
             star_face=Face(
                 name="B3: Air-Gapped Backup",
@@ -381,7 +381,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             code="Y1",
             name="Algorithmic Trading",
             die_color=DieColor.YELLOW,
-            description="Gain +$4, OR pay $2 in Phase 3 to gain +1 Corporate Secret.",
+            description="Gain +$4, OR pay $2 in Phase 6: Operations to gain +1 Corporate Secret.",
             cost=6,
             star_face=Face(
                 name="Y1: Algorithmic Trading",
@@ -424,7 +424,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             code="P1",
             name="Zero-Day Injection",
             die_color=DieColor.PURPLE,
-            description="Gain +$2; in Phase 3 you may add 1 Attack Cube (Red/Blue/Green) to the Staging Cup.",
+            description="Gain +$2; in Phase 6: Operations you may add 1 Attack Cube (Red/Blue/Green) to the Staging Cup.",
             cost=5,
             star_face=Face(
                 name="P1: Zero-Day Injection",
@@ -452,7 +452,7 @@ def get_all_variant_cards() -> Dict[str, VariantCard]:
             code="P3",
             name="Packet Deflection",
             die_color=DieColor.PURPLE,
-            description="Block 2 of any single color; in Phase 3 you may pay $1 to add 1 cube of that color from the supply to the Staging Cup.",
+            description="Block 2 of any single color; in Phase 6: Operations you may pay $1 to add 1 cube of that color from the supply to the Staging Cup.",
             cost=5,
             star_face=Face(
                 name="P3: Packet Deflection",
@@ -806,7 +806,7 @@ def get_random_setup(
 
 
 # =====================================================================
-# Consultancy Archetypes (RULES.md Section 6D)
+# Legacy archetype cards (bridge to White Hat Operatives; RULES.md Section 6D)
 # =====================================================================
 
 def get_all_archetype_cards() -> List[ArchetypeCard]:
@@ -815,14 +815,14 @@ def get_all_archetype_cards() -> List[ArchetypeCard]:
         ArchetypeCard(
             code=ArchetypeCode.ACOUSTIC,
             name="The Acoustic",
-            timing_window="Phase 2: Step 2B Damage",
+            timing_window="Phase 4: Attack Resolution",
             ability_name="Baffle Echo",
             description="When resolving compiler damage, ignore 1 Attack Cube (Red, Blue, or Green) of your choice for yourself this round. (All exited cubes remain in the exit tray and recycle into the Staging Cup as normal).",
         ),
         ArchetypeCard(
             code=ArchetypeCode.PHREAKER,
             name="The Phreaker",
-            timing_window="Phase 3: Pipeline Prep",
+            timing_window="Phase 5: Emergency Hotfix & Magnetic Splice",
             ability_name="Magnetic Splice",
             description="Move 1 die from your Glitched Box directly to your Ready for Release Zone for free (bypassing Scanned and saving 1 🔧).",
         ),
@@ -836,14 +836,14 @@ def get_all_archetype_cards() -> List[ArchetypeCard]:
         ArchetypeCard(
             code=ArchetypeCode.SPOOK,
             name="The Spook",
-            timing_window="Phase 2: Step 2B Damage",
+            timing_window="Phase 4: Attack Resolution",
             ability_name="Slush Fund",
             description="The Spook accesses emergency black budget reserves: Absorb up to 2 Corporate Secret loss (from Blue Spyware or unpaid Red Ransom) for free without paying cash. (Any additional Secret loss may be absorbed by paying $1 per Secret as normal).",
         ),
         ArchetypeCard(
             code=ArchetypeCode.CIPHER,
             name="The Cipher",
-            timing_window="Phase 3: Operations Turn",
+            timing_window="Phase 6: Operations Turn",
             ability_name="Algorithmic Arbitrage",
             description="Purchase 1 Colored Die from the Market at a $2 discount (minimum cost $0), OR gain an immediate +$2 cash payout from the bank.",
         ),
@@ -904,7 +904,7 @@ COMPANIES: Dict[CompanyCode, Company] = {
         name="Omnidyne Systems",
         sector="Tech Giant",
         override_name="Magnetic Splice",
-        timing_window="Phase 3: Pipeline Prep",
+        timing_window="Phase 5: Emergency Hotfix & Magnetic Splice",
         description="Move 1 die from your Glitched Box directly to your Ready for Release Zone for free (bypassing Scanned and saving 1 🔬).",
         flavor="Proprietary hardware backplanes allow instantaneous hot-swapping under live load.",
         starting_defense_capacity=1,
@@ -920,7 +920,7 @@ COMPANIES: Dict[CompanyCode, Company] = {
         name="Aegis Defense Relay",
         sector="Security Firm",
         override_name="Baffle Echo",
-        timing_window="Phase 2: Step 2B Damage",
+        timing_window="Phase 4: Attack Resolution",
         description="When resolving compiler damage, ignore 1 Attack Cube (Red, Blue, or Green) of your choice for yourself this round. (All exited cubes remain in the exit tray and recycle into the Staging Cup as normal).",
         flavor="Multi-layered kinetic dampeners disperse inbound network blast energy.",
         starting_defense_capacity=3,
@@ -936,7 +936,7 @@ COMPANIES: Dict[CompanyCode, Company] = {
         name="Department of Telecommunications Oversight",
         sector="Federal Agency",
         override_name="Slush Fund",
-        timing_window="Phase 2: Step 2B Damage",
+        timing_window="Phase 4: Attack Resolution",
         description="Absorb up to 2 Corporate Secret loss (from Blue Spyware or unpaid Red Ransom) for free without paying cash. (Any additional Secret loss may be absorbed by paying $1 per Secret as normal).",
         flavor="Classified black budget allocations absorb compliance failures without public oversight.",
         starting_defense_capacity=2,
@@ -970,7 +970,7 @@ COMPANIES: Dict[CompanyCode, Company] = {
         name="The Prometheus Foundation",
         sector="Non-Profit",
         override_name="Algorithmic Arbitrage",
-        timing_window="Phase 3: Operations Turn",
+        timing_window="Phase 6: Operations Turn",
         description="Purchase 1 Colored Die from the Market or Personal Reserve at a $2 discount (minimum cost $0), OR gain an immediate +$2 cash payout from the bank.",
         flavor="Open-source cryptographic protocols circumvent proprietary enterprise licensing fees.",
         starting_defense_capacity=2,
@@ -1000,7 +1000,7 @@ WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
         name="The Phreaker",
         role="Hardware Intrusion Specialist",
         protocol_name="Jumper Diagnostics",
-        timing_window="Phase 3: Operations Turn",
+        timing_window="Phase 3: Income",
         description="When Purple ★ is rolled, roll 1 offline die in Under Development (Glitched or Scanned); if Under Development is empty, collect +$1 cash (shields/glitches produce 0; die remains in place).",
         flavor="Raw voltage pulses extract signal from dormant silicon.",
         reserve_cost=4,
@@ -1010,7 +1010,7 @@ WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
         name="The Acoustic",
         role="Side-Channel Cryptanalyst",
         protocol_name="Resonance Sensor",
-        timing_window="Phase 3: Step 2 Income",
+        timing_window="Phase 3: Income",
         description="When Purple ★ is rolled, gain +$1 cash per distinct cube color present in the Exit Tray this round (Red, Blue, Green, Black; max +$4).",
         flavor="Harmonic resonance frequencies decode physical chassis vibrations.",
         reserve_cost=4,
@@ -1020,7 +1020,7 @@ WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
         name="The Spook",
         role="Covert Intelligence Specialist",
         protocol_name="Burn Notice",
-        timing_window="Phase 3: Operations Turn",
+        timing_window="Phase 3: Income",
         description="When Purple ★ is rolled, gain +$2 cash payout. Additionally, you may optionally burn 1 owned colored die back to supply to gain +1 Corporate Secret.",
         flavor="Scorched-earth protocols ensure zero forensic recovery.",
         reserve_cost=5,
@@ -1040,8 +1040,8 @@ WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
         name="The Cipher",
         role="Distributed Ledger Architect",
         protocol_name="Algorithmic Parity",
-        timing_window="Phase 3: Operations Turn",
-        description="When Purple ★ is rolled, collect +$2 cash and +1 🔬 Research Token in Phase 3A Income.",
+        timing_window="Phase 3: Income",
+        description="When Purple ★ is rolled, collect +$2 cash and +1 🔬 Research Token in Phase 3: Income.",
         flavor="Parity calculations balance zero-knowledge proofs flawlessly.",
         reserve_cost=6,
     ),
@@ -1284,3 +1284,50 @@ def create_colored_die(
         return Die(die_id=die_id, color=color, cost=die_cost, vp=0, faces=faces, variant_code="PURPLE_STAR")
 
     raise ValueError(f"Unsupported die color: {color}")
+
+
+# =====================================================================
+# Identity checks (v0.34.0): Institutional Overrides come ONLY from the Client Company and Signature
+# Protocols ONLY from the White Hat Dossier. v0.33 granted each White Hat its paired company's override
+# (and vice versa) through the legacy ``PlayerState.archetype`` bridge; that behaviour is reproduced only
+# when ``GameConfig.legacy_archetype_override_bridge`` is True (set by ``GameConfig.legacy_v033()``).
+# =====================================================================
+_COMPANY_TO_LEGACY_ARCHETYPE = {
+    CompanyCode.MERIDIAN: ArchetypeCode.OPERATOR,
+    CompanyCode.OMNIDYNE: ArchetypeCode.PHREAKER,
+    CompanyCode.AEGIS: ArchetypeCode.ACOUSTIC,
+    CompanyCode.DTO: ArchetypeCode.SPOOK,
+    CompanyCode.HELIX: ArchetypeCode.PRODIGY,
+    CompanyCode.PROMETHEUS: ArchetypeCode.CIPHER,
+}
+
+
+def legacy_bridge_enabled(ctx: Any) -> bool:
+    """Reads ``legacy_archetype_override_bridge`` from a config, engine, game state or web controller."""
+    cfg = getattr(ctx, "config", None)
+    if cfg is None:
+        st = getattr(ctx, "state", None)
+        cfg = getattr(st, "config", None)
+    return bool(getattr(cfg, "legacy_archetype_override_bridge", False))
+
+
+def has_company_override(player: Any, company_code: CompanyCode, bridge: bool = False) -> bool:
+    """True if the player's Client Company is ``company_code`` (legacy bridge: or the paired archetype)."""
+    comp = getattr(player, "company", None)
+    if comp is not None and comp.code == company_code:
+        return True
+    if bridge:
+        arch = player.archetype
+        return bool(arch and arch.code == _COMPANY_TO_LEGACY_ARCHETYPE[company_code])
+    return False
+
+
+def has_signature_protocol(player: Any, white_hat_code: WhiteHatCode, bridge: bool = False) -> bool:
+    """True if the player's White Hat Operative is ``white_hat_code`` (legacy bridge: or the archetype)."""
+    wh = getattr(player, "white_hat", None)
+    if wh is not None and wh.code == white_hat_code:
+        return True
+    if bridge:
+        arch = player.archetype
+        return bool(arch and arch.code == ArchetypeCode(white_hat_code.value))
+    return False

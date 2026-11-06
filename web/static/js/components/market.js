@@ -85,7 +85,7 @@ export function renderMarket() {
         <span>WHITE CONTRACTOR SUPPLY (12 DICE TOTAL — ${state.contractor_supply || 0} IN POOL)</span>
       </div>
       <div class="contractor-rules-note">
-        Phase 1 Staffing | Max 3/Round | Returns to supply after Phase 2 | Never enters Under Development
+        Phase 1 Staffing | Max 3/Round | Pays income in Phase 3 | Returns to supply after Phase 4 | Never enters Under Development
       </div>
     </div>
     <div class="contractor-cost-tiers">

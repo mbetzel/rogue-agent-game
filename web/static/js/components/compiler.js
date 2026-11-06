@@ -114,7 +114,7 @@ export function renderCompiler() {
         <div class="agent-corruption-track-box">
           <div class="agent-track-header">
             <span class="track-title">CORRUPTION TRACK (${capacity} SPACES)</span>
-            <span class="track-step-badge">STEP 2A</span>
+            <span class="track-step-badge">PHASE 2</span>
           </div>
 
           <div class="agent-track-cells-row">
@@ -140,7 +140,7 @@ export function renderCompiler() {
           </div>
 
           <div class="agent-track-footnote">
-            <strong>Step 2A:</strong> Each exited ■ Black advances track 1 space and triggers its printed effect. Fills at <strong>${capacity} spaces</strong>: advance Version (v3.0 fill = <strong>SINGULARITY</strong>).
+            <strong>Phase 2: Compiler Drop &amp; Corruption:</strong> Each exited ■ Black advances track 1 space and triggers its printed effect. Fills at <strong>${capacity} spaces</strong>: advance Version (v3.0 fill = <strong>SINGULARITY</strong>).
             ${state.active_phase1_locks && state.active_phase1_locks.length > 0 ? `<div style="color: #ff3366; font-weight: bold; margin-top: 3px;">⚠️ Phase 1 Locks Active: ${state.active_phase1_locks.join(', ')}</div>` : ''}
             ${state.pending_next_phase_locks && state.pending_next_phase_locks.length > 0 ? `<div style="color: #ffaa00; font-weight: bold; margin-top: 3px;">⏳ Queued Next Phase 1 Locks: ${state.pending_next_phase_locks.join(', ')}</div>` : ''}
           </div>
@@ -200,11 +200,11 @@ export function renderCompiler() {
           </div>
         </div>
 
-        <!-- Compiler Exit Sorting Tray (2A: Black, 2B: Red, 2B: Blue, 2B: Green) -->
+        <!-- Compiler Exit Sorting Tray (Phase 2: Black; Phase 4: Red, Blue, Green) -->
         <div class="exit-sorting-tray-card">
           <div class="exit-tray-hdr">
             <span class="exit-tray-title">COMPILER EXIT TRAY (SORTING)</span>
-            <span class="exit-tray-sub">Sort exited Cube Tower packets here before resolving Step 2A → 2B</span>
+            <span class="exit-tray-sub">Black resolves in Phase 2: Compiler Drop &amp; Corruption; Red / Blue / Green wait here for Phase 4: Attack Resolution</span>
           </div>
 
           <div class="exit-pockets-grid" id="lastCompileResult">
@@ -213,32 +213,32 @@ export function renderCompiler() {
                 const res = state.last_compile_result;
                 return `
                   <div class="exit-pocket black-pocket">
-                    <div class="pocket-color-tag">2A: BLACK</div>
-                    <div class="pocket-val">+${res.exited_cubes.black}</div>
+                    <div class="pocket-color-tag" title="Phase 2: Compiler Drop &amp; Corruption">PHASE 2: BLACK</div>
+                    <div class="pocket-val">+${(res.exited_cubes || {}).black || 0}</div>
                     <div class="pocket-sub">Corruption</div>
                   </div>
                   <div class="exit-pocket red-pocket">
-                    <div class="pocket-color-tag">2B: RED</div>
-                    <div class="pocket-val">${res.exited_cubes.red} (Atk: ${res.attack_strengths.red})</div>
+                    <div class="pocket-color-tag" title="Phase 4: Attack Resolution">PHASE 4: RED</div>
+                    <div class="pocket-val">${(res.exited_cubes || {}).red || 0}</div>
                     <div class="pocket-sub">Ransomware</div>
                   </div>
                   <div class="exit-pocket blue-pocket">
-                    <div class="pocket-color-tag">2B: BLUE</div>
-                    <div class="pocket-val">${res.exited_cubes.blue} (Atk: ${res.attack_strengths.blue})</div>
+                    <div class="pocket-color-tag" title="Phase 4: Attack Resolution">PHASE 4: BLUE</div>
+                    <div class="pocket-val">${(res.exited_cubes || {}).blue || 0}</div>
                     <div class="pocket-sub">Spyware</div>
                   </div>
                   <div class="exit-pocket green-pocket">
-                    <div class="pocket-color-tag">2B: GREEN</div>
-                    <div class="pocket-val">${res.exited_cubes.green} (Atk: ${res.attack_strengths.green})</div>
+                    <div class="pocket-color-tag" title="Phase 4: Attack Resolution">PHASE 4: GREEN</div>
+                    <div class="pocket-val">${(res.exited_cubes || {}).green || 0}</div>
                     <div class="pocket-sub">Malware</div>
                   </div>
                 `;
               }
               return `
-                <div class="exit-pocket black-pocket"><div class="pocket-color-tag">2A: BLACK</div><div class="pocket-val">0</div><div class="pocket-sub">Corruption</div></div>
-                <div class="exit-pocket red-pocket"><div class="pocket-color-tag">2B: RED</div><div class="pocket-val">0</div><div class="pocket-sub">Ransomware</div></div>
-                <div class="exit-pocket blue-pocket"><div class="pocket-color-tag">2B: BLUE</div><div class="pocket-val">0</div><div class="pocket-sub">Spyware</div></div>
-                <div class="exit-pocket green-pocket"><div class="pocket-color-tag">2B: GREEN</div><div class="pocket-val">0</div><div class="pocket-sub">Malware</div></div>
+                <div class="exit-pocket black-pocket"><div class="pocket-color-tag" title="Phase 2: Compiler Drop &amp; Corruption">PHASE 2: BLACK</div><div class="pocket-val">0</div><div class="pocket-sub">Corruption</div></div>
+                <div class="exit-pocket red-pocket"><div class="pocket-color-tag" title="Phase 4: Attack Resolution">PHASE 4: RED</div><div class="pocket-val">0</div><div class="pocket-sub">Ransomware</div></div>
+                <div class="exit-pocket blue-pocket"><div class="pocket-color-tag" title="Phase 4: Attack Resolution">PHASE 4: BLUE</div><div class="pocket-val">0</div><div class="pocket-sub">Spyware</div></div>
+                <div class="exit-pocket green-pocket"><div class="pocket-color-tag" title="Phase 4: Attack Resolution">PHASE 4: GREEN</div><div class="pocket-val">0</div><div class="pocket-sub">Malware</div></div>
               `;
             })()}
           </div>
@@ -249,7 +249,7 @@ export function renderCompiler() {
           <div class="cube-threat-row black-row">
             <span class="threat-pill black">■ BLACK // CORRUPTION</span>
             <div class="threat-row-text">
-              <strong>Step 2A (First):</strong> Advance Corruption Track 1 space per exited Black. Fills at capacity: queue Version upgrade for next round. <strong>v3.0 fill = SINGULARITY!</strong>
+              <strong>Phase 2: Compiler Drop &amp; Corruption:</strong> Advance Corruption Track 1 space per exited Black. Fills at capacity: queue Version upgrade for next round. <strong>v3.0 fill = SINGULARITY!</strong>
             </div>
           </div>
           <div class="cube-threat-row red-row">
@@ -301,26 +301,48 @@ export function renderCompiler() {
 
           <!-- Phase 2 -->
           <div class="seq-card">
-            <div class="seq-card-header">PHASE 2: COMPILER DROP & DEFENSE (Simultaneous)</div>
+            <div class="seq-card-header">PHASE 2: COMPILER DROP & CORRUPTION (Simultaneous)</div>
             <div class="seq-card-body">
               <strong>Drop</strong> entire Staging Cup into Cube Tower.<br>
-              <strong>2A.</strong> Resolve Black cubes on Corruption Track.<br>
-              <strong>2B.</strong> Resolve Red/Blue/Green attacks; recycle exited R/B/G → Staging Cup.<br>
-              <strong>Buffer Overflow:</strong> If 0 cubes exit, idle cycle injects +1 R, +1 B, +1 G into cup for next round.<br>
-              <strong>2C. End Check:</strong> Singularity OR any player ≤ 0 Secrets triggers Final Round.
+              Resolve Black cubes on the Corruption Track (Version Advance, Spillover, Singularity).<br>
+              <strong>Compile Buffer Overflow:</strong> If 0 cubes exit, inject +1 R, +1 B, +1 G into the cup (no attacks this round).<br>
+              <strong>End Check:</strong> Singularity ends the game; any player ≤ 0 Secrets → Final Round.
             </div>
           </div>
 
           <!-- Phase 3 -->
           <div class="seq-card">
-            <div class="seq-card-header">PHASE 3: OPERATIONS & PIPELINE PREP</div>
+            <div class="seq-card-header">PHASE 3: INCOME (Simultaneous)</div>
             <div class="seq-card-body">
-              <strong>3A. Operations Turns (Clockwise):</strong><br>
-              1. <strong>Harvest Income:</strong> Collect $, 🔬, &amp; ★ from surviving Production dice.<br>
-              2. <strong>Operations:</strong> Buy Dice (max 2), Upgrade Tracks (🔬), File Patents (🔬), or Dirty Income (+$3, -1 Secret, Glitch 1 die).<br>
-              <strong>3B. Pipeline Prep (Simultaneous):</strong><br>
-              3. <strong>Graduation:</strong> Scanned Box → Ready for Release (Release Bandwidth).<br>
-              4. <strong>Conveyor Shift:</strong> Glitched Box → Scanned Box (Triage Bandwidth); surviving Production → Scanned Box; pass First Player.
+              Collect $, 🔬, &amp; ★ from every die still In Production (Income + Shield slots, incl. White Contractors). Signature Protocols (Burn Notice, Jumper Diagnostics) resolve here.
+            </div>
+          </div>
+
+          <!-- Phase 4 -->
+          <div class="seq-card">
+            <div class="seq-card-header">PHASE 4: ATTACK RESOLUTION (Simultaneous)</div>
+            <div class="seq-card-body">
+              Passive Firewall → Two-Stage Defensive Blocking → Red / Blue / Green damage.<br>
+              <strong>Snowball Recycle</strong> exited R/B/G → Staging Cup; <strong>Contractor Expiration</strong>; End Check.
+            </div>
+          </div>
+
+          <!-- Phase 5 -->
+          <div class="seq-card">
+            <div class="seq-card-header">PHASE 5: CI/CD PIPELINE SHIFT (Simultaneous)</div>
+            <div class="seq-card-body">
+              1. <strong>Emergency Hotfix &amp; Magnetic Splice:</strong> Glitched → Ready.<br>
+              2. <strong>Production Return:</strong> In Production → Scanned Box.<br>
+              3. <strong>Scanned Graduation:</strong> Scanned → Ready (≤ Release Bandwidth, your choice).<br>
+              4. <strong>Conveyor Triage:</strong> Glitched → Scanned (≤ Triage Bandwidth).
+            </div>
+          </div>
+
+          <!-- Phase 6 -->
+          <div class="seq-card">
+            <div class="seq-card-header">PHASE 6: OPERATIONS (Clockwise)</div>
+            <div class="seq-card-body">
+              Buy Dice (max 2, straight to Ready for Release), Upgrade Tracks (🔬), File Patents (🔬), paid ★ actions; then pass the First Player Marker.
             </div>
           </div>
 
@@ -333,7 +355,7 @@ export function renderCompiler() {
               <strong>Tiebreaker 1:</strong> Most remaining <strong>Money ($)</strong>.<br>
               <strong>Tiebreaker 2:</strong> Most owned <strong>Colored Dice</strong> (all zones).<br>
               <strong>Tiebreaker 3:</strong> Most remaining <strong>Research Tokens (🔬)</strong>.<br>
-              <em>(Total Wipeout: shallowest Breach Depth wins).</em>
+              <em>(Total Wipeout: ranked by the same tiebreakers).</em>
             </div>
           </div>
         </div>

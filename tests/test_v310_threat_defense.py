@@ -451,8 +451,9 @@ class TestV310ThreatDefense(unittest.TestCase):
         All players reach Secrets <= 0. Player A has Secrets -2; Player B has Secrets -4.
         Both had empty production. Net score: Player A = -2, Player B = -4.
         Player A ranked #1. unfulfilled_destructions is absent from tiebreakers.
+        (v0.34: Net Wipeout Score ranking is legacy-only (OQ-4); pinned to the v0.33 sequence.)
         """
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v033(num_players=2)
         engine = GameEngine(cfg, seed=42)
         pA = engine.state.players[0]
         pB = engine.state.players[1]

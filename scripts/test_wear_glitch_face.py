@@ -29,6 +29,7 @@ from sim.entities import Die, Face, VariantCard, create_gray_die, create_white_d
 import sim.entities
 import sim.engine.phase1_boot
 import sim.engine.phase3_ops
+import sim.engine.phase6_operations  # v0.34: purchases bind create_colored_die here
 
 _ORIGINAL_CREATE_COLORED_DIE = sim.entities.create_colored_die
 
@@ -254,7 +255,7 @@ def main():
     sim.engine.phase1_boot.execute_phase_1 = execute_phase_1_with_wear_glitch
     sim.engine.core.execute_phase_1 = execute_phase_1_with_wear_glitch
     sim.entities.create_colored_die = create_colored_die_wear_glitch
-    sim.engine.phase3_ops.create_colored_die = create_colored_die_wear_glitch
+    sim.engine.phase3_ops.create_colored_die = sim.engine.phase6_operations.create_colored_die = create_colored_die_wear_glitch
 
     results = {p: run_pod_sweep(p, num_runs=num_runs, base_seed=base_seed) for p in [4, 3, 2]}
 
@@ -262,7 +263,7 @@ def main():
     sim.engine.phase1_boot.execute_phase_1 = orig_p1
     sim.engine.core.execute_phase_1 = orig_p1
     sim.entities.create_colored_die = _ORIGINAL_CREATE_COLORED_DIE
-    sim.engine.phase3_ops.create_colored_die = _ORIGINAL_CREATE_COLORED_DIE
+    sim.engine.phase3_ops.create_colored_die = sim.engine.phase6_operations.create_colored_die = _ORIGINAL_CREATE_COLORED_DIE
 
     for p in [4, 3, 2]:
         res = results[p]

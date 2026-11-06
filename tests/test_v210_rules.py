@@ -17,13 +17,13 @@ class TestV210Rules(unittest.TestCase):
     """Test suite verifying v0.21.0 rules and mechanics."""
 
     def test_starting_secrets_by_player_count(self) -> None:
-        """4P starts with 12 Secrets; 2P and 3P start with 8 Secrets."""
-        cfg = GameConfig()
+        """Legacy v0.33 sequence: 4P starts with 12 Secrets; 2P and 3P start with 8 Secrets."""
+        cfg = GameConfig.legacy_v033()
         self.assertEqual(cfg.starting_secrets_by_player_count[2], 8)
         self.assertEqual(cfg.starting_secrets_by_player_count[3], 8)
         self.assertEqual(cfg.starting_secrets_by_player_count[4], 12)
 
-        eng4 = GameEngine(config=GameConfig(num_players=4), bots=[BaseBot(i) for i in range(4)], seed=42)
+        eng4 = GameEngine(config=GameConfig.legacy_v033(num_players=4), bots=[BaseBot(i) for i in range(4)], seed=42)
         for p in eng4.state.players:
             self.assertEqual(p.secrets, 12)
 

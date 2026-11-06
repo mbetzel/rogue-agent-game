@@ -4,8 +4,9 @@ import random
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
+from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
 from sim.entities import ArchetypeCode, CompanyCode, WhiteHatCode
-from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index, plan_final_round_repairs
+from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index, plan_final_round_repairs, is_six_phase_state
 
 if TYPE_CHECKING:
     from sim.engine import GameState, PlayerState
@@ -178,10 +179,7 @@ class AdaptiveBalancedBot(BaseBot):
         )
 
         rerolls: List[int] = []
-        is_prodigy = (
-            player_state.archetype is not None
-            and player_state.archetype.code == ArchetypeCode.PRODIGY
-        )
+        is_prodigy = has_signature_protocol(player_state, WhiteHatCode.PRODIGY)
         threats_covered = (
             threats[CubeColor.BLUE] <= blue_shields
             and threats[CubeColor.RED] <= red_shields
@@ -343,7 +341,7 @@ class AdaptiveBalancedBot(BaseBot):
 
         return assignments
 
-    def take_phase3_actions(
+    def take_operations_actions(
         self,
         player_state: PlayerState,
         game_state: GameState,
@@ -359,11 +357,8 @@ class AdaptiveBalancedBot(BaseBot):
 
         active_ver = game_state.active_version.version_str
 
-        # 0. Consultancy Archetype / Institutional Override Phase 3 Abilities
-        is_omnidyne = bool(
-            (player_state.company and player_state.company.code == CompanyCode.OMNIDYNE)
-            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.PHREAKER)
-        )
+        # 0. White Hat Operative / Institutional Override Operations Abilities
+        is_omnidyne = has_company_override(player_state, CompanyCode.OMNIDYNE, legacy_bridge_enabled(game_state))
         if (
             is_omnidyne
             and player_state.is_ability_available(active_ver)
@@ -376,10 +371,7 @@ class AdaptiveBalancedBot(BaseBot):
         if threats[CubeColor.RED] > threats[CubeColor.BLUE]:
             preferred_colors = [DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW]
 
-        is_prometheus = bool(
-            (player_state.company and player_state.company.code == CompanyCode.PROMETHEUS)
-            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.CIPHER)
-        )
+        is_prometheus = has_company_override(player_state, CompanyCode.PROMETHEUS, legacy_bridge_enabled(game_state))
         if (
             is_prometheus
             and player_state.is_ability_available(active_ver)
@@ -448,19 +440,13 @@ class AdaptiveBalancedBot(BaseBot):
             current_money -= 6
 
         # Operative Protocol Selectors (Spook & Phreaker)
-        is_spook = bool(
-            (player_state.white_hat and player_state.white_hat.code == WhiteHatCode.SPOOK)
-            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.SPOOK)
-        )
+        is_spook = has_signature_protocol(player_state, WhiteHatCode.SPOOK, legacy_bridge_enabled(game_state))
         if is_spook:
             burn_id = self.choose_spook_burn_notice(player_state, game_state, rng)
             if burn_id is not None:
                 plan.spook_burn_die_id = burn_id
 
-        is_phreaker = bool(
-            (player_state.white_hat and player_state.white_hat.code == WhiteHatCode.PHREAKER)
-            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.PHREAKER)
-        )
+        is_phreaker = has_signature_protocol(player_state, WhiteHatCode.PHREAKER, legacy_bridge_enabled(game_state))
         if is_phreaker:
             diag_id = self.choose_phreaker_jumper_diagnostics(player_state, game_state, rng)
             if diag_id is not None:
@@ -505,6 +491,11 @@ class AdaptiveBalancedBot(BaseBot):
             plan.track_upgrades.append("DEFENSE")
             res_available -= def_cost
 
+        six_phase = is_six_phase_state(game_state)
+        if six_phase:
+            # v0.34: Release Bandwidth caps Scanned -> Ready; value RELEASE (L1-L2) before TRIAGE.
+            res_available = self.plan_release_upgrade(player_state, plan, res_available, min_pressure=1)
+
         triage_cost = player_state.get_track_upgrade_cost("TRIAGE")
         if (
             player_state.triage_level < 1
@@ -517,7 +508,8 @@ class AdaptiveBalancedBot(BaseBot):
 
         rel_cost = player_state.get_track_upgrade_cost("RELEASE")
         if (
-            player_state.release_level < 1
+            not six_phase
+            and player_state.release_level < 1
             and rel_cost is not None
             and res_available >= rel_cost
             and len(player_state.total_dice) > 6

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Dict, List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
 from sim.entities import ArchetypeCode, Face
@@ -17,7 +17,11 @@ if TYPE_CHECKING:
 
 @dataclass
 class Phase3ActionPlan:
-    """Operations plan chosen by a bot during Phase 3."""
+    """Operations plan chosen by a bot (v0.34: Phase 6 Operations; v0.33: Phase 3).
+
+    In the six-phase round, ``spook_burn_die_id``, ``phreaker_diagnostics_die_id`` and
+    ``use_omnidyne_override`` are ignored by Phase 6 (they belong to Phases 3 and 5).
+    """
 
     take_dirty_income: bool = False
     dirty_income_cube_choice: CubeColor = CubeColor.RED
@@ -63,6 +67,16 @@ class Phase3ActionPlan:
             self.prometheus_mode = self.cipher_mode
         if self.cipher_free_die_color is not None and self.prometheus_discount_die_color is None:
             self.prometheus_discount_die_color = self.cipher_free_die_color
+
+
+# v0.34 code alias; the dataclass name is kept for backward compatibility.
+OperationsActionPlan = Phase3ActionPlan
+
+
+def is_six_phase_state(game_state: Any) -> bool:
+    """True when the game runs the v0.34 six-phase round (tolerates mock / partial game states)."""
+    cfg = getattr(game_state, "config", None)
+    return bool(getattr(cfg, "is_six_phase", False)) if cfg is not None else False
 
 
 def choose_backlash_die_index(ready_dice: List[Die]) -> int:
@@ -572,8 +586,12 @@ class BaseBot:
         player: PlayerState,
         count: int,
         threat_strengths: Dict[CubeColor, int],
+        expected_income: int = 0,
     ) -> List[Die]:
         """Selects up to `count` owned Colored Module Dice to return to Market in Step 2A (INV-RETURN-CHOICE-01).
+
+        ``expected_income`` (v0.34 six-phase): previewed Phase 3 cash, so a Red shield is judged
+        "unfunded" against post-income cash (0 on the legacy path).
 
         7-Tier Mathematical Valuation Hierarchy (ascending priority to return):
         - Tier 0: Glitched Box (glitched_dice) -> (0, 0, 0, is_purple, cost, die_id)
@@ -733,7 +751,7 @@ class BaseBot:
                     if role_val == "BLUE_SHIELD" or (eff and eff.shield_color == ShieldColor.BLUE):
                         s_prio = 5
                     elif role_val == "RED_SHIELD" or (eff and eff.shield_color == ShieldColor.RED):
-                        s_prio = 4 if player.money < red_threat else 2
+                        s_prio = 4 if player.money + expected_income < red_threat else 2
                     elif role_val == "ANY_SHIELD" or (eff and eff.shield_color == ShieldColor.ANY):
                         s_prio = 3
                     else:
@@ -741,7 +759,7 @@ class BaseBot:
                     blk = eff.block_amount if (eff and eff.block_amount > 0) else 1
                     scored_candidates.append(((6, s_prio, blk, is_purple, cost, d.die_id), d))
                 else:
-                    # Redundant shield: if it has Phase 3A output (e.g. R1, G1, G2, B3), score as Income Tier 4/5
+                    # Redundant shield: if it has income output (e.g. R1, G1, G2, B3), score as Income Tier 4/5
                     if _has_phase3_output(eff):
                         econ = _face_econ_score(eff)
                         tier = 5 if (eff and eff.is_star) else 4
@@ -767,14 +785,108 @@ class BaseBot:
         """Deprecated in v0.29.0: Fast-patching is excised (INV-FASTPATCH-EXCISE-01)."""
         return []
 
+    def take_operations_actions(
+        self,
+        player_state: PlayerState,
+        game_state: GameState,
+        rng: random.Random,
+    ) -> Phase3ActionPlan:
+        """Phase 6: Operations. Called after Income, Attack Resolution and Pipeline Shift."""
+        if type(self).take_phase3_actions is not BaseBot.take_phase3_actions:
+            return self.take_phase3_actions(player_state, game_state, rng)  # legacy subclass override
+        return Phase3ActionPlan()
+
     def take_phase3_actions(
         self,
         player_state: PlayerState,
         game_state: GameState,
         rng: random.Random,
     ) -> Phase3ActionPlan:
-        """Returns the actions to execute during Phase 3: Corporate Operations."""
+        """Deprecated alias (v0.33 name) of take_operations_actions."""
+        if type(self).take_operations_actions is not BaseBot.take_operations_actions:
+            return self.take_operations_actions(player_state, game_state, rng)
         return Phase3ActionPlan()
+
+    # ------------------------------------------------------------------
+    # v0.34.0 Six-Phase hooks
+    # ------------------------------------------------------------------
+    def choose_scanned_graduates(
+        self,
+        player_state: PlayerState,
+        n: int,
+        game_state: Optional[GameState] = None,
+        rng: Optional[random.Random] = None,
+    ) -> List[Die]:
+        """Phase 5 step 3: choose up to n dice to graduate Scanned -> Ready (OQ-1: fewer is allowed; the
+        default graduates the maximum). Priority: Purple, then Colored by descending cost, then Gray."""
+        key = lambda d: (  # noqa: E731
+            0 if d.color == DieColor.PURPLE else (1 if d.color != DieColor.GRAY else 2),
+            -getattr(d, "cost", 0),
+            d.die_id,
+        )
+        return sorted(player_state.scanned_dice, key=key)[: max(0, n)]
+
+    def choose_malware_glitch_targets(
+        self,
+        player_state: PlayerState,
+        in_production_dice: List[Die],
+        count: int,
+        game_state: Optional[GameState] = None,
+    ) -> List[Die]:
+        """Phase 4 Green Malware targets (six-phase). Income is already collected, so only future
+        availability matters: White first (Contractor Sacrifice), Gray, cheapest Colored, Purple last."""
+        key = lambda d: (  # noqa: E731
+            0 if d.color == DieColor.WHITE else 1,
+            0 if d.color == DieColor.GRAY else 1,
+            1 if d.color == DieColor.PURPLE else 0,
+            getattr(d, "cost", 0),
+            d.die_id,
+        )
+        return sorted(in_production_dice, key=key)[: max(0, count)]
+
+    def release_pressure(self, player_state: PlayerState, planned_purchases: int = 0) -> int:
+        """Permanent dice (+ planned purchases) in excess of Release Bandwidth."""
+        permanent = sum(1 for d in player_state.total_dice if d.color != DieColor.WHITE)
+        return max(0, permanent + planned_purchases - player_state.release_bandwidth)
+
+    def plan_release_upgrade(
+        self,
+        player_state: PlayerState,
+        plan: Phase3ActionPlan,
+        res_available: int,
+        min_pressure: int = 1,
+    ) -> int:
+        """Six-phase Release Track valuation (Levels 1 and 2). Appends "RELEASE" when owned dice exceed
+        Release Bandwidth and research allows; returns the remaining research budget."""
+        if player_state.release_level >= 2:
+            return res_available
+        planned = len(plan.market_purchases)
+        if plan.buy_purple_reserve and DieColor.PURPLE not in plan.market_purchases:
+            planned += 1
+        if plan.use_prometheus_override and plan.prometheus_mode in ("BUY_FREE_DIE", "DISCOUNT"):
+            planned += 1
+        if self.release_pressure(player_state, planned) < min_pressure:
+            return res_available
+        cost = player_state.get_track_upgrade_cost("RELEASE")
+        if cost is None or res_available < cost:
+            return res_available
+        plan.track_upgrades.append("RELEASE")
+        return res_available - cost
+
+    def expected_income(
+        self,
+        player_state: PlayerState,
+        game_state: Optional[GameState] = None,
+        exclude_die_ids: Iterable[int] = (),
+    ) -> int:
+        """Previewed Phase 3 cash ($ only) from dice still In Production."""
+        if game_state is None:
+            return 0
+        from sim.engine.phase3_income import preview_player_income
+
+        excluded = set(exclude_die_ids)
+        rec = preview_player_income(game_state, player_state)
+        return sum(r["money"] for r in rec.details if r["die_id"] not in excluded)
 
     def choose_purple_reserve_purchase(
         self,

@@ -1,3 +1,6 @@
+# NOTE (v0.34.0): this script targets the v0.33-era module layout (phase1_boot / phase2_threat /
+# phase3_ops). After the six-phase module split, its monkeypatches of those modules may no longer
+# take effect on either round sequence (legacy_v033 binds the new modules). Results are historical.
 """Analyze glitched dice by source across versions with and without patch usage.
 
 Supports:

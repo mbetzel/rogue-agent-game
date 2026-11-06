@@ -1,0 +1,1443 @@
+{
+  "metadata": {
+    "version": "v0.34.0",
+    "baseline": "GameConfig.legacy_v033 (v0.33.0, 4P = 12 Secrets)",
+    "base_seed": 42,
+    "seed_formula": "base_seed + num_players*100000 + match_idx",
+    "games_per_pod": 10,
+    "elapsed_seconds": 0.21940040588378906,
+    "pod_seconds": {
+      "SIX_PHASE_2P": 0.024888992309570312,
+      "SIX_PHASE_3P": 0.031140565872192383,
+      "SIX_PHASE_4P": 0.03667163848876953,
+      "LEGACY_V033_2P": 0.029384613037109375,
+      "LEGACY_V033_3P": 0.04176211357116699,
+      "LEGACY_V033_4P": 0.05519437789916992
+    },
+    "companies": {
+      "MERIDIAN": "Meridian Financial Trust",
+      "OMNIDYNE": "Omnidyne Systems",
+      "AEGIS": "Aegis Defense Relay",
+      "DTO": "Department of Telecommunications Oversight",
+      "HELIX": "Helix Biomedical Consortium",
+      "PROMETHEUS": "The Prometheus Foundation"
+    },
+    "operatives": {
+      "OPERATOR": "The Operator",
+      "PHREAKER": "The Phreaker",
+      "ACOUSTIC": "The Acoustic",
+      "SPOOK": "The Spook",
+      "PRODIGY": "The Prodigy",
+      "CIPHER": "The Cipher"
+    }
+  },
+  "guardrails": {
+    "SIX_PHASE": {
+      "2P": {
+        "rounds_8_11": "PASS",
+        "singularity_le_45": "PASS",
+        "wipeout_le_15": "PASS",
+        "zero_income_le_30": "PASS",
+        "bot_spread_le_45": "FAIL",
+        "top_company_no_regression": "FAIL"
+      },
+      "3P": {
+        "rounds_8_11": "PASS",
+        "singularity_le_45": "PASS",
+        "wipeout_le_15": "PASS",
+        "zero_income_le_30": "PASS",
+        "bot_spread_le_45": "FAIL",
+        "top_company_no_regression": "PASS"
+      },
+      "4P": {
+        "rounds_8_11": "FAIL",
+        "singularity_le_45": "PASS",
+        "wipeout_le_15": "PASS",
+        "zero_income_le_30": "PASS",
+        "bot_spread_le_45": "FAIL",
+        "top_company_no_regression": "FAIL"
+      }
+    },
+    "LEGACY_V033": {
+      "2P": {
+        "rounds_8_11": "PASS",
+        "singularity_le_45": "PASS",
+        "wipeout_le_15": "FAIL",
+        "zero_income_le_30": "FAIL",
+        "bot_spread_le_45": "FAIL"
+      },
+      "3P": {
+        "rounds_8_11": "PASS",
+        "singularity_le_45": "PASS",
+        "wipeout_le_15": "PASS",
+        "zero_income_le_30": "FAIL",
+        "bot_spread_le_45": "FAIL"
+      },
+      "4P": {
+        "rounds_8_11": "PASS",
+        "singularity_le_45": "PASS",
+        "wipeout_le_15": "PASS",
+        "zero_income_le_30": "FAIL",
+        "bot_spread_le_45": "FAIL"
+      }
+    }
+  },
+  "results": {
+    "SIX_PHASE": {
+      "2P": {
+        "sequence": "SIX_PHASE",
+        "num_players": 2,
+        "games": 10,
+        "player_games": 20,
+        "seed_range": [
+          200042,
+          200051
+        ],
+        "mean_rounds": 8.2,
+        "median_rounds": 8.5,
+        "stdev_rounds": 1.2292725943057183,
+        "min_rounds": 6,
+        "max_rounds": 10,
+        "round_hist": {
+          "6": 1,
+          "7": 2,
+          "8": 2,
+          "9": 4,
+          "10": 1
+        },
+        "end_reasons": {
+          "patient_zero": 0.9,
+          "singularity": 0.1
+        },
+        "end_reason_counts": {
+          "patient_zero": 9,
+          "singularity": 1
+        },
+        "player_survival": 0.55,
+        "mean_final_secrets": 2.15,
+        "mean_survivor_secrets": 4.181818181818182,
+        "income_events": 162,
+        "income_per_turn_total": 2.271604938271605,
+        "income_per_turn_cash": 1.845679012345679,
+        "income_per_turn_research": 0.42592592592592593,
+        "zero_income_rate": 0.2716049382716049,
+        "tel_income_per_turn_incl_protocols": 2.3209876543209877,
+        "corruption_glitch_player_rounds": 38,
+        "unblocked_green_player_rounds": 105,
+        "whammy_player_rounds": 29,
+        "whammy_per_player": 1.45,
+        "whammy_income_mean": 1.2413793103448276,
+        "colored_dice_owned_end": 2.5,
+        "bots": {
+          "AccelerationistBot": {
+            "matches": 4,
+            "win_rate": 0.5,
+            "survival_rate": 0.5,
+            "mean_secrets": 1.75
+          },
+          "AdaptiveBalancedBot": {
+            "matches": 4,
+            "win_rate": 1.0,
+            "survival_rate": 1.0,
+            "mean_secrets": 5.5
+          },
+          "RecklessSaboteurBot": {
+            "matches": 4,
+            "win_rate": 0.5,
+            "survival_rate": 0.75,
+            "mean_secrets": 1.5
+          },
+          "SecOpsTurtleBot": {
+            "matches": 4,
+            "win_rate": 0.5,
+            "survival_rate": 0.5,
+            "mean_secrets": 2.5
+          },
+          "VentureGreedBot": {
+            "matches": 4,
+            "win_rate": 0.0,
+            "survival_rate": 0.0,
+            "mean_secrets": -0.5
+          }
+        },
+        "companies": {
+          "DTO": {
+            "matches": 6,
+            "win_rate": 0.8333333333333334,
+            "survival_rate": 0.8333333333333334,
+            "mean_secrets": 4.666666666666667
+          },
+          "HELIX": {
+            "matches": 6,
+            "win_rate": 0.3333333333333333,
+            "survival_rate": 0.3333333333333333,
+            "mean_secrets": 1.5
+          },
+          "MERIDIAN": {
+            "matches": 3,
+            "win_rate": 0.3333333333333333,
+            "survival_rate": 0.3333333333333333,
+            "mean_secrets": 0
+          },
+          "PROMETHEUS": {
+            "matches": 5,
+            "win_rate": 0.4,
+            "survival_rate": 0.6,
+            "mean_secrets": 1.2
+          }
+        },
+        "operatives": {
+          "ACOUSTIC": {
+            "matches": 1,
+            "win_rate": 0.0,
+            "survival_rate": 0.0,
+            "mean_secrets": -1
+          },
+          "CIPHER": {
+            "matches": 5,
+            "win_rate": 0.8,
+            "survival_rate": 0.8,
+            "mean_secrets": 3
+          },
+          "OPERATOR": {
+            "matches": 2,
+            "win_rate": 0.5,
+            "survival_rate": 0.5,
+            "mean_secrets": 3
+          },
+          "PHREAKER": {
+            "matches": 5,
+            "win_rate": 0.4,
+            "survival_rate": 0.4,
+            "mean_secrets": 1
+          },
+          "PRODIGY": {
+            "matches": 3,
+            "win_rate": 0.6666666666666666,
+            "survival_rate": 0.6666666666666666,
+            "mean_secrets": 3.3333333333333335
+          },
+          "SPOOK": {
+            "matches": 4,
+            "win_rate": 0.25,
+            "survival_rate": 0.5,
+            "mean_secrets": 2
+          }
+        },
+        "bot_win_spread_pts": 100.0,
+        "top_company": "DTO",
+        "top_company_win_rate": 0.8333333333333334,
+        "purple_star_ge2_rate_of_income_turns": 0.0,
+        "purple_star_ge2_spook_turns": 0,
+        "spook_income_turns": 32,
+        "tel_purple_star_double_trigger_rounds": 0,
+        "tel_purple_star_player_rounds": 162,
+        "burn_notice_uses": 0,
+        "burn_notice_uses_per_game": 0.0,
+        "burn_notice_on_in_production": 0,
+        "graduation_events": 153,
+        "graduation_capped_rate": 0.1111111111111111,
+        "held_in_scanned_per_player_round": 0.1830065359477124,
+        "held_in_scanned_nonzero_rate": 0.1111111111111111,
+        "graduation_by_company": {
+          "DTO": {
+            "events": 46,
+            "capped_rate": 0.043478260869565216,
+            "held_per_player_round": 0.043478260869565216
+          },
+          "HELIX": {
+            "events": 44,
+            "capped_rate": 0.09090909090909091,
+            "held_per_player_round": 0.11363636363636363
+          },
+          "MERIDIAN": {
+            "events": 23,
+            "capped_rate": 0.34782608695652173,
+            "held_per_player_round": 0.782608695652174
+          },
+          "PROMETHEUS": {
+            "events": 40,
+            "capped_rate": 0.075,
+            "held_per_player_round": 0.075
+          }
+        },
+        "tel_scanned_held_mean": 0.1830065359477124,
+        "release_level_dist": {
+          "0": 0.5,
+          "1": 0.5
+        },
+        "release_level_ge1": 0.5,
+        "release_level_2": 0.0,
+        "contractor_hires_per_game": 5.9,
+        "contractor_hires_per_player": 2.95,
+        "contractor_payout_events_per_game": 0.8,
+        "contractor_payout_cash_per_game": 0.8,
+        "ransom_leaks_per_player": 2.1,
+        "unblocked_green_per_player": 11.6,
+        "final_round_trigger_phase": {
+          "4": 9
+        },
+        "end_phase": {
+          "6": 9,
+          "2": 1
+        },
+        "wipeout_tiebreak_level": {},
+        "dmg_star_forfeited": 0,
+        "dmg_star_forfeited_by_code": {},
+        "dmg_star_in_production_at_phase4": 4,
+        "outliers": {
+          "rounds_le_3": [],
+          "rounds_ge_14": [],
+          "4p_under_6": [],
+          "round_limit": []
+        }
+      },
+      "3P": {
+        "sequence": "SIX_PHASE",
+        "num_players": 3,
+        "games": 10,
+        "player_games": 30,
+        "seed_range": [
+          300042,
+          300051
+        ],
+        "mean_rounds": 8,
+        "median_rounds": 8.5,
+        "stdev_rounds": 1.8257418583505538,
+        "min_rounds": 5,
+        "max_rounds": 10,
+        "round_hist": {
+          "5": 2,
+          "7": 1,
+          "8": 2,
+          "9": 3,
+          "10": 2
+        },
+        "end_reasons": {
+          "patient_zero": 0.9,
+          "singularity": 0.1
+        },
+        "end_reason_counts": {
+          "patient_zero": 9,
+          "singularity": 1
+        },
+        "player_survival": 0.6,
+        "mean_final_secrets": 1.6333333333333333,
+        "mean_survivor_secrets": 3.2777777777777777,
+        "income_events": 237,
+        "income_per_turn_total": 2.2489451476793247,
+        "income_per_turn_cash": 1.729957805907173,
+        "income_per_turn_research": 0.5189873417721519,
+        "zero_income_rate": 0.2869198312236287,
+        "tel_income_per_turn_incl_protocols": 2.2531645569620253,
+        "corruption_glitch_player_rounds": 56,
+        "unblocked_green_player_rounds": 152,
+        "whammy_player_rounds": 45,
+        "whammy_per_player": 1.5,
+        "whammy_income_mean": 1.2444444444444445,
+        "colored_dice_owned_end": 2.1666666666666665,
+        "bots": {
+          "AccelerationistBot": {
+            "matches": 6,
+            "win_rate": 0.5,
+            "survival_rate": 0.6666666666666666,
+            "mean_secrets": 2.6666666666666665
+          },
+          "AdaptiveBalancedBot": {
+            "matches": 6,
+            "win_rate": 0.16666666666666666,
+            "survival_rate": 0.8333333333333334,
+            "mean_secrets": 1.8333333333333333
+          },
+          "RecklessSaboteurBot": {
+            "matches": 6,
+            "win_rate": 0.3333333333333333,
+            "survival_rate": 0.6666666666666666,
+            "mean_secrets": 1.3333333333333333
+          },
+          "SecOpsTurtleBot": {
+            "matches": 6,
+            "win_rate": 0.6666666666666666,
+            "survival_rate": 0.8333333333333334,
+            "mean_secrets": 3.3333333333333335
+          },
+          "VentureGreedBot": {
+            "matches": 6,
+            "win_rate": 0.0,
+            "survival_rate": 0.0,
+            "mean_secrets": -1
+          }
+        },
+        "companies": {
+          "AEGIS": {
+            "matches": 4,
+            "win_rate": 0.0,
+            "survival_rate": 0.0,
+            "mean_secrets": -0.75
+          },
+          "DTO": {
+            "matches": 4,
+            "win_rate": 0.75,
+            "survival_rate": 1.0,
+            "mean_secrets": 4.5
+          },
+          "HELIX": {
+            "matches": 5,
+            "win_rate": 0.4,
+            "survival_rate": 0.6,
+            "mean_secrets": 1.8
+          },
+          "MERIDIAN": {
+            "matches": 5,
+            "win_rate": 0.4,
+            "survival_rate": 1.0,
+            "mean_secrets": 2.4
+          },
+          "OMNIDYNE": {
+            "matches": 7,
+            "win_rate": 0.14285714285714285,
+            "survival_rate": 0.5714285714285714,
+            "mean_secrets": 1.4285714285714286
+          },
+          "PROMETHEUS": {
+            "matches": 5,
+            "win_rate": 0.4,
+            "survival_rate": 0.4,
+            "mean_secrets": 0.6
+          }
+        },
+        "operatives": {
+          "ACOUSTIC": {
+            "matches": 3,
+            "win_rate": 0.6666666666666666,
+            "survival_rate": 1.0,
+            "mean_secrets": 3
+          },
+          "CIPHER": {
+            "matches": 7,
+            "win_rate": 0.2857142857142857,
+            "survival_rate": 0.5714285714285714,
+            "mean_secrets": 2
+          },
+          "OPERATOR": {
+            "matches": 4,
+            "win_rate": 0.5,
+            "survival_rate": 0.75,
+            "mean_secrets": 1.75
+          },
+          "PHREAKER": {
+            "matches": 6,
+            "win_rate": 0.16666666666666666,
+            "survival_rate": 0.5,
+            "mean_secrets": 0.5
+          },
+          "PRODIGY": {
+            "matches": 6,
+            "win_rate": 0.16666666666666666,
+            "survival_rate": 0.3333333333333333,
+            "mean_secrets": 0.3333333333333333
+          },
+          "SPOOK": {
+            "matches": 4,
+            "win_rate": 0.5,
+            "survival_rate": 0.75,
+            "mean_secrets": 3.5
+          }
+        },
+        "bot_win_spread_pts": 66.66666666666666,
+        "top_company": "DTO",
+        "top_company_win_rate": 0.75,
+        "purple_star_ge2_rate_of_income_turns": 0.0,
+        "purple_star_ge2_spook_turns": 0,
+        "spook_income_turns": 31,
+        "tel_purple_star_double_trigger_rounds": 0,
+        "tel_purple_star_player_rounds": 237,
+        "burn_notice_uses": 0,
+        "burn_notice_uses_per_game": 0.0,
+        "burn_notice_on_in_production": 0,
+        "graduation_events": 225,
+        "graduation_capped_rate": 0.09777777777777778,
+        "held_in_scanned_per_player_round": 0.10666666666666667,
+        "held_in_scanned_nonzero_rate": 0.09777777777777778,
+        "graduation_by_company": {
+          "AEGIS": {
+            "events": 30,
+            "capped_rate": 0.26666666666666666,
+            "held_per_player_round": 0.3
+          },
+          "DTO": {
+            "events": 29,
+            "capped_rate": 0.0,
+            "held_per_player_round": 0.0
+          },
+          "HELIX": {
+            "events": 38,
+            "capped_rate": 0.0,
+            "held_per_player_round": 0.0
+          },
+          "MERIDIAN": {
+            "events": 40,
+            "capped_rate": 0.2,
+            "held_per_player_round": 0.2
+          },
+          "OMNIDYNE": {
+            "events": 52,
+            "capped_rate": 0.019230769230769232,
+            "held_per_player_round": 0.019230769230769232
+          },
+          "PROMETHEUS": {
+            "events": 36,
+            "capped_rate": 0.1388888888888889,
+            "held_per_player_round": 0.16666666666666666
+          }
+        },
+        "tel_scanned_held_mean": 0.10666666666666667,
+        "release_level_dist": {
+          "0": 0.36666666666666664,
+          "1": 0.4,
+          "2": 0.23333333333333334
+        },
+        "release_level_ge1": 0.6333333333333333,
+        "release_level_2": 0.23333333333333334,
+        "contractor_hires_per_game": 8.7,
+        "contractor_hires_per_player": 2.9,
+        "contractor_payout_events_per_game": 0.8,
+        "contractor_payout_cash_per_game": 0.8,
+        "ransom_leaks_per_player": 2.1333333333333333,
+        "unblocked_green_per_player": 10.933333333333334,
+        "final_round_trigger_phase": {
+          "4": 9
+        },
+        "end_phase": {
+          "6": 9,
+          "2": 1
+        },
+        "wipeout_tiebreak_level": {},
+        "dmg_star_forfeited": 0,
+        "dmg_star_forfeited_by_code": {},
+        "dmg_star_in_production_at_phase4": 7,
+        "outliers": {
+          "rounds_le_3": [],
+          "rounds_ge_14": [],
+          "4p_under_6": [],
+          "round_limit": []
+        }
+      },
+      "4P": {
+        "sequence": "SIX_PHASE",
+        "num_players": 4,
+        "games": 10,
+        "player_games": 40,
+        "seed_range": [
+          400042,
+          400051
+        ],
+        "mean_rounds": 7.4,
+        "median_rounds": 7.0,
+        "stdev_rounds": 1.837873166945363,
+        "min_rounds": 4,
+        "max_rounds": 10,
+        "round_hist": {
+          "4": 1,
+          "6": 2,
+          "7": 3,
+          "9": 3,
+          "10": 1
+        },
+        "end_reasons": {
+          "patient_zero": 0.8,
+          "singularity": 0.2
+        },
+        "end_reason_counts": {
+          "patient_zero": 8,
+          "singularity": 2
+        },
+        "player_survival": 0.725,
+        "mean_final_secrets": 2.375,
+        "mean_survivor_secrets": 3.7241379310344827,
+        "income_events": 288,
+        "income_per_turn_total": 2.3125,
+        "income_per_turn_cash": 1.8333333333333333,
+        "income_per_turn_research": 0.4791666666666667,
+        "zero_income_rate": 0.2743055555555556,
+        "tel_income_per_turn_incl_protocols": 2.326388888888889,
+        "corruption_glitch_player_rounds": 70,
+        "unblocked_green_player_rounds": 143,
+        "whammy_player_rounds": 50,
+        "whammy_per_player": 1.25,
+        "whammy_income_mean": 1.46,
+        "colored_dice_owned_end": 2.275,
+        "bots": {
+          "AccelerationistBot": {
+            "matches": 8,
+            "win_rate": 0.25,
+            "survival_rate": 0.875,
+            "mean_secrets": 2.375
+          },
+          "AdaptiveBalancedBot": {
+            "matches": 8,
+            "win_rate": 0.5,
+            "survival_rate": 1.0,
+            "mean_secrets": 4
+          },
+          "RecklessSaboteurBot": {
+            "matches": 8,
+            "win_rate": 0.375,
+            "survival_rate": 0.875,
+            "mean_secrets": 3.5
+          },
+          "SecOpsTurtleBot": {
+            "matches": 8,
+            "win_rate": 0.125,
+            "survival_rate": 0.625,
+            "mean_secrets": 1.875
+          },
+          "VentureGreedBot": {
+            "matches": 8,
+            "win_rate": 0.0,
+            "survival_rate": 0.25,
+            "mean_secrets": 0.125
+          }
+        },
+        "companies": {
+          "AEGIS": {
+            "matches": 6,
+            "win_rate": 0.0,
+            "survival_rate": 0.6666666666666666,
+            "mean_secrets": 1
+          },
+          "DTO": {
+            "matches": 8,
+            "win_rate": 0.875,
+            "survival_rate": 1.0,
+            "mean_secrets": 5.875
+          },
+          "HELIX": {
+            "matches": 7,
+            "win_rate": 0.14285714285714285,
+            "survival_rate": 0.7142857142857143,
+            "mean_secrets": 2.142857142857143
+          },
+          "MERIDIAN": {
+            "matches": 4,
+            "win_rate": 0.0,
+            "survival_rate": 0.75,
+            "mean_secrets": 3
+          },
+          "OMNIDYNE": {
+            "matches": 7,
+            "win_rate": 0.14285714285714285,
+            "survival_rate": 0.7142857142857143,
+            "mean_secrets": 0.5714285714285714
+          },
+          "PROMETHEUS": {
+            "matches": 8,
+            "win_rate": 0.125,
+            "survival_rate": 0.5,
+            "mean_secrets": 1.375
+          }
+        },
+        "operatives": {
+          "ACOUSTIC": {
+            "matches": 6,
+            "win_rate": 0.5,
+            "survival_rate": 0.8333333333333334,
+            "mean_secrets": 3.1666666666666665
+          },
+          "CIPHER": {
+            "matches": 7,
+            "win_rate": 0.2857142857142857,
+            "survival_rate": 0.8571428571428571,
+            "mean_secrets": 2.7142857142857144
+          },
+          "OPERATOR": {
+            "matches": 8,
+            "win_rate": 0.375,
+            "survival_rate": 0.625,
+            "mean_secrets": 2.5
+          },
+          "PHREAKER": {
+            "matches": 7,
+            "win_rate": 0.0,
+            "survival_rate": 0.5714285714285714,
+            "mean_secrets": 1.8571428571428572
+          },
+          "PRODIGY": {
+            "matches": 6,
+            "win_rate": 0.16666666666666666,
+            "survival_rate": 0.8333333333333334,
+            "mean_secrets": 2.3333333333333335
+          },
+          "SPOOK": {
+            "matches": 6,
+            "win_rate": 0.16666666666666666,
+            "survival_rate": 0.6666666666666666,
+            "mean_secrets": 1.6666666666666667
+          }
+        },
+        "bot_win_spread_pts": 50.0,
+        "top_company": "DTO",
+        "top_company_win_rate": 0.875,
+        "purple_star_ge2_rate_of_income_turns": 0.0,
+        "purple_star_ge2_spook_turns": 0,
+        "spook_income_turns": 43,
+        "tel_purple_star_double_trigger_rounds": 0,
+        "tel_purple_star_player_rounds": 288,
+        "burn_notice_uses": 2,
+        "burn_notice_uses_per_game": 0.2,
+        "burn_notice_on_in_production": 0,
+        "graduation_events": 277,
+        "graduation_capped_rate": 0.18772563176895307,
+        "held_in_scanned_per_player_round": 0.24548736462093862,
+        "held_in_scanned_nonzero_rate": 0.18772563176895307,
+        "graduation_by_company": {
+          "AEGIS": {
+            "events": 47,
+            "capped_rate": 0.48936170212765956,
+            "held_per_player_round": 0.6808510638297872
+          },
+          "DTO": {
+            "events": 56,
+            "capped_rate": 0.07142857142857142,
+            "held_per_player_round": 0.07142857142857142
+          },
+          "HELIX": {
+            "events": 47,
+            "capped_rate": 0.19148936170212766,
+            "held_per_player_round": 0.3191489361702128
+          },
+          "MERIDIAN": {
+            "events": 28,
+            "capped_rate": 0.21428571428571427,
+            "held_per_player_round": 0.21428571428571427
+          },
+          "OMNIDYNE": {
+            "events": 46,
+            "capped_rate": 0.021739130434782608,
+            "held_per_player_round": 0.021739130434782608
+          },
+          "PROMETHEUS": {
+            "events": 53,
+            "capped_rate": 0.16981132075471697,
+            "held_per_player_round": 0.18867924528301888
+          }
+        },
+        "tel_scanned_held_mean": 0.24548736462093862,
+        "release_level_dist": {
+          "0": 0.4,
+          "1": 0.475,
+          "2": 0.125
+        },
+        "release_level_ge1": 0.6,
+        "release_level_2": 0.125,
+        "contractor_hires_per_game": 12.3,
+        "contractor_hires_per_player": 3.075,
+        "contractor_payout_events_per_game": 1.6,
+        "contractor_payout_cash_per_game": 1.6,
+        "ransom_leaks_per_player": 1.375,
+        "unblocked_green_per_player": 7.3,
+        "final_round_trigger_phase": {
+          "4": 8
+        },
+        "end_phase": {
+          "6": 8,
+          "2": 2
+        },
+        "wipeout_tiebreak_level": {},
+        "dmg_star_forfeited": 0,
+        "dmg_star_forfeited_by_code": {},
+        "dmg_star_in_production_at_phase4": 8,
+        "outliers": {
+          "rounds_le_3": [],
+          "rounds_ge_14": [],
+          "4p_under_6": [
+            {
+              "seed": 400046,
+              "match_idx": 4,
+              "rounds": 4,
+              "end_reason": "patient_zero"
+            }
+          ],
+          "round_limit": []
+        }
+      }
+    },
+    "LEGACY_V033": {
+      "2P": {
+        "sequence": "LEGACY_V033",
+        "num_players": 2,
+        "games": 10,
+        "player_games": 20,
+        "seed_range": [
+          200042,
+          200051
+        ],
+        "mean_rounds": 8.4,
+        "median_rounds": 9.0,
+        "stdev_rounds": 1.505545305418162,
+        "min_rounds": 5,
+        "max_rounds": 10,
+        "round_hist": {
+          "5": 1,
+          "7": 1,
+          "8": 2,
+          "9": 4,
+          "10": 2
+        },
+        "end_reasons": {
+          "total_wipeout": 0.4,
+          "patient_zero": 0.4,
+          "singularity": 0.2
+        },
+        "end_reason_counts": {
+          "total_wipeout": 4,
+          "patient_zero": 4,
+          "singularity": 2
+        },
+        "player_survival": 0.4,
+        "mean_final_secrets": 0.35,
+        "mean_survivor_secrets": 3.5,
+        "income_events": 152,
+        "income_per_turn_total": 1.388157894736842,
+        "income_per_turn_cash": 1.0723684210526316,
+        "income_per_turn_research": 0.3157894736842105,
+        "zero_income_rate": 0.4276315789473684,
+        "tel_income_per_turn_incl_protocols": null,
+        "corruption_glitch_player_rounds": 36,
+        "unblocked_green_player_rounds": 109,
+        "whammy_player_rounds": 29,
+        "whammy_per_player": 1.45,
+        "whammy_income_mean": 0.68,
+        "colored_dice_owned_end": 1.2,
+        "bots": {
+          "AccelerationistBot": {
+            "matches": 4,
+            "win_rate": 0.75,
+            "survival_rate": 0.75,
+            "mean_secrets": 3
+          },
+          "AdaptiveBalancedBot": {
+            "matches": 4,
+            "win_rate": 0.875,
+            "survival_rate": 0.5,
+            "mean_secrets": 0.5
+          },
+          "RecklessSaboteurBot": {
+            "matches": 4,
+            "win_rate": 0.25,
+            "survival_rate": 0.5,
+            "mean_secrets": 0.25
+          },
+          "SecOpsTurtleBot": {
+            "matches": 4,
+            "win_rate": 0.625,
+            "survival_rate": 0.25,
+            "mean_secrets": -0.25
+          },
+          "VentureGreedBot": {
+            "matches": 4,
+            "win_rate": 0.0,
+            "survival_rate": 0.0,
+            "mean_secrets": -1.75
+          }
+        },
+        "companies": {
+          "DTO": {
+            "matches": 6,
+            "win_rate": 0.6666666666666666,
+            "survival_rate": 0.6666666666666666,
+            "mean_secrets": 2.8333333333333335
+          },
+          "HELIX": {
+            "matches": 6,
+            "win_rate": 0.4166666666666667,
+            "survival_rate": 0.3333333333333333,
+            "mean_secrets": -0.6666666666666666
+          },
+          "MERIDIAN": {
+            "matches": 3,
+            "win_rate": 0.3333333333333333,
+            "survival_rate": 0.0,
+            "mean_secrets": -1
+          },
+          "PROMETHEUS": {
+            "matches": 5,
+            "win_rate": 0.5,
+            "survival_rate": 0.4,
+            "mean_secrets": -0.6
+          }
+        },
+        "operatives": {
+          "ACOUSTIC": {
+            "matches": 1,
+            "win_rate": 0.0,
+            "survival_rate": 0.0,
+            "mean_secrets": -2
+          },
+          "CIPHER": {
+            "matches": 5,
+            "win_rate": 0.8,
+            "survival_rate": 0.4,
+            "mean_secrets": 0.2
+          },
+          "OPERATOR": {
+            "matches": 2,
+            "win_rate": 0.25,
+            "survival_rate": 0.0,
+            "mean_secrets": -2
+          },
+          "PHREAKER": {
+            "matches": 5,
+            "win_rate": 0.3,
+            "survival_rate": 0.4,
+            "mean_secrets": -0.2
+          },
+          "PRODIGY": {
+            "matches": 3,
+            "win_rate": 0.6666666666666666,
+            "survival_rate": 0.3333333333333333,
+            "mean_secrets": 1
+          },
+          "SPOOK": {
+            "matches": 4,
+            "win_rate": 0.5,
+            "survival_rate": 0.75,
+            "mean_secrets": 2.5
+          }
+        },
+        "bot_win_spread_pts": 87.5,
+        "top_company": "DTO",
+        "top_company_win_rate": 0.6666666666666666,
+        "purple_star_ge2_rate_of_income_turns": 0.0,
+        "purple_star_ge2_spook_turns": 0,
+        "spook_income_turns": 31,
+        "tel_purple_star_double_trigger_rounds": 0,
+        "tel_purple_star_player_rounds": 0,
+        "burn_notice_uses": 2,
+        "burn_notice_uses_per_game": 0.2,
+        "burn_notice_on_in_production": 0,
+        "graduation_events": 152,
+        "graduation_capped_rate": 0.0,
+        "held_in_scanned_per_player_round": 0.0,
+        "held_in_scanned_nonzero_rate": 0.0,
+        "graduation_by_company": {
+          "DTO": {
+            "events": 44,
+            "capped_rate": 0.0,
+            "held_per_player_round": 0.0
+          },
+          "HELIX": {
+            "events": 47,
+            "capped_rate": 0.0,
+            "held_per_player_round": 0.0
+          },
+          "MERIDIAN": {
+            "events": 19,
+            "capped_rate": 0.0,
+            "held_per_player_round": 0.0
+          },
+          "PROMETHEUS": {
+            "events": 42,
+            "capped_rate": 0.0,
+            "held_per_player_round": 0.0
+          }
+        },
+        "tel_scanned_held_mean": null,
+        "release_level_dist": {
+          "0": 0.85,
+          "1": 0.15
+        },
+        "release_level_ge1": 0.15,
+        "release_level_2": 0.0,
+        "contractor_hires_per_game": 10.0,
+        "contractor_hires_per_player": 5,
+        "contractor_payout_events_per_game": 0.0,
+        "contractor_payout_cash_per_game": 0.0,
+        "ransom_leaks_per_player": 3.3,
+        "unblocked_green_per_player": 12.7,
+        "final_round_trigger_phase": {},
+        "end_phase": {
+          "None": 10
+        },
+        "wipeout_tiebreak_level": {
+          "shared": 1,
+          "net_score": 1,
+          "ready_colored_dice_count": 1,
+          "patches": 1
+        },
+        "dmg_star_forfeited": 0,
+        "dmg_star_forfeited_by_code": {},
+        "dmg_star_in_production_at_phase4": 0,
+        "outliers": {
+          "rounds_le_3": [],
+          "rounds_ge_14": [],
+          "4p_under_6": [],
+          "round_limit": []
+        }
+      },
+      "3P": {
+        "sequence": "LEGACY_V033",
+        "num_players": 3,
+        "games": 10,
+        "player_games": 30,
+        "seed_range": [
+          300042,
+          300051
+        ],
+        "mean_rounds": 8.3,
+        "median_rounds": 8.5,
+        "stdev_rounds": 1.4944341180973262,
+        "min_rounds": 5,
+        "max_rounds": 10,
+        "round_hist": {
+          "5": 1,
+          "7": 1,
+          "8": 3,
+          "9": 3,
+          "10": 2
+        },
+        "end_reasons": {
+          "patient_zero": 0.9,
+          "total_wipeout": 0.1
+        },
+        "end_reason_counts": {
+          "patient_zero": 9,
+          "total_wipeout": 1
+        },
+        "player_survival": 0.4666666666666667,
+        "mean_final_secrets": 0.8333333333333334,
+        "mean_survivor_secrets": 3.4285714285714284,
+        "income_events": 233,
+        "income_per_turn_total": 1.5708154506437768,
+        "income_per_turn_cash": 1.2274678111587982,
+        "income_per_turn_research": 0.34334763948497854,
+        "zero_income_rate": 0.3905579399141631,
+        "tel_income_per_turn_incl_protocols": null,
+        "corruption_glitch_player_rounds": 51,
+        "unblocked_green_player_rounds": 147,
+        "whammy_player_rounds": 43,
+        "whammy_per_player": 1.4333333333333333,
+        "whammy_income_mean": 0.4418604651162791,
+        "colored_dice_owned_end": 1.0666666666666667,
+        "bots": {
+          "AccelerationistBot": {
+            "matches": 6,
+            "win_rate": 0.3333333333333333,
+            "survival_rate": 0.6666666666666666,
+            "mean_secrets": 0.6666666666666666
+          },
+          "AdaptiveBalancedBot": {
+            "matches": 6,
+            "win_rate": 0.6666666666666666,
+            "survival_rate": 0.6666666666666666,
+            "mean_secrets": 2
+          },
+          "RecklessSaboteurBot": {
+            "matches": 6,
+            "win_rate": 0.16666666666666666,
+            "survival_rate": 0.16666666666666666,
+            "mean_secrets": -0.5
+          },
+          "SecOpsTurtleBot": {
+            "matches": 6,
+            "win_rate": 0.5,
+            "survival_rate": 0.6666666666666666,
+            "mean_secrets": 3
+          },
+          "VentureGreedBot": {
+            "matches": 6,
+            "win_rate": 0.0,
+            "survival_rate": 0.16666666666666666,
+            "mean_secrets": -1
+          }
+        },
+        "companies": {
+          "AEGIS": {
+            "matches": 4,
+            "win_rate": 0.25,
+            "survival_rate": 0.5,
+            "mean_secrets": 0.25
+          },
+          "DTO": {
+            "matches": 4,
+            "win_rate": 1.0,
+            "survival_rate": 0.75,
+            "mean_secrets": 4.5
+          },
+          "HELIX": {
+            "matches": 5,
+            "win_rate": 0.4,
+            "survival_rate": 0.6,
+            "mean_secrets": 1.4
+          },
+          "MERIDIAN": {
+            "matches": 5,
+            "win_rate": 0.4,
+            "survival_rate": 0.4,
+            "mean_secrets": 0.6
+          },
+          "OMNIDYNE": {
+            "matches": 7,
+            "win_rate": 0.0,
+            "survival_rate": 0.42857142857142855,
+            "mean_secrets": 0.14285714285714285
+          },
+          "PROMETHEUS": {
+            "matches": 5,
+            "win_rate": 0.2,
+            "survival_rate": 0.2,
+            "mean_secrets": -1
+          }
+        },
+        "operatives": {
+          "ACOUSTIC": {
+            "matches": 3,
+            "win_rate": 0.0,
+            "survival_rate": 0.6666666666666666,
+            "mean_secrets": 0.6666666666666666
+          },
+          "CIPHER": {
+            "matches": 7,
+            "win_rate": 0.5714285714285714,
+            "survival_rate": 0.7142857142857143,
+            "mean_secrets": 1.8571428571428572
+          },
+          "OPERATOR": {
+            "matches": 4,
+            "win_rate": 0.5,
+            "survival_rate": 0.5,
+            "mean_secrets": 0.25
+          },
+          "PHREAKER": {
+            "matches": 6,
+            "win_rate": 0.0,
+            "survival_rate": 0.0,
+            "mean_secrets": -1.1666666666666667
+          },
+          "PRODIGY": {
+            "matches": 6,
+            "win_rate": 0.16666666666666666,
+            "survival_rate": 0.3333333333333333,
+            "mean_secrets": 0.16666666666666666
+          },
+          "SPOOK": {
+            "matches": 4,
+            "win_rate": 0.75,
+            "survival_rate": 0.75,
+            "mean_secrets": 3.75
+          }
+        },
+        "bot_win_spread_pts": 66.66666666666666,
+        "top_company": "DTO",
+        "top_company_win_rate": 1.0,
+        "purple_star_ge2_rate_of_income_turns": 0.0,
+        "purple_star_ge2_spook_turns": 0,
+        "spook_income_turns": 33,
+        "tel_purple_star_double_trigger_rounds": 0,
+        "tel_purple_star_player_rounds": 0,
+        "burn_notice_uses": 1,
+        "burn_notice_uses_per_game": 0.1,
+        "burn_notice_on_in_production": 0,
+        "graduation_events": 233,
+        "graduation_capped_rate": 0.0,
+        "held_in_scanned_per_player_round": 0.0,
+        "held_in_scanned_nonzero_rate": 0.0,
+        "graduation_by_company": {
+          "AEGIS": {
+            "events": 32,
+            "capped_rate": 0.0,
+            "held_per_player_round": 0.0
+          },
+          "DTO": {
+            "events": 31,
+            "capped_rate": 0.0,
+            "held_per_player_round": 0.0
+          },
+          "HELIX": {
+            "events": 42,
+            "capped_rate": 0.0,
+            "held_per_player_round": 0.0
+          },
+          "MERIDIAN": {
+            "events": 38,
+            "capped_rate": 0.0,
+            "held_per_player_round": 0.0
+          },
+          "OMNIDYNE": {
+            "events": 55,
+            "capped_rate": 0.0,
+            "held_per_player_round": 0.0
+          },
+          "PROMETHEUS": {
+            "events": 35,
+            "capped_rate": 0.0,
+            "held_per_player_round": 0.0
+          }
+        },
+        "tel_scanned_held_mean": null,
+        "release_level_dist": {
+          "0": 0.6666666666666666,
+          "1": 0.3333333333333333
+        },
+        "release_level_ge1": 0.3333333333333333,
+        "release_level_2": 0.0,
+        "contractor_hires_per_game": 14.7,
+        "contractor_hires_per_player": 4.9,
+        "contractor_payout_events_per_game": 0.0,
+        "contractor_payout_cash_per_game": 0.0,
+        "ransom_leaks_per_player": 2.7666666666666666,
+        "unblocked_green_per_player": 11.1,
+        "final_round_trigger_phase": {},
+        "end_phase": {
+          "None": 10
+        },
+        "wipeout_tiebreak_level": {
+          "net_score": 1
+        },
+        "dmg_star_forfeited": 0,
+        "dmg_star_forfeited_by_code": {},
+        "dmg_star_in_production_at_phase4": 0,
+        "outliers": {
+          "rounds_le_3": [],
+          "rounds_ge_14": [],
+          "4p_under_6": [],
+          "round_limit": []
+        }
+      },
+      "4P": {
+        "sequence": "LEGACY_V033",
+        "num_players": 4,
+        "games": 10,
+        "player_games": 40,
+        "seed_range": [
+          400042,
+          400051
+        ],
+        "mean_rounds": 8.5,
+        "median_rounds": 9.0,
+        "stdev_rounds": 1.7159383568311668,
+        "min_rounds": 5,
+        "max_rounds": 10,
+        "round_hist": {
+          "5": 1,
+          "7": 2,
+          "8": 1,
+          "9": 2,
+          "10": 4
+        },
+        "end_reasons": {
+          "patient_zero": 0.7,
+          "singularity": 0.3
+        },
+        "end_reason_counts": {
+          "patient_zero": 7,
+          "singularity": 3
+        },
+        "player_survival": 0.8,
+        "mean_final_secrets": 3.325,
+        "mean_survivor_secrets": 4.5,
+        "income_events": 320,
+        "income_per_turn_total": 1.7125,
+        "income_per_turn_cash": 1.3375,
+        "income_per_turn_research": 0.375,
+        "zero_income_rate": 0.36875,
+        "tel_income_per_turn_incl_protocols": null,
+        "corruption_glitch_player_rounds": 89,
+        "unblocked_green_player_rounds": 191,
+        "whammy_player_rounds": 70,
+        "whammy_per_player": 1.75,
+        "whammy_income_mean": 0.5970149253731343,
+        "colored_dice_owned_end": 1.2,
+        "bots": {
+          "AccelerationistBot": {
+            "matches": 8,
+            "win_rate": 0.375,
+            "survival_rate": 0.75,
+            "mean_secrets": 3.625
+          },
+          "AdaptiveBalancedBot": {
+            "matches": 8,
+            "win_rate": 0.5,
+            "survival_rate": 1.0,
+            "mean_secrets": 5.75
+          },
+          "RecklessSaboteurBot": {
+            "matches": 8,
+            "win_rate": 0.25,
+            "survival_rate": 1.0,
+            "mean_secrets": 4.125
+          },
+          "SecOpsTurtleBot": {
+            "matches": 8,
+            "win_rate": 0.125,
+            "survival_rate": 1.0,
+            "mean_secrets": 3.625
+          },
+          "VentureGreedBot": {
+            "matches": 8,
+            "win_rate": 0.0,
+            "survival_rate": 0.25,
+            "mean_secrets": -0.5
+          }
+        },
+        "companies": {
+          "AEGIS": {
+            "matches": 6,
+            "win_rate": 0.0,
+            "survival_rate": 0.8333333333333334,
+            "mean_secrets": 2.5
+          },
+          "DTO": {
+            "matches": 8,
+            "win_rate": 0.625,
+            "survival_rate": 1.0,
+            "mean_secrets": 5.625
+          },
+          "HELIX": {
+            "matches": 7,
+            "win_rate": 0.2857142857142857,
+            "survival_rate": 0.7142857142857143,
+            "mean_secrets": 3.7142857142857144
+          },
+          "MERIDIAN": {
+            "matches": 4,
+            "win_rate": 0.5,
+            "survival_rate": 0.75,
+            "mean_secrets": 4
+          },
+          "OMNIDYNE": {
+            "matches": 7,
+            "win_rate": 0.0,
+            "survival_rate": 0.8571428571428571,
+            "mean_secrets": 2
+          },
+          "PROMETHEUS": {
+            "matches": 8,
+            "win_rate": 0.125,
+            "survival_rate": 0.625,
+            "mean_secrets": 2.125
+          }
+        },
+        "operatives": {
+          "ACOUSTIC": {
+            "matches": 6,
+            "win_rate": 0.16666666666666666,
+            "survival_rate": 1.0,
+            "mean_secrets": 3.8333333333333335
+          },
+          "CIPHER": {
+            "matches": 7,
+            "win_rate": 0.5714285714285714,
+            "survival_rate": 0.8571428571428571,
+            "mean_secrets": 4.857142857142857
+          },
+          "OPERATOR": {
+            "matches": 8,
+            "win_rate": 0.125,
+            "survival_rate": 0.625,
+            "mean_secrets": 2
+          },
+          "PHREAKER": {
+            "matches": 7,
+            "win_rate": 0.14285714285714285,
+            "survival_rate": 0.7142857142857143,
+            "mean_secrets": 2.142857142857143
+          },
+          "PRODIGY": {
+            "matches": 6,
+            "win_rate": 0.3333333333333333,
+            "survival_rate": 0.8333333333333334,
+            "mean_secrets": 4.166666666666667
+          },
+          "SPOOK": {
+            "matches": 6,
+            "win_rate": 0.16666666666666666,
+            "survival_rate": 0.8333333333333334,
+            "mean_secrets": 3.3333333333333335
+          }
+        },
+        "bot_win_spread_pts": 50.0,
+        "top_company": "DTO",
+        "top_company_win_rate": 0.625,
+        "purple_star_ge2_rate_of_income_turns": 0.003125,
+        "purple_star_ge2_spook_turns": 0,
+        "spook_income_turns": 51,
+        "tel_purple_star_double_trigger_rounds": 0,
+        "tel_purple_star_player_rounds": 0,
+        "burn_notice_uses": 0,
+        "burn_notice_uses_per_game": 0.0,
+        "burn_notice_on_in_production": 0,
+        "graduation_events": 320,
+        "graduation_capped_rate": 0.0,
+        "held_in_scanned_per_player_round": 0.0,
+        "held_in_scanned_nonzero_rate": 0.0,
+        "graduation_by_company": {
+          "AEGIS": {
+            "events": 52,
+            "capped_rate": 0.0,
+            "held_per_player_round": 0.0
+          },
+          "DTO": {
+            "events": 65,
+            "capped_rate": 0.0,
+            "held_per_player_round": 0.0
+          },
+          "HELIX": {
+            "events": 54,
+            "capped_rate": 0.0,
+            "held_per_player_round": 0.0
+          },
+          "MERIDIAN": {
+            "events": 35,
+            "capped_rate": 0.0,
+            "held_per_player_round": 0.0
+          },
+          "OMNIDYNE": {
+            "events": 54,
+            "capped_rate": 0.0,
+            "held_per_player_round": 0.0
+          },
+          "PROMETHEUS": {
+            "events": 60,
+            "capped_rate": 0.0,
+            "held_per_player_round": 0.0
+          }
+        },
+        "tel_scanned_held_mean": null,
+        "release_level_dist": {
+          "0": 0.7,
+          "1": 0.3
+        },
+        "release_level_ge1": 0.3,
+        "release_level_2": 0.0,
+        "contractor_hires_per_game": 23.7,
+        "contractor_hires_per_player": 5.925,
+        "contractor_payout_events_per_game": 0.0,
+        "contractor_payout_cash_per_game": 0.0,
+        "ransom_leaks_per_player": 2.575,
+        "unblocked_green_per_player": 11.125,
+        "final_round_trigger_phase": {},
+        "end_phase": {
+          "None": 10
+        },
+        "wipeout_tiebreak_level": {},
+        "dmg_star_forfeited": 0,
+        "dmg_star_forfeited_by_code": {},
+        "dmg_star_in_production_at_phase4": 5,
+        "outliers": {
+          "rounds_le_3": [],
+          "rounds_ge_14": [],
+          "4p_under_6": [
+            {
+              "seed": 400046,
+              "match_idx": 4,
+              "rounds": 5,
+              "end_reason": "patient_zero"
+            }
+          ],
+          "round_limit": []
+        }
+      }
+    }
+  }
+}

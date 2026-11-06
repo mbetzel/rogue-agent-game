@@ -4,8 +4,9 @@ import random
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
+from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
 from sim.entities import ArchetypeCode, CompanyCode, WhiteHatCode
-from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index, plan_final_round_repairs
+from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index, plan_final_round_repairs, is_six_phase_state
 
 if TYPE_CHECKING:
     from sim.engine import GameState, PlayerState
@@ -166,7 +167,7 @@ class RecklessSaboteurBot(BaseBot):
                 assignments[idx] = ShieldColor.BLUE
         return assignments
 
-    def take_phase3_actions(
+    def take_operations_actions(
         self,
         player_state: PlayerState,
         game_state: GameState,
@@ -178,10 +179,7 @@ class RecklessSaboteurBot(BaseBot):
         cash_cushion = 0 if is_final_round else 2
 
         active_ver = game_state.active_version.version_str
-        is_omnidyne = bool(
-            (player_state.company and player_state.company.code == CompanyCode.OMNIDYNE)
-            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.PHREAKER)
-        )
+        is_omnidyne = has_company_override(player_state, CompanyCode.OMNIDYNE, legacy_bridge_enabled(game_state))
         if (
             is_omnidyne
             and player_state.is_ability_available(active_ver)
@@ -190,10 +188,7 @@ class RecklessSaboteurBot(BaseBot):
             plan.use_omnidyne_override = True
             plan.use_phreaker_ability = True
 
-        is_prometheus = bool(
-            (player_state.company and player_state.company.code == CompanyCode.PROMETHEUS)
-            or (player_state.archetype and player_state.archetype.code == ArchetypeCode.CIPHER)
-        )
+        is_prometheus = has_company_override(player_state, CompanyCode.PROMETHEUS, legacy_bridge_enabled(game_state))
         if (
             is_prometheus
             and player_state.is_ability_available(active_ver)
@@ -278,6 +273,9 @@ class RecklessSaboteurBot(BaseBot):
 
         # Hardware Upgrades & Patents (v0.28.0)
         res_available = player_state.research_tokens
+        if is_six_phase_state(game_state):
+            # v0.34: keeps its no-upgrade identity unless Release pressure >= 2.
+            res_available = self.plan_release_upgrade(player_state, plan, res_available, min_pressure=2)
         patent_cost = player_state.get_patent_cost()
         if res_available >= patent_cost:
             plan.patent_filings = res_available // patent_cost

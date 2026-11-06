@@ -13,6 +13,7 @@ export let selectedRerollIndices = new Set();
 export let selectedChoiceDeclarations = {};
 export let selectedGlitchDieIds = new Set();
 export let selectedAnyAllocations = [];
+export let selectedGraduateIds = null; // Phase 5: Set of die ids (null = not yet initialised from server default)
 export let activePlayerTab = "human"; // "human", player_id number, or "all"
 export let activeBoardView = "tabletop"; // "tabletop", "terminals", "agent", "market"
 
@@ -63,7 +64,7 @@ export function sanitizeSelectionState(newState) {
 
   // 2. Cipher discount toggle auto-reset when no longer available
   const canAnyCipherBuy = Boolean(
-    newState.phase === 3 &&
+    newState.phase === 6 &&
     caps.can_cipher_buy &&
     Object.values(caps.can_cipher_buy).some(Boolean)
   );
@@ -72,7 +73,7 @@ export function sanitizeSelectionState(newState) {
   }
 
   // 3. Patch mode toggle auto-sync
-  if (newState.phase === 3) {
+  if (newState.phase === 6) {
     if (patchCashSelected && !caps.can_patch_cash && caps.can_patch_token) {
       patchCashSelected = false;
     } else if (!patchCashSelected && !caps.can_patch_token && caps.can_patch_cash) {
@@ -92,9 +93,27 @@ export function sanitizeSelectionState(newState) {
   }
 
   // 5. Glitch & Any shield allocation selection state
-  if (newState.phase !== 3 || newState.subphase !== "confirm_income") {
+  if (newState.phase !== 4 || newState.subphase !== "confirm_attacks") {
     selectedGlitchDieIds.clear();
     selectedAnyAllocations = [];
+  }
+
+  // 6. Phase 5 Scanned Graduation selection
+  if (newState.phase !== 5) {
+    selectedGraduateIds = null;
+  }
+}
+
+export function initSelectedGraduateIds(ids) {
+  selectedGraduateIds = new Set(ids);
+}
+
+export function toggleSelectedGraduateId(dieId, maxAllowed) {
+  if (!selectedGraduateIds) selectedGraduateIds = new Set();
+  if (selectedGraduateIds.has(dieId)) {
+    selectedGraduateIds.delete(dieId);
+  } else if (selectedGraduateIds.size < maxAllowed) {
+    selectedGraduateIds.add(dieId);
   }
 }
 

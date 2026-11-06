@@ -1,3 +1,6 @@
+# NOTE (v0.34.0): this script targets the v0.33-era module layout (phase1_boot / phase2_threat /
+# phase3_ops). After the six-phase module split, its monkeypatches of those modules may no longer
+# take effect on either round sequence (legacy_v033 binds the new modules). Results are historical.
 """Run multi-pod Monte Carlo telemetry sweep for Rogue Agent v0.27.0 Baseline.
 
 Phase 34: Per-Version Corruption Track Recalibration.

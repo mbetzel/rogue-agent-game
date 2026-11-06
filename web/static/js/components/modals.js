@@ -38,7 +38,8 @@ export function renderGameOverModal() {
 
   content.innerHTML = `
     <h2 style="font-size: 1.4rem; color: #fff;">
-      ${res.is_total_wipeout ? "💀 TOTAL WIPEOUT" : "🏆 VICTORY: " + res.winner_name}
+      ${res.is_total_wipeout ? "💀 TOTAL WIPEOUT" : (res.is_shared_victory ? "🏆 SHARED VICTORY: " : "🏆 VICTORY: ") + res.winner_name}
+      ${res.is_total_wipeout && res.winner_name ? `<div style="font-size: 0.85rem; color: var(--text-dim);">Top ${res.is_shared_victory ? "(shared)" : ""}: ${res.winner_name}</div>` : ""}
     </h2>
     <p style="color: var(--text-dim); font-size: 0.85rem;">
       Concluded in Round ${res.total_rounds} | Trigger: ${res.end_reason.toUpperCase()}

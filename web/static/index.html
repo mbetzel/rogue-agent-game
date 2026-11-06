@@ -126,7 +126,7 @@
         <label style="font-size: 0.85rem; color: var(--text-dim);">Player Count:</label>
         <select id="modalPlayerCount"
           style="padding: 8px; background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); border-radius: 4px;">
-          <option value="4" selected>4 Players (1 Human vs 3 Bots — 12 Secrets)</option>
+          <option value="4" selected>4 Players (1 Human vs 3 Bots — 8 Secrets)</option>
           <option value="3">3 Players (1 Human vs 2 Bots — 8 Secrets)</option>
           <option value="2">2 Players (1 Human vs 1 Bot — 8 Secrets)</option>
           <option value="1">1 Player (Solo Survival Practice)</option>
@@ -197,8 +197,9 @@
       </div>
 
       <p style="font-size: 0.8rem; color: var(--text-dim); margin: 0;">
-        During <strong>Phase 2: Compiler Drop &amp; Defense</strong>, cubes exit the Cube Tower into the tray. Resolve
-        Black cubes first in Step 2A, then Red, Blue, and Green attacks simultaneously in Step 2B.
+        During <strong>Phase 2: Compiler Drop &amp; Corruption</strong>, cubes exit the Cube Tower into the tray and
+        Black cubes resolve on the Corruption Track. Red, Blue, and Green attacks resolve simultaneously in
+        <strong>Phase 4: Attack Resolution</strong>, after Phase 3: Income.
       </p>
 
       <div class="cube-effects-grid" style="grid-template-columns: 1fr;">
@@ -233,7 +234,7 @@
         <div class="cube-effect-item">
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <span class="cube-badge black">Black (Corruption)</span>
-            <span style="font-size: 0.72rem; color: var(--text-dim);">Step 2A: System Upgrade</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Phase 2: Compiler Drop &amp; Corruption</span>
           </div>
           <p>Exited Black cubes advance the active Version's <strong>Corruption Track</strong>. When the track fills,
             the Rogue Agent queues a Version upgrade for the start of the next round (or triggers

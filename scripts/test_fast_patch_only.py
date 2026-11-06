@@ -1,3 +1,6 @@
+# NOTE (v0.34.0): this script targets the v0.33-era module layout (phase1_boot / phase2_threat /
+# phase3_ops). After the six-phase module split, its monkeypatches of those modules may no longer
+# take effect on either round sequence (legacy_v033 binds the new modules). Results are historical.
 """Monte Carlo simulation comparing:
 1. v0.22.0 Baseline (Both Debug Unlocks in Phase 1 and Fast-Patching in Phase 3)
 2. Fast-Patch ONLY (No Phase 1 Debug Unlocks; 100% of patches reserved for Phase 3 Fast-Patching)

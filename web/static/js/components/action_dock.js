@@ -26,6 +26,9 @@ import {
   setSelectedAnyAllocation,
   initSelectedAnyAllocations,
   clearSelectedAnyAllocations,
+  selectedGraduateIds,
+  initSelectedGraduateIds,
+  toggleSelectedGraduateId,
 } from "../state.js";
 import {
   doHireContractors,
@@ -34,6 +37,8 @@ import {
   doCommit,
   doCompile,
   doConfirmIncome,
+  doConfirmAttacks,
+  doChooseGraduates,
   doAcoustic,
   doSpook,
   doDirtyIncome,
@@ -394,11 +399,26 @@ export function renderActionDock() {
       controls.appendChild(spookWrap);
     }
   } else if (state.phase === 3) {
-    if (caps.can_confirm_income || state.subphase === "confirm_income") {
+    renderIncomePanel(controls, human, caps);
+  } else if (state.phase === 5) {
+    renderGraduationPanel(controls, human, caps);
+  } else if (state.phase === 4 || state.phase === 6) {
+    if (state.phase === 4) {
       const compileRes = state.last_compile_result || {};
+      const attackRes = state.last_attack_result || {};
       const exited = compileRes.exited_cubes || {};
-      const rawIncome = (compileRes.income_summary && compileRes.income_summary[human.player_id]) || compileRes.human_income || { money: 0, patches: 0, secrets: 0, details: [] };
-      const humanThreat = (compileRes.threat_summary && compileRes.threat_summary[human.player_id]) || compileRes.human_threat || {};
+      const incomeMap = state.last_income_result || {};
+      const rawIncome = incomeMap[human.player_id] || incomeMap[String(human.player_id)] || { money: 0, patches: 0, secrets: 0, details: [] };
+      const threatMap = attackRes.threat_summary || {};
+      const humanThreat = threatMap[human.player_id] || threatMap[String(human.player_id)] || attackRes.human_threat || {};
+      if (!caps.can_confirm_attacks) {
+        const waitMsg = document.createElement("span");
+        waitMsg.style.fontSize = "0.8rem";
+        waitMsg.style.color = "var(--text-dim)";
+        waitMsg.innerText = "Phase 4: Attack Resolution — waiting for other corporations to confirm defenses.";
+        controls.appendChild(waitMsg);
+        return;
+      }
 
       const redInfo = humanThreat.red || { cubes: exited.red || 0, shields: 0, unblocked: exited.red || 0 };
       const blueInfo = humanThreat.blue || { cubes: exited.blue || 0, shields: 0, unblocked: exited.blue || 0 };
@@ -487,8 +507,8 @@ export function renderActionDock() {
       const liveBlockedBlue = (effAtk.blue || 0) - liveUnblockedBlue;
       const liveBlockedGreen = (effAtk.green || 0) - liveUnblockedGreen;
 
-      // Pre-step2b cash + star bonuses to determine live flat leak
-      const preMoney = humanThreat.pre_step2b_money !== undefined ? humanThreat.pre_step2b_money : (human.money || 0);
+      // Post-income cash (Phase 3 already paid) + star bonuses to determine live flat leak
+      const preMoney = humanThreat.money !== undefined ? humanThreat.money : (human.money || 0);
       const r2Bonus = (humanThreat.r2_count || 0) > 0 && liveUnblockedRed === 0 ? 2 * humanThreat.r2_count : 0;
       const r3Bonus = (humanThreat.r3_count || 0) > 0 && (exited.red || 0) >= 3 ? 1 * humanThreat.r3_count : 0;
       const b1Bonus = (humanThreat.b1_count || 0) > 0 && (exited.blue || 0) >= 1 && liveUnblockedBlue === 0 ? 2 * humanThreat.b1_count : 0;
@@ -498,7 +518,7 @@ export function renderActionDock() {
         : Boolean(redInfo.flat_leak);
 
       const unblockedGreen = liveUnblockedGreen;
-      let candidates = compileRes.candidate_glitch_dice || (greenInfo.candidate_dice) || [];
+      let candidates = attackRes.candidate_glitch_dice || (greenInfo.candidate_dice) || [];
       if (!candidates || candidates.length === 0) {
         const fallbackCandidates = [];
         (human.contractor_dice || []).forEach((d) => {
@@ -554,28 +574,18 @@ export function renderActionDock() {
         selectedGlitchDieIds.add(candidates[0].die_id);
       }
 
-      // Compute effective income based on current glitch selections
-      const effectiveDetails = (rawIncome.details || []).map((det) => {
-        const isGlitched = selectedGlitchDieIds.has(det.die_id);
-        return {
-          ...det,
-          is_glitched: isGlitched,
-        };
-      });
-
-      const effectiveMoney = effectiveDetails
-        .filter((d) => !d.is_glitched)
-        .reduce((sum, d) => sum + (d.money || 0), 0);
-      const effectivePatches = effectiveDetails
-        .filter((d) => !d.is_glitched)
-        .reduce((sum, d) => sum + (d.patches || 0), 0);
-      const effectiveSecrets = effectiveDetails
-        .filter((d) => !d.is_glitched)
-        .reduce((sum, d) => sum + (d.secrets || 0), 0);
+      // Phase 3 income was already collected; a glitch now only costs future tempo
+      const effectiveDetails = (rawIncome.details || []).map((det) => ({
+        ...det,
+        is_glitched: selectedGlitchDieIds.has(det.die_id),
+      }));
+      const effectiveMoney = rawIncome.money || 0;
+      const effectivePatches = rawIncome.research !== undefined ? rawIncome.research : (rawIncome.patches || 0);
+      const effectiveSecrets = rawIncome.secrets || 0;
 
       const hasEnoughSelections = (actualRequired === 0) || (selectedGlitchDieIds.size === actualRequired);
 
-      let btnText = "✓ Confirm Income & Move Dice to Pipeline";
+      let btnText = "✓ Confirm Defenses & Resolve Attacks";
       if (actualRequired > 0) {
         if (!hasEnoughSelections) {
           const needed = actualRequired - selectedGlitchDieIds.size;
@@ -643,7 +653,7 @@ export function renderActionDock() {
                 <span class="confirm-malware-title">LOGIC BOMB INFECTION (${unblockedGreen} Unblocked Green Cube${unblockedGreen > 1 ? 's' : ''})</span>
               </div>
               <span class="confirm-malware-sub">
-                You took unblocked malware damage! Click below to select <strong>${actualRequired}</strong> active module${actualRequired > 1 ? 's' : ''} to move to the <strong>Glitched Box</strong> (or sacrifice White Contractor). A glitched Income die forfeits its revenue this round; a sacrificed Shield die absorbs the damage to protect your income.
+                You took unblocked malware damage! Click below to select <strong>${actualRequired}</strong> active module${actualRequired > 1 ? 's' : ''} to move to the <strong>Glitched Box</strong> (or sacrifice a White Contractor). This round's income was already collected in Phase 3, so a glitch only delays that die.
               </span>
             </div>
             <div class="confirm-malware-grid">
@@ -654,9 +664,9 @@ export function renderActionDock() {
                 if (c.is_contractor) {
                   consequenceText = "Contractor Sacrifice: Discard to supply (saves permanent modules)";
                 } else if (c.is_shield) {
-                  consequenceText = "Shield Sacrifice: Already blocked attack; moves to Glitched Box (protects income!)";
+                  consequenceText = "Defensive Shield Sacrifice: moves to Glitched Box (its block still counts)";
                 } else {
-                  consequenceText = `Income Forfeiture: Moves to Glitched Box (-$${c.money || 0}${c.patches ? ', -' + c.patches + '🔬' : ''})`;
+                  consequenceText = "Moves to Glitched Box (income already collected in Phase 3)";
                 }
                 return `
                   <div class="malware-die-card ${c.color} ${isSel ? 'selected' : ''}" data-die-id="${c.die_id}">
@@ -694,11 +704,11 @@ export function renderActionDock() {
       panel.innerHTML = `
         <div class="confirm-income-header">
           <div class="confirm-income-title-wrap">
-            <span class="confirm-badge">STEP 2B / 3A RESOLUTION</span>
-            <span class="confirm-income-title">COMPILE DROP & PRODUCTION HARVEST SUMMARY</span>
+            <span class="confirm-badge">PHASE 4: ATTACK RESOLUTION</span>
+            <span class="confirm-income-title">TWO-STAGE DEFENSIVE BLOCKING SUMMARY</span>
           </div>
           <span style="font-size: 0.72rem; color: var(--text-dim); font-family: monospace;">
-            Round ${state.current_round} // Review Output Before Moving to Pipeline
+            Round ${state.current_round} // Allocate Any shields and Green targets before damage resolves
           </span>
         </div>
 
@@ -738,8 +748,8 @@ export function renderActionDock() {
           <!-- Card 2: Harvested Income -->
           <div class="confirm-income-card" style="border-color: rgba(234, 179, 8, 0.4);">
             <div class="confirm-income-card-hdr">
-              <span style="color: #facc15;">HARVESTED PRODUCTION INCOME</span>
-              <span>Delayed Yield (Surviving Dice)</span>
+              <span style="color: #facc15;">PHASE 3 INCOME (COLLECTED)</span>
+              <span>Banked before attacks</span>
             </div>
             <div class="confirm-pills-row">
               <span class="income-pill money">+$${effectiveMoney} Cash</span>
@@ -762,8 +772,13 @@ export function renderActionDock() {
 
         <div class="confirm-action-bar">
           <span style="font-size: 0.75rem; color: var(--text-dim);">
-            Confirming clears <strong>In Production</strong> and transfers surviving dice to the <strong>Scanned Box</strong> for next round. Glitched dice move to <strong>Glitched Box</strong>.
+            Confirming resolves Red / Blue / Green damage. Glitched dice move to the <strong>Glitched Box</strong>; contractors expire at the end of Phase 4.
           </span>
+          ${(humanThreat.aegis && humanThreat.aegis.available) ? `
+            <select id="aegisEchoSelect" style="padding: 4px 8px;" title="Aegis Baffle Echo (Institutional Override, once per Version)">
+              <option value="none">Aegis Baffle Echo: do not use</option>
+              ${(humanThreat.aegis.qualifying_colors || []).map((c) => `<option value="${c}">Aegis Baffle Echo: ignore 1 ${c.toUpperCase()}</option>`).join("")}
+            </select>` : ''}
           <button class="action-btn btn-confirm-income ${hasEnoughSelections ? '' : 'disabled'}" id="btnConfirmIncome" ${hasEnoughSelections ? '' : 'disabled'}>
             ${btnText}
           </button>
@@ -799,7 +814,8 @@ export function renderActionDock() {
           } : null;
           clearSelectedGlitchDieIds();
           clearSelectedAnyAllocations();
-          doConfirmIncome(toGlitch, allocPayload);
+          const aegisSel = panel.querySelector("#aegisEchoSelect");
+          doConfirmAttacks(toGlitch, allocPayload, aegisSel ? aegisSel.value : null);
         };
       }
 
@@ -902,7 +918,7 @@ export function renderActionDock() {
       phreakBtn.className = "action-btn";
       phreakBtn.style.borderColor = "#4ade80";
       phreakBtn.style.color = "#4ade80";
-      phreakBtn.innerText = "⚡ Phreaker: Magnetic Splice (Repair 1 Die Free)";
+      phreakBtn.innerText = "⚡ Omnidyne: Magnetic Splice (Glitched → Ready)";
       phreakBtn.onclick = () => {
         setSelectedPhreakerDieId(parseInt(phreakSelect.value, 10));
         doPhreaker(1);
@@ -1148,11 +1164,169 @@ export function renderActionDock() {
     endTurnBtn.disabled = !caps.can_end_turn;
     endTurnBtn.onclick = doEndTurn;
     controls.appendChild(endTurnBtn);
-  } else if (state.phase === 4) {
+  } else if (state.phase === 7) {
     const viewBtn = document.createElement("button");
     viewBtn.className = "action-btn btn-accent";
     viewBtn.innerText = "View Standings";
     viewBtn.onclick = () => openModal("gameOverModal");
     controls.appendChild(viewBtn);
   }
+}
+
+
+// ---------------------------------------------------------------------------
+// Phase 3: Income (simultaneous) — preview, optional Signature Protocol targets, confirm
+// ---------------------------------------------------------------------------
+function renderIncomePanel(controls, human, caps) {
+  const incomeMap = state.last_income_result || {};
+  const inc = incomeMap[human.player_id] || incomeMap[String(human.player_id)] || { money: 0, research: 0, secrets: 0, details: [] };
+  const panel = document.createElement("div");
+  panel.className = "confirm-income-panel";
+  const details = inc.details || [];
+  const ownedColored = []
+    .concat(human.in_production_dice || [], human.glitched_dice || [], human.scanned_dice || [], human.ready_for_release_dice || [])
+    .filter((d) => d.color !== "gray" && d.color !== "white");
+  const ud = [].concat(human.glitched_dice || [], human.scanned_dice || []);
+
+  panel.innerHTML = `
+    <div class="confirm-income-header">
+      <div class="confirm-income-title-wrap">
+        <span class="confirm-badge">PHASE 3: INCOME</span>
+        <span class="confirm-income-title">COLLECT $, 🔬 &amp; ★ FROM DICE STILL IN PRODUCTION</span>
+      </div>
+      <span style="font-size: 0.72rem; color: var(--text-dim); font-family: monospace;">
+        Round ${state.current_round} // Income is banked before Phase 4 attacks
+      </span>
+    </div>
+    <div class="confirm-income-card" style="border-color: rgba(234, 179, 8, 0.4);">
+      <div class="confirm-income-card-hdr">
+        <span style="color: #facc15;">${inc.preview ? "INCOME PREVIEW" : "INCOME COLLECTED"}</span>
+        <span>Income slot + Shield slots + White Contractor dice</span>
+      </div>
+      <div class="confirm-pills-row">
+        <span class="income-pill money">+$${inc.money || 0} Cash</span>
+        <span class="income-pill patches">+${inc.research !== undefined ? inc.research : (inc.patches || 0)} 🔬 Research</span>
+        ${(inc.secrets || 0) > 0 ? `<span class="income-pill secrets">+${inc.secrets} Secrets</span>` : ""}
+      </div>
+      <div class="confirm-dice-chips">
+        ${details.length > 0
+          ? details.map((d) => `<span class="confirm-die-chip ${d.color}"><strong>${d.color.toUpperCase()}:</strong> ${d.face_name}${d.star_note ? " (" + d.star_note + ")" : ""}</span>`).join("")
+          : '<span style="font-size: 0.75rem; color: var(--text-dim); font-style: italic;">No dice In Production yield income this round.</span>'}
+      </div>
+    </div>
+    <div class="confirm-action-bar" id="incomeActionBar"></div>
+  `;
+
+  const bar = panel.querySelector("#incomeActionBar");
+  const burnSelects = [];
+  let diagSelect = null;
+  const triggers = Math.max(1, inc.purple_star_triggers || 1);
+  if (caps.can_spook_burn && ownedColored.length > 0) {
+    // One Burn Notice per Purple ★ trigger (OQ-17); the same die cannot be burned twice.
+    for (let t = 0; t < triggers; t++) {
+      const burnSelect = document.createElement("select");
+      burnSelect.style.padding = "4px 8px";
+      burnSelect.className = "burn-notice-select";
+      burnSelect.innerHTML = `<option value="">Burn Notice ${triggers > 1 ? "#" + (t + 1) + " " : ""}: decline</option>` +
+        ownedColored.map((d) => `<option value="${d.die_id}">Burn Notice ${triggers > 1 ? "#" + (t + 1) + " " : ""}: ${d.color.toUpperCase()} #${d.die_id} (+1 Secret)</option>`).join("");
+      bar.appendChild(burnSelect);
+      burnSelects.push(burnSelect);
+    }
+  }
+  if (caps.can_phreaker_diagnostics) {
+    diagSelect = document.createElement("select");
+    diagSelect.style.padding = "4px 8px";
+    diagSelect.innerHTML = ud.length > 0
+      ? ud.map((d) => `<option value="${d.die_id}">Jumper Diagnostics: roll ${d.color.toUpperCase()} #${d.die_id}</option>`).join("")
+      : `<option value="">Jumper Diagnostics: empty Under Development (+$1)</option>`;
+    bar.appendChild(diagSelect);
+  }
+  const btn = document.createElement("button");
+  btn.className = "action-btn btn-confirm-income";
+  btn.innerText = caps.can_confirm_income ? "✓ Confirm Income" : "Waiting for other corporations…";
+  btn.disabled = !caps.can_confirm_income;
+  btn.onclick = () => {
+    const burnIds = [];
+    burnSelects.forEach((sel) => {
+      if (sel.value === "") return;
+      const id = parseInt(sel.value, 10);
+      if (!burnIds.includes(id)) burnIds.push(id);
+    });
+    const diagId = diagSelect && diagSelect.value !== "" ? parseInt(diagSelect.value, 10) : null;
+    doConfirmIncome(burnIds.length > 0 ? burnIds : null, diagId);
+  };
+  bar.appendChild(btn);
+  controls.appendChild(panel);
+}
+
+// ---------------------------------------------------------------------------
+// Phase 5: CI/CD Pipeline Shift — Emergency Hotfix & Magnetic Splice, Scanned Graduation choice
+// ---------------------------------------------------------------------------
+function renderGraduationPanel(controls, human, caps) {
+  const pendMap = state.pending_graduation || {};
+  const pend = pendMap[human.player_id] || pendMap[String(human.player_id)];
+  if (!pend || !caps.can_choose_graduates) {
+    const waitMsg = document.createElement("span");
+    waitMsg.style.fontSize = "0.8rem";
+    waitMsg.style.color = "var(--text-dim)";
+    waitMsg.innerText = "Phase 5: CI/CD Pipeline Shift — waiting for other corporations.";
+    controls.appendChild(waitMsg);
+    return;
+  }
+  if (selectedGraduateIds === null) {
+    initSelectedGraduateIds(pend.default_graduate_ids || []);
+  }
+  const chosen = selectedGraduateIds || new Set();
+  const panel = document.createElement("div");
+  panel.className = "confirm-income-panel";
+  panel.innerHTML = `
+    <div class="confirm-income-header">
+      <div class="confirm-income-title-wrap">
+        <span class="confirm-badge">PHASE 5: CI/CD PIPELINE SHIFT</span>
+        <span class="confirm-income-title">SCANNED GRADUATION (${chosen.size} / ${pend.n} — Release Bandwidth ${pend.release_bandwidth})</span>
+      </div>
+      <span style="font-size: 0.72rem; color: var(--text-dim);">
+        Emergency Hotfix &amp; Magnetic Splice → In Production → Scanned Box → Ready for Release (≤ Release Bandwidth, your choice; fewer is allowed) → Glitched → Scanned (≤ Triage Bandwidth)
+      </span>
+    </div>
+    <div class="confirm-malware-grid">
+      ${(pend.candidates || []).map((c) => `
+        <div class="malware-die-card ${c.color} ${chosen.has(c.die_id) ? "selected" : ""}" data-die-id="${c.die_id}">
+          <div class="malware-die-top"><span style="font-weight: 700; font-size: 0.72rem; color: #fff;">${c.color.toUpperCase()} DIE #${c.die_id}</span></div>
+          <div class="malware-die-status">${chosen.has(c.die_id) ? "✓ GRADUATES TO READY" : "○ Held in Scanned Box"}</div>
+        </div>`).join("")}
+    </div>
+    <div class="confirm-action-bar" id="gradActionBar"></div>
+  `;
+  panel.querySelectorAll(".malware-die-card").forEach((card) => {
+    card.onclick = () => {
+      toggleSelectedGraduateId(parseInt(card.getAttribute("data-die-id"), 10), pend.n);
+      renderActionDock();
+    };
+  });
+  const bar = panel.querySelector("#gradActionBar");
+  let spliceSelect = null;
+  let hotfixSelect = null;
+  const glitched = pend.glitched || [];
+  if (pend.splice_available && glitched.length > 0) {
+    spliceSelect = document.createElement("select");
+    spliceSelect.innerHTML = `<option value="">Magnetic Splice: decline</option>` +
+      glitched.map((d) => `<option value="${d.die_id}">Magnetic Splice: ${d.color.toUpperCase()} #${d.die_id} → Ready</option>`).join("");
+    bar.appendChild(spliceSelect);
+  }
+  if (pend.hotfix_available && glitched.length > 0) {
+    hotfixSelect = document.createElement("select");
+    hotfixSelect.innerHTML = glitched.map((d) => `<option value="${d.die_id}">Emergency Hotfix: ${d.color.toUpperCase()} #${d.die_id} → Ready</option>`).join("");
+    bar.appendChild(hotfixSelect);
+  }
+  const btn = document.createElement("button");
+  btn.className = "action-btn btn-confirm-income";
+  btn.innerText = `✓ Confirm Pipeline Shift (${chosen.size} graduate${chosen.size === 1 ? "" : "s"})`;
+  btn.onclick = () => {
+    const spliceId = spliceSelect && spliceSelect.value !== "" ? parseInt(spliceSelect.value, 10) : null;
+    const hotfixId = hotfixSelect && hotfixSelect.value !== "" ? parseInt(hotfixSelect.value, 10) : null;
+    doChooseGraduates(Array.from(chosen), spliceId, hotfixId);
+  };
+  bar.appendChild(btn);
+  controls.appendChild(panel);
 }

@@ -62,6 +62,15 @@ from web.game_controller import GameController
 from web.schemas import GameStateSerializer
 
 
+
+def _pause_in_phase5(controller, pid):
+    """v0.34: Omnidyne Magnetic Splice resolves in Phase 5 step 1; park the controller in choose_graduates."""
+    from web.controller.phase5_pipeline_actions import _needs_choice
+
+    controller.phase = 5
+    controller.subphase = "choose_graduates"
+    controller.pending_graduation = {pid: _needs_choice(controller, controller.state.players[pid])}
+
 class TestArchetypeRegistry(unittest.TestCase):
     """Group A: Archetype Registry & Initialization (Tests 1-3)."""
 
@@ -608,8 +617,6 @@ class TestPhreakerAndCipher(unittest.TestCase):
         )
 
         player = controller.state.players[0]
-        # Transition controller directly to Phase 3
-        controller.phase = 3
         controller.active_player_index = 0
 
         # Move 3 ready dice to unpatched
@@ -622,7 +629,10 @@ class TestPhreakerAndCipher(unittest.TestCase):
         player.patches = 0
         player.money = 0
 
-        res = controller.use_phreaker_ability(player_id=0, count=1)
+        # v0.34: Magnetic Splice is recorded in Phase 5 and resolves at step 1 (Emergency Hotfix & Magnetic Splice)
+        _pause_in_phase5(controller, 0)
+        controller.use_phreaker_ability(player_id=0, count=1)
+        res = controller.choose_graduates(0, [])
         self.assertIn("players", res)
         self.assertEqual(len(player.unpatched_dice), initial_unpatched - 1)
         self.assertEqual(len(player.ready_dice), initial_ready + 1)
@@ -642,14 +652,15 @@ class TestPhreakerAndCipher(unittest.TestCase):
         )
 
         player = controller.state.players[0]
-        controller.phase = 3
         controller.active_player_index = 0
 
         # Move exactly 1 die to unpatched
         d = player.ready_dice.pop(0)
         player.unpatched_dice.append(d)
 
-        res = controller.use_phreaker_ability(player_id=0, count=2)
+        _pause_in_phase5(controller, 0)
+        controller.use_phreaker_ability(player_id=0, count=2)
+        res = controller.choose_graduates(0, [])
         self.assertIn("players", res)
         self.assertEqual(len(player.unpatched_dice), 0)
         self.assertEqual(player.ability_v1_status, AbilityStatus.USED)
@@ -666,7 +677,7 @@ class TestPhreakerAndCipher(unittest.TestCase):
         )
 
         player = controller.state.players[0]
-        controller.phase = 3
+        controller.phase = 6
         controller.active_player_index = 0
         player.money = 0  # $0 cash
 
@@ -698,7 +709,7 @@ class TestPhreakerAndCipher(unittest.TestCase):
         )
 
         player = controller.state.players[0]
-        controller.phase = 3
+        controller.phase = 6
         controller.active_player_index = 0
 
         player.money = 0
@@ -729,7 +740,7 @@ class TestPhreakerAndCipher(unittest.TestCase):
                         get_archetype_by_code(ArchetypeCode.CIPHER), get_archetype_by_code(ArchetypeCode.SPOOK)],
         )
 
-        controller.phase = 3
+        controller.phase = 6
         controller.active_player_index = 0
         with self.assertRaises(ValueError):
             controller.use_phreaker_ability(player_id=0, count=0)
@@ -777,8 +788,11 @@ class TestPhreakerAndCipher(unittest.TestCase):
         ready_before = len(player.ready_dice)
         unpatched_before = len(player.unpatched_dice)
         controller._execute_bot_phase3(player, meta)
-        self.assertEqual(player.money, 3)
-        self.assertEqual(player.secrets, 4)
+        # v0.34: the web bot path now matches sim.engine.phase6_operations: the deprecated "DIRTY_INCOME"
+        # mode resolves as the Algorithmic Arbitrage +$2 cash payout (Dirty Income itself is config-disabled).
+        self.assertEqual(player.money, 2)
+        self.assertEqual(player.secrets, 5)
+        self.assertEqual(player.ability_v1_status, AbilityStatus.USED)
         self.assertEqual(len(player.ready_dice), ready_before)
         self.assertEqual(len(player.unpatched_dice), unpatched_before)
 
@@ -853,15 +867,18 @@ class TestWebSerializerAndController(unittest.TestCase):
         self.assertTrue(caps0.get("can_operator"))
         self.assertFalse(caps0.get("can_prodigy"))
 
-        # Transition to Phase 3 with Player 2 (Phreaker) active and worn dice
+        # Phase 5 with Player 2 (Omnidyne / Phreaker) holding a Glitched die: Magnetic Splice available
         p2 = controller.state.players[2]
         p2.unpatched_dice.append(p2.ready_dice.pop(0))
-        controller.phase = 3
+        _pause_in_phase5(controller, 2)
         controller.active_player_index = 2
         caps2 = controller.get_action_capabilities(2)
         self.assertTrue(caps2.get("can_phreaker"))
+        self.assertTrue(caps2.get("can_splice"))
 
-        # Transition to Player 3 (Cipher) in Phase 3
+        # Transition to Player 3 (Cipher) in Phase 6: Operations
+        controller.phase = 6
+        controller.subphase = "player_turn"
         controller.active_player_index = 3
         caps3 = controller.get_action_capabilities(3)
         self.assertTrue(caps3.get("can_cipher_dirty"))
