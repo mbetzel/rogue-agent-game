@@ -425,52 +425,6 @@ class TestV230Rules(unittest.TestCase):
     # Category 4: Bot Heuristics & Deprecation Verification
     # =========================================================================
 
-    def test_base_bot_choose_debug_unlocks_returns_empty(self) -> None:
-        """BaseBot.choose_debug_unlocks is deprecated and returns []."""
-        bot = BaseBot(0)
-        p = PlayerState(0, bot, money=5, secrets=8, patches=3)
-        die = create_gray_die(1)
-        die.is_locked = True
-        res = bot.choose_debug_unlocks(p, [die], {}, {}, "DIRECTIVE", random.Random(42))
-        self.assertEqual(res, [])
-
-    def test_bot_subclasses_delegate_or_empty_debug_unlocks(self) -> None:
-        """All bot subclasses return [] for choose_debug_unlocks."""
-        subclasses = [
-            AdaptiveBalancedBot(0),
-            SecOpsTurtleBot(1),
-            VentureGreedBot(2),
-            AccelerationistBot(3),
-            RecklessSaboteurBot(4),
-        ]
-        for bot in subclasses:
-            p = PlayerState(bot.bot_id, bot, money=5, secrets=8, patches=3)
-            die = create_gray_die(1)
-            die.is_locked = True
-            res = bot.choose_debug_unlocks(p, [die], {}, {}, "DIRECTIVE", random.Random(42))
-            self.assertEqual(res, [], f"{bot.name} must return empty list for choose_debug_unlocks")
-
-    def test_bot_fast_patch_avoids_cap_waste(self) -> None:
-        """Bot fast-patches down to <= 3 patches to avoid end-of-round cap discard."""
-        bot = BaseBot(0)
-        p = PlayerState(0, bot, money=5, secrets=8, patches=4)
-        d1 = create_colored_die(DieColor.RED, 1)
-        d2 = create_gray_die(2)
-        p.glitched_dice = [d1, d2]
-
-        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
-        chosen = bot.choose_fast_patches(p, engine.state, random.Random(42))
-
-        self.assertEqual(chosen, [], "Fast patching is excised in v0.29.0")
-
-    def test_bot_fast_patch_prioritizes_colored_dice(self) -> None:
-        """BaseBot.choose_fast_patches is deprecated and returns [] in v0.29.0."""
-        bot = BaseBot(0)
-        p = PlayerState(0, bot, money=5, secrets=8, patches=4)
-        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
-        chosen = bot.choose_fast_patches(p, engine.state, random.Random(42))
-        self.assertEqual(chosen, [])
-
     def test_bot_full_round_wrench_conservation(self) -> None:
         """Run a full game round; verify bots spend 0 patches in Phase 1."""
         engine = GameEngine(

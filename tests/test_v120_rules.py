@@ -210,25 +210,6 @@ class TestV120Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     # Test 6: Debug Unlock Glitch Die with Patch Token
     # -------------------------------------------------------------------------
-    def test_06_glitch_die_debug_unlock_spending_patch(self) -> None:
-        """6. A locked glitch die can be unlocked by spending 1 🔬 token via choose_debug_unlocks."""
-        bot = AdaptiveBalancedBot(0)
-        red_die = create_colored_die(DieColor.RED, 10)
-        red_die.current_face = red_die.faces[4]  # Glitch
-        red_die.is_locked = True
-
-        player = PlayerState(0, bot, money=5, secrets=8, patches=1, ready_dice=[red_die])
-        unlocks = bot.choose_debug_unlocks(
-            player_state=player,
-            active_dice=[red_die],
-            staging_cubes={},
-            stuck_cubes={},
-            directive_code="SCRIPT_KIDDIE",
-            rng=random.Random(42),
-        )
-        # In v0.23.0, choose_debug_unlocks is deprecated and returns []
-        self.assertEqual(unlocks, [])
-
     # -------------------------------------------------------------------------
     # Test 7: Reroll Glitch Die After Debug Unlock
     # -------------------------------------------------------------------------
@@ -433,33 +414,6 @@ class TestV120Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     # Test 14: Bot Debug Unlock Prioritizes Colored Glitches
     # -------------------------------------------------------------------------
-    def test_14_bot_debug_unlock_prioritizes_colored_glitches(self) -> None:
-        """14. Bot debug unlock heuristics prioritize locked colored glitch dice over other locked dice."""
-        bot = AdaptiveBalancedBot(0)
-        # Die 0: Contractor die with glitch
-        c_die = create_white_die(100)
-        c_die.current_face = c_die.faces[4]  # Glitch
-        c_die.is_locked = True
-
-        # Die 1: Colored Red die with glitch
-        red_die = create_colored_die(DieColor.RED, 10)
-        red_die.current_face = red_die.faces[4]  # Glitch
-        red_die.is_locked = True
-
-        player = PlayerState(0, bot, money=5, secrets=8, patches=1, ready_dice=[red_die], contractor_dice=[c_die])
-        active_dice = [c_die, red_die]
-
-        unlocks = bot.choose_debug_unlocks(
-            player_state=player,
-            active_dice=active_dice,
-            staging_cubes={},
-            stuck_cubes={},
-            directive_code="SCRIPT_KIDDIE",
-            rng=random.Random(42),
-        )
-        # In v0.23.0, choose_debug_unlocks is deprecated and returns []
-        self.assertEqual(unlocks, [])
-
     # -------------------------------------------------------------------------
     # Test 15: Web Controller Human Glitch Triage
     # -------------------------------------------------------------------------
