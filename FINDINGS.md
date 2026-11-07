@@ -1925,3 +1925,13 @@ Bot follow-ups, not blocking:
 - Diversify roster focus orders.
 
 **Status: OFFICIALLY APPROVED (`v0.36.0` Baseline).** `v036()` sets Secrets 7 / 7 / 8. Phase B is done: RULES.md, glossary, CLAUDE.md, web and PnP; `GameConfig()` is now v0.36.
+
+## 35. Engine Fix: Multi-Version Black Cube Spillover Cascade (six-phase Phase 2, no rules change)
+
+The six-phase compiler (`sim/engine/phase2_compiler.py`) stopped spillover at v2.0: when spillover filled v2.0 in the same compile, later cubes were counted but not resolved, and the v3.0 advance waited for a later Black cube. RULES.md Phase 2 ("Version Advance & Track Spillover") already says excess cubes spill onto the next Version's track from Space 1, so the engine now matches the rules.
+
+- **Fix:** a new field, `GameState.pending_extra_version_advances`, queues one extra Version Switch for each non-final track that spillover fills. Spillover continues onto the following track from Space 1, and Singularity fires if it covers v3.0 Space 6. The Phase 1 Step 1 Version Switch then runs each queued switch in order. Each switch forfeits the old override, unlocks the new one and adds the new Version's staging payload, so on v1.0 → v3.0 the v2.0 override is unlocked and forfeited at once. `GameState.multi_version_spill_events` counts these compiles. The legacy v0.33 path (`legacy_v033.py`) is unchanged, for parity.
+- **Tests:** `tests/test_version_spillover_cascade.py` covers four cases: overfill v2.0 onto v3.0, exactly fill v2.0, cascade to Singularity, and a single-version regression guard.
+- **Frequency (v0.35 sweep setup, `GameConfig()` V035, seeds `42 + n*100000 + idx`, 1,000 games per pod):** **0 / 1,000** occurrences in 2P, 3P and 4P each. All 3,000 game fingerprints (rounds, end reason, winners, full rankings) match the pre-fix engine. Across the 26,223 compiles, at most 4 Black cubes exited in one compile and at most 3 spilled past a filled track. Filling v2.0 by spillover needs ≥ 6 in one compile. In every v1.0 compile, the Black cubes in the Staging Cup and tower were at least 3 short of that, so the case is possible under the rules but practically unreachable under current tuning. The fix only matters for future levers that raise Black cube volume.
+- **Decision (User, 2026-11-06):** keep the engine fix; no RULES.md cap or clarification for this hypothetical.
+- **v0.36 coordination:** the spec's §4.3 "known limitation / do not fix" note no longer applies. Its spillover-branch comparison hook falls exactly where the new non-final-fill arm runs (`spill_idx == next_ver.track_capacity` on a non-final target), and `double_version_fill_events` matches `multi_version_spill_events`.

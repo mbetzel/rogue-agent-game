@@ -448,12 +448,12 @@ class TestComparison(MSHarness):
         self.assertEqual(vs, [("v1.0", 2, False), ("v2.0", 4, True)])
         self.assertEqual(e.state.double_version_fill_events, 1)
         self.assertEqual([p.money for p in e.state.players], [11, 0])
-        # the delayed v3.0 advance later re-hits capacity on v2.0: once-guard blocks a duplicate
+        # spillover cascade (FINDINGS §35): the next Version Switch goes straight to v3.0, and
+        # later compiles never repeat a comparison (once per version)
         phase1_roll_deploy.check_and_execute_start_of_round_version_transition(e)
-        self.assertEqual(e.state.active_version.version_str, "v2.0")
+        self.assertEqual(e.state.active_version.version_str, "v3.0")
         self.run_phases_2_to_4(e, self.bare(e), {CubeColor.BLACK: 1})
         self.assertEqual(len(e.state.version_comparisons), 2)
-        self.assertTrue(e.state.pending_version_advance)
 
     def test_ms18_no_comparison_on_v3_or_game_end(self):
         e = self.make_ms()

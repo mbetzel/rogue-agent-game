@@ -350,24 +350,35 @@ def execute_compiler_drop(engine: GameEngine, player_commitments: Commitments) -
                         state.pending_version_advance = True
                         state.overflow_black_cubes_on_next_track = 0
             else:
+                # Spillover: cubes go onto the pending target Version's track, cascading through every
+                # track they fill (RULES Phase 2 "Version Advance & Track Spillover").
+                last_idx = len(state.version_deck) - 1
                 state.overflow_black_cubes_on_next_track += 1
-                next_ver_idx = min(state.current_version_index + 1, len(state.version_deck) - 1)
+                next_ver_idx = min(
+                    state.current_version_index + 1 + state.pending_extra_version_advances, last_idx
+                )
                 next_ver = state.version_deck[next_ver_idx]
                 spill_idx = state.overflow_black_cubes_on_next_track
                 if next_ver.corruption_track and 1 <= spill_idx <= len(next_ver.corruption_track):
                     _resolve(next_ver.corruption_track[spill_idx - 1])
-                if next_ver_idx < len(state.version_deck) - 1 and spill_idx == next_ver.track_capacity:
+                if spill_idx >= next_ver.track_capacity:
+                    if next_ver_idx >= last_idx:
+                        state.current_version_index = next_ver_idx
+                        state.corruption_track = spill_idx
+                        state.pending_version_advance = False
+                        state.pending_extra_version_advances = 0
+                        state.overflow_black_cubes_on_next_track = 0
+                        state.singularity_triggered = True
+                        break
+                    # A non-final track filled by spillover: queue one more Version Switch and keep
+                    # spilling onto the following Version's track from Space 1.
+                    state.pending_extra_version_advances += 1
                     # Spillover covered the final space of a non-last version (spec §4.3, E6). The counter is
                     # telemetry only (both modes); the comparison is a no-op under RANSOM.
                     state.double_version_fill_events += 1
                     market_share.resolve_version_comparison(engine, next_ver.version_str, True)
-                if next_ver_idx >= len(state.version_deck) - 1 and spill_idx >= next_ver.track_capacity:
-                    state.current_version_index = next_ver_idx
-                    state.corruption_track = spill_idx
-                    state.pending_version_advance = False
                     state.overflow_black_cubes_on_next_track = 0
-                    state.singularity_triggered = True
-                    break
+                    state.multi_version_spill_events += 1
 
         apply_p2_chaos_profiteer_bonus(engine, player_commitments, black_dropped)
 
