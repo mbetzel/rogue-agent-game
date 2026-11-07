@@ -246,7 +246,7 @@ class TestGroupCEngineAndTowerMechanics(unittest.TestCase):
     def test_engine_upgrade_polymorphic_worm_adds_black_cube(self) -> None:
         """10. Version upgrade to Polymorphic Worm adds Black cube to Staging Cup in 4P and 2P."""
         # 4P Test
-        cfg_4p = GameConfig(num_players=4, tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=1.0, corruption_track_flat_capacity=4)
+        cfg_4p = GameConfig.legacy_v035(num_players=4, tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=1.0, corruption_track_flat_capacity=4)
         bots_4p = [AdaptiveBalancedBot(i) for i in range(4)]
         v082_cards = get_v082_test_cards()
         deck_contagion = [v082_cards["SCRIPT_KIDDIE"], v082_cards["POLYMORPHIC_WORM"], v082_cards["ZERO_DAY_OVERRIDE"]]
@@ -267,7 +267,7 @@ class TestGroupCEngineAndTowerMechanics(unittest.TestCase):
         self.assertEqual(engine_4p.state.staging_cup[CubeColor.BLACK], 1)
 
         # 2P Test
-        cfg_2p = GameConfig(num_players=2, tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=1.0, corruption_track_flat_capacity=4)
+        cfg_2p = GameConfig.legacy_v035(num_players=2, tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=1.0, corruption_track_flat_capacity=4)
         bots_2p = [AdaptiveBalancedBot(i) for i in range(2)]
         engine_2p = GameEngine(config=cfg_2p, bots=bots_2p, seed=42, version_deck=deck_contagion)
 
@@ -287,7 +287,7 @@ class TestGroupCEngineAndTowerMechanics(unittest.TestCase):
     def test_engine_upgrade_zero_day_override_adds_black_cube(self) -> None:
         """11. Version upgrade to Zero-Day Override adds Black cube to Staging Cup in 4P and 2P."""
         # 4P Test
-        cfg_4p = GameConfig(num_players=4, tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=1.0, corruption_track_flat_capacity=4)
+        cfg_4p = GameConfig.legacy_v035(num_players=4, tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=1.0, corruption_track_flat_capacity=4)
         bots_4p = [AdaptiveBalancedBot(i) for i in range(4)]
         v082_cards = get_v082_test_cards()
         deck_contagion = [v082_cards["SCRIPT_KIDDIE"], v082_cards["POLYMORPHIC_WORM"], v082_cards["ZERO_DAY_OVERRIDE"]]
@@ -312,7 +312,7 @@ class TestGroupCEngineAndTowerMechanics(unittest.TestCase):
         self.assertEqual(engine_4p.state.staging_cup[CubeColor.BLACK], 1)
 
         # 2P Test
-        cfg_2p = GameConfig(num_players=2, tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=1.0, corruption_track_flat_capacity=4)
+        cfg_2p = GameConfig.legacy_v035(num_players=2, tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=1.0, corruption_track_flat_capacity=4)
         bots_2p = [AdaptiveBalancedBot(i) for i in range(2)]
         engine_2p = GameEngine(config=cfg_2p, bots=bots_2p, seed=42, version_deck=deck_contagion)
 
@@ -333,7 +333,7 @@ class TestGroupCEngineAndTowerMechanics(unittest.TestCase):
 
     def test_tower_drop_with_upgrade_black_cubes(self) -> None:
         """12. CubeTower correctly drops and processes Black cubes added by version upgrades."""
-        cfg = GameConfig(tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=1.0)
+        cfg = GameConfig.legacy_v035(tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=1.0)
         tower = CubeTower(cfg)
 
         staged = {CubeColor.RED: 1, CubeColor.GREEN: 1, CubeColor.BLUE: 1, CubeColor.BLACK: 2}
@@ -345,7 +345,7 @@ class TestGroupCEngineAndTowerMechanics(unittest.TestCase):
         self.assertEqual(tower.stuck_cubes[CubeColor.BLACK], 0)
 
         # Test with 0% exit probability (all cubes get stuck)
-        cfg_stuck = GameConfig(tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=0.0)
+        cfg_stuck = GameConfig.legacy_v035(tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=0.0)
         tower_stuck = CubeTower(cfg_stuck)
         exited_stuck = tower_stuck.drop(staged, rng)
         self.assertEqual(exited_stuck[CubeColor.BLACK], 0)

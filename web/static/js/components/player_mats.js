@@ -26,6 +26,9 @@ const TRACK_STRIPS = [
   { key: "patent", label: "📜 PATENTS", color: "#c084fc", rgb: "192,132,252",
     steps: ["2 🔬 → 1 Secret", "★ +$3", "3 🔬 → 2 Secrets", "★ 2nd Purple die", "1 🔬 → 1 Secret"] },
 ];
+// v0.36.0: the fourth track is the Public Relations Track (Phase 6: spend 2 🔬 per +1 Market Share, limit per turn).
+const PUBLIC_RELATIONS_STRIP = { key: "patent", label: "📣 PUBLIC RELATIONS", color: "#c084fc", rgb: "192,132,252",
+  steps: ["+1 Market Share / turn (2 🔬)", "★ +$3 · +1 / turn", "+2 Market Share / turn", "★ 2nd Purple die · +2 / turn", "+3 Market Share / turn"] };
 const TRACK_STRIPS_V034 = {
   triage: ["Bandwidth 2", "Bandwidth 3", "Bandwidth 4"],
   release: ["Bandwidth 4", "Bandwidth 5", "Bandwidth 6"],
@@ -35,7 +38,8 @@ const TRACK_STRIPS_V034 = {
 
 function renderTrackStrips(p) {
   const maxLvl = p.max_track_level === 2 ? 2 : 4;
-  const cards = TRACK_STRIPS.map((t) => {
+  const strips = state.is_share_regain ? TRACK_STRIPS.map((t) => (t.key === "patent" ? PUBLIC_RELATIONS_STRIP : t)) : TRACK_STRIPS;
+  const cards = strips.map((t) => {
     const lvl = p[`${t.key}_level`] || 0;
     const steps = maxLvl === 4 ? t.steps : TRACK_STRIPS_V034[t.key];
     const cells = steps.map((txt, i) => {
@@ -103,7 +107,7 @@ const COMPANIES_DATA = {
     sector: "Federal Agency",
     overrideName: "Slush Fund",
     timing: "P4: ATTACK RESOLUTION",
-    description: "Once per Rogue Agent Version, absorb up to 2 Corporate Secret loss (from Blue Spyware or Red Ransom) for free without paying cash.",
+    description: "Once per game, absorb up to 2 Corporate Secret loss (from Blue Spyware) for free without paying cash.",
     themeColor: "#a855f7",
     startingSetupDesc: "Def Cap 2, Triage 2, Release 4, +1 Corporate Secret.",
   },
@@ -115,7 +119,7 @@ const COMPANIES_DATA = {
     timing: "P1: REROLLS",
     description: "Once per Rogue Agent Version, during Phase 1 rerolls, include locked dice for free and turn 1 rolled die to any legal non-Star face.",
     themeColor: "#f43f5e",
-    startingSetupDesc: "Starts at Patent Lvl 1 (3 🔬 cost), +2 🔬 Starting Research (2 🔬 total).",
+    startingSetupDesc: "Def Cap 2, Triage 2, Release 4.",
   },
   PROMETHEUS: {
     code: "PROMETHEUS",
@@ -345,7 +349,7 @@ export function renderPlayerMats() {
       <span class="tab-player-icon">${isHuman ? "👤" : "🤖"}</span>
       <span class="tab-player-name">${p.name}</span>
       ${isFirstPlayer ? '<span class="tab-first-player-tag">1ST PLAYER</span>' : ''}
-      <span class="tab-vp-badge">${p.secrets} Secrets</span>
+      <span class="tab-vp-badge">${p.secrets} Secrets${p.market_share !== null && p.market_share !== undefined ? ` · ${p.market_share} MS` : ''}</span>
     `;
     tabBtn.onclick = () => {
       setActivePlayerTab(p.player_id);
@@ -444,7 +448,7 @@ export function renderPlayerMats() {
         <div class="terminal-banner-right">
           ${isFirstPlayerMat ? '<span class="first-player-pill">★ FIRST PLAYER</span>' : ''}
           ${p.is_patient_zero ? '<span class="breach-pill">TOTAL DATA BREACH</span>' : ''}
-          <span class="vp-pill">${p.secrets} Secrets</span>
+          <span class="vp-pill">${p.secrets} Secrets</span>${p.market_share !== null && p.market_share !== undefined ? `<span class="vp-pill" title="Market Share" style="color: #f43f5e;">📈 ${p.market_share}/${p.market_share_max}</span>` : ''}
         </div>
       </div>
 
@@ -588,7 +592,7 @@ export function renderPlayerMats() {
                     <span class="shield-count">(${redShieldDice.length + blueShieldDice.length + greenShieldDice.length + anyShieldDice.length}/${p.defense_capacity || 2} CAP)</span>
                   </div>
                   <div style="font-size: 0.65rem; color: var(--text-dim);">
-                    Red (Ransom) | Blue (Spyware) | Green (Malware) | Any
+                    ${state.is_market_share ? 'Red (Market Manipulation)' : 'Red (Ransom)'} | Blue (Spyware) | Green (Malware) | Any
                   </div>
                 </div>
                 <div class="shield-desc-sub1">Active Shields Committed Against Compiler Threats</div>
@@ -692,7 +696,7 @@ export function renderPlayerMats() {
             <span class="reserve-currency-value" style="color: #c084fc;">${p.research_tokens !== undefined ? p.research_tokens : p.patches}</span>
           </div>
           <div class="reserve-card-footer">
-            Hardware Upgrades | Cryptographic Patents
+            Hardware Upgrades | ${p.patent_track_name || 'Cryptographic Patents'}
           </div>
         </div>
 
@@ -707,9 +711,24 @@ export function renderPlayerMats() {
             <span class="reserve-secrets-value ${p.secrets <= 2 ? 'critical' : ''}">${p.secrets}</span>
           </div>
           <div class="reserve-card-footer ${p.secrets <= 0 ? 'breach-alert' : ''}">
-            ${p.secrets <= 0 ? '<strong style="color: #ff0055;">TOTAL DATA BREACH (PATIENT ZERO)</strong>' : 'Start: 8 (2P/3P) | 12 (4P) — ≤0 = Total Breach'}
+            ${p.secrets <= 0 ? '<strong style="color: #ff0055;">TOTAL DATA BREACH (PATIENT ZERO)</strong>' : (state.is_market_share ? 'Start: 7 (2P/3P) | 8 (4P) — ≤0 = Total Breach' : 'Start: 8 — ≤0 = Total Breach')}
           </div>
         </div>
+
+        ${p.market_share !== null && p.market_share !== undefined ? `
+        <!-- 3b. Market Share (v0.36.0) -->
+        <div class="reserve-card market-share-card" style="border-color: rgba(244, 63, 94, 0.45);">
+          <div class="reserve-card-header">
+            <span class="reserve-card-title" style="color: #f43f5e;">📈 MARKET SHARE</span>
+            <span class="reserve-rate-pill" style="background: rgba(244, 63, 94, 0.18); color: #f43f5e;">MAX ${p.market_share_max}</span>
+          </div>
+          <div class="reserve-card-main">
+            <span class="reserve-secrets-value ${p.market_share <= 3 ? 'critical' : ''}" style="color: #f43f5e;">${p.market_share}</span>
+          </div>
+          <div class="reserve-card-footer ${p.market_share <= 0 ? 'breach-alert' : ''}">
+            ${p.market_share <= 0 ? '<strong style="color: #ff0055;">MARKET COLLAPSE (FINAL ROUND)</strong>' : `−1 per unblocked Red | Regain: ${p.regain_cost} 🔬 each, +${p.regain_cap} / turn`}
+          </div>
+        </div>` : ''}
 
         <!-- 4. Personal Purple Reserve -->
         <div class="reserve-card purple-reserve-card ${p.can_buy_purple_reserve ? 'clickable' : ''}" id="purple_reserve_${p.player_id}" style="border-color: rgba(168, 85, 247, 0.4);">
@@ -724,11 +743,11 @@ export function renderPlayerMats() {
             </div>
             <div class="patch-token-slot ${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 1) >= 1 ? 'filled' : 'empty'}" style="border-color: #a855f7;" title="${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 1) >= 1 ? 'Die 2: In Personal Reserve' : 'Die 2: Released'}">
               <span class="slot-number-lbl">DIE 2</span>
-              <span class="slot-wrench-icon" style="color: #c084fc;">${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 1) >= 1 ? (p.purple_purchasable === false ? 'PAT L3' : `▼ $${p.purple_reserve_cost !== undefined ? p.purple_reserve_cost : 4}`) : '✓'}</span>
+              <span class="slot-wrench-icon" style="color: #c084fc;">${(p.personal_purple_reserve !== undefined ? p.personal_purple_reserve : 1) >= 1 ? (p.purple_purchasable === false ? (state.is_share_regain ? 'PR L3' : 'PAT L3') : `▼ $${p.purple_reserve_cost !== undefined ? p.purple_reserve_cost : 4}`) : '✓'}</span>
             </div>
           </div>
           <div class="reserve-card-footer">
-            ${p.purple_purchasable === false ? 'Die 1: Setup | Die 2: Patents L3 Breakthrough' : (p.can_buy_purple_reserve ? `<strong style="color: #c084fc;">CLICK TO PROCURE ($${p.purple_reserve_cost !== undefined ? p.purple_reserve_cost : 4})</strong>` : 'Die 1: Setup | Die 2: Reserve ($' + (p.purple_reserve_cost !== undefined ? p.purple_reserve_cost : 4) + ')')}
+            ${p.purple_purchasable === false ? `Die 1: Setup | Die 2: ${state.is_share_regain ? 'Public Relations' : 'Patents'} L3 Breakthrough` : (p.can_buy_purple_reserve ? `<strong style="color: #c084fc;">CLICK TO PROCURE ($${p.purple_reserve_cost !== undefined ? p.purple_reserve_cost : 4})</strong>` : 'Die 1: Setup | Die 2: Reserve ($' + (p.purple_reserve_cost !== undefined ? p.purple_reserve_cost : 4) + ')')}
           </div>
         </div>
       </div>

@@ -56,7 +56,7 @@ class TestV06Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_config_parameters_v06(self) -> None:
         """GameConfig defines contractor and reroll parameters for v0.6."""
-        cfg = GameConfig()
+        cfg = GameConfig.legacy_v035()
         self.assertEqual(cfg.contractor_hire_cost, 1)
         self.assertEqual(cfg.contractor_max_hire, 3)
         self.assertEqual(cfg.contractor_supply_total, 12)
@@ -64,7 +64,7 @@ class TestV06Rules(unittest.TestCase):
         self.assertEqual(cfg.throttled_free_rerolls, 1)
         self.assertEqual(cfg.vp_per_die[DieColor.WHITE], 0)
 
-        engine = GameEngine(config=GameConfig(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
         self.assertEqual(engine.state.contractor_supply, 12)
 
     # -------------------------------------------------------------------------
@@ -186,7 +186,7 @@ class TestV06Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_contractor_hiring_deduction_and_supply(self) -> None:
         """Hiring contractors deducts $1 per die, decrements supply, and adds dice to player."""
-        engine = GameEngine(config=GameConfig(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
         p0 = engine.state.players[0]
         p0.money = 7
         self.assertEqual(engine.state.contractor_supply, 12)
@@ -449,7 +449,7 @@ class TestV06Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_white_contractor_wear_immunity(self) -> None:
         """White contractor dice that absorb damage are immune to wear and do not go to unpatched zone."""
-        engine = GameEngine(config=GameConfig(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
         p0 = engine.state.players[0]
 
         shield_face = Face("Block 1 Red", shield_color=ShieldColor.RED, block_amount=1)
@@ -496,7 +496,7 @@ class TestV06Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_green_malware_contractor_sacrifice_and_expiration(self) -> None:
         """Green malware can be absorbed by contractor sacrifice, and contractors expire to supply."""
-        engine = GameEngine(config=GameConfig(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
         p0 = engine.state.players[0]
 
         c_die1 = create_white_die(101)
@@ -535,7 +535,7 @@ class TestV06Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_evaluate_end_game_includes_contractor_and_reroll_metrics(self) -> None:
         """evaluate_end_game includes total_contractors_hired and total_rerolls_used."""
-        engine = GameEngine(config=GameConfig(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
         p0 = engine.state.players[0]
         p0.total_contractors_hired = 3
         p0.total_rerolls_used = 4

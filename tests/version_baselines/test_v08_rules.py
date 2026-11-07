@@ -217,7 +217,7 @@ class TestV08Rules(unittest.TestCase):
         raas_card = next(c for c in deck if c.directive_code == "RAAS")
 
         engine = GameEngine(
-            config=GameConfig(num_players=2),
+            config=GameConfig.legacy_v035(num_players=2),
             bots=[BaseBot(0), BaseBot(1)],
             version_deck=[raas_card, raas_card, raas_card],
             seed=42,
@@ -255,7 +255,7 @@ class TestV08Rules(unittest.TestCase):
         zero_day_card = next(c for c in deck if c.directive_code == "ZERO_DAY_OVERRIDE")
 
         engine = GameEngine(
-            config=GameConfig(num_players=2),
+            config=GameConfig.legacy_v035(num_players=2),
             bots=[BaseBot(0), BaseBot(1)],
             version_deck=[zero_day_card, zero_day_card, zero_day_card],
             seed=42,
@@ -285,7 +285,7 @@ class TestV08Rules(unittest.TestCase):
     def test_phase1_sequence_assign_before_collect(self) -> None:
         """Step 5 (Assign Defenses & Choices) precedes Step 6 (Gain Resource Outputs)."""
         engine = GameEngine(
-            config=GameConfig(num_players=2),
+            config=GameConfig.legacy_v035(num_players=2),
             bots=[AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)],
             seed=42,
         )
@@ -320,7 +320,7 @@ class TestV08Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_blue_choice_face_committed_to_shield_produces_no_patch(self) -> None:
         """Committed Blue Face 4 blocks Blue damage and produces 0 patches in Step 6."""
-        engine = GameEngine(config=GameConfig(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         blue_die = create_colored_die(DieColor.BLUE, 10)
         blue_face = blue_die.faces[3]  # Block 1 Blue / +1 🔬
@@ -347,7 +347,7 @@ class TestV08Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_blue_choice_face_unassigned_produces_patch(self) -> None:
         """Unassigned Blue Face 4 syncs choice 1 and grants +1 🔬 in Step 6."""
-        engine = GameEngine(config=GameConfig(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         blue_die = create_colored_die(DieColor.BLUE, 10)
         blue_face = blue_die.faces[3]  # Block 1 Blue / +1 🔬
@@ -402,7 +402,7 @@ class TestV08Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_gray_choice_face_patch_declaration(self) -> None:
         """Declaring Choice 1 on Gray Face 5 grants +1 🔬 in Step 6 without altering cash."""
-        engine = GameEngine(config=GameConfig(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         gray_die = create_gray_die(10)
         gray_face = gray_die.faces[4]  # +$1 / +1 🔬
@@ -478,7 +478,7 @@ class TestV08Rules(unittest.TestCase):
         g1_card = variants[DieColor.GREEN]  # G1: Self-Healing Kernel: Block 2 Green + gain +1 🔬
 
         engine = GameEngine(
-            config=GameConfig(num_players=2),
+            config=GameConfig.legacy_v035(num_players=2),
             bots=[BaseBot(0), BaseBot(1)],
             variant_cards={DieColor.RED: r1_card, DieColor.GREEN: g1_card},
             seed=42,
@@ -623,7 +623,7 @@ class TestV08Rules(unittest.TestCase):
         """When Blue Face 4 is committed to Blue defense and 1 Blue cube exits in Phase 2:
         0 Blue damage is taken (secrets stay intact) and under Zero Dice Wear the Blue die remains in production.
         """
-        engine = GameEngine(config=GameConfig(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         blue_die = create_colored_die(DieColor.BLUE, 10)
         blue_face = blue_die.faces[3]  # Block 1 Blue / +1 🔬

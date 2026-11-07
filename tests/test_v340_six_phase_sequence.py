@@ -127,7 +127,7 @@ class SixPhaseHarness(unittest.TestCase):
     """Builds a neutral engine (no companies / operatives / priming) with stub bots."""
 
     def make_engine(self, n: int = 2, deck=None, bots=None, **cfg_kw) -> GameEngine:
-        cfg = GameConfig(num_players=n, enable_compiler_priming=False, **cfg_kw)
+        cfg = GameConfig.legacy_v035(num_players=n, enable_compiler_priming=False, **cfg_kw)
         bots = bots or [StubBot(i) for i in range(n)]
         e = GameEngine(cfg, bots, seed=7, version_deck=deck or noop_deck())
         for p in e.state.players:
@@ -281,7 +281,7 @@ class TestSixPhaseIncomeTiming(SixPhaseHarness):
         self.assertEqual(p0.money, 1)
 
     def test_contractors_expire_end_of_phase4_supply_conserved(self):  # S-06
-        total = GameConfig().contractor_supply_total
+        total = GameConfig.legacy_v035().contractor_supply_total
         for exits in ({CubeColor.BLUE: 1}, {}, {CubeColor.GREEN: 1}):  # normal, overflow, Contractor Sacrifice
             e = self.make_engine()
             p0, p1 = e.state.players
@@ -642,13 +642,13 @@ class TestSixPhaseBotsAndSetup(SixPhaseHarness):
         e = GameEngine(GameConfig.legacy_v033(num_players=4, enable_corporate_asymmetry=True),
                        [BaseBot(i) for i in range(4)], seed=1, companies=comps)
         self.assertEqual(e.state.players[0].secrets, 13)
-        self.assertEqual(GameConfig(num_players=4, starting_secrets_by_player_count={4: 10}).get_starting_secrets(4), 10)
-        self.assertEqual(GameConfig(round_sequence="V033_THREE_PHASE").round_sequence, RoundSequence.V033_THREE_PHASE)
-        self.assertTrue(GameConfig().round_sequence == "SIX_PHASE")
+        self.assertEqual(GameConfig.legacy_v035(num_players=4, starting_secrets_by_player_count={4: 10}).get_starting_secrets(4), 10)
+        self.assertEqual(GameConfig.legacy_v035(round_sequence="V033_THREE_PHASE").round_sequence, RoundSequence.V033_THREE_PHASE)
+        self.assertTrue(GameConfig.legacy_v035().round_sequence == "SIX_PHASE")
 
     def test_round_telemetry_six_phase_fields(self):  # S-20
         for seed in range(6):
-            e = GameEngine(GameConfig(num_players=3), seed=seed)
+            e = GameEngine(GameConfig.legacy_v035(num_players=3), seed=seed)
             rounds = 0
             while not e.state.game_over:
                 survivors = {p.player_id for p in e.state.players if not p.is_patient_zero}
@@ -702,7 +702,7 @@ class TestSixPhaseBotsAndSetup(SixPhaseHarness):
 
     def test_six_phase_never_sets_pre_step2b_snapshot(self):  # S-22
         for seed in range(8):
-            e = GameEngine(GameConfig(num_players=4, enable_corporate_asymmetry=True), seed=seed)
+            e = GameEngine(GameConfig.legacy_v035(num_players=4, enable_corporate_asymmetry=True), seed=seed)
             while not e.state.game_over:
                 e.run_round()
                 for p in e.state.players:

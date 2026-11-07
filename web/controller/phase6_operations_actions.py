@@ -70,6 +70,7 @@ def advance_operations_turns(controller: GameController) -> None:
         if meta["is_human"]:
             meta["purchases_this_turn"] = 0
             meta["dirty_income_taken_this_turn"] = False
+            player.regain_this_turn = 0  # v0.36.0 Public Relations Track: per-Operations-Turn cap
             return
 
         controller.operations_turn_queue.pop(0)
@@ -292,6 +293,7 @@ def _execute_bot_operations_v035(controller: GameController, player: PlayerState
     from sim.engine.phase6_operations import execute_player_operations_turn
 
     money0, secrets0, research0 = player.money, player.secrets, player.research_tokens
+    ms0, regain0, r2_0 = player.market_share, player.market_share_regained, player.r2_uses
     bt0 = len(player.breakthroughs)
     dice0 = {d.die_id for d in player.ready_for_release_dice}
     lv0 = {t: getattr(player, a) for t, a in research_tracks.LEVEL_ATTR.items()}
@@ -308,9 +310,16 @@ def _execute_bot_operations_v035(controller: GameController, player: PlayerState
         controller.event_log.append(
             f"{meta['name']} added {', '.join(d.color.value.capitalize() for d in new_dice)} to Ready for Release."
         )
+    if player.market_share_regained > regain0:
+        controller.event_log.append(
+            f"{meta['name']} Public Relations Track: regained {player.market_share_regained - regain0} Market Share."
+        )
+    if player.r2_uses > r2_0:
+        controller.event_log.append(f"{meta['name']} Ad Campaign: +{player.r2_uses - r2_0} Market Share.")
+    ms_note = f", Market Share {ms0} -> {player.market_share}" if ms0 is not None else ""
     controller.event_log.append(
         f"{meta['name']} finished Operations (${player.money - money0:+d}, {player.secrets - secrets0:+d} Secrets, "
-        f"{player.research_tokens - research0:+d} 🔬)."
+        f"{player.research_tokens - research0:+d} 🔬{ms_note})."
     )
 
 
@@ -820,6 +829,23 @@ def execute_star_action(
         player.p3_available = None
         controller.event_log.append(f"{meta['name']} activated P3 Packet Deflection: paid ${cost} to add 1 {chosen.value.capitalize()} Cube to Staging Cup.")
 
+    elif action_type in ("R2", "R2_MKT", "AD_CAMPAIGN"):
+        cfg = controller.state.config
+        if not cfg.is_market_share:
+            raise ValueError("Ad Campaign requires the Market Share ruleset")
+        if player.r2_actions_available <= 0:
+            raise ValueError("Ad Campaign is not available: no Ad Campaign face was In Production in Phase 3")
+        if player.market_share >= player.market_share_max:
+            raise ValueError("Market Share is already at its maximum")
+        if player.money < cfg.r2_share_cost:
+            raise ValueError(f"Ad Campaign requires ${cfg.r2_share_cost}")
+        from sim.engine.phase6_operations import execute_ad_campaigns
+
+        execute_ad_campaigns(controller.engine, player, 1)
+        controller.event_log.append(
+            f"{meta['name']} ran an Ad Campaign: paid ${cfg.r2_share_cost} for +{cfg.r2_share_gain} Market Share."
+        )
+
     else:
         raise ValueError(f"Unsupported star action type: {action_type}")
 
@@ -844,6 +870,7 @@ def end_turn(controller: GameController, player_id: int) -> Dict[str, Any]:
     pending = getattr(controller, "pending_breakthrough", {}) or {}
     if player_id in pending:  # an unanswered Triage L3 prompt is declined (forfeited, OQ-1)
         resolve_pending_breakthrough(controller, player_id, accept=False)
+    controller.state.players[player_id].r2_actions_available = 0  # unused Ad Campaign actions are lost
     controller.event_log.append(f"{meta['name']} ended operations turn.")
 
     if controller.operations_turn_queue and controller.operations_turn_queue[0] == player_id:
@@ -910,7 +937,12 @@ def file_cryptographic_patent(
     controller: GameController,
     player_id: int,
 ) -> Dict[str, Any]:
-    """Human action: Files a Cryptographic Patent for +1 Corporate Secret (INV-PATENT-CONV-01)."""
+    """Human action: Files a Cryptographic Patent for +1 Corporate Secret (INV-PATENT-CONV-01).
+
+    v0.35 ruleset only: under the Public Relations Track there is no Patent Filing (use ``regain_market_share``).
+    """
+    if controller.state.config.is_share_regain:
+        raise ValueError("No Patent Filing under the Public Relations Track: spend research to regain Market Share instead")
     if controller.phase != int(RoundPhase.OPERATIONS):
         raise ValueError(f"Cannot file cryptographic patents in phase {controller.phase}")
     if player_id != controller.active_player_index:
@@ -944,3 +976,37 @@ def file_cryptographic_patent(
     return controller.get_full_state()
 
 
+
+
+def regain_market_share(controller: GameController, player_id: int) -> Dict[str, Any]:
+    """Human action (v0.36.0 Public Relations Track): spend research for +1 Market Share.
+
+    Cost and per-Operations-Turn cap come from the current Public Relations Track level (INV-MS-REGAIN-01).
+    """
+    cfg = controller.state.config
+    if not cfg.is_share_regain:
+        raise ValueError("Market Share regain requires the Public Relations Track ruleset")
+    if controller.phase != int(RoundPhase.OPERATIONS):
+        raise ValueError(f"Market Share can only be regained in Phase 6: Operations (current phase {controller.phase})")
+    if player_id != controller.active_player_index:
+        raise ValueError(f"Not player {player_id}'s turn (current: {controller.active_player_index})")
+    player = controller.state.players[player_id]
+    meta = controller.player_meta[player_id]
+    if player.is_patient_zero:
+        raise ValueError("Eliminated players cannot regain Market Share")
+    _require_no_pending_breakthrough(controller, player_id)
+    cost, cap = research_tracks.regain_rate(cfg, player)
+    if player.market_share >= player.market_share_max:
+        raise ValueError("Market Share is already at its maximum")
+    if player.regain_this_turn >= cap:
+        raise ValueError(f"Public Relations Track limit reached: +{cap} Market Share this turn at Level {player.patent_level}")
+    if player.research_tokens < cost:
+        raise ValueError(f"Insufficient research tokens: need {cost} 🔬, have {player.research_tokens} 🔬")
+    player.research_tokens -= cost
+    player.research_spent_regain += cost
+    player.change_market_share(+1, "regain")
+    player.regain_this_turn += 1
+    controller.event_log.append(
+        f"{meta['name']} Public Relations Track: spent {cost} 🔬 for +1 Market Share (now {player.market_share})."
+    )
+    return controller.get_full_state()

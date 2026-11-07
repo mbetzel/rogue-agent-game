@@ -9,7 +9,7 @@ from sim.tower import CubeTower
 
 class TestCubeTower(unittest.TestCase):
     def setUp(self) -> None:
-        self.config = GameConfig()
+        self.config = GameConfig.legacy_v035()
         self.tower = CubeTower(self.config)
 
     def test_tower_initial_empty(self) -> None:
@@ -30,7 +30,7 @@ class TestCubeTower(unittest.TestCase):
         self.assertEqual(self.tower.total_stuck(), 0)
 
     def test_flat_binomial_probabilities(self) -> None:
-        cfg = GameConfig(tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=1.0)
+        cfg = GameConfig.legacy_v035(tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=1.0)
         tower = CubeTower(cfg)
         rng = random.Random(123)
 
@@ -45,14 +45,14 @@ class TestCubeTower(unittest.TestCase):
         self.assertEqual(tower.total_stuck(), 0)
 
         # With p=0.0, all cubes remain stuck
-        cfg_zero = GameConfig(tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=0.0)
+        cfg_zero = GameConfig.legacy_v035(tower_mode=TowerMode.FLAT_BINOMIAL, tower_flat_exit_prob=0.0)
         tower_zero = CubeTower(cfg_zero)
         exited_zero = tower_zero.drop(staged, rng)
         self.assertEqual(sum(exited_zero.values()), 0)
         self.assertEqual(tower_zero.total_stuck(), 7)
 
     def test_ledge_avalanche_probability_scaling(self) -> None:
-        cfg = GameConfig(
+        cfg = GameConfig.legacy_v035(
             tower_mode=TowerMode.LEDGE_AVALANCHE,
             tower_ledge_capacity=5.0,
             tower_base_exit_prob=0.60,

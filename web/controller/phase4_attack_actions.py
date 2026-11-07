@@ -92,6 +92,12 @@ def _threat_summary(controller: GameController, pid: int, attack: Dict[CubeColor
     red, blue, green = _col("red"), _col("blue"), _col("green")
     red.update(unpaid_ransom=bd.get("unpaid_ransom", 0) if bd else 0,
                flat_leak=bd.get("flat_ransom_leak", False) if bd else False)
+    cfg = controller.state.config
+    if cfg.is_market_share:
+        # v0.36.0 Market Manipulation: unblocked Red lowers Market Share (no Money / Secrets)
+        red.update(unpaid_ransom=0, flat_leak=False, market_share=player.market_share,
+                   market_share_max=player.market_share_max,
+                   market_share_lost=bd.get("market_share_lost", 0) if bd else min(player.market_share or 0, red["unblocked"]))
     green.update(fizzled=bd.get("malware_fizzled", False) if bd else (green["unblocked"] > 0 and not player.in_production_dice),
                  pending_glitches=0 if resolved else green["unblocked"],
                  candidate_dice=[] if resolved else _candidate_dice(player, income_rows))
@@ -114,6 +120,9 @@ def _threat_summary(controller: GameController, pid: int, attack: Dict[CubeColor
         "firewall_blocked": bd.get("firewall_blocked") if bd else None,
         "money": player.money,
         "secrets": player.secrets,
+        "red_mode": cfg.red_mode.value,
+        "any_shield_policy": cfg.any_shield_policy.value,
+        "market_share": player.market_share,
         "r2_count": sum(1 for d in rolled if (d.effective_face or d.current_face) and (d.effective_face or d.current_face).star_code == "R2"),
         "r3_count": sum(1 for d in rolled if (d.effective_face or d.current_face) and (d.effective_face or d.current_face).star_code == "R3"),
         "b1_count": sum(1 for d in rolled if (d.effective_face or d.current_face) and (d.effective_face or d.current_face).star_code == "B1"),
@@ -195,9 +204,15 @@ def _finish_phase_4(controller: GameController) -> None:
         bd = getattr(controller.state.players[pid], "last_defense_breakdown", None)
         if bd:
             u = bd["unblocked"]
+            ms = (f" Market Share {bd['market_share_before']} -> {bd['market_share_after']}."
+                  if bd.get("market_share_after") is not None else "")
             controller.event_log.append(
-                f"{controller.player_meta[pid]['name']} Attack Resolution: unblocked {u['red']} Red, {u['blue']} Blue, {u['green']} Green."
+                f"{controller.player_meta[pid]['name']} Attack Resolution: unblocked {u['red']} Red, {u['blue']} Blue, {u['green']} Green.{ms}"
             )
+    s = controller.state
+    if s.market_collapse_triggered and s.market_collapse_round == s.current_round:
+        names = ", ".join(controller.player_meta[pid]["name"] for pid in s.market_collapse_pids)
+        controller.event_log.append(f"MARKET COLLAPSE: {names} reached 0 Market Share. This is the Final Round.")
     _refresh_attack_result(controller)
     if controller.last_compile_result is not None:
         controller.last_compile_result["is_final_round"] = controller.state.is_final_round

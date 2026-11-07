@@ -49,6 +49,7 @@ import {
   doEndTurn,
   doUpgradeTrack,
   doFilePatent,
+  doRegainMarketShare,
 } from "../api.js";
 import { openModal } from "./modals.js";
 import { renderMarket } from "./market.js";
@@ -494,6 +495,22 @@ export function renderActionDock() {
       const remBlueStage1 = Math.max(0, (effAtk.blue || 0) - fixedBlueShields);
       const remGreenStage1 = Math.max(0, (effAtk.green || 0) - fixedGreenShields);
 
+      // v0.36.0 free choice: every available Any shield must block while unblocked cubes remain; the player
+      // chooses only the split. Mirror the engine's legalisation (clamp, trim Blue > Red > Green, back-fill).
+      if (anyShieldCount > 0 && humanThreat.any_shield_policy === "FREE_CHOICE") {
+        const rem = { red: remRedStage1, blue: remBlueStage1, green: remGreenStage1 };
+        let budget = anyShieldCount;
+        ["blue", "red", "green"].forEach((c) => {
+          userAnyAlloc[c] = Math.min(Math.max(0, userAnyAlloc[c]), rem[c], budget);
+          budget -= userAnyAlloc[c];
+        });
+        let short = Math.min(anyShieldCount, rem.red + rem.blue + rem.green) - (userAnyAlloc.red + userAnyAlloc.blue + userAnyAlloc.green);
+        ["blue", "red", "green"].forEach((c) => {
+          const add = Math.min(short, rem[c] - userAnyAlloc[c]);
+          if (add > 0) { userAnyAlloc[c] += add; short -= add; }
+        });
+      }
+
       const liveUnblockedRed = anyShieldCount > 0
         ? Math.max(0, remRedStage1 - userAnyAlloc.red)
         : (redInfo.unblocked || 0);
@@ -733,8 +750,8 @@ export function renderActionDock() {
               <span>${blackCubes} cube${blackCubes === 1 ? '' : 's'} -> Track space ${state.corruption_track || 0}</span>
             </div>
             <div class="confirm-threat-row">
-              <span style="color: var(--color-red); font-weight: 700;">◆ RED // RANSOMWARE</span>
-              <span>${redInfo.cubes} exited vs ${liveBlockedRed} blocked -> ${liveUnblockedRed > 0 ? (liveFlatLeak ? `<strong style="color: #f43f5e;">-${liveUnblockedRed} Cash (Flat -1 Secret Leak!)</strong>` : `<strong style="color: #f43f5e;">-${liveUnblockedRed} Cash</strong>`) : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
+              <span style="color: var(--color-red); font-weight: 700;">◆ RED // ${state.is_market_share ? 'MARKET MANIPULATION' : 'RANSOMWARE'}</span>
+              <span>${redInfo.cubes} exited vs ${liveBlockedRed} blocked -> ${liveUnblockedRed > 0 && state.is_market_share ? `<strong style="color: #f43f5e;">-${Math.min(liveUnblockedRed, humanThreat.market_share || 0)} Market Share${(humanThreat.market_share || 0) - liveUnblockedRed <= 0 ? ' (MARKET COLLAPSE!)' : ''}</strong>` : liveUnblockedRed > 0 ? (liveFlatLeak ? `<strong style="color: #f43f5e;">-${liveUnblockedRed} Cash (Flat -1 Secret Leak!)</strong>` : `<strong style="color: #f43f5e;">-${liveUnblockedRed} Cash</strong>`) : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
             </div>
             <div class="confirm-threat-row">
               <span style="color: var(--color-blue); font-weight: 700;">● BLUE // SPYWARE</span>
@@ -1092,9 +1109,35 @@ export function renderActionDock() {
       p3Btn.onclick = () => doStarAction("P3", p3Color);
       controls.appendChild(p3Btn);
     }
+    if (caps.is_market_share && (caps.ad_campaign_actions || 0) > 0) {
+      // v0.36.0 Ad Campaign (Red ★): pay $2 for +1 Market Share; does not count toward the Public Relations limit
+      const adBtn = document.createElement("button");
+      adBtn.className = "action-btn";
+      adBtn.style.color = "var(--color-red)";
+      adBtn.innerText = `R2 Ad Campaign ($${caps.ad_campaign_cost} -> +1 Market Share) x${caps.ad_campaign_actions}`;
+      adBtn.disabled = !caps.can_ad_campaign;
+      adBtn.title = caps.can_ad_campaign ? "Pay to gain +1 Market Share" : "Requires Money and Market Share below its maximum";
+      adBtn.onclick = () => doStarAction("R2");
+      controls.appendChild(adBtn);
+    }
 
 
-    // Cryptographic Patents (INV-PATENT-CONV-01)
+    if (caps.is_share_regain) {
+      // v0.36.0 Public Relations Track: spend research to regain Market Share (limit per Operations Turn)
+      const prBtn = document.createElement("button");
+      prBtn.className = "action-btn";
+      prBtn.style.borderColor = "#c084fc";
+      prBtn.style.color = "#c084fc";
+      prBtn.innerText = `📣 Regain Market Share (${caps.regain_cost} 🔬 → +1; ${caps.regain_left_this_turn}/${caps.regain_cap} left this turn)`;
+      prBtn.disabled = !caps.can_regain_market_share;
+      prBtn.title = caps.can_regain_market_share
+        ? `Public Relations Track: spend ${caps.regain_cost} 🔬 for +1 Market Share`
+        : "Requires research, Market Share below its maximum, and turn limit remaining";
+      prBtn.onclick = () => doRegainMarketShare();
+      controls.appendChild(prBtn);
+    }
+
+    // Cryptographic Patents (INV-PATENT-CONV-01) - v0.35 ruleset only
     const patCost = caps.patent_cost || 4;
     const canPat = caps.can_file_patent || false;
     const patBtn = document.createElement("button");
@@ -1107,7 +1150,7 @@ const patGain = caps.patent_gain || 1;
     patBtn.disabled = !canPat;
     patBtn.title = canPat ? `Spend ${patCost} 🔬 to gain +${patGain} Corporate Secret${patGain === 1 ? '' : 's'}` : `Requires ${patCost} 🔬 to file patent`;
     patBtn.onclick = () => doFilePatent();
-    controls.appendChild(patBtn);
+    if (!caps.is_share_regain) controls.appendChild(patBtn);
 
     // Terminal Hardware Upgrade Tracks (INV-UPGRADE-TRACK-01)
     const upgradeCosts = caps.upgrade_track_costs || {};
@@ -1194,9 +1237,9 @@ const patGain = caps.patent_gain || 1;
       patUpBtn.className = "action-btn";
       patUpBtn.style.borderColor = "#a855f7";
       patUpBtn.style.color = "#a855f7";
-      patUpBtn.innerText = `🔬 Upgr Patents [L${(human.patent_level || 0) + 1}] (${patentTrackCost} 🔬)`;
+      patUpBtn.innerText = `🔬 Upgr ${caps.is_share_regain ? 'Public Relations' : 'Patents'} [L${(human.patent_level || 0) + 1}] (${patentTrackCost} 🔬)`;
       patUpBtn.disabled = !canUp.patent;
-      patUpBtn.title = canUp.patent ? `Upgrade Patent R&D to Level ${(human.patent_level || 0) + 1} (${patentTrackCost} 🔬)` : `Requires ${patentTrackCost} 🔬`;
+      patUpBtn.title = canUp.patent ? `Upgrade ${caps.patent_track_name || 'Patent R&D'} to Level ${(human.patent_level || 0) + 1} (${patentTrackCost} 🔬)` : `Requires ${patentTrackCost} 🔬`;
       patUpBtn.title += btNote("patent");
       patUpBtn.onclick = () => doUpgradeTrack("patent");
       controls.appendChild(patUpBtn);

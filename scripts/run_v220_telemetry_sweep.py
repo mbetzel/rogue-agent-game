@@ -50,7 +50,7 @@ def run_sweep(num_games: int = 1000):
         player_final_patches = []
 
         for seed in range(num_games):
-            cfg = GameConfig(num_players=p_count)
+            cfg = GameConfig.legacy_v035(num_players=p_count)
             all_bots = [
                 AdaptiveBalancedBot(0),
                 SecOpsTurtleBot(1),

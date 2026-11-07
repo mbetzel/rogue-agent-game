@@ -69,7 +69,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_commercial_exposure_deleted(self) -> None:
         """Verify that an unblocked Green cube does NOT force Yellow dice to be glitched first."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         yellow_die = create_colored_die(DieColor.YELLOW, 10)
         yellow_die.production_role = ProductionRole.INCOME
@@ -96,7 +96,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_initial_state_ready_for_release(self) -> None:
         """Verify 4 Gray dice start in ready_for_release_dice and Under Development is empty."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         for p in engine.state.players:
             self.assertEqual(len(p.ready_for_release_dice), 4)
             self.assertEqual(len(p.in_production_dice), 0)
@@ -154,7 +154,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_phase1_glitch_locking(self) -> None:
         """Assert rolling a Glitch face sets is_locked = True."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.bot = BaseBot(0)
         red = create_colored_die(DieColor.RED, 1)
@@ -167,7 +167,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_phase1_debug_action_unlock(self) -> None:
         """Verify spending 1 🔬 unlocks a glitched die for subsequent rerolls."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.patches = 2
 
@@ -190,7 +190,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_phase1_unresolved_glitch_moves_to_glitched_box(self) -> None:
         """Verify permanent dice with unresolved glitches move to glitched_dice."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         red = create_colored_die(DieColor.RED, 1)
         # Lock bot from rerolling
@@ -211,7 +211,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_phase1_unresolved_contractor_glitch_discarded(self) -> None:
         """Verify White contractor with unresolved glitch returns to supply, not Under Development."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         for p in engine.state.players:
             p.bot = BaseBot(p.player_id)
         p0 = engine.state.players[0]
@@ -245,7 +245,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_no_income_collected_in_phase1(self) -> None:
         """Verify money/patches/secrets do not increase during Phase 1 deployment."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         for p in engine.state.players:
             p.bot = BaseBot(p.player_id)
         p0 = engine.state.players[0]
@@ -273,7 +273,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_defensive_shields_zero_dice_wear(self) -> None:
         """Assert shields that block attack cubes remain safely in in_production_dice."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         blue_die = create_colored_die(DieColor.BLUE, 1)
         blue_die.production_role = ProductionRole.BLUE_SHIELD
@@ -296,7 +296,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_red_ransom_cash_only_leak(self) -> None:
         """Assert unblocked Red drains cash, and unpaid cash leaks 1:1 to Corporate Secrets."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 2
         p0.secrets = 8
@@ -321,7 +321,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_green_malware_glitches_in_production_die(self) -> None:
         """Verify unblocked Green moves 1 die from in_production_dice to glitched_dice."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         d1 = create_gray_die(1)
         d1.production_role = ProductionRole.INCOME
@@ -341,7 +341,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_green_malware_contractor_sacrifice(self) -> None:
         """Verify player can sacrifice 1 active White contractor instead of glitching a die."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         d1 = create_gray_die(1)
         d1.production_role = ProductionRole.INCOME
@@ -365,7 +365,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_green_malware_destruction_fallback(self) -> None:
         """Verify when in_production_dice is empty, unblocked Green fizzles with 0 penalty (v0.31.0 INV-MALWARE-FIZZLE-01)."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.ready_for_release_dice = []
         p0.in_production_dice = []
@@ -388,7 +388,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_green_glitched_die_forfeits_income(self) -> None:
         """Verify a die glitched by Green malware in Phase 2 yields 0 income in Phase 3."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 0
         p0.patches = 0
@@ -421,7 +421,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_phase3_income_collected_from_all_production_dice(self) -> None:
         """Verify surviving Income and Shield dice yield their printed resources."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 0
         p0.patches = 0
@@ -443,7 +443,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_phase3_fast_patching(self) -> None:
         """Verify spending 1 🔬 moves a die from glitched_dice to scanned_dice."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.patches = 2
         d1 = create_colored_die(DieColor.RED, 1)
@@ -463,7 +463,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_phase3_scanned_graduation(self) -> None:
         """Verify all dice in scanned_dice graduate to ready_for_release_dice."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         d1 = create_gray_die(1)
         p0.scanned_dice = [d1]
@@ -478,7 +478,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_phase3_production_return(self) -> None:
         """Verify all surviving in_production_dice return to ready_for_release_dice."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         d1 = create_gray_die(1)
         d1.production_role = ProductionRole.INCOME
@@ -493,7 +493,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_phase3_conveyor_shift(self) -> None:
         """Verify all remaining glitched_dice shift to scanned_dice."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.patches = 0  # No patches to fast-patch
         p0.ready_for_release_dice = []
@@ -510,7 +510,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_natural_pipeline_graduation_lifecycle(self) -> None:
         """Trace a die through Glitched -> Scanned -> Ready over 2 rounds with 0 patch spent."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 0
         p0.patches = 0
@@ -550,7 +550,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_phreaker_magnetic_splice(self) -> None:
         """Verify Phreaker moves 1 die from glitched_dice directly to ready_for_release_dice for free."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.archetype = get_archetype_by_code(ArchetypeCode.PHREAKER)
         p0.patches = 0
@@ -569,7 +569,7 @@ class TestV220Rules(unittest.TestCase):
 
     def test_prodigy_brute_force_bypass(self) -> None:
         """Verify Prodigy rerolls locked dice freely and overrides 1 face to a legal non-Star face."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.archetype = get_archetype_by_code(ArchetypeCode.PRODIGY)
         p0.patches = 0  # 0 patches, but Prodigy bypasses locks freely

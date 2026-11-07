@@ -938,7 +938,7 @@ def get_all_archetype_cards() -> List[ArchetypeCard]:
             name="The Spook",
             timing_window="Phase 4: Attack Resolution",
             ability_name="Slush Fund",
-            description="The Spook accesses emergency black budget reserves: Absorb up to 2 Corporate Secret loss (from Blue Spyware or unpaid Red Ransom) for free without paying cash. (Any additional Secret loss may be absorbed by paying $1 per Secret as normal).",
+            description="The Spook accesses emergency black budget reserves: Absorb up to 2 Corporate Secret loss (from Blue Spyware) for free without paying cash. (Any additional Secret loss may be absorbed by paying $1 per Secret as normal).",
         ),
         ArchetypeCard(
             code=ArchetypeCode.CIPHER,
@@ -1037,7 +1037,7 @@ COMPANIES: Dict[CompanyCode, Company] = {
         sector="Federal Agency",
         override_name="Slush Fund",
         timing_window="Phase 4: Attack Resolution",
-        description="Absorb up to 2 Corporate Secret loss (from Blue Spyware or unpaid Red Ransom) for free without paying cash. (Any additional Secret loss may be absorbed by paying $1 per Secret as normal).",
+        description="Absorb up to 2 Corporate Secret loss (from Blue Spyware) for free without paying cash. (Any additional Secret loss may be absorbed by paying $1 per Secret as normal).",
         flavor="Classified black budget allocations absorb compliance failures without public oversight.",
         starting_defense_capacity=2,
         starting_triage_bandwidth=2,

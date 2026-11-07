@@ -65,7 +65,7 @@ def run_detailed_telemetry(num_players: int = 4, num_runs: int = 500, candidate:
 
     for run_idx in range(num_runs):
         seed = 42 + run_idx
-        config = GameConfig(num_players=num_players)
+        config = GameConfig.legacy_v035(num_players=num_players)
         bots = [
             AdaptiveBalancedBot(0),
             SecOpsTurtleBot(1),

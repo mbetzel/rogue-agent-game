@@ -64,7 +64,7 @@ def simulate_turn1_buyer_cadence(
         ]
         rng.shuffle(bots)
         
-        cfg = GameConfig(
+        cfg = GameConfig.legacy_v035(
             num_players=4,
             starting_money=6,
             starting_gray_dice=3,

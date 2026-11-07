@@ -50,7 +50,7 @@ class TestV240Rules(unittest.TestCase):
 
     def test_personal_purple_reserve_initializes_to_two(self) -> None:
         """INV-PURPLE-01: Each player starts the match with personal_purple_reserve == 1 (v0.30.0 Baseline)."""
-        engine = GameEngine(config=GameConfig(num_players=4), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=4), seed=42)
         self.assertEqual(len(engine.state.players), 4)
         for p in engine.state.players:
             self.assertEqual(p.personal_purple_reserve, 1, "Each player must initialize with 1 Purple die in reserve")
@@ -122,7 +122,7 @@ class TestV240Rules(unittest.TestCase):
 
     def test_central_market_excludes_purple_die_supply(self) -> None:
         """INV-PURPLE-02: Central Market excludes Purple and only stocks Red, Blue, Green, Yellow."""
-        engine = GameEngine(config=GameConfig(num_players=3), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=3), seed=42)
         self.assertNotIn(DieColor.PURPLE, engine.state.market, "DieColor.PURPLE must not exist in central market")
         for col in [DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW]:
             self.assertIn(col, engine.state.market)
@@ -166,7 +166,7 @@ class TestV240Rules(unittest.TestCase):
 
     def test_purple_die_glitch_locks_immediately_in_phase_1(self) -> None:
         """INV-PURPLE-04 / INV-LOCK-01: Purple die rolling Face 5 (Glitch) locks immediately."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         purple = create_colored_die(DieColor.PURPLE, 1)
         glitch_face = purple.faces[4]
@@ -185,7 +185,7 @@ class TestV240Rules(unittest.TestCase):
 
     def test_purple_die_wild_shields_absorb_red_blue_or_green(self) -> None:
         """INV-PURPLE-04: Block 1 Any shield can be assigned to Red, Blue, or Green threat."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.secrets = 8
         p0.money = 5
@@ -214,7 +214,7 @@ class TestV240Rules(unittest.TestCase):
 
     def test_purple_die_face3_and_face4_income_harvesting(self) -> None:
         """INV-PURPLE-04: Faces 3 (+$2) and 4 (+$1 & +1 🔬) harvest resources accurately in Phase 3A."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 0
         p0.patches = 0
@@ -239,7 +239,7 @@ class TestV240Rules(unittest.TestCase):
 
     def test_acoustic_resonance_sensor_awards_dollar_per_unique_exit_color(self) -> None:
         """INV-PURPLE-05: The Acoustic gains +$1 per unique cube color in Exit Tray this round (max +$4)."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.archetype = get_archetype_by_code(ArchetypeCode.ACOUSTIC)
         p0.money = 0
@@ -263,7 +263,7 @@ class TestV240Rules(unittest.TestCase):
 
     def test_phreaker_jumper_diagnostics_harvests_ud_die_without_moving_it(self) -> None:
         """INV-PURPLE-05: The Phreaker rolls 1 die in Under Development, harvests resources, leaves die in place."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.archetype = get_archetype_by_code(ArchetypeCode.PHREAKER)
         p0.money = 0
@@ -284,7 +284,7 @@ class TestV240Rules(unittest.TestCase):
 
     def test_prodigy_arbitrary_code_execution_overrides_other_rolled_die(self) -> None:
         """INV-PURPLE-05: The Prodigy turns any 1 other rolled die to any legal non-Star face."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.archetype = get_archetype_by_code(ArchetypeCode.PRODIGY)
 
@@ -312,7 +312,7 @@ class TestV240Rules(unittest.TestCase):
 
     def test_spook_burn_notice_awards_cash_and_optional_secret_burn(self) -> None:
         """INV-PURPLE-05: The Spook gains +$2 cash and may permanently burn 1 colored die for +1 Secret."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.archetype = get_archetype_by_code(ArchetypeCode.SPOOK)
         p0.money = 0
@@ -365,7 +365,7 @@ class TestV240Rules(unittest.TestCase):
 
     def test_operator_contingent_staffing_rolls_free_white_contractor(self) -> None:
         """INV-PURPLE-05: The Operator rolls a free White Contractor into pool when Purple Star is rolled."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.archetype = get_archetype_by_code(ArchetypeCode.OPERATOR)
         supply_before = engine.state.contractor_supply
@@ -406,7 +406,7 @@ class TestV240Rules(unittest.TestCase):
         """BaseBot.choose_spook_burn_notice prioritizes glitched colored dice."""
         bot = BaseBot(0)
         p0 = PlayerState(0, bot, money=5, secrets=6, patches=2)
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
 
         red_glitched = create_colored_die(DieColor.RED, 10)
         p0.glitched_dice = [red_glitched]
@@ -418,7 +418,7 @@ class TestV240Rules(unittest.TestCase):
         """BaseBot.choose_phreaker_jumper_diagnostics targets highest yield die (Green/Yellow)."""
         bot = BaseBot(0)
         p0 = PlayerState(0, bot, money=5, secrets=6, patches=2)
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
 
         gray = create_gray_die(1)
         green = create_colored_die(DieColor.GREEN, 2)
@@ -512,7 +512,7 @@ class TestV240Rules(unittest.TestCase):
 
     def test_reserve_dice_immune_to_corruption_track_market_returns(self) -> None:
         """INV-PURPLE-01: Personal reserve dice are immune to corruption track Return 1 Colored Die."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.personal_purple_reserve = 1
         p0.ready_for_release_dice = [d for d in p0.ready_for_release_dice if d.color == DieColor.GRAY]
@@ -526,7 +526,7 @@ class TestV240Rules(unittest.TestCase):
 
     def test_corruption_return_scraps_owned_purple_die_without_contaminating_market(self) -> None:
         """INV-PURPLE-02: Returning an owned physical Purple die scraps it and does NOT add Purple to central market."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         purple = create_colored_die(DieColor.PURPLE, 99)
         p0.ready_for_release_dice = [purple]

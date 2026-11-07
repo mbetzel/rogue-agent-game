@@ -51,7 +51,7 @@ def run_sweep(num_runs: int = 1000, base_seed: int = 42):
 
         for run_idx in range(num_runs):
             seed = base_seed + run_idx * 13
-            config = GameConfig(num_players=p_count)
+            config = GameConfig.legacy_v035(num_players=p_count)
             bots = [bot_classes[i % len(bot_classes)](i) for i in range(p_count)]
             engine = GameEngine(config=config, bots=bots, seed=seed)
 

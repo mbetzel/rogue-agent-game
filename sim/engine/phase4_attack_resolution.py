@@ -273,7 +273,18 @@ def resolve_player_defense_and_wear(
         CubeColor.BLUE: 0,
         CubeColor.GREEN: 0,
     }
-    if any_shield_allocations is not None:
+    if any_shield_allocations is not None and engine.config.any_shield_policy == AnyShieldPolicy.FREE_CHOICE:
+        # v0.36.0 human (web) split: legalised like a bot's (clamp + back-fill; every available shield blocks)
+        remaining = {CubeColor.RED: rem_red, CubeColor.BLUE: rem_blue, CubeColor.GREEN: rem_green}
+        if avail_any > 0 and sum(remaining.values()) > 0:
+            alloc = validate_any_shield_allocation(dict(any_shield_allocations), remaining, avail_any)
+            for c_color, used in alloc.items():
+                any_allocated[c_color] += used
+                avail_any -= used
+            rem_red -= alloc[CubeColor.RED]
+            rem_blue -= alloc[CubeColor.BLUE]
+            rem_green -= alloc[CubeColor.GREEN]
+    elif any_shield_allocations is not None:
         for c_color in (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN):
             req = max(0, int(any_shield_allocations.get(c_color, 0)))
             if req > 0 and avail_any > 0:

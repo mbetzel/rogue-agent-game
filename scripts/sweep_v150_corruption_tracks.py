@@ -60,7 +60,7 @@ def run_sweep(num_runs: int = 500, base_seed: int = 42):
 
                 for run_idx in range(num_runs):
                     seed = base_seed + run_idx
-                    cfg = GameConfig(
+                    cfg = GameConfig.legacy_v035(
                         num_players=p_count,
                         corruption_track_profile=profile,
                         corruption_cubes_resolve_immediately=immediate_resolve,

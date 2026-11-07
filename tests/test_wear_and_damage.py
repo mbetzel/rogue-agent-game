@@ -10,7 +10,7 @@ from sim.entities import Face, VariantCard, create_colored_die, create_gray_die
 
 class TestWearAndDamage(unittest.TestCase):
     def setUp(self) -> None:
-        self.config = GameConfig(num_players=2, starting_money=5, starting_secrets=6)
+        self.config = GameConfig.legacy_v035(num_players=2, starting_money=5, starting_secrets=6)
         self.bot = AdaptiveBalancedBot(0)
 
     def test_unused_shields_do_not_wear(self) -> None:

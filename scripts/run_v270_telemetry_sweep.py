@@ -164,7 +164,7 @@ def run_v270_telemetry_sweep(
 
         for match_idx in range(num_games):
             seed = base_seed + match_idx
-            cfg = GameConfig(num_players=p_count)
+            cfg = GameConfig.legacy_v035(num_players=p_count)
 
             all_bots = [
                 AdaptiveBalancedBot(0),

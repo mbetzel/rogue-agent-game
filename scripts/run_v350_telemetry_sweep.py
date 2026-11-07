@@ -3,7 +3,7 @@
 Phase 43 (Scenario Execution & Telemetry, product-owner).
 
 Runs N matches per pod (2P / 3P / 4P) on explicit base seeds under the v0.35 default
-(``GameConfig()`` = SIX_PHASE + V035_FIVE_LEVEL) and the SAME seeds under ``GameConfig.legacy_v034``.
+(``GameConfig.legacy_v035()`` = SIX_PHASE + V035_FIVE_LEVEL) and the SAME seeds under ``GameConfig.legacy_v034``.
 Match setup mirrors ``scripts/run_v340_telemetry_sweep.py``: 5-bot rotation, ``get_random_setup``
 STANDARD, random Client Companies and White Hat Operatives, starting_money=6, 3 Gray + 1 Purple,
 1 Purple reserve, enable_corporate_asymmetry=True.
@@ -59,7 +59,7 @@ def build_engine(cfg_name: str, num_players: int, match_idx: int, match_seed: in
         num_players=num_players, starting_money=6, starting_gray_dice=3, starting_purple_dice=1,
         starting_purple_reserve=1, corruption_track_profile="STANDARD", enable_corporate_asymmetry=True,
     )
-    cfg = GameConfig(**kw) if cfg_name == "V035" else GameConfig.legacy_v034(**kw)
+    cfg = GameConfig.legacy_v035(**kw) if cfg_name == "V035" else GameConfig.legacy_v034(**kw)
     return GameEngine(config=cfg, bots=bots, seed=match_seed, variant_cards=variants, version_deck=version_deck,
                       companies=companies, white_hats=white_hats)
 

@@ -148,7 +148,7 @@ class TestSystemReboot(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_sr_eng_01_phase3_ops_bot_triggers_system_reboot_when_empty(self) -> None:
         """SR-ENG-01: Phase 3 Action Plan does not contain use_system_reboot in v0.22.0."""
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         engine = GameEngine(cfg, seed=42)
         p0 = engine.state.players[0]
 
@@ -157,7 +157,7 @@ class TestSystemReboot(unittest.TestCase):
 
     def test_sr_eng_02_phase3_ops_bot_does_not_reboot_if_ready_dice_or_used(self) -> None:
         """SR-ENG-02: BaseBot does not provide should_trigger_system_reboot."""
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         engine = GameEngine(cfg, seed=42)
         p0 = engine.state.players[0]
         self.assertFalse(hasattr(p0.bot, "should_trigger_system_reboot"))
@@ -177,7 +177,7 @@ class TestSystemReboot(unittest.TestCase):
             ready_dice=[],
             unpatched_dice=[create_gray_die(1)],
         )
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         ser = GameStateSerializer.serialize_player(player, cfg, is_human=True, name="Player 1")
 
         self.assertNotIn("system_reboot_used", ser)

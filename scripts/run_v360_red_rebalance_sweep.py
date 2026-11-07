@@ -92,7 +92,7 @@ def build_engine(cfg_name: str, num_players: int, match_idx: int, match_seed: in
     variants, version_deck = get_random_setup(rng, profile="STANDARD")
     companies = get_random_companies(num_players, rng)
     white_hats = get_random_white_hats(num_players, rng)
-    cfg = GameConfig(
+    cfg = GameConfig.legacy_v035(
         num_players=num_players, starting_money=6, starting_gray_dice=3, starting_purple_dice=1,
         starting_purple_reserve=1, corruption_track_profile="STANDARD", enable_corporate_asymmetry=True,
         **CONFIGS[cfg_name],

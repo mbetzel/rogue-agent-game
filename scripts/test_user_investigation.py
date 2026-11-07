@@ -202,7 +202,7 @@ def run_experiment_suite(
         ]
         rng.shuffle(bots)
 
-        cfg = GameConfig(
+        cfg = GameConfig.legacy_v035(
             num_players=4,
             starting_money=starting_cash,
             starting_gray_dice=starting_gray,

@@ -58,7 +58,7 @@ class TestV290RulesStreamlining(unittest.TestCase):
         leaves active version at v1.0 for Phase 2B/3, keeps v1 override usable in Phase 3,
         and transitions at start of next round.
         """
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         engine = GameEngine(cfg, seed=42)
 
         # Ensure v1.0 is active with 3 corruption cubes
@@ -92,7 +92,7 @@ class TestV290RulesStreamlining(unittest.TestCase):
 
         Space 4 triggers, and 2 excess cubes trigger v2.0 Spaces 1 and 2 immediately.
         """
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         engine = GameEngine(cfg, seed=42)
 
         engine.state.corruption_track = 3
@@ -124,7 +124,7 @@ class TestV290RulesStreamlining(unittest.TestCase):
 
         immediately in Step 2A without waiting for next round.
         """
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         engine = GameEngine(cfg, seed=42)
 
         # Advance to v3.0
@@ -148,7 +148,7 @@ class TestV290RulesStreamlining(unittest.TestCase):
 
         secrets awarded from cryptographic hash matches.
         """
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         engine = GameEngine(cfg, seed=42)
         p0 = engine.state.players[0]
 
@@ -172,7 +172,7 @@ class TestV290RulesStreamlining(unittest.TestCase):
 
         income yields +$2 cash and +1 🔬 Research without hash matching.
         """
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         engine = GameEngine(cfg, seed=42)
         p0 = engine.state.players[0]
 
@@ -198,7 +198,7 @@ class TestV290RulesStreamlining(unittest.TestCase):
 
         choose redundant shield die instead of income die.
         """
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         engine = GameEngine(cfg, seed=42)
         p0 = engine.state.players[0]
 
@@ -323,7 +323,7 @@ class TestV290RulesStreamlining(unittest.TestCase):
 
         bandwidth cannot be fast-patched with research tokens.
         """
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         engine = GameEngine(cfg, seed=42)
         p0 = engine.state.players[0]
 

@@ -1924,4 +1924,4 @@ Bot follow-ups, not blocking:
 - RecklessSaboteur focus order.
 - Diversify roster focus orders.
 
-**Status: APPROVED WITH TUNE; set Secrets 7 / 7 / 8 in `v036()`, then Phase B (RULES.md, glossary, CLAUDE.md, web, PnP).**
+**Status: OFFICIALLY APPROVED (`v0.36.0` Baseline).** `v036()` sets Secrets 7 / 7 / 8. Phase B is done: RULES.md, glossary, CLAUDE.md, web and PnP; `GameConfig()` is now v0.36.

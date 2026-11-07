@@ -365,6 +365,12 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
 
+                elif clean_path == "/api/game/action/regain_market_share":
+                    pid = get_target_pid(default_to_human=False)
+                    state = self.controller.regain_market_share(pid)
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
                 elif clean_path == "/api/game/action/patent":
                     pid = get_target_pid(default_to_human=False)
                     state = self.controller.file_patent(pid)

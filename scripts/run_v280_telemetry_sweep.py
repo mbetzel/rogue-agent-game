@@ -117,7 +117,7 @@ def run_v280_telemetry_sweep(
             companies = get_random_companies(num_players, rng)
             white_hats = get_random_white_hats(num_players, rng)
 
-            cfg = GameConfig(
+            cfg = GameConfig.legacy_v035(
                 num_players=num_players,
                 starting_money=4,
                 corruption_track_profile="STANDARD",

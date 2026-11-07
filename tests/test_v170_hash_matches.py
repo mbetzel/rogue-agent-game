@@ -74,7 +74,7 @@ class TestHashMatchesAndScoring(unittest.TestCase):
 
     def test_secrets_uncapped_beyond_10_on_b2_and_y1(self):
         """Verify B2 and Y1 allow purchasing secrets beyond the previous cap of 10."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         player = engine.state.players[0]
         player.secrets = 12
         player.money = 20
@@ -97,7 +97,7 @@ class TestHashMatchesAndScoring(unittest.TestCase):
 
     def test_secrets_only_victory_scoring_and_tiebreakers(self):
         """Verify survivors rank strictly by Corporate Secrets with hierarchical tiebreakers."""
-        engine = GameEngine(config=GameConfig(num_players=4), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=4), seed=42)
         p0, p1, p2, p3 = engine.state.players
 
         # P0: 12 Secrets, $0, 0 colored dice, 0 patches, 0 unpatched
@@ -148,7 +148,7 @@ class TestHashMatchesAndScoring(unittest.TestCase):
 
     def test_detailed_tiebreaker_hierarchy(self):
         """Verify the full tiebreaker ladder: Money -> Ready Colored Dice -> Patches -> Fewest Unpatched."""
-        engine = GameEngine(config=GameConfig(num_players=4), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=4), seed=42)
         p0, p1, p2, p3 = engine.state.players
 
         # All players have 8 secrets

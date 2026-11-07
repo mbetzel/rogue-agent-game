@@ -369,6 +369,7 @@ class GameController:
 
             # Reset star ability eligibility
             p.b2_available = False
+            p.r2_actions_available = 0  # v0.36.0 Ad Campaign (earned in Phase 3)
             p.y1_available = False
             p.p1_available = False
             p.p3_available = None
@@ -551,6 +552,9 @@ class GameController:
 
     def file_patent(self, player_id: int) -> Dict[str, Any]:
         return phase6_operations_actions.file_cryptographic_patent(self, player_id)
+
+    def regain_market_share(self, player_id: int) -> Dict[str, Any]:
+        return phase6_operations_actions.regain_market_share(self, player_id)
 
     def resolve_breakthrough(
         self,

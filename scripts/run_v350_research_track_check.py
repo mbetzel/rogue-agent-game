@@ -1,6 +1,6 @@
 """Phase 43 (v0.35.0) reproduction check against the D1 prototype sweep (spec R-32).
 
-Runs the canonical engine (``GameConfig()`` = V035_FIVE_LEVEL, research-aware bots) with the same setup
+Runs the canonical engine (``GameConfig.legacy_v035()`` = V035_FIVE_LEVEL, research-aware bots) with the same setup
 harness as ``scripts/investigate_v350_research_sweep.py`` (random Variant Cards / version deck / Client
 Companies / White Hat Operatives) and reports mean research per player and Singularity rate per player count.
 
@@ -29,7 +29,7 @@ from sim.entities import get_random_companies, get_random_setup, get_random_whit
 BOT_CLASSES = [AdaptiveBalancedBot, SecOpsTurtleBot, VentureGreedBot, AccelerationistBot, RecklessSaboteurBot]
 
 
-def run(games: int, seed: int, players=(2, 3, 4), config_factory=GameConfig) -> dict:
+def run(games: int, seed: int, players=(2, 3, 4), config_factory=GameConfig.legacy_v035) -> dict:
     out = {"research": [], "by_p": {}}
     for n in players:
         reasons: Counter = Counter()

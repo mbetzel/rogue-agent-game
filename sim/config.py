@@ -293,7 +293,10 @@ class GameConfig:
     red_ransom_per_cube: int = 1  # [TUNE] $ extorted per unblocked Red cube (read only under RedMode.RANSOM)
 
     # --- v0.36.0 Market Share Red rework (INV-MS-*). Defaults reproduce v0.35.0 bit-identically. ---
-    red_mode: RedMode = RedMode.RANSOM
+    # v0.36.0 is the default (Phase B, User-approved). None resolves in __post_init__: MARKET_SHARE, except
+    # RANSOM for the legacy round / track models (V033_THREE_PHASE, V034_THREE_LEVEL), which never supported it.
+    # GameConfig.legacy_v035() reproduces v0.35.0 bit-identically.
+    red_mode: Optional[RedMode] = None
     market_share_start_by_player_count: Dict[int, int] = field(
         # [TUNE] start = max; not read under RANSOM. Balance iteration 1 (User 2026-11-06): 19/20/20 -> 17/18/18
         default_factory=lambda: {2: 17, 3: 18, 4: 18}
@@ -322,6 +325,12 @@ class GameConfig:
 
     def __post_init__(self) -> None:
         self.round_sequence = RoundSequence(self.round_sequence)
+        if self.red_mode is None:
+            legacy_model = (
+                self.round_sequence == RoundSequence.V033_THREE_PHASE
+                or ResearchTrackModel(self.research_track_model) != ResearchTrackModel.V035_FIVE_LEVEL
+            )
+            self.red_mode = RedMode.RANSOM if legacy_model else RedMode.MARKET_SHARE
         self.red_mode = RedMode(self.red_mode)
         ms = self.red_mode == RedMode.MARKET_SHARE
         # NOTE: resolved once at construction; re-assigning red_mode later does NOT re-resolve.
@@ -376,11 +385,12 @@ class GameConfig:
         if self.starting_secrets_by_player_count is None:
             # NOTE: resolved once at construction. Re-assigning round_sequence later does NOT
             # re-resolve this dict; use GameConfig.legacy_v033() or pass round_sequence to __init__.
-            self.starting_secrets_by_player_count = (
-                {2: 8, 3: 8, 4: 12}
-                if self.round_sequence == RoundSequence.V033_THREE_PHASE
-                else {2: 8, 3: 8, 4: 8}
-            )
+            if self.round_sequence == RoundSequence.V033_THREE_PHASE:
+                self.starting_secrets_by_player_count = {2: 8, 3: 8, 4: 12}
+            elif self.red_mode == RedMode.MARKET_SHARE:
+                self.starting_secrets_by_player_count = {2: 7, 3: 7, 4: 8}  # v0.36.0 [TUNE] (plan §11)
+            else:
+                self.starting_secrets_by_player_count = {2: 8, 3: 8, 4: 8}  # v0.34 / v0.35
 
     @classmethod
     def v036(cls, **overrides) -> "GameConfig":
@@ -399,7 +409,7 @@ class GameConfig:
     def legacy_v035(cls, **overrides) -> "GameConfig":
         """v0.35.0 baseline (today's defaults). Exists now so the parity test survives a later default flip."""
         overrides.setdefault("red_mode", RedMode.RANSOM)
-        overrides.setdefault("starting_secrets_by_player_count", {2: 8, 3: 8, 4: 8})
+        # Starting Secrets resolve in __post_init__ under RANSOM: 8/8/8 (six-phase), 8/8/12 (v0.33 round).
         return cls(**overrides)
 
     @classmethod

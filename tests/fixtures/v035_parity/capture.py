@@ -2,8 +2,8 @@
 
 Captured from a clean checkout of commit ``b1b1f11`` (v0.35.0, without the uncommitted Phase 44
 levers) *before* the v0.36 Market Share refactor, using ``GameConfig(...)`` (the v0.35 default at
-that commit). ``tests/test_v360_market_share.py`` replays the same scenarios with both
-``GameConfig`` and ``GameConfig.legacy_v035`` and compares bit-for-bit.
+that commit). ``tests/test_v360_market_share.py`` replays the same scenarios with ``GameConfig.legacy_v035`` (``GameConfig()``
+is v0.36.0 since Phase B) and compares bit-for-bit.
 
 300 seeds x 2/3/4P x {mixed, asym, setup}:
 - ``mixed`` / ``asym``: as in ``tests/fixtures/v034_parity`` (default variant cards).

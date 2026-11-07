@@ -143,7 +143,11 @@ class MSHarness(SixPhaseHarness):
 # ----------------------------------------------------------------------------------------------
 class TestConfig(unittest.TestCase):
     def test_ms01_resolution(self):
-        c = GameConfig()
+        # Phase B: GameConfig() is the v0.36.0 ruleset; legacy_v035() is the v0.35.0 baseline.
+        self.assertEqual(GameConfig(), GameConfig.v036())
+        for n in (2, 3, 4):
+            self.assertEqual(GameConfig(num_players=n), GameConfig.v036(num_players=n))
+        c = GameConfig.legacy_v035()
         self.assertEqual((c.red_mode, c.patents_mode, c.red_variant_set, c.tiebreak_order, c.any_shield_policy),
                          (RedMode.RANSOM, PatentsMode.PATENTS, RedVariantSet.V035, TiebreakOrder.V035,
                           AnyShieldPolicy.V035_TIERS))
@@ -169,8 +173,11 @@ class TestConfig(unittest.TestCase):
         s = GameConfig(red_mode="MARKET_SHARE", any_shield_policy="V035_TIERS")
         self.assertEqual((s.red_mode, s.any_shield_policy), (RedMode.MARKET_SHARE, AnyShieldPolicy.V035_TIERS))
         # allowed under RANSOM (documented, no raise)
-        GameConfig(any_shield_policy=AnyShieldPolicy.FREE_CHOICE)
-        GameConfig(red_variant_set=RedVariantSet.MARKETING)
+        GameConfig.legacy_v035(any_shield_policy=AnyShieldPolicy.FREE_CHOICE)
+        GameConfig.legacy_v035(red_variant_set=RedVariantSet.MARKETING)
+        # legacy round / track models default to RANSOM
+        self.assertEqual(GameConfig(round_sequence=RoundSequence.V033_THREE_PHASE).red_mode, RedMode.RANSOM)
+        self.assertEqual(GameConfig(research_track_model="V034_THREE_LEVEL").red_mode, RedMode.RANSOM)
 
     def test_ms02_invalid_combos(self):
         bad = [
@@ -183,6 +190,7 @@ class TestConfig(unittest.TestCase):
             dict(red_mode=RedMode.MARKET_SHARE, market_share_bot_policy="SMART"),
         ]
         for kw in bad:
+            kw.setdefault("red_mode", RedMode.RANSOM)
             with self.assertRaises(ValueError, msg=kw):
                 GameConfig(**kw)
         with self.assertRaises(ValueError):
@@ -197,10 +205,12 @@ class TestParity(unittest.TestCase):
     def test_ms03_v035_parity_fixtures(self):
         from tests.fixtures.v035_parity import capture
 
-        # GameConfig() is the v0.35 baseline today: full seeds; legacy_v035() equals it and gets a 50-seed subset.
+        # Phase B: legacy_v035() is the v0.35.0 baseline (full seeds); GameConfig() is now v0.36.0.
+        # GameConfig(red_mode=RANSOM) resolves identically and gets a 50-seed subset.
         for n in capture.PLAYER_COUNTS:
-            self.assertEqual(GameConfig(num_players=n), GameConfig.legacy_v035(num_players=n))
-        for factory, seeds in ((GameConfig, capture.SEEDS), (GameConfig.legacy_v035, capture.SEEDS[:50])):
+            self.assertEqual(GameConfig(num_players=n, red_mode=RedMode.RANSOM), GameConfig.legacy_v035(num_players=n))
+        ransom = lambda **kw: GameConfig(red_mode=RedMode.RANSOM, **kw)  # noqa: E731
+        for factory, seeds in ((GameConfig.legacy_v035, capture.SEEDS), (ransom, capture.SEEDS[:50])):
             for scenario in capture.SCENARIOS:
                 for n in capture.PLAYER_COUNTS:
                     with open(capture.fixture_path(scenario, n), encoding="utf-8") as fh:
@@ -632,7 +642,7 @@ class TestRegainAndVariants(MSHarness):
         self.assertEqual((p.patent_level, p.money, p.personal_purple_reserve), (3, 3, 0))
         self.assertEqual(sum(1 for d in p.total_dice if d.color == DieColor.PURPLE), 1)
         self.assertEqual(rt.track_display_name(e.config, "PATENT"), "Public Relations Track")
-        self.assertEqual(rt.track_display_name(GameConfig(), "PATENT"), "Cryptographic Patents Track")
+        self.assertEqual(rt.track_display_name(GameConfig.legacy_v035(), "PATENT"), "Cryptographic Patents Track")
         self.assertEqual(rt.breakthrough_preview(p)["PATENT"]["regain_cap"], 2)
 
     def test_ms34_ad_campaign(self):
@@ -962,7 +972,7 @@ class TestBotPolicy(MSHarness):
             self.assertIn(res.tiebreak_decided_by, {"secrets", "market_share", "money", "ready_colored_dice_count",
                                                     "patches", "unpatched_dice_count", "shared", "sole_survivor"})
         # RANSOM keeps Red ledgers / purchases but no Market Share telemetry
-        res = _seeded_engine(GameConfig, 3, 0, 5).run_game()
+        res = _seeded_engine(GameConfig.legacy_v035, 3, 0, 5).run_game()
         t = res.telemetry_history[0]
         self.assertTrue(t.red_by_player and not t.regain_by_player and not t.market_share_end_of_round)
 
@@ -971,7 +981,9 @@ class TestBotPolicy(MSHarness):
             e = GameEngine(GameConfig.v036(num_players=n), seed=1)
             for p in e.state.players:
                 self.assertEqual((p.secrets, p.market_share, p.market_share_max, p.market_share_min), (sec, ms, ms, ms))
-            e = GameEngine(GameConfig(num_players=n), seed=1)
+            e = GameEngine(GameConfig(num_players=n), seed=1)  # v0.36 default
+            self.assertTrue(all((p.secrets, p.market_share) == (sec, ms) for p in e.state.players))
+            e = GameEngine(GameConfig.legacy_v035(num_players=n), seed=1)
             self.assertTrue(all(p.market_share is None and p.secrets == 8 for p in e.state.players))
 
 

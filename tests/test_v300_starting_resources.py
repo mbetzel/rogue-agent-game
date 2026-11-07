@@ -31,7 +31,7 @@ class TestV300StartingResources(unittest.TestCase):
         3 Gray dice and 1 Purple die in ready_for_release_dice for all players (total 4 dice).
         """
         for n in [2, 3, 4]:
-            config = GameConfig(num_players=n)
+            config = GameConfig.legacy_v035(num_players=n)
             engine = GameEngine(config=config, seed=42)
             self.assertEqual(len(engine.state.players), n)
             for p in engine.state.players:
@@ -45,7 +45,7 @@ class TestV300StartingResources(unittest.TestCase):
         """TEST-V300-02 (INV-START-POOL-01): Verify starting Purple die has correct faces
         (2 Any shields, $2, $1+1🔬, Glitch, Purple ★) and 0 starting cost.
         """
-        config = GameConfig(num_players=4)
+        config = GameConfig.legacy_v035(num_players=4)
         engine = GameEngine(config=config, seed=123)
         for p in engine.state.players:
             purple_die = next(d for d in p.ready_for_release_dice if d.color == DieColor.PURPLE)
@@ -69,7 +69,7 @@ class TestV300StartingResources(unittest.TestCase):
         0 🔬 research tokens across 2P, 3P, and 4P configurations.
         """
         for n in [2, 3, 4]:
-            config = GameConfig(num_players=n, enable_corporate_asymmetry=False)
+            config = GameConfig.legacy_v035(num_players=n, enable_corporate_asymmetry=False)
             engine = GameEngine(config=config, seed=42)
             for p in engine.state.players:
                 self.assertEqual(p.patches, 0)
@@ -98,7 +98,7 @@ class TestV300StartingResources(unittest.TestCase):
         """TEST-V300-05 (INV-START-CASH-01): Verify default corporate players start with
         exactly $6 cash (with non-bonus version card).
         """
-        config = GameConfig(num_players=4, enable_corporate_asymmetry=False)
+        config = GameConfig.legacy_v035(num_players=4, enable_corporate_asymmetry=False)
         engine = GameEngine(config=config, seed=42)
         cash_bonus = 1 if engine.state.active_directive_code == "DATA_SCRAPER" else 0
         for p in engine.state.players:
@@ -128,7 +128,7 @@ class TestV300StartingResources(unittest.TestCase):
         """TEST-V300-07 (INV-PURPLE-RES-01): Verify player.personal_purple_reserve initializes
         to 1; purchasing drops it to 0; second purchase attempt fails.
         """
-        config = GameConfig(num_players=4)
+        config = GameConfig.legacy_v035(num_players=4)
         engine = GameEngine(config=config, seed=42)
         p = engine.state.players[0]
         self.assertEqual(p.personal_purple_reserve, 1)
@@ -150,7 +150,7 @@ class TestV300StartingResources(unittest.TestCase):
         Purple dice plus total reserve Purple dice equals 2 * num_players (8 dice in 4P).
         """
         for n in [2, 3, 4]:
-            config = GameConfig(num_players=n)
+            config = GameConfig.legacy_v035(num_players=n)
             engine = GameEngine(config=config, seed=42)
             total_active_purple = sum(
                 len([d for d in p.ready_for_release_dice if d.color == DieColor.PURPLE])
@@ -165,7 +165,7 @@ class TestV300StartingResources(unittest.TestCase):
         """TEST-V300-09 (INV-PHREAKER-FALLBACK-01): Trigger Phreaker Jumper Diagnostics with
         empty Under Development pipeline; verify player receives immediate +$1 cash.
         """
-        config = GameConfig(num_players=2)
+        config = GameConfig.legacy_v035(num_players=2)
         phreaker_wh = WHITE_HATS[WhiteHatCode.PHREAKER]
         other_wh = WHITE_HATS[WhiteHatCode.OPERATOR]
         engine = GameEngine(config=config, white_hats=[phreaker_wh, other_wh], seed=42)
@@ -185,7 +185,7 @@ class TestV300StartingResources(unittest.TestCase):
         """TEST-V300-10 (INV-PHREAKER-FALLBACK-01): Trigger Phreaker Jumper Diagnostics with
         1 die in Glitched; verify glitched die is rolled and offline position is preserved.
         """
-        config = GameConfig(num_players=2)
+        config = GameConfig.legacy_v035(num_players=2)
         phreaker_wh = WHITE_HATS[WhiteHatCode.PHREAKER]
         other_wh = WHITE_HATS[WhiteHatCode.OPERATOR]
         engine = GameEngine(config=config, white_hats=[phreaker_wh, other_wh], seed=42)
@@ -269,7 +269,7 @@ class TestV300StartingResources(unittest.TestCase):
             self.assertEqual(die.cost, cost, f"create_colored_die fallback mismatch for {color}")
 
         # Verify GameState.get_market_die_cost fallback when variant_cards is empty
-        engine = GameEngine(GameConfig(num_players=2), seed=42)
+        engine = GameEngine(GameConfig.legacy_v035(num_players=2), seed=42)
         engine.state.variant_cards.clear()
         for color, cost in expected_fallback.items():
             self.assertEqual(

@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from sim.config import ROUND_PHASE_NAMES, DieColor, RoundPhase
 from sim.engine.phase3_income import (
     execute_player_income,
+    finalize_income,
     preview_player_income,
     purple_star_dice_in_production,
 )
@@ -74,6 +75,18 @@ def enter_phase_3(controller: GameController) -> None:
 
 def _finish_phase_3(controller: GameController) -> None:
     from web.controller.phase4_attack_actions import enter_phase_4
+
+    # v0.36.0: after every player's Income, resolve Customer Poaching (no carry-over of pending poaches)
+    for ev in finalize_income(controller.engine):
+        actor = controller.player_meta[ev["actor"]]["name"]
+        if ev["target"] is None:
+            controller.event_log.append(f"{actor} Customer Poaching: no rival with Market Share to take from.")
+        else:
+            target = controller.player_meta[ev["target"]]["name"]
+            capped = " (own Market Share already at maximum)" if ev["gained"] < ev["moved"] else ""
+            controller.event_log.append(
+                f"{actor} Customer Poaching: {target} loses {ev['moved']} Market Share, {actor} gains {ev['gained']}{capped}."
+            )
 
     enter_phase_4(controller)
 

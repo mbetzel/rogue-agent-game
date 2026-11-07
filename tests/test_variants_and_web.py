@@ -147,7 +147,7 @@ class TestGroupBVariantCardBehaviors(unittest.TestCase):
         all_vars = get_all_variant_cards()
         r2_card = all_vars["R2"]
 
-        config = GameConfig(num_players=2, starting_money=5)
+        config = GameConfig.legacy_v035(num_players=2, starting_money=5)
         bots = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         custom_vars = get_default_variant_cards()
         custom_vars[DieColor.RED] = r2_card
@@ -201,7 +201,7 @@ class TestGroupBVariantCardBehaviors(unittest.TestCase):
         all_vars = get_all_variant_cards()
         r3_card = all_vars["R3"]
 
-        config = GameConfig(num_players=2, starting_money=5)
+        config = GameConfig.legacy_v035(num_players=2, starting_money=5)
         bots = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         custom_vars = get_default_variant_cards()
         custom_vars[DieColor.RED] = r3_card
@@ -245,7 +245,7 @@ class TestGroupBVariantCardBehaviors(unittest.TestCase):
         all_vars = get_all_variant_cards()
         b1_card = all_vars["B1"]
 
-        config = GameConfig(num_players=2, starting_money=5)
+        config = GameConfig.legacy_v035(num_players=2, starting_money=5)
         bots = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         custom_vars = get_default_variant_cards()
         custom_vars[DieColor.BLUE] = b1_card
@@ -289,7 +289,7 @@ class TestGroupBVariantCardBehaviors(unittest.TestCase):
         all_vars = get_all_variant_cards()
         b3_card = all_vars["B3"]
 
-        config = GameConfig(num_players=2, starting_money=5)
+        config = GameConfig.legacy_v035(num_players=2, starting_money=5)
         bots = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         custom_vars = get_default_variant_cards()
         custom_vars[DieColor.BLUE] = b3_card
@@ -341,7 +341,7 @@ class TestGroupBVariantCardBehaviors(unittest.TestCase):
         all_vars = get_all_variant_cards()
         y2_card = all_vars["Y2"]
 
-        config = GameConfig(num_players=2, starting_money=0)
+        config = GameConfig.legacy_v035(num_players=2, starting_money=0)
         bots = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         custom_vars = get_default_variant_cards()
         custom_vars[DieColor.YELLOW] = y2_card
@@ -388,7 +388,7 @@ class TestGroupBVariantCardBehaviors(unittest.TestCase):
         all_vars = get_all_variant_cards()
         y3_card = all_vars["Y3"]
 
-        config = GameConfig(num_players=2, starting_money=5)
+        config = GameConfig.legacy_v035(num_players=2, starting_money=5)
         bots = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         custom_vars = get_default_variant_cards()
         custom_vars[DieColor.YELLOW] = y3_card
@@ -411,7 +411,7 @@ class TestGroupBVariantCardBehaviors(unittest.TestCase):
         all_vars = get_all_variant_cards()
         p2_card = all_vars["P2"]
 
-        config = GameConfig(num_players=2, starting_money=5)
+        config = GameConfig.legacy_v035(num_players=2, starting_money=5)
         bots = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         custom_vars = get_default_variant_cards()
         custom_vars[DieColor.PURPLE] = p2_card
@@ -519,7 +519,7 @@ class TestGroupCVersionDirectives(unittest.TestCase):
         self.assertEqual(data_scraper.directive_code, "DATA_SCRAPER")
 
         custom_deck = [data_scraper, all_versions[2], all_versions[4]]
-        config = GameConfig(num_players=4, starting_money=7)
+        config = GameConfig.legacy_v035(num_players=4, starting_money=7)
         bots = [AdaptiveBalancedBot(i) for i in range(4)]
 
         engine = GameEngine(config=config, bots=bots, seed=42, version_deck=custom_deck)
@@ -544,7 +544,7 @@ class TestGroupCVersionDirectives(unittest.TestCase):
         self.assertEqual(corrupted_kernel.get_staging_payload(2), {CubeColor.RED: 1, CubeColor.BLUE: 1})
 
         custom_deck = [all_versions[0], all_versions[2], corrupted_kernel]
-        config = GameConfig(num_players=2)
+        config = GameConfig.legacy_v035(num_players=2)
         bots = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
 
         engine = GameEngine(config=config, bots=bots, seed=42, version_deck=custom_deck)
@@ -801,7 +801,7 @@ class TestGroupFExperimentsTelemetry(unittest.TestCase):
     def test_experiment_metrics_winning_and_mean_scores(self) -> None:
         """18. ExperimentMetrics calculates mean_winning_score and mean_scores dictionary."""
         def cfg_fn():
-            return GameConfig(num_players=4)
+            return GameConfig.legacy_v035(num_players=4)
 
         def bots_fn():
             return [
@@ -830,7 +830,7 @@ class TestGroupFExperimentsTelemetry(unittest.TestCase):
         custom_deck = [all_vers[1], all_vers[3], all_vers[5]]  # All-alternates
 
         def cfg_fn():
-            return GameConfig(num_players=4)
+            return GameConfig.legacy_v035(num_players=4)
 
         def bots_fn():
             return [

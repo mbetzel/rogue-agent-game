@@ -20,7 +20,7 @@ class TestV130Archetypes(unittest.TestCase):
 
     def test_phreaker_patches_strictly_one_die(self) -> None:
         """1. Phreaker restores strictly 1 worn die (down from 2 in v0.12.0) for free."""
-        config = GameConfig(num_players=4)
+        config = GameConfig.legacy_v035(num_players=4)
         phreaker_card = get_archetype_by_code(ArchetypeCode.PHREAKER)
         engine = GameEngine(
             config=config,
@@ -51,7 +51,7 @@ class TestV130Archetypes(unittest.TestCase):
 
     def test_acoustic_ignores_one_cube_without_tray_removal(self) -> None:
         """2. Acoustic Baffle Echo ignores 1 attack cube for self without decrementing tray exited cubes."""
-        config = GameConfig(num_players=4)
+        config = GameConfig.legacy_v035(num_players=4)
         acoustic_card = get_archetype_by_code(ArchetypeCode.ACOUSTIC)
         engine = GameEngine(
             config=config,
@@ -87,7 +87,7 @@ class TestV130Archetypes(unittest.TestCase):
 
     def test_acoustic_multiple_colors_prioritizes_highest_threat(self) -> None:
         """3. Acoustic bot prioritizes Blue threat (Secrets) over Red (Cash) when both deal unblocked damage."""
-        config = GameConfig(num_players=4)
+        config = GameConfig.legacy_v035(num_players=4)
         acoustic_card = get_archetype_by_code(ArchetypeCode.ACOUSTIC)
         engine = GameEngine(
             config=config,
@@ -121,7 +121,7 @@ class TestV130Archetypes(unittest.TestCase):
 
     def test_spook_slush_fund_absorbs_two_secrets_free(self) -> None:
         """4. Spook Slush Fund absorbs up to 2 Corporate Secret loss for free ($0 spent)."""
-        config = GameConfig(num_players=4)
+        config = GameConfig.legacy_v035(num_players=4)
         spook_card = get_archetype_by_code(ArchetypeCode.SPOOK)
         engine = GameEngine(
             config=config,
@@ -155,7 +155,7 @@ class TestV130Archetypes(unittest.TestCase):
 
     def test_spook_slush_fund_absorbs_excess_with_cash(self) -> None:
         """5. Spook absorbs 2 secrets free + pays $1 cash for the 3rd secret loss."""
-        config = GameConfig(num_players=4)
+        config = GameConfig.legacy_v035(num_players=4)
         spook_card = get_archetype_by_code(ArchetypeCode.SPOOK)
         engine = GameEngine(
             config=config,
@@ -189,7 +189,7 @@ class TestV130Archetypes(unittest.TestCase):
 
     def test_spook_does_not_waste_charge_on_zero_loss(self) -> None:
         """6. Spook Slush Fund does not activate or waste charge when 0 Secret loss occurs."""
-        config = GameConfig(num_players=4)
+        config = GameConfig.legacy_v035(num_players=4)
         spook_card = get_archetype_by_code(ArchetypeCode.SPOOK)
         engine = GameEngine(
             config=config,
@@ -223,7 +223,7 @@ class TestV130Archetypes(unittest.TestCase):
 
     def test_prodigy_brute_force_face_override(self) -> None:
         """7. Prodigy Brute-Force Bypass unlocks locked dice and overrides 1 rolled die to non-Star face."""
-        config = GameConfig(num_players=4)
+        config = GameConfig.legacy_v035(num_players=4)
         prodigy_card = get_archetype_by_code(ArchetypeCode.PRODIGY)
         engine = GameEngine(
             config=config,

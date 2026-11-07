@@ -141,7 +141,7 @@ def run_pod_sweep(
 
     for run_idx in range(num_runs):
         seed = base_seed + run_idx
-        config = GameConfig(num_players=p_count)
+        config = GameConfig.legacy_v035(num_players=p_count)
 
         bots = [
             AdaptiveBalancedBot(0),

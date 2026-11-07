@@ -343,14 +343,41 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         ),
     }
 
+    cfg = controller.state.config
+    share_regain = bool(getattr(cfg, "is_share_regain", False))
     can_file_patent = bool(
-        controller.phase == 6
+        not share_regain  # v0.36.0: no Patent Filing under the Public Relations Track
+        and controller.phase == 6
         and not can_confirm_income
         and is_active
         and not is_eliminated
         and research_avail >= patent_cost
         and pending_bt is None
     )
+    # v0.36.0 Public Relations Track regain / Ad Campaign
+    regain_cost, regain_cap = (research_tracks.regain_rate(cfg, player) if share_regain else (None, 0))
+    ms_room = (player.market_share_max - player.market_share) if player.market_share is not None else 0
+    regain_left = max(0, regain_cap - getattr(player, "regain_this_turn", 0)) if share_regain else 0
+    can_regain = bool(
+        share_regain
+        and controller.phase == 6
+        and is_active
+        and not is_eliminated
+        and pending_bt is None
+        and ms_room > 0
+        and regain_left > 0
+        and research_avail >= regain_cost
+    )
+    can_ad_campaign = bool(
+        getattr(cfg, "is_market_share", False)
+        and controller.phase == 6
+        and is_active
+        and not is_eliminated
+        and getattr(player, "r2_actions_available", 0) > 0
+        and ms_room > 0
+        and player.money >= cfg.r2_share_cost
+    )
+    can_star["R2"] = can_ad_campaign
 
     upgrade_track_costs = {
         "triage": triage_cost,
@@ -396,6 +423,17 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         "upgrade_track_costs": upgrade_track_costs,
         "can_file_patent": can_file_patent,
         "patent_cost": patent_cost,
+        # v0.36.0 Market Share
+        "is_market_share": bool(getattr(cfg, "is_market_share", False)),
+        "is_share_regain": share_regain,
+        "can_regain_market_share": can_regain,
+        "regain_cost": regain_cost,
+        "regain_cap": regain_cap,
+        "regain_left_this_turn": regain_left,
+        "can_ad_campaign": can_ad_campaign,
+        "ad_campaign_cost": cfg.r2_share_cost,
+        "ad_campaign_actions": getattr(player, "r2_actions_available", 0),
+        "patent_track_name": research_tracks.track_display_name(cfg, "PATENT"),
         "can_end_turn": can_end_turn,
         # Archetype capabilities
         "can_operator": can_operator,

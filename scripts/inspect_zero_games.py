@@ -6,7 +6,7 @@ from sim.bots.adaptive_balanced import AdaptiveBalancedBot
 # Let's inspect what happens in games where 0 total cubes exit currently.
 # How do those games proceed?
 def inspect_zero_exit_games():
-    config = GameConfig(num_players=4)
+    config = GameConfig.legacy_v035(num_players=4)
     bots = [AdaptiveBalancedBot(f"Bot{i}") for i in range(4)]
     
     stalled_games = 0

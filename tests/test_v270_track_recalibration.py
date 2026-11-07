@@ -94,7 +94,7 @@ class TestV270CorruptionTrackRecalibration(unittest.TestCase):
 
     def test_step2a_raas_space_1_execution(self) -> None:
         """INV-STEP2A-DEDUCTION-01: Triggering RaaS Space 1 in Step 2A deducts exactly $2."""
-        cfg = GameConfig(num_players=2, starting_money=5)
+        cfg = GameConfig.legacy_v035(num_players=2, starting_money=5)
         bots = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         engine = GameEngine(cfg, bots=bots, seed=42)
 
@@ -116,7 +116,7 @@ class TestV270CorruptionTrackRecalibration(unittest.TestCase):
 
     def test_step2a_zeroday_space_2_execution(self) -> None:
         """INV-STEP2A-DEDUCTION-01: Triggering Zero-Day Space 2 deducts $3 and 1 patch."""
-        cfg = GameConfig(num_players=2, starting_money=5)
+        cfg = GameConfig.legacy_v035(num_players=2, starting_money=5)
         bots = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         engine = GameEngine(cfg, bots=bots, seed=42)
 
@@ -145,7 +145,7 @@ class TestV270CorruptionTrackRecalibration(unittest.TestCase):
 
     def test_floor_at_zero_no_secret_leak(self) -> None:
         """INV-STEP2A-DEDUCTION-01: Unpaid track cash loss does NOT leak into secrets."""
-        cfg = GameConfig(num_players=2, starting_money=5)
+        cfg = GameConfig.legacy_v035(num_players=2, starting_money=5)
         bots = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         engine = GameEngine(cfg, bots=bots, seed=42)
 

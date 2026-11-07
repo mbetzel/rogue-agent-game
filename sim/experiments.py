@@ -376,10 +376,11 @@ def run_experiment_5a(runs: int = 500, base_seed: int = 42) -> None:
         )
 
 
-def run_experiment_5b(runs: int = 500, base_seed: int = 42, red_variant_set: str = "V035") -> None:
+def run_experiment_5b(runs: int = 500, base_seed: int = 42, red_variant_set: str = "MARKETING") -> None:
     """Experiment 5b: Colored Module Variant Benchmark (R1-R3, B1-B3, G1-G3, Y1-Y3, P1-P3).
 
-    ``red_variant_set="MARKETING"`` benchmarks the v0.36.0 Red set (R1, R2_MKT, R3_MKT) under ``GameConfig.v036``.
+    Default ``red_variant_set="MARKETING"`` benchmarks the v0.36.0 Red set (R1, R2_MKT, R3_MKT) under the v0.36.0
+    default config; ``"V035"`` benchmarks the v0.35 Red set under ``GameConfig.legacy_v035``.
     """
     print("\n========================================================")
     print("Experiment 5b: Colored Module Variant Benchmark")
@@ -404,7 +405,8 @@ def run_experiment_5b(runs: int = 500, base_seed: int = 42, red_variant_set: str
         custom_vars[card.die_color] = card
 
         def cfg_fn():
-            return GameConfig.v036(num_players=4) if marketing else GameConfig(num_players=4)
+            # v0.35 Red set needs the v0.35 ruleset (MARKETING would remap R2/R3); v0.36 is the default
+            return GameConfig(num_players=4) if marketing else GameConfig.legacy_v035(num_players=4)
 
         def bots_fn():
             return [

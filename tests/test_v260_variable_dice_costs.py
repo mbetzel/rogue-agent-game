@@ -59,8 +59,8 @@ class TestV260VariableDiceCosts(unittest.TestCase):
     # TEST-VAR-01: Default starting cash is $6 (INV-START-CASH-01)
     # -------------------------------------------------------------------------
     def test_default_starting_cash_is_four(self) -> None:
-        """Instantiate GameEngine; verify player.money == 6 for all players. Verify GameConfig().starting_money == 6."""
-        cfg = GameConfig()
+        """Instantiate GameEngine; verify player.money == 6 for all players. Verify GameConfig.legacy_v035().starting_money == 6."""
+        cfg = GameConfig.legacy_v035()
         self.assertEqual(cfg.starting_money, 6)
 
         engine = GameEngine(cfg, seed=42)
@@ -74,7 +74,7 @@ class TestV260VariableDiceCosts(unittest.TestCase):
     def test_version_cash_bonus_stacks_on_four(self) -> None:
         """Initialize engine with Data Scraper (starting_cash_bonus=1); verify players start with $7."""
         data_scraper = [c for c in get_all_version_cards() if c.directive_code == "DATA_SCRAPER"][0]
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         engine = GameEngine(config=cfg, seed=42, version_deck=[data_scraper])
         for p in engine.state.players:
             self.assertEqual(p.money, 7, "Data Scraper starting cash bonus (+$1) must stack onto $6 to yield $7")
@@ -150,7 +150,7 @@ class TestV260VariableDiceCosts(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_game_state_get_market_die_cost(self) -> None:
         """Set active variant cards to R3 ($4), B2 ($6), G1 ($5), Y1 ($6); verify get_market_die_cost returns 4, 6, 5, 6."""
-        engine = GameEngine(GameConfig(num_players=2), seed=42)
+        engine = GameEngine(GameConfig.legacy_v035(num_players=2), seed=42)
         engine.state.variant_cards = {
             DieColor.RED: self.variants["R3"],
             DieColor.BLUE: self.variants["B2"],
@@ -167,7 +167,7 @@ class TestV260VariableDiceCosts(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_player_state_get_purple_reserve_cost(self) -> None:
         """Pair player with The Cipher; assert get_purple_reserve_cost() == 6. Pair with The Acoustic; assert == 4."""
-        engine = GameEngine(GameConfig(num_players=2), seed=42)
+        engine = GameEngine(GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
 
         p0.white_hat = WHITE_HATS[WhiteHatCode.CIPHER]
@@ -215,7 +215,7 @@ class TestV260VariableDiceCosts(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_phase3_market_purchase_deducts_exact_cost(self) -> None:
         """Set active Blue to B2 ($6). Player has $6; buy Blue; assert player.money == 0, stock decrements, die in ready."""
-        engine = GameEngine(GameConfig(num_players=2), seed=42)
+        engine = GameEngine(GameConfig.legacy_v035(num_players=2), seed=42)
         engine.state.variant_cards[DieColor.BLUE] = self.variants["B2"]
         p0 = engine.state.players[0]
         p0.money = 6
@@ -243,7 +243,7 @@ class TestV260VariableDiceCosts(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_phase3_market_purchase_rejects_insufficient_funds(self) -> None:
         """Set active Blue to B2 ($6). Player has $5; assert purchase fails / die not bought."""
-        engine = GameEngine(GameConfig(num_players=2), seed=42)
+        engine = GameEngine(GameConfig.legacy_v035(num_players=2), seed=42)
         engine.state.variant_cards[DieColor.BLUE] = self.variants["B2"]
         p0 = engine.state.players[0]
         p0.money = 5
@@ -294,7 +294,7 @@ class TestV260VariableDiceCosts(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_phase3_purple_purchase_rejects_insufficient_funds(self) -> None:
         """Player with The Cipher ($6) has $5; assert purple procurement fails; reserve remains 1."""
-        engine = GameEngine(GameConfig(num_players=2), seed=42)
+        engine = GameEngine(GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.white_hat = WHITE_HATS[WhiteHatCode.CIPHER]
         p0.money = 5
@@ -320,7 +320,7 @@ class TestV260VariableDiceCosts(unittest.TestCase):
     def test_prometheus_discount_on_high_tier_market_die(self) -> None:
         """Active B2 ($6). Prometheus activates discount; assert purchase price is max(0, 6 - 2) = $4."""
         engine = GameEngine(
-            GameConfig(num_players=2),
+            GameConfig.legacy_v035(num_players=2),
             companies=[COMPANIES[CompanyCode.PROMETHEUS], COMPANIES[CompanyCode.AEGIS]],
             white_hats=[WHITE_HATS[WhiteHatCode.OPERATOR], WHITE_HATS[WhiteHatCode.ACOUSTIC]],
             seed=42,
@@ -349,7 +349,7 @@ class TestV260VariableDiceCosts(unittest.TestCase):
     def test_prometheus_discount_on_budget_market_die(self) -> None:
         """Active R3 ($4). Prometheus activates discount; assert purchase price is max(0, 4 - 2) = $2."""
         engine = GameEngine(
-            GameConfig(num_players=2),
+            GameConfig.legacy_v035(num_players=2),
             companies=[COMPANIES[CompanyCode.PROMETHEUS], COMPANIES[CompanyCode.AEGIS]],
             white_hats=[WHITE_HATS[WhiteHatCode.OPERATOR], WHITE_HATS[WhiteHatCode.ACOUSTIC]],
             seed=42,
@@ -460,7 +460,7 @@ class TestV260VariableDiceCosts(unittest.TestCase):
     def test_adaptive_balanced_bot_respects_variant_costs(self) -> None:
         """Run bot Phase 3 planning with $4 cash and $5 Red market die; assert bot does not plan purchase."""
         bot = AdaptiveBalancedBot(0)
-        engine = GameEngine(GameConfig(num_players=2), seed=42)
+        engine = GameEngine(GameConfig.legacy_v035(num_players=2), seed=42)
         engine.state.variant_cards[DieColor.RED] = self.variants["R1"]  # Cost: $5
         p0 = engine.state.players[0]
         p0.money = 4
@@ -492,7 +492,7 @@ class TestV260VariableDiceCosts(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_web_serializer_game_state_market_costs(self) -> None:
         """Call serialize_game_state; assert market['blue']['cost'] reflects active variant cost."""
-        engine = GameEngine(GameConfig(num_players=2), seed=42)
+        engine = GameEngine(GameConfig.legacy_v035(num_players=2), seed=42)
         engine.state.variant_cards[DieColor.BLUE] = self.variants["B2"]  # Cost: $6
         engine.state.variant_cards[DieColor.YELLOW] = self.variants["Y1"]  # Cost: $6
 

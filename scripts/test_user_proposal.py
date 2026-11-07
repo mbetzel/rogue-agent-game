@@ -29,7 +29,7 @@ def test_user_zero_total_rule():
         quiet_attack_streaks = []
 
         for g in range(games):
-            config = GameConfig(num_players=num_players)
+            config = GameConfig.legacy_v035(num_players=num_players)
             bots = [AdaptiveBalancedBot(f"Bot{i}") for i in range(num_players)]
             engine = GameEngine(config, bots, seed=g + 40000 + num_players * 1000)
 
