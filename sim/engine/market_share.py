@@ -4,6 +4,8 @@
   (``resolve_version_comparison``).
 - Phase 3: Customer Poaching (R3) resolution after all players' Income (``resolve_poaches``).
 - Phase 4: Market Collapse end-trigger check (``check_market_collapse``).
+- v0.37.0 end-game scoring: Market Leader Bonus placement (``market_share_places``, ``market_leader_bonus_awards``)
+  and the bot estimate ``expected_market_leader_bonus`` (INV-MLB-*).
 
 Every function is a no-op unless ``config.is_market_share``. No RNG is drawn anywhere in this module
 (INV-MS-RNG-01): all ties are broken by seat / clockwise order.
@@ -11,7 +13,7 @@ Every function is a no-op unless ``config.is_market_share``. No RNG is drawn any
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from sim.config import EndGameReason
 from sim.engine.state import VersionComparisonRecord
@@ -32,6 +34,40 @@ def add_end_trigger(state: "GameState", name: str) -> None:
 
 def survivors(state: "GameState") -> List["PlayerState"]:
     return [p for p in state.players if not p.is_patient_zero]
+
+
+# ---------------------------------------------------------------------------
+# v0.37.0 Market Leader Bonus (pure helpers: no state mutation, no RNG)
+# ---------------------------------------------------------------------------
+def market_share_places(shares: Dict[int, int]) -> Dict[int, int]:
+    """Competition ranking (1-based) of player_id -> place by Market Share, highest first.
+
+    place = 1 + number of entries with strictly greater share. Tied players share the better place
+    (INV-MLB-TIES-01)."""
+    vals = list(shares.values())
+    return {pid: 1 + sum(1 for v in vals if v > s) for pid, s in shares.items()}
+
+
+def _bonus_at(schedule: Sequence[int], idx: int) -> int:
+    return int(schedule[idx]) if 0 <= idx < len(schedule) else 0
+
+
+def market_leader_bonus_awards(shares: Dict[int, int], schedule: Sequence[int]) -> Dict[int, Tuple[int, int]]:
+    """player_id -> (place, bonus) for the survivors in ``shares``; bonus = schedule[place - 1] (0 past the end)."""
+    return {pid: (place, _bonus_at(schedule, place - 1)) for pid, place in market_share_places(shares).items()}
+
+
+def expected_market_leader_bonus(share: int, rival_shares: Iterable[int], schedule: Sequence[int]) -> float:
+    """Bot estimate (reference: the §38 probe). hi = #rivals with share > s, tie = #rivals == s;
+    mean of schedule[hi : hi + tie + 1] (0-padded). Used only by bots, never by scoring.
+
+    Deliberately not the rule's tie outcome (the rule gives every tied player ``schedule[hi]``): averaging over the
+    places a tie spans values breaking a tie (spec §3 note, OQ-3)."""
+    rivals = list(rival_shares)
+    hi = sum(1 for r in rivals if r > share)
+    tie = sum(1 for r in rivals if r == share)
+    span = [_bonus_at(schedule, i) for i in range(hi, hi + tie + 1)]
+    return sum(span) / len(span)
 
 
 def clockwise_from(state: "GameState", start_index: int) -> List["PlayerState"]:

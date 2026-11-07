@@ -2005,3 +2005,108 @@ Question (User, 2026-11-07): would 2–3 threshold points on the Market Share tr
 **Next candidate:** reward Market Share instead of punishing it (for example, end-game Market Share → Secrets, or a `v2.0` comparison that pays Secrets), while watching the Total Wipeout risk noted for idea 5 in §36. Any lock rule would need a new glossary term, which must be confirmed with the User first.
 
 **Status: exploration recorded (User, 2026-11-07). No RULES.md, PnP or web change.**
+
+## 38. Pre-SDLC Exploration: End-Game Market Share Placement Bonus (no rules change yet)
+
+Question (User, 2026-11-07): at game end, award bonus Corporate Secrets by relative Market Share placement (proposed 5/3/2/1). Patient Zeros get nothing; ties broken by the standard tiebreakers. What does it do to Blue as the default block? Probe (hooks only, not rules code; `GameConfig.v036`, current bot roster): `scripts/explore_v360_share_placement_probe.py` (modes `main`, `variants`, `cands`, `deep`, `prfirst`, `tw2p`, `fresh`). Seeds `42 + n*100000 + idx`, re-checked on `7000 + …`; 1,500–3,000 games per cell. Data: `sim_results/v360_share_placement_*.txt|json`.
+
+A **bonus-aware** seat (probe heuristic, TUNE-BOT) values one Red cube at time weight × 3 × the expected change in bonus. The time weight is 0.3 / 0.6 / 1.0 in `v1.0` / `v2.0` / `v3.0`–Final Round; 3 is the value of one Secret saved by blocking Blue. From `v2.0` on it also buys the smallest regain that raises its expected bonus. Lethal Blue stays protected.
+
+**Only the gaps between places matter.** Every survivor gets a bonus, so 5/3/2/1 is really +2 / +1 / +1, and 3/2/1/0 plays the same as 2/1/0/0 at 2–3P.
+
+| 5/3/2/1, standard ties (2P / 3P / 4P) | Value |
+|---|---|
+| Winner changed by the bonus (current bots) | 21 / 36 / 46% |
+| Highest-Market-Share survivor wins (baseline 55 / 45 / 34%) | 72 / 68 / 61% |
+| One bonus-aware seat wins (fair 50 / 33 / 25%) | 57 / 44 / 40% |
+| 3P Patient Zero / Singularity / Market Collapse, all bonus-aware (baseline 35 / 33 / 33) | 53 / 30 / 18 |
+
+Too strong: a 4-Secret swing at 4P against ~4.7 average survivor Secrets.
+
+**Findings:**
+1. **Ties are common.** Every player takes the same Red cubes, so a scoring place is tied on Market Share in 19 / 45 / 72% of games. Under standard tiebreakers, Money decides a 1–2 Secret bonus in those games. Shared ties (tied players all take the better place) cut winner flips by ~5 points.
+2. **Survivors-only vs all-player placement:** almost no difference. Use survivors only.
+3. **Patient Zero rises when players chase the bonus**, by +6–19 points depending on the schedule. This is rational: a more Red-aggressive seat wins *more*. +1 starting Secret offsets it at 3–4P.
+4. **The 2P bonus needs a gap of 2.** A 1-point gap does nothing (bonus-aware seat 49.6%) because Market Share is already the first tiebreaker.
+5. **Red die buying doesn't pay:** Red purchases roughly double (0.6 → 1.1–1.3), win rate unchanged. **Public Relations-first still loses:** 46 / 27 / 18% with the bonus vs 39 / 21 / 13% without (fair 50 / 33 / 25%). Research income (~1.3 🔬/round), not the regain limit, is the bottleneck. Average Public Relations level stays 0.2–0.4.
+6. **Blue agency:** with shields short, Blue left open on purpose 6–7% → 17–22%; Red chosen 22% → 39–43%; Any shields on Blue 63% → 57–60%. Blue stays the main target. Red overtakes Blue only if players treat Market Share loss as permanent from round 1, and then Patient Zero hits 59–67% (degenerate). Win rate for 0 vs 2+ Blue dice flattens: 2P 40 / 66% → 45 / 61%.
+7. **2P Total Wipeout:** at 8 starting Secrets, all bonus-aware, 10.1–10.4% (baseline 7.6%). At 9 Secrets it is 7.7–8.4%, with Singularity 45–46% (guardrail 43%).
+
+**Proposed package (seed base 7000):** 2P 1st +2; 3–4P 1st +2, 2nd +1; others 0; Market Share ties share the better place; survivors only; no bonus on a Total Wipeout; starting Secrets **9 / 8 / 9** (2P +2 chosen by User).
+
+| | 2P | 3P | 4P |
+|---|---|---|---|
+| Baseline endings | 30 / 36 / 34 | 33 / 34 / 33 | 30 / 34 / 35 |
+| Endings, current bots | 18 / 42 / 39 | 26 / 39 / 36 | 24 / 38 / 38 |
+| Endings, all bonus-aware | 27 / 46 / 27 | 37 / 41 / 22 | 32 / 39 / 28 |
+| Total Wipeout, all bonus-aware (baseline) | 8.4% (7.1%) | 3.8% (2.6%) | 1.2% (1.0%) |
+| Rounds, all bonus-aware (baseline) | 9.13 (8.83) | 8.97 (8.79) | 8.95 (8.83) |
+| One bonus-aware seat wins | 59.2% | 39.6% | 33.7% |
+| Winner changed by the bonus | 15–18% | 17–20% | 25–27% |
+| Lowest-Market-Share survivor wins (baseline) | 31% (44%) | 20% (33%) | 13% (23%) |
+
+Seed-42 results agree within ~2 points. RecklessSaboteur's 2P win rate rises 27 → 37–42%.
+
+**Watch items:** 2P Singularity 46% (over the 43% guardrail); 2P bonus-aware edge +9 points; Patient Zero 18–26% if players ignore the bonus; Public Relations Track weakness (separate exploration).
+
+**Implementation plan (pending User sign-off). Rule name: Market Leader Bonus (User, 2026-11-07).**
+1. **Glossary:** add **Market Leader Bonus**. Change Market Share's "Scores `0 VP`" line, and update the Corporate Secrets and Total Wipeout entries.
+2. **RULES.md:**
+   - Section 5 scoring step: award by placement before comparing Secrets; ties share; Patient Zeros excluded; none on a Total Wipeout.
+   - Starting Secrets `[TUNE]` 9 / 8 / 9.
+   - Market Collapse note: the player at `0` scores normally but places last.
+3. **sim:**
+   - `GameConfig` fields for the bonus schedule and tie mode, plus a v0.37 factory.
+   - `sim/engine/end_game.py`: apply the bonus before ranking; record pre-bonus Secrets and the bonus in telemetry.
+   - `sim/bots/market_share_policy.py`: placement-bonus valuation in `marginal_block_value` and `urgent_regain` (time weight [TUNE-BOT]).
+   - Tests: tie sharing, Patient Zero exclusion, Total Wipeout, 2P schedule.
+4. **Acceptance sweep** with the full guardrail set (product-owner) and an independent balance check (game-designer).
+5. **PnP and web:** scoring summary, Market Share track placement reminder, Company Terminal Mat and end-game screen (graphic-designer).
+
+**Status: exploration recorded (User, 2026-11-07). No RULES.md, PnP or web change.**
+
+## 39. Phase 46 Market Leader Bonus Sweep & Balance: APPROVED WITH TUNE (`v0.37.0`)
+
+Sources: product-owner [docs/findings/v370_market_leader_bonus_telemetry_report.md](docs/findings/v370_market_leader_bonus_telemetry_report.md) (spec cells at seed 42, V036 / V037 / ONE-AWARE again at seed 7000, extra 2P seed bases 9000 and 13000); game-designer [docs/findings/v370_balance_assessment.md](docs/findings/v370_balance_assessment.md) (~48,000 more games of tune slices). Implementation: spec [docs/specs/v370_market_leader_bonus_spec.md](docs/specs/v370_market_leader_bonus_spec.md), `GameConfig.v037()`.
+
+| V037, seed 42 | Patient Zero / Singularity / Market Collapse | Total Wipeout (V036) | Rounds | Winner changed (over all games) | Bonus-aware edge |
+|---|---|---|---|---|---|
+| 2P | 27.0 / 47.1 / 25.9 | 8.4% (7.6) | 9.14 | 10.7% | +7.9 |
+| 3P | 37.5 / 39.9 / 22.6 | 4.2% (2.6) | 8.97 | 14.4% | +6.2 |
+| 4P | 30.4 / 40.1 / 29.4 | 1.6% (1.0) | 8.99 | 24.5% | +7.4 |
+
+Seeds 42 and 7000 agree within 2.1 points. Endings, Total Wipeout and edge match §38 within 2.5 points.
+
+**2P Singularity** is 46.0% [45.1, 46.9] pooled over 12,000 games (four seed bases), on the 46% fail line. It is driven by the 9-Secret 2P start, not the bonus: with V036 starting Secrets it is 36.2%, but Patient Zero is 42.2% and Total Wipeout 12.0%.
+
+| 2P tune option | Patient Zero / Singularity / Market Collapse | Total Wipeout | Edge | Outcome |
+|---|---|---|---|---|
+| A. 9 Secrets, +2 (kept) | 27 / 47 / 26 | 8.4 / 7.7 | +7.9 | Singularity on the line |
+| B. 8 Secrets, +2 | 34 / 42 / 24 | 10.4 / 9.3 | +7.1 | Total Wipeout fails |
+| C. 9 Secrets, +1 | 23 / 45 / 31 | 5.8 | +1 to +2.5 | Bonus barely worth chasing |
+| D. 8 Secrets, +3 | 42 / 39 / 19 | 13 | +9.4 | Three guardrails fail |
+
+The 46–47% is the worst case, where every bot chases the bonus. With one bonus-aware seat it is 44.2 / 42.4%; with none, 43.0%.
+
+**Blue agency goal: met.**
+- Generic shields on Blue: 63% → 57–60%.
+- Blue left open in contested rounds: 6–7% → 17–23%.
+- Red chosen in contested rounds: 22% → 39–44%.
+- Red block rate: 15% → 21–22%.
+- 2P win rate with 0 vs 2+ Blue dice: 41 / 67% → 44 / 62%.
+
+**Game-designer notes:**
+- The winner-changed gap with §38 is a counting difference, not a gameplay one. The probe divided by all games and used a shorter pre-bonus tiebreak. Like-for-like it is ~13% vs the sweep's 10.7–11.7%. The new 2P baseline is 11–13%.
+- At 2P, 4.7% of games see a 2-Secret lead overturned: +2 creates a tie and Market Share breaks it. Accepted as a playtest watch item; Market Share is public and the trailing player must win it outright.
+- RecklessSaboteur's 2P win rate rises 29.4 → 37.7%. This is intended catch-up; it is still the weakest bot, and the spread between bots narrows from 31.5 to 22.5 points.
+
+**Watch items:**
+- 3P Market Collapse 22.6 / 23.2%.
+- Bonus-aware edge +7.4 to +9.4 (fail +10).
+- Zero Day Override as the v3.0 card: 2P Singularity 50.5% (fail 55%).
+- 2P Patient Zero 17.4% when no bot chases the bonus.
+- 2P Blue left open 23.1% (line 25%).
+
+**Decisions (User, 2026-11-07):** keep option A (starting Secrets 9 / 8 / 9; 2P 1st +2; 3–4P 1st +2, 2nd +1). Move the 2P Singularity guardrail to pass ≤ 43%, watch 43–48%, fail > 48%. The game-designer's notes on 2-Secret overturns and the 11–13% winner-changed baseline are adopted as watch / baseline values.
+
+**Status: approved for Phase B (RULES.md v0.37.0, glossary, `GameConfig()` default, web, PnP).**

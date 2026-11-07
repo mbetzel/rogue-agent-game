@@ -405,7 +405,7 @@ def run_experiment_5b(runs: int = 500, base_seed: int = 42, red_variant_set: str
         custom_vars[card.die_color] = card
 
         def cfg_fn():
-            # v0.35 Red set needs the v0.35 ruleset (MARKETING would remap R2/R3); v0.36 is the default
+            # v0.35 Red set needs the v0.35 ruleset (MARKETING would remap R2/R3); GameConfig() is the current default
             return GameConfig(num_players=4) if marketing else GameConfig.legacy_v035(num_players=4)
 
         def bots_fn():

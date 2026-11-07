@@ -7,6 +7,9 @@ from enum import Enum, IntEnum
 from typing import Dict, Optional, Tuple
 
 _ALL_TRACK_LEVELS = (0, 1, 2, 3, 4)
+# v0.37.0 [TUNE] (FINDINGS §38 / §39): Market Leader Bonus by Market Share place, and starting Corporate Secrets
+V037_MARKET_LEADER_BONUS = {2: (2, 0), 3: (2, 1, 0), 4: (2, 1, 0, 0)}
+V037_STARTING_SECRETS = {2: 9, 3: 8, 4: 9}
 
 
 class CubeColor(str, Enum):
@@ -322,6 +325,11 @@ class GameConfig:
     # FREE_CHOICE is allowed under RANSOM (isolates the bot heuristic).
     any_shield_policy: Optional[AnyShieldPolicy] = None
     market_share_bot_policy: str = "AWARE"  # sim-only: "AWARE" | "NAIVE" (ablation)
+    # --- v0.37.0 Market Leader Bonus (INV-MLB-*). Empty = disabled = v0.36.0 bit-identical. ---
+    # [TUNE] player count -> bonus Corporate Secrets by Market Share place among survivors (index 0 = 1st place).
+    # Shorter tuples are padded with 0 up to the player count; extra entries are ignored.
+    # None resolves once in __post_init__: MARKET_SHARE -> the v0.37.0 schedule, RANSOM -> {} (disabled).
+    market_leader_bonus_by_player_count: Optional[Dict[int, Tuple[int, ...]]] = None
 
     def __post_init__(self) -> None:
         self.round_sequence = RoundSequence(self.round_sequence)
@@ -369,6 +377,9 @@ class GameConfig:
             missing = [lvl for lvl in _ALL_TRACK_LEVELS if lvl not in getattr(self, name)]
             if missing:
                 raise ValueError(f"{name} is missing levels {missing}")
+        if self.market_leader_bonus_by_player_count is None:
+            self.market_leader_bonus_by_player_count = dict(V037_MARKET_LEADER_BONUS) if ms else {}
+        self._validate_market_leader_bonus(ms)
         self.research_track_model = ResearchTrackModel(self.research_track_model)
         v035 = self.research_track_model == ResearchTrackModel.V035_FIVE_LEVEL
         # NOTE: resolved once at construction; re-assigning research_track_model later does NOT re-resolve.
@@ -388,13 +399,19 @@ class GameConfig:
             if self.round_sequence == RoundSequence.V033_THREE_PHASE:
                 self.starting_secrets_by_player_count = {2: 8, 3: 8, 4: 12}
             elif self.red_mode == RedMode.MARKET_SHARE:
-                self.starting_secrets_by_player_count = {2: 7, 3: 7, 4: 8}  # v0.36.0 [TUNE] (plan §11)
+                self.starting_secrets_by_player_count = dict(V037_STARTING_SECRETS)  # v0.37.0 [TUNE] (FINDINGS §39)
             else:
                 self.starting_secrets_by_player_count = {2: 8, 3: 8, 4: 8}  # v0.34 / v0.35
 
     @classmethod
     def v036(cls, **overrides) -> "GameConfig":
-        """v0.36.0 candidate: Market Share Red, Public Relations Track, Market Collapse, 7/7/8 Secrets.
+        """Alias of ``legacy_v036()`` (kept for the v0.36-era scripts and tests)."""
+        return cls.legacy_v036(**overrides)
+
+    @classmethod
+    def legacy_v036(cls, **overrides) -> "GameConfig":
+        """v0.36.0 baseline: Market Share Red, Public Relations Track, Market Collapse, 7/7/8 Secrets, no Market
+        Leader Bonus. Bit-identical to the v0.36.0 default (tests/fixtures/v036_parity).
 
         Balance iteration 1 (User 2026-11-06): Market Share start 17/18/18; only the v2.0 -> v3.0 comparison ($4).
         Final tune (User, plan §11 / FINDINGS §34): starting Secrets 7/7/8 (2P/3P/4P), replacing 8/10/11.
@@ -403,7 +420,19 @@ class GameConfig:
         overrides.setdefault("starting_secrets_by_player_count", {2: 7, 3: 7, 4: 8})  # [TUNE]
         overrides.setdefault("market_share_start_by_player_count", {2: 17, 3: 18, 4: 18})
         overrides.setdefault("version_share_payout", {"v2.0": 4})
+        overrides.setdefault("market_leader_bonus_by_player_count", {})
         return cls(**overrides)
+
+    @classmethod
+    def v037(cls, **overrides) -> "GameConfig":
+        """v0.37.0 (the ``GameConfig()`` default): v0.36.0 + Market Leader Bonus (FINDINGS §38 / §39).
+
+        2P 1st +2; 3P 1st +2, 2nd +1; 4P 1st +2, 2nd +1; others 0 [TUNE]. Ties share the better place,
+        survivors only, none on a Total Wipeout. Starting Secrets 9 / 8 / 9 [TUNE].
+        """
+        overrides.setdefault("market_leader_bonus_by_player_count", dict(V037_MARKET_LEADER_BONUS))
+        overrides.setdefault("starting_secrets_by_player_count", dict(V037_STARTING_SECRETS))  # [TUNE]
+        return cls.legacy_v036(**overrides)
 
     @classmethod
     def legacy_v035(cls, **overrides) -> "GameConfig":
@@ -443,6 +472,39 @@ class GameConfig:
         """Starting (= maximum) Market Share for the player count (or self.num_players)."""
         n = num_players if num_players is not None else self.num_players
         return self.market_share_start_by_player_count.get(n, self.market_share_start_by_player_count.get(4, 18))
+
+    def _validate_market_leader_bonus(self, ms: bool) -> None:
+        raw = self.market_leader_bonus_by_player_count
+        if not isinstance(raw, dict):
+            raise ValueError("market_leader_bonus_by_player_count must be a dict of player count -> schedule")
+        norm: Dict[int, Tuple[int, ...]] = {}
+        for n, sched in raw.items():
+            if isinstance(n, bool) or not isinstance(n, int) or not 2 <= n <= 4:
+                raise ValueError(f"market_leader_bonus player-count keys must be 2..4, got {n!r}")
+            if not isinstance(sched, (tuple, list)) or any(
+                    isinstance(b, bool) or not isinstance(b, int) for b in sched):
+                raise ValueError(f"market_leader_bonus schedule for {n}P must be a tuple/list of ints, got {sched!r}")
+            if any(b < 0 for b in sched):
+                raise ValueError(f"market_leader_bonus schedule for {n}P has a negative entry: {sched!r}")
+            if any(sched[i] < sched[i + 1] for i in range(len(sched) - 1)):
+                raise ValueError(f"market_leader_bonus schedule for {n}P must be non-increasing: {sched!r}")
+            if any(b > 0 for b in sched) and not ms:
+                raise ValueError("market_leader_bonus requires red_mode=MARKET_SHARE")
+            norm[int(n)] = tuple(int(b) for b in sched)
+        self.market_leader_bonus_by_player_count = norm
+
+    def market_leader_bonus_schedule(self, num_players: Optional[int] = None) -> Tuple[int, ...]:
+        """Bonus by place (index 0 = 1st), padded with 0 / truncated to the player count. () when disabled."""
+        n = num_players if num_players is not None else self.num_players
+        sched = self.market_leader_bonus_by_player_count.get(n, ())
+        if not any(b > 0 for b in sched):
+            return ()
+        return tuple(sched[:n]) + (0,) * max(0, n - len(sched))
+
+    @property
+    def is_market_leader_bonus(self) -> bool:
+        """True when the schedule for self.num_players has any positive entry."""
+        return bool(self.market_leader_bonus_schedule())
 
     @property
     def is_six_phase(self) -> bool:

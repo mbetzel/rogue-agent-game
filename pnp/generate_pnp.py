@@ -1,4 +1,4 @@
-"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.36.0 Baseline).
+"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.37.0 Baseline).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
   - 01_Player_Boards.pdf (6 pages — 4x Company Terminal Mats with CI/CD Pipeline loop + 6x Client Company Cards sheet + 6x White Hat Dossier Cards sheet)
@@ -19,7 +19,7 @@ from pnp.pdf_engine import PALETTE, Color, PDFDocument, PDFPage, measure_text
 
 
 # =============================================================================
-# Canonical Game Data (Synchronized 1:1 with RULES.md v0.36.0 & sim/entities.py)
+# Canonical Game Data (Synchronized 1:1 with RULES.md v0.37.0 & sim/entities.py)
 # =============================================================================
 
 @dataclass(frozen=True)
@@ -48,7 +48,7 @@ COMPANIES: List[CompanyCardSpec] = [
         ),
         flavor='"When liquidity is limitless, headcount is merely an accounting variable."',
         hardware_summary="DEF CAP: 2  |  TRIAGE: 2  |  RELEASE: 4  |  ALL 4 TRACKS AT LEVEL 0",
-        starting_bonus="START: $6  |  7 SECRETS (4P: 8)  |  18 MARKET SHARE (2P: 17)  |  0 {RESEARCH}",
+        starting_bonus="START: $6  |  9 SECRETS (3P: 8)  |  18 MARKET SHARE (2P: 17)  |  0 {RESEARCH}",
     ),
     CompanyCardSpec(
         code="OMNIDYNE",
@@ -62,7 +62,7 @@ COMPANIES: List[CompanyCardSpec] = [
         ),
         flavor='"Proprietary hardware backplanes allow instantaneous hot-swapping under live load."',
         hardware_summary="DEF CAP: 2  |  TRIAGE: 2  |  RELEASE: 4  |  ALL 4 TRACKS AT LEVEL 0",
-        starting_bonus="START: $6  |  7 SECRETS (4P: 8)  |  18 MARKET SHARE (2P: 17)  |  0 {RESEARCH}",
+        starting_bonus="START: $6  |  9 SECRETS (3P: 8)  |  18 MARKET SHARE (2P: 17)  |  0 {RESEARCH}",
     ),
     CompanyCardSpec(
         code="AEGIS",
@@ -76,7 +76,7 @@ COMPANIES: List[CompanyCardSpec] = [
         ),
         flavor='"Multi-layered kinetic dampeners disperse inbound network blast energy."',
         hardware_summary="DEF CAP: 2  |  TRIAGE: 2  |  RELEASE: 4  |  ALL 4 TRACKS AT LEVEL 0",
-        starting_bonus="START: $6  |  7 SECRETS (4P: 8)  |  18 MARKET SHARE (2P: 17)  |  0 {RESEARCH}",
+        starting_bonus="START: $6  |  9 SECRETS (3P: 8)  |  18 MARKET SHARE (2P: 17)  |  0 {RESEARCH}",
     ),
     CompanyCardSpec(
         code="DTO",
@@ -90,7 +90,7 @@ COMPANIES: List[CompanyCardSpec] = [
         ),
         flavor='"Classified black budget allocations absorb compliance failures without public oversight."',
         hardware_summary="DEF CAP: 2  |  TRIAGE: 2  |  RELEASE: 4  |  ALL 4 TRACKS AT LEVEL 0",
-        starting_bonus="START: $6  |  7 SECRETS (4P: 8)  |  18 MARKET SHARE (2P: 17)  |  0 {RESEARCH}",
+        starting_bonus="START: $6  |  9 SECRETS (3P: 8)  |  18 MARKET SHARE (2P: 17)  |  0 {RESEARCH}",
     ),
     CompanyCardSpec(
         code="HELIX",
@@ -105,7 +105,7 @@ COMPANIES: List[CompanyCardSpec] = [
         ),
         flavor='"Massively parallel quantum sequencing breaks deterministic encryption gates."',
         hardware_summary="DEF CAP: 2  |  TRIAGE: 2  |  RELEASE: 4  |  ALL 4 TRACKS AT LEVEL 0",
-        starting_bonus="START: $6  |  7 SECRETS (4P: 8)  |  18 MARKET SHARE (2P: 17)  |  0 {RESEARCH}",
+        starting_bonus="START: $6  |  9 SECRETS (3P: 8)  |  18 MARKET SHARE (2P: 17)  |  0 {RESEARCH}",
     ),
     CompanyCardSpec(
         code="PROMETHEUS",
@@ -120,7 +120,7 @@ COMPANIES: List[CompanyCardSpec] = [
         ),
         flavor='"Open-source cryptographic protocols circumvent proprietary enterprise licensing fees."',
         hardware_summary="DEF CAP: 2  |  TRIAGE: 2  |  RELEASE: 4  |  ALL 4 TRACKS AT LEVEL 0",
-        starting_bonus="START: $6  |  7 SECRETS (4P: 8)  |  18 MARKET SHARE (2P: 17)  |  0 {RESEARCH}",
+        starting_bonus="START: $6  |  9 SECRETS (3P: 8)  |  18 MARKET SHARE (2P: 17)  |  0 {RESEARCH}",
     ),
 ]
 
@@ -755,7 +755,8 @@ PUBLIC_RELATIONS_LEVELS = [
     ("Regain up to 3/rnd", ""),
 ]
 
-# Market Share track (RULES.md v0.36.0): start = max = 17 (2P) / 18 (3-4P); 0 = Market Collapse.
+# Market Share track (RULES.md v0.37.0): start = max = 17 (2P) / 18 (3-4P); 0 = Market Collapse;
+# final place sets the Market Leader Bonus (1st +2 Secrets; 2nd +1 at 3-4P).
 MARKET_SHARE_MAX = 18
 MARKET_SHARE_START = {17: "2P START/MAX", 18: "3-4P START/MAX"}
 
@@ -828,7 +829,8 @@ def _draw_market_share_track(page: PDFPage, x: float, y: float, w: float, h: flo
         "Start = your max (never above).\n"
         "**-1** per unblocked {RED} (P4).\n"
         "Regain in P6: Public Relations.\n"
-        "**Tiebreaker #1** | 0 VP",
+        "**Game end:** 1st **+2** Secrets, 2nd\n"
+        "**+1** (3-4P); ties share. Tiebreak #1.",
         size=4.4, leading=6.6, color=PALETTE["ink"],
     )
 
@@ -874,7 +876,7 @@ def render_player_board(
     draw_board_outer_frame(
         page,
         left_tag=f"TOO MANY SECRETS // COMPANY TERMINAL MAT [TERM-0{idx}/4]",
-        right_tag="PNP PROTOTYPE v0.36.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.37.0 // US LETTER",
     )
 
     # -------------------------------------------------------------------------
@@ -905,7 +907,7 @@ def render_player_board(
     _draw_chip_well(
         page, lx, g_y1, cell_w, cell_h,
         "{SECRET} **CORPORATE SECRETS (VP)**", PALETTE["blue"], PALETTE["blue"], PALETTE["blue_light"],
-        "Start: **7** (2-3P) / **8** (4P)", "Uncapped | 1 Secret = 1 VP", "secret",
+        "Start: **9** (2P/4P) / **8** (3P)", "Uncapped | 1 Secret = 1 VP", "secret",
     )
     _draw_chip_well(
         page, g_x2, g_y1, cell_w, cell_h,
@@ -1109,7 +1111,7 @@ def render_company_cards_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x CLIENT COMPANY CARDS [PAGE 5/6]",
-        right_tag="PNP PROTOTYPE v0.36.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.37.0 // US LETTER",
     )
 
     page.text(
@@ -1158,7 +1160,7 @@ def render_white_hat_dossiers_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x WHITE HAT DOSSIER CARDS [PAGE 6/6]",
-        right_tag="PNP PROTOTYPE v0.36.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.37.0 // US LETTER",
     )
 
     page.text(
@@ -1210,7 +1212,7 @@ def render_agent_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // CENTRAL ROGUE AGENT & COMPILER BOARD [1/2]",
-        right_tag="PNP PROTOTYPE v0.36.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.37.0 // US LETTER",
     )
 
     # Top Title Bar inside board
@@ -1394,7 +1396,8 @@ def render_agent_board(page: PDFPage) -> None:
         (
             "SECRETS VICTORY & TIEBREAKERS",
             (
-                "**Most Corporate Secrets** among survivors wins. *Ties: 1. Market Share  2. Cash ($)  3. Ready Colored Dice  4. Research ({RESEARCH})  5. Fewest Under Dev.*"
+                "**Market Leader Bonus:** survivors by final Market Share gain Corporate Secrets: 1st **+2**; 2nd **+1** (3-4P); ties share the better place.\n"
+                "Then **most Corporate Secrets** among survivors wins. *Ties: 1. Market Share  2. Cash ($)  3. Ready Colored Dice  4. Research ({RESEARCH})  5. Fewest Under Dev.* Total Wipeout: no bonus."
             ),
         ),
     ]
@@ -1427,7 +1430,7 @@ def render_market_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // SOFTWARE MODULE MARKET & CENTRAL SUPPLY [2/2]",
-        right_tag="PNP PROTOTYPE v0.36.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.37.0 // US LETTER",
     )
 
     # Top Title Bar
@@ -1552,7 +1555,7 @@ def render_market_board(page: PDFPage) -> None:
     page.text(48.0, fy + 11.8, "SETUP QUICK-REFERENCE & COMPILER PRIMING", font="bold", size=7.8, color=PALETTE["ink"])
     page.rich_paragraph(
         48.0, fy + 26.5, fw - 16.0,
-        "- **2P / 3P / 4P:** **$6** | **7 / 7 / 8** Secrets | **17 / 18 / 18** Market Share (= max) | **0** {RESEARCH}\n"
+        "- **2P / 3P / 4P:** **$6** | **9 / 8 / 9** Secrets | **17 / 18 / 18** Market Share (= max) | **0** {RESEARCH}\n"
         "- **Market:** **4 / 6 / 8** dice per color | identical company start (all tracks L0); DTO Slush Fund **once per game**\n"
         "- **Corruption Tracks:** v1.0 **4** / v2.0 **5** / v3.0 **6** spaces (all player counts)\n"
         "- **Each player:** 3 Gray + 1 Purple in Ready for Release; 1 Purple in Personal Reserve (5 Gray per player in the box); Market Share Marker on your start value.",
@@ -1566,10 +1569,10 @@ def render_market_board(page: PDFPage) -> None:
     page.text(rx_f + 8.0, fy + 11.8, "SECRETS VICTORY & TIEBREAKERS  (SURVIVING OPERATIVES)", font="bold", size=7.8, color=PALETTE["ink"])
     page.rich_paragraph(
         rx_f + 8.0, fy + 27.5, fw - 16.0,
-        "- **Primary Victory Condition:** Most remaining **Corporate Secrets** wins! (Uncapped).\n"
-        "- **Tiebreakers:** 1. Market Share | 2. Cash ($) | 3. Ready Colored Dice | 4. Research ({RESEARCH}) | 5. Fewest Under Dev.\n"
+        "- **Market Leader Bonus:** survivors by final Market Share: 1st **+2** Secrets; 2nd **+1** (3-4P); ties share.\n"
+        "- **Victory:** Most **Corporate Secrets** wins. **Ties:** Market Share > $ > Ready Colored Dice > {RESEARCH} > Fewest Under Dev.\n"
         "- **Ends:** Singularity | Final Round after **Patient Zero** or **Market Collapse** (0 Share, no elimination) | Total Wipeout.\n"
-        "- *Patient Zero (<=0 Secrets) eliminated! Total Wipeout: rank by the tiebreakers only (breach depth ignored).*",
+        "- *Patient Zero (<=0 Secrets) eliminated, no bonus. Total Wipeout: no bonus; tiebreakers only.*",
         size=6.2, leading=9.6, color=PALETTE["ink"],
     )
 
@@ -1583,7 +1586,7 @@ def render_master_dice_reference(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // MASTER DICE PIP & ABILITY VISUAL AID [1/4]",
-        right_tag="PNP PROTOTYPE v0.36.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.37.0 // US LETTER",
     )
 
     page.rect(40.0, 32.0, 712.0, 24.0, stroke=PALETTE["ink"], fill=PALETTE["ink"], line_width=1.0)
@@ -1781,7 +1784,7 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
                 "**P5 CI/CD Pipeline Shift:** Magnetic Splice -> Production Return (In Production -> Scanned) -> Scanned Graduation (-> Ready, <= Release Bandwidth, your choice) -> Conveyor Triage (Glitched -> Scanned, <= Triage Bandwidth).\n"
                 "**P6 Operations (clockwise):** Upgrade Tracks (1/2/2/3 {RESEARCH}) | Regain Market Share (2{RESEARCH} each, Public Relations limit 1/1/2/2/3) | Paid {STAR} (Ad Campaign: $2 -> +1 Share) | Buy <= 2 dice -> Ready -> Pass First Player.\n"
                 "**Breakthroughs (L1 / L3):** Defense & Release: +1 Gray die / +1 Secret | Triage: +2 {WHITE} / pay $3 swap Gray -> Market die | Public Relations: +$3 / 2nd Purple. Purple is never sold. DTO Slush Fund: once per game.\n"
-                "**VICTORY:** Most Secrets among survivors (Patient Zero eliminated). Ties: Market Share > $ > Ready Colored Dice > {RESEARCH} > Fewest Under Dev. Total Wipeout: tiebreakers only.",
+                "**VICTORY:** Survivors gain the Market Leader Bonus by Market Share (1st +2 Secrets; 2nd +1 at 3-4P; ties share), then most Secrets wins. Ties: Market Share > $ > Ready Colored Dice > {RESEARCH} > Fewest Under Dev. Total Wipeout: no bonus, tiebreakers only.",
                 cb_y - 2.0, size=5.1, leading=6.9, min_size=4.3,
             )
             # Mini CI/CD Pipeline summary bar at bottom
@@ -2103,7 +2106,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated: List[str] = []
 
     # 1. Player Terminal Mats & Split Cards (6 pages: 4x Mats with empty modular docks + 1x Company Cards + 1x White Hat Cards)
-    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.36.0)")
+    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.37.0)")
     for idx in range(1, 5):
         p = doc_players.add_page()
         render_player_board(p, idx)
@@ -2144,7 +2147,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated.append(path_versions)
 
     # 5. Combined Master Print-and-Play Pack (All 14 pages)
-    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.36.0)")
+    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.37.0)")
     for sub_doc in (doc_central, doc_players, doc_dice, doc_versions):
         for pg in sub_doc.pages:
             doc_master.pages.append(pg)

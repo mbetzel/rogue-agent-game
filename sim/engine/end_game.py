@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 
 from sim.config import DieColor, EndGameReason, TiebreakOrder
+from sim.engine.market_share import market_leader_bonus_awards, market_share_places
 from sim.engine.state import EndGameResult
 
 if TYPE_CHECKING:
@@ -64,6 +65,14 @@ def _wipeout_key_v033(r: Dict) -> Tuple:
     return (r["net_score"], r["secrets"], r["money"], r["ready_colored_dice_count"], r["patches"], -r["unpatched_dice_count"])
 
 
+def _dice_by_color(p) -> Dict[str, int]:
+    out: Dict[str, int] = {c.value: 0 for c in DieColor}
+    for d in p.total_dice:
+        k = getattr(d.color, "value", str(d.color))
+        out[k] = out.get(k, 0) + 1
+    return out
+
+
 def _return_held_contractors(engine: GameEngine) -> None:
     """End-of-game cleanup: unexpired White Contractor dice (e.g. Triage L1 Breakthrough contractors gained in
     the Final Round's Phase 6) return to the supply, keeping ``contractor_supply`` conserved."""
@@ -80,12 +89,24 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
     _return_held_contractors(engine)
     all_patient_zero = all(p.is_patient_zero for p in engine.state.players)
 
+    # v0.37.0 Market Leader Bonus (INV-MLB-*): survivors are placed by final Market Share (ties share the better
+    # place) and gain bonus Corporate Secrets by place before Secrets are compared. None on a Total Wipeout.
+    # PlayerState.secrets is never mutated: the bonus lives in the ranking rows (INV-MLB-SCORE-01).
+    players = engine.state.players
+    bonus_on = bool(cfg.is_market_leader_bonus) and not all_patient_zero
+    bonus_schedule = list(cfg.market_leader_bonus_schedule(len(players))) if bonus_on else []
+    survivor_shares = {p.player_id: int(p.market_share or 0) for p in players if not p.is_patient_zero}
+    places = market_share_places(survivor_shares) if cfg.is_market_share and not all_patient_zero else {}
+    awards = market_leader_bonus_awards(survivor_shares, bonus_schedule) if bonus_on else {}
+
     rankings: List[Dict] = []
 
-    for p in engine.state.players:
+    for p in players:
+        bonus = awards.get(p.player_id, (None, 0))[1]
+        final_secrets = p.secrets + bonus
         # Portfolio Value (v0.19.0: Pure Corporate Secrets Victory Scoring):
         # 1 VP per Secret. Software modules and cash have 0 direct VP.
-        portfolio_value = max(0, p.secrets) * cfg.vp_per_secret
+        portfolio_value = max(0, final_secrets) * cfg.vp_per_secret
 
         # Telemetry: unpatched colored dice count and VP lost
         unpatched_colored_dice_count = sum(
@@ -111,7 +132,10 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
                 "net_score": net_score,
                 "is_patient_zero": p.is_patient_zero,
                 "elimination_reason": p.elimination_reason,
-                "secrets": p.secrets,
+                "secrets": final_secrets,
+                "secrets_before_bonus": p.secrets,
+                "market_leader_bonus": bonus,
+                "market_share_place": places.get(p.player_id),
                 "money": p.money,
                 "patches": p.patches,
                 "debt": p.debt,
@@ -176,6 +200,12 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
                 "red_blocked_color_total": p.red_blocked_color_total,
                 "red_blocked_any_total": p.red_blocked_any_total,
                 "red_unblocked_total": p.red_unblocked_total,
+                # v0.37.0 Generic shield / contested-round telemetry (spec §4.4)
+                "any_shield_allocated_by_color": dict(p.any_shield_allocated_by_color),
+                "contested_defense_rounds": p.contested_defense_rounds,
+                "contested_blue_left_open": p.contested_blue_left_open,
+                "contested_red_chosen": p.contested_red_chosen,
+                "dice_owned_final_by_color": _dice_by_color(p),
                 "rejected_patent_filings": getattr(p, "rejected_patent_filings", 0),
                 "company_code": getattr(getattr(p.company, "code", None), "value", None),
                 "white_hat_code": getattr(getattr(p.white_hat, "code", None), "value", None),
@@ -239,6 +269,22 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
     # full ranking key wins. Reporting only; gameplay is unaffected.
     winner_ids = [r["player_id"] for r in win_pool if win_key(r) == win_key(win_pool[0])] if win_pool else []
     is_shared_victory = len(winner_ids) > 1
+
+    # v0.37.0 telemetry: who would have won on Corporate Secrets held, and was a paid place tied?
+    pre_bonus_winner_ids: List[int] = []
+    tied_paid_place = False
+    if bonus_on:
+        pre_pool = [dict(r, secrets=r["secrets_before_bonus"]) for r in rankings if not r["is_patient_zero"]]
+        pre_pool.sort(key=win_key, reverse=True)
+        if pre_pool:
+            top = win_key(pre_pool[0])
+            pre_bonus_winner_ids = [r["player_id"] for r in pre_pool if win_key(r) == top]
+        group_sizes: Dict[int, int] = {}
+        for place, _ in awards.values():
+            group_sizes[place] = group_sizes.get(place, 0) + 1
+        tied_paid_place = any(size >= 2 and bonus_schedule[place - 1] > 0
+                              for place, size in group_sizes.items() if place - 1 < len(bonus_schedule))
+    changed_winner = bonus_on and set(pre_bonus_winner_ids) != set(winner_ids)
     for r in final_rankings:
         r["is_winner"] = r["player_id"] in winner_ids
     if getattr(cfg, "is_six_phase", False):
@@ -273,4 +319,9 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
         collapse_trigger_pids_were_secret_leaders=list(engine.state.market_collapse_secret_leaders),
         market_collapse_context=dict(engine.state.market_collapse_context),
         double_version_fill_events=engine.state.double_version_fill_events,
+        market_leader_bonus_awarded=bonus_on,
+        market_leader_bonus_schedule=bonus_schedule,
+        pre_bonus_winner_ids=pre_bonus_winner_ids,
+        market_leader_bonus_changed_winner=changed_winner,
+        market_leader_bonus_tied_paid_place=tied_paid_place,
     )

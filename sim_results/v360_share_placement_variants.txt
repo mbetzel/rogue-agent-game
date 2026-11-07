@@ -1,0 +1,117 @@
+2P bonus=5/3/2/1   all/std all  w=0.3-1.0 sec+0 | PZ/Sing/Coll 41%/38%/21% TW 11.7% rnds 8.88 | flip 15% MS-tie games 24% | lowMS win 31% topMS win 69%
+   all: survSec pre 3.37 +bonus 4.04 | BlueLost 4.74 regain 1.62 | Any->Blue 57% Any->Red 34% | blk R/B 22%/61% | contested 4.60/seat: Blue left open 20%, Red chosen 42% | buys R/B 0.48/0.88
+   win by Blue owned 0/1/2+ 44%/54%/62%  Red owned 0/1/2+ 49%/54%/48%  bots Accele=57% Adapti=48% Reckle=39% SecOps=48% Ventur=58%
+2P bonus=5/3/2/1   surv/share all  w=0.3-1.0 sec+0 | PZ/Sing/Coll 41%/38%/21% TW 11.7% rnds 8.88 | flip 10% MS-tie games 19% | lowMS win 31% topMS win 69%
+   all: survSec pre 3.37 +bonus 4.49 | BlueLost 4.74 regain 1.62 | Any->Blue 57% Any->Red 34% | blk R/B 22%/61% | contested 4.60/seat: Blue left open 20%, Red chosen 42% | buys R/B 0.48/0.88
+   win by Blue owned 0/1/2+ 44%/54%/63%  Red owned 0/1/2+ 50%/53%/47%  bots Accele=56% Adapti=46% Reckle=37% SecOps=51% Ventur=60%
+2P bonus=5/3/2/1   surv/share one  w=0.3-1.0 sec+0 | PZ/Sing/Coll 33%/37%/30% TW 7.4% rnds 8.89 | flip 15% MS-tie games 18% | lowMS win 29% topMS win 71%
+   all: survSec pre 3.84 +bonus 4.41 | BlueLost 4.16 regain 1.31 | Any->Blue 62% Any->Red 26% | blk R/B 17%/66% | contested 4.63/seat: Blue left open 10%, Red chosen 28% | buys R/B 0.55/0.90
+   win by Blue owned 0/1/2+ 44%/54%/61%  Red owned 0/1/2+ 50%/54%/46%  bots Accele=53% Adapti=47% Reckle=37% SecOps=52% Ventur=61%
+   aware seat win 56.0% (naive 44.0%) PZ 24%/19% BlueLost 4.29/4.03 regain 1.41/1.21
+2P bonus=3/2/1/0   surv/share all  w=0.3-1.0 sec+0 | PZ/Sing/Coll 37%/37%/26% TW 8.9% rnds 8.86 | flip 8% MS-tie games 19% | lowMS win 36% topMS win 64%
+   all: survSec pre 3.67 +bonus 2.72 | BlueLost 4.35 regain 1.59 | Any->Blue 60% Any->Red 28% | blk R/B 18%/64% | contested 4.57/seat: Blue left open 14%, Red chosen 31% | buys R/B 0.50/0.88
+   win by Blue owned 0/1/2+ 42%/56%/64%  Red owned 0/1/2+ 51%/50%/43%  bots Accele=58% Adapti=49% Reckle=32% SecOps=48% Ventur=62%
+2P bonus=5/3/2/1   surv/std all  w=1.0-1.0 sec+0 | PZ/Sing/Coll 59%/29%/12% TW 18.1% rnds 8.48 | flip 10% MS-tie games 13% | lowMS win 31% topMS win 69%
+   all: survSec pre 2.95 +bonus 4.37 | BlueLost 5.47 regain 1.49 | Any->Blue 45% Any->Red 47% | blk R/B 31%/53% | contested 4.37/seat: Blue left open 51%, Red chosen 73% | buys R/B 0.40/0.85
+   win by Blue owned 0/1/2+ 43%/55%/62%  Red owned 0/1/2+ 50%/57%/42%  bots Accele=56% Adapti=51% Reckle=35% SecOps=51% Ventur=56%
+2P bonus=5/3/2/1   surv/std all  w=0.15-0.5 sec+0 | PZ/Sing/Coll 37%/37%/26% TW 8.9% rnds 8.86 | flip 18% MS-tie games 19% | lowMS win 29% topMS win 71%
+   all: survSec pre 3.67 +bonus 4.20 | BlueLost 4.35 regain 1.59 | Any->Blue 60% Any->Red 28% | blk R/B 18%/64% | contested 4.57/seat: Blue left open 14%, Red chosen 31% | buys R/B 0.50/0.88
+   win by Blue owned 0/1/2+ 44%/55%/61%  Red owned 0/1/2+ 49%/54%/49%  bots Accele=54% Adapti=48% Reckle=40% SecOps=48% Ventur=61%
+2P bonus=5/3/2/1   surv/std all  w=0.3-1.0 sec+1 | PZ/Sing/Coll 33%/43%/23% TW 10.0% rnds 9.05 | flip 17% MS-tie games 21% | lowMS win 32% topMS win 68%
+   all: survSec pre 3.96 +bonus 4.18 | BlueLost 5.06 regain 1.64 | Any->Blue 57% Any->Red 35% | blk R/B 22%/60% | contested 4.68/seat: Blue left open 22%, Red chosen 43% | buys R/B 0.50/0.89
+   win by Blue owned 0/1/2+ 44%/54%/62%  Red owned 0/1/2+ 49%/53%/50%  bots Accele=57% Adapti=49% Reckle=39% SecOps=48% Ventur=57%
+2P bonus=3/2/1/0   surv/std all  w=0.3-1.0 sec+1 | PZ/Sing/Coll 29%/43%/28% TW 8.3% rnds 9.01 | flip 12% MS-tie games 21% | lowMS win 37% topMS win 63%
+   all: survSec pre 4.33 +bonus 2.57 | BlueLost 4.62 regain 1.61 | Any->Blue 60% Any->Red 28% | blk R/B 18%/63% | contested 4.66/seat: Blue left open 15%, Red chosen 32% | buys R/B 0.52/0.88
+   win by Blue owned 0/1/2+ 43%/55%/64%  Red owned 0/1/2+ 50%/52%/46%  bots Accele=56% Adapti=49% Reckle=36% SecOps=47% Ventur=62%
+2P bonus=3/2/1/0   surv/std one  w=0.3-1.0 sec+1 | PZ/Sing/Coll 25%/42%/34% TW 6.0% rnds 9.01 | flip 13% MS-tie games 23% | lowMS win 36% topMS win 64%
+   all: survSec pre 4.55 +bonus 2.56 | BlueLost 4.32 regain 1.33 | Any->Blue 62% Any->Red 25% | blk R/B 16%/65% | contested 4.66/seat: Blue left open 10%, Red chosen 26% | buys R/B 0.56/0.90
+   win by Blue owned 0/1/2+ 43%/53%/65%  Red owned 0/1/2+ 50%/54%/47%  bots Accele=57% Adapti=48% Reckle=35% SecOps=50% Ventur=61%
+   aware seat win 51.0% (naive 49.0%) PZ 18%/15% BlueLost 4.39/4.24 regain 1.45/1.21
+2P bonus=2/1/0/0   surv/std all  w=0.3-1.0 sec+1 | PZ/Sing/Coll 29%/43%/28% TW 8.3% rnds 9.01 | flip 12% MS-tie games 21% | lowMS win 37% topMS win 63%
+   all: survSec pre 4.33 +bonus 1.57 | BlueLost 4.62 regain 1.61 | Any->Blue 60% Any->Red 28% | blk R/B 18%/63% | contested 4.66/seat: Blue left open 15%, Red chosen 32% | buys R/B 0.52/0.88
+   win by Blue owned 0/1/2+ 43%/55%/64%  Red owned 0/1/2+ 50%/52%/46%  bots Accele=56% Adapti=49% Reckle=36% SecOps=47% Ventur=62%
+2P bonus=1/0/0/0   surv/std all  w=0.3-1.0 sec+0 | PZ/Sing/Coll 37%/37%/26% TW 8.9% rnds 8.86 | flip 11% MS-tie games 19% | lowMS win 36% topMS win 64%
+   all: survSec pre 3.67 +bonus 0.60 | BlueLost 4.35 regain 1.59 | Any->Blue 60% Any->Red 28% | blk R/B 18%/64% | contested 4.57/seat: Blue left open 14%, Red chosen 31% | buys R/B 0.50/0.88
+   win by Blue owned 0/1/2+ 42%/56%/64%  Red owned 0/1/2+ 51%/51%/44%  bots Accele=57% Adapti=49% Reckle=34% SecOps=47% Ventur=63%
+2P bonus=1/0/0/0   surv/std one  w=0.3-1.0 sec+0 | PZ/Sing/Coll 32%/37%/31% TW 7.0% rnds 8.88 | flip 12% MS-tie games 20% | lowMS win 36% topMS win 64%
+   all: survSec pre 3.86 +bonus 0.59 | BlueLost 4.10 regain 1.34 | Any->Blue 62% Any->Red 25% | blk R/B 16%/66% | contested 4.59/seat: Blue left open 9%, Red chosen 25% | buys R/B 0.55/0.90
+   win by Blue owned 0/1/2+ 43%/53%/65%  Red owned 0/1/2+ 50%/54%/47%  bots Accele=57% Adapti=48% Reckle=34% SecOps=49% Ventur=62%
+   aware seat win 49.7% (naive 50.3%) PZ 22%/19% BlueLost 4.18/4.03 regain 1.46/1.22
+3P bonus=5/3/2/1   all/std all  w=0.3-1.0 sec+0 | PZ/Sing/Coll 53%/30%/18% TW 5.9% rnds 8.67 | flip 26% MS-tie games 43% | lowMS win 17% topMS win 67%
+   all: survSec pre 3.28 +bonus 3.38 | BlueLost 4.81 regain 1.62 | Any->Blue 56% Any->Red 36% | blk R/B 23%/60% | contested 4.52/seat: Blue left open 26%, Red chosen 48% | buys R/B 0.49/0.96
+   win by Blue owned 0/1/2+ 28%/34%/45%  Red owned 0/1/2+ 33%/36%/27%  bots Accele=38% Adapti=24% Reckle=20% SecOps=37% Ventur=47%
+3P bonus=5/3/2/1   surv/share all  w=0.3-1.0 sec+0 | PZ/Sing/Coll 53%/30%/18% TW 5.9% rnds 8.67 | flip 22% MS-tie games 32% | lowMS win 17% topMS win 67%
+   all: survSec pre 3.28 +bonus 3.97 | BlueLost 4.81 regain 1.62 | Any->Blue 56% Any->Red 36% | blk R/B 23%/60% | contested 4.52/seat: Blue left open 26%, Red chosen 48% | buys R/B 0.49/0.96
+   win by Blue owned 0/1/2+ 27%/35%/45%  Red owned 0/1/2+ 34%/35%/24%  bots Accele=39% Adapti=23% Reckle=17% SecOps=40% Ventur=48%
+3P bonus=5/3/2/1   surv/share one  w=0.3-1.0 sec+0 | PZ/Sing/Coll 38%/31%/31% TW 2.9% rnds 8.71 | flip 29% MS-tie games 39% | lowMS win 15% topMS win 67%
+   all: survSec pre 3.89 +bonus 3.86 | BlueLost 4.03 regain 1.25 | Any->Blue 63% Any->Red 24% | blk R/B 16%/67% | contested 4.58/seat: Blue left open 10%, Red chosen 26% | buys R/B 0.56/0.98
+   win by Blue owned 0/1/2+ 28%/34%/44%  Red owned 0/1/2+ 35%/33%/26%  bots Accele=35% Adapti=23% Reckle=19% SecOps=45% Ventur=45%
+   aware seat win 42.4% (naive 28.8%) PZ 23%/16% BlueLost 4.36/3.87 regain 1.44/1.15
+3P bonus=3/2/1/0   surv/share all  w=0.3-1.0 sec+0 | PZ/Sing/Coll 46%/33%/21% TW 4.2% rnds 8.75 | flip 14% MS-tie games 40% | lowMS win 23% topMS win 58%
+   all: survSec pre 3.49 +bonus 2.42 | BlueLost 4.44 regain 1.67 | Any->Blue 60% Any->Red 31% | blk R/B 20%/64% | contested 4.55/seat: Blue left open 16%, Red chosen 38% | buys R/B 0.50/0.97
+   win by Blue owned 0/1/2+ 26%/35%/49%  Red owned 0/1/2+ 35%/33%/23%  bots Accele=42% Adapti=23% Reckle=16% SecOps=36% Ventur=50%
+3P bonus=5/3/2/1   surv/std all  w=1.0-1.0 sec+0 | PZ/Sing/Coll 67%/25%/9% TW 7.6% rnds 8.17 | flip 23% MS-tie games 30% | lowMS win 22% topMS win 66%
+   all: survSec pre 2.84 +bonus 3.80 | BlueLost 5.36 regain 1.48 | Any->Blue 43% Any->Red 49% | blk R/B 33%/52% | contested 4.22/seat: Blue left open 56%, Red chosen 79% | buys R/B 0.42/0.91
+   win by Blue owned 0/1/2+ 27%/35%/46%  Red owned 0/1/2+ 35%/31%/26%  bots Accele=41% Adapti=25% Reckle=18% SecOps=37% Ventur=46%
+3P bonus=5/3/2/1   surv/std all  w=0.15-0.5 sec+0 | PZ/Sing/Coll 44%/33%/23% TW 3.1% rnds 8.75 | flip 30% MS-tie games 39% | lowMS win 16% topMS win 68%
+   all: survSec pre 3.62 +bonus 3.60 | BlueLost 4.27 regain 1.65 | Any->Blue 62% Any->Red 30% | blk R/B 19%/65% | contested 4.55/seat: Blue left open 13%, Red chosen 34% | buys R/B 0.51/0.97
+   win by Blue owned 0/1/2+ 28%/34%/46%  Red owned 0/1/2+ 33%/37%/28%  bots Accele=38% Adapti=21% Reckle=22% SecOps=37% Ventur=48%
+3P bonus=5/3/2/1   surv/std all  w=0.3-1.0 sec+1 | PZ/Sing/Coll 43%/36%/20% TW 4.7% rnds 8.88 | flip 30% MS-tie games 37% | lowMS win 17% topMS win 65%
+   all: survSec pre 3.76 +bonus 3.60 | BlueLost 5.21 regain 1.63 | Any->Blue 55% Any->Red 37% | blk R/B 24%/59% | contested 4.62/seat: Blue left open 28%, Red chosen 50% | buys R/B 0.51/0.98
+   win by Blue owned 0/1/2+ 27%/34%/47%  Red owned 0/1/2+ 34%/34%/29%  bots Accele=39% Adapti=24% Reckle=20% SecOps=36% Ventur=48%
+3P bonus=3/2/1/0   surv/std all  w=0.3-1.0 sec+1 | PZ/Sing/Coll 37%/39%/24% TW 4.3% rnds 8.95 | flip 21% MS-tie games 45% | lowMS win 21% topMS win 57%
+   all: survSec pre 4.07 +bonus 2.15 | BlueLost 4.80 regain 1.67 | Any->Blue 60% Any->Red 32% | blk R/B 20%/62% | contested 4.65/seat: Blue left open 17%, Red chosen 38% | buys R/B 0.52/0.98
+   win by Blue owned 0/1/2+ 26%/36%/48%  Red owned 0/1/2+ 34%/34%/27%  bots Accele=42% Adapti=21% Reckle=18% SecOps=37% Ventur=49%
+3P bonus=3/2/1/0   surv/std one  w=0.3-1.0 sec+1 | PZ/Sing/Coll 29%/37%/34% TW 2.5% rnds 8.90 | flip 24% MS-tie games 45% | lowMS win 20% topMS win 58%
+   all: survSec pre 4.56 +bonus 2.12 | BlueLost 4.23 regain 1.25 | Any->Blue 63% Any->Red 24% | blk R/B 16%/66% | contested 4.67/seat: Blue left open 9%, Red chosen 25% | buys R/B 0.58/0.99
+   win by Blue owned 0/1/2+ 27%/35%/47%  Red owned 0/1/2+ 34%/33%/28%  bots Accele=37% Adapti=22% Reckle=19% SecOps=40% Ventur=48%
+   aware seat win 38.5% (naive 30.8%) PZ 17%/14% BlueLost 4.39/4.14 regain 1.51/1.12
+3P bonus=2/1/0/0   surv/std all  w=0.3-1.0 sec+1 | PZ/Sing/Coll 37%/39%/24% TW 4.3% rnds 8.95 | flip 21% MS-tie games 45% | lowMS win 21% topMS win 57%
+   all: survSec pre 4.07 +bonus 1.15 | BlueLost 4.80 regain 1.67 | Any->Blue 60% Any->Red 32% | blk R/B 20%/62% | contested 4.65/seat: Blue left open 17%, Red chosen 38% | buys R/B 0.52/0.98
+   win by Blue owned 0/1/2+ 26%/36%/48%  Red owned 0/1/2+ 34%/34%/27%  bots Accele=42% Adapti=21% Reckle=18% SecOps=37% Ventur=49%
+3P bonus=1/0/0/0   surv/std all  w=0.3-1.0 sec+0 | PZ/Sing/Coll 41%/31%/28% TW 3.0% rnds 8.71 | flip 15% MS-tie games 39% | lowMS win 25% topMS win 56%
+   all: survSec pre 3.69 +bonus 0.41 | BlueLost 4.19 regain 1.53 | Any->Blue 62% Any->Red 28% | blk R/B 18%/66% | contested 4.57/seat: Blue left open 12%, Red chosen 32% | buys R/B 0.54/0.97
+   win by Blue owned 0/1/2+ 26%/35%/49%  Red owned 0/1/2+ 34%/34%/26%  bots Accele=42% Adapti=24% Reckle=17% SecOps=35% Ventur=49%
+3P bonus=1/0/0/0   surv/std one  w=0.3-1.0 sec+0 | PZ/Sing/Coll 36%/31%/33% TW 3.0% rnds 8.72 | flip 18% MS-tie games 42% | lowMS win 24% topMS win 55%
+   all: survSec pre 3.91 +bonus 0.39 | BlueLost 3.95 regain 1.25 | Any->Blue 63% Any->Red 23% | blk R/B 15%/67% | contested 4.59/seat: Blue left open 8%, Red chosen 24% | buys R/B 0.57/0.97
+   win by Blue owned 0/1/2+ 27%/37%/45%  Red owned 0/1/2+ 35%/33%/25%  bots Accele=37% Adapti=24% Reckle=18% SecOps=38% Ventur=49%
+   aware seat win 36.0% (naive 32.0%) PZ 19%/16% BlueLost 4.06/3.89 regain 1.45/1.15
+4P bonus=5/3/2/1   all/std all  w=0.3-1.0 sec+0 | PZ/Sing/Coll 49%/31%/19% TW 2.5% rnds 8.75 | flip 40% MS-tie games 67% | lowMS win 11% topMS win 58%
+   all: survSec pre 3.69 +bonus 2.78 | BlueLost 5.27 regain 1.65 | Any->Blue 52% Any->Red 40% | blk R/B 26%/57% | contested 4.57/seat: Blue left open 32%, Red chosen 55% | buys R/B 0.50/0.95
+   win by Blue owned 0/1/2+ 20%/27%/35%  Red owned 0/1/2+ 25%/26%/23%  bots Accele=30% Adapti=15% Reckle=13% SecOps=27% Ventur=39%
+4P bonus=5/3/2/1   surv/share all  w=0.3-1.0 sec+0 | PZ/Sing/Coll 49%/31%/19% TW 2.5% rnds 8.75 | flip 34% MS-tie games 57% | lowMS win 11% topMS win 58%
+   all: survSec pre 3.69 +bonus 3.52 | BlueLost 5.27 regain 1.65 | Any->Blue 52% Any->Red 40% | blk R/B 26%/57% | contested 4.57/seat: Blue left open 32%, Red chosen 55% | buys R/B 0.50/0.95
+   win by Blue owned 0/1/2+ 20%/27%/36%  Red owned 0/1/2+ 26%/23%/20%  bots Accele=29% Adapti=14% Reckle=11% SecOps=30% Ventur=40%
+4P bonus=5/3/2/1   surv/share one  w=0.3-1.0 sec+0 | PZ/Sing/Coll 34%/34%/33% TW 1.3% rnds 8.84 | flip 36% MS-tie games 65% | lowMS win 9% topMS win 60%
+   all: survSec pre 4.58 +bonus 3.37 | BlueLost 4.19 regain 1.21 | Any->Blue 62% Any->Red 24% | blk R/B 16%/66% | contested 4.62/seat: Blue left open 10%, Red chosen 26% | buys R/B 0.59/0.97
+   win by Blue owned 0/1/2+ 21%/26%/34%  Red owned 0/1/2+ 25%/26%/21%  bots Accele=28% Adapti=11% Reckle=14% SecOps=35% Ventur=37%
+   aware seat win 36.8% (naive 21.1%) PZ 19%/12% BlueLost 4.63/4.04 regain 1.50/1.12
+4P bonus=3/2/1/0   surv/share all  w=0.3-1.0 sec+0 | PZ/Sing/Coll 47%/33%/20% TW 2.5% rnds 8.81 | flip 22% MS-tie games 65% | lowMS win 15% topMS win 50%
+   all: survSec pre 3.88 +bonus 2.11 | BlueLost 5.05 regain 1.69 | Any->Blue 55% Any->Red 37% | blk R/B 24%/59% | contested 4.58/seat: Blue left open 26%, Red chosen 49% | buys R/B 0.51/0.95
+   win by Blue owned 0/1/2+ 19%/28%/38%  Red owned 0/1/2+ 26%/25%/19%  bots Accele=31% Adapti=13% Reckle=9% SecOps=30% Ventur=42%
+4P bonus=5/3/2/1   surv/std all  w=1.0-1.0 sec+0 | PZ/Sing/Coll 63%/26%/10% TW 3.9% rnds 8.34 | flip 38% MS-tie games 56% | lowMS win 13% topMS win 59%
+   all: survSec pre 3.26 +bonus 3.19 | BlueLost 5.89 regain 1.48 | Any->Blue 41% Any->Red 52% | blk R/B 35%/49% | contested 4.31/seat: Blue left open 62%, Red chosen 84% | buys R/B 0.44/0.91
+   win by Blue owned 0/1/2+ 21%/26%/36%  Red owned 0/1/2+ 27%/21%/18%  bots Accele=30% Adapti=14% Reckle=13% SecOps=29% Ventur=39%
+4P bonus=5/3/2/1   surv/std all  w=0.15-0.5 sec+0 | PZ/Sing/Coll 39%/36%/25% TW 1.5% rnds 8.89 | flip 42% MS-tie games 67% | lowMS win 9% topMS win 60%
+   all: survSec pre 4.19 +bonus 2.99 | BlueLost 4.58 regain 1.71 | Any->Blue 60% Any->Red 32% | blk R/B 20%/63% | contested 4.61/seat: Blue left open 15%, Red chosen 38% | buys R/B 0.53/0.95
+   win by Blue owned 0/1/2+ 20%/25%/37%  Red owned 0/1/2+ 25%/26%/25%  bots Accele=30% Adapti=13% Reckle=14% SecOps=29% Ventur=40%
+4P bonus=5/3/2/1   surv/std all  w=0.3-1.0 sec+1 | PZ/Sing/Coll 41%/38%/22% TW 2.5% rnds 8.93 | flip 41% MS-tie games 61% | lowMS win 11% topMS win 56%
+   all: survSec pre 4.26 +bonus 3.02 | BlueLost 5.63 regain 1.68 | Any->Blue 52% Any->Red 41% | blk R/B 26%/56% | contested 4.65/seat: Blue left open 34%, Red chosen 56% | buys R/B 0.51/0.96
+   win by Blue owned 0/1/2+ 20%/26%/36%  Red owned 0/1/2+ 25%/25%/24%  bots Accele=29% Adapti=14% Reckle=14% SecOps=27% Ventur=40%
+4P bonus=3/2/1/0   surv/std all  w=0.3-1.0 sec+1 | PZ/Sing/Coll 38%/40%/22% TW 2.6% rnds 9.00 | flip 31% MS-tie games 70% | lowMS win 14% topMS win 50%
+   all: survSec pre 4.44 +bonus 1.70 | BlueLost 5.40 regain 1.72 | Any->Blue 55% Any->Red 38% | blk R/B 24%/58% | contested 4.66/seat: Blue left open 27%, Red chosen 50% | buys R/B 0.52/0.96
+   win by Blue owned 0/1/2+ 19%/27%/39%  Red owned 0/1/2+ 25%/27%/22%  bots Accele=30% Adapti=13% Reckle=12% SecOps=27% Ventur=43%
+4P bonus=3/2/1/0   surv/std one  w=0.3-1.0 sec+1 | PZ/Sing/Coll 26%/38%/36% TW 0.7% rnds 8.98 | flip 35% MS-tie games 70% | lowMS win 10% topMS win 53%
+   all: survSec pre 5.31 +bonus 1.63 | BlueLost 4.34 regain 1.21 | Any->Blue 62% Any->Red 24% | blk R/B 16%/66% | contested 4.67/seat: Blue left open 9%, Red chosen 25% | buys R/B 0.60/0.98
+   win by Blue owned 0/1/2+ 20%/25%/36%  Red owned 0/1/2+ 25%/28%/21%  bots Accele=29% Adapti=11% Reckle=14% SecOps=32% Ventur=38%
+   aware seat win 34.1% (naive 22.0%) PZ 13%/9% BlueLost 4.65/4.24 regain 1.54/1.10
+4P bonus=3/2/1/1   surv/std all  w=0.3-1.0 sec+1 | PZ/Sing/Coll 30%/41%/30% TW 1.7% rnds 9.00 | flip 29% MS-tie games 67% | lowMS win 15% topMS win 48%
+   all: survSec pre 4.84 +bonus 1.84 | BlueLost 4.85 regain 1.62 | Any->Blue 59% Any->Red 33% | blk R/B 21%/62% | contested 4.69/seat: Blue left open 17%, Red chosen 40% | buys R/B 0.55/0.97
+   win by Blue owned 0/1/2+ 18%/29%/38%  Red owned 0/1/2+ 26%/26%/17%  bots Accele=32% Adapti=13% Reckle=10% SecOps=28% Ventur=42%
+4P bonus=1/0/0/0   surv/std all  w=0.3-1.0 sec+0 | PZ/Sing/Coll 35%/35%/31% TW 1.0% rnds 8.84 | flip 17% MS-tie games 60% | lowMS win 18% topMS win 46%
+   all: survSec pre 4.46 +bonus 0.29 | BlueLost 4.26 regain 1.47 | Any->Blue 62% Any->Red 28% | blk R/B 18%/65% | contested 4.63/seat: Blue left open 10%, Red chosen 32% | buys R/B 0.55/0.97
+   win by Blue owned 0/1/2+ 18%/29%/39%  Red owned 0/1/2+ 26%/27%/15%  bots Accele=33% Adapti=14% Reckle=7% SecOps=29% Ventur=42%
+4P bonus=1/0/0/0   surv/std one  w=0.3-1.0 sec+0 | PZ/Sing/Coll 32%/33%/34% TW 1.3% rnds 8.85 | flip 19% MS-tie games 69% | lowMS win 18% topMS win 45%
+   all: survSec pre 4.65 +bonus 0.28 | BlueLost 4.10 regain 1.21 | Any->Blue 63% Any->Red 23% | blk R/B 15%/67% | contested 4.61/seat: Blue left open 8%, Red chosen 24% | buys R/B 0.59/0.97
+   win by Blue owned 0/1/2+ 18%/27%/40%  Red owned 0/1/2+ 26%/27%/18%  bots Accele=32% Adapti=12% Reckle=10% SecOps=28% Ventur=43%
+   aware seat win 28.4% (naive 23.9%) PZ 14%/12% BlueLost 4.24/4.05 regain 1.48/1.12

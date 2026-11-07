@@ -1,0 +1,1445 @@
+{
+ "base_seed": 7000,
+ "results": [
+  {
+   "cell": "V036",
+   "players": 2,
+   "games": 3000,
+   "base_seed": 7000,
+   "win_rate_by_red_dice": {
+    "0": {
+     "rate": 0.5148,
+     "ci95": [
+      0.4995,
+      0.5301
+     ],
+     "seats": 4087
+    },
+    "1": {
+     "rate": 0.5205,
+     "ci95": [
+      0.4919,
+      0.549
+     ],
+     "seats": 1170
+    },
+    "2+": {
+     "rate": 0.3863,
+     "ci95": [
+      0.3519,
+      0.4218
+     ],
+     "seats": 743
+    }
+   },
+   "win_rate_by_bot_post": {
+    "AccelerationistBot": 0.6,
+    "AdaptiveBalancedBot": 0.5413,
+    "RecklessSaboteurBot": 0.27,
+    "SecOpsTurtleBot": 0.4646,
+    "VentureGreedBot": 0.6242
+   },
+   "win_rate_by_bot_pre_bonus": {
+    "AccelerationistBot": 0.6,
+    "AdaptiveBalancedBot": 0.5413,
+    "RecklessSaboteurBot": 0.27,
+    "SecOpsTurtleBot": 0.4646,
+    "VentureGreedBot": 0.6242
+   },
+   "bot_seats": {
+    "AdaptiveBalancedBot": 1200,
+    "SecOpsTurtleBot": 1200,
+    "AccelerationistBot": 1200,
+    "VentureGreedBot": 1200,
+    "RecklessSaboteurBot": 1200
+   },
+   "mean_secrets_by_bot": {
+    "AccelerationistBot": {
+     "pre": 3.717,
+     "post": 3.717
+    },
+    "AdaptiveBalancedBot": {
+     "pre": 2.907,
+     "post": 2.907
+    },
+    "RecklessSaboteurBot": {
+     "pre": 1.954,
+     "post": 1.954
+    },
+    "SecOpsTurtleBot": {
+     "pre": 2.978,
+     "post": 2.978
+    },
+    "VentureGreedBot": {
+     "pre": 3.782,
+     "post": 3.782
+    }
+   },
+   "survivor_secrets": {
+    "pre": 3.974,
+    "post": 3.974,
+    "pre_median": 4.0
+   },
+   "all_seat_final_secrets_mean": 3.068,
+   "survivor_count_dist": {
+    "0": 213,
+    "1": 762,
+    "2": 2025
+   },
+   "flip_pre_bonus_lead_dist": {},
+   "rounds_dist": {
+    "3": 1,
+    "4": 5,
+    "5": 22,
+    "6": 80,
+    "7": 250,
+    "8": 680,
+    "9": 1060,
+    "10": 777,
+    "11": 125
+   },
+   "pz_end_round_dist": {
+    "3": 1,
+    "4": 5,
+    "5": 22,
+    "6": 74,
+    "7": 144,
+    "8": 287,
+    "9": 274,
+    "10": 88,
+    "11": 5
+   },
+   "outlier_seed_counts": {
+    "le_5_rounds_any": 28,
+    "pz_or_tw_le_3_rounds": 1
+   },
+   "outlier_seeds": {
+    "le_5_rounds_any": [
+     207197,
+     207406,
+     207454,
+     207519,
+     207733,
+     208047,
+     208054,
+     208078,
+     208088,
+     208139,
+     208154,
+     208172,
+     208253,
+     208269,
+     208444,
+     208636,
+     208676,
+     208708,
+     208787,
+     208894,
+     209301,
+     209398,
+     209551,
+     209722,
+     209832
+    ],
+    "pz_or_tw_le_3_rounds": [
+     208078
+    ]
+   }
+  },
+  {
+   "cell": "V037",
+   "players": 2,
+   "games": 3000,
+   "base_seed": 7000,
+   "win_rate_by_red_dice": {
+    "0": {
+     "rate": 0.5014,
+     "ci95": [
+      0.4865,
+      0.5162
+     ],
+     "seats": 4359
+    },
+    "1": {
+     "rate": 0.5253,
+     "ci95": [
+      0.4945,
+      0.5561
+     ],
+     "seats": 1006
+    },
+    "2+": {
+     "rate": 0.4504,
+     "ci95": [
+      0.4121,
+      0.4893
+     ],
+     "seats": 635
+    }
+   },
+   "win_rate_by_bot_post": {
+    "AccelerationistBot": 0.5387,
+    "AdaptiveBalancedBot": 0.4583,
+    "RecklessSaboteurBot": 0.3854,
+    "SecOpsTurtleBot": 0.5067,
+    "VentureGreedBot": 0.6108
+   },
+   "win_rate_by_bot_pre_bonus": {
+    "AccelerationistBot": 0.6012,
+    "AdaptiveBalancedBot": 0.495,
+    "RecklessSaboteurBot": 0.3113,
+    "SecOpsTurtleBot": 0.4525,
+    "VentureGreedBot": 0.64
+   },
+   "bot_seats": {
+    "AdaptiveBalancedBot": 1200,
+    "SecOpsTurtleBot": 1200,
+    "VentureGreedBot": 1200,
+    "AccelerationistBot": 1200,
+    "RecklessSaboteurBot": 1200
+   },
+   "mean_secrets_by_bot": {
+    "AccelerationistBot": {
+     "pre": 4.24,
+     "post": 5.338
+    },
+    "AdaptiveBalancedBot": {
+     "pre": 3.297,
+     "post": 4.382
+    },
+    "RecklessSaboteurBot": {
+     "pre": 2.507,
+     "post": 3.623
+    },
+    "SecOpsTurtleBot": {
+     "pre": 3.514,
+     "post": 4.838
+    },
+    "VentureGreedBot": {
+     "pre": 4.438,
+     "post": 5.657
+    }
+   },
+   "survivor_secrets": {
+    "pre": 4.604,
+    "post": 6.049,
+    "pre_median": 5.0
+   },
+   "all_seat_final_secrets_mean": 4.768,
+   "survivor_count_dist": {
+    "0": 231,
+    "1": 686,
+    "2": 2083
+   },
+   "flip_pre_bonus_lead_dist": {
+    "1": 208,
+    "2": 143
+   },
+   "rounds_dist": {
+    "5": 1,
+    "6": 30,
+    "7": 154,
+    "8": 569,
+    "9": 1076,
+    "10": 987,
+    "11": 183
+   },
+   "pz_end_round_dist": {
+    "5": 1,
+    "6": 29,
+    "7": 95,
+    "8": 271,
+    "9": 287,
+    "10": 122,
+    "11": 5
+   },
+   "outlier_seed_counts": {
+    "flip_overturned_pre_bonus_lead_ge_2": 143,
+    "le_5_rounds_any": 1
+   },
+   "outlier_seeds": {
+    "flip_overturned_pre_bonus_lead_ge_2": [
+     207001,
+     207015,
+     207037,
+     207068,
+     207083,
+     207089,
+     207093,
+     207109,
+     207116,
+     207160,
+     207166,
+     207187,
+     207188,
+     207208,
+     207211,
+     207227,
+     207237,
+     207238,
+     207251,
+     207254,
+     207304,
+     207305,
+     207344,
+     207347,
+     207384
+    ],
+    "le_5_rounds_any": [
+     208139
+    ]
+   }
+  },
+  {
+   "cell": "V037-ONE-AWARE",
+   "players": 2,
+   "games": 3000,
+   "base_seed": 7000,
+   "win_rate_by_red_dice": {
+    "0": {
+     "rate": 0.4957,
+     "ci95": [
+      0.4803,
+      0.5111
+     ],
+     "seats": 4055
+    },
+    "1": {
+     "rate": 0.5248,
+     "ci95": [
+      0.4966,
+      0.5527
+     ],
+     "seats": 1212
+    },
+    "2+": {
+     "rate": 0.4829,
+     "ci95": [
+      0.447,
+      0.5191
+     ],
+     "seats": 733
+    }
+   },
+   "win_rate_by_bot_post": {
+    "AccelerationistBot": 0.5317,
+    "AdaptiveBalancedBot": 0.4392,
+    "RecklessSaboteurBot": 0.3892,
+    "SecOpsTurtleBot": 0.5475,
+    "VentureGreedBot": 0.5925
+   },
+   "win_rate_by_bot_pre_bonus": {
+    "AccelerationistBot": 0.5875,
+    "AdaptiveBalancedBot": 0.5042,
+    "RecklessSaboteurBot": 0.3083,
+    "SecOpsTurtleBot": 0.4775,
+    "VentureGreedBot": 0.6225
+   },
+   "bot_seats": {
+    "AdaptiveBalancedBot": 1200,
+    "SecOpsTurtleBot": 1200,
+    "VentureGreedBot": 1200,
+    "AccelerationistBot": 1200,
+    "RecklessSaboteurBot": 1200
+   },
+   "mean_secrets_by_bot": {
+    "AccelerationistBot": {
+     "pre": 4.969,
+     "post": 6.059
+    },
+    "AdaptiveBalancedBot": {
+     "pre": 4.08,
+     "post": 5.035
+    },
+    "RecklessSaboteurBot": {
+     "pre": 3.198,
+     "post": 4.35
+    },
+    "SecOpsTurtleBot": {
+     "pre": 4.327,
+     "post": 5.723
+    },
+    "VentureGreedBot": {
+     "pre": 5.232,
+     "post": 6.45
+    }
+   },
+   "survivor_secrets": {
+    "pre": 5.19,
+    "post": 6.543,
+    "pre_median": 5
+   },
+   "all_seat_final_secrets_mean": 5.523,
+   "survivor_count_dist": {
+    "0": 161,
+    "1": 525,
+    "2": 2314
+   },
+   "flip_pre_bonus_lead_dist": {
+    "1": 279,
+    "2": 183
+   },
+   "rounds_dist": {
+    "5": 1,
+    "6": 24,
+    "7": 169,
+    "8": 624,
+    "9": 1104,
+    "10": 907,
+    "11": 171
+   },
+   "pz_end_round_dist": {
+    "5": 1,
+    "6": 21,
+    "7": 76,
+    "8": 226,
+    "9": 227,
+    "10": 77,
+    "11": 2
+   },
+   "outlier_seed_counts": {
+    "flip_overturned_pre_bonus_lead_ge_2": 183,
+    "le_5_rounds_any": 1
+   },
+   "outlier_seeds": {
+    "flip_overturned_pre_bonus_lead_ge_2": [
+     207026,
+     207027,
+     207049,
+     207057,
+     207063,
+     207083,
+     207090,
+     207093,
+     207109,
+     207168,
+     207227,
+     207235,
+     207237,
+     207238,
+     207254,
+     207273,
+     207342,
+     207347,
+     207355,
+     207361,
+     207365,
+     207396,
+     207410,
+     207424,
+     207429
+    ],
+    "le_5_rounds_any": [
+     208139
+    ]
+   }
+  },
+  {
+   "cell": "V036",
+   "players": 3,
+   "games": 3000,
+   "base_seed": 7000,
+   "win_rate_by_red_dice": {
+    "0": {
+     "rate": 0.3541,
+     "ci95": [
+      0.3422,
+      0.3662
+     ],
+     "seats": 6077
+    },
+    "1": {
+     "rate": 0.3335,
+     "ci95": [
+      0.3116,
+      0.3562
+     ],
+     "seats": 1718
+    },
+    "2+": {
+     "rate": 0.2282,
+     "ci95": [
+      0.2054,
+      0.2528
+     ],
+     "seats": 1205
+    }
+   },
+   "win_rate_by_bot_post": {
+    "AccelerationistBot": 0.4344,
+    "AdaptiveBalancedBot": 0.2431,
+    "RecklessSaboteurBot": 0.1217,
+    "SecOpsTurtleBot": 0.3419,
+    "VentureGreedBot": 0.5256
+   },
+   "win_rate_by_bot_pre_bonus": {
+    "AccelerationistBot": 0.4344,
+    "AdaptiveBalancedBot": 0.2431,
+    "RecklessSaboteurBot": 0.1217,
+    "SecOpsTurtleBot": 0.3419,
+    "VentureGreedBot": 0.5256
+   },
+   "bot_seats": {
+    "VentureGreedBot": 1800,
+    "AdaptiveBalancedBot": 1800,
+    "SecOpsTurtleBot": 1800,
+    "AccelerationistBot": 1800,
+    "RecklessSaboteurBot": 1800
+   },
+   "mean_secrets_by_bot": {
+    "AccelerationistBot": {
+     "pre": 3.896,
+     "post": 3.896
+    },
+    "AdaptiveBalancedBot": {
+     "pre": 3.108,
+     "post": 3.108
+    },
+    "RecklessSaboteurBot": {
+     "pre": 1.967,
+     "post": 1.967
+    },
+    "SecOpsTurtleBot": {
+     "pre": 3.469,
+     "post": 3.469
+    },
+    "VentureGreedBot": {
+     "pre": 4.106,
+     "post": 4.106
+    }
+   },
+   "survivor_secrets": {
+    "pre": 4.06,
+    "post": 4.06,
+    "pre_median": 4.0
+   },
+   "all_seat_final_secrets_mean": 3.309,
+   "survivor_count_dist": {
+    "0": 78,
+    "1": 228,
+    "2": 772,
+    "3": 1922
+   },
+   "flip_pre_bonus_lead_dist": {},
+   "rounds_dist": {
+    "3": 1,
+    "4": 5,
+    "5": 29,
+    "6": 91,
+    "7": 274,
+    "8": 676,
+    "9": 1030,
+    "10": 763,
+    "11": 131
+   },
+   "pz_end_round_dist": {
+    "3": 1,
+    "4": 5,
+    "5": 29,
+    "6": 87,
+    "7": 174,
+    "8": 274,
+    "9": 307,
+    "10": 111
+   },
+   "outlier_seed_counts": {
+    "le_5_rounds_any": 35,
+    "pz_or_tw_le_3_rounds": 1
+   },
+   "outlier_seeds": {
+    "le_5_rounds_any": [
+     307004,
+     307005,
+     307368,
+     307424,
+     307493,
+     307531,
+     307532,
+     307691,
+     307729,
+     307949,
+     307962,
+     308202,
+     308207,
+     308218,
+     308228,
+     308347,
+     308389,
+     308437,
+     308554,
+     308564,
+     308713,
+     308778,
+     308802,
+     308831,
+     308840
+    ],
+    "pz_or_tw_le_3_rounds": [
+     309380
+    ]
+   }
+  },
+  {
+   "cell": "V037",
+   "players": 3,
+   "games": 3000,
+   "base_seed": 7000,
+   "win_rate_by_red_dice": {
+    "0": {
+     "rate": 0.346,
+     "ci95": [
+      0.3345,
+      0.3577
+     ],
+     "seats": 6462
+    },
+    "1": {
+     "rate": 0.3513,
+     "ci95": [
+      0.3278,
+      0.3754
+     ],
+     "seats": 1543
+    },
+    "2+": {
+     "rate": 0.2231,
+     "ci95": [
+      0.1983,
+      0.25
+     ],
+     "seats": 995
+    }
+   },
+   "win_rate_by_bot_post": {
+    "AccelerationistBot": 0.4228,
+    "AdaptiveBalancedBot": 0.2394,
+    "RecklessSaboteurBot": 0.1433,
+    "SecOpsTurtleBot": 0.3539,
+    "VentureGreedBot": 0.5072
+   },
+   "win_rate_by_bot_pre_bonus": {
+    "AccelerationistBot": 0.4617,
+    "AdaptiveBalancedBot": 0.2578,
+    "RecklessSaboteurBot": 0.1078,
+    "SecOpsTurtleBot": 0.3289,
+    "VentureGreedBot": 0.5106
+   },
+   "bot_seats": {
+    "AdaptiveBalancedBot": 1800,
+    "SecOpsTurtleBot": 1800,
+    "VentureGreedBot": 1800,
+    "AccelerationistBot": 1800,
+    "RecklessSaboteurBot": 1800
+   },
+   "mean_secrets_by_bot": {
+    "AccelerationistBot": {
+     "pre": 3.92,
+     "post": 5.093
+    },
+    "AdaptiveBalancedBot": {
+     "pre": 3.033,
+     "post": 4.064
+    },
+    "RecklessSaboteurBot": {
+     "pre": 1.883,
+     "post": 2.759
+    },
+    "SecOpsTurtleBot": {
+     "pre": 3.428,
+     "post": 4.73
+    },
+    "VentureGreedBot": {
+     "pre": 4.038,
+     "post": 5.308
+    }
+   },
+   "survivor_secrets": {
+    "pre": 4.16,
+    "post": 5.556,
+    "pre_median": 4
+   },
+   "all_seat_final_secrets_mean": 4.391,
+   "survivor_count_dist": {
+    "0": 100,
+    "1": 315,
+    "2": 783,
+    "3": 1802
+   },
+   "flip_pre_bonus_lead_dist": {
+    "1": 370,
+    "2": 84
+   },
+   "rounds_dist": {
+    "3": 1,
+    "4": 1,
+    "5": 6,
+    "6": 70,
+    "7": 216,
+    "8": 592,
+    "9": 1073,
+    "10": 866,
+    "11": 175
+   },
+   "pz_end_round_dist": {
+    "3": 1,
+    "4": 1,
+    "5": 6,
+    "6": 69,
+    "7": 167,
+    "8": 334,
+    "9": 371,
+    "10": 129,
+    "11": 2
+   },
+   "outlier_seed_counts": {
+    "flip_winner_was_last_pre_bonus": 176,
+    "flip_overturned_pre_bonus_lead_ge_2": 84,
+    "le_5_rounds_any": 8,
+    "pz_or_tw_le_3_rounds": 1
+   },
+   "outlier_seeds": {
+    "flip_winner_was_last_pre_bonus": [
+     307000,
+     307003,
+     307016,
+     307035,
+     307057,
+     307072,
+     307077,
+     307086,
+     307106,
+     307107,
+     307120,
+     307125,
+     307142,
+     307145,
+     307152,
+     307167,
+     307195,
+     307255,
+     307265,
+     307278,
+     307286,
+     307304,
+     307324,
+     307349,
+     307375
+    ],
+    "flip_overturned_pre_bonus_lead_ge_2": [
+     307003,
+     307072,
+     307086,
+     307112,
+     307125,
+     307145,
+     307225,
+     307265,
+     307272,
+     307330,
+     307364,
+     307375,
+     307414,
+     307475,
+     307522,
+     307604,
+     307629,
+     307647,
+     307694,
+     307731,
+     307862,
+     307892,
+     307955,
+     307978,
+     308037
+    ],
+    "le_5_rounds_any": [
+     307004,
+     307531,
+     308228,
+     308347,
+     308389,
+     308778,
+     309380,
+     309734
+    ],
+    "pz_or_tw_le_3_rounds": [
+     309380
+    ]
+   }
+  },
+  {
+   "cell": "V037-ONE-AWARE",
+   "players": 3,
+   "games": 3000,
+   "base_seed": 7000,
+   "win_rate_by_red_dice": {
+    "0": {
+     "rate": 0.3397,
+     "ci95": [
+      0.3279,
+      0.3516
+     ],
+     "seats": 6141
+    },
+    "1": {
+     "rate": 0.3433,
+     "ci95": [
+      0.321,
+      0.3662
+     ],
+     "seats": 1697
+    },
+    "2+": {
+     "rate": 0.2853,
+     "ci95": [
+      0.2601,
+      0.3119
+     ],
+     "seats": 1162
+    }
+   },
+   "win_rate_by_bot_post": {
+    "AccelerationistBot": 0.3867,
+    "AdaptiveBalancedBot": 0.2369,
+    "RecklessSaboteurBot": 0.1828,
+    "SecOpsTurtleBot": 0.3697,
+    "VentureGreedBot": 0.4906
+   },
+   "win_rate_by_bot_pre_bonus": {
+    "AccelerationistBot": 0.4322,
+    "AdaptiveBalancedBot": 0.2631,
+    "RecklessSaboteurBot": 0.1261,
+    "SecOpsTurtleBot": 0.3364,
+    "VentureGreedBot": 0.5089
+   },
+   "bot_seats": {
+    "AdaptiveBalancedBot": 1800,
+    "SecOpsTurtleBot": 1800,
+    "VentureGreedBot": 1800,
+    "RecklessSaboteurBot": 1800,
+    "AccelerationistBot": 1800
+   },
+   "mean_secrets_by_bot": {
+    "AccelerationistBot": {
+     "pre": 4.486,
+     "post": 5.588
+    },
+    "AdaptiveBalancedBot": {
+     "pre": 3.736,
+     "post": 4.75
+    },
+    "RecklessSaboteurBot": {
+     "pre": 2.559,
+     "post": 3.594
+    },
+    "SecOpsTurtleBot": {
+     "pre": 4.055,
+     "post": 5.418
+    },
+    "VentureGreedBot": {
+     "pre": 4.762,
+     "post": 5.999
+    }
+   },
+   "survivor_secrets": {
+    "pre": 4.64,
+    "post": 5.974,
+    "pre_median": 5.0
+   },
+   "all_seat_final_secrets_mean": 5.07,
+   "survivor_count_dist": {
+    "0": 52,
+    "1": 213,
+    "2": 656,
+    "3": 2079
+   },
+   "flip_pre_bonus_lead_dist": {
+    "1": 450,
+    "2": 90
+   },
+   "rounds_dist": {
+    "3": 1,
+    "4": 1,
+    "5": 6,
+    "6": 61,
+    "7": 227,
+    "8": 670,
+    "9": 1034,
+    "10": 844,
+    "11": 155,
+    "12": 1
+   },
+   "pz_end_round_dist": {
+    "3": 1,
+    "4": 1,
+    "5": 6,
+    "6": 57,
+    "7": 138,
+    "8": 259,
+    "9": 285,
+    "10": 82
+   },
+   "outlier_seed_counts": {
+    "flip_overturned_pre_bonus_lead_ge_2": 90,
+    "flip_winner_was_last_pre_bonus": 210,
+    "le_5_rounds_any": 8,
+    "pz_or_tw_le_3_rounds": 1
+   },
+   "outlier_seeds": {
+    "flip_overturned_pre_bonus_lead_ge_2": [
+     307000,
+     307069,
+     307088,
+     307140,
+     307177,
+     307197,
+     307204,
+     307229,
+     307264,
+     307295,
+     307409,
+     307559,
+     307560,
+     307565,
+     307624,
+     307645,
+     307649,
+     307661,
+     307716,
+     307724,
+     307862,
+     307909,
+     307930,
+     307952,
+     307965
+    ],
+    "flip_winner_was_last_pre_bonus": [
+     307000,
+     307016,
+     307020,
+     307032,
+     307047,
+     307073,
+     307077,
+     307082,
+     307088,
+     307091,
+     307123,
+     307124,
+     307151,
+     307174,
+     307177,
+     307184,
+     307204,
+     307213,
+     307229,
+     307243,
+     307246,
+     307266,
+     307303,
+     307318,
+     307320
+    ],
+    "le_5_rounds_any": [
+     307004,
+     307531,
+     308228,
+     308347,
+     308389,
+     308778,
+     309380,
+     309734
+    ],
+    "pz_or_tw_le_3_rounds": [
+     309380
+    ]
+   }
+  },
+  {
+   "cell": "V036",
+   "players": 4,
+   "games": 3000,
+   "base_seed": 7000,
+   "win_rate_by_red_dice": {
+    "0": {
+     "rate": 0.2668,
+     "ci95": [
+      0.2572,
+      0.2765
+     ],
+     "seats": 8097
+    },
+    "1": {
+     "rate": 0.256,
+     "ci95": [
+      0.2386,
+      0.2742
+     ],
+     "seats": 2305
+    },
+    "2+": {
+     "rate": 0.1564,
+     "ci95": [
+      0.1395,
+      0.1751
+     ],
+     "seats": 1598
+    }
+   },
+   "win_rate_by_bot_post": {
+    "AccelerationistBot": 0.3367,
+    "AdaptiveBalancedBot": 0.1504,
+    "RecklessSaboteurBot": 0.0587,
+    "SecOpsTurtleBot": 0.2729,
+    "VentureGreedBot": 0.4313
+   },
+   "win_rate_by_bot_pre_bonus": {
+    "AccelerationistBot": 0.3367,
+    "AdaptiveBalancedBot": 0.1504,
+    "RecklessSaboteurBot": 0.0587,
+    "SecOpsTurtleBot": 0.2729,
+    "VentureGreedBot": 0.4313
+   },
+   "bot_seats": {
+    "VentureGreedBot": 2400,
+    "AdaptiveBalancedBot": 2400,
+    "SecOpsTurtleBot": 2400,
+    "AccelerationistBot": 2400,
+    "RecklessSaboteurBot": 2400
+   },
+   "mean_secrets_by_bot": {
+    "AccelerationistBot": {
+     "pre": 4.685,
+     "post": 4.685
+    },
+    "AdaptiveBalancedBot": {
+     "pre": 3.855,
+     "post": 3.855
+    },
+    "RecklessSaboteurBot": {
+     "pre": 2.639,
+     "post": 2.639
+    },
+    "SecOpsTurtleBot": {
+     "pre": 4.296,
+     "post": 4.296
+    },
+    "VentureGreedBot": {
+     "pre": 4.927,
+     "post": 4.927
+    }
+   },
+   "survivor_secrets": {
+    "pre": 4.718,
+    "post": 4.718,
+    "pre_median": 5
+   },
+   "all_seat_final_secrets_mean": 4.08,
+   "survivor_count_dist": {
+    "0": 29,
+    "1": 86,
+    "2": 195,
+    "3": 677,
+    "4": 2013
+   },
+   "flip_pre_bonus_lead_dist": {},
+   "rounds_dist": {
+    "5": 21,
+    "6": 64,
+    "7": 255,
+    "8": 725,
+    "9": 1068,
+    "10": 735,
+    "11": 132
+   },
+   "pz_end_round_dist": {
+    "5": 21,
+    "6": 58,
+    "7": 167,
+    "8": 284,
+    "9": 280,
+    "10": 105
+   },
+   "outlier_seed_counts": {
+    "le_5_rounds_any": 21
+   },
+   "outlier_seeds": {
+    "le_5_rounds_any": [
+     407101,
+     407291,
+     407460,
+     407539,
+     407560,
+     407572,
+     407631,
+     407714,
+     407986,
+     408013,
+     408230,
+     408332,
+     408368,
+     409284,
+     409514,
+     409558,
+     409679,
+     409686,
+     409781,
+     409863,
+     409907
+    ]
+   }
+  },
+  {
+   "cell": "V037",
+   "players": 4,
+   "games": 3000,
+   "base_seed": 7000,
+   "win_rate_by_red_dice": {
+    "0": {
+     "rate": 0.2658,
+     "ci95": [
+      0.2565,
+      0.2752
+     ],
+     "seats": 8619
+    },
+    "1": {
+     "rate": 0.2476,
+     "ci95": [
+      0.2291,
+      0.2671
+     ],
+     "seats": 1977
+    },
+    "2+": {
+     "rate": 0.1567,
+     "ci95": [
+      0.1386,
+      0.1766
+     ],
+     "seats": 1404
+    }
+   },
+   "win_rate_by_bot_post": {
+    "AccelerationistBot": 0.2929,
+    "AdaptiveBalancedBot": 0.1267,
+    "RecklessSaboteurBot": 0.096,
+    "SecOpsTurtleBot": 0.3019,
+    "VentureGreedBot": 0.4325
+   },
+   "win_rate_by_bot_pre_bonus": {
+    "AccelerationistBot": 0.3423,
+    "AdaptiveBalancedBot": 0.1346,
+    "RecklessSaboteurBot": 0.0612,
+    "SecOpsTurtleBot": 0.259,
+    "VentureGreedBot": 0.4529
+   },
+   "bot_seats": {
+    "VentureGreedBot": 2400,
+    "AccelerationistBot": 2400,
+    "AdaptiveBalancedBot": 2400,
+    "SecOpsTurtleBot": 2400,
+    "RecklessSaboteurBot": 2400
+   },
+   "mean_secrets_by_bot": {
+    "AccelerationistBot": {
+     "pre": 4.858,
+     "post": 5.78
+    },
+    "AdaptiveBalancedBot": {
+     "pre": 3.919,
+     "post": 4.707
+    },
+    "RecklessSaboteurBot": {
+     "pre": 2.673,
+     "post": 3.477
+    },
+    "SecOpsTurtleBot": {
+     "pre": 4.335,
+     "post": 5.56
+    },
+    "VentureGreedBot": {
+     "pre": 5.059,
+     "post": 6.148
+    }
+   },
+   "survivor_secrets": {
+    "pre": 4.873,
+    "post": 5.98,
+    "pre_median": 5.0
+   },
+   "all_seat_final_secrets_mean": 5.134,
+   "survivor_count_dist": {
+    "0": 48,
+    "1": 86,
+    "2": 212,
+    "3": 662,
+    "4": 1992
+   },
+   "flip_pre_bonus_lead_dist": {
+    "1": 503,
+    "2": 203
+   },
+   "rounds_dist": {
+    "5": 4,
+    "6": 54,
+    "7": 222,
+    "8": 599,
+    "9": 1133,
+    "10": 841,
+    "11": 147
+   },
+   "pz_end_round_dist": {
+    "5": 4,
+    "6": 51,
+    "7": 153,
+    "8": 284,
+    "9": 328,
+    "10": 98
+   },
+   "outlier_seed_counts": {
+    "flip_overturned_pre_bonus_lead_ge_2": 203,
+    "flip_winner_was_last_pre_bonus": 193,
+    "le_5_rounds_any": 4
+   },
+   "outlier_seeds": {
+    "flip_overturned_pre_bonus_lead_ge_2": [
+     407003,
+     407015,
+     407017,
+     407037,
+     407051,
+     407071,
+     407073,
+     407079,
+     407081,
+     407089,
+     407100,
+     407119,
+     407129,
+     407130,
+     407145,
+     407168,
+     407171,
+     407190,
+     407191,
+     407199,
+     407207,
+     407245,
+     407262,
+     407286,
+     407287
+    ],
+    "flip_winner_was_last_pre_bonus": [
+     407003,
+     407017,
+     407031,
+     407037,
+     407051,
+     407081,
+     407094,
+     407103,
+     407108,
+     407130,
+     407132,
+     407145,
+     407158,
+     407165,
+     407171,
+     407185,
+     407191,
+     407194,
+     407245,
+     407268,
+     407287,
+     407300,
+     407309,
+     407332,
+     407336
+    ],
+    "le_5_rounds_any": [
+     407460,
+     407714,
+     409558,
+     409679
+    ]
+   }
+  },
+  {
+   "cell": "V037-ONE-AWARE",
+   "players": 4,
+   "games": 3000,
+   "base_seed": 7000,
+   "win_rate_by_red_dice": {
+    "0": {
+     "rate": 0.2606,
+     "ci95": [
+      0.2512,
+      0.2703
+     ],
+     "seats": 8153
+    },
+    "1": {
+     "rate": 0.2668,
+     "ci95": [
+      0.249,
+      0.2854
+     ],
+     "seats": 2264
+    },
+    "2+": {
+     "rate": 0.1712,
+     "ci95": [
+      0.1534,
+      0.1905
+     ],
+     "seats": 1583
+    }
+   },
+   "win_rate_by_bot_post": {
+    "AccelerationistBot": 0.2892,
+    "AdaptiveBalancedBot": 0.1296,
+    "RecklessSaboteurBot": 0.0975,
+    "SecOpsTurtleBot": 0.325,
+    "VentureGreedBot": 0.4088
+   },
+   "win_rate_by_bot_pre_bonus": {
+    "AccelerationistBot": 0.3435,
+    "AdaptiveBalancedBot": 0.1375,
+    "RecklessSaboteurBot": 0.0579,
+    "SecOpsTurtleBot": 0.2687,
+    "VentureGreedBot": 0.4423
+   },
+   "bot_seats": {
+    "VentureGreedBot": 2400,
+    "AdaptiveBalancedBot": 2400,
+    "AccelerationistBot": 2400,
+    "SecOpsTurtleBot": 2400,
+    "RecklessSaboteurBot": 2400
+   },
+   "mean_secrets_by_bot": {
+    "AccelerationistBot": {
+     "pre": 5.439,
+     "post": 6.292
+    },
+    "AdaptiveBalancedBot": {
+     "pre": 4.509,
+     "post": 5.256
+    },
+    "RecklessSaboteurBot": {
+     "pre": 3.29,
+     "post": 4.236
+    },
+    "SecOpsTurtleBot": {
+     "pre": 4.978,
+     "post": 6.197
+    },
+    "VentureGreedBot": {
+     "pre": 5.675,
+     "post": 6.733
+    }
+   },
+   "survivor_secrets": {
+    "pre": 5.376,
+    "post": 6.448,
+    "pre_median": 5.0
+   },
+   "all_seat_final_secrets_mean": 5.743,
+   "survivor_count_dist": {
+    "0": 23,
+    "1": 65,
+    "2": 186,
+    "3": 541,
+    "4": 2185
+   },
+   "flip_pre_bonus_lead_dist": {
+    "1": 535,
+    "2": 234
+   },
+   "rounds_dist": {
+    "5": 4,
+    "6": 45,
+    "7": 195,
+    "8": 713,
+    "9": 1111,
+    "10": 789,
+    "11": 143
+   },
+   "pz_end_round_dist": {
+    "5": 4,
+    "6": 40,
+    "7": 108,
+    "8": 255,
+    "9": 265,
+    "10": 72
+   },
+   "outlier_seed_counts": {
+    "flip_overturned_pre_bonus_lead_ge_2": 234,
+    "flip_winner_was_last_pre_bonus": 188,
+    "le_5_rounds_any": 4
+   },
+   "outlier_seeds": {
+    "flip_overturned_pre_bonus_lead_ge_2": [
+     407025,
+     407055,
+     407056,
+     407066,
+     407069,
+     407074,
+     407081,
+     407086,
+     407096,
+     407128,
+     407131,
+     407138,
+     407179,
+     407184,
+     407211,
+     407231,
+     407277,
+     407280,
+     407317,
+     407318,
+     407353,
+     407386,
+     407392,
+     407401,
+     407406
+    ],
+    "flip_winner_was_last_pre_bonus": [
+     407058,
+     407069,
+     407085,
+     407086,
+     407096,
+     407101,
+     407141,
+     407144,
+     407158,
+     407179,
+     407211,
+     407244,
+     407254,
+     407292,
+     407304,
+     407318,
+     407340,
+     407357,
+     407386,
+     407392,
+     407410,
+     407448,
+     407451,
+     407463,
+     407468
+    ],
+    "le_5_rounds_any": [
+     407460,
+     407714,
+     409558,
+     409679
+    ]
+   }
+  }
+ ]
+}
