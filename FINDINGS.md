@@ -1935,3 +1935,73 @@ The six-phase compiler (`sim/engine/phase2_compiler.py`) stopped spillover at v2
 - **Frequency (v0.35 sweep setup, `GameConfig()` V035, seeds `42 + n*100000 + idx`, 1,000 games per pod):** **0 / 1,000** occurrences in 2P, 3P and 4P each. All 3,000 game fingerprints (rounds, end reason, winners, full rankings) match the pre-fix engine. Across the 26,223 compiles, at most 4 Black cubes exited in one compile and at most 3 spilled past a filled track. Filling v2.0 by spillover needs ≥ 6 in one compile. In every v1.0 compile, the Black cubes in the Staging Cup and tower were at least 3 short of that, so the case is possible under the rules but practically unreachable under current tuning. The fix only matters for future levers that raise Black cube volume.
 - **Decision (User, 2026-11-06):** keep the engine fix; no RULES.md cap or clarification for this hypothetical.
 - **v0.36 coordination:** the spec's §4.3 "known limitation / do not fix" note no longer applies. Its spillover-branch comparison hook falls exactly where the new non-final-fill arm runs (`spill_idx == next_ver.track_capacity` on a non-final target), and `double_version_fill_events` matches `multi_version_spill_events`.
+
+## 36. Pre-SDLC Exploration: Blue Defense Agency (no rules change)
+
+Question (User, 2026-11-06): blocking Blue always comes first, so defense "plays itself", and v0.36 has no repeatable Secrets engine. Probes (hooks only, not rules code; `GameConfig.v036`, current bot roster, seeds `42 + n*100000 + idx`, 600 games per pod): `scripts/explore_v360_blue_pressure_probe.py`, `scripts/explore_v360_topoff_probe.py`, `scripts/explore_v360_blue_block2_probe.py`.
+
+**Diagnosis (baseline, per seat per game):**
+
+| | 2P | 3P | 4P |
+|---|---|---|---|
+| Block rate Red / Blue / Green | 15 / 67 / 12% | 15 / 68 / 12% | 15 / 67 / 12% |
+| Any shields spent on Blue | 63% | 63% | 62% |
+| Contested Any splits (Blue covered first) | 66% of attack rounds (94%) | 66% (94%) | 67% (94%) |
+| Start → final Secrets; lost to Blue | 7 → 3.12; 3.96 | 7 → 3.29; 3.79 | 8 → 4.17; 3.94 |
+| All other Secret gains minus Corruption losses | +0.08 | +0.07 | +0.11 |
+
+1. **Final Secrets ≈ starting Secrets − Blue losses.** Blue defense is effectively the score. A Blue cube costs a permanent VP; Red and Green cost recoverable resources, so Blue-first is always correct. (Bots fill Blue first by policy, but the scoring math backs it.)
+2. Patient Zero seats lose 7.5–8.7 Secrets to Blue vs 3.1–3.4 for survivors.
+
+**Idea 3 — L4 top-off** (once per round in Phase 6, any track at L4: pay X 🔬 for +1 Corporate Secret; working name only, no glossary term):
+- Research income is ~1.3 🔬 per round per seat; 42–44% of seats reach one L4 track, around round 4–5.
+- Bots that convert only leftover research rarely use it (2–8% of seats).
+- A top-off-aware bot (tops off before other spending; prices the first repairable Blue cube each round at X 🔬): at 3 🔬, 27% of seats use it, about 1.75 Secrets per user. Endings stay within ~3 points of baseline, rounds unchanged. One aware seat vs current bots wins 50.2 / 37.2 / 27.7% (fair share 50 / 33 / 25%). At 2 🔬: 40.7% at 3P and 31.1% at 4P, too strong.
+- Starting Secrets −1 with top-off pushes Patient Zero to 37–41%: keep 7 / 7 / 8.
+- **Agency barely moves:** Blue left open on purpose in contested splits goes from ~6% to 7–8% (8–9% at 2 🔬). A repairable Blue (3 🔬) still costs more than Red (2 🔬 regain) or Green, and the L4 gate arrives late.
+
+**Idea 2 — Block 2 Blue faces** (A: Face 1 → Block 2 Blue; C: Faces 1 and 4 → Block 2 Blue):
+- Blue lost per seat falls by 0.2–0.4 (3P: 3.79 → 3.59 / 3.42); Any shields on Blue 63% → 61 / 60%; endings shift 1–3 points.
+- Small because seats own only 0.75–0.86 Blue dice and see Blue block faces 2 times in 6, vs ~1.5 Blue cubes per round.
+- **Must-buy risk:** win rate by Blue dice owned (0 / 2+) at 4P goes from 17 / 39% to 13 / 47% (C). Partly correlational; bots' buying logic does not know Blue got stronger.
+
+**Not simulated:** idea 1 (lower a track for a Secret — a late lifeline, would lower Patient Zero endings), idea 4 (new track — Patents again), idea 5 (Market Share → Secrets thresholds — the −1 side brings back the Unpaid Ransom Leak; shared Red cubes push toward Total Wipeouts).
+
+**Takeaways:**
+1. Making Blue cheaper to block (idea 2) or to recover from (idea 3) leaves Blue the costliest cube to take, so Blue-first stays correct. Real shield-split agency likely needs Red or Green damage to hurt more.
+2. Idea 3 at 3 🔬 is worth keeping as a Secrets engine and strategic path (pacing-neutral, modest edge). Idea 2 is at most a small tuning option.
+3. Sim/rules mismatch: `sim/engine/phase4_attack_resolution.py` lets DTO *Slush Fund* pay `$1` per extra Secret beyond the free 2; RULES.md has no such rule.
+
+**Status: exploration recorded (User, 2026-11-07). No RULES.md, PnP or web change. Next candidate: probe costlier Red / Green damage.**
+
+## 37. Pre-SDLC Exploration: Market Share Threshold Penalties (no rules change)
+
+Question (User, 2026-11-07): would 2–3 threshold points on the Market Share track, each switching off something while a player is below it, push players to invest in Public Relations and make tanking toward Market Collapse less attractive? Candidate penalties: Client Company ability (Institutional Override) unavailable, Signature Protocol unavailable, lose a Purple die. Each comes back when the player climbs back above the threshold. Probes ran on scratchpad hooks only, not rules code: `GameConfig.v036`, the current bot roster, seeds `42 + n*100000 + idx`, 600–800 games per pod.
+
+**Baseline Market Share curve (3P mean):** r2 16.7, r4 14.5, r6 11.9, r7 9.5, r8 6.7, r9 5.3. It falls about 1 per round in `v1.0`/`v2.0`, then about 2.5 per round once `v3.0` Red cubes arrive. Share of seats that ever reach ≤12 / ≤9 / ≤6 / ≤3: 94 / 84 / 70 / 51% (2P and 4P are similar). **The surviving player with the lowest Market Share wins 68 / 47 / 37%** (fair share 50 / 33 / 25%).
+
+**Value of each penalty (one seat with it switched off all game):** without the Client Company ability, that seat wins 33.7 / 19.8 / 12.5%, about half its fair share. Without the Signature Protocol it wins 46.4 / 31.3 / 20.3%, a small loss. A lost Purple die was not simulated.
+
+**Fixed thresholds** (Company off at ≤9 and Signature off at ≤5; at ≤6 / ≤3; at ≤12 / ≤9; both off at ≤14): endings move 1–5 points and rounds stay at 8.6–8.9. The lowest-Market-Share player wins just as often. Shared Red cubes push every player across a threshold together, and only late, after most Institutional Overrides are already used, so a threshold acts as a tax on everyone rather than a penalty for tanking.
+
+**Relative lock** (the lowest-Market-Share survivor(s) lose the Client Company ability; nobody when everyone is tied). Aware bots spend research before track upgrades to get strictly above their lowest rival, except in the Final Round.
+
+| 3P | Patient Zero / Singularity / Market Collapse | Market Share regained per seat | Final Secrets | Lowest Market Share wins |
+|---|---|---|---|---|
+| Baseline | 35 / 31 / 34% | 1.14 | 3.29 | 47% |
+| Lock, bots ignore it | 37 / 31 / 32% | 1.16 | 3.09 | 42% |
+| Lock, all bots aware | 40 / 36 / 24% | 2.43 | 2.65 | 49% |
+| Lock, one aware bot | 38 / 30 / 32% | 1.42 | 2.98 | aware seat wins 33.2% (fair 33%) |
+| Lock with a 2-point gap, all aware | 40 / 36 / 24% | 2.44 | 2.65 | 55% |
+
+2P and 4P show the same pattern. With all bots aware, the lowest-Market-Share player wins 74% (2P) and 32% (4P). One aware bot wins 50.2% (2P) and 27.5% (4P).
+
+**Takeaways:**
+1. The relative lock does change behaviour: regain roughly doubles. But it becomes an arms race. Placings barely move, the research comes out of defense, Final Secrets fall by about 0.6, Patient Zero rises 3–6 points and Market Collapse falls about 10 points.
+2. Avoiding the lock gives no edge (the one aware bot wins at its fair share), and tanking still pays as well as before.
+3. Root cause (hypothesis): Market Share pays too little against Secrets, so research spent on defense beats research spent on Public Relations. Penalties add cost but don't change that trade-off.
+4. Caveat: the aware bot follows a fixed "never be last" rule and doesn't weigh the lock against what it gives up.
+
+**Next candidate:** reward Market Share instead of punishing it (for example, end-game Market Share → Secrets, or a `v2.0` comparison that pays Secrets), while watching the Total Wipeout risk noted for idea 5 in §36. Any lock rule would need a new glossary term, which must be confirmed with the User first.
+
+**Status: exploration recorded (User, 2026-11-07). No RULES.md, PnP or web change.**

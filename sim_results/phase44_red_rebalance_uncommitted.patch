@@ -1,0 +1,108 @@
+diff --git a/sim/config.py b/sim/config.py
+index 4cc8663..c53d0c2 100644
+--- a/sim/config.py
++++ b/sim/config.py
+@@ -243,6 +243,9 @@ class GameConfig:
+     company_setup_bonuses: Optional[bool] = None
+     slush_fund_once_per_game: Optional[bool] = None
+     level2_perks_enabled: Optional[bool] = None  # Emergency Hotfix + Passive Firewall (v0.34 only)
++    # v0.36 Red rebalance experiment levers (defaults = v0.35 behavior).
++    red_ransom_per_cube: int = 1  # [TUNE] $ extorted per unblocked Red cube
++    red_die_profile: str = "V035"  # "V035" | "V036_RED" (Block 2 Red, +$2, +$2, +$1 / +1 research)
+ 
+     def __post_init__(self) -> None:
+         self.round_sequence = RoundSequence(self.round_sequence)
+diff --git a/sim/engine/phase4_attack_resolution.py b/sim/engine/phase4_attack_resolution.py
+index 4087abe..81362ed 100644
+--- a/sim/engine/phase4_attack_resolution.py
++++ b/sim/engine/phase4_attack_resolution.py
+@@ -270,7 +270,7 @@ def resolve_player_defense_and_wear(
+                 avail_any -= 1
+                 any_allocated[CubeColor.BLUE] += 1
+             # Tier 2: Red Threat if Cash < Red (prevent Unpaid Ransom Flat Leak)
+-            elif rem_red > 0 and player.money < rem_red:
++            elif rem_red > 0 and player.money < rem_red * engine.config.red_ransom_per_cube:
+                 rem_red -= 1
+                 avail_any -= 1
+                 any_allocated[CubeColor.RED] += 1
+@@ -308,9 +308,10 @@ def resolve_player_defense_and_wear(
+     # 7. Red Ransomware Resolution (INV-RANSOM-FLAT-01)
+     unpaid_ransom = 0
+     if unblocked_red > 0:
+-        cash_paid = min(player.money, unblocked_red)
++        ransom_due = unblocked_red * engine.config.red_ransom_per_cube
++        cash_paid = min(player.money, ransom_due)
+         player.money -= cash_paid
+-        unpaid_ransom = unblocked_red - cash_paid
++        unpaid_ransom = ransom_due - cash_paid
+ 
+     # Legacy Patch Ransom Absorption Flag (if explicitly enabled in GameConfig)
+     if getattr(engine.state.config, "patch_ransom_absorption", False) and unpaid_ransom > 0 and player.patches > 0:
+diff --git a/sim/engine/phase6_operations.py b/sim/engine/phase6_operations.py
+index c013d70..f67507d 100644
+--- a/sim/engine/phase6_operations.py
++++ b/sim/engine/phase6_operations.py
+@@ -139,6 +139,7 @@ def execute_player_operations_turn(
+                 color=free_color,
+                 die_id=engine.state.next_die_id,
+                 variant_card=engine.state.variant_cards.get(free_color),
++                red_profile=engine.config.red_die_profile,
+             )
+             engine.state.next_die_id += 1
+             player.ready_for_release_dice.append(new_die)
+@@ -250,6 +251,7 @@ def execute_player_operations_turn(
+                     color=color,
+                     die_id=engine.state.next_die_id,
+                     variant_card=engine.state.variant_cards.get(color),
++                    red_profile=engine.config.red_die_profile,
+                 )
+                 engine.state.next_die_id += 1
+                 player.ready_for_release_dice.append(new_die)
+diff --git a/sim/engine/research_tracks.py b/sim/engine/research_tracks.py
+index 3772aa1..3a3d24c 100644
+--- a/sim/engine/research_tracks.py
++++ b/sim/engine/research_tracks.py
+@@ -211,6 +211,7 @@ def _resolve_triage_l3(engine: GameEngine, player: PlayerState, choice: Optional
+         color=color,
+         die_id=_new_die_id(engine),
+         variant_card=engine.state.variant_cards.get(color),
++        red_profile=engine.config.red_die_profile,
+     )
+     player.ready_for_release_dice.append(new_die)
+     player.triage_l3_upgrade_color = color.value
+diff --git a/sim/entities.py b/sim/entities.py
+index bb48ae9..8dbc8b8 100644
+--- a/sim/entities.py
++++ b/sim/entities.py
+@@ -1222,6 +1222,7 @@ def create_colored_die(
+     reserve_cost: Optional[int] = None,
+     cost: Optional[int] = None,
+     gray_profile: Optional[str] = "V035_D1",
++    red_profile: str = "V035",
+ ) -> Die:
+     """Creates a colored die of the specified color with dynamic cost (v0.26.0 Baseline)."""
+     if color == DieColor.GRAY:
+@@ -1256,6 +1257,23 @@ def create_colored_die(
+             die_cost = default_costs.get(color, 4)
+ 
+     if color == DieColor.RED:
++        if red_profile == "V036_RED":
++            faces = [
++                Face(name="Block 2 Red", block_amount=2, shield_color=ShieldColor.RED),
++                Face(name="+$2", money=2),
++                Face(name="+$2", money=2),
++                Face(
++                    name="+$1 / +1 🔬",
++                    is_choice=True,
++                    choices=(
++                        Face("+$1", money=1),
++                        Face("+1 🔬", patches=1),
++                    ),
++                ),
++                glitch_face,
++                star_face,
++            ]
++            return Die(die_id=die_id, color=color, cost=die_cost, vp=0, faces=faces, variant_code=var_code)
+         faces = [
+             Face(name="Block 1 Red", block_amount=1, shield_color=ShieldColor.RED),
+             Face(name="+$2", money=2),
