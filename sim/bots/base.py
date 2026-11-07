@@ -150,6 +150,8 @@ class BaseBot:
     any_shield_fill_order: Tuple[CubeColor, ...] = (CubeColor.BLUE, CubeColor.RED, CubeColor.GREEN)
     # Preferred Central Market colours for the Triage L3 Breakthrough (falls back to Yellow > Green > Red > Blue)
     market_color_preference: Tuple[DieColor, ...] = ()
+    # Lever A (sim/bots/pr_push_policy.py): only AdaptiveBalanced opts in; inert unless config.bot_pr_push
+    pr_push_capable: bool = False
 
     def __init__(self, bot_id: int, name: str = "BaseBot") -> None:
         self.bot_id = bot_id

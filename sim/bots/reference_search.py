@@ -42,61 +42,11 @@ SEARCHED_PHASE: Dict[str, int] = {"commit_shields": 1, "choose_any_shield_alloca
 _COLORS = (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN)
 
 
-# [TUNE-BOT] Public Relations push / Market Share dump portfolio lines (FINDINGS §40 follow-up, 2026-11-07)
-PR_PUSH_POLICY = MarketSharePolicy(red_base_value=5.0, red_danger_value=3.0, danger_margin=4, red_buy_share_frac=1.0)
-PR_PUSH_FOCUS = ("PATENT", "DEFENSE", "TRIAGE", "RELEASE")  # PATENT = Public Relations Track (internal key)
-PR_PUSH_FILL = (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN)
-DUMP_POLICY = MarketSharePolicy(red_base_value=-10.0, red_danger_value=0.0, red_collapse_value=0.0,
-                                comparison_weight=0.0, danger_margin=-1000, red_buy_share_frac=-1.0,
-                                leader_bonus_aware=False)
-DUMP_FOCUS = ("DEFENSE", "TRIAGE", "RELEASE", "PATENT")  # PATENT never bought by the dump line
-DUMP_FILL = (CubeColor.BLUE, CubeColor.GREEN, CubeColor.RED)
-
-
-def _ordered_research(player: Any, state: Any, pr_first: bool, focus: Sequence[str]) -> Tuple[List[str], int]:
-    """Greedy research split ``(track_upgrades, share_regain)`` for the two lines below (no RNG).
-
-    ``pr_first``: Public Relations Track steps, then Market Share regain (post-upgrade rate), then the other
-    tracks. Otherwise: the research-policy want-list without the Public Relations Track and no regain."""
-    from sim.bots.research_policy import LEVEL_ATTR, ResearchPolicy, _want_list
-
-    cfg = state.config
-    costs = cfg.track_step_costs
-    res = int(player.research_tokens)
-    lv = {t: int(getattr(player, LEVEL_ATTR[t])) for t in LEVEL_ATTR}
-    upgrades: List[str] = []
-
-    def buy(t: str) -> bool:
-        nonlocal res
-        if lv[t] >= 4 or res < int(costs[lv[t]]):
-            return False
-        res -= int(costs[lv[t]])
-        lv[t] += 1
-        upgrades.append(t)
-        return True
-
-    regain = 0
-    if pr_first:
-        while buy("PATENT"):
-            pass
-        if getattr(cfg, "is_share_regain", False) and getattr(player, "market_share", None) is not None:
-            lvl = max(0, min(4, lv["PATENT"]))
-            cost, cap = int(cfg.share_regain_cost_by_level[lvl]), int(cfg.share_regain_cap_by_level[lvl])
-            room = max(0, min(cap, int(player.market_share_max) - int(player.market_share)))
-            if cost > 0:
-                regain = min(room, res // cost)
-                res -= regain * cost
-        for t in focus:
-            if t != "PATENT":
-                buy(t)
-    else:
-        others = tuple(t for t in focus if t != "PATENT")
-        for t in _want_list(ResearchPolicy(focus_order=others), lv):  # type: ignore[arg-type]
-            if t == "PATENT" or lv[t] >= 4:
-                continue
-            if not buy(t):
-                break
-    return upgrades, regain
+# [TUNE-BOT] Public Relations push / Market Share dump portfolio lines (FINDINGS §40 follow-up, 2026-11-07).
+# Defined in the leaf module ``pr_push_policy`` (lever A, H-LA-4); re-exported here as the same objects.
+from sim.bots.pr_push_policy import (  # noqa: E402,F401
+    DUMP_FILL, DUMP_FOCUS, DUMP_POLICY, PR_PUSH_FILL, PR_PUSH_FOCUS, PR_PUSH_POLICY, _ordered_research,
+)
 
 
 class _ResearchLineBot(AdaptiveBalancedBot):
@@ -105,6 +55,7 @@ class _ResearchLineBot(AdaptiveBalancedBot):
 
     pr_first = False
     research_aware = False
+    pr_push_capable = False  # lever A H-LA-6: the fixed lines are what the window imitates; never re-window
 
     def take_operations_actions(self, player_state, game_state, rng):
         plan = super().take_operations_actions(player_state, game_state, rng)
@@ -333,6 +284,9 @@ class ReferenceSearchBot(BaseBot):
         self.portfolio = portfolio if portfolio is not None else build_portfolio(bot_id)
         for _, m in self.portfolio:
             force_fixed_focus(m)
+        # lever A scope "non_reference": these never window (read only in that mode)
+        for m in [self.fallback] + [m for _, m in self.portfolio]:
+            m.pr_push_reference_owned = True
         self.engine: Any = None
         self.phase_log: List[Tuple[str, Any]] = []
         self._phase: Optional[int] = None
@@ -432,6 +386,7 @@ class ReferenceSearchBot(BaseBot):
     def rollout(self, hook: str, call_index: int, record: Any, seed: int) -> float:
         snap = self.engine._snap
         clone, commitments, cr = fast_clone.from_snapshot(snap)
+        clone.state.pr_push_rollout = True  # lever A scope "non_reference": rollouts keep old behaviour
         forced_self: Optional[ForcedChoiceBot] = None
         for p in clone.state.players:
             b = p.bot

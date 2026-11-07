@@ -140,6 +140,41 @@ ROUND_PHASE_NAMES: Dict[int, str] = {
 }
 
 
+@dataclass(frozen=True)
+class PrPushParams:
+    """[TUNE-BOT] Lever A thresholds (docs/specs/lever_a_roster_upgrade_spec.md §2). Sim-only, not a rule.
+
+    Read by ``sim/bots/pr_push_policy.py`` when ``GameConfig.bot_pr_push`` is on. Frozen because rollout
+    clones share ``config`` by reference (H-LA-5)."""
+
+    push_min_share: int = 6  # PUSH_MIN_SHARE
+    push_low_gap: int = 7  # PUSH_LOW_GAP
+    push_top_gap: int = 3  # PUSH_TOP_GAP
+    push_max_version: int = 1  # PUSH_MAX_VERSION (Version index; 1 = v2.0)
+    push_secrets_band: int = 2  # PUSH_SECRETS_BAND
+    push_pr_cap: int = 1  # PUSH_PR_CAP (Public Relations Track level)
+    push_max_research: int = 2  # PUSH_MAX_RESEARCH (Research Tokens on hand)
+    dump_max_share: int = 5  # DUMP_MAX_SHARE
+    dump_top_gap: int = 2  # DUMP_TOP_GAP (variant only)
+    dump_threat_margin: int = 2  # DUMP_THREAT_MARGIN (variant only)
+    dump_condition: str = "share_only"  # "share_only" (default) | "reach_or_threat" (sweep variant)
+    push_blue_slack: int = 0  # PUSH_BLUE_SLACK: Blue blocks the push split may give up vs the default (0 = Blue-safe)
+
+    def validate(self) -> None:
+        if self.dump_condition not in ("share_only", "reach_or_threat"):
+            raise ValueError(f"dump_condition must be 'share_only' or 'reach_or_threat', got {self.dump_condition!r}")
+        for name in ("push_min_share", "push_max_version", "push_secrets_band", "push_pr_cap",
+                     "push_max_research", "dump_max_share", "dump_threat_margin", "push_blue_slack"):
+            v = getattr(self, name)
+            if not isinstance(v, int) or v < 0:
+                raise ValueError(f"PrPushParams.{name} must be an int >= 0, got {v!r}")
+        for name in ("push_low_gap", "push_top_gap", "dump_top_gap"):
+            if not isinstance(getattr(self, name), int):
+                raise ValueError(f"PrPushParams.{name} must be an int")
+        if not self.push_min_share > self.dump_max_share:
+            raise ValueError("PUSH_MIN_SHARE must exceed DUMP_MAX_SHARE (windows must be disjoint)")
+
+
 @dataclass
 class GameConfig:
     """Tunable game parameters with baselines from RULES.md."""
@@ -330,8 +365,20 @@ class GameConfig:
     # Shorter tuples are padded with 0 up to the player count; extra entries are ignored.
     # None resolves once in __post_init__: MARKET_SHARE -> the v0.37.0 schedule, RANSOM -> {} (disabled).
     market_leader_bonus_by_player_count: Optional[Dict[int, Tuple[int, ...]]] = None
+    # --- Lever A (docs/specs/lever_a_roster_upgrade_spec.md). [TUNE-BOT] sim-only, default off = bit-identical. ---
+    # Set only at construction: rollout clones share this config (H-LA-5); never flip it mid-game.
+    bot_pr_push: bool = False
+    bot_pr_push_params: PrPushParams = field(default_factory=PrPushParams)
+    # "all" (default): every capable seat windows. "non_reference" (measurement mode, spec amendment 3): the
+    # reference bot's fallback / portfolio members and every rollout clone keep the old AdaptiveBalanced behaviour.
+    bot_pr_push_scope: str = "all"
 
     def __post_init__(self) -> None:
+        if not isinstance(self.bot_pr_push_params, PrPushParams):
+            raise ValueError("bot_pr_push_params must be a PrPushParams")
+        self.bot_pr_push_params.validate()
+        if self.bot_pr_push_scope not in ("all", "non_reference"):
+            raise ValueError(f"bot_pr_push_scope must be 'all' or 'non_reference', got {self.bot_pr_push_scope!r}")
         self.round_sequence = RoundSequence(self.round_sequence)
         if self.red_mode is None:
             legacy_model = (

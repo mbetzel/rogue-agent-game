@@ -348,3 +348,11 @@ Harness `scripts/run_reference_bot_validation.py`, extended with `--pr-push {off
 4. Sweep-picked constants that differ from the starting values **come back to the User** before becoming defaults.
 5. The Phase 4 window reads Market Share **at the start of Phase 4** (snapshot), matching how the thresholds were measured (H-LA-8). This overrides the spec's earlier recommendation of live Market Share.
 6. The windowed colour order **also applies** to the Prometheus discounted purchase.
+
+## Amendment after regression diagnosis (User, 2026-11-07)
+
+See `docs/findings/lever_a_regression_diagnosis.md`.
+1. **Blue-safe push split (default).** In the push window AdaptiveBalanced computes its default Phase 4 split and the push split, and uses the push split only if it blocks at least as many Blue cubes (`push_alloc[Blue] >= default_alloc[Blue]`); otherwise the default split. New `PrPushParams` field `push_blue_slack: int = 0` [TUNE-BOT] (Blue blocks the push split may give up; 0 = Blue-safe). Phase 6 and dice buying unchanged.
+2. Dump window unchanged.
+3. Add a measurement mode where the switch applies to non-reference seats only (reference fallback/rollouts on old AdaptiveBalanced); default stays consistent (A7).
+4. Push window width unchanged for now; narrower settings go in the tuning sweep.

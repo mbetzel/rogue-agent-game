@@ -21,7 +21,13 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Pre-SDLC Game Designer Scoping:* `docs/findings/lever_a_roster_upgrade_scoping.md` (situational push + dump for AdaptiveBalanced behind a `bot_pr_push` [TUNE-BOT] switch, default off). User decisions 2026-11-07 recorded in the doc.
   - [x] *1,200-game state log + threshold refinement (`game-designer`):* thresholds in scoping §3; User decisions on §9 recorded 2026-11-07.
   - [x] *Spec (`principal-engineer`):* `docs/specs/lever_a_roster_upgrade_spec.md`; 6 open questions resolved by the User 2026-11-07.
-  - [ ] *Implementation (`senior-engineer`) → review → sweep → assessment.*
+  - [x] *Implementation (`senior-engineer`):* 818 tests OK; switch-off parity byte-identical. **Smoke (600 games, 3P v037) contradicts the spec:** switch on drops AdaptiveBalanced 18.3% → 12.5% and raises ref1 69.2% → 77.5%; Patient Zero +3.6 pts (guardrail ≤2). Needs diagnosis before the sweep.
+  - [x] *Review (`staff-engineer`):* APPROVED vs spec; no code bug. Cause is a design flaw: push values Red (5–8) above non-lethal Blue (3).
+  - [x] *Diagnosis (`game-designer`):* `docs/findings/lever_a_regression_diagnosis.md`. The push Phase 4 split is the whole regression. Blue-safe push split probe: AdaptiveBalanced 17.2% → 26.5%, Patient Zero 9.3% → 8.8%; ref1 77.1% (off 69.1%). 4 User decisions pending.
+  - [x] *User decisions 2026-11-07:* Blue-safe push split default (`push_blue_slack` 0), dump unchanged, add non-reference-only measurement mode, window width left to the sweep (spec amendment).
+  - [x] *Blue-safe fix (`senior-engineer`):* `push_blue_slack` + `bot_pr_push_scope`; 824 tests OK, switch-off parity intact, `v037_push` fixtures regenerated. 3P v037 1,200 games: AdaptiveBalanced 17.2% → 26.5%, Patient Zero 9.3% → 8.8%; ref1 77.1% (scope all) / 71.2% (non_reference) vs 69.1% off.
+  - [x] *Re-review (`staff-engineer`):* APPROVED (824 tests OK; marks don't leak; leak check 0.87 normal vs 0.97 leaky). All three findings fixed (825 tests OK; switch-on results unchanged).
+  - [ ] *Tuning sweep (`product-owner`) → assessment (`game-designer`).*
 - [x] **Phase 46: Market Leader Bonus (`v0.37.0` Baseline)**
   - [x] *Pre-SDLC Game Designer Modeling:* end-game Corporate Secrets by Market Share placement among survivors. 2P 1st +2; 3–4P 1st +2, 2nd +1; others 0. Ties share the better place; Patient Zeros excluded; no bonus on a Total Wipeout. Starting Secrets 9 / 8 / 9. Probe `scripts/explore_v360_share_placement_probe.py`; results `FINDINGS.md` §38.
   - [x] *User sign-off (2026-11-07):* package above; 2P +2 Secrets; new term **Market Leader Bonus**.

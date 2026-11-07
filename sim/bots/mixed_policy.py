@@ -33,7 +33,7 @@ DEFAULT_GRANULARITY = "game"
 # Bot attributes the engine / post-processing read (spec §2 "Attribute reads on the bot").
 PROFILE_ATTRS: Tuple[str, ...] = (
     "research_focus", "research_focus_v036", "research_aware", "market_share_policy", "any_shield_fill_order",
-    "market_color_preference",
+    "market_color_preference", "pr_push_capable",
 )
 
 # Hook -> decision type (spec §4 "Decision types"). Helper methods a delegate calls on itself
