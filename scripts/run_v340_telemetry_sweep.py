@@ -3,7 +3,7 @@
 Phase 42 (Step 7 of docs/explorations/2026_11_six_phase_round_sequence_plan.md).
 
 Runs N matches per pod (2P / 3P / 4P) on explicit base seeds under the v0.34 default
-(``GameConfig()`` = SIX_PHASE, flat 8 Secrets) and the SAME seeds under ``GameConfig.legacy_v033``
+(``GameConfig.legacy_v035()`` = SIX_PHASE, flat 8 Secrets) and the SAME seeds under ``GameConfig.legacy_v033``
 (three-phase round, 4P = 12 Secrets). Match setup mirrors ``scripts/run_v330_telemetry_sweep.py``:
 5-bot rotation, ``get_random_setup`` STANDARD, random Client Companies and White Hat Operatives,
 starting_money=6, 3 Gray + 1 Purple, 1 Purple reserve, enable_corporate_asymmetry=True.
@@ -223,7 +223,7 @@ def build_engine(seq: str, num_players: int, match_idx: int, match_seed: int) ->
         num_players=num_players, starting_money=6, starting_gray_dice=3, starting_purple_dice=1,
         starting_purple_reserve=1, corruption_track_profile="STANDARD", enable_corporate_asymmetry=True,
     )
-    cfg = GameConfig(**kw) if seq == "SIX_PHASE" else GameConfig.legacy_v033(**kw)
+    cfg = GameConfig.legacy_v035(**kw) if seq == "SIX_PHASE" else GameConfig.legacy_v033(**kw)
     return GameEngine(config=cfg, bots=bots, seed=match_seed, variant_cards=variants, version_deck=version_deck,
                       companies=companies, white_hats=white_hats)
 

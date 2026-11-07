@@ -46,7 +46,7 @@ class DummyControlledBot(BaseBot):
 
 class TestEnginePhases(unittest.TestCase):
     def test_phase1_boot_and_configure(self) -> None:
-        cfg = GameConfig(num_players=2, starting_money=5, starting_secrets=6, starting_patches=1)
+        cfg = GameConfig.legacy_v035(num_players=2, starting_money=5, starting_secrets=6, starting_patches=1)
         bot0 = DummyControlledBot(0)
         bot1 = DummyControlledBot(1)
         engine = GameEngine(cfg, [bot0, bot1], seed=42)
@@ -65,7 +65,7 @@ class TestEnginePhases(unittest.TestCase):
 
     def test_hotfix_reroll_costs_patch_token(self) -> None:
         """In v0.6, unlocking a locked die via debug unlock costs 1 🔬 token."""
-        cfg = GameConfig(num_players=2, starting_patches=2)
+        cfg = GameConfig.legacy_v035(num_players=2, starting_patches=2)
         bot0 = DummyControlledBot(0)
         bot1 = DummyControlledBot(1)
         bot0.next_unlocks = [0]  # Request debug unlock on index 0
@@ -90,7 +90,7 @@ class TestEnginePhases(unittest.TestCase):
         self.assertEqual(p0.patches, 2)
 
     def test_phase2_black_cubes_and_version_upgrade(self) -> None:
-        cfg = GameConfig(num_players=2)  # corruption track = 2 + 1 = 3 spaces
+        cfg = GameConfig.legacy_v035(num_players=2)  # corruption track = 2 + 1 = 3 spaces
         bot0 = DummyControlledBot(0)
         bot1 = DummyControlledBot(1)
         engine = GameEngine(cfg, [bot0, bot1], seed=1)
@@ -120,7 +120,7 @@ class TestEnginePhases(unittest.TestCase):
         self.assertEqual(engine.state.staging_cup[CubeColor.BLACK], 1)
 
     def test_phase2_singularity_trigger_on_v3(self) -> None:
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         bot0 = DummyControlledBot(0)
         bot1 = DummyControlledBot(1)
         engine = GameEngine(cfg, [bot0, bot1], seed=1)
@@ -143,7 +143,7 @@ class TestEnginePhases(unittest.TestCase):
         self.assertEqual(engine.state.end_reason, EndGameReason.SINGULARITY)
 
     def test_phase3_operations_and_turn_rotation(self) -> None:
-        cfg = GameConfig(num_players=2, starting_money=10, starting_patches=1, dirty_income_enabled=True)
+        cfg = GameConfig.legacy_v035(num_players=2, starting_money=10, starting_patches=1, dirty_income_enabled=True)
         bot0 = DummyControlledBot(0)
         bot1 = DummyControlledBot(1)
 
@@ -177,7 +177,7 @@ class TestEnginePhases(unittest.TestCase):
 
     def test_hotfix_reroll_does_not_retain_old_face_output(self) -> None:
         """Verify that rerolling a die discards its initial face output (no double-dipping)."""
-        cfg = GameConfig(num_players=2, starting_money=5, starting_patches=1)
+        cfg = GameConfig.legacy_v035(num_players=2, starting_money=5, starting_patches=1)
         bot0 = DummyControlledBot(0)
         bot1 = DummyControlledBot(1)
         bot0.next_rerolls = [0]  # Reroll die 0

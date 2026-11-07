@@ -48,7 +48,7 @@ class TestV320BlueVariants(unittest.TestCase):
         Tower drops 2 Blue cubes (attack_strengths[BLUE] = 2). Unblocked Blue = 0.
         B1 blocks both Blue cubes and awards exactly +$2 cash (player.money increases by 2, not 3).
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 5
         p0.secrets = 8
@@ -80,7 +80,7 @@ class TestV320BlueVariants(unittest.TestCase):
         Tower drops 0 Blue cubes (exited_cubes[BLUE] = 0).
         Unblocked Blue is 0, but because 0 Blue cubes exited the tower, B1 awards $0 bonus cash.
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 5
         p0.secrets = 8
@@ -112,7 +112,7 @@ class TestV320BlueVariants(unittest.TestCase):
         Tower drops 3 Blue cubes (attack_strengths[BLUE] = 3). Unblocked Blue = 1.
         B1 blocks 2 Blue cubes, player loses 1 Secret, and because unblocked_blue > 0, B1 awards $0 bonus cash.
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 5
         p0.secrets = 8
@@ -143,7 +143,7 @@ class TestV320BlueVariants(unittest.TestCase):
         """TEST-V320-05: INV-B1-BOUNTY-01: Player has $0 cash, commits 1 B1 die, and faces 1 Blue cube + 2 Red cubes.
         B1 blocks the 1 Blue cube, grants +$2 cash in Step 6, and Step 7 uses that $2 to fully pay the 2 Red ransomware cubes (0 Secrets lost).
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 0
         p0.secrets = 8
@@ -191,7 +191,7 @@ class TestV320BlueVariants(unittest.TestCase):
         Gray (cost=0, id=1), Red (cost=4, id=2), Yellow (cost=6, id=3). Call collect_player_production_income.
         B3 selects Yellow (cost=6, colored), removes it from glitched_dice, clears transient roll/role fields, and appends it to scanned_dice.
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
 
         b3_card = self.variants["B3"]
@@ -231,7 +231,7 @@ class TestV320BlueVariants(unittest.TestCase):
         and 2 Colored dice in glitched_dice with equal cost (cost=5, die_id=10 vs cost=5, die_id=25).
         B3 deterministically selects die_id=25 via (1, 5, 25) > (1, 5, 10) and moves it to scanned_dice.
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
 
         b3_card = self.variants["B3"]
@@ -255,7 +255,7 @@ class TestV320BlueVariants(unittest.TestCase):
         and glitched_dice == []. Call collect_player_production_income.
         Clean no-op: glitched_dice and scanned_dice remain unchanged, no exception raised.
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
 
         b3_card = self.variants["B3"]
@@ -278,7 +278,7 @@ class TestV320BlueVariants(unittest.TestCase):
         In Phase 3A, surviving B3 recovers the Gray die from glitched_dice to scanned_dice.
         In Phase 3B, the Gray die graduates from scanned_dice to ready_for_release_dice!
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.secrets = 8
         p0.money = 5
@@ -340,7 +340,7 @@ class TestV320BlueVariants(unittest.TestCase):
         1 unblocked Green malware hits.
         glitch_sort_key sacrifices the $5 pure shield (0, 0, 1, 5) BEFORE the $4 dual-output B3 shield (0, 1, 1, 4), preserving B3 for Phase 3A!
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
 
         b1_card = self.variants["B1"]  # cost=5
@@ -375,7 +375,7 @@ class TestV320BlueVariants(unittest.TestCase):
         """TEST-V320-12: INV-GLITCH-SHIELD-PRIO-01: Verify glitch_sort_key across R1, G1, G2, and pure shields:
         pure Colored shield is sacrificed before R1/G1/G2, and R1/G1/G2 shields are sacrificed before non-shield Income dice.
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
 
         # Pure colored shield ($6 B2 showing basic Block 1 Blue)

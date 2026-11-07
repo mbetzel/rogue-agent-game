@@ -35,7 +35,7 @@ class TestV120Rules(unittest.TestCase):
 
     def setUp(self) -> None:
         self.variants = get_default_variant_cards()
-        self.config = GameConfig(num_players=2)
+        self.config = GameConfig.legacy_v035(num_players=2)
 
     # -------------------------------------------------------------------------
     # Test 1: Red Die Recalibration

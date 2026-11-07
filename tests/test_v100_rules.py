@@ -15,9 +15,9 @@ class TestV100Rules(unittest.TestCase):
 
     def test_corruption_track_capacity_scaling(self):
         """Corruption track capacity should scale to 4 for 2P, 5 for 3P, and 6 for 4P."""
-        cfg_2p = GameConfig(num_players=2)
-        cfg_3p = GameConfig(num_players=3)
-        cfg_4p = GameConfig(num_players=4)
+        cfg_2p = GameConfig.legacy_v035(num_players=2)
+        cfg_3p = GameConfig.legacy_v035(num_players=3)
+        cfg_4p = GameConfig.legacy_v035(num_players=4)
 
         self.assertEqual(cfg_2p.corruption_track_capacity, 4)
         self.assertEqual(cfg_3p.corruption_track_capacity, 5)
@@ -25,7 +25,7 @@ class TestV100Rules(unittest.TestCase):
 
     def test_corruption_track_flat_override(self):
         """Flat capacity scalar override should override player-count scaling when provided."""
-        cfg = GameConfig(num_players=4, corruption_track_flat_capacity=4)
+        cfg = GameConfig.legacy_v035(num_players=4, corruption_track_flat_capacity=4)
         self.assertEqual(cfg.corruption_track_capacity, 4)
 
     def test_starting_secrets_scaling(self):
@@ -40,9 +40,9 @@ class TestV100Rules(unittest.TestCase):
 
     def test_starting_patches_flat(self):
         """Starting Patch Tokens should be 0 across all player counts (v0.30.0 INV-START-RES-01)."""
-        cfg_2p = GameConfig(num_players=2)
-        cfg_3p = GameConfig(num_players=3)
-        cfg_4p = GameConfig(num_players=4)
+        cfg_2p = GameConfig.legacy_v035(num_players=2)
+        cfg_3p = GameConfig.legacy_v035(num_players=3)
+        cfg_4p = GameConfig.legacy_v035(num_players=4)
 
         self.assertEqual(cfg_2p.get_starting_patches(2), 0)
         self.assertEqual(cfg_3p.get_starting_patches(3), 0)
@@ -81,7 +81,7 @@ class TestV100Rules(unittest.TestCase):
             self.assertEqual(player.patches, 0)
 
         # 3-player game
-        cfg_3p = GameConfig(num_players=3)
+        cfg_3p = GameConfig.legacy_v035(num_players=3)
         bots_3p = [AdaptiveBalancedBot(i) for i in range(3)]
         eng_3p = GameEngine(cfg_3p, bots_3p, seed=42)
 
@@ -91,7 +91,7 @@ class TestV100Rules(unittest.TestCase):
             self.assertEqual(player.patches, 0)
 
         # 2-player game
-        cfg_2p = GameConfig(num_players=2)
+        cfg_2p = GameConfig.legacy_v035(num_players=2)
         bots_2p = [AdaptiveBalancedBot(i) for i in range(2)]
         eng_2p = GameEngine(cfg_2p, bots_2p, seed=42)
 
@@ -102,14 +102,14 @@ class TestV100Rules(unittest.TestCase):
 
     def test_web_serializer_reports_player_count_capacity(self):
         """Web state serializer exposes corruption_capacity matching the active version track capacity."""
-        cfg_4p = GameConfig(num_players=4)
+        cfg_4p = GameConfig.legacy_v035(num_players=4)
         bots_4p = [AdaptiveBalancedBot(i) for i in range(4)]
         eng_4p = GameEngine(cfg_4p, bots_4p, seed=42)
 
         serialized = GameStateSerializer.serialize_game_state(eng_4p.state, {"players": {}})
         self.assertEqual(serialized["corruption_capacity"], 4)  # v1.0 track has 4 spaces
 
-        cfg_2p = GameConfig(num_players=2)
+        cfg_2p = GameConfig.legacy_v035(num_players=2)
         bots_2p = [AdaptiveBalancedBot(i) for i in range(2)]
         eng_2p = GameEngine(cfg_2p, bots_2p, seed=42)
 

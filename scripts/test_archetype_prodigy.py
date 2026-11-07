@@ -84,7 +84,7 @@ def run_archetype_tournament(num_runs: int = 1000, base_seed: int = 42):
 
     for run_idx in range(num_runs):
         seed = base_seed + run_idx
-        config = GameConfig(num_players=4)
+        config = GameConfig.legacy_v035(num_players=4)
 
         bots = [
             AdaptiveBalancedBot(0),

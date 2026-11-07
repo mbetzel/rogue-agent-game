@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 
-from sim.config import DieColor, EndGameReason
+from sim.config import DieColor, EndGameReason, TiebreakOrder
 from sim.engine.state import EndGameResult
 
 if TYPE_CHECKING:
@@ -17,6 +17,47 @@ def _standard_key(r: Dict) -> Tuple:
 
 def _wipeout_key_six_phase(r: Dict) -> Tuple:
     return (r["money"], r["ready_colored_dice_count"], r["patches"], -r["unpatched_dice_count"])
+
+
+# v0.36.0 MARKET_SHARE_FIRST tiebreakers (INV-MS-TIEBREAK-01): Market Share sits right after Secrets
+def _standard_key_ms(r: Dict) -> Tuple:
+    return (r["secrets"], r["market_share"], r["money"], r["ready_colored_dice_count"], r["patches"],
+            -r["unpatched_dice_count"])
+
+
+def _wipeout_key_ms(r: Dict) -> Tuple:
+    return (r["market_share"], r["money"], r["ready_colored_dice_count"], r["patches"], -r["unpatched_dice_count"])
+
+
+_KEY_FIELDS = {
+    _standard_key: ("secrets", "money", "ready_colored_dice_count", "patches", "unpatched_dice_count"),
+    _wipeout_key_six_phase: ("money", "ready_colored_dice_count", "patches", "unpatched_dice_count"),
+    _standard_key_ms: ("secrets", "market_share", "money", "ready_colored_dice_count", "patches", "unpatched_dice_count"),
+    _wipeout_key_ms: ("market_share", "money", "ready_colored_dice_count", "patches", "unpatched_dice_count"),
+}
+
+
+def _tiebreak_decided_by(win_pool: List[Dict], key) -> str:
+    """Name of the first key field separating the winner from the runner-up (``"shared"`` / ``"sole_survivor"``)."""
+    if len(win_pool) <= 1:
+        return "sole_survivor"
+    a, b = key(win_pool[0]), key(win_pool[1])
+    names = _KEY_FIELDS.get(key)
+    for i, (x, y) in enumerate(zip(a, b)):
+        if x != y:
+            return names[i] if names and i < len(names) else f"key_{i}"
+    return "shared"
+
+
+def _setup_record(engine: GameEngine) -> Dict[str, Any]:
+    s = engine.state
+    return {
+        "version_cards": [v.directive_code for v in s.version_deck],
+        "variant_cards": {getattr(c, "value", str(c)): v.code for c, v in s.variant_cards.items()},
+        "companies": [getattr(getattr(p.company, "code", None), "value", None) for p in s.players],
+        "white_hats": [getattr(getattr(p.white_hat, "code", None), "value", None) for p in s.players],
+        "first_player_index_start": getattr(s, "first_player_index_start", 0),
+    }
 
 
 def _wipeout_key_v033(r: Dict) -> Tuple:
@@ -116,8 +157,35 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
                 "ability_v1_status": p.ability_v1_status.value,
                 "ability_v2_status": p.ability_v2_status.value,
                 "ability_v3_status": p.ability_v3_status.value,
+                # v0.36.0 Market Share / Red telemetry (spec §4.8)
+                "market_share": p.market_share,
+                "market_share_min": p.market_share_min,
+                "market_share_lost_red": p.market_share_lost_red,
+                "market_share_red_overflow": p.market_share_red_overflow,
+                "market_share_lost_poach": p.market_share_lost_poach,
+                "market_share_gained_poach": p.market_share_gained_poach,
+                "market_share_regained": p.market_share_regained,
+                "market_share_gained_r2": p.market_share_gained_r2,
+                "research_spent_regain": p.research_spent_regain,
+                "r2_uses": p.r2_uses,
+                "comparison_money_gained": p.comparison_money_gained,
+                "comparison_money_paid": p.comparison_money_paid,
+                "comparison_shortfall_forgiven": p.comparison_shortfall_forgiven,
+                "purchases_by_color": dict(p.purchases_by_color),
+                "red_incoming_total": p.red_incoming_total,
+                "red_blocked_color_total": p.red_blocked_color_total,
+                "red_blocked_any_total": p.red_blocked_any_total,
+                "red_unblocked_total": p.red_unblocked_total,
+                "rejected_patent_filings": getattr(p, "rejected_patent_filings", 0),
+                "company_code": getattr(getattr(p.company, "code", None), "value", None),
+                "white_hat_code": getattr(getattr(p.white_hat, "code", None), "value", None),
+                "seat": p.player_id,
             }
         )
+
+    ms_first = getattr(cfg, "tiebreak_order", TiebreakOrder.V035) == TiebreakOrder.MARKET_SHARE_FIRST
+    std_key = _standard_key_ms if ms_first else _standard_key
+    wipe_key = _wipeout_key_ms if ms_first else _wipeout_key_six_phase
 
     if not all_patient_zero:
         # Standard Ending: Survivors ranked strictly by Corporate Secrets, with hierarchical tiebreakers:
@@ -125,26 +193,8 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
         survivors = [r for r in rankings if not r["is_patient_zero"]]
         eliminated = [r for r in rankings if r["is_patient_zero"]]
 
-        survivors.sort(
-            key=lambda r: (
-                r["secrets"],
-                r["money"],
-                r["ready_colored_dice_count"],
-                r["patches"],
-                -r["unpatched_dice_count"],
-            ),
-            reverse=True,
-        )
-        eliminated.sort(
-            key=lambda r: (
-                r["secrets"],
-                r["money"],
-                r["ready_colored_dice_count"],
-                r["patches"],
-                -r["unpatched_dice_count"],
-            ),
-            reverse=True,
-        )
+        survivors.sort(key=std_key, reverse=True)
+        eliminated.sort(key=std_key, reverse=True)
 
         sorted_rankings = survivors + eliminated
         for rank_idx, r in enumerate(sorted_rankings):
@@ -152,26 +202,18 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
 
         winner_id = sorted_rankings[0]["player_id"] if sorted_rankings else None
         final_rankings = sorted_rankings
-        win_pool, win_key = survivors, _standard_key
+        win_pool, win_key = survivors, std_key
     elif getattr(cfg, "is_six_phase", False):
         # v0.34 Total Wipeout (OQ-4): breach depth is ignored; rank ONLY by the standard hierarchical
         # tiebreakers: Money > Active Colored dice in Ready > Research > fewest Under Development.
         # breach_depth / net_score stay recorded for telemetry only. Python's stable sort keeps
         # player-index order for fully shared ranks.
-        rankings.sort(
-            key=lambda r: (
-                r["money"],
-                r["ready_colored_dice_count"],
-                r["patches"],
-                -r["unpatched_dice_count"],
-            ),
-            reverse=True,
-        )
+        rankings.sort(key=wipe_key, reverse=True)
         for rank_idx, r in enumerate(rankings):
             r["rank"] = rank_idx + 1
         winner_id = rankings[0]["player_id"] if rankings else None
         final_rankings = rankings
-        win_pool, win_key = rankings, _wipeout_key_six_phase
+        win_pool, win_key = rankings, wipe_key
     else:
         # Legacy v0.33 Total Wipeout: Ranked by Net Wipeout Score, Secrets, Money, Ready Colored Dice, Patches, fewest unpatched dice
         rankings.sort(
@@ -222,4 +264,13 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
         rankings=final_rankings,
         telemetry_history=engine.telemetry_history,
         total_buffer_overflows=engine.state.total_buffer_overflows,
+        end_triggers=list(engine.state.end_triggers),
+        market_collapse_pids=list(engine.state.market_collapse_pids),
+        market_collapse_round=engine.state.market_collapse_round,
+        version_comparisons=[r.as_dict() for r in engine.state.version_comparisons],
+        tiebreak_decided_by=_tiebreak_decided_by(win_pool, win_key),
+        setup=_setup_record(engine),
+        collapse_trigger_pids_were_secret_leaders=list(engine.state.market_collapse_secret_leaders),
+        market_collapse_context=dict(engine.state.market_collapse_context),
+        double_version_fill_events=engine.state.double_version_fill_events,
     )

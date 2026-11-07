@@ -95,7 +95,7 @@ def run_experiment(num_games: int = 1000, player_counts: List[int] = [4, 2]):
 
             for seed in range(num_games):
                 rng = random.Random(seed)
-                cfg = GameConfig(num_players=p_count)
+                cfg = GameConfig.legacy_v035(num_players=p_count)
                 raw_bots = [
                     AdaptiveBalancedBot(0),
                     SecOpsTurtleBot(1),

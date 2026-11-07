@@ -22,7 +22,7 @@ def test_mechanics():
         zero_attack_rounds = 0
         
         for g in range(games):
-            config = GameConfig(num_players=4)
+            config = GameConfig.legacy_v035(num_players=4)
             bots = [AdaptiveBalancedBot(f"Bot{i}") for i in range(4)]
             engine = GameEngine(config, bots, seed=g + 3000)
             

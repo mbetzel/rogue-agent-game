@@ -125,13 +125,14 @@ class TestWebAPI(unittest.TestCase):
     # 2. New Game Custom Player Counts (2P Resilience Buffer)
     # -------------------------------------------------------------------------
     def test_new_game_custom_player_counts(self) -> None:
-        """2P and 3P initialize with 8 Secrets & 0 Patches; 4P with 12 Secrets & 0 Patches (v0.30.0 INV-START-RES-01)."""
+        """v0.36.0 web default: 7 / 7 / 8 Secrets, Market Share 17 / 18 / 18, 0 research (plan §11)."""
         # 2 Players
         res2p = self._post("/api/game/new", {"num_players": 2, "seed": 100})
         state2p = res2p["state"]
         self.assertEqual(len(state2p["players"]), 2)
         p0_2p = state2p["players"][0]
-        self.assertEqual(p0_2p["secrets"], 8)
+        self.assertEqual(p0_2p["secrets"], 7)
+        self.assertEqual(p0_2p["market_share"], 17)
         self.assertEqual(p0_2p["patches"], 0)
 
         # 3 Players
@@ -139,7 +140,8 @@ class TestWebAPI(unittest.TestCase):
         state3p = res3p["state"]
         self.assertEqual(len(state3p["players"]), 3)
         p0_3p = state3p["players"][0]
-        self.assertEqual(p0_3p["secrets"], 8)
+        self.assertEqual(p0_3p["secrets"], 7)
+        self.assertEqual(p0_3p["market_share"], 18)
         self.assertEqual(p0_3p["patches"], 0)
 
         # 4 Players
@@ -147,8 +149,11 @@ class TestWebAPI(unittest.TestCase):
         state4p = res4p["state"]
         self.assertEqual(len(state4p["players"]), 4)
         p0_4p = state4p["players"][0]
-        self.assertEqual(p0_4p["secrets"], 8)  # v0.34 flat 8 Secrets at every player count
+        self.assertEqual(p0_4p["secrets"], 8)
+        self.assertEqual(p0_4p["market_share"], 18)
         self.assertEqual(p0_4p["patches"], 0)
+        self.assertEqual(state4p["red_mode"], "MARKET_SHARE")
+        self.assertEqual(state4p["patent_track_name"], "Public Relations Track")
 
     # -------------------------------------------------------------------------
     # 3. Get State Endpoint
@@ -343,6 +348,9 @@ class TestWebAPI(unittest.TestCase):
         self._post("/api/game/new", {"num_players": 4, "seed": 42})
         ctrl = RogueAgentRequestHandler.controller
         self._post("/api/game/action/roll", {"player_id": 0})
+        # v0.36 free-choice rule: every available Any shield must block, so give the human no shields at all
+        for d in ctrl.player_meta[0]["rolled_pool"]:
+            d.current_face = Face(name="+$1", money=1)
         self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
         orig_drop = ctrl.state.tower.drop
         ctrl.state.tower.drop = lambda cup, rng: {CubeColor.RED: 0, CubeColor.BLUE: 0, CubeColor.GREEN: 1, CubeColor.BLACK: 0}
@@ -1209,7 +1217,7 @@ class TestWebAPI(unittest.TestCase):
         self.assertEqual(conf_p0["secrets"], 7)
 
     def test_confirm_income_default_any_shield_allocation_when_omitted(self) -> None:
-        """Calling confirm_attacks without any_shield_allocations preserves the default 4-tier heuristic."""
+        """v0.36: confirm_attacks without any_shield_allocations asks the bot hook (free choice, shield must block)."""
         self._post("/api/game/new", {"num_players": 4, "seed": 42})
         self._post("/api/game/action/roll", {"player_id": 0})
 
@@ -1246,9 +1254,21 @@ class TestWebAPI(unittest.TestCase):
         self.assertTrue(res_conf["success"])
         conf_p0 = res_conf["state"]["players"][0]
 
-        # Default heuristic kept: Blue blocked (8 secrets), paid $1 for Red ($5 + $3 Phase 3 income - $1 = $7)
-        self.assertEqual(conf_p0["money"], 7)
+        # Bot hook blocks Blue (a Secret beats 1 of 18 Market Share); Red costs Market Share, not Money
+        self.assertEqual(conf_p0["money"], 8)  # $5 + $3 Phase 3 income
         self.assertEqual(conf_p0["secrets"], 8)
+        self.assertEqual(conf_p0["market_share"], 17)  # 18 - 1 unblocked Red
+
+    def test_regain_market_share_endpoint_routed(self) -> None:
+        """v0.36: /api/game/action/regain_market_share is routed; outside Phase 6 it is rejected (400)."""
+        self._post("/api/game/new", {"num_players": 2, "seed": 7})
+        url = f"{self.base_url}/api/game/action/regain_market_share"
+        body = json.dumps({"player_id": 0}).encode("utf-8")
+        req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"}, method="POST")
+        with self.assertRaises(urllib.error.HTTPError) as ctx:
+            urllib.request.urlopen(req)
+        self.assertEqual(ctx.exception.code, 400)
+        self.assertIn("Phase 6", json.loads(ctx.exception.read().decode("utf-8"))["error"])
 
 
 if __name__ == "__main__":

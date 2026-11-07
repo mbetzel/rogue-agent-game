@@ -60,7 +60,7 @@ class TestV05Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_config_starting_secrets_by_player_count(self) -> None:
         """GameConfig defines starting secrets: 2P -> 8, 3P -> 7, 4P -> 7 (v0.5 Baseline)."""
-        cfg_default = GameConfig(starting_secrets_by_player_count={2: 8, 3: 7, 4: 7})
+        cfg_default = GameConfig.legacy_v035(starting_secrets_by_player_count={2: 8, 3: 7, 4: 7})
         self.assertEqual(cfg_default.starting_secrets_by_player_count.get(2), 8)
         self.assertEqual(cfg_default.starting_secrets_by_player_count.get(3), 7)
         self.assertEqual(cfg_default.starting_secrets_by_player_count.get(4), 7)
@@ -72,11 +72,11 @@ class TestV05Rules(unittest.TestCase):
         self.assertEqual(cfg_default.get_starting_secrets(5), 7)  # Fallback
 
         # Test helper method using config.num_players
-        cfg_2p = GameConfig(num_players=2, starting_secrets_by_player_count={2: 8, 3: 7, 4: 7})
+        cfg_2p = GameConfig.legacy_v035(num_players=2, starting_secrets_by_player_count={2: 8, 3: 7, 4: 7})
         self.assertEqual(cfg_2p.get_starting_secrets(), 8)
-        cfg_3p = GameConfig(num_players=3, starting_secrets_by_player_count={2: 8, 3: 7, 4: 7})
+        cfg_3p = GameConfig.legacy_v035(num_players=3, starting_secrets_by_player_count={2: 8, 3: 7, 4: 7})
         self.assertEqual(cfg_3p.get_starting_secrets(), 7)
-        cfg_4p = GameConfig(num_players=4, starting_secrets_by_player_count={2: 8, 3: 7, 4: 7})
+        cfg_4p = GameConfig.legacy_v035(num_players=4, starting_secrets_by_player_count={2: 8, 3: 7, 4: 7})
         self.assertEqual(cfg_4p.get_starting_secrets(), 7)
 
     # -------------------------------------------------------------------------
@@ -84,7 +84,7 @@ class TestV05Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_config_starting_patches_by_player_count(self) -> None:
         """GameConfig defines starting patches: 2P -> 2 (Resilience Buffer), 3P -> 1, 4P -> 1 (v0.5 Baseline)."""
-        cfg_default = GameConfig(starting_patches_by_player_count={2: 2, 3: 1, 4: 1})
+        cfg_default = GameConfig.legacy_v035(starting_patches_by_player_count={2: 2, 3: 1, 4: 1})
         self.assertEqual(cfg_default.starting_patches_by_player_count.get(2), 2)
         self.assertEqual(cfg_default.starting_patches_by_player_count.get(3), 1)
         self.assertEqual(cfg_default.starting_patches_by_player_count.get(4), 1)
@@ -96,11 +96,11 @@ class TestV05Rules(unittest.TestCase):
         self.assertEqual(cfg_default.get_starting_patches(5), 1)  # Fallback
 
         # Test helper method using config.num_players
-        cfg_2p = GameConfig(num_players=2, starting_patches_by_player_count={2: 2, 3: 1, 4: 1})
+        cfg_2p = GameConfig.legacy_v035(num_players=2, starting_patches_by_player_count={2: 2, 3: 1, 4: 1})
         self.assertEqual(cfg_2p.get_starting_patches(), 2)
-        cfg_3p = GameConfig(num_players=3, starting_patches_by_player_count={2: 2, 3: 1, 4: 1})
+        cfg_3p = GameConfig.legacy_v035(num_players=3, starting_patches_by_player_count={2: 2, 3: 1, 4: 1})
         self.assertEqual(cfg_3p.get_starting_patches(), 1)
-        cfg_4p = GameConfig(num_players=4, starting_patches_by_player_count={2: 2, 3: 1, 4: 1})
+        cfg_4p = GameConfig.legacy_v035(num_players=4, starting_patches_by_player_count={2: 2, 3: 1, 4: 1})
         self.assertEqual(cfg_4p.get_starting_patches(), 1)
 
     # -------------------------------------------------------------------------
@@ -108,7 +108,7 @@ class TestV05Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_config_scalar_overrides(self) -> None:
         """Scalar overrides starting_secrets and starting_patches take precedence when specified."""
-        cfg = GameConfig(num_players=2, starting_secrets=6, starting_patches=0)
+        cfg = GameConfig.legacy_v035(num_players=2, starting_secrets=6, starting_patches=0)
         self.assertEqual(cfg.get_starting_secrets(), 6)
         self.assertEqual(cfg.get_starting_secrets(2), 6)
         self.assertEqual(cfg.get_starting_secrets(4), 6)
@@ -122,7 +122,7 @@ class TestV05Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_game_engine_init_2p_resilience(self) -> None:
         """GameEngine initializes 2P players with 8 Secrets and 2 Patch Tokens."""
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         bots = [BaseBot(0), BaseBot(1)]
         engine = GameEngine(config=config, bots=bots, seed=42)
 
@@ -139,7 +139,7 @@ class TestV05Rules(unittest.TestCase):
     def test_game_engine_init_3p_4p_baseline(self) -> None:
         """GameEngine initializes 3P and 4P players with 7 Secrets and 1 Patch Token (v0.5 Baseline)."""
         # 3 Players
-        config_3p = GameConfig(
+        config_3p = GameConfig.legacy_v035(
             num_players=3,
             starting_secrets_by_player_count={2: 8, 3: 7, 4: 7},
             starting_patches_by_player_count={2: 2, 3: 1, 4: 1},
@@ -151,7 +151,7 @@ class TestV05Rules(unittest.TestCase):
             self.assertEqual(player.patches, 1, "3P player must start with 1 Patch")
 
         # 4 Players
-        config_4p = GameConfig(
+        config_4p = GameConfig.legacy_v035(
             num_players=4,
             starting_secrets_by_player_count={2: 8, 3: 7, 4: 7},
             starting_patches_by_player_count={2: 2, 3: 1, 4: 1},
@@ -171,7 +171,7 @@ class TestV05Rules(unittest.TestCase):
             def take_phase3_actions(self, player_state, game_state, rng):
                 return Phase3ActionPlan(take_dirty_income=True)
 
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[DirtyBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
 
@@ -209,7 +209,7 @@ class TestV05Rules(unittest.TestCase):
             def take_phase3_actions(self, player_state, game_state, rng):
                 return Phase3ActionPlan(take_dirty_income=True)
 
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[DirtyBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
 
@@ -233,7 +233,7 @@ class TestV05Rules(unittest.TestCase):
     def test_phase3_skipped_when_game_over(self) -> None:
         """_execute_phase_3 returns immediately if state.game_over is True."""
         actions_called: List[int] = []
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         bots = [TrackingBot(0, actions_called), TrackingBot(1, actions_called)]
         engine = GameEngine(config=config, bots=bots, seed=42)
 
@@ -248,7 +248,7 @@ class TestV05Rules(unittest.TestCase):
     def test_phase3_skipped_when_all_patient_zero(self) -> None:
         """_execute_phase_3 returns immediately if all players are Patient Zero."""
         actions_called: List[int] = []
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         bots = [TrackingBot(0, actions_called), TrackingBot(1, actions_called)]
         engine = GameEngine(config=config, bots=bots, seed=42)
 
@@ -264,7 +264,7 @@ class TestV05Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_total_wipeout_step_2c_state(self) -> None:
         """When all players breach, Step 2C sets game_over=True, is_final_round=False, end_reason=TOTAL_WIPEOUT."""
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         bots = [BaseBot(0), BaseBot(1)]
         engine = GameEngine(config=config, bots=bots, seed=42)
 
@@ -294,7 +294,7 @@ class TestV05Rules(unittest.TestCase):
     def test_total_wipeout_skips_phase3_in_run_round(self) -> None:
         """run_round skips Phase 3 completely when total wipeout occurs during Phase 2."""
         actions_called: List[int] = []
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         bots = [TrackingBot(0, actions_called), TrackingBot(1, actions_called)]
         engine = GameEngine(config=config, bots=bots, seed=42)
 
@@ -326,7 +326,7 @@ class TestV05Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_shield_wear_order_partial_absorption(self) -> None:
         """When multiple dice are committed and partial damage is taken, ordered dice absorb and unneeded dice remain Ready."""
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
 
@@ -372,7 +372,7 @@ class TestV05Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_shield_wear_order_b3_air_gapped_backup(self) -> None:
         """Under v0.22.0 Zero Dice Wear, shields block cleanly without wear."""
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
 

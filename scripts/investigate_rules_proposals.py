@@ -291,7 +291,7 @@ def run_pod_simulation(
     try:
         for match_idx in range(num_matches):
             seed = base_seed + match_idx
-            config = GameConfig(num_players=num_players)
+            config = GameConfig.legacy_v035(num_players=num_players)
             engine = GameEngine(config, seed=seed)
 
             # Play match

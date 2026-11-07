@@ -35,7 +35,7 @@ class TestV310ThreatDefense(unittest.TestCase):
         """TEST-01: INV-FLEX-SHIELD-01: Commit Gray and Purple dice showing Block 1 Any.
         Dice are assigned ShieldColor.ANY and ProductionRole.ANY_SHIELD without being coerced to Blue/Red/Green.
         """
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         engine = GameEngine(cfg, seed=42)
         p0 = engine.state.players[0]
 
@@ -80,7 +80,7 @@ class TestV310ThreatDefense(unittest.TestCase):
         """TEST-02: INV-FLEX-SHIELD-01: Assign 3 shields with defense_capacity=2 (1 Blue, 1 Any, 1 Green).
         Priority BLUE > ANY > RED > GREEN truncates Green, keeping Blue and Any. Rejected die moved to Income.
         """
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         engine = GameEngine(cfg, seed=42)
         p0 = engine.state.players[0]
         p0.defense_capacity = 2
@@ -125,7 +125,7 @@ class TestV310ThreatDefense(unittest.TestCase):
         Stage 2: Any shield prioritizes remaining Blue threat (Tier 1).
         Result: 0 Blue unblocked, 1 Red unblocked.
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 5
         p0.secrets = 8
@@ -165,7 +165,7 @@ class TestV310ThreatDefense(unittest.TestCase):
         Stage 2 Any shield prioritizes unfunded Red threat (Tier 2: player.money < rem_red) over Green.
         Result: 1 Red unblocked (shortfall $1 -> flat 1 Secret leak), 1 Green unblocked (glitches die).
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 0
         p0.secrets = 8
@@ -202,7 +202,7 @@ class TestV310ThreatDefense(unittest.TestCase):
         Player has enough cash ($5 >= 2), so Any shield prioritizes Green (Tier 3) over funded Red.
         Result: 0 Green unblocked (no glitch), 2 Red unblocked (player pays $2 cash).
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 5
         p0.secrets = 8
@@ -238,7 +238,7 @@ class TestV310ThreatDefense(unittest.TestCase):
         Any shield absorbs 1 Red (Tier 4 fallback to save cash).
         Result: 1 Red unblocked -> player pays $1 cash ($4 remaining).
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 5
         p0.secrets = 8
@@ -268,7 +268,7 @@ class TestV310ThreatDefense(unittest.TestCase):
         """TEST-07: INV-FLEX-SHIELD-01: Zero wear verification.
         Gray and Purple dice assigned to ANY_SHIELD absorb threat cleanly and remain in in_production_dice.
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
 
         d_gray = create_gray_die(1)
@@ -302,7 +302,7 @@ class TestV310ThreatDefense(unittest.TestCase):
         """TEST-08: INV-RANSOM-FLAT-01: Unblocked Red = 2, Player Cash = $1.
         Shortfall = $1 ($1 unpaid). Player pays $1 cash ($0 left). Player loses exactly flat 1 Corporate Secret.
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 1
         p0.secrets = 8
@@ -324,7 +324,7 @@ class TestV310ThreatDefense(unittest.TestCase):
         """TEST-09: INV-RANSOM-FLAT-01: Unblocked Red = 4, Player Cash = $0.
         Shortfall = $4 ($4 unpaid). Player pays $0. Player loses exactly flat 1 Corporate Secret (NOT 4).
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 0
         p0.secrets = 8
@@ -346,7 +346,7 @@ class TestV310ThreatDefense(unittest.TestCase):
         """TEST-10: INV-RANSOM-FLAT-01: Unblocked Red = 3, Player Cash = $3.
         Shortfall = $0 (fully funded). Player pays $3 cash ($0 left). Exactly 0 Secrets lost.
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 3
         p0.secrets = 8
@@ -394,7 +394,7 @@ class TestV310ThreatDefense(unittest.TestCase):
         Player has 0 dice in in_production_dice, 3 dice in glitched_dice, 2 dice in ready_for_release_dice.
         Malware fizzles! Glitched count remains 3, Ready count remains 2. Zero dice destroyed. Zero unfulfilled destructions.
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.in_production_dice = []
         p0.contractor_dice = []
@@ -421,7 +421,7 @@ class TestV310ThreatDefense(unittest.TestCase):
         Player has 1 White contractor die and 1 Gray die in in_production_dice.
         Contractor is sacrificed and returned to supply. Gray die in production remains safe.
         """
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         contractor = create_white_die(99)
         p0.contractor_dice = [contractor]
@@ -483,7 +483,7 @@ class TestV310ThreatDefense(unittest.TestCase):
 
     def test_15_manual_any_shield_allocation_override(self) -> None:
         """TEST-15: Manual any_shield_allocations parameter overrides the 4-tier bot heuristic."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 5
         p0.secrets = 8

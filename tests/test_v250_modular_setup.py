@@ -119,7 +119,7 @@ class TestV250ModularSetup(unittest.TestCase):
     def test_mod_03_inv_setup_01_modular_split_setup(self) -> None:
         """TEST-MOD-03: INV-SETUP-01: All players receive non-null company and white_hat instances."""
         for num_players in (2, 3, 4):
-            engine = GameEngine(config=GameConfig(num_players=num_players), seed=42 + num_players)
+            engine = GameEngine(config=GameConfig.legacy_v035(num_players=num_players), seed=42 + num_players)
             for p in engine.state.players:
                 self.assertIsNotNone(p.company, f"Player {p.player_id} must have non-null company")
                 self.assertIsInstance(p.company, Company)
@@ -128,14 +128,14 @@ class TestV250ModularSetup(unittest.TestCase):
 
     def test_mod_04_inv_setup_02_unique_assignment_2p(self) -> None:
         """TEST-MOD-04: INV-SETUP-02: Player 1 and Player 2 receive distinct companies and distinct white hats."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=100)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=100)
         p0, p1 = engine.state.players[0], engine.state.players[1]
         self.assertNotEqual(p0.company.code, p1.company.code, "2P setup must assign distinct companies")
         self.assertNotEqual(p0.white_hat.code, p1.white_hat.code, "2P setup must assign distinct white hats")
 
     def test_mod_05_inv_setup_02_unique_assignment_4p(self) -> None:
         """TEST-MOD-05: INV-SETUP-02: All 4 players receive unique companies and unique white hats."""
-        engine = GameEngine(config=GameConfig(num_players=4), seed=200)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=4), seed=200)
         company_codes = [p.company.code for p in engine.state.players]
         white_hat_codes = [p.white_hat.code for p in engine.state.players]
         self.assertEqual(len(set(company_codes)), 4, "All 4 players must have unique companies")
@@ -187,7 +187,7 @@ class TestV250ModularSetup(unittest.TestCase):
 
     def test_mod_08_inv_setup_04_preset_2p_mapping(self) -> None:
         """TEST-MOD-08: INV-SETUP-04: 2P preset assigns Meridian+Operator to P0 and Omnidyne+Phreaker to P1."""
-        engine = GameEngine(config=GameConfig(num_players=2), use_introductory_presets=True)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), use_introductory_presets=True)
         p0, p1 = engine.state.players[0], engine.state.players[1]
         self.assertEqual(p0.company.code, CompanyCode.MERIDIAN)
         self.assertEqual(p0.white_hat.code, WhiteHatCode.OPERATOR)
@@ -196,7 +196,7 @@ class TestV250ModularSetup(unittest.TestCase):
 
     def test_mod_09_inv_setup_04_preset_3p_mapping(self) -> None:
         """TEST-MOD-09: INV-SETUP-04: 3P preset assigns Meridian+Operator, Omnidyne+Phreaker, Aegis+Acoustic."""
-        engine = GameEngine(config=GameConfig(num_players=3), use_introductory_presets=True)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=3), use_introductory_presets=True)
         self.assertEqual(engine.state.players[0].company.code, CompanyCode.MERIDIAN)
         self.assertEqual(engine.state.players[0].white_hat.code, WhiteHatCode.OPERATOR)
         self.assertEqual(engine.state.players[1].company.code, CompanyCode.OMNIDYNE)
@@ -206,7 +206,7 @@ class TestV250ModularSetup(unittest.TestCase):
 
     def test_mod_10_inv_setup_04_preset_4p_mapping(self) -> None:
         """TEST-MOD-10: INV-SETUP-04: 4P preset assigns Meridian+Operator, Omnidyne+Phreaker, Aegis+Acoustic, DTO+Spook."""
-        engine = GameEngine(config=GameConfig(num_players=4), use_introductory_presets=True)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=4), use_introductory_presets=True)
         self.assertEqual(engine.state.players[0].company.code, CompanyCode.MERIDIAN)
         self.assertEqual(engine.state.players[0].white_hat.code, WhiteHatCode.OPERATOR)
         self.assertEqual(engine.state.players[1].company.code, CompanyCode.OMNIDYNE)
@@ -285,7 +285,7 @@ class TestV250ModularSetup(unittest.TestCase):
 
     def test_mod_13_inv_purple_01_reserve_insulation(self) -> None:
         """TEST-MOD-13: INV-PURPLE-01: Purple dice initialize to 1 in reserve and cannot be drafted by opponents."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0, p1 = engine.state.players[0], engine.state.players[1]
         self.assertEqual(p0.personal_purple_reserve, 1)
         self.assertEqual(p1.personal_purple_reserve, 1)
@@ -316,7 +316,7 @@ class TestV250ModularSetup(unittest.TestCase):
         purple_die.production_role = ProductionRole.INCOME
         player.in_production_dice.append(purple_die)
 
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         engine.state.last_exited_cubes[CubeColor.RED] = 1
         engine.state.last_exited_cubes[CubeColor.BLUE] = 1
         engine.state.last_exited_cubes[CubeColor.GREEN] = 1
@@ -335,7 +335,7 @@ class TestV250ModularSetup(unittest.TestCase):
     def test_mod_15_phase1_meridian_override(self) -> None:
         """TEST-MOD-15: Meridian Override in Phase 1: Redundant Crew hires free White contractors."""
         engine = GameEngine(
-            config=GameConfig(num_players=2),
+            config=GameConfig.legacy_v035(num_players=2),
             companies=[get_company_by_code(CompanyCode.MERIDIAN), get_company_by_code(CompanyCode.AEGIS)],
             white_hats=[get_white_hat_by_code(WhiteHatCode.OPERATOR), get_white_hat_by_code(WhiteHatCode.ACOUSTIC)],
             seed=42,
@@ -357,7 +357,7 @@ class TestV250ModularSetup(unittest.TestCase):
     def test_mod_16_phase1_helix_override(self) -> None:
         """TEST-MOD-16: Helix Override in Phase 1: Brute-Force Bypass unlocks locked dice and sets 1 face."""
         engine = GameEngine(
-            config=GameConfig(num_players=2),
+            config=GameConfig.legacy_v035(num_players=2),
             companies=[get_company_by_code(CompanyCode.HELIX), get_company_by_code(CompanyCode.AEGIS)],
             white_hats=[get_white_hat_by_code(WhiteHatCode.PRODIGY), get_white_hat_by_code(WhiteHatCode.ACOUSTIC)],
             seed=42,
@@ -378,7 +378,7 @@ class TestV250ModularSetup(unittest.TestCase):
 
     def test_mod_17_phase1_operator_protocol(self) -> None:
         """TEST-MOD-17: Operator Protocol in Phase 1: Rolling Purple ★ rolls 1 free White Contractor die into pool."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         # Give P0 Aegis company + Operator White Hat
         p0 = engine.state.players[0]
         p0.company = get_company_by_code(CompanyCode.AEGIS)
@@ -404,7 +404,7 @@ class TestV250ModularSetup(unittest.TestCase):
 
     def test_mod_18_phase1_prodigy_protocol(self) -> None:
         """TEST-MOD-18: Prodigy Protocol in Phase 1: Rolling Purple ★ overrides 1 active die face to non-Star."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.company = get_company_by_code(CompanyCode.DTO)
         p0.white_hat = get_white_hat_by_code(WhiteHatCode.PRODIGY)
@@ -459,7 +459,7 @@ class TestV250ModularSetup(unittest.TestCase):
     def test_mod_20_phase2_aegis_override(self) -> None:
         """TEST-MOD-20: Aegis Override in Phase 2: Baffle Echo ignores 1 Attack Cube for player."""
         engine = GameEngine(
-            config=GameConfig(num_players=2),
+            config=GameConfig.legacy_v035(num_players=2),
             companies=[get_company_by_code(CompanyCode.AEGIS), get_company_by_code(CompanyCode.DTO)],
             white_hats=[get_white_hat_by_code(WhiteHatCode.OPERATOR), get_white_hat_by_code(WhiteHatCode.SPOOK)],
             seed=42,
@@ -489,7 +489,7 @@ class TestV250ModularSetup(unittest.TestCase):
     def test_mod_21_phase2_dto_override(self) -> None:
         """TEST-MOD-21: DTO Override in Phase 2: Slush Fund absorbs up to 2 Secret loss for $0."""
         engine = GameEngine(
-            config=GameConfig(num_players=2),
+            config=GameConfig.legacy_v035(num_players=2),
             companies=[get_company_by_code(CompanyCode.DTO), get_company_by_code(CompanyCode.AEGIS)],
             white_hats=[get_white_hat_by_code(WhiteHatCode.PHREAKER), get_white_hat_by_code(WhiteHatCode.ACOUSTIC)],
             seed=42,
@@ -523,7 +523,7 @@ class TestV250ModularSetup(unittest.TestCase):
     def test_mod_22_phase3_omnidyne_override(self) -> None:
         """TEST-MOD-22: Omnidyne Override in Phase 3: Magnetic Splice moves die from Glitched directly to Ready."""
         engine = GameEngine(
-            config=GameConfig(num_players=2),
+            config=GameConfig.legacy_v035(num_players=2),
             companies=[get_company_by_code(CompanyCode.OMNIDYNE), get_company_by_code(CompanyCode.DTO)],
             white_hats=[get_white_hat_by_code(WhiteHatCode.OPERATOR), get_white_hat_by_code(WhiteHatCode.SPOOK)],
             seed=42,
@@ -553,7 +553,7 @@ class TestV250ModularSetup(unittest.TestCase):
     def test_mod_23_phase3_prometheus_override(self) -> None:
         """TEST-MOD-23: Prometheus Override in Phase 3: Algorithmic Arbitrage applies $2 discount or gives cash."""
         engine = GameEngine(
-            config=GameConfig(num_players=2),
+            config=GameConfig.legacy_v035(num_players=2),
             companies=[get_company_by_code(CompanyCode.PROMETHEUS), get_company_by_code(CompanyCode.DTO)],
             white_hats=[get_white_hat_by_code(WhiteHatCode.OPERATOR), get_white_hat_by_code(WhiteHatCode.SPOOK)],
             seed=42,
@@ -580,7 +580,7 @@ class TestV250ModularSetup(unittest.TestCase):
 
     def test_mod_24_phase3_acoustic_protocol(self) -> None:
         """TEST-MOD-24: Acoustic Protocol in Phase 3: Resonance Sensor yields +$1 per unique exited cube color."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.company = get_company_by_code(CompanyCode.DTO)
         p0.white_hat = get_white_hat_by_code(WhiteHatCode.ACOUSTIC)
@@ -599,7 +599,7 @@ class TestV250ModularSetup(unittest.TestCase):
 
     def test_mod_25_phase3_phreaker_protocol(self) -> None:
         """TEST-MOD-25: Phreaker Protocol in Phase 3: Jumper Diagnostics rolls offline die for income."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.white_hat = get_white_hat_by_code(WhiteHatCode.PHREAKER)
 
@@ -618,7 +618,7 @@ class TestV250ModularSetup(unittest.TestCase):
 
     def test_mod_26_phase3_spook_protocol(self) -> None:
         """TEST-MOD-26: Spook Protocol in Phase 3: Burn Notice gives +$2 cash and optional die burn for +1 Secret."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.white_hat = get_white_hat_by_code(WhiteHatCode.SPOOK)
 
@@ -677,7 +677,7 @@ class TestV250ModularSetup(unittest.TestCase):
             white_hat=wh,
         )
 
-        config = GameConfig()
+        config = GameConfig.legacy_v035()
         serialized = GameStateSerializer.serialize_player(player, config, is_human=True, name="P0")
         self.assertIn("company", serialized)
         self.assertIn("white_hat", serialized)

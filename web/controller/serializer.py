@@ -48,6 +48,12 @@ def serialize_end_game_result(controller: GameController, res: EndGameResult) ->
         "singularity_reached": res.singularity_reached,
         "rankings": res.rankings,
         "total_buffer_overflows": getattr(res, "total_buffer_overflows", 0),
+        # v0.36.0
+        "end_triggers": list(getattr(res, "end_triggers", []) or []),
+        "market_collapse_pids": list(getattr(res, "market_collapse_pids", []) or []),
+        "market_collapse_round": getattr(res, "market_collapse_round", None),
+        "version_comparisons": list(getattr(res, "version_comparisons", []) or []),
+        "tiebreak_decided_by": getattr(res, "tiebreak_decided_by", None),
     }
 
 

@@ -8,7 +8,7 @@ import { doBuy } from "../api.js";
 
 const MARKET_BASE_SPECS = {
   red: {
-    title: "RED // FINSEC",
+    title: "RED // MARKETING",
     symbol: "◆",
     baseCost: 5,
     row1: "⚀ 1 Red Shield | ⚁-⚃ +$2",
@@ -157,7 +157,7 @@ export function renderMarket() {
         ${item.variant ? `
           <div class="variant-card-body">
             <div class="variant-card-code-row">
-              <span class="variant-code-pill">${item.variant.code}</span>
+              <span class="variant-code-pill">${item.variant.printed_code || item.variant.code}</span>
               <strong class="variant-card-name">${item.variant.name}</strong>
             </div>
             <div class="variant-card-desc">${item.variant.description}</div>

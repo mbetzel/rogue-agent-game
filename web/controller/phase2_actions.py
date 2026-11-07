@@ -37,6 +37,8 @@ def enter_game_over(controller: GameController) -> None:
     elif controller.state.end_reason == EndGameReason.SINGULARITY:
         controller.event_log.append("SINGULARITY REACHED! Project: SETEC completed v3.0 compilation. Game Over!")
     else:
+        if controller.state.end_reason == EndGameReason.MARKET_COLLAPSE:
+            controller.event_log.append("MARKET COLLAPSE ending: the Final Round is complete.")
         if end_res.is_shared_victory:
             winner = " & ".join(controller.player_meta[w]["name"] for w in end_res.winner_ids) + " (shared victory)"
         else:
@@ -70,6 +72,7 @@ def compile_drop(controller: GameController) -> Dict[str, Any]:
         "buffer_overflow": cr.buffer_overflow,
         "black_dropped": cr.black_dropped,
         "breached_player_ids": sorted(cr.breached_pids),
+        "version_comparisons": [r.as_dict() for r in cr.version_comparisons],  # v0.36.0
     }
     controller.last_income_result = {}
     controller.last_attack_result = None
@@ -84,6 +87,21 @@ def compile_drop(controller: GameController) -> Dict[str, Any]:
         controller.event_log.append(
             f"Cube Tower Drop results: {exited_dict.get('red', 0)} Red, {exited_dict.get('blue', 0)} Blue, "
             f"{exited_dict.get('green', 0)} Green, {exited_dict.get('black', 0)} Black."
+        )
+    names = {pid: m["name"] for pid, m in controller.player_meta.items()}
+    for rec in cr.version_comparisons:
+        if rec.all_tied:
+            controller.event_log.append(
+                f"{rec.version} complete: Market Share comparison is tied - no Money changes hands."
+            )
+            continue
+        top = ", ".join(f"{names[p]} +${rec.gains[p]}" for p in rec.top_pids)
+        bottom = ", ".join(
+            f"{names[p]} -${rec.paid[p]}" + (f" (${rec.forgiven[p]} forgiven)" if rec.forgiven.get(p) else "")
+            for p in rec.bottom_pids
+        )
+        controller.event_log.append(
+            f"{rec.version} complete: Market Share comparison (${rec.payout}). Highest: {top}. Lowest: {bottom}."
         )
     for pid in sorted(cr.breached_pids):
         controller.event_log.append(

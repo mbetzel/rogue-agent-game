@@ -190,6 +190,11 @@ class VariantCard:
     description: str
     star_face: Face
     cost: int = 5  # [v0.26.0 Baseline: Dynamic market cost per variant card (INV-VAR-COST-01)]
+    display_code: Optional[str] = None  # printed label when it differs from the internal code (e.g. R2_MKT -> "R2")
+
+    @property
+    def printed_code(self) -> str:
+        return self.display_code or self.code
 
 
 @dataclass(frozen=True)
@@ -239,8 +244,102 @@ class VersionCard:
 # Factory Functions & Appendix Definitions
 # =====================================================================
 
-def get_all_variant_cards() -> Dict[str, VariantCard]:
-    """Returns a dictionary of all 15 prototype Variant Cards (R1-R3, B1-B3, G1-G3, Y1-Y3, P1-P3)."""
+def get_marketing_red_variant_cards() -> List[VariantCard]:
+    """v0.36.0 Red (Marketing) ★ Variant Cards: Brand Protection, Ad Campaign, Customer Poaching.
+
+    Internal codes are distinct (``R2_MKT`` / ``R3_MKT``) so that no v0.35 star-code branch can fire a retired
+    effect; ``display_code`` keeps the printed R1/R2/R3 labels.
+    """
+    return [
+        VariantCard(
+            code="R1",
+            name="Brand Protection",
+            die_color=DieColor.RED,
+            description="Block 1 Red + gain +$2.",
+            cost=5,
+            star_face=Face(
+                name="R1: Brand Protection",
+                block_amount=1,
+                shield_color=ShieldColor.RED,
+                money=2,
+                is_star=True,
+                star_code="R1",
+            ),
+        ),
+        VariantCard(
+            code="R2_MKT",
+            name="Ad Campaign",
+            die_color=DieColor.RED,
+            description="No Income. If this die is In Production in Phase 3, you may pay $2 in Phase 6: Operations to gain +1 Market Share (does not count toward the Public Relations Track limit).",
+            cost=4,
+            star_face=Face(
+                name="R2: Ad Campaign",
+                block_amount=0,
+                money=0,  # Paid action latched in Phase 3, spent in Phase 6
+                is_star=True,
+                star_code="R2_MKT",
+            ),
+            display_code="R2",
+        ),
+        VariantCard(
+            code="R3_MKT",
+            name="Customer Poaching",
+            die_color=DieColor.RED,
+            description="In Phase 3 (Income), take 1 Market Share from the rival with the most Market Share (your own Market Share cannot exceed its maximum).",
+            cost=5,
+            star_face=Face(
+                name="R3: Customer Poaching",
+                block_amount=0,
+                money=0,  # Resolved after all players' Income (market_share.resolve_poaches)
+                is_star=True,
+                star_code="R3_MKT",
+            ),
+            display_code="R3",
+        ),
+    ]
+
+
+_MARKETING_RED_CODE_MAP = {"R1": "R1", "R2": "R2_MKT", "R3": "R3_MKT"}
+
+
+def resolve_variant_cards(
+    variant_cards: Dict[DieColor, VariantCard], red_variant_set: Any = "V035"
+) -> Dict[DieColor, VariantCard]:
+    """Maps a drawn Red card onto the configured Red ★ set (INV-MS-RNG-02).
+
+    Under ``MARKETING`` a V035 Red card is replaced by code (R1 -> R1 renamed, R2 -> R2_MKT, R3 -> R3_MKT), so
+    setup draws made with ``get_random_setup(rng)`` stay identical (seed-paired) across ``red_variant_set`` cells.
+    Under ``V035`` the mapping is returned unchanged (same object).
+    """
+    rv = getattr(red_variant_set, "value", red_variant_set)
+    if rv != "MARKETING":
+        return variant_cards
+    red = variant_cards.get(DieColor.RED)
+    if red is None:
+        return variant_cards
+    mkt = {c.code: c for c in get_marketing_red_variant_cards()}
+    target = _MARKETING_RED_CODE_MAP.get(red.code, red.code)
+    if target not in mkt:
+        return variant_cards
+    out = dict(variant_cards)
+    out[DieColor.RED] = mkt[target]
+    return out
+
+
+def get_all_variant_cards(red_variant_set: Any = "V035") -> Dict[str, VariantCard]:
+    """Returns a dictionary of all 15 prototype Variant Cards (R1-R3, B1-B3, G1-G3, Y1-Y3, P1-P3).
+
+    ``red_variant_set="MARKETING"`` replaces the Red trio with R1 / R2_MKT / R3_MKT (same list order).
+    """
+    if getattr(red_variant_set, "value", red_variant_set) == "MARKETING":
+        base = get_all_variant_cards("V035")
+        out: Dict[str, VariantCard] = {}
+        for c in get_marketing_red_variant_cards():
+            out[c.code] = c
+        for code, c in base.items():
+            if c.die_color != DieColor.RED:
+                out[code] = c
+        return out
     cards = [
         # Red ★ Variants
         VariantCard(
@@ -839,7 +938,7 @@ def get_all_archetype_cards() -> List[ArchetypeCard]:
             name="The Spook",
             timing_window="Phase 4: Attack Resolution",
             ability_name="Slush Fund",
-            description="The Spook accesses emergency black budget reserves: Absorb up to 2 Corporate Secret loss (from Blue Spyware or unpaid Red Ransom) for free without paying cash. (Any additional Secret loss may be absorbed by paying $1 per Secret as normal).",
+            description="The Spook accesses emergency black budget reserves: Absorb up to 2 Corporate Secret loss (from Blue Spyware) for free without paying cash. (Any additional Secret loss may be absorbed by paying $1 per Secret as normal).",
         ),
         ArchetypeCard(
             code=ArchetypeCode.CIPHER,
@@ -938,7 +1037,7 @@ COMPANIES: Dict[CompanyCode, Company] = {
         sector="Federal Agency",
         override_name="Slush Fund",
         timing_window="Phase 4: Attack Resolution",
-        description="Absorb up to 2 Corporate Secret loss (from Blue Spyware or unpaid Red Ransom) for free without paying cash. (Any additional Secret loss may be absorbed by paying $1 per Secret as normal).",
+        description="Absorb up to 2 Corporate Secret loss (from Blue Spyware) for free without paying cash. (Any additional Secret loss may be absorbed by paying $1 per Secret as normal).",
         flavor="Classified black budget allocations absorb compliance failures without public oversight.",
         starting_defense_capacity=2,
         starting_triage_bandwidth=2,

@@ -220,7 +220,7 @@ export function renderCompiler() {
                   <div class="exit-pocket red-pocket">
                     <div class="pocket-color-tag" title="Phase 4: Attack Resolution">PHASE 4: RED</div>
                     <div class="pocket-val">${(res.exited_cubes || {}).red || 0}</div>
-                    <div class="pocket-sub">Ransomware</div>
+                    <div class="pocket-sub">${state.is_market_share ? 'Market Manipulation' : 'Ransomware'}</div>
                   </div>
                   <div class="exit-pocket blue-pocket">
                     <div class="pocket-color-tag" title="Phase 4: Attack Resolution">PHASE 4: BLUE</div>
@@ -236,7 +236,7 @@ export function renderCompiler() {
               }
               return `
                 <div class="exit-pocket black-pocket"><div class="pocket-color-tag" title="Phase 2: Compiler Drop &amp; Corruption">PHASE 2: BLACK</div><div class="pocket-val">0</div><div class="pocket-sub">Corruption</div></div>
-                <div class="exit-pocket red-pocket"><div class="pocket-color-tag" title="Phase 4: Attack Resolution">PHASE 4: RED</div><div class="pocket-val">0</div><div class="pocket-sub">Ransomware</div></div>
+                <div class="exit-pocket red-pocket"><div class="pocket-color-tag" title="Phase 4: Attack Resolution">PHASE 4: RED</div><div class="pocket-val">0</div><div class="pocket-sub">${state.is_market_share ? 'Market Manipulation' : 'Ransomware'}</div></div>
                 <div class="exit-pocket blue-pocket"><div class="pocket-color-tag" title="Phase 4: Attack Resolution">PHASE 4: BLUE</div><div class="pocket-val">0</div><div class="pocket-sub">Spyware</div></div>
                 <div class="exit-pocket green-pocket"><div class="pocket-color-tag" title="Phase 4: Attack Resolution">PHASE 4: GREEN</div><div class="pocket-val">0</div><div class="pocket-sub">Malware</div></div>
               `;
@@ -250,13 +250,19 @@ export function renderCompiler() {
             <span class="threat-pill black">■ BLACK // CORRUPTION</span>
             <div class="threat-row-text">
               <strong>Phase 2: Compiler Drop &amp; Corruption:</strong> Advance Corruption Track 1 space per exited Black. Fills at capacity: queue Version upgrade for next round. <strong>v3.0 fill = SINGULARITY!</strong>
+              ${state.is_market_share ? marketShareComparisonNote() : ""}
             </div>
           </div>
           <div class="cube-threat-row red-row">
+            ${state.is_market_share ? `
+            <span class="threat-pill red">◆ RED // MARKET MANIPULATION</span>
+            <div class="threat-row-text">
+              <strong>Blocks: Red / Any Shield.</strong> Lose 1 Market Share per unblocked Red (never below 0). <em>Market Collapse: any surviving player at 0 Market Share after Phase 4 makes this the Final Round.</em>
+            </div>` : `
             <span class="threat-pill red">◆ RED // RANSOMWARE</span>
             <div class="threat-row-text">
               <strong>Blocks: Red / Any Shield.</strong> Lose $1 per unblocked Red. <em>Flat Leak Penalty: if any unpaid ransom remains (shortfall &gt; $0), lose a flat 1 Corporate Secret!</em>
-            </div>
+            </div>`}
           </div>
           <div class="cube-threat-row blue-row">
             <span class="threat-pill blue">● BLUE // SPYWARE</span>
@@ -342,7 +348,7 @@ export function renderCompiler() {
           <div class="seq-card">
             <div class="seq-card-header">PHASE 6: OPERATIONS (Clockwise)</div>
             <div class="seq-card-body">
-              Buy Dice (max 2, straight to Ready for Release), Upgrade Tracks (🔬), File Patents (🔬), paid ★ actions; then pass the First Player Marker.
+              Buy Dice (max 2, straight to Ready for Release), Upgrade Tracks (🔬), ${state.is_share_regain ? 'regain Market Share on the Public Relations Track (🔬)' : 'File Patents (🔬)'}, paid ★ actions; then pass the First Player Marker.
             </div>
           </div>
 
@@ -363,4 +369,23 @@ export function renderCompiler() {
 
     </div>
   `;
+}
+
+// v0.36.0: Market Share comparison when a Version's final space is covered (bank payout; v2.0 only by default)
+function marketShareComparisonNote() {
+  const pay = Object.entries(state.version_share_payout || {}).map(([v, n]) => `${v} fill: $${n}`).join(", ");
+  const last = (state.version_comparisons || []).slice(-1)[0];
+  const nameOf = (pid) => ((state.players || [])[pid] || {}).name || `Player ${pid + 1}`;
+  let res = "";
+  if (last) {
+    if (last.all_tied) {
+      res = `<br><em>${last.version} comparison: tied, no Money moved.</em>`;
+    } else {
+      const top = last.top_pids.map((p) => `${nameOf(p)} +$${last.gains[p]}`).join(", ");
+      const bottom = last.bottom_pids.map((p) => `${nameOf(p)} -$${last.paid[p]}${last.forgiven[p] ? ` ($${last.forgiven[p]} forgiven)` : ""}`).join(", ");
+      res = `<br><em>${last.version} comparison: highest ${top}; lowest ${bottom}.</em>`;
+    }
+  }
+  const rule = pay ? `<br><strong>Market Share comparison</strong> (${pay}): highest Market Share gains the payout from the bank; lowest pays what it can.` : "";
+  return rule + res;
 }

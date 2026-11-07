@@ -64,7 +64,7 @@ class TestV150CorruptionTracks(unittest.TestCase):
 
     def test_step_by_step_black_cube_resolution_and_carryover(self) -> None:
         """2 Black Cubes dropping at 3/4 on v1.0 trigger v1.0 space 4 upgrade and v2.0 space 1."""
-        config = GameConfig(num_players=2, starting_money=10, starting_patches=3)
+        config = GameConfig.legacy_v035(num_players=2, starting_money=10, starting_patches=3)
         bots = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         engine = GameEngine(config=config, bots=bots, seed=42)
 
@@ -110,7 +110,7 @@ class TestV150CorruptionTracks(unittest.TestCase):
 
     def test_corruption_space_penalties(self) -> None:
         """Test lose_money, lose_patches, lose_secrets, demote_dice, and return_colored_dice."""
-        config = GameConfig(num_players=2, starting_money=5, starting_patches=2)
+        config = GameConfig.legacy_v035(num_players=2, starting_money=5, starting_patches=2)
         bots = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         engine = GameEngine(config=config, bots=bots, seed=42)
 
@@ -174,7 +174,7 @@ class TestV150CorruptionTracks(unittest.TestCase):
 
     def test_phase1_lock_directives_lifecycle(self) -> None:
         """Lock directives queued in Phase 2 apply in next round's Phase 1, then clear."""
-        config = GameConfig(num_players=2)
+        config = GameConfig.legacy_v035(num_players=2)
         bots = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         engine = GameEngine(config=config, bots=bots, seed=42)
 
@@ -195,7 +195,7 @@ class TestV150CorruptionTracks(unittest.TestCase):
     def test_mode_a_vs_mode_b_cube_spawn_timing(self) -> None:
         """Mode A adds cubes to staging cup; Mode B immediately adds attack cubes to tray."""
         # --- Mode A (Default: corruption_cubes_resolve_immediately = False) ---
-        cfg_a = GameConfig(num_players=2, corruption_cubes_resolve_immediately=False)
+        cfg_a = GameConfig.legacy_v035(num_players=2, corruption_cubes_resolve_immediately=False)
         bots_a = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         engine_a = GameEngine(config=cfg_a, bots=bots_a, seed=42)
 
@@ -212,7 +212,7 @@ class TestV150CorruptionTracks(unittest.TestCase):
         self.assertEqual(engine_a.state.staging_cup[CubeColor.GREEN], 0)
 
         # --- Mode B (corruption_cubes_resolve_immediately = True) ---
-        cfg_b = GameConfig(num_players=2, corruption_cubes_resolve_immediately=True)
+        cfg_b = GameConfig.legacy_v035(num_players=2, corruption_cubes_resolve_immediately=True)
         bots_b = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         engine_b = GameEngine(config=cfg_b, bots=bots_b, seed=42)
 
@@ -227,7 +227,7 @@ class TestV150CorruptionTracks(unittest.TestCase):
 
     def test_v3_singularity_space_6_resolution(self) -> None:
         """Filling Space 6 of v3.0 triggers Singularity and final round."""
-        config = GameConfig(num_players=2)
+        config = GameConfig.legacy_v035(num_players=2)
         bots = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         engine = GameEngine(config=config, bots=bots, seed=42)
 

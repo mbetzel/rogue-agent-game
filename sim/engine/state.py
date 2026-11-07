@@ -220,6 +220,30 @@ class PlayerState:
         }
         self.slush_fund_used_game = False
         self.triage_l3_upgrade_color: Optional[str] = None
+        # v0.36.0 Market Share (None under RedMode.RANSOM; initialised by GameEngine under MARKET_SHARE)
+        self.market_share: Optional[int] = None
+        self.market_share_max: Optional[int] = None
+        self.market_share_min: Optional[int] = None
+        self.market_share_start: Optional[int] = None
+        self.market_share_lost_red = 0  # actual decrease from Red (after floor clamp)
+        self.market_share_red_overflow = 0  # unblocked Red beyond the floor (telemetry only)
+        self.market_share_lost_poach = 0  # Customer Poaching taken from this player
+        self.market_share_gained_poach = 0
+        self.market_share_regained = 0  # +1 steps bought with research (Public Relations Track)
+        self.market_share_gained_r2 = 0  # Ad Campaign
+        self.research_spent_regain = 0
+        self.regain_this_turn = 0  # reset at the start of each Operations Turn
+        self.r2_actions_available = 0  # earned in Phase 3, spent/cleared in Phase 6
+        self.r2_uses = 0
+        self.comparison_money_gained = 0
+        self.comparison_money_paid = 0
+        self.comparison_shortfall_forgiven = 0
+        # Red ledgers (both modes; telemetry only)
+        self.red_incoming_total = 0  # effective Red attack after Baffle Echo / Aegis
+        self.red_blocked_color_total = 0
+        self.red_blocked_any_total = 0
+        self.red_unblocked_total = 0
+        self.purchases_by_color: Dict[str, int] = {}  # Central Market purchases incl. Algorithmic Arbitrage
         self.player_id = player_id
         self.bot = bot
         self.money = money
@@ -311,6 +335,42 @@ class PlayerState:
         self.personal_purple_reserve = personal_purple_reserve
         self.purple_star_available = purple_star_available
         self.purple_star_count = purple_star_count
+
+    # --- v0.36.0 Market Share (INV-MS-LEDGER-01) ---
+    def init_market_share(self, start: int) -> None:
+        self.market_share = self.market_share_max = self.market_share_min = self.market_share_start = int(start)
+
+    def change_market_share(self, delta: int, source: str) -> int:
+        """Applies a Market Share change clamped to [0, max]; updates ledgers; returns the actual change.
+
+        ``source`` is one of ``"red"``, ``"poach_lost"``, ``"poach_gained"``, ``"regain"``, ``"r2"``.
+        """
+        if self.market_share is None:
+            return 0
+        before = self.market_share
+        after = max(0, min(self.market_share_max, before + int(delta)))
+        actual = after - before
+        self.market_share = after
+        if source == "red":
+            self.market_share_lost_red += -actual
+            self.market_share_red_overflow += max(0, -int(delta)) - (-actual)
+        elif source == "poach_lost":
+            self.market_share_lost_poach += -actual
+        elif source == "poach_gained":
+            self.market_share_gained_poach += actual
+        elif source == "regain":
+            self.market_share_regained += actual
+        elif source == "r2":
+            self.market_share_gained_r2 += actual
+        else:
+            raise ValueError(f"unknown Market Share source {source!r}")
+        if self.market_share_min is None or after < self.market_share_min:
+            self.market_share_min = after
+        return actual
+
+    def record_purchase(self, color: Any) -> None:
+        key = getattr(color, "value", color)
+        self.purchases_by_color[key] = self.purchases_by_color.get(key, 0) + 1
 
     # --- Backward Compatibility Properties & Hardware Methods ---
     @property
@@ -438,7 +498,14 @@ class PlayerState:
         return 1
 
     def file_patent(self) -> bool:
-        """Files one Cryptographic Patent (INV-PATENT-CONV-01 / INV-RT-PATENT-RATE-01)."""
+        """Files one Cryptographic Patent (INV-PATENT-CONV-01 / INV-RT-PATENT-RATE-01).
+
+        Under the Public Relations Track (``patents_mode=SHARE_REGAIN``) Patent Filing does not exist:
+        returns False without changing state (INV-MS-NO-PATENT-01).
+        """
+        cfg = getattr(self, "config", None)
+        if cfg is not None and getattr(cfg, "is_share_regain", False):
+            return False
         if not self.is_v035_tracks:
             cost = self._v034_get_patent_cost()
             ok = self._v034_file_patent()
@@ -830,6 +897,52 @@ class RoundTelemetry:
     track_upgrades_by_player: Dict[int, List[Tuple[str, int]]] = field(default_factory=dict)
     breakthroughs_by_player: Dict[int, List[Dict[str, Any]]] = field(default_factory=dict)
     rejected_purple_purchases_by_player: Dict[int, int] = field(default_factory=dict)
+    # --- v0.36.0 Market Share telemetry (empty / None under RANSOM except red_by_player, purchases_by_player) ---
+    market_share_after_p4: Dict[int, Optional[int]] = field(default_factory=dict)
+    market_share_end_of_round: Dict[int, Optional[int]] = field(default_factory=dict)
+    red_by_player: Dict[int, Dict[str, int]] = field(default_factory=dict)
+    regain_by_player: Dict[int, Dict[str, int]] = field(default_factory=dict)
+    r2_by_player: Dict[int, int] = field(default_factory=dict)
+    r3_events: List[Dict[str, Any]] = field(default_factory=list)
+    version_comparisons: List[Dict[str, Any]] = field(default_factory=list)
+    purchases_by_player: Dict[int, Dict[str, int]] = field(default_factory=dict)
+    end_triggers_this_round: List[str] = field(default_factory=list)
+
+
+@dataclass
+class VersionComparisonRecord:
+    """v0.36.0 Market Share comparison when a non-last Version's final space is covered (Phase 2)."""
+
+    version: str  # completed version: "v1.0" | "v2.0"
+    round_number: int
+    payout: int
+    during_spillover: bool
+    eligible_pids: List[int] = field(default_factory=list)
+    shares: Dict[int, int] = field(default_factory=dict)
+    money_before: Dict[int, int] = field(default_factory=dict)
+    top_pids: List[int] = field(default_factory=list)
+    bottom_pids: List[int] = field(default_factory=list)
+    gains: Dict[int, int] = field(default_factory=dict)  # bank -> player
+    paid: Dict[int, int] = field(default_factory=dict)  # player -> bank
+    forgiven: Dict[int, int] = field(default_factory=dict)
+    all_tied: bool = False
+
+    def as_dict(self) -> Dict[str, Any]:
+        return {
+            "version": self.version,
+            "round_number": self.round_number,
+            "payout": self.payout,
+            "during_spillover": self.during_spillover,
+            "eligible_pids": list(self.eligible_pids),
+            "shares": dict(self.shares),
+            "money_before": dict(self.money_before),
+            "top_pids": list(self.top_pids),
+            "bottom_pids": list(self.bottom_pids),
+            "gains": dict(self.gains),
+            "paid": dict(self.paid),
+            "forgiven": dict(self.forgiven),
+            "all_tied": self.all_tied,
+        }
 
 
 # ---------------------------------------------------------------------------
@@ -850,6 +963,7 @@ class CompileResult:
     buffer_overflow: bool = False
     black_dropped: int = 0
     breached_pids: Set[int] = field(default_factory=set)  # players who became Patient Zero during Phase 2
+    version_comparisons: List[VersionComparisonRecord] = field(default_factory=list)  # v0.36.0
 
 
 @dataclass
@@ -905,6 +1019,16 @@ class EndGameResult:
     # path winner_id is None when the victory is shared; the legacy path keeps v0.33 winner_id.
     winner_ids: List[int] = field(default_factory=list)
     is_shared_victory: bool = False
+    # --- v0.36.0 telemetry (INV-MS-*) ---
+    end_triggers: List[str] = field(default_factory=list)
+    market_collapse_pids: List[int] = field(default_factory=list)
+    market_collapse_round: Optional[int] = None
+    version_comparisons: List[Dict[str, Any]] = field(default_factory=list)
+    tiebreak_decided_by: Optional[str] = None
+    setup: Dict[str, Any] = field(default_factory=dict)
+    collapse_trigger_pids_were_secret_leaders: List[bool] = field(default_factory=list)
+    market_collapse_context: Dict[str, Any] = field(default_factory=dict)
+    double_version_fill_events: int = 0
 
 
 @dataclass
@@ -966,6 +1090,22 @@ class GameState:
     pending_next_phase_locks: Set[str] = field(default_factory=set)
     active_phase1_locks: Set[str] = field(default_factory=set)
     rng: random.Random = field(default_factory=random.Random)
+    # --- v0.36.0 Market Share state ---
+    version_comparisons: List[VersionComparisonRecord] = field(default_factory=list)
+    version_comparisons_done: Set[str] = field(default_factory=set)  # once-guard
+    market_collapse_triggered: bool = False
+    market_collapse_round: Optional[int] = None
+    market_collapse_pids: List[int] = field(default_factory=list)
+    market_collapse_secret_leaders: List[bool] = field(default_factory=list)  # kamikaze watch
+    market_collapse_context: Dict[str, Any] = field(default_factory=dict)  # survivors / strict leader at Collapse
+    end_triggers: List[str] = field(default_factory=list)  # ordered, e.g. ["patient_zero", "market_collapse"]
+    r3_events: List[Dict[str, Any]] = field(default_factory=list)
+    double_version_fill_events: int = 0
+    first_player_index_start: int = 0
+    # Market Share of every player at the start of this round's Phase 4 (bot projections; INV-MS-RNG-01 safe)
+    phase4_market_share_start: Dict[int, Optional[int]] = field(default_factory=dict)
+    phase4_snapshot_round: Optional[int] = None
+    _pending_poaches: List[Tuple[int, int]] = field(default_factory=list)  # (player_id, die_id), Phase 3
 
     def __post_init__(self) -> None:
         self.tower = CubeTower(self.config)

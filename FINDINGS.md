@@ -1813,7 +1813,120 @@ Sources: [docs/findings/v350_research_income_sweep.md](docs/findings/v350_resear
 
 **Status: OFFICIALLY APPROVED (`v0.35.0` Baseline).**
 
-## 31. Engine Fix: Multi-Version Black Cube Spillover Cascade (six-phase Phase 2, no rules change)
+
+## 31. Phase 44 Exploration: Red Rebalance Sweep (not adopted)
+
+Question: at $1 per cube, blocking Red is worth less than any income face. Proposed fix: $2 per unblocked Red cube, a `Block 2 Red` 1-pip face, and one Red `+$2` face changed to `+$1 / +1 🔬`.
+Script: `scripts/run_v360_red_rebalance_sweep.py`, 1,500 games per pod, same seeds across configs. Data: `sim_results/v360_red_rebalance_sweep.json`.
+
+| Pod | Config | Rounds | Patient Zero games | Singularity | Red dice bought / seat | Red block rate | Ransom paid / seat | Leaks / seat | Final Secrets |
+|---|---|---|---|---|---|---|---|---|---|
+| 2P | v0.35 | 8.89 | 60.4% | 41.8% | 0.17 | 10.4% | $8.27 | 2.72 | 2.21 |
+| 2P | $2 ransom | 8.54 | 72.1% | 30.1% | 0.11 | 13.2% | $10.50 | 3.71 | 1.68 |
+| 2P | Red die only | 8.90 | 60.4% | 41.7% | 0.15 | 10.7% | $8.20 | 2.73 | 2.25 |
+| 2P | Package | 8.54 | 71.9% | 30.0% | 0.11 | 13.4% | $10.44 | 3.71 | 1.68 |
+| 3P | v0.35 | 8.69 | 69.5% | 33.8% | 0.16 | 10.4% | $8.09 | 2.62 | 2.57 |
+| 3P | Package | 8.29 | 77.8% | 24.8% | 0.12 | 13.2% | $10.19 | 3.57 | 2.10 |
+| 4P | v0.35 | 8.60 | 71.8% | 31.6% | 0.16 | 10.6% | $8.00 | 2.56 | 2.94 |
+| 4P | Package | 8.18 | 80.2% | 22.0% | 0.11 | 13.7% | $10.09 | 3.49 | 2.52 |
+
+Takeaways:
+1. **The premise was wrong in the sim.** Players end the game at ~$0.5 cash, and the Unpaid Ransom Leak already happens in ~31% of attack resolutions at $1. Red is not mainly a cash tax; it is mostly a source of 1-Secret leaks for broke players.
+2. **$2 per Red cube** mostly adds leaks (+~1 per seat, leak rate 31% → 44%). That costs ~0.5 Secrets per seat, raises Patient Zero games by 8–12 points, shortens games by ~0.4 rounds, cuts Singularity by ~10 points, and lowers market purchases (Blue 0.46 → 0.31, Yellow 0.55 → 0.32 per seat).
+3. **The Red die change does nothing measurable.** Bots buy ~0.15 Red dice per seat and the Block 2 face shows up 1 time in 6, so Red color shields block only ~6% of blocked Red cubes. Testing it properly needs a bot purchase policy that values Red dice.
+4. Company spread barely moves (DTO unchanged).
+
+Caveats: bot heuristics were not retuned for $2 ransom (only the Phase 4 `Block 1 Any` Tier 2 check was scaled); results reflect current bot buying.
+
+**Status: exploration only; no `RULES.md` change.**
+
+
+## 32. Phase 45 Exploration: Market Share & Market Collapse Probe (pre-SDLC)
+
+Question: can Red become corporate competition (Market Share) instead of a cash attack, with a third end trigger (Market Collapse) balanced against Patient Zero and Singularity?
+Plan: [docs/explorations/2026_11_market_share_red_rework_plan.md](docs/explorations/2026_11_market_share_red_rework_plan.md).
+Probe: `scripts/explore_v360_market_collapse_probe.py` (hooks only, not rules code). Data: `sim_results/v360_market_collapse_probe_starts.txt`, `sim_results/v360_market_collapse_probe_secrets.txt`.
+Setup: Red ransom off, no Patent filings, Market Share −1 per unblocked Red cube. At 0, Market Share triggers the Final Round. Bots regain at 2 🔬 per +1, max +1 per round. Money payouts and new Red ★ variants are not modeled.
+
+| Pod | Starting Secrets | Market Share start | Patient Zero / Singularity / Market Collapse | Rounds | Games |
+|---|---|---|---|---|---|
+| 2P | 8 | 19 | 37 / 33 / 30% | 8.56 | 800 |
+| 3P | 10 | 20 | 35 / 32 / 33% | 8.78 | 400 |
+| 4P | 11 | 20 | 36 / 33 / 31% | 8.79 | 400 |
+
+Takeaways:
+1. **Red is today's second-biggest Secret drain.** It costs ~2.3 Secrets per seat via the Unpaid Ransom Leak. Red off: Patient Zero games 59 / 69 / 72% → 28 / 33 / 38%. Removing Patents as well brings pacing back near v0.35 (Patient Zero games 40 / 57 / 58%, rounds 9.02 / 8.65 / 8.41).
+2. **Collapse mostly replaces Singularity endings** (both land late). With 8 starting Secrets, Patient Zero stays at 44–57% at 3–4P whatever the Market Share start, because it triggers when *any* player breaches. More Secrets at 3–4P (10 / 11) restore the three-way balance.
+3. **Elimination at 0 would be unsafe.** Players face identical Red cubes, so with no deliberate Red play they hit 0 together. That would be 25–66% Total Wipeouts, so Market Collapse does not eliminate.
+4. **Comparisons tie a lot without deliberate play.** The cumulative best–worst gap is 1–2 cubes and rankings tie 38–67%. At the Phase 2 Version change, the median player has `$2`, so the bank funds the top payout.
+5. **Setup tilt is mild at 2P.** By v3.0 card, company seat and White Hat, endings move within about ±5 points.
+
+Caveats: v0.35 bots ignore Red, and the regain rule is fixed. The results are first-order until Red-aware bots exist.
+
+**Status: design locked by User 2026-11-06 (plan Sections 7–8). Next: SDLC (spec, Red-aware bots, sweep). No `RULES.md` change yet.**
+
+
+## 33. Phase 45 v0.36 Sweep & Balance Iteration 1 (not approved yet)
+
+Sources: product-owner [docs/findings/v360_market_share_telemetry_report.md](docs/findings/v360_market_share_telemetry_report.md) (51,000 games, seed 42, data `sim_results/v360_market_share_sweep.json`) and game-designer [docs/findings/v360_balance_assessment.md](docs/findings/v360_balance_assessment.md).
+
+| V036 (3,000 games/pod) | 2P | 3P | 4P |
+|---|---|---|---|
+| Patient Zero / Singularity / Market Collapse | 43 / 37 / 20% | 41 / 39 / 20% | 42 / 37 / 22% |
+| Rounds | 8.64 | 8.77 | 8.77 |
+| Total Wipeout (V035) | 5.8% (16.0%) | 1.3% (5.8%) | 0.2% (1.9%) |
+
+Takeaways:
+1. **VentureGreed is broken under v0.36.** Its win rate falls from 52 / 46 / 42% to 4.5 / 1.5 / 0.7%: it lost Patent Filing, its only Secrets source. It drives most of the Patient Zero excess, and its presence swings the right starting Secrets by 2–3.
+2. **The Collapse shortfall is genuine.** Payout-driven regain and Red-aware blocking each cost about 6–7 points against the ~30% pre-SDLC probe. Market Share start −2 restores it with any bot roster.
+3. **`v1.0` comparisons are structurally tied.** All players tie 65 / 41 / 31% of the time.
+4. **Several flags are bot artifacts:**
+   - Public Relations at 60% of maxed tracks is a bot focus-order artifact (18–21% with neutral focus).
+   - Ad Campaign is weak by construction.
+   - Money inflation comes from removing ransom.
+5. **The kamikaze signal is not degenerate** once ties and multi-player collapses are accounted for.
+
+**Decisions (User, 2026-11-06):** Market Share start 17 / 18 / 18; drop the `v1.0` comparison (keep `v2.0` at `$4`); re-open starting Secrets after the bot fixes; look at a Money → Secrets outlet next phase. **Status: tune and bot fixes in progress, then re-sweep.**
+
+
+## 34. Phase 45 Balance Iteration 2: APPROVED WITH TUNE
+
+Sources: product-owner [docs/findings/v360_market_share_iter1_telemetry_report.md](docs/findings/v360_market_share_iter1_telemetry_report.md) (94,000 games, seed 42) and game-designer [docs/findings/v360_balance_assessment_iter1.md](docs/findings/v360_balance_assessment_iter1.md) (fresh seeds 7000, 3,000 games/pod).
+
+| Starting Secrets 7 / 7 / 8, v2.0-only comparison | Seeds 7000 | Seed 42 |
+|---|---|---|
+| 2P: Patient Zero / Singularity / Market Collapse | 30.0 / 35.5 / 34.5 | 31.0 / 34.8 / 34.2 |
+| 3P | 32.9 / 34.1 / 32.9 | 34.5 / 33.5 / 32.1 |
+| 4P | 30.5 / 34.1 / 35.4 | 30.3 / 33.6 / 36.1 |
+
+Guardrails at these values:
+- Rounds 8.76–8.86.
+- Total Wipeout 7.1–7.5 / 2.3–2.6 / 1.0% (v0.35: 15.8 / 5.9 / 2.1%).
+- Highest single-setup trigger ≤ 43%.
+- Red block rate 14.6–15.4% (v0.35 ~10%).
+- Regain share 24–26%.
+- Comparison all-tied 37 / 10 / 4%.
+- No Market Collapse in ≤ 5 rounds.
+- Kamikaze Collapse at chance.
+
+Takeaways:
+1. **VentureGreed is back to v0.35 strength.** The fix moved it from 1–5% wins to 42–62%. That removes the per-player-count Secrets scaling, which turns out to have been an artifact of the broken bot.
+2. **Keeping the `v1.0` comparison at `$2` still fails the 2P tie guardrail** (51.6% all-tied), so it stays dropped.
+3. **Release Track concentration of 68–72% is a bot focus artifact.** It is 33–35% with random focus.
+4. **The economy rise is intended** (buys 1.8–2.0× v0.35, end Money ~$1.9). It comes from removing Red ransom.
+
+**Decisions (User, 2026-11-06):**
+- Starting Secrets 7 / 7 / 8.
+- Company spread (20–23 points) deferred to the company-identity phase.
+- Release concentration accepted as a bot artifact; the Release / Defense vs Triage / Public Relations strength gap is a watch item.
+
+Bot follow-ups, not blocking:
+- RecklessSaboteur focus order.
+- Diversify roster focus orders.
+
+**Status: OFFICIALLY APPROVED (`v0.36.0` Baseline).** `v036()` sets Secrets 7 / 7 / 8. Phase B is done: RULES.md, glossary, CLAUDE.md, web and PnP; `GameConfig()` is now v0.36.
+
+## 35. Engine Fix: Multi-Version Black Cube Spillover Cascade (six-phase Phase 2, no rules change)
 
 The six-phase compiler (`sim/engine/phase2_compiler.py`) stopped spillover at v2.0: when spillover filled v2.0 in the same compile, later cubes were counted but not resolved, and the v3.0 advance waited for a later Black cube. RULES.md Phase 2 ("Version Advance & Track Spillover") already says excess cubes spill onto the next Version's track from Space 1, so the engine now matches the rules.
 

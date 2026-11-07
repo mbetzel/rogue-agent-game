@@ -9,7 +9,7 @@ from sim.engine import GameEngine
 
 class TestDeterminism(unittest.TestCase):
     def test_reproducible_game_run(self) -> None:
-        cfg = GameConfig(num_players=4)
+        cfg = GameConfig.legacy_v035(num_players=4)
 
         def make_bots():
             return [
@@ -62,7 +62,7 @@ class TestDeterminism(unittest.TestCase):
             VentureGreedBot(2),
             RecklessSaboteurBot(3),
         ]
-        engine1 = GameEngine(GameConfig(num_players=4), bots_pod1, seed=101)
+        engine1 = GameEngine(GameConfig.legacy_v035(num_players=4), bots_pod1, seed=101)
         result1 = engine1.run_game()
 
         self.assertGreater(result1.total_rounds, 0)
@@ -78,7 +78,7 @@ class TestDeterminism(unittest.TestCase):
             AccelerationistBot(2),
             RecklessSaboteurBot(3),
         ]
-        engine2 = GameEngine(GameConfig(num_players=4), bots_pod2, seed=202)
+        engine2 = GameEngine(GameConfig.legacy_v035(num_players=4), bots_pod2, seed=202)
         result2 = engine2.run_game()
 
         self.assertGreater(result2.total_rounds, 0)

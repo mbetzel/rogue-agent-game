@@ -30,7 +30,7 @@ class TestModelCPatches(unittest.TestCase):
 
     def test_tc01_phase1_boot_allows_patch_accumulation_above_cap(self):
         """TC-01: Phase 1 boot allows patch accumulation above cap without premature clipping."""
-        cfg = GameConfig(num_players=2, max_patch_tokens=3)
+        cfg = GameConfig.legacy_v035(num_players=2, max_patch_tokens=3)
         engine = GameEngine(config=cfg, seed=42)
         player = engine.state.players[0]
         player.patches = 2
@@ -95,7 +95,7 @@ class TestModelCPatches(unittest.TestCase):
 
     def test_tc03_phase3_ops_spending_down_excess_patches(self):
         """TC-03: Phase 3 operations can spend down from an above-cap patch total."""
-        cfg = GameConfig(num_players=2, max_patch_tokens=3)
+        cfg = GameConfig.legacy_v035(num_players=2, max_patch_tokens=3)
         engine = GameEngine(config=cfg, seed=42)
         player = engine.state.players[0]
 
@@ -123,7 +123,7 @@ class TestModelCPatches(unittest.TestCase):
 
     def test_tc04_sim_engine_end_of_round_cleanup_clamps_unspent_patches(self):
         """TC-04: Sim engine End-of-Round Cleanup clamps unspent patches to max_patch_tokens."""
-        cfg = GameConfig(num_players=2, max_patch_tokens=3)
+        cfg = GameConfig.legacy_v035(num_players=2, max_patch_tokens=3)
         engine = GameEngine(config=cfg, seed=42)
         player0 = engine.state.players[0]
         player1 = engine.state.players[1]
@@ -186,7 +186,7 @@ class TestModelCPatches(unittest.TestCase):
     def test_tc07_patient_zero_skipped_during_cleanup(self):
         """TC-07: Patient Zero players are skipped during End-of-Round Cleanup."""
         # Sim engine test
-        cfg = GameConfig(num_players=2, max_patch_tokens=3)
+        cfg = GameConfig.legacy_v035(num_players=2, max_patch_tokens=3)
         engine = GameEngine(config=cfg, seed=42)
         pz_player = engine.state.players[0]
         pz_player.is_patient_zero = True

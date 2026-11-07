@@ -44,7 +44,7 @@ class TestV280TerminalUpgrades(unittest.TestCase):
 
     def test_research_tokens_no_cap(self) -> None:
         """INV-RESEARCH-UNCAPPED-01: Research tokens accumulate without an upper bound cap of 3."""
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         engine = GameEngine(cfg, seed=42)
         p0 = engine.state.players[0]
         p0.research_tokens = 7
@@ -64,7 +64,7 @@ class TestV280TerminalUpgrades(unittest.TestCase):
 
     def test_defense_capacity_enforcement(self) -> None:
         """INV-DEF-CAP-01: When defense_capacity=2, players cannot commit more than 2 dice to Shields."""
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         engine = GameEngine(cfg, seed=42)
         p0 = engine.state.players[0]
         p0.defense_capacity = 2
@@ -98,7 +98,7 @@ class TestV280TerminalUpgrades(unittest.TestCase):
 
     def test_pipeline_triage_bandwidth(self) -> None:
         """INV-PIPE-TRIAGE-01: At most triage_bandwidth dice move from Glitched to Scanned per round."""
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         engine = GameEngine(cfg, seed=42)
         p0 = engine.state.players[0]
         p0.triage_bandwidth = 2
@@ -122,7 +122,7 @@ class TestV280TerminalUpgrades(unittest.TestCase):
 
     def test_pipeline_release_bandwidth(self) -> None:
         """INV-PIPE-GRAD-01: At most release_bandwidth dice move from Scanned to Ready per round."""
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         engine = GameEngine(cfg, seed=42)
         p0 = engine.state.players[0]
         p0.release_bandwidth = 2

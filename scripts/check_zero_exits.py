@@ -20,7 +20,7 @@ def run_check():
         consecutive_zero_total_events = 0
 
         for g in range(games_tested):
-            config = GameConfig(num_players=num_players)
+            config = GameConfig.legacy_v035(num_players=num_players)
             bots = [AdaptiveBalancedBot(f"Bot{i}") for i in range(num_players)]
             engine = GameEngine(config, bots, seed=g + 1000)
             has_zero_total = False

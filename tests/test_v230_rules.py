@@ -42,7 +42,7 @@ class TestV230Rules(unittest.TestCase):
 
     def test_glitch_die_locks_immediately_on_roll(self) -> None:
         """INV-LOCK-01: Any die rolling a Glitch face receives is_locked = True immediately."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         red = create_colored_die(DieColor.RED, 1)
         glitch_face = red.faces[4]  # Face 5 is Glitch
@@ -61,7 +61,7 @@ class TestV230Rules(unittest.TestCase):
 
     def test_corruption_track_locks_cannot_be_unlocked_with_patches(self) -> None:
         """INV-LOCK-02 & INV-PATCH-01: Corruption track locks are absolute; patches cannot unlock them."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.patches = 3
 
@@ -91,7 +91,7 @@ class TestV230Rules(unittest.TestCase):
 
     def test_standard_reroll_cannot_include_locked_dice(self) -> None:
         """INV-LOCK-03: Reroll indices corresponding to locked dice are strictly filtered out."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
 
         red = create_colored_die(DieColor.RED, 1)
@@ -124,7 +124,7 @@ class TestV230Rules(unittest.TestCase):
 
     def test_patches_never_spent_in_phase_1(self) -> None:
         """INV-PATCH-01: Patch balances must NEVER decrease during Phase 1 for any player."""
-        engine = GameEngine(config=GameConfig(num_players=4), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=4), seed=42)
         for i, p in enumerate(engine.state.players):
             p.patches = 3
             # Give player some colored dice that may glitch
@@ -138,7 +138,7 @@ class TestV230Rules(unittest.TestCase):
 
     def test_unresolved_glitch_moves_to_glitched_box(self) -> None:
         """INV-LOCK-04: Permanent module die locked on Glitch moves immediately to glitched_dice."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         red = create_colored_die(DieColor.RED, 1)
         red.faces = [red.faces[4]] * 6  # Glitch
@@ -153,7 +153,7 @@ class TestV230Rules(unittest.TestCase):
 
     def test_unresolved_contractor_glitch_discarded_to_supply(self) -> None:
         """INV-LOCK-04: White Contractor with unresolved glitch is discarded to general supply."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         contractor = create_white_die(99)
         contractor.faces = [contractor.faces[4]] * 6  # Glitch
@@ -175,7 +175,7 @@ class TestV230Rules(unittest.TestCase):
 
     def test_prodigy_rerolls_locked_dice_without_spending_patches(self) -> None:
         """The Prodigy rerolls locked glitch dice with zero patch cost via Brute-Force Bypass."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.archetype = get_archetype_by_code(ArchetypeCode.PRODIGY)
         p0.patches = 0  # Zero patches
@@ -202,7 +202,7 @@ class TestV230Rules(unittest.TestCase):
 
     def test_prodigy_face_override_non_star(self) -> None:
         """The Prodigy can override 1 rolled die to any legal non-Star face."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.archetype = get_archetype_by_code(ArchetypeCode.PRODIGY)
 
@@ -229,7 +229,7 @@ class TestV230Rules(unittest.TestCase):
 
     def test_prodigy_only_entity_capable_of_rerolling_locks(self) -> None:
         """Non-Prodigy player cannot reroll locked dice; Prodigy can."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]  # Standard (No archetype)
         p1 = engine.state.players[1]
         p1.archetype = get_archetype_by_code(ArchetypeCode.PRODIGY)
@@ -262,7 +262,7 @@ class TestV230Rules(unittest.TestCase):
 
     def test_phreaker_magnetic_splice_free_glitch_to_ready(self) -> None:
         """The Phreaker moves 1 die from glitched_dice directly to ready_for_release_dice for free."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.archetype = get_archetype_by_code(ArchetypeCode.PHREAKER)
         p0.patches = 0
@@ -282,7 +282,7 @@ class TestV230Rules(unittest.TestCase):
 
     def test_phreaker_coexists_with_fast_patching(self) -> None:
         """The Phreaker ability and Fast-Patching operate together cleanly in Phase 3B."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.archetype = get_archetype_by_code(ArchetypeCode.PHREAKER)
         p0.patches = 1
@@ -313,7 +313,7 @@ class TestV230Rules(unittest.TestCase):
 
     def test_fast_patch_spends_exact_one_wrench_per_die(self) -> None:
         """Fast-patching costs exactly 1 🔬 per die."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.patches = 2
 
@@ -337,7 +337,7 @@ class TestV230Rules(unittest.TestCase):
 
     def test_fast_patched_dice_graduate_immediately_to_ready(self) -> None:
         """Fast-patched dice move to scanned_dice, then graduate to ready_for_release_dice at round end."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.patches = 1
         d1 = create_gray_die(1)
@@ -358,7 +358,7 @@ class TestV230Rules(unittest.TestCase):
 
     def test_unpatched_dice_shift_naturally_via_conveyor(self) -> None:
         """Unpatched dice shift Glitched -> Scanned -> Ready over 2 rounds with 0 patches spent."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.money = 0
         p0.patches = 0
@@ -385,7 +385,7 @@ class TestV230Rules(unittest.TestCase):
 
     def test_patch_token_cap_enforced_at_three(self) -> None:
         """Patches exceeding 3 🔬 are discarded at round end cleanup (uncapped in v0.28.0+)."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.bot = BaseBot(0)
         engine.state.players[1].bot = BaseBot(1)
@@ -397,7 +397,7 @@ class TestV230Rules(unittest.TestCase):
 
     def test_fast_patch_respects_available_wrench_balance(self) -> None:
         """Fast-patching cannot exceed the player's available patch tokens."""
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         p0 = engine.state.players[0]
         p0.patches = 1
 
@@ -458,7 +458,7 @@ class TestV230Rules(unittest.TestCase):
         d2 = create_gray_die(2)
         p.glitched_dice = [d1, d2]
 
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         chosen = bot.choose_fast_patches(p, engine.state, random.Random(42))
 
         self.assertEqual(chosen, [], "Fast patching is excised in v0.29.0")
@@ -467,14 +467,14 @@ class TestV230Rules(unittest.TestCase):
         """BaseBot.choose_fast_patches is deprecated and returns [] in v0.29.0."""
         bot = BaseBot(0)
         p = PlayerState(0, bot, money=5, secrets=8, patches=4)
-        engine = GameEngine(config=GameConfig(num_players=2), seed=42)
+        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), seed=42)
         chosen = bot.choose_fast_patches(p, engine.state, random.Random(42))
         self.assertEqual(chosen, [])
 
     def test_bot_full_round_wrench_conservation(self) -> None:
         """Run a full game round; verify bots spend 0 patches in Phase 1."""
         engine = GameEngine(
-            config=GameConfig(num_players=4),
+            config=GameConfig.legacy_v035(num_players=4),
             bots=[
                 AdaptiveBalancedBot(0),
                 SecOpsTurtleBot(1),

@@ -39,7 +39,7 @@ def run_simulation_sweep():
             secrets_at_end = []
             
             for g in range(games_per_cell):
-                config = GameConfig(num_players=num_players)
+                config = GameConfig.legacy_v035(num_players=num_players)
                 bots = [AdaptiveBalancedBot(f"Bot{i}") for i in range(num_players)]
                 engine = GameEngine(config, bots, seed=g + 20000 + num_players * 1000)
 

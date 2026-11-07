@@ -35,7 +35,7 @@ class TestV200Rules(unittest.TestCase):
     def test_engine_setup_and_pulse_staging_cup(self) -> None:
         """Setup staging cup starts with 0 Black cubes; Phase 1 pulse brings it to exactly 1 Black cube."""
         engine = GameEngine(
-            config=GameConfig(num_players=4),
+            config=GameConfig.legacy_v035(num_players=4),
             bots=[BaseBot(i) for i in range(4)],
             seed=42,
         )
@@ -64,7 +64,7 @@ class TestV200Rules(unittest.TestCase):
 
         for seed in range(trials):
             engine = GameEngine(
-                config=GameConfig(num_players=4),
+                config=GameConfig.legacy_v035(num_players=4),
                 bots=[BaseBot(i) for i in range(4)],
                 seed=seed,
             )

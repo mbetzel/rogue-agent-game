@@ -27,18 +27,18 @@ class TestV210Rules(unittest.TestCase):
         for p in eng4.state.players:
             self.assertEqual(p.secrets, 12)
 
-        eng2 = GameEngine(config=GameConfig(num_players=2), bots=[BaseBot(i) for i in range(2)], seed=42)
+        eng2 = GameEngine(config=GameConfig.legacy_v035(num_players=2), bots=[BaseBot(i) for i in range(2)], seed=42)
         for p in eng2.state.players:
             self.assertEqual(p.secrets, 8)
 
     def test_autonomous_pulse_1_black_across_all_versions(self) -> None:
         """Autonomous AI Pulse adds exactly 1 Black cube in v1.0, v2.0, and v3.0."""
-        cfg = GameConfig()
+        cfg = GameConfig.legacy_v035()
         self.assertEqual(cfg.autonomous_pulse_by_version["v1.0"], 1)
         self.assertEqual(cfg.autonomous_pulse_by_version["v2.0"], 1)
         self.assertEqual(cfg.autonomous_pulse_by_version["v3.0"], 1)
 
-        eng = GameEngine(config=GameConfig(num_players=4), bots=[BaseBot(i) for i in range(4)], seed=42)
+        eng = GameEngine(config=GameConfig.legacy_v035(num_players=4), bots=[BaseBot(i) for i in range(4)], seed=42)
         # v1.0 Pulse
         for c in eng.state.staging_cup:
             eng.state.staging_cup[c] = 0
@@ -61,7 +61,7 @@ class TestV210Rules(unittest.TestCase):
 
     def test_red_ransomware_cash_only_no_patch_absorption(self) -> None:
         """Unblocked Red ransom is strictly cash-only; held patches NEVER absorb unpaid ransom."""
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         eng = GameEngine(config=cfg, bots=[BaseBot(0), BaseBot(1)], seed=42)
         p0 = eng.state.players[0]
         p0.money = 0
@@ -84,7 +84,7 @@ class TestV210Rules(unittest.TestCase):
 
     def test_red_ransomware_partial_cash_leak(self) -> None:
         """Cash pays partial ransom; remaining balance leaks to Secrets while patches remain intact."""
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         eng = GameEngine(config=cfg, bots=[BaseBot(0), BaseBot(1)], seed=42)
         p0 = eng.state.players[0]
         p0.money = 1
@@ -143,7 +143,7 @@ class TestV210Rules(unittest.TestCase):
 
     def test_corruption_track_black_cube_injections(self) -> None:
         """Corruption track spaces inject Black cubes into Staging Cup (Mode A)."""
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         eng = GameEngine(config=cfg, bots=[BaseBot(0), BaseBot(1)], seed=42)
         # Advance to space 1
         eng.state.corruption_track = 1
@@ -161,7 +161,7 @@ class TestV210Rules(unittest.TestCase):
 
     def test_legacy_patch_ransom_absorption_flag(self) -> None:
         """When patch_ransom_absorption is explicitly enabled, legacy Tier 2 behavior is preserved."""
-        cfg = GameConfig(num_players=2, patch_ransom_absorption=True)
+        cfg = GameConfig.legacy_v035(num_players=2, patch_ransom_absorption=True)
         eng = GameEngine(config=cfg, bots=[BaseBot(0), BaseBot(1)], seed=42)
         p0 = eng.state.players[0]
         p0.money = 0

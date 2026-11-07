@@ -27,7 +27,7 @@ def run_sweep(num_games: int = 1000):
         wipeouts = 0
 
         for seed in range(num_games):
-            cfg = GameConfig(num_players=p_count)
+            cfg = GameConfig.legacy_v035(num_players=p_count)
             all_bots = [AdaptiveBalancedBot(0), SecOpsTurtleBot(1), VentureGreedBot(2), AccelerationistBot(3)]
             bots = all_bots[:p_count]
             deck = get_default_version_deck()

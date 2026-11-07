@@ -376,15 +376,20 @@ def run_experiment_5a(runs: int = 500, base_seed: int = 42) -> None:
         )
 
 
-def run_experiment_5b(runs: int = 500, base_seed: int = 42) -> None:
-    """Experiment 5b: Colored Module Variant Benchmark (R1-R3, B1-B3, G1-G3, Y1-Y3, P1-P3)."""
+def run_experiment_5b(runs: int = 500, base_seed: int = 42, red_variant_set: str = "MARKETING") -> None:
+    """Experiment 5b: Colored Module Variant Benchmark (R1-R3, B1-B3, G1-G3, Y1-Y3, P1-P3).
+
+    Default ``red_variant_set="MARKETING"`` benchmarks the v0.36.0 Red set (R1, R2_MKT, R3_MKT) under the v0.36.0
+    default config; ``"V035"`` benchmarks the v0.35 Red set under ``GameConfig.legacy_v035``.
+    """
     print("\n========================================================")
     print("Experiment 5b: Colored Module Variant Benchmark")
     print("========================================================\n")
 
-    all_vars = get_all_variant_cards()
+    marketing = red_variant_set == "MARKETING"
+    all_vars = get_all_variant_cards(red_variant_set)
     variant_codes = [
-        "R1", "R2", "R3",
+        *(("R1", "R2_MKT", "R3_MKT") if marketing else ("R1", "R2", "R3")),
         "B1", "B2", "B3",
         "G1", "G2", "G3",
         "Y1", "Y2", "Y3",
@@ -400,7 +405,8 @@ def run_experiment_5b(runs: int = 500, base_seed: int = 42) -> None:
         custom_vars[card.die_color] = card
 
         def cfg_fn():
-            return GameConfig(num_players=4)
+            # v0.35 Red set needs the v0.35 ruleset (MARKETING would remap R2/R3); v0.36 is the default
+            return GameConfig(num_players=4) if marketing else GameConfig.legacy_v035(num_players=4)
 
         def bots_fn():
             return [
@@ -414,7 +420,7 @@ def run_experiment_5b(runs: int = 500, base_seed: int = 42) -> None:
         top_bot = max(metrics.win_rates.items(), key=lambda x: x[1]) if metrics.win_rates else ("None", 0.0)
         is_baseline = " (Baseline)" if code in ("R1", "B1", "G1", "Y1", "P1") else ""
         print(
-            f"| {code} | {card.name}{is_baseline} | {card.die_color.value.capitalize()} | "
+            f"| {card.printed_code} | {card.name}{is_baseline} | {card.die_color.value.capitalize()} | "
             f"{metrics.mean_rounds:.2f} | "
             f"{metrics.singularity_pct * 100:.1f}% | "
             f"{metrics.total_wipeout_pct * 100:.1f}% | "

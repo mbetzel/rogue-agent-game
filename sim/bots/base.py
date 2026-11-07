@@ -53,6 +53,9 @@ class Phase3ActionPlan:
     breakthrough_choices: Dict[Any, Any] = field(default_factory=dict)
     # Phase 3 Part 3B Fast-patching (v0.22.0)
     fast_patch_indices: List[int] = field(default_factory=list)
+    # v0.36.0 Market Share: Public Relations Track regain steps and Ad Campaign (R2) uses this Operations Turn
+    share_regain: int = 0
+    use_r2_share: int = 0
 
     # Legacy Backward Compatibility fields
     use_phreaker_ability: bool = False
@@ -141,6 +144,10 @@ class BaseBot:
     research_focus: Tuple[str, str, str, str] = ("TRIAGE", "DEFENSE", "RELEASE", "PATENT")
     research_focus_mode: str = "fixed"  # "fixed" | "random" (seeded from the engine rng)
     research_aware: bool = True
+    # v0.36.0 Market Share policy (sim/bots/market_share_policy.py); None = MarketSharePolicy() defaults
+    market_share_policy: Any = None
+    research_focus_v036: Optional[Tuple[str, str, str, str]] = None  # None = research_focus
+    any_shield_fill_order: Tuple[CubeColor, ...] = (CubeColor.BLUE, CubeColor.RED, CubeColor.GREEN)
     # Preferred Central Market colours for the Triage L3 Breakthrough (falls back to Yellow > Green > Red > Blue)
     market_color_preference: Tuple[DieColor, ...] = ()
 
@@ -633,6 +640,9 @@ class BaseBot:
             "GREEN_SHIELD": CubeColor.GREEN,
         }
 
+        # v0.36.0: Ad Campaign / Customer Poaching are Phase 3 output under MARKET_SHARE
+        ms_output = bool(getattr(getattr(player, "config", None), "is_market_share", False))
+
         def _has_phase3_output(face: Optional[Face]) -> bool:
             if face is None:
                 return False
@@ -641,6 +651,7 @@ class BaseBot:
                 or face.patches > 0
                 or face.secrets > 0
                 or getattr(face, "star_code", None) in ("B3", "R1", "G1", "G2")
+                or (ms_output and getattr(face, "star_code", None) in ("R2_MKT", "R3_MKT"))
             )
 
         def _face_econ_score(face: Optional[Face]) -> int:
@@ -657,6 +668,8 @@ class BaseBot:
                     score += 3
                 elif sc == "PURPLE_STAR":
                     score += 4
+                elif ms_output and sc in ("R2_MKT", "R3_MKT"):
+                    score += 2  # v0.36.0: worth ~1 Market Share
             return score
 
         # 1. Color-specific shields: allocate needed absorption to White/high-value shields first
@@ -944,6 +957,47 @@ class BaseBot:
                 color = c
                 break
         return BreakthroughChoice(accept=True, gray_die_id=options.gray_die_ids[0], color=color)
+
+    def choose_aegis_override_market_share(
+        self,
+        player_state: PlayerState,
+        qualifying_colors: List[CubeColor],
+        game_state: GameState,
+        remaining: Dict[CubeColor, int],
+        attack: Dict[CubeColor, int],
+    ) -> Optional[CubeColor]:
+        """v0.36.0 Baffle Echo under MARKET_SHARE (AWARE): ignore the color whose single cube has the highest
+        marginal value (spec §5.2). ``None`` falls back to ``choose_aegis_override``."""
+        from sim.bots import market_share_policy as msp
+
+        if not msp.is_aware(game_state):
+            return None
+        return msp.choose_aegis_color(player_state, qualifying_colors, game_state, remaining, attack,
+                                      msp.policy_for(self))
+
+    def choose_any_shield_allocation(
+        self,
+        player_state: PlayerState,
+        remaining: Dict[CubeColor, int],
+        available_any: int,
+        game_state: GameState,
+        attack: Dict[CubeColor, int],
+    ) -> Dict[CubeColor, int]:
+        """v0.36.0 Stage 2 free choice (``any_shield_policy=FREE_CHOICE``): split of the Generic shields.
+
+        The engine legalises the result (clamp + back-fill; every available shield must block). Default:
+        greedy marginal value (AWARE) or Blue > Red > Green (NAIVE / RANSOM-naive).
+        """
+        from sim.bots import market_share_policy as msp
+
+        return msp.default_any_shield_allocation(player_state, remaining, available_any, game_state, attack,
+                                                 msp.policy_for(self))
+
+    def choose_poach_target(self, player_state: PlayerState, game_state: GameState, tied_pids: List[int]) -> int:
+        """v0.36.0 Customer Poaching tie: default most Corporate Secrets, then first clockwise from the actor."""
+        from sim.engine.market_share import default_poach_target
+
+        return default_poach_target(player_state, game_state, list(tied_pids))
 
     def choose_slush_fund(self, player_state: PlayerState, game_state: GameState, potential_secret_loss: int) -> bool:
         """v0.35.0 DTO Slush Fund (once per game, optional): use on a 2+ Secret loss or to avoid a Total Data Breach."""

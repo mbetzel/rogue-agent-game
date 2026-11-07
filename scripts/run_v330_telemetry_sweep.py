@@ -319,7 +319,7 @@ def run_v330_telemetry_sweep(
                 companies = get_random_companies(num_players, rng)
                 white_hats = get_random_white_hats(num_players, rng)
 
-                cfg = GameConfig(
+                cfg = GameConfig.legacy_v035(
                     num_players=num_players,
                     starting_money=6,
                     starting_gray_dice=3,

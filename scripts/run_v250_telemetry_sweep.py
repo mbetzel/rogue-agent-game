@@ -330,7 +330,7 @@ def run_sweep(num_games: int = 1000, base_seed: int = 42) -> Dict[str, Any]:
 
         for match_idx in range(num_games):
             seed = base_seed + match_idx
-            cfg = GameConfig(num_players=p_count)
+            cfg = GameConfig.legacy_v035(num_players=p_count)
 
             all_bots = [
                 AdaptiveBalancedBot(0),

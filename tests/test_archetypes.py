@@ -401,7 +401,7 @@ class TestOperatorAndProdigy(unittest.TestCase):
 
     def test_engine_operator_buy_third_die_cost(self) -> None:
         """9b. GameEngine charges $3 for Operator's 3rd contractor die."""
-        config = GameConfig(num_players=4)
+        config = GameConfig.legacy_v035(num_players=4)
         operator_card = get_archetype_by_code(ArchetypeCode.OPERATOR)
 
         money_snapshots: List[int] = []
@@ -441,7 +441,7 @@ class TestSpookAndAcoustic(unittest.TestCase):
 
     def test_spook_slush_fund_absorbs_blue_secret_loss(self) -> None:
         """12. Spook pays $1 per secret to absorb Blue secret loss."""
-        config = GameConfig(num_players=4)
+        config = GameConfig.legacy_v035(num_players=4)
         spook_card = get_archetype_by_code(ArchetypeCode.SPOOK)
         engine = GameEngine(
             config=config,
@@ -476,7 +476,7 @@ class TestSpookAndAcoustic(unittest.TestCase):
 
     def test_spook_slush_fund_absorbs_unpaid_red_ransom(self) -> None:
         """13. Spook Slush Fund absorbs unpaid Red ransom before Secret leak."""
-        config = GameConfig(num_players=4)
+        config = GameConfig.legacy_v035(num_players=4)
         spook_card = get_archetype_by_code(ArchetypeCode.SPOOK)
         engine = GameEngine(
             config=config,
@@ -510,7 +510,7 @@ class TestSpookAndAcoustic(unittest.TestCase):
 
     def test_spook_slush_fund_insufficient_cash(self) -> None:
         """14. Spook absorbs up to 2 secrets for free, and pays $1 cash for 3rd."""
-        config = GameConfig(num_players=4)
+        config = GameConfig.legacy_v035(num_players=4)
         spook_card = get_archetype_by_code(ArchetypeCode.SPOOK)
         engine = GameEngine(
             config=config,
@@ -544,7 +544,7 @@ class TestSpookAndAcoustic(unittest.TestCase):
 
     def test_acoustic_baffle_echo_removes_exited_cube(self) -> None:
         """15. Acoustic Baffle Echo ignores 1 attack cube for self without modifying exited cubes."""
-        config = GameConfig(num_players=4)
+        config = GameConfig.legacy_v035(num_players=4)
         acoustic_card = get_archetype_by_code(ArchetypeCode.ACOUSTIC)
         engine = GameEngine(
             config=config,
@@ -815,7 +815,7 @@ class TestWebSerializerAndController(unittest.TestCase):
             ability_v3_status=AbilityStatus.LOCKED,
         )
 
-        serialized = GameStateSerializer.serialize_player(player, config=GameConfig(), is_human=True, name="Corp 1")
+        serialized = GameStateSerializer.serialize_player(player, config=GameConfig.legacy_v035(), is_human=True, name="Corp 1")
         self.assertIn("archetype", serialized)
         self.assertIsNotNone(serialized["archetype"])
         self.assertEqual(serialized["archetype"]["code"], "OPERATOR")

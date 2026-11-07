@@ -6,6 +6,8 @@ from dataclasses import dataclass, field
 from enum import Enum, IntEnum
 from typing import Dict, Optional, Tuple
 
+_ALL_TRACK_LEVELS = (0, 1, 2, 3, 4)
+
 
 class CubeColor(str, Enum):
     RED = "red"
@@ -42,6 +44,7 @@ class EndGameReason(str, Enum):
     PATIENT_ZERO = "patient_zero"
     TOTAL_WIPEOUT = "total_wipeout"
     ROUND_LIMIT = "round_limit"
+    MARKET_COLLAPSE = "market_collapse"  # v0.36.0: a survivor at 0 Market Share after Phase 4 -> Final Round
 
 
 class RoundSequence(str, Enum):
@@ -65,6 +68,49 @@ class ResearchTrackModel(str, Enum):
 
     V034_THREE_LEVEL = "V034_THREE_LEVEL"
     V035_FIVE_LEVEL = "V035_FIVE_LEVEL"
+
+
+class RedMode(str, Enum):
+    """Red attack ruleset master switch (v0.36.0).
+
+    RANSOM: v0.35.0 (each unblocked Red cube costs Money; shortfall -> Unpaid Ransom Leak).
+    MARKET_SHARE: v0.36.0 Market Manipulation (each unblocked Red cube lowers Market Share by 1).
+    """
+
+    RANSOM = "RANSOM"
+    MARKET_SHARE = "MARKET_SHARE"
+
+
+class PatentsMode(str, Enum):
+    """Fourth research track ruleset (internal key stays ``"PATENT"``).
+
+    PATENTS: v0.35 Cryptographic Patents Track + Patent Filing.
+    SHARE_REGAIN: v0.36 Public Relations Track (Phase 6: spend research to regain Market Share).
+    """
+
+    PATENTS = "PATENTS"
+    SHARE_REGAIN = "SHARE_REGAIN"
+
+
+class RedVariantSet(str, Enum):
+    """Red Variant (★) Card set. V035: R1/R2/R3 of v0.35. MARKETING: Brand Protection / Ad Campaign / Customer Poaching."""
+
+    V035 = "V035"
+    MARKETING = "MARKETING"
+
+
+class TiebreakOrder(str, Enum):
+    """V035: Secrets > Money > ... ; MARKET_SHARE_FIRST: Secrets > Market Share > Money > ..."""
+
+    V035 = "V035"
+    MARKET_SHARE_FIRST = "MARKET_SHARE_FIRST"
+
+
+class AnyShieldPolicy(str, Enum):
+    """Stage 2 Generic (Any) shield allocation. V035_TIERS: engine 4-tier priority. FREE_CHOICE: player/bot split."""
+
+    V035_TIERS = "V035_TIERS"
+    FREE_CHOICE = "FREE_CHOICE"
 
 
 class RoundPhase(IntEnum):
@@ -243,9 +289,86 @@ class GameConfig:
     company_setup_bonuses: Optional[bool] = None
     slush_fund_once_per_game: Optional[bool] = None
     level2_perks_enabled: Optional[bool] = None  # Emergency Hotfix + Passive Firewall (v0.34 only)
+    # v0.36 Phase 44 Red experiment lever (RANSOM only; default = v0.35 behavior).
+    red_ransom_per_cube: int = 1  # [TUNE] $ extorted per unblocked Red cube (read only under RedMode.RANSOM)
+
+    # --- v0.36.0 Market Share Red rework (INV-MS-*). Defaults reproduce v0.35.0 bit-identically. ---
+    # v0.36.0 is the default (Phase B, User-approved). None resolves in __post_init__: MARKET_SHARE, except
+    # RANSOM for the legacy round / track models (V033_THREE_PHASE, V034_THREE_LEVEL), which never supported it.
+    # GameConfig.legacy_v035() reproduces v0.35.0 bit-identically.
+    red_mode: Optional[RedMode] = None
+    market_share_start_by_player_count: Dict[int, int] = field(
+        # [TUNE] start = max; not read under RANSOM. Balance iteration 1 (User 2026-11-06): 19/20/20 -> 17/18/18
+        default_factory=lambda: {2: 17, 3: 18, 4: 18}
+    )
+    # Sub-flags: None resolves once in __post_init__ from red_mode (re-assigning red_mode later does NOT re-resolve).
+    market_collapse_enabled: Optional[bool] = None
+    # [TUNE] Version -> payout. Under MARKET_SHARE resolves to {"v2.0": 4}: the v1.0 -> v2.0 comparison was dropped
+    # (User 2026-11-06). A version absent from the map (or mapped to 0) has no comparison at all (no event recorded).
+    version_share_payout: Optional[Dict[str, int]] = None
+    patents_mode: Optional[PatentsMode] = None
+    share_regain_cost_by_level: Dict[int, int] = field(
+        default_factory=lambda: {0: 2, 1: 2, 2: 2, 3: 2, 4: 2}  # [TUNE] research per +1 Market Share
+    )
+    share_regain_cap_by_level: Dict[int, int] = field(
+        default_factory=lambda: {0: 1, 1: 1, 2: 2, 3: 2, 4: 3}  # [TUNE] +Market Share per Operations Turn
+    )
+    # MARKETING is allowed under RANSOM only for the R1 rename (R2/R3 are inert without Market Share).
+    red_variant_set: Optional[RedVariantSet] = None
+    r2_share_cost: int = 2  # [TUNE] Ad Campaign: $ paid in Phase 6
+    r2_share_gain: int = 1  # [TUNE] Ad Campaign: Market Share gained
+    r3_poach_amount: int = 1  # [TUNE] Customer Poaching: Market Share taken from the rival with the most
+    tiebreak_order: Optional[TiebreakOrder] = None
+    # FREE_CHOICE is allowed under RANSOM (isolates the bot heuristic).
+    any_shield_policy: Optional[AnyShieldPolicy] = None
+    market_share_bot_policy: str = "AWARE"  # sim-only: "AWARE" | "NAIVE" (ablation)
 
     def __post_init__(self) -> None:
         self.round_sequence = RoundSequence(self.round_sequence)
+        if self.red_mode is None:
+            legacy_model = (
+                self.round_sequence == RoundSequence.V033_THREE_PHASE
+                or ResearchTrackModel(self.research_track_model) != ResearchTrackModel.V035_FIVE_LEVEL
+            )
+            self.red_mode = RedMode.RANSOM if legacy_model else RedMode.MARKET_SHARE
+        self.red_mode = RedMode(self.red_mode)
+        ms = self.red_mode == RedMode.MARKET_SHARE
+        # NOTE: resolved once at construction; re-assigning red_mode later does NOT re-resolve.
+        self.patents_mode = PatentsMode(self.patents_mode) if self.patents_mode is not None else (
+            PatentsMode.SHARE_REGAIN if ms else PatentsMode.PATENTS)
+        self.red_variant_set = RedVariantSet(self.red_variant_set) if self.red_variant_set is not None else (
+            RedVariantSet.MARKETING if ms else RedVariantSet.V035)
+        self.tiebreak_order = TiebreakOrder(self.tiebreak_order) if self.tiebreak_order is not None else (
+            TiebreakOrder.MARKET_SHARE_FIRST if ms else TiebreakOrder.V035)
+        self.any_shield_policy = AnyShieldPolicy(self.any_shield_policy) if self.any_shield_policy is not None else (
+            AnyShieldPolicy.FREE_CHOICE if ms else AnyShieldPolicy.V035_TIERS)
+        if self.market_collapse_enabled is None:
+            self.market_collapse_enabled = ms
+        if self.version_share_payout is None:
+            self.version_share_payout = {"v2.0": 4} if ms else {}
+        if self.market_share_bot_policy not in ("AWARE", "NAIVE"):
+            raise ValueError(f"market_share_bot_policy must be 'AWARE' or 'NAIVE', got {self.market_share_bot_policy!r}")
+        if ms and self.round_sequence == RoundSequence.V033_THREE_PHASE:
+            raise ValueError("red_mode=MARKET_SHARE is not supported with round_sequence=V033_THREE_PHASE")
+        if ms and self.research_track_model != ResearchTrackModel.V035_FIVE_LEVEL:
+            raise ValueError("red_mode=MARKET_SHARE requires research_track_model=V035_FIVE_LEVEL "
+                             "(the Public Relations Track regain needs the five-level tracks)")
+        if not ms:
+            bad = []
+            if self.patents_mode == PatentsMode.SHARE_REGAIN:
+                bad.append("patents_mode=SHARE_REGAIN")
+            if self.market_collapse_enabled:
+                bad.append("market_collapse_enabled=True")
+            if self.version_share_payout:
+                bad.append("version_share_payout non-empty")
+            if self.tiebreak_order == TiebreakOrder.MARKET_SHARE_FIRST:
+                bad.append("tiebreak_order=MARKET_SHARE_FIRST")
+            if bad:
+                raise ValueError(f"{', '.join(bad)} requires red_mode=MARKET_SHARE (no Market Share under RANSOM)")
+        for name in ("share_regain_cost_by_level", "share_regain_cap_by_level"):
+            missing = [lvl for lvl in _ALL_TRACK_LEVELS if lvl not in getattr(self, name)]
+            if missing:
+                raise ValueError(f"{name} is missing levels {missing}")
         self.research_track_model = ResearchTrackModel(self.research_track_model)
         v035 = self.research_track_model == ResearchTrackModel.V035_FIVE_LEVEL
         # NOTE: resolved once at construction; re-assigning research_track_model later does NOT re-resolve.
@@ -262,15 +385,37 @@ class GameConfig:
         if self.starting_secrets_by_player_count is None:
             # NOTE: resolved once at construction. Re-assigning round_sequence later does NOT
             # re-resolve this dict; use GameConfig.legacy_v033() or pass round_sequence to __init__.
-            self.starting_secrets_by_player_count = (
-                {2: 8, 3: 8, 4: 12}
-                if self.round_sequence == RoundSequence.V033_THREE_PHASE
-                else {2: 8, 3: 8, 4: 8}
-            )
+            if self.round_sequence == RoundSequence.V033_THREE_PHASE:
+                self.starting_secrets_by_player_count = {2: 8, 3: 8, 4: 12}
+            elif self.red_mode == RedMode.MARKET_SHARE:
+                self.starting_secrets_by_player_count = {2: 7, 3: 7, 4: 8}  # v0.36.0 [TUNE] (plan §11)
+            else:
+                self.starting_secrets_by_player_count = {2: 8, 3: 8, 4: 8}  # v0.34 / v0.35
+
+    @classmethod
+    def v036(cls, **overrides) -> "GameConfig":
+        """v0.36.0 candidate: Market Share Red, Public Relations Track, Market Collapse, 7/7/8 Secrets.
+
+        Balance iteration 1 (User 2026-11-06): Market Share start 17/18/18; only the v2.0 -> v3.0 comparison ($4).
+        Final tune (User, plan §11 / FINDINGS §34): starting Secrets 7/7/8 (2P/3P/4P), replacing 8/10/11.
+        """
+        overrides.setdefault("red_mode", RedMode.MARKET_SHARE)
+        overrides.setdefault("starting_secrets_by_player_count", {2: 7, 3: 7, 4: 8})  # [TUNE]
+        overrides.setdefault("market_share_start_by_player_count", {2: 17, 3: 18, 4: 18})
+        overrides.setdefault("version_share_payout", {"v2.0": 4})
+        return cls(**overrides)
+
+    @classmethod
+    def legacy_v035(cls, **overrides) -> "GameConfig":
+        """v0.35.0 baseline (today's defaults). Exists now so the parity test survives a later default flip."""
+        overrides.setdefault("red_mode", RedMode.RANSOM)
+        # Starting Secrets resolve in __post_init__ under RANSOM: 8/8/8 (six-phase), 8/8/12 (v0.33 round).
+        return cls(**overrides)
 
     @classmethod
     def legacy_v033(cls, **overrides) -> "GameConfig":
         """v0.33.0 baseline: three-phase round + 4P = 12 Secrets."""
+        overrides.setdefault("red_mode", RedMode.RANSOM)
         overrides.setdefault("legacy_archetype_override_bridge", True)
         overrides.setdefault("research_track_model", ResearchTrackModel.V034_THREE_LEVEL)
         return cls(round_sequence=RoundSequence.V033_THREE_PHASE, **overrides)
@@ -278,12 +423,26 @@ class GameConfig:
     @classmethod
     def legacy_v034(cls, **overrides) -> "GameConfig":
         """v0.34.0 baseline: six-phase round with the v0.34 three-level research tracks."""
+        overrides.setdefault("red_mode", RedMode.RANSOM)
         overrides.setdefault("research_track_model", ResearchTrackModel.V034_THREE_LEVEL)
         return cls(**overrides)
 
     @property
     def is_v035_tracks(self) -> bool:
         return self.research_track_model == ResearchTrackModel.V035_FIVE_LEVEL
+
+    @property
+    def is_market_share(self) -> bool:
+        return self.red_mode == RedMode.MARKET_SHARE
+
+    @property
+    def is_share_regain(self) -> bool:
+        return self.patents_mode == PatentsMode.SHARE_REGAIN
+
+    def market_share_start(self, num_players: Optional[int] = None) -> int:
+        """Starting (= maximum) Market Share for the player count (or self.num_players)."""
+        n = num_players if num_players is not None else self.num_players
+        return self.market_share_start_by_player_count.get(n, self.market_share_start_by_player_count.get(4, 18))
 
     @property
     def is_six_phase(self) -> bool:

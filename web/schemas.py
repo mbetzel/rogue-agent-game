@@ -38,6 +38,21 @@ ARCHETYPE_FLAVOR: Dict[str, Dict[str, str]] = {
 }
 
 
+def _patent_track_name(config: Any) -> str:
+    from sim.engine import research_tracks
+
+    return research_tracks.track_display_name(config, "PATENT")
+
+
+def _regain(config: Any, player: Any) -> Tuple[Optional[int], int]:
+    """(research per +1 Market Share, per-turn cap) under the Public Relations Track, else (None, 0)."""
+    if not getattr(config, "is_share_regain", False):
+        return None, 0
+    from sim.engine import research_tracks
+
+    return research_tracks.regain_rate(config, player)
+
+
 class GameStateSerializer:
     """Serializes GameState, PlayerState, Dice, and telemetry objects into JSON-compatible dictionaries."""
 
@@ -98,6 +113,7 @@ class GameStateSerializer:
             "description": card.description,
             "star_face": GameStateSerializer.serialize_face(card.star_face),
             "cost": card.cost,  # Added in v0.26.0 (INV-VAR-COST-01)
+            "printed_code": getattr(card, "printed_code", card.code),  # v0.36.0: R2_MKT / R3_MKT print as R2 / R3
         }
 
     @staticmethod
@@ -345,6 +361,14 @@ class GameStateSerializer:
             "patent_gain": player.get_patent_gain() if hasattr(player, "get_patent_gain") else 1,
             "slush_fund_used_game": bool(getattr(player, "slush_fund_used_game", False)),
             "purple_purchasable": bool(getattr(config, "purple_purchasable", True)),
+            # v0.36.0 Market Share / Public Relations Track (None under the v0.35 ruleset)
+            "market_share": getattr(player, "market_share", None),
+            "market_share_max": getattr(player, "market_share_max", None),
+            "patent_track_name": _patent_track_name(config),
+            "regain_cost": _regain(config, player)[0],
+            "regain_cap": _regain(config, player)[1],
+            "regain_this_turn": getattr(player, "regain_this_turn", 0),
+            "r2_actions_available": getattr(player, "r2_actions_available", 0),
             "is_patient_zero": player.is_patient_zero,
             "elimination_round": player.elimination_round,
             "elimination_reason": player.elimination_reason,
@@ -480,6 +504,17 @@ class GameStateSerializer:
             "game_over": state.game_over,
             "end_reason": state.end_reason.value if isinstance(state.end_reason, EndGameReason) else str(state.end_reason),
             "singularity_triggered": state.singularity_triggered,
+            # v0.36.0 Market Share ruleset
+            "red_mode": state.config.red_mode.value,
+            "is_market_share": state.config.is_market_share,
+            "is_share_regain": state.config.is_share_regain,
+            "patent_track_name": _patent_track_name(state.config),
+            "version_share_payout": dict(state.config.version_share_payout or {}),
+            "version_comparisons": [r.as_dict() for r in getattr(state, "version_comparisons", [])],
+            "market_collapse_triggered": getattr(state, "market_collapse_triggered", False),
+            "market_collapse_round": getattr(state, "market_collapse_round", None),
+            "market_collapse_pids": list(getattr(state, "market_collapse_pids", [])),
+            "end_triggers": list(getattr(state, "end_triggers", [])),
             # Temp Staffing & Contractors (v0.6 / v0.7)
             "contractor_supply": getattr(state, "contractor_supply", 12),
             "contractor_hire_cost": getattr(state.config, "contractor_hire_cost", 1),

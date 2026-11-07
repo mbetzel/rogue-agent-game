@@ -32,7 +32,7 @@ class TestV160Rules(unittest.TestCase):
     def test_setup_staging_cup_priming(self) -> None:
         """Setup staging cup starts with 1 Red, 1 Blue, 1 Green, 0 Black (v1.0 Script Kiddie)."""
         engine = GameEngine(
-            config=GameConfig(num_players=4),
+            config=GameConfig.legacy_v035(num_players=4),
             bots=[BaseBot(i) for i in range(4)],
             seed=42,
         )
@@ -44,7 +44,7 @@ class TestV160Rules(unittest.TestCase):
     def test_autonomous_pulse_by_version(self) -> None:
         """Autonomous pulse can be configured per version (tested here with v0.16.0 mapping: 1 in v1, 2 in v2, 2 in v3)."""
         engine = GameEngine(
-            config=GameConfig(num_players=4, autonomous_pulse_by_version={"v1.0": 1, "v2.0": 2, "v3.0": 2}),
+            config=GameConfig.legacy_v035(num_players=4, autonomous_pulse_by_version={"v1.0": 1, "v2.0": 2, "v3.0": 2}),
             bots=[BaseBot(i) for i in range(4)],
             seed=42,
         )
@@ -77,7 +77,7 @@ class TestV160Rules(unittest.TestCase):
                 return Phase3ActionPlan(take_dirty_income=True)
 
         engine = GameEngine(
-            config=GameConfig(num_players=2),
+            config=GameConfig.legacy_v035(num_players=2),
             bots=[GreedyDirtyBot(0), BaseBot(1)],
             seed=42,
         )
@@ -101,7 +101,7 @@ class TestV160Rules(unittest.TestCase):
                 return Phase3ActionPlan(use_cipher_ability=True, cipher_mode="CASH")
 
         engine = GameEngine(
-            config=GameConfig(num_players=2),
+            config=GameConfig.legacy_v035(num_players=2),
             bots=[CipherCashBot(0), BaseBot(1)],
             seed=42,
         )
@@ -150,7 +150,7 @@ class TestV160Rules(unittest.TestCase):
             AccelerationistBot(3),
         ]
         engine = GameEngine(
-            config=GameConfig(num_players=4),
+            config=GameConfig.legacy_v035(num_players=4),
             bots=bots,
             seed=123,
         )

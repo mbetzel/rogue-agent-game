@@ -40,7 +40,7 @@ from sim.engine.phase2_threat import (
 
 class TestV330Step2AAgencyAndSingularity(unittest.TestCase):
     def setUp(self):
-        self.config = GameConfig(num_players=2)
+        self.config = GameConfig.legacy_v035(num_players=2)
         self.engine = GameEngine(config=self.config, seed=42)
         self.p1 = self.engine.state.players[0]
         self.p2 = self.engine.state.players[1]

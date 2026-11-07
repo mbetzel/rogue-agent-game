@@ -22,7 +22,7 @@ class TestCardsAndDirectives(unittest.TestCase):
         self.all_versions = {v.directive_code: v for v in get_all_version_cards()}
 
     def test_directive_data_scraper_setup_cash(self) -> None:
-        cfg = GameConfig(num_players=2, starting_money=5)
+        cfg = GameConfig.legacy_v035(num_players=2, starting_money=5)
         deck = [self.all_versions["DATA_SCRAPER"], self.all_versions["RAAS"], self.all_versions["ZERO_DAY_OVERRIDE"]]
         engine = GameEngine(cfg, [self.bot, AdaptiveBalancedBot(1)], version_deck=deck, seed=42)
 
@@ -32,7 +32,7 @@ class TestCardsAndDirectives(unittest.TestCase):
 
     def test_directive_raas_red_strength_boost(self) -> None:
         """v0.15.0 RAAS Encrypted Memory: Any rolled die showing cash is locked when CASH lock is active."""
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         deck = [self.all_versions["SCRIPT_KIDDIE"], self.all_versions["RAAS"], self.all_versions["ZERO_DAY_OVERRIDE"]]
         engine = GameEngine(cfg, [self.bot, AdaptiveBalancedBot(1)], version_deck=deck, seed=42)
         engine.state.current_version_index = 1  # Active: RAAS
@@ -49,7 +49,7 @@ class TestCardsAndDirectives(unittest.TestCase):
 
     def test_directive_zero_day_override_reduces_shields(self) -> None:
         """v0.15.0 ZERO_DAY_OVERRIDE Kernel Lock: Any rolled die showing a shield is locked when SHIELD lock is active."""
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         deck = [self.all_versions["SCRIPT_KIDDIE"], self.all_versions["RAAS"], self.all_versions["ZERO_DAY_OVERRIDE"]]
         engine = GameEngine(cfg, [self.bot, AdaptiveBalancedBot(1)], version_deck=deck, seed=42)
         engine.state.current_version_index = 2  # Active: ZERO_DAY_OVERRIDE
@@ -71,7 +71,7 @@ class TestCardsAndDirectives(unittest.TestCase):
         die.current_face = self.all_variants["R2"].star_face
         player.ready_dice = [die]
 
-        engine = GameEngine(GameConfig(num_players=2), [self.bot, AdaptiveBalancedBot(1)], seed=42)
+        engine = GameEngine(GameConfig.legacy_v035(num_players=2), [self.bot, AdaptiveBalancedBot(1)], seed=42)
         commitments = {0: ShieldColor.RED}
 
         # 2 Red attack vs 2 Red shield -> 0 unblocked Red damage -> +$2 bounty awarded!
@@ -95,7 +95,7 @@ class TestCardsAndDirectives(unittest.TestCase):
         die2.current_face = Face("+$2", money=2)
 
         player.ready_dice = [die1, die2]
-        engine = GameEngine(GameConfig(num_players=2), [self.bot, AdaptiveBalancedBot(1)], seed=42)
+        engine = GameEngine(GameConfig.legacy_v035(num_players=2), [self.bot, AdaptiveBalancedBot(1)], seed=42)
 
         # Owned distinct colored dice = 2 (Yellow, Red). Payout = 2 + 2 = $4 from die1, plus $2 from die2 = +$6
         engine._apply_immediate_face_outputs(player)
@@ -109,7 +109,7 @@ class TestCardsAndDirectives(unittest.TestCase):
         die.current_face = y3_card.star_face
         player.ready_dice = [die]
 
-        engine = GameEngine(GameConfig(num_players=2), [self.bot, AdaptiveBalancedBot(1)], seed=42)
+        engine = GameEngine(GameConfig.legacy_v035(num_players=2), [self.bot, AdaptiveBalancedBot(1)], seed=42)
         engine._apply_immediate_face_outputs(player)
 
         self.assertEqual(player.secrets, 7)  # 6 + 1
@@ -121,7 +121,7 @@ class TestCardsAndDirectives(unittest.TestCase):
         from sim.bots import Phase3ActionPlan
 
         engine = GameEngine(
-            GameConfig(num_players=2, starting_money=10, starting_secrets=5),
+            GameConfig.legacy_v035(num_players=2, starting_money=10, starting_secrets=5),
             [self.bot, AdaptiveBalancedBot(1)],
             seed=42,
         )

@@ -42,7 +42,7 @@ class TestV03Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_autonomous_ai_pulse(self) -> None:
         """Autonomous AI Corruption Pulse adds +1 Black Cube to staging cup at Phase 1 start."""
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         bots = [BaseBot(0), BaseBot(1)]
         engine = GameEngine(config=config, bots=bots, seed=42)
 
@@ -90,7 +90,7 @@ class TestV03Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_starting_money_default(self) -> None:
         """Default starting money is $6 (or $7 under Data Scraper per v0.30.0 INV-START-CASH-01)."""
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         self.assertEqual(config.starting_money, 6)
 
         # Baseline engine with Script Kiddie
@@ -110,7 +110,7 @@ class TestV03Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_unblocked_red_drains_cash(self) -> None:
         """Unblocked Red damage drains cash down when money is sufficient; secrets remain intact."""
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         player.money = 5
@@ -135,7 +135,7 @@ class TestV03Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_unblocked_red_ransom_leak_to_secrets(self) -> None:
         """When money is exhausted ($0), unpaid Red damage leaks into Secrets (1 Secret per unpaid $1)."""
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         player.money = 2
@@ -161,7 +161,7 @@ class TestV03Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_cash_strictly_non_negative(self) -> None:
         """Money never drops below $0 even under massive unblocked Red ransomware attack."""
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         player.money = 1
@@ -188,7 +188,7 @@ class TestV03Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_patient_zero_strictly_on_secrets(self) -> None:
         """Patient Zero is strictly determined by Secrets <= 0, NOT by having $0 money."""
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[BaseBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
 
@@ -230,7 +230,7 @@ class TestV03Rules(unittest.TestCase):
             def take_phase3_actions(self, player_state, game_state, rng):
                 return Phase3ActionPlan(take_dirty_income=True)
 
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[DirtyIncomeBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         initial_money = player.money
@@ -267,7 +267,7 @@ class TestV03Rules(unittest.TestCase):
                     dirty_income_backlash_die_index=1,
                 )
 
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[SelectiveBacklashBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
         target_die = player.ready_dice[1]
@@ -286,7 +286,7 @@ class TestV03Rules(unittest.TestCase):
             def take_phase3_actions(self, player_state, game_state, rng):
                 return Phase3ActionPlan(take_dirty_income=True)
 
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[AggressiveDirtyBot(0), BaseBot(1)], seed=42)
         player = engine.state.players[0]
 
@@ -322,7 +322,7 @@ class TestV03Rules(unittest.TestCase):
                 # Survivor buys a die
                 return Phase3ActionPlan(market_purchases=[DieColor.RED])
 
-        config = GameConfig(num_players=2, tower_mode="flat_binomial", tower_flat_exit_prob=1.0)
+        config = GameConfig.legacy_v035(num_players=2, tower_mode="flat_binomial", tower_flat_exit_prob=1.0)
         engine = GameEngine(
             config=config,
             bots=[TrackingBot(0, p0_acted), TrackingBot(1, p1_acted)],
@@ -396,7 +396,7 @@ class TestV03Rules(unittest.TestCase):
                 self.log_list.append(self.bot_id)
                 return Phase3ActionPlan()
 
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(
             config=config,
             bots=[TrackingBot(0, p0_acted), TrackingBot(1, p1_acted)],
@@ -441,7 +441,7 @@ class TestV03Rules(unittest.TestCase):
                 p_acted.append(self.bot_id)
                 return Phase3ActionPlan()
 
-        config = GameConfig(num_players=2, dirty_income_enabled=True)
+        config = GameConfig.legacy_v035(num_players=2, dirty_income_enabled=True)
         engine = GameEngine(config=config, bots=[NoOpBot(0), NoOpBot(1)], seed=42)
 
         p0 = engine.state.players[0]

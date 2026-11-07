@@ -162,7 +162,7 @@ def run_combinations_test(num_runs_per_pair=250):
         tray_g = defaultdict(list)
 
         for i in range(num_runs_per_pair):
-            cfg = GameConfig(
+            cfg = GameConfig.legacy_v035(
                 num_players=4,
                 autonomous_pulse_by_version={"v1.0": 1, "v2.0": 1, "v3.0": 1},
                 starting_secrets=12,

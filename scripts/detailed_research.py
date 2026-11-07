@@ -68,7 +68,7 @@ def run_detailed_sweep(
 
     for i in range(num_runs):
         seed = base_seed + i
-        config = GameConfig(num_players=num_players)
+        config = GameConfig.legacy_v035(num_players=num_players)
 
         if mode == "user_exact" and num_players == 2:
             bots = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]

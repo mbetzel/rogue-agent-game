@@ -63,7 +63,7 @@ def run_no_dirty_income_sweep(num_players: int = 4, num_runs: int = 500, candida
 
     for run_idx in range(num_runs):
         seed = 100 + run_idx
-        config = GameConfig(num_players=num_players)
+        config = GameConfig.legacy_v035(num_players=num_players)
         # 4 Cautious human-style bots
         bots = [
             NoDirtyAdaptiveBot(0),

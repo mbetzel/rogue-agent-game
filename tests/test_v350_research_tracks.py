@@ -372,7 +372,7 @@ class TestRulesRemovals(V035Harness):
     def test_r17_flat_setup_all_companies(self):
         for code in CompanyCode:
             comps = [COMPANIES[code], COMPANIES[[c for c in CompanyCode if c != code][0]]]
-            cfg = GameConfig(num_players=2, enable_corporate_asymmetry=True)
+            cfg = GameConfig.legacy_v035(num_players=2, enable_corporate_asymmetry=True)
             e = GameEngine(cfg, [PlanBot(0), PlanBot(1)], seed=3, version_deck=noop_deck(), companies=comps)
             p = e.state.players[0]
             self.assertEqual((p.money, p.secrets, p.research_tokens), (6, 8, 0), code)
@@ -482,7 +482,7 @@ class TestLevel4Effects(V035Harness):
         self.assertEqual(p.research_tokens, 0)
 
     def test_r22_release_l4_reroll(self):
-        cfg = GameConfig(num_players=2)
+        cfg = GameConfig.legacy_v035(num_players=2)
         e = self.make()
         p = e.state.players[0]
         self.assertEqual(rt.free_rerolls_for(cfg, p, 2), 2)
@@ -545,7 +545,7 @@ class TestLevel4Effects(V035Harness):
         self.assertEqual((create_gray_die(1).faces[2].money, create_gray_die(1).faces[2].patches), (1, 1))
         v34 = [f.name for f in create_gray_die(1, "V034").faces]
         self.assertEqual(v34, ["Block 1 Any", "Block 1 Any", "+$1", "+$1", "+$1 / +1 🔬", "+1 🔬"])
-        e = GameEngine(GameConfig(num_players=2), seed=1)
+        e = GameEngine(GameConfig.legacy_v035(num_players=2), seed=1)
         for p in e.state.players:
             for d in p.ready_for_release_dice:
                 if d.color == DieColor.GRAY:
@@ -559,7 +559,7 @@ class TestLevel4Effects(V035Harness):
 # ----------------------------------------------------------------------------------------------
 # Whole-game invariants, parity, determinism, policy, telemetry
 # ----------------------------------------------------------------------------------------------
-def _run(seed: int, n: int, cfg_factory=GameConfig, mode: str = "fixed"):
+def _run(seed: int, n: int, cfg_factory=GameConfig.legacy_v035, mode: str = "fixed"):
     bots = [BOT_CLASSES[(seed + i) % 5](i) for i in range(n)]
     for b in bots:
         b.research_focus_mode = mode
@@ -668,7 +668,7 @@ class TestResearchPolicy(unittest.TestCase):
 
     def plan(self, p, final=False, order=("TRIAGE", "DEFENSE", "RELEASE", "PATENT"), others=None):
         s = self._S([p] + (others or []), final)
-        return plan_research(ResearchPolicy(focus_order=order), p, s, GameConfig())
+        return plan_research(ResearchPolicy(focus_order=order), p, s, GameConfig.legacy_v035())
 
     def test_r29_policy(self):
         # Focus first up to L4 (1+2+2+3 = 8)
@@ -696,7 +696,7 @@ class TestResearchPolicy(unittest.TestCase):
     def test_r29b_policy_replaces_plan_and_takes_research_on_choice_faces(self):
         from sim.bots.research_policy import adjust_declared_choices
 
-        e = GameEngine(GameConfig(num_players=2), seed=5)
+        e = GameEngine(GameConfig.legacy_v035(num_players=2), seed=5)
         p = e.state.players[0]
         p.research_tokens = 3
         plan = phase6_operations.resolve_operations_plan(p.bot, p, e.state, e.rng)

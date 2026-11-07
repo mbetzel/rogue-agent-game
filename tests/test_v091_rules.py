@@ -51,7 +51,7 @@ class TestCompilerPrimingAndBufferOverflow(unittest.TestCase):
     """Test suite covering Compiler Buffer Overflow & Tower Priming for v0.9.1."""
 
     def setUp(self) -> None:
-        self.config = GameConfig(num_players=4)
+        self.config = GameConfig.legacy_v035(num_players=4)
         self.bots = [AdaptiveBalancedBot(i) for i in range(4)]
 
     # =========================================================================
@@ -60,7 +60,7 @@ class TestCompilerPrimingAndBufferOverflow(unittest.TestCase):
 
     def test_priming_enabled_by_default(self) -> None:
         """1. Verify GameConfig has priming and overflow enabled by default with correct cube payloads."""
-        cfg = GameConfig()
+        cfg = GameConfig.legacy_v035()
         self.assertTrue(cfg.enable_compiler_priming)
         self.assertEqual(
             cfg.compiler_priming_cubes,
@@ -123,7 +123,7 @@ class TestCompilerPrimingAndBufferOverflow(unittest.TestCase):
 
     def test_priming_disabled_configuration(self) -> None:
         """4. Verify that when enable_compiler_priming=False, the tower starts completely empty."""
-        cfg = GameConfig(num_players=4, enable_compiler_priming=False)
+        cfg = GameConfig.legacy_v035(num_players=4, enable_compiler_priming=False)
         engine = GameEngine(config=cfg, bots=self.bots, seed=42)
 
         self.assertEqual(engine.state.tower.total_stuck(), 0)
@@ -138,7 +138,7 @@ class TestCompilerPrimingAndBufferOverflow(unittest.TestCase):
 
     def test_buffer_overflow_triggered_on_zero_exits(self) -> None:
         """5. Verify buffer overflow is triggered and tracked when 0 cubes exit in Phase 2."""
-        cfg = GameConfig(
+        cfg = GameConfig.legacy_v035(
             num_players=4,
             tower_mode=TowerMode.FLAT_BINOMIAL,
             tower_flat_exit_prob=0.0,
@@ -158,7 +158,7 @@ class TestCompilerPrimingAndBufferOverflow(unittest.TestCase):
 
     def test_buffer_overflow_injects_rgb_into_staging_cup(self) -> None:
         """6. Verify buffer overflow injects 1 Red, 1 Blue, and 1 Green cube into staging_cup."""
-        cfg = GameConfig(
+        cfg = GameConfig.legacy_v035(
             num_players=4,
             tower_mode=TowerMode.FLAT_BINOMIAL,
             tower_flat_exit_prob=0.0,
@@ -176,7 +176,7 @@ class TestCompilerPrimingAndBufferOverflow(unittest.TestCase):
 
     def test_buffer_overflow_no_corruption_no_damage(self) -> None:
         """7. Verify 0 corruption advances and 0 damage is dealt to player cash, secrets, or dice."""
-        cfg = GameConfig(
+        cfg = GameConfig.legacy_v035(
             num_players=4,
             tower_mode=TowerMode.FLAT_BINOMIAL,
             tower_flat_exit_prob=0.0,
@@ -206,7 +206,7 @@ class TestCompilerPrimingAndBufferOverflow(unittest.TestCase):
 
     def test_buffer_overflow_unused_shields_remain_ready(self) -> None:
         """8. Verify committed permanent shield dice do not wear into unpatched during buffer overflow."""
-        cfg = GameConfig(
+        cfg = GameConfig.legacy_v035(
             num_players=4,
             tower_mode=TowerMode.FLAT_BINOMIAL,
             tower_flat_exit_prob=0.0,
@@ -239,7 +239,7 @@ class TestCompilerPrimingAndBufferOverflow(unittest.TestCase):
 
     def test_buffer_overflow_contractors_expire(self) -> None:
         """9. Verify hired White Contractor dice expire and return to supply during buffer overflow."""
-        cfg = GameConfig(
+        cfg = GameConfig.legacy_v035(
             num_players=4,
             tower_mode=TowerMode.FLAT_BINOMIAL,
             tower_flat_exit_prob=0.0,
@@ -263,7 +263,7 @@ class TestCompilerPrimingAndBufferOverflow(unittest.TestCase):
 
     def test_buffer_overflow_flag_resets_on_normal_round(self) -> None:
         """10. Verify last_round_buffer_overflow flag resets on a round with exits, while total persists."""
-        cfg = GameConfig(
+        cfg = GameConfig.legacy_v035(
             num_players=4,
             tower_mode=TowerMode.FLAT_BINOMIAL,
             tower_flat_exit_prob=0.0,
@@ -287,7 +287,7 @@ class TestCompilerPrimingAndBufferOverflow(unittest.TestCase):
 
     def test_buffer_overflow_disabled_configuration(self) -> None:
         """11. Verify that when enable_buffer_overflow=False, 0 exits does not trigger buffer overflow."""
-        cfg = GameConfig(
+        cfg = GameConfig.legacy_v035(
             num_players=4,
             enable_buffer_overflow=False,
             tower_mode=TowerMode.FLAT_BINOMIAL,
@@ -308,7 +308,7 @@ class TestCompilerPrimingAndBufferOverflow(unittest.TestCase):
 
     def test_consecutive_buffer_overflows_accumulation(self) -> None:
         """12. Verify consecutive buffer overflow rounds accumulate total_buffer_overflows and staging cubes."""
-        cfg = GameConfig(
+        cfg = GameConfig.legacy_v035(
             num_players=4,
             tower_mode=TowerMode.FLAT_BINOMIAL,
             tower_flat_exit_prob=0.0,
@@ -341,7 +341,7 @@ class TestCompilerPrimingAndBufferOverflow(unittest.TestCase):
 
     def test_end_game_result_records_total_buffer_overflows(self) -> None:
         """13. Verify EndGameResult properly includes total_buffer_overflows."""
-        cfg = GameConfig(
+        cfg = GameConfig.legacy_v035(
             num_players=4,
             tower_mode=TowerMode.FLAT_BINOMIAL,
             tower_flat_exit_prob=0.0,
@@ -358,7 +358,7 @@ class TestCompilerPrimingAndBufferOverflow(unittest.TestCase):
 
     def test_round_telemetry_records_buffer_overflow(self) -> None:
         """14. Verify RoundTelemetry.buffer_overflow is recorded in telemetry_history."""
-        cfg = GameConfig(
+        cfg = GameConfig.legacy_v035(
             num_players=4,
             tower_mode=TowerMode.FLAT_BINOMIAL,
             tower_flat_exit_prob=0.0,

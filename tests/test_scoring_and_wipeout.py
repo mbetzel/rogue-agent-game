@@ -23,7 +23,7 @@ from web.schemas import GameStateSerializer
 
 class TestScoringAndWipeout(unittest.TestCase):
     def setUp(self) -> None:
-        self.config = GameConfig(num_players=2)
+        self.config = GameConfig.legacy_v035(num_players=2)
         self.bot0 = AdaptiveBalancedBot(0)
         self.bot1 = AdaptiveBalancedBot(1)
 
@@ -208,7 +208,7 @@ class TestScoringAndWipeout(unittest.TestCase):
         rng = random.Random(42)
 
         for bot in bots:
-            engine = GameEngine(GameConfig(num_players=2), [bot, self.bot1], seed=42)
+            engine = GameEngine(GameConfig.legacy_v035(num_players=2), [bot, self.bot1], seed=42)
             engine.state.is_final_round = True
 
             # Broke with high secrets and ready dice: conditions that would normally trigger Dirty Income
@@ -245,7 +245,7 @@ class TestScoringAndWipeout(unittest.TestCase):
         rng = random.Random(42)
 
         for bot in bots:
-            engine = GameEngine(GameConfig(num_players=2), [bot, self.bot1], seed=42)
+            engine = GameEngine(GameConfig.legacy_v035(num_players=2), [bot, self.bot1], seed=42)
             engine.state.is_final_round = True
 
             # $5 cash, 0 patches, 1 ready gray die, 2 unpatched colored dice
@@ -354,7 +354,7 @@ class TestScoringAndWipeout(unittest.TestCase):
 
     def test_total_wipeout_hierarchical_tiebreakers(self) -> None:
         """In total wipeout with tied net_score, differentiate by secrets, unfulfilled_destructions, money, colored dice, patches, unpatched."""
-        cfg_4p = GameConfig(num_players=4)
+        cfg_4p = GameConfig.legacy_v035(num_players=4)
         bots = [AdaptiveBalancedBot(i) for i in range(4)]
         engine = GameEngine(cfg_4p, bots, seed=42)
 

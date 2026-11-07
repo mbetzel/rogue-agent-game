@@ -29,7 +29,7 @@ export function renderGameOverModal() {
     <tr style="border-bottom: 1px solid var(--border-color); text-align: left;">
       <td style="padding: 6px;">#${r.rank}</td>
       <td style="padding: 6px;">${r.bot_name}</td>
-      <td style="padding: 6px;">${r.secrets} Secrets</td>
+      <td style="padding: 6px;">${r.secrets} Secrets${r.market_share !== null && r.market_share !== undefined ? ` · ${r.market_share} Market Share` : ""}</td>
       <td style="padding: 6px;">${r.overflow_penalties}</td>
       <td style="padding: 6px; font-weight: 700; color: var(--accent-gold);">${r.net_score}</td>
       <td style="padding: 6px;">${r.is_patient_zero ? '<span style="color: #ff0055;">Breached</span>' : '<span style="color: #00ff88;">Survived</span>'}</td>
@@ -42,7 +42,9 @@ export function renderGameOverModal() {
       ${res.is_total_wipeout && res.winner_name ? `<div style="font-size: 0.85rem; color: var(--text-dim);">Top ${res.is_shared_victory ? "(shared)" : ""}: ${res.winner_name}</div>` : ""}
     </h2>
     <p style="color: var(--text-dim); font-size: 0.85rem;">
-      Concluded in Round ${res.total_rounds} | Trigger: ${res.end_reason.toUpperCase()}
+      Concluded in Round ${res.total_rounds} | Trigger: ${res.end_reason.replace(/_/g, " ").toUpperCase()}
+      ${(res.market_collapse_pids || []).length ? ` | Market Collapse in Round ${res.market_collapse_round}` : ""}
+      ${res.tiebreak_decided_by && !["secrets", "sole_survivor"].includes(res.tiebreak_decided_by) ? ` | Tiebreak: ${res.tiebreak_decided_by.replace(/_/g, " ")}` : ""}
     </p>
 
     <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px;">

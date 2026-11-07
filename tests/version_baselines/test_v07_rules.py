@@ -58,7 +58,7 @@ class TestV07Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_config_parameters_v07(self) -> None:
         """GameConfig defines progressive contractor pricing (1, 2, 3), cost helper methods, and Yellow VP=0 in v0.19.0."""
-        cfg = GameConfig()
+        cfg = GameConfig.legacy_v035()
         self.assertEqual(cfg.contractor_cost_progression, (1, 2, 3))
         self.assertEqual(cfg.contractor_max_hire, 3)
         self.assertEqual(cfg.vp_per_die[DieColor.YELLOW], 0)
@@ -207,7 +207,7 @@ class TestV07Rules(unittest.TestCase):
     def test_staging_cup_initialization_2p_and_4p(self) -> None:
         """Engine initializes staging cup using version_deck[0].get_staging_payload(num_players)."""
         engine_2p = GameEngine(
-            config=GameConfig(num_players=2),
+            config=GameConfig.legacy_v035(num_players=2),
             bots=[BaseBot(0), BaseBot(1)],
             seed=42,
         )
@@ -217,7 +217,7 @@ class TestV07Rules(unittest.TestCase):
         self.assertEqual(engine_2p.state.staging_cup[CubeColor.BLACK], 0)
 
         engine_4p = GameEngine(
-            config=GameConfig(num_players=4),
+            config=GameConfig.legacy_v035(num_players=4),
             bots=[BaseBot(0), BaseBot(1), BaseBot(2), BaseBot(3)],
             seed=42,
         )
@@ -233,7 +233,7 @@ class TestV07Rules(unittest.TestCase):
         """In Step 2A, version upgrade to RaaS adds 1 Red, 1 Green in 2P, and 2 Red, 1 Green in 4P."""
         # 2-Player Match
         engine_2p = GameEngine(
-            config=GameConfig(num_players=2),
+            config=GameConfig.legacy_v035(num_players=2),
             bots=[BaseBot(0), BaseBot(1)],
             seed=42,
         )
@@ -262,7 +262,7 @@ class TestV07Rules(unittest.TestCase):
             get_all_version_cards()[4],
         ]
         engine_4p = GameEngine(
-            config=GameConfig(num_players=4, corruption_track_flat_capacity=4),
+            config=GameConfig.legacy_v035(num_players=4, corruption_track_flat_capacity=4),
             bots=[BaseBot(0), BaseBot(1), BaseBot(2), BaseBot(3)],
             seed=42,
             version_deck=custom_v07_deck,
@@ -282,7 +282,7 @@ class TestV07Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_contractor_progressive_cost_calculation(self) -> None:
         """get_contractor_cost_for_hire calculates exact progressive cumulative costs."""
-        cfg = GameConfig()
+        cfg = GameConfig.legacy_v035()
         # From 0 hired: 1 die costs $1, 2 dice cost $3, 3 dice cost $6
         self.assertEqual(cfg.get_contractor_cost_for_hire(1, already_hired=0), 1)
         self.assertEqual(cfg.get_contractor_cost_for_hire(2, already_hired=0), 3)
@@ -377,7 +377,7 @@ class TestV07Rules(unittest.TestCase):
     def test_commercial_exposure_ready_yellow_demoted_first(self) -> None:
         """Commercial Exposure: Ready Yellow die is demoted first before Contractor Sacrifice can absorb Green malware."""
         engine = GameEngine(
-            config=GameConfig(num_players=2),
+            config=GameConfig.legacy_v035(num_players=2),
             bots=[BaseBot(0), BaseBot(1)],
             seed=42,
         )
@@ -415,7 +415,7 @@ class TestV07Rules(unittest.TestCase):
     def test_commercial_exposure_multiple_green_malware(self) -> None:
         """With 2 Green malware: 1st is absorbed by Contractor Sacrifice; 2nd destroys fallback ready die."""
         engine = GameEngine(
-            config=GameConfig(num_players=2),
+            config=GameConfig.legacy_v035(num_players=2),
             bots=[BaseBot(0), BaseBot(1)],
             seed=42,
         )
@@ -452,7 +452,7 @@ class TestV07Rules(unittest.TestCase):
     def test_commercial_exposure_no_yellow_allows_contractor_sacrifice(self) -> None:
         """When player has no Ready Yellow dice, Contractor Sacrifice absorbs Green malware normally."""
         engine = GameEngine(
-            config=GameConfig(num_players=2),
+            config=GameConfig.legacy_v035(num_players=2),
             bots=[BaseBot(0), BaseBot(1)],
             seed=42,
         )
@@ -489,7 +489,7 @@ class TestV07Rules(unittest.TestCase):
     def test_commercial_exposure_unpatched_yellow_not_demoted_again(self) -> None:
         """Unpatched Yellow dice do not trigger Commercial Exposure; Contractor Sacrifice absorbs malware."""
         engine = GameEngine(
-            config=GameConfig(num_players=2),
+            config=GameConfig.legacy_v035(num_players=2),
             bots=[BaseBot(0), BaseBot(1)],
             seed=42,
         )

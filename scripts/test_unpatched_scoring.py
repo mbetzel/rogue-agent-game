@@ -50,7 +50,7 @@ def run_scoring_comparison(num_runs: int = 1500, base_seed: int = 200):
         # Test across runs
         for i in range(num_runs):
             seed = base_seed + i
-            config = GameConfig(num_players=num_players)
+            config = GameConfig.legacy_v035(num_players=num_players)
 
             if num_players == 2:
                 bots = [AdaptiveBalancedBot(0), SecOpsTurtleBot(1)]
