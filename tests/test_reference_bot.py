@@ -570,5 +570,122 @@ class TestCleanup(unittest.TestCase):
         self.assertTrue(os.path.exists(c33.fixture_path("mixed", 2)))  # full v033 replay: test_v350 / test_v360
 
 
+class TestPortfolioLines(unittest.TestCase):
+    """FINDINGS §40 follow-up: Public Relations push and Market Share dump portfolio members."""
+
+    def _snapshot_state(self, want=(3, 6), seed=4):
+        cls = type("E", (SnapAtEngine,), {"want": want})
+        classes = _bot_classes()
+        bots = [classes[(seed + i) % 5](i) for i in range(3)]
+        e = cls(V036(num_players=3), bots, seed=seed)
+        e.run_game()
+        self.assertIsNotNone(e.kept)
+        se = e.kept.engine
+        p = next(q for q in se.state.players if not q.is_patient_zero)
+        return se, p
+
+    def test_members_present(self):
+        labels = [label for label, _ in rs.build_portfolio(0)]
+        self.assertEqual(len(labels), 13)
+        self.assertIn("PublicRelationsPush", labels)
+        self.assertIn("MarketShareDump", labels)
+        rb = ReferenceSearchBot(1, 5)
+        members = dict(rb.portfolio)
+        for label in ("PublicRelationsPush", "MarketShareDump"):
+            self.assertEqual(members[label].research_focus_mode, "fixed")
+            self.assertFalse(members[label].research_aware)
+
+    def test_distinct_legal_operations_candidates(self):
+        se, p = self._snapshot_state()
+        p.research_tokens = 9
+        p.market_share = max(0, p.market_share_max - 4)
+        p.patent_level = 1
+        members = dict(rs.build_portfolio(p.player_id))
+        g0 = se.rng.getstate()
+        recs = {}
+        for label in ("PublicRelationsPush", "MarketShareDump"):
+            key, rec = rs._candidate("take_operations_actions", members[label],
+                                     {"player_state": p, "game_state": se.state}, random.Random(1))
+            recs[label] = (key, rec)
+            final = post_process_operations_plan(members[label], copy.deepcopy(rec[0]), p, se.state, random.Random(1))
+            costs = se.config.track_step_costs
+            lv = {"DEFENSE": p.defense_level, "TRIAGE": p.triage_level, "RELEASE": p.release_level,
+                  "PATENT": p.patent_level}
+            spent = 0
+            for t in final.track_upgrades:
+                spent += costs[lv[t]]
+                lv[t] += 1
+                self.assertLessEqual(lv[t], 4)
+            self.assertLessEqual(spent, p.research_tokens, label)
+            if label == "MarketShareDump":
+                self.assertNotIn("PATENT", final.track_upgrades)
+                self.assertEqual(final.share_regain, 0)
+            else:
+                self.assertEqual(final.track_upgrades[0], "PATENT")
+                self.assertGreater(final.share_regain, 0)
+        self.assertEqual(se.rng.getstate(), g0)  # H1
+        self.assertNotEqual(recs["PublicRelationsPush"][0], recs["MarketShareDump"][0])
+
+    def test_distinct_legal_generic_split(self):
+        from sim.engine.phase4_attack_resolution import validate_any_shield_allocation
+
+        se, p = self._snapshot_state()
+        p.secrets = max(p.secrets, 8)
+        members = dict(rs.build_portfolio(p.player_id))
+        rem = {CubeColor.RED: 2, CubeColor.BLUE: 2, CubeColor.GREEN: 2}
+        kw = {"player_state": p, "remaining": rem, "available_any": 2, "game_state": se.state, "attack": dict(rem)}
+        keys = {}
+        for label in ("PublicRelationsPush", "MarketShareDump"):
+            key, legal = rs._candidate("choose_any_shield_allocation", members[label], kw, random.Random(1))
+            self.assertEqual(legal, validate_any_shield_allocation(legal, rem, 2))
+            self.assertEqual(sum(legal.values()), 2)
+            keys[label] = legal
+        self.assertEqual(keys["PublicRelationsPush"][CubeColor.RED], 2)
+        self.assertEqual(keys["MarketShareDump"][CubeColor.RED], 0)
+
+    def test_no_reference_seat_unchanged(self):
+        # games without a reference seat never build the portfolio: same result on either engine
+        for seed in range(10):
+            a = _build("mixed", 3, seed).run_game()
+            b = _build("mixed", 3, seed, engine_cls=ReferenceSearchEngine).run_game()
+            self.assertEqual(_summary(a), _summary(b))
+        with mock.patch.object(rs, "build_portfolio", side_effect=AssertionError("built")):
+            _build("mixed", 3, 1, engine_cls=ReferenceSearchEngine).run_game()
+
+    def test_research_choice_pick_kept(self):
+        from sim.bots.research_policy import adjust_declared_choices
+        from sim.engine.state import PlayerState
+
+        engine_cfg = GameConfig.v037(num_players=3)
+        found = 0
+        for seed in range(30):
+            cls = type("E", (SnapAtEngine,), {"want": (3, 6)})
+            classes = _bot_classes()
+            e = cls(GameConfig.v037(num_players=3), [classes[(seed + i) % 5](i) for i in range(3)], seed=seed)
+            e.run_game()
+            if e.kept is None:
+                continue
+            for p in e.kept.engine.state.players:
+                dice = []
+                for d in p.total_dice:
+                    for f in d.faces:
+                        if f.is_choice and not f.has_shield_option and any(c.patches > 0 for c in f.choices):
+                            d.current_face = f
+                            dice.append(d)
+                            break
+                ref = adjust_declared_choices(AdaptiveBalancedBot(0), p, dice, {}, engine_cfg)
+                if not ref:
+                    continue
+                for cls_ in (rs.PublicRelationsPushBot, rs.MarketShareDumpBot):
+                    b = cls_(p.player_id)
+                    self.assertEqual(adjust_declared_choices(b, p, dice, {}, engine_cfg), {})  # engine no-op
+                    self.assertEqual(b.adjust_declared_choices(p, dice, {}, engine_cfg), ref, cls_.__name__)
+                    self.assertFalse(b.research_aware)
+                    for idx in ref:
+                        self.assertFalse(dice[idx].current_face.has_shield_option)  # Blue-first faces untouched
+                found += 1
+        self.assertGreater(found, 0)
+
+
 if __name__ == "__main__":
     unittest.main()

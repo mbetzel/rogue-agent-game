@@ -2146,3 +2146,14 @@ Question (User, 2026-11-07): is the reference bot fit as the "competent player" 
 **Status: analysis recorded (game-designer, 2026-11-07). No RULES.md, PnP, web or sim change.**
 
 **Decisions (User, 2026-11-07):** adopt the roster rule (one Mixed seat in every routine sweep; ref1, 3P, 1,200 games, as the edge check on every rule candidate). Close the kamikaze Market Collapse concern with lever A (no rule change). Add "Public Relations push" and "Market Share dump" as reference-bot candidates so future no-exploit results cover those lines.
+
+**Addendum: portfolio follow-up (game-designer, 2026-11-07).** The 13-member portfolio lifts ref1 v0.37 3P win 69.1 → 78.6% (±2.3). Attribution, 1,200 games each, same seeds; details in [docs/findings/v370_reference_bot_attribution.md](docs/findings/v370_reference_bot_attribution.md), data in `sim_results/reference_bot/attribution/`:
+
+| Portfolio | Win % | Δ | Collapse off | Ref at 0 at trigger (alone) | MLB 1st | Red share of blocks |
+|---|---|---|---|---|---|---|
+| 11 | 69.1 | — | 66.7 | 375 (59) | 64% | 36% |
+| + push | 74.2 | +5.1 | 68.0 | 254 (35) | 78% | 42% |
+| + dump | 76.3 | +7.2 | 78.6 | 446 (94) | 63% | 34% |
+| 13 | 78.6 | +9.5 | 77.6 | 321 (51) | 75% | 40% |
+
+Both lines contribute (overlapping, not additive). Push is undervalued Red blocking and Public Relations, and it pays mainly by keeping the ref off 0 when Market Collapse triggers. Dump trades Market Share for Secrets and is stronger with Collapse off, so it is not kamikaze. §40 "no kamikaze" and §38 "Public Relations-first loses" both stand; §38 is refined to "situational Public Relations wins". Candidate levers (none decided): A bot update only (recommended); B larger Market Leader Bonus gap [TUNE]; C stronger Red [TUNE]; D Secrets penalty at 0 Market Share (new term, needs User approval). No RULES.md, PnP, web or sim change.

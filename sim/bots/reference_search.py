@@ -28,7 +28,7 @@ from sim.bots.mixed_policy import (
 from sim.bots.reckless_saboteur import RecklessSaboteurBot
 from sim.bots.secops_turtle import SecOpsTurtleBot
 from sim.bots.venture_greed import VentureGreedBot
-from sim.config import CubeColor
+from sim.config import CubeColor, DieColor
 from sim.engine import fast_clone
 from sim.engine.core import GameEngine
 
@@ -42,8 +42,139 @@ SEARCHED_PHASE: Dict[str, int] = {"commit_shields": 1, "choose_any_shield_alloca
 _COLORS = (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN)
 
 
+# [TUNE-BOT] Public Relations push / Market Share dump portfolio lines (FINDINGS §40 follow-up, 2026-11-07)
+PR_PUSH_POLICY = MarketSharePolicy(red_base_value=5.0, red_danger_value=3.0, danger_margin=4, red_buy_share_frac=1.0)
+PR_PUSH_FOCUS = ("PATENT", "DEFENSE", "TRIAGE", "RELEASE")  # PATENT = Public Relations Track (internal key)
+PR_PUSH_FILL = (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN)
+DUMP_POLICY = MarketSharePolicy(red_base_value=-10.0, red_danger_value=0.0, red_collapse_value=0.0,
+                                comparison_weight=0.0, danger_margin=-1000, red_buy_share_frac=-1.0,
+                                leader_bonus_aware=False)
+DUMP_FOCUS = ("DEFENSE", "TRIAGE", "RELEASE", "PATENT")  # PATENT never bought by the dump line
+DUMP_FILL = (CubeColor.BLUE, CubeColor.GREEN, CubeColor.RED)
+
+
+def _ordered_research(player: Any, state: Any, pr_first: bool, focus: Sequence[str]) -> Tuple[List[str], int]:
+    """Greedy research split ``(track_upgrades, share_regain)`` for the two lines below (no RNG).
+
+    ``pr_first``: Public Relations Track steps, then Market Share regain (post-upgrade rate), then the other
+    tracks. Otherwise: the research-policy want-list without the Public Relations Track and no regain."""
+    from sim.bots.research_policy import LEVEL_ATTR, ResearchPolicy, _want_list
+
+    cfg = state.config
+    costs = cfg.track_step_costs
+    res = int(player.research_tokens)
+    lv = {t: int(getattr(player, LEVEL_ATTR[t])) for t in LEVEL_ATTR}
+    upgrades: List[str] = []
+
+    def buy(t: str) -> bool:
+        nonlocal res
+        if lv[t] >= 4 or res < int(costs[lv[t]]):
+            return False
+        res -= int(costs[lv[t]])
+        lv[t] += 1
+        upgrades.append(t)
+        return True
+
+    regain = 0
+    if pr_first:
+        while buy("PATENT"):
+            pass
+        if getattr(cfg, "is_share_regain", False) and getattr(player, "market_share", None) is not None:
+            lvl = max(0, min(4, lv["PATENT"]))
+            cost, cap = int(cfg.share_regain_cost_by_level[lvl]), int(cfg.share_regain_cap_by_level[lvl])
+            room = max(0, min(cap, int(player.market_share_max) - int(player.market_share)))
+            if cost > 0:
+                regain = min(room, res // cost)
+                res -= regain * cost
+        for t in focus:
+            if t != "PATENT":
+                buy(t)
+    else:
+        others = tuple(t for t in focus if t != "PATENT")
+        for t in _want_list(ResearchPolicy(focus_order=others), lv):  # type: ignore[arg-type]
+            if t == "PATENT" or lv[t] >= 4:
+                continue
+            if not buy(t):
+                break
+    return upgrades, regain
+
+
+class _ResearchLineBot(AdaptiveBalancedBot):
+    """AdaptiveBalanced with a fixed research split; ``research_aware=False`` so the engine's Phase 6
+    post-processing (mirrored profile, H2) keeps the split instead of re-planning it."""
+
+    pr_first = False
+    research_aware = False
+
+    def take_operations_actions(self, player_state, game_state, rng):
+        plan = super().take_operations_actions(player_state, game_state, rng)
+        if getattr(game_state.config, "is_v035_tracks", False):
+            ups, regain = _ordered_research(player_state, game_state, self.pr_first,
+                                            self.research_focus_v036 or self.research_focus)
+            plan.track_upgrades = ups
+            plan.patent_filings = 0
+            if getattr(game_state.config, "is_share_regain", False):
+                plan.share_regain = regain
+        return plan
+
+    def adjust_declared_choices(self, player_state, active_dice, declared, config):
+        """v0.35 research auto-pick (``research_policy.adjust_declared_choices``), which the engine skips for
+        ``research_aware=False``. It only touches choice faces without a shield option, so the dump line's
+        Blue-first rule on shield-option faces always wins."""
+        from sim.bots.research_policy import adjust_declared_choices as pick
+
+        prev = self.__dict__.get("research_aware", None)
+        self.research_aware = True
+        try:
+            return pick(self, player_state, active_dice, declared, config)
+        finally:
+            if prev is None:
+                del self.research_aware
+            else:
+                self.research_aware = prev
+
+    def declare_choices(self, player_state, active_dice=None, *args, **kwargs):
+        out = super().declare_choices(player_state, active_dice, *args, **kwargs)
+        cfg = getattr(player_state, "config", None)
+        dice = active_dice if active_dice is not None else kwargs.get("rolled_dice")
+        return self.adjust_declared_choices(player_state, dice or [], out, cfg) if cfg is not None else out
+
+
+class PublicRelationsPushBot(_ResearchLineBot):
+    """[TUNE-BOT] Phase 6: Public Relations Track then Market Share regain first; Phase 1/4: Red first."""
+
+    pr_first = True
+    research_focus_v036 = PR_PUSH_FOCUS
+    market_share_policy = PR_PUSH_POLICY
+    any_shield_fill_order = PR_PUSH_FILL
+    market_color_preference = (DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW)
+
+
+class MarketShareDumpBot(_ResearchLineBot):
+    """[TUNE-BOT] Ignores Red: no Public Relations Track, no regain, Generic shields on Blue/Green first."""
+
+    pr_first = False
+    research_focus_v036 = DUMP_FOCUS
+    market_share_policy = DUMP_POLICY
+    any_shield_fill_order = DUMP_FILL
+    market_color_preference = (DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW)
+
+    def commit_shields(self, player_state, rolled_dice, staging_cubes, stuck_cubes, directive_code, rng):
+        # Blue-option faces are committed to Blue whenever any Blue threat exists (Red is ignored)
+        out = super().commit_shields(player_state, rolled_dice, staging_cubes, stuck_cubes, directive_code, rng)
+        from sim.config import ShieldColor
+
+        if staging_cubes.get(CubeColor.BLUE, 0) + stuck_cubes.get(CubeColor.BLUE, 0) > 0:
+            for idx, die in enumerate(rolled_dice):
+                f = die.current_face
+                if f and not f.is_glitch and not f.is_shield and f.has_shield_option:
+                    out[idx] = ShieldColor.BLUE
+        return out
+
+
 def build_portfolio(bot_id: int) -> List[Tuple[str, BaseBot]]:
-    """Spec §5.3: 5 archetypes + 4 Adaptive Balanced focus rotations + 2 Market Share policy variants (11)."""
+    """Spec §5.3: 5 archetypes + 4 Adaptive Balanced focus rotations + 2 Market Share policy variants
+    + Public Relations push + Market Share dump (13; FINDINGS §40 follow-up)."""
     members: List[Tuple[str, BaseBot]] = [(cls.__name__, cls(bot_id)) for cls in (
         AccelerationistBot, AdaptiveBalancedBot, RecklessSaboteurBot, SecOpsTurtleBot, VentureGreedBot)]
     base = tuple(AdaptiveBalancedBot.research_focus)
@@ -57,6 +188,8 @@ def build_portfolio(bot_id: int) -> List[Tuple[str, BaseBot]]:
         b = AdaptiveBalancedBot(bot_id)
         b.market_share_policy = pol
         members.append((f"AdaptiveBalanced[{label}]", b))
+    members.append(("PublicRelationsPush", PublicRelationsPushBot(bot_id)))
+    members.append(("MarketShareDump", MarketShareDumpBot(bot_id)))
     for _, b in members:
         force_fixed_focus(b)
     return members
