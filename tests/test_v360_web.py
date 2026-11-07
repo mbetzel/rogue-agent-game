@@ -68,8 +68,9 @@ class TestWebV036(unittest.TestCase):
         self.assertEqual(st["patent_track_name"], "Public Relations Track")
         self.assertEqual(st["version_share_payout"], {"v2.0": 4})
         p0 = st["players"][0]
+        # v0.37 Phase B: the web default is v0.37.0 (3P starts at 8 Secrets; Market Share unchanged)
         self.assertEqual((p0["secrets"], p0["market_share"], p0["market_share_max"], p0["regain_cost"], p0["regain_cap"]),
-                         (7, 18, 18, 2, 1))
+                         (8, 18, 18, 2, 1))
         red = st["market"]["red"]["variant"]
         self.assertEqual((red["code"], red["name"]), ("R1", "Brand Protection"))
 

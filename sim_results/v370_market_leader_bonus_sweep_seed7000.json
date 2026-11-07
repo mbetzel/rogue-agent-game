@@ -1,0 +1,4563 @@
+{
+ "seed": 7000,
+ "pods": [
+  2,
+  3,
+  4
+ ],
+ "cells": [
+  "V036",
+  "V037",
+  "V037-ONE-AWARE"
+ ],
+ "results": [
+  {
+   "cell": "V036",
+   "players": 2,
+   "games": 3000,
+   "end_reasons": {
+    "market_collapse": 0.345,
+    "patient_zero": 0.229,
+    "singularity": 0.355,
+    "total_wipeout": 0.071
+   },
+   "three_way_split": {
+    "patient_zero": {
+     "rate": 0.3,
+     "ci95": [
+      0.2839,
+      0.3166
+     ],
+     "n": 3000
+    },
+    "singularity": {
+     "rate": 0.355,
+     "ci95": [
+      0.3381,
+      0.3723
+     ],
+     "n": 3000
+    },
+    "market_collapse": {
+     "rate": 0.345,
+     "ci95": [
+      0.3282,
+      0.3622
+     ],
+     "n": 3000
+    }
+   },
+   "total_wipeout_rate": {
+    "rate": 0.071,
+    "ci95": [
+     0.0623,
+     0.0807
+    ],
+    "n": 3000
+   },
+   "market_collapse_le_5_rounds": 0,
+   "rounds": {
+    "mean": 8.829,
+    "median": 9.0,
+    "stdev": 1.169
+   },
+   "by_setup": {
+    "v3_card": {
+     "rates": {
+      "CORRUPTED_KERNEL": {
+       "patient_zero": 0.32,
+       "singularity": 0.334,
+       "market_collapse": 0.346,
+       "n": 1517
+      },
+      "ZERO_DAY_OVERRIDE": {
+       "patient_zero": 0.28,
+       "singularity": 0.376,
+       "market_collapse": 0.344,
+       "n": 1483
+      }
+     },
+     "max_trigger": [
+      "ZERO_DAY_OVERRIDE",
+      "singularity",
+      0.376,
+      1483
+     ],
+     "max_trigger_n_ge_200": [
+      "ZERO_DAY_OVERRIDE",
+      "singularity",
+      0.376,
+      1483
+     ]
+    },
+    "company_seat": {
+     "rates": {
+      "AEGIS@0": {
+       "patient_zero": 0.297,
+       "singularity": 0.392,
+       "market_collapse": 0.311,
+       "n": 502
+      },
+      "AEGIS@1": {
+       "patient_zero": 0.282,
+       "singularity": 0.345,
+       "market_collapse": 0.374,
+       "n": 522
+      },
+      "DTO@0": {
+       "patient_zero": 0.262,
+       "singularity": 0.346,
+       "market_collapse": 0.392,
+       "n": 503
+      },
+      "DTO@1": {
+       "patient_zero": 0.298,
+       "singularity": 0.377,
+       "market_collapse": 0.325,
+       "n": 480
+      },
+      "HELIX@0": {
+       "patient_zero": 0.304,
+       "singularity": 0.351,
+       "market_collapse": 0.345,
+       "n": 496
+      },
+      "HELIX@1": {
+       "patient_zero": 0.314,
+       "singularity": 0.355,
+       "market_collapse": 0.331,
+       "n": 507
+      },
+      "MERIDIAN@0": {
+       "patient_zero": 0.337,
+       "singularity": 0.362,
+       "market_collapse": 0.301,
+       "n": 495
+      },
+      "MERIDIAN@1": {
+       "patient_zero": 0.3,
+       "singularity": 0.35,
+       "market_collapse": 0.35,
+       "n": 497
+      },
+      "OMNIDYNE@0": {
+       "patient_zero": 0.298,
+       "singularity": 0.358,
+       "market_collapse": 0.344,
+       "n": 500
+      },
+      "OMNIDYNE@1": {
+       "patient_zero": 0.297,
+       "singularity": 0.351,
+       "market_collapse": 0.353,
+       "n": 499
+      },
+      "PROMETHEUS@0": {
+       "patient_zero": 0.302,
+       "singularity": 0.321,
+       "market_collapse": 0.377,
+       "n": 504
+      },
+      "PROMETHEUS@1": {
+       "patient_zero": 0.311,
+       "singularity": 0.354,
+       "market_collapse": 0.335,
+       "n": 495
+      }
+     },
+     "max_trigger": [
+      "AEGIS@0",
+      "singularity",
+      0.392,
+      502
+     ],
+     "max_trigger_n_ge_200": [
+      "AEGIS@0",
+      "singularity",
+      0.392,
+      502
+     ]
+    },
+    "white_hat_seat": {
+     "rates": {
+      "ACOUSTIC@0": {
+       "patient_zero": 0.307,
+       "singularity": 0.345,
+       "market_collapse": 0.347,
+       "n": 524
+      },
+      "ACOUSTIC@1": {
+       "patient_zero": 0.317,
+       "singularity": 0.327,
+       "market_collapse": 0.356,
+       "n": 495
+      },
+      "CIPHER@0": {
+       "patient_zero": 0.301,
+       "singularity": 0.342,
+       "market_collapse": 0.357,
+       "n": 515
+      },
+      "CIPHER@1": {
+       "patient_zero": 0.302,
+       "singularity": 0.366,
+       "market_collapse": 0.332,
+       "n": 494
+      },
+      "OPERATOR@0": {
+       "patient_zero": 0.324,
+       "singularity": 0.351,
+       "market_collapse": 0.324,
+       "n": 490
+      },
+      "OPERATOR@1": {
+       "patient_zero": 0.272,
+       "singularity": 0.377,
+       "market_collapse": 0.351,
+       "n": 507
+      },
+      "PHREAKER@0": {
+       "patient_zero": 0.294,
+       "singularity": 0.348,
+       "market_collapse": 0.358,
+       "n": 528
+      },
+      "PHREAKER@1": {
+       "patient_zero": 0.322,
+       "singularity": 0.338,
+       "market_collapse": 0.34,
+       "n": 512
+      },
+      "PRODIGY@0": {
+       "patient_zero": 0.305,
+       "singularity": 0.361,
+       "market_collapse": 0.334,
+       "n": 476
+      },
+      "PRODIGY@1": {
+       "patient_zero": 0.293,
+       "singularity": 0.361,
+       "market_collapse": 0.345,
+       "n": 498
+      },
+      "SPOOK@0": {
+       "patient_zero": 0.268,
+       "singularity": 0.385,
+       "market_collapse": 0.347,
+       "n": 467
+      },
+      "SPOOK@1": {
+       "patient_zero": 0.294,
+       "singularity": 0.36,
+       "market_collapse": 0.346,
+       "n": 494
+      }
+     },
+     "max_trigger": [
+      "SPOOK@0",
+      "singularity",
+      0.385,
+      467
+     ],
+     "max_trigger_n_ge_200": [
+      "SPOOK@0",
+      "singularity",
+      0.385,
+      467
+     ]
+    }
+   },
+   "red_block_rate": 0.1522,
+   "regain_share_of_spend": 0.2615,
+   "market_leader_bonus": {
+    "awarded_games": 0,
+    "winner_changed_over_awarded": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ],
+     "n": 0
+    },
+    "winner_changed_over_all": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0013
+     ],
+     "n": 3000
+    },
+    "paid_place_tied_over_awarded": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ],
+     "n": 0
+    },
+    "mean_survivor_secrets_before_bonus": 3.974,
+    "mean_survivor_bonus": 0,
+    "mean_bonus_by_place": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "games_with_2plus_survivors": 2025,
+   "highest_share_survivor_wins": {
+    "rate": 0.5579,
+    "ci95": [
+     0.5387,
+     0.5768
+    ],
+    "n": 2601
+   },
+   "lowest_share_survivor_wins": {
+    "rate": 0.4421,
+    "ci95": [
+     0.4232,
+     0.4613
+    ],
+    "n": 2601
+   },
+   "bonus_aware_edge": null,
+   "any_shields": {
+    "blue": 0.6313,
+    "red": 0.2253,
+    "green": 0.1435,
+    "total": 66042
+   },
+   "contested": {
+    "rounds": 27614,
+    "blue_left_open": 0.0726,
+    "red_chosen": 0.2245
+   },
+   "win_rate_by_blue_dice": {
+    "0": {
+     "rate": 0.4045,
+     "seats": 3288
+    },
+    "1": {
+     "rate": 0.5753,
+     "seats": 1394
+    },
+    "2+": {
+     "rate": 0.6586,
+     "seats": 1318
+    }
+   },
+   "win_rate_by_bot": {
+    "AccelerationistBot": {
+     "rate": 0.6,
+     "seats": 1200
+    },
+    "AdaptiveBalancedBot": {
+     "rate": 0.5413,
+     "seats": 1200
+    },
+    "RecklessSaboteurBot": {
+     "rate": 0.27,
+     "seats": 1200
+    },
+    "SecOpsTurtleBot": {
+     "rate": 0.4646,
+     "seats": 1200
+    },
+    "VentureGreedBot": {
+     "rate": 0.6242,
+     "seats": 1200
+    }
+   },
+   "tiebreak_decided_by": {
+    "secrets": 0.5383,
+    "sole_survivor": 0.254,
+    "market_share": 0.141,
+    "money": 0.052,
+    "ready_colored_dice_count": 0.0077,
+    "patches": 0.0037,
+    "shared": 0.0017,
+    "unpatched_dice_count": 0.0017
+   },
+   "company_win_rates": {
+    "AEGIS": 0.5732,
+    "DTO": 0.6267,
+    "HELIX": 0.4232,
+    "MERIDIAN": 0.5121,
+    "OMNIDYNE": 0.4149,
+    "PROMETHEUS": 0.4505
+   },
+   "company_win_spread_pts": 21.17,
+   "company_win_spread_ci95_bootstrap": [
+    17.64,
+    26.4
+   ],
+   "seed_log": {}
+  },
+  {
+   "cell": "V037",
+   "players": 2,
+   "games": 3000,
+   "end_reasons": {
+    "market_collapse": 0.2627,
+    "patient_zero": 0.193,
+    "singularity": 0.4673,
+    "total_wipeout": 0.077
+   },
+   "three_way_split": {
+    "patient_zero": {
+     "rate": 0.27,
+     "ci95": [
+      0.2544,
+      0.2862
+     ],
+     "n": 3000
+    },
+    "singularity": {
+     "rate": 0.4673,
+     "ci95": [
+      0.4495,
+      0.4852
+     ],
+     "n": 3000
+    },
+    "market_collapse": {
+     "rate": 0.2627,
+     "ci95": [
+      0.2472,
+      0.2787
+     ],
+     "n": 3000
+    }
+   },
+   "total_wipeout_rate": {
+    "rate": 0.077,
+    "ci95": [
+     0.068,
+     0.0871
+    ],
+    "n": 3000
+   },
+   "market_collapse_le_5_rounds": 0,
+   "rounds": {
+    "mean": 9.127,
+    "median": 9.0,
+    "stdev": 1.023
+   },
+   "by_setup": {
+    "v3_card": {
+     "rates": {
+      "CORRUPTED_KERNEL": {
+       "patient_zero": 0.287,
+       "singularity": 0.451,
+       "market_collapse": 0.262,
+       "n": 1517
+      },
+      "ZERO_DAY_OVERRIDE": {
+       "patient_zero": 0.252,
+       "singularity": 0.484,
+       "market_collapse": 0.264,
+       "n": 1483
+      }
+     },
+     "max_trigger": [
+      "ZERO_DAY_OVERRIDE",
+      "singularity",
+      0.484,
+      1483
+     ],
+     "max_trigger_n_ge_200": [
+      "ZERO_DAY_OVERRIDE",
+      "singularity",
+      0.484,
+      1483
+     ]
+    },
+    "company_seat": {
+     "rates": {
+      "AEGIS@0": {
+       "patient_zero": 0.271,
+       "singularity": 0.488,
+       "market_collapse": 0.241,
+       "n": 502
+      },
+      "AEGIS@1": {
+       "patient_zero": 0.268,
+       "singularity": 0.462,
+       "market_collapse": 0.27,
+       "n": 522
+      },
+      "DTO@0": {
+       "patient_zero": 0.219,
+       "singularity": 0.487,
+       "market_collapse": 0.294,
+       "n": 503
+      },
+      "DTO@1": {
+       "patient_zero": 0.242,
+       "singularity": 0.471,
+       "market_collapse": 0.287,
+       "n": 480
+      },
+      "HELIX@0": {
+       "patient_zero": 0.252,
+       "singularity": 0.494,
+       "market_collapse": 0.254,
+       "n": 496
+      },
+      "HELIX@1": {
+       "patient_zero": 0.28,
+       "singularity": 0.467,
+       "market_collapse": 0.252,
+       "n": 507
+      },
+      "MERIDIAN@0": {
+       "patient_zero": 0.307,
+       "singularity": 0.471,
+       "market_collapse": 0.222,
+       "n": 495
+      },
+      "MERIDIAN@1": {
+       "patient_zero": 0.296,
+       "singularity": 0.469,
+       "market_collapse": 0.235,
+       "n": 497
+      },
+      "OMNIDYNE@0": {
+       "patient_zero": 0.314,
+       "singularity": 0.43,
+       "market_collapse": 0.256,
+       "n": 500
+      },
+      "OMNIDYNE@1": {
+       "patient_zero": 0.248,
+       "singularity": 0.469,
+       "market_collapse": 0.283,
+       "n": 499
+      },
+      "PROMETHEUS@0": {
+       "patient_zero": 0.258,
+       "singularity": 0.435,
+       "market_collapse": 0.308,
+       "n": 504
+      },
+      "PROMETHEUS@1": {
+       "patient_zero": 0.285,
+       "singularity": 0.467,
+       "market_collapse": 0.248,
+       "n": 495
+      }
+     },
+     "max_trigger": [
+      "HELIX@0",
+      "singularity",
+      0.494,
+      496
+     ],
+     "max_trigger_n_ge_200": [
+      "HELIX@0",
+      "singularity",
+      0.494,
+      496
+     ]
+    },
+    "white_hat_seat": {
+     "rates": {
+      "ACOUSTIC@0": {
+       "patient_zero": 0.246,
+       "singularity": 0.487,
+       "market_collapse": 0.267,
+       "n": 524
+      },
+      "ACOUSTIC@1": {
+       "patient_zero": 0.295,
+       "singularity": 0.428,
+       "market_collapse": 0.277,
+       "n": 495
+      },
+      "CIPHER@0": {
+       "patient_zero": 0.282,
+       "singularity": 0.456,
+       "market_collapse": 0.262,
+       "n": 515
+      },
+      "CIPHER@1": {
+       "patient_zero": 0.281,
+       "singularity": 0.453,
+       "market_collapse": 0.265,
+       "n": 494
+      },
+      "OPERATOR@0": {
+       "patient_zero": 0.31,
+       "singularity": 0.416,
+       "market_collapse": 0.273,
+       "n": 490
+      },
+      "OPERATOR@1": {
+       "patient_zero": 0.235,
+       "singularity": 0.505,
+       "market_collapse": 0.26,
+       "n": 507
+      },
+      "PHREAKER@0": {
+       "patient_zero": 0.263,
+       "singularity": 0.455,
+       "market_collapse": 0.282,
+       "n": 528
+      },
+      "PHREAKER@1": {
+       "patient_zero": 0.277,
+       "singularity": 0.471,
+       "market_collapse": 0.252,
+       "n": 512
+      },
+      "PRODIGY@0": {
+       "patient_zero": 0.263,
+       "singularity": 0.489,
+       "market_collapse": 0.248,
+       "n": 476
+      },
+      "PRODIGY@1": {
+       "patient_zero": 0.293,
+       "singularity": 0.466,
+       "market_collapse": 0.241,
+       "n": 498
+      },
+      "SPOOK@0": {
+       "patient_zero": 0.257,
+       "singularity": 0.503,
+       "market_collapse": 0.24,
+       "n": 467
+      },
+      "SPOOK@1": {
+       "patient_zero": 0.239,
+       "singularity": 0.48,
+       "market_collapse": 0.281,
+       "n": 494
+      }
+     },
+     "max_trigger": [
+      "OPERATOR@1",
+      "singularity",
+      0.505,
+      507
+     ],
+     "max_trigger_n_ge_200": [
+      "OPERATOR@1",
+      "singularity",
+      0.505,
+      507
+     ]
+    }
+   },
+   "red_block_rate": 0.2203,
+   "regain_share_of_spend": 0.3638,
+   "market_leader_bonus": {
+    "awarded_games": 2769,
+    "winner_changed_over_awarded": {
+     "rate": 0.1268,
+     "ci95": [
+      0.1149,
+      0.1397
+     ],
+     "n": 2769
+    },
+    "winner_changed_over_all": {
+     "rate": 0.117,
+     "ci95": [
+      0.106,
+      0.129
+     ],
+     "n": 3000
+    },
+    "paid_place_tied_over_awarded": {
+     "rate": 0.2658,
+     "ci95": [
+      0.2497,
+      0.2826
+     ],
+     "n": 2769
+    },
+    "mean_survivor_secrets_before_bonus": 4.604,
+    "mean_survivor_bonus": 1.445,
+    "mean_bonus_by_place": {
+     "1": 2,
+     "2": 0
+    }
+   },
+   "games_with_2plus_survivors": 2083,
+   "highest_share_survivor_wins": {
+    "rate": 0.6736,
+    "ci95": [
+     0.6561,
+     0.6907
+    ],
+    "n": 2819
+   },
+   "lowest_share_survivor_wins": {
+    "rate": 0.3264,
+    "ci95": [
+     0.3093,
+     0.3439
+    ],
+    "n": 2819
+   },
+   "bonus_aware_edge": null,
+   "any_shields": {
+    "blue": 0.5682,
+    "red": 0.3505,
+    "green": 0.0813,
+    "total": 65600
+   },
+   "contested": {
+    "rounds": 28288,
+    "blue_left_open": 0.2321,
+    "red_chosen": 0.4379
+   },
+   "win_rate_by_blue_dice": {
+    "0": {
+     "rate": 0.4458,
+     "seats": 3395
+    },
+    "1": {
+     "rate": 0.539,
+     "seats": 1424
+    },
+    "2+": {
+     "rate": 0.6088,
+     "seats": 1181
+    }
+   },
+   "win_rate_by_bot": {
+    "AccelerationistBot": {
+     "rate": 0.5387,
+     "seats": 1200
+    },
+    "AdaptiveBalancedBot": {
+     "rate": 0.4583,
+     "seats": 1200
+    },
+    "RecklessSaboteurBot": {
+     "rate": 0.3854,
+     "seats": 1200
+    },
+    "SecOpsTurtleBot": {
+     "rate": 0.5067,
+     "seats": 1200
+    },
+    "VentureGreedBot": {
+     "rate": 0.6108,
+     "seats": 1200
+    }
+   },
+   "tiebreak_decided_by": {
+    "secrets": 0.5953,
+    "sole_survivor": 0.2287,
+    "market_share": 0.0947,
+    "money": 0.0617,
+    "ready_colored_dice_count": 0.01,
+    "patches": 0.0047,
+    "unpatched_dice_count": 0.0027,
+    "shared": 0.0023
+   },
+   "company_win_rates": {
+    "AEGIS": 0.6113,
+    "DTO": 0.5956,
+    "HELIX": 0.4028,
+    "MERIDIAN": 0.5287,
+    "OMNIDYNE": 0.4339,
+    "PROMETHEUS": 0.4269
+   },
+   "company_win_spread_pts": 20.85,
+   "company_win_spread_ci95_bootstrap": [
+    17.74,
+    25.99
+   ],
+   "seed_log": {
+    "bonus_changed_winner": [
+     207001,
+     207015,
+     207027,
+     207036,
+     207037,
+     207046,
+     207057,
+     207067,
+     207068,
+     207083,
+     207089,
+     207093,
+     207099,
+     207101,
+     207109,
+     207116,
+     207126,
+     207128,
+     207136,
+     207152,
+     207160,
+     207161,
+     207166,
+     207187,
+     207188,
+     207190,
+     207201,
+     207208,
+     207211,
+     207217,
+     207224,
+     207227,
+     207236,
+     207237,
+     207238,
+     207251,
+     207254,
+     207278,
+     207285,
+     207304,
+     207305,
+     207310,
+     207333,
+     207344,
+     207347,
+     207368,
+     207379,
+     207381,
+     207384,
+     207398
+    ]
+   }
+  },
+  {
+   "cell": "V037-ONE-AWARE",
+   "players": 2,
+   "games": 3000,
+   "end_reasons": {
+    "market_collapse": 0.3657,
+    "patient_zero": 0.1563,
+    "singularity": 0.4243,
+    "total_wipeout": 0.0537
+   },
+   "three_way_split": {
+    "patient_zero": {
+     "rate": 0.21,
+     "ci95": [
+      0.1958,
+      0.2249
+     ],
+     "n": 3000
+    },
+    "singularity": {
+     "rate": 0.4243,
+     "ci95": [
+      0.4068,
+      0.4421
+     ],
+     "n": 3000
+    },
+    "market_collapse": {
+     "rate": 0.3657,
+     "ci95": [
+      0.3486,
+      0.3831
+     ],
+     "n": 3000
+    }
+   },
+   "total_wipeout_rate": {
+    "rate": 0.0537,
+    "ci95": [
+     0.0462,
+     0.0623
+    ],
+    "n": 3000
+   },
+   "market_collapse_le_5_rounds": 0,
+   "rounds": {
+    "mean": 9.07,
+    "median": 9.0,
+    "stdev": 1.018
+   },
+   "by_setup": {
+    "v3_card": {
+     "rates": {
+      "CORRUPTED_KERNEL": {
+       "patient_zero": 0.227,
+       "singularity": 0.405,
+       "market_collapse": 0.368,
+       "n": 1517
+      },
+      "ZERO_DAY_OVERRIDE": {
+       "patient_zero": 0.192,
+       "singularity": 0.444,
+       "market_collapse": 0.363,
+       "n": 1483
+      }
+     },
+     "max_trigger": [
+      "ZERO_DAY_OVERRIDE",
+      "singularity",
+      0.444,
+      1483
+     ],
+     "max_trigger_n_ge_200": [
+      "ZERO_DAY_OVERRIDE",
+      "singularity",
+      0.444,
+      1483
+     ]
+    },
+    "company_seat": {
+     "rates": {
+      "AEGIS@0": {
+       "patient_zero": 0.203,
+       "singularity": 0.442,
+       "market_collapse": 0.355,
+       "n": 502
+      },
+      "AEGIS@1": {
+       "patient_zero": 0.195,
+       "singularity": 0.429,
+       "market_collapse": 0.375,
+       "n": 522
+      },
+      "DTO@0": {
+       "patient_zero": 0.183,
+       "singularity": 0.423,
+       "market_collapse": 0.394,
+       "n": 503
+      },
+      "DTO@1": {
+       "patient_zero": 0.208,
+       "singularity": 0.427,
+       "market_collapse": 0.365,
+       "n": 480
+      },
+      "HELIX@0": {
+       "patient_zero": 0.198,
+       "singularity": 0.438,
+       "market_collapse": 0.365,
+       "n": 496
+      },
+      "HELIX@1": {
+       "patient_zero": 0.213,
+       "singularity": 0.43,
+       "market_collapse": 0.357,
+       "n": 507
+      },
+      "MERIDIAN@0": {
+       "patient_zero": 0.242,
+       "singularity": 0.438,
+       "market_collapse": 0.319,
+       "n": 495
+      },
+      "MERIDIAN@1": {
+       "patient_zero": 0.209,
+       "singularity": 0.414,
+       "market_collapse": 0.376,
+       "n": 497
+      },
+      "OMNIDYNE@0": {
+       "patient_zero": 0.246,
+       "singularity": 0.4,
+       "market_collapse": 0.354,
+       "n": 500
+      },
+      "OMNIDYNE@1": {
+       "patient_zero": 0.206,
+       "singularity": 0.425,
+       "market_collapse": 0.369,
+       "n": 499
+      },
+      "PROMETHEUS@0": {
+       "patient_zero": 0.188,
+       "singularity": 0.405,
+       "market_collapse": 0.407,
+       "n": 504
+      },
+      "PROMETHEUS@1": {
+       "patient_zero": 0.228,
+       "singularity": 0.42,
+       "market_collapse": 0.352,
+       "n": 495
+      }
+     },
+     "max_trigger": [
+      "AEGIS@0",
+      "singularity",
+      0.442,
+      502
+     ],
+     "max_trigger_n_ge_200": [
+      "AEGIS@0",
+      "singularity",
+      0.442,
+      502
+     ]
+    },
+    "white_hat_seat": {
+     "rates": {
+      "ACOUSTIC@0": {
+       "patient_zero": 0.21,
+       "singularity": 0.426,
+       "market_collapse": 0.365,
+       "n": 524
+      },
+      "ACOUSTIC@1": {
+       "patient_zero": 0.212,
+       "singularity": 0.398,
+       "market_collapse": 0.39,
+       "n": 495
+      },
+      "CIPHER@0": {
+       "patient_zero": 0.21,
+       "singularity": 0.441,
+       "market_collapse": 0.35,
+       "n": 515
+      },
+      "CIPHER@1": {
+       "patient_zero": 0.217,
+       "singularity": 0.445,
+       "market_collapse": 0.338,
+       "n": 494
+      },
+      "OPERATOR@0": {
+       "patient_zero": 0.243,
+       "singularity": 0.402,
+       "market_collapse": 0.355,
+       "n": 490
+      },
+      "OPERATOR@1": {
+       "patient_zero": 0.195,
+       "singularity": 0.418,
+       "market_collapse": 0.387,
+       "n": 507
+      },
+      "PHREAKER@0": {
+       "patient_zero": 0.212,
+       "singularity": 0.403,
+       "market_collapse": 0.384,
+       "n": 528
+      },
+      "PHREAKER@1": {
+       "patient_zero": 0.217,
+       "singularity": 0.434,
+       "market_collapse": 0.35,
+       "n": 512
+      },
+      "PRODIGY@0": {
+       "patient_zero": 0.189,
+       "singularity": 0.426,
+       "market_collapse": 0.384,
+       "n": 476
+      },
+      "PRODIGY@1": {
+       "patient_zero": 0.239,
+       "singularity": 0.42,
+       "market_collapse": 0.341,
+       "n": 498
+      },
+      "SPOOK@0": {
+       "patient_zero": 0.195,
+       "singularity": 0.45,
+       "market_collapse": 0.355,
+       "n": 467
+      },
+      "SPOOK@1": {
+       "patient_zero": 0.18,
+       "singularity": 0.431,
+       "market_collapse": 0.389,
+       "n": 494
+      }
+     },
+     "max_trigger": [
+      "SPOOK@0",
+      "singularity",
+      0.45,
+      467
+     ],
+     "max_trigger_n_ge_200": [
+      "SPOOK@0",
+      "singularity",
+      0.45,
+      467
+     ]
+    }
+   },
+   "red_block_rate": 0.1697,
+   "regain_share_of_spend": 0.2808,
+   "market_leader_bonus": {
+    "awarded_games": 2839,
+    "winner_changed_over_awarded": {
+     "rate": 0.1627,
+     "ci95": [
+      0.1496,
+      0.1768
+     ],
+     "n": 2839
+    },
+    "winner_changed_over_all": {
+     "rate": 0.154,
+     "ci95": [
+      0.1415,
+      0.1674
+     ],
+     "n": 3000
+    },
+    "paid_place_tied_over_awarded": {
+     "rate": 0.2279,
+     "ci95": [
+      0.2128,
+      0.2437
+     ],
+     "n": 2839
+    },
+    "mean_survivor_secrets_before_bonus": 5.19,
+    "mean_survivor_bonus": 1.353,
+    "mean_bonus_by_place": {
+     "1": 2,
+     "2": 0
+    }
+   },
+   "games_with_2plus_survivors": 2314,
+   "highest_share_survivor_wins": {
+    "rate": 0.7001,
+    "ci95": [
+     0.6833,
+     0.7163
+    ],
+    "n": 2961
+   },
+   "lowest_share_survivor_wins": {
+    "rate": 0.2999,
+    "ci95": [
+     0.2837,
+     0.3167
+    ],
+    "n": 2961
+   },
+   "bonus_aware_edge": {
+    "aware_win_credit": {
+     "mean": 0.5767,
+     "ci95": [
+      0.559,
+      0.5943
+     ],
+     "n": 3000
+    },
+    "fair_share": 0.5,
+    "edge_pts": 7.67,
+    "edge_ci95_pts": [
+     5.9,
+     9.43
+    ]
+   },
+   "any_shields": {
+    "blue": 0.6184,
+    "red": 0.261,
+    "green": 0.1206,
+    "total": 66613
+   },
+   "contested": {
+    "rounds": 28344,
+    "blue_left_open": 0.116,
+    "red_chosen": 0.2877
+   },
+   "win_rate_by_blue_dice": {
+    "0": {
+     "rate": 0.4567,
+     "seats": 3341
+    },
+    "1": {
+     "rate": 0.5385,
+     "seats": 1376
+    },
+    "2+": {
+     "rate": 0.5713,
+     "seats": 1283
+    }
+   },
+   "win_rate_by_bot": {
+    "AccelerationistBot": {
+     "rate": 0.5317,
+     "seats": 1200
+    },
+    "AdaptiveBalancedBot": {
+     "rate": 0.4392,
+     "seats": 1200
+    },
+    "RecklessSaboteurBot": {
+     "rate": 0.3892,
+     "seats": 1200
+    },
+    "SecOpsTurtleBot": {
+     "rate": 0.5475,
+     "seats": 1200
+    },
+    "VentureGreedBot": {
+     "rate": 0.5925,
+     "seats": 1200
+    }
+   },
+   "tiebreak_decided_by": {
+    "secrets": 0.6707,
+    "sole_survivor": 0.175,
+    "market_share": 0.0957,
+    "money": 0.0443,
+    "ready_colored_dice_count": 0.009,
+    "patches": 0.0033,
+    "unpatched_dice_count": 0.002
+   },
+   "company_win_rates": {
+    "AEGIS": 0.6064,
+    "DTO": 0.5727,
+    "HELIX": 0.4277,
+    "MERIDIAN": 0.5333,
+    "OMNIDYNE": 0.4364,
+    "PROMETHEUS": 0.4224
+   },
+   "company_win_spread_pts": 18.4,
+   "company_win_spread_ci95_bootstrap": [
+    15.19,
+    23.72
+   ],
+   "seed_log": {
+    "bonus_changed_winner": [
+     207006,
+     207007,
+     207026,
+     207027,
+     207028,
+     207037,
+     207049,
+     207056,
+     207057,
+     207063,
+     207083,
+     207089,
+     207090,
+     207093,
+     207097,
+     207099,
+     207109,
+     207126,
+     207128,
+     207148,
+     207164,
+     207168,
+     207173,
+     207177,
+     207181,
+     207227,
+     207234,
+     207235,
+     207237,
+     207238,
+     207240,
+     207243,
+     207249,
+     207251,
+     207254,
+     207262,
+     207269,
+     207273,
+     207277,
+     207278,
+     207288,
+     207333,
+     207338,
+     207342,
+     207347,
+     207355,
+     207361,
+     207365,
+     207368,
+     207375
+    ]
+   }
+  },
+  {
+   "cell": "V036",
+   "players": 3,
+   "games": 3000,
+   "end_reasons": {
+    "market_collapse": 0.3293,
+    "patient_zero": 0.3033,
+    "singularity": 0.3413,
+    "total_wipeout": 0.026
+   },
+   "three_way_split": {
+    "patient_zero": {
+     "rate": 0.3293,
+     "ci95": [
+      0.3127,
+      0.3464
+     ],
+     "n": 3000
+    },
+    "singularity": {
+     "rate": 0.3413,
+     "ci95": [
+      0.3246,
+      0.3585
+     ],
+     "n": 3000
+    },
+    "market_collapse": {
+     "rate": 0.3293,
+     "ci95": [
+      0.3127,
+      0.3464
+     ],
+     "n": 3000
+    }
+   },
+   "total_wipeout_rate": {
+    "rate": 0.026,
+    "ci95": [
+     0.0209,
+     0.0323
+    ],
+    "n": 3000
+   },
+   "market_collapse_le_5_rounds": 0,
+   "rounds": {
+    "mean": 8.794,
+    "median": 9.0,
+    "stdev": 1.208
+   },
+   "by_setup": {
+    "v3_card": {
+     "rates": {
+      "CORRUPTED_KERNEL": {
+       "patient_zero": 0.37,
+       "singularity": 0.311,
+       "market_collapse": 0.32,
+       "n": 1491
+      },
+      "ZERO_DAY_OVERRIDE": {
+       "patient_zero": 0.29,
+       "singularity": 0.372,
+       "market_collapse": 0.339,
+       "n": 1509
+      }
+     },
+     "max_trigger": [
+      "ZERO_DAY_OVERRIDE",
+      "singularity",
+      0.372,
+      1509
+     ],
+     "max_trigger_n_ge_200": [
+      "ZERO_DAY_OVERRIDE",
+      "singularity",
+      0.372,
+      1509
+     ]
+    },
+    "company_seat": {
+     "rates": {
+      "AEGIS@0": {
+       "patient_zero": 0.337,
+       "singularity": 0.321,
+       "market_collapse": 0.342,
+       "n": 514
+      },
+      "AEGIS@1": {
+       "patient_zero": 0.362,
+       "singularity": 0.352,
+       "market_collapse": 0.287,
+       "n": 520
+      },
+      "AEGIS@2": {
+       "patient_zero": 0.302,
+       "singularity": 0.364,
+       "market_collapse": 0.334,
+       "n": 527
+      },
+      "DTO@0": {
+       "patient_zero": 0.312,
+       "singularity": 0.346,
+       "market_collapse": 0.342,
+       "n": 503
+      },
+      "DTO@1": {
+       "patient_zero": 0.307,
+       "singularity": 0.355,
+       "market_collapse": 0.337,
+       "n": 501
+      },
+      "DTO@2": {
+       "patient_zero": 0.316,
+       "singularity": 0.353,
+       "market_collapse": 0.331,
+       "n": 450
+      },
+      "HELIX@0": {
+       "patient_zero": 0.338,
+       "singularity": 0.355,
+       "market_collapse": 0.307,
+       "n": 482
+      },
+      "HELIX@1": {
+       "patient_zero": 0.308,
+       "singularity": 0.333,
+       "market_collapse": 0.359,
+       "n": 510
+      },
+      "HELIX@2": {
+       "patient_zero": 0.336,
+       "singularity": 0.296,
+       "market_collapse": 0.368,
+       "n": 500
+      },
+      "MERIDIAN@0": {
+       "patient_zero": 0.334,
+       "singularity": 0.366,
+       "market_collapse": 0.3,
+       "n": 530
+      },
+      "MERIDIAN@1": {
+       "patient_zero": 0.313,
+       "singularity": 0.337,
+       "market_collapse": 0.35,
+       "n": 489
+      },
+      "MERIDIAN@2": {
+       "patient_zero": 0.31,
+       "singularity": 0.344,
+       "market_collapse": 0.346,
+       "n": 474
+      },
+      "OMNIDYNE@0": {
+       "patient_zero": 0.355,
+       "singularity": 0.295,
+       "market_collapse": 0.351,
+       "n": 482
+      },
+      "OMNIDYNE@1": {
+       "patient_zero": 0.367,
+       "singularity": 0.321,
+       "market_collapse": 0.311,
+       "n": 498
+      },
+      "OMNIDYNE@2": {
+       "patient_zero": 0.331,
+       "singularity": 0.361,
+       "market_collapse": 0.308,
+       "n": 532
+      },
+      "PROMETHEUS@0": {
+       "patient_zero": 0.301,
+       "singularity": 0.364,
+       "market_collapse": 0.335,
+       "n": 489
+      },
+      "PROMETHEUS@1": {
+       "patient_zero": 0.317,
+       "singularity": 0.349,
+       "market_collapse": 0.334,
+       "n": 482
+      },
+      "PROMETHEUS@2": {
+       "patient_zero": 0.379,
+       "singularity": 0.329,
+       "market_collapse": 0.292,
+       "n": 517
+      }
+     },
+     "max_trigger": [
+      "PROMETHEUS@2",
+      "patient_zero",
+      0.379,
+      517
+     ],
+     "max_trigger_n_ge_200": [
+      "PROMETHEUS@2",
+      "patient_zero",
+      0.379,
+      517
+     ]
+    },
+    "white_hat_seat": {
+     "rates": {
+      "ACOUSTIC@0": {
+       "patient_zero": 0.343,
+       "singularity": 0.335,
+       "market_collapse": 0.322,
+       "n": 516
+      },
+      "ACOUSTIC@1": {
+       "patient_zero": 0.325,
+       "singularity": 0.352,
+       "market_collapse": 0.323,
+       "n": 483
+      },
+      "ACOUSTIC@2": {
+       "patient_zero": 0.354,
+       "singularity": 0.342,
+       "market_collapse": 0.304,
+       "n": 503
+      },
+      "CIPHER@0": {
+       "patient_zero": 0.351,
+       "singularity": 0.341,
+       "market_collapse": 0.308,
+       "n": 516
+      },
+      "CIPHER@1": {
+       "patient_zero": 0.333,
+       "singularity": 0.333,
+       "market_collapse": 0.335,
+       "n": 472
+      },
+      "CIPHER@2": {
+       "patient_zero": 0.337,
+       "singularity": 0.347,
+       "market_collapse": 0.317,
+       "n": 505
+      },
+      "OPERATOR@0": {
+       "patient_zero": 0.314,
+       "singularity": 0.355,
+       "market_collapse": 0.331,
+       "n": 507
+      },
+      "OPERATOR@1": {
+       "patient_zero": 0.323,
+       "singularity": 0.33,
+       "market_collapse": 0.347,
+       "n": 545
+      },
+      "OPERATOR@2": {
+       "patient_zero": 0.339,
+       "singularity": 0.351,
+       "market_collapse": 0.31,
+       "n": 487
+      },
+      "PHREAKER@0": {
+       "patient_zero": 0.329,
+       "singularity": 0.345,
+       "market_collapse": 0.325,
+       "n": 507
+      },
+      "PHREAKER@1": {
+       "patient_zero": 0.323,
+       "singularity": 0.333,
+       "market_collapse": 0.343,
+       "n": 501
+      },
+      "PHREAKER@2": {
+       "patient_zero": 0.325,
+       "singularity": 0.343,
+       "market_collapse": 0.331,
+       "n": 498
+      },
+      "PRODIGY@0": {
+       "patient_zero": 0.317,
+       "singularity": 0.354,
+       "market_collapse": 0.329,
+       "n": 480
+      },
+      "PRODIGY@1": {
+       "patient_zero": 0.343,
+       "singularity": 0.351,
+       "market_collapse": 0.307,
+       "n": 502
+      },
+      "PRODIGY@2": {
+       "patient_zero": 0.31,
+       "singularity": 0.332,
+       "market_collapse": 0.358,
+       "n": 506
+      },
+      "SPOOK@0": {
+       "patient_zero": 0.321,
+       "singularity": 0.316,
+       "market_collapse": 0.363,
+       "n": 474
+      },
+      "SPOOK@1": {
+       "patient_zero": 0.33,
+       "singularity": 0.35,
+       "market_collapse": 0.32,
+       "n": 497
+      },
+      "SPOOK@2": {
+       "patient_zero": 0.311,
+       "singularity": 0.333,
+       "market_collapse": 0.355,
+       "n": 501
+      }
+     },
+     "max_trigger": [
+      "SPOOK@0",
+      "market_collapse",
+      0.363,
+      474
+     ],
+     "max_trigger_n_ge_200": [
+      "SPOOK@0",
+      "market_collapse",
+      0.363,
+      474
+     ]
+    }
+   },
+   "red_block_rate": 0.1494,
+   "regain_share_of_spend": 0.2508,
+   "market_leader_bonus": {
+    "awarded_games": 0,
+    "winner_changed_over_awarded": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ],
+     "n": 0
+    },
+    "winner_changed_over_all": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0013
+     ],
+     "n": 3000
+    },
+    "paid_place_tied_over_awarded": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ],
+     "n": 0
+    },
+    "mean_survivor_secrets_before_bonus": 4.06,
+    "mean_survivor_bonus": 0,
+    "mean_bonus_by_place": {
+     "1": 0,
+     "2": 0,
+     "3": 0
+    }
+   },
+   "games_with_2plus_survivors": 2694,
+   "highest_share_survivor_wins": {
+    "rate": 0.4347,
+    "ci95": [
+     0.4187,
+     0.4509
+    ],
+    "n": 3623
+   },
+   "lowest_share_survivor_wins": {
+    "rate": 0.3262,
+    "ci95": [
+     0.3115,
+     0.3412
+    ],
+    "n": 3823
+   },
+   "bonus_aware_edge": null,
+   "any_shields": {
+    "blue": 0.6278,
+    "red": 0.2217,
+    "green": 0.1505,
+    "total": 99098
+   },
+   "contested": {
+    "rounds": 41289,
+    "blue_left_open": 0.0641,
+    "red_chosen": 0.2228
+   },
+   "win_rate_by_blue_dice": {
+    "0": {
+     "rate": 0.2357,
+     "seats": 4960
+    },
+    "1": {
+     "rate": 0.4074,
+     "seats": 1998
+    },
+    "2+": {
+     "rate": 0.498,
+     "seats": 2042
+    }
+   },
+   "win_rate_by_bot": {
+    "AccelerationistBot": {
+     "rate": 0.4344,
+     "seats": 1800
+    },
+    "AdaptiveBalancedBot": {
+     "rate": 0.2431,
+     "seats": 1800
+    },
+    "RecklessSaboteurBot": {
+     "rate": 0.1217,
+     "seats": 1800
+    },
+    "SecOpsTurtleBot": {
+     "rate": 0.3419,
+     "seats": 1800
+    },
+    "VentureGreedBot": {
+     "rate": 0.5256,
+     "seats": 1800
+    }
+   },
+   "tiebreak_decided_by": {
+    "secrets": 0.6813,
+    "market_share": 0.1723,
+    "sole_survivor": 0.076,
+    "money": 0.0503,
+    "ready_colored_dice_count": 0.015,
+    "patches": 0.0033,
+    "unpatched_dice_count": 0.0013,
+    "shared": 0.0003
+   },
+   "company_win_rates": {
+    "AEGIS": 0.3946,
+    "DTO": 0.467,
+    "HELIX": 0.2624,
+    "MERIDIAN": 0.3413,
+    "OMNIDYNE": 0.2765,
+    "PROMETHEUS": 0.2594
+   },
+   "company_win_spread_pts": 20.76,
+   "company_win_spread_ci95_bootstrap": [
+    18.08,
+    24.16
+   ],
+   "seed_log": {}
+  },
+  {
+   "cell": "V037",
+   "players": 3,
+   "games": 3000,
+   "end_reasons": {
+    "market_collapse": 0.232,
+    "patient_zero": 0.3267,
+    "singularity": 0.408,
+    "total_wipeout": 0.0333
+   },
+   "three_way_split": {
+    "patient_zero": {
+     "rate": 0.36,
+     "ci95": [
+      0.343,
+      0.3773
+     ],
+     "n": 3000
+    },
+    "singularity": {
+     "rate": 0.408,
+     "ci95": [
+      0.3905,
+      0.4257
+     ],
+     "n": 3000
+    },
+    "market_collapse": {
+     "rate": 0.232,
+     "ci95": [
+      0.2172,
+      0.2474
+     ],
+     "n": 3000
+    }
+   },
+   "total_wipeout_rate": {
+    "rate": 0.0333,
+    "ci95": [
+     0.0275,
+     0.0404
+    ],
+    "n": 3000
+   },
+   "market_collapse_le_5_rounds": 0,
+   "rounds": {
+    "mean": 8.982,
+    "median": 9.0,
+    "stdev": 1.127
+   },
+   "by_setup": {
+    "v3_card": {
+     "rates": {
+      "CORRUPTED_KERNEL": {
+       "patient_zero": 0.391,
+       "singularity": 0.386,
+       "market_collapse": 0.223,
+       "n": 1491
+      },
+      "ZERO_DAY_OVERRIDE": {
+       "patient_zero": 0.329,
+       "singularity": 0.43,
+       "market_collapse": 0.241,
+       "n": 1509
+      }
+     },
+     "max_trigger": [
+      "ZERO_DAY_OVERRIDE",
+      "singularity",
+      0.43,
+      1509
+     ],
+     "max_trigger_n_ge_200": [
+      "ZERO_DAY_OVERRIDE",
+      "singularity",
+      0.43,
+      1509
+     ]
+    },
+    "company_seat": {
+     "rates": {
+      "AEGIS@0": {
+       "patient_zero": 0.36,
+       "singularity": 0.411,
+       "market_collapse": 0.23,
+       "n": 514
+      },
+      "AEGIS@1": {
+       "patient_zero": 0.385,
+       "singularity": 0.406,
+       "market_collapse": 0.21,
+       "n": 520
+      },
+      "AEGIS@2": {
+       "patient_zero": 0.345,
+       "singularity": 0.408,
+       "market_collapse": 0.247,
+       "n": 527
+      },
+      "DTO@0": {
+       "patient_zero": 0.348,
+       "singularity": 0.416,
+       "market_collapse": 0.237,
+       "n": 503
+      },
+      "DTO@1": {
+       "patient_zero": 0.357,
+       "singularity": 0.405,
+       "market_collapse": 0.238,
+       "n": 501
+      },
+      "DTO@2": {
+       "patient_zero": 0.327,
+       "singularity": 0.409,
+       "market_collapse": 0.264,
+       "n": 450
+      },
+      "HELIX@0": {
+       "patient_zero": 0.361,
+       "singularity": 0.411,
+       "market_collapse": 0.228,
+       "n": 482
+      },
+      "HELIX@1": {
+       "patient_zero": 0.337,
+       "singularity": 0.425,
+       "market_collapse": 0.237,
+       "n": 510
+      },
+      "HELIX@2": {
+       "patient_zero": 0.362,
+       "singularity": 0.4,
+       "market_collapse": 0.238,
+       "n": 500
+      },
+      "MERIDIAN@0": {
+       "patient_zero": 0.372,
+       "singularity": 0.4,
+       "market_collapse": 0.228,
+       "n": 530
+      },
+      "MERIDIAN@1": {
+       "patient_zero": 0.344,
+       "singularity": 0.419,
+       "market_collapse": 0.237,
+       "n": 489
+      },
+      "MERIDIAN@2": {
+       "patient_zero": 0.357,
+       "singularity": 0.418,
+       "market_collapse": 0.226,
+       "n": 474
+      },
+      "OMNIDYNE@0": {
+       "patient_zero": 0.365,
+       "singularity": 0.402,
+       "market_collapse": 0.232,
+       "n": 482
+      },
+      "OMNIDYNE@1": {
+       "patient_zero": 0.406,
+       "singularity": 0.376,
+       "market_collapse": 0.219,
+       "n": 498
+      },
+      "OMNIDYNE@2": {
+       "patient_zero": 0.365,
+       "singularity": 0.429,
+       "market_collapse": 0.207,
+       "n": 532
+      },
+      "PROMETHEUS@0": {
+       "patient_zero": 0.354,
+       "singularity": 0.409,
+       "market_collapse": 0.237,
+       "n": 489
+      },
+      "PROMETHEUS@1": {
+       "patient_zero": 0.33,
+       "singularity": 0.417,
+       "market_collapse": 0.253,
+       "n": 482
+      },
+      "PROMETHEUS@2": {
+       "patient_zero": 0.4,
+       "singularity": 0.385,
+       "market_collapse": 0.215,
+       "n": 517
+      }
+     },
+     "max_trigger": [
+      "OMNIDYNE@2",
+      "singularity",
+      0.429,
+      532
+     ],
+     "max_trigger_n_ge_200": [
+      "OMNIDYNE@2",
+      "singularity",
+      0.429,
+      532
+     ]
+    },
+    "white_hat_seat": {
+     "rates": {
+      "ACOUSTIC@0": {
+       "patient_zero": 0.364,
+       "singularity": 0.393,
+       "market_collapse": 0.242,
+       "n": 516
+      },
+      "ACOUSTIC@1": {
+       "patient_zero": 0.352,
+       "singularity": 0.437,
+       "market_collapse": 0.211,
+       "n": 483
+      },
+      "ACOUSTIC@2": {
+       "patient_zero": 0.394,
+       "singularity": 0.366,
+       "market_collapse": 0.241,
+       "n": 503
+      },
+      "CIPHER@0": {
+       "patient_zero": 0.372,
+       "singularity": 0.419,
+       "market_collapse": 0.209,
+       "n": 516
+      },
+      "CIPHER@1": {
+       "patient_zero": 0.347,
+       "singularity": 0.426,
+       "market_collapse": 0.227,
+       "n": 472
+      },
+      "CIPHER@2": {
+       "patient_zero": 0.349,
+       "singularity": 0.436,
+       "market_collapse": 0.216,
+       "n": 505
+      },
+      "OPERATOR@0": {
+       "patient_zero": 0.339,
+       "singularity": 0.424,
+       "market_collapse": 0.237,
+       "n": 507
+      },
+      "OPERATOR@1": {
+       "patient_zero": 0.367,
+       "singularity": 0.391,
+       "market_collapse": 0.242,
+       "n": 545
+      },
+      "OPERATOR@2": {
+       "patient_zero": 0.347,
+       "singularity": 0.437,
+       "market_collapse": 0.216,
+       "n": 487
+      },
+      "PHREAKER@0": {
+       "patient_zero": 0.367,
+       "singularity": 0.398,
+       "market_collapse": 0.235,
+       "n": 507
+      },
+      "PHREAKER@1": {
+       "patient_zero": 0.347,
+       "singularity": 0.419,
+       "market_collapse": 0.234,
+       "n": 501
+      },
+      "PHREAKER@2": {
+       "patient_zero": 0.345,
+       "singularity": 0.418,
+       "market_collapse": 0.237,
+       "n": 498
+      },
+      "PRODIGY@0": {
+       "patient_zero": 0.358,
+       "singularity": 0.408,
+       "market_collapse": 0.233,
+       "n": 480
+      },
+      "PRODIGY@1": {
+       "patient_zero": 0.367,
+       "singularity": 0.408,
+       "market_collapse": 0.225,
+       "n": 502
+      },
+      "PRODIGY@2": {
+       "patient_zero": 0.37,
+       "singularity": 0.385,
+       "market_collapse": 0.245,
+       "n": 506
+      },
+      "SPOOK@0": {
+       "patient_zero": 0.359,
+       "singularity": 0.405,
+       "market_collapse": 0.236,
+       "n": 474
+      },
+      "SPOOK@1": {
+       "patient_zero": 0.378,
+       "singularity": 0.37,
+       "market_collapse": 0.252,
+       "n": 497
+      },
+      "SPOOK@2": {
+       "patient_zero": 0.355,
+       "singularity": 0.407,
+       "market_collapse": 0.238,
+       "n": 501
+      }
+     },
+     "max_trigger": [
+      "ACOUSTIC@1",
+      "singularity",
+      0.437,
+      483
+     ],
+     "max_trigger_n_ge_200": [
+      "ACOUSTIC@1",
+      "singularity",
+      0.437,
+      483
+     ]
+    }
+   },
+   "red_block_rate": 0.2079,
+   "regain_share_of_spend": 0.3822,
+   "market_leader_bonus": {
+    "awarded_games": 2900,
+    "winner_changed_over_awarded": {
+     "rate": 0.1566,
+     "ci95": [
+      0.1438,
+      0.1702
+     ],
+     "n": 2900
+    },
+    "winner_changed_over_all": {
+     "rate": 0.1513,
+     "ci95": [
+      0.139,
+      0.1646
+     ],
+     "n": 3000
+    },
+    "paid_place_tied_over_awarded": {
+     "rate": 0.4572,
+     "ci95": [
+      0.4392,
+      0.4754
+     ],
+     "n": 2900
+    },
+    "mean_survivor_secrets_before_bonus": 4.16,
+    "mean_survivor_bonus": 1.396,
+    "mean_bonus_by_place": {
+     "1": 2,
+     "2": 1,
+     "3": 0
+    }
+   },
+   "games_with_2plus_survivors": 2585,
+   "highest_share_survivor_wins": {
+    "rate": 0.5718,
+    "ci95": [
+     0.5558,
+     0.5877
+    ],
+    "n": 3697
+   },
+   "lowest_share_survivor_wins": {
+    "rate": 0.2117,
+    "ci95": [
+     0.1989,
+     0.2251
+    ],
+    "n": 3708
+   },
+   "bonus_aware_edge": null,
+   "any_shields": {
+    "blue": 0.5875,
+    "red": 0.3291,
+    "green": 0.0835,
+    "total": 97452
+   },
+   "contested": {
+    "rounds": 41598,
+    "blue_left_open": 0.1759,
+    "red_chosen": 0.3951
+   },
+   "win_rate_by_blue_dice": {
+    "0": {
+     "rate": 0.2552,
+     "seats": 5077
+    },
+    "1": {
+     "rate": 0.3843,
+     "seats": 1940
+    },
+    "2+": {
+     "rate": 0.4836,
+     "seats": 1983
+    }
+   },
+   "win_rate_by_bot": {
+    "AccelerationistBot": {
+     "rate": 0.4228,
+     "seats": 1800
+    },
+    "AdaptiveBalancedBot": {
+     "rate": 0.2394,
+     "seats": 1800
+    },
+    "RecklessSaboteurBot": {
+     "rate": 0.1433,
+     "seats": 1800
+    },
+    "SecOpsTurtleBot": {
+     "rate": 0.3539,
+     "seats": 1800
+    },
+    "VentureGreedBot": {
+     "rate": 0.5072,
+     "seats": 1800
+    }
+   },
+   "tiebreak_decided_by": {
+    "secrets": 0.6853,
+    "market_share": 0.131,
+    "sole_survivor": 0.105,
+    "money": 0.0593,
+    "ready_colored_dice_count": 0.0087,
+    "patches": 0.0067,
+    "unpatched_dice_count": 0.0033,
+    "shared": 0.0007
+   },
+   "company_win_rates": {
+    "AEGIS": 0.425,
+    "DTO": 0.4164,
+    "HELIX": 0.254,
+    "MERIDIAN": 0.3563,
+    "OMNIDYNE": 0.289,
+    "PROMETHEUS": 0.2574
+   },
+   "company_win_spread_pts": 17.1,
+   "company_win_spread_ci95_bootstrap": [
+    14.98,
+    20.75
+   ],
+   "seed_log": {
+    "bonus_changed_winner": [
+     307000,
+     307003,
+     307004,
+     307016,
+     307029,
+     307035,
+     307055,
+     307057,
+     307064,
+     307067,
+     307069,
+     307072,
+     307077,
+     307086,
+     307094,
+     307106,
+     307107,
+     307109,
+     307112,
+     307120,
+     307125,
+     307140,
+     307142,
+     307144,
+     307145,
+     307146,
+     307152,
+     307153,
+     307154,
+     307167,
+     307178,
+     307195,
+     307216,
+     307225,
+     307228,
+     307232,
+     307241,
+     307244,
+     307246,
+     307255,
+     307257,
+     307265,
+     307269,
+     307272,
+     307278,
+     307286,
+     307289,
+     307304,
+     307309,
+     307318
+    ]
+   }
+  },
+  {
+   "cell": "V037-ONE-AWARE",
+   "players": 3,
+   "games": 3000,
+   "end_reasons": {
+    "market_collapse": 0.3363,
+    "patient_zero": 0.259,
+    "singularity": 0.3873,
+    "total_wipeout": 0.0173
+   },
+   "three_way_split": {
+    "patient_zero": {
+     "rate": 0.2763,
+     "ci95": [
+      0.2606,
+      0.2926
+     ],
+     "n": 3000
+    },
+    "singularity": {
+     "rate": 0.3873,
+     "ci95": [
+      0.3701,
+      0.4049
+     ],
+     "n": 3000
+    },
+    "market_collapse": {
+     "rate": 0.3363,
+     "ci95": [
+      0.3196,
+      0.3534
+     ],
+     "n": 3000
+    }
+   },
+   "total_wipeout_rate": {
+    "rate": 0.0173,
+    "ci95": [
+     0.0132,
+     0.0227
+    ],
+    "n": 3000
+   },
+   "market_collapse_le_5_rounds": 0,
+   "rounds": {
+    "mean": 8.938,
+    "median": 9.0,
+    "stdev": 1.117
+   },
+   "by_setup": {
+    "v3_card": {
+     "rates": {
+      "CORRUPTED_KERNEL": {
+       "patient_zero": 0.298,
+       "singularity": 0.375,
+       "market_collapse": 0.327,
+       "n": 1491
+      },
+      "ZERO_DAY_OVERRIDE": {
+       "patient_zero": 0.255,
+       "singularity": 0.4,
+       "market_collapse": 0.345,
+       "n": 1509
+      }
+     },
+     "max_trigger": [
+      "ZERO_DAY_OVERRIDE",
+      "singularity",
+      0.4,
+      1509
+     ],
+     "max_trigger_n_ge_200": [
+      "ZERO_DAY_OVERRIDE",
+      "singularity",
+      0.4,
+      1509
+     ]
+    },
+    "company_seat": {
+     "rates": {
+      "AEGIS@0": {
+       "patient_zero": 0.29,
+       "singularity": 0.375,
+       "market_collapse": 0.335,
+       "n": 514
+      },
+      "AEGIS@1": {
+       "patient_zero": 0.296,
+       "singularity": 0.41,
+       "market_collapse": 0.294,
+       "n": 520
+      },
+      "AEGIS@2": {
+       "patient_zero": 0.256,
+       "singularity": 0.419,
+       "market_collapse": 0.324,
+       "n": 527
+      },
+      "DTO@0": {
+       "patient_zero": 0.268,
+       "singularity": 0.4,
+       "market_collapse": 0.332,
+       "n": 503
+      },
+      "DTO@1": {
+       "patient_zero": 0.24,
+       "singularity": 0.401,
+       "market_collapse": 0.359,
+       "n": 501
+      },
+      "DTO@2": {
+       "patient_zero": 0.258,
+       "singularity": 0.38,
+       "market_collapse": 0.362,
+       "n": 450
+      },
+      "HELIX@0": {
+       "patient_zero": 0.29,
+       "singularity": 0.396,
+       "market_collapse": 0.313,
+       "n": 482
+      },
+      "HELIX@1": {
+       "patient_zero": 0.249,
+       "singularity": 0.386,
+       "market_collapse": 0.365,
+       "n": 510
+      },
+      "HELIX@2": {
+       "patient_zero": 0.288,
+       "singularity": 0.358,
+       "market_collapse": 0.354,
+       "n": 500
+      },
+      "MERIDIAN@0": {
+       "patient_zero": 0.268,
+       "singularity": 0.396,
+       "market_collapse": 0.336,
+       "n": 530
+      },
+      "MERIDIAN@1": {
+       "patient_zero": 0.274,
+       "singularity": 0.387,
+       "market_collapse": 0.339,
+       "n": 489
+      },
+      "MERIDIAN@2": {
+       "patient_zero": 0.259,
+       "singularity": 0.403,
+       "market_collapse": 0.338,
+       "n": 474
+      },
+      "OMNIDYNE@0": {
+       "patient_zero": 0.288,
+       "singularity": 0.349,
+       "market_collapse": 0.363,
+       "n": 482
+      },
+      "OMNIDYNE@1": {
+       "patient_zero": 0.327,
+       "singularity": 0.365,
+       "market_collapse": 0.307,
+       "n": 498
+      },
+      "OMNIDYNE@2": {
+       "patient_zero": 0.297,
+       "singularity": 0.37,
+       "market_collapse": 0.333,
+       "n": 532
+      },
+      "PROMETHEUS@0": {
+       "patient_zero": 0.254,
+       "singularity": 0.407,
+       "market_collapse": 0.339,
+       "n": 489
+      },
+      "PROMETHEUS@1": {
+       "patient_zero": 0.272,
+       "singularity": 0.373,
+       "market_collapse": 0.355,
+       "n": 482
+      },
+      "PROMETHEUS@2": {
+       "patient_zero": 0.296,
+       "singularity": 0.393,
+       "market_collapse": 0.311,
+       "n": 517
+      }
+     },
+     "max_trigger": [
+      "AEGIS@2",
+      "singularity",
+      0.419,
+      527
+     ],
+     "max_trigger_n_ge_200": [
+      "AEGIS@2",
+      "singularity",
+      0.419,
+      527
+     ]
+    },
+    "white_hat_seat": {
+     "rates": {
+      "ACOUSTIC@0": {
+       "patient_zero": 0.289,
+       "singularity": 0.38,
+       "market_collapse": 0.331,
+       "n": 516
+      },
+      "ACOUSTIC@1": {
+       "patient_zero": 0.284,
+       "singularity": 0.408,
+       "market_collapse": 0.308,
+       "n": 483
+      },
+      "ACOUSTIC@2": {
+       "patient_zero": 0.294,
+       "singularity": 0.382,
+       "market_collapse": 0.324,
+       "n": 503
+      },
+      "CIPHER@0": {
+       "patient_zero": 0.285,
+       "singularity": 0.372,
+       "market_collapse": 0.343,
+       "n": 516
+      },
+      "CIPHER@1": {
+       "patient_zero": 0.28,
+       "singularity": 0.411,
+       "market_collapse": 0.309,
+       "n": 472
+      },
+      "CIPHER@2": {
+       "patient_zero": 0.277,
+       "singularity": 0.39,
+       "market_collapse": 0.333,
+       "n": 505
+      },
+      "OPERATOR@0": {
+       "patient_zero": 0.27,
+       "singularity": 0.416,
+       "market_collapse": 0.314,
+       "n": 507
+      },
+      "OPERATOR@1": {
+       "patient_zero": 0.277,
+       "singularity": 0.356,
+       "market_collapse": 0.367,
+       "n": 545
+      },
+      "OPERATOR@2": {
+       "patient_zero": 0.263,
+       "singularity": 0.415,
+       "market_collapse": 0.322,
+       "n": 487
+      },
+      "PHREAKER@0": {
+       "patient_zero": 0.272,
+       "singularity": 0.375,
+       "market_collapse": 0.353,
+       "n": 507
+      },
+      "PHREAKER@1": {
+       "patient_zero": 0.265,
+       "singularity": 0.379,
+       "market_collapse": 0.355,
+       "n": 501
+      },
+      "PHREAKER@2": {
+       "patient_zero": 0.273,
+       "singularity": 0.4,
+       "market_collapse": 0.327,
+       "n": 498
+      },
+      "PRODIGY@0": {
+       "patient_zero": 0.279,
+       "singularity": 0.394,
+       "market_collapse": 0.327,
+       "n": 480
+      },
+      "PRODIGY@1": {
+       "patient_zero": 0.273,
+       "singularity": 0.398,
+       "market_collapse": 0.329,
+       "n": 502
+      },
+      "PRODIGY@2": {
+       "patient_zero": 0.271,
+       "singularity": 0.362,
+       "market_collapse": 0.368,
+       "n": 506
+      },
+      "SPOOK@0": {
+       "patient_zero": 0.262,
+       "singularity": 0.388,
+       "market_collapse": 0.35,
+       "n": 474
+      },
+      "SPOOK@1": {
+       "patient_zero": 0.28,
+       "singularity": 0.376,
+       "market_collapse": 0.344,
+       "n": 497
+      },
+      "SPOOK@2": {
+       "patient_zero": 0.279,
+       "singularity": 0.377,
+       "market_collapse": 0.343,
+       "n": 501
+      }
+     },
+     "max_trigger": [
+      "OPERATOR@0",
+      "singularity",
+      0.416,
+      507
+     ],
+     "max_trigger_n_ge_200": [
+      "OPERATOR@0",
+      "singularity",
+      0.416,
+      507
+     ]
+    }
+   },
+   "red_block_rate": 0.1596,
+   "regain_share_of_spend": 0.2695,
+   "market_leader_bonus": {
+    "awarded_games": 2948,
+    "winner_changed_over_awarded": {
+     "rate": 0.1832,
+     "ci95": [
+      0.1696,
+      0.1975
+     ],
+     "n": 2948
+    },
+    "winner_changed_over_all": {
+     "rate": 0.18,
+     "ci95": [
+      0.1667,
+      0.1942
+     ],
+     "n": 3000
+    },
+    "paid_place_tied_over_awarded": {
+     "rate": 0.4742,
+     "ci95": [
+      0.4562,
+      0.4923
+     ],
+     "n": 2948
+    },
+    "mean_survivor_secrets_before_bonus": 4.64,
+    "mean_survivor_bonus": 1.334,
+    "mean_bonus_by_place": {
+     "1": 2,
+     "2": 1,
+     "3": 0
+    }
+   },
+   "games_with_2plus_survivors": 2735,
+   "highest_share_survivor_wins": {
+    "rate": 0.5684,
+    "ci95": [
+     0.5524,
+     0.5843
+    ],
+    "n": 3700
+   },
+   "lowest_share_survivor_wins": {
+    "rate": 0.2031,
+    "ci95": [
+     0.1906,
+     0.2161
+    ],
+    "n": 3841
+   },
+   "bonus_aware_edge": {
+    "aware_win_credit": {
+     "mean": 0.4092,
+     "ci95": [
+      0.3916,
+      0.4268
+     ],
+     "n": 3000
+    },
+    "fair_share": 0.3333,
+    "edge_pts": 7.59,
+    "edge_ci95_pts": [
+     5.83,
+     9.35
+    ]
+   },
+   "any_shields": {
+    "blue": 0.6213,
+    "red": 0.2416,
+    "green": 0.1371,
+    "total": 99711
+   },
+   "contested": {
+    "rounds": 42018,
+    "blue_left_open": 0.0851,
+    "red_chosen": 0.2562
+   },
+   "win_rate_by_blue_dice": {
+    "0": {
+     "rate": 0.2677,
+     "seats": 5000
+    },
+    "1": {
+     "rate": 0.3736,
+     "seats": 1970
+    },
+    "2+": {
+     "rate": 0.4559,
+     "seats": 2030
+    }
+   },
+   "win_rate_by_bot": {
+    "AccelerationistBot": {
+     "rate": 0.3867,
+     "seats": 1800
+    },
+    "AdaptiveBalancedBot": {
+     "rate": 0.2369,
+     "seats": 1800
+    },
+    "RecklessSaboteurBot": {
+     "rate": 0.1828,
+     "seats": 1800
+    },
+    "SecOpsTurtleBot": {
+     "rate": 0.3697,
+     "seats": 1800
+    },
+    "VentureGreedBot": {
+     "rate": 0.4906,
+     "seats": 1800
+    }
+   },
+   "tiebreak_decided_by": {
+    "secrets": 0.7167,
+    "market_share": 0.144,
+    "sole_survivor": 0.071,
+    "money": 0.0533,
+    "ready_colored_dice_count": 0.0097,
+    "patches": 0.0027,
+    "unpatched_dice_count": 0.0017,
+    "shared": 0.001
+   },
+   "company_win_rates": {
+    "AEGIS": 0.4113,
+    "DTO": 0.4367,
+    "HELIX": 0.2621,
+    "MERIDIAN": 0.3486,
+    "OMNIDYNE": 0.2718,
+    "PROMETHEUS": 0.2692
+   },
+   "company_win_spread_pts": 17.47,
+   "company_win_spread_ci95_bootstrap": [
+    14.69,
+    21.13
+   ],
+   "seed_log": {
+    "bonus_changed_winner": [
+     307000,
+     307008,
+     307016,
+     307019,
+     307020,
+     307032,
+     307041,
+     307047,
+     307054,
+     307065,
+     307069,
+     307071,
+     307073,
+     307077,
+     307081,
+     307082,
+     307088,
+     307089,
+     307091,
+     307104,
+     307112,
+     307119,
+     307123,
+     307124,
+     307140,
+     307144,
+     307146,
+     307151,
+     307164,
+     307174,
+     307177,
+     307178,
+     307184,
+     307188,
+     307193,
+     307197,
+     307204,
+     307208,
+     307213,
+     307223,
+     307229,
+     307243,
+     307245,
+     307246,
+     307264,
+     307266,
+     307268,
+     307276,
+     307282,
+     307284
+    ]
+   }
+  },
+  {
+   "cell": "V036",
+   "players": 4,
+   "games": 3000,
+   "end_reasons": {
+    "market_collapse": 0.354,
+    "patient_zero": 0.2953,
+    "singularity": 0.341,
+    "total_wipeout": 0.0097
+   },
+   "three_way_split": {
+    "patient_zero": {
+     "rate": 0.305,
+     "ci95": [
+      0.2888,
+      0.3217
+     ],
+     "n": 3000
+    },
+    "singularity": {
+     "rate": 0.341,
+     "ci95": [
+      0.3242,
+      0.3582
+     ],
+     "n": 3000
+    },
+    "market_collapse": {
+     "rate": 0.354,
+     "ci95": [
+      0.3371,
+      0.3713
+     ],
+     "n": 3000
+    }
+   },
+   "total_wipeout_rate": {
+    "rate": 0.0097,
+    "ci95": [
+     0.0067,
+     0.0138
+    ],
+    "n": 3000
+   },
+   "market_collapse_le_5_rounds": 0,
+   "rounds": {
+    "mean": 8.829,
+    "median": 9.0,
+    "stdev": 1.13
+   },
+   "by_setup": {
+    "v3_card": {
+     "rates": {
+      "CORRUPTED_KERNEL": {
+       "patient_zero": 0.34,
+       "singularity": 0.332,
+       "market_collapse": 0.327,
+       "n": 1451
+      },
+      "ZERO_DAY_OVERRIDE": {
+       "patient_zero": 0.272,
+       "singularity": 0.349,
+       "market_collapse": 0.379,
+       "n": 1549
+      }
+     },
+     "max_trigger": [
+      "ZERO_DAY_OVERRIDE",
+      "market_collapse",
+      0.379,
+      1549
+     ],
+     "max_trigger_n_ge_200": [
+      "ZERO_DAY_OVERRIDE",
+      "market_collapse",
+      0.379,
+      1549
+     ]
+    },
+    "company_seat": {
+     "rates": {
+      "AEGIS@0": {
+       "patient_zero": 0.309,
+       "singularity": 0.363,
+       "market_collapse": 0.328,
+       "n": 488
+      },
+      "AEGIS@1": {
+       "patient_zero": 0.279,
+       "singularity": 0.356,
+       "market_collapse": 0.365,
+       "n": 545
+      },
+      "AEGIS@2": {
+       "patient_zero": 0.322,
+       "singularity": 0.346,
+       "market_collapse": 0.332,
+       "n": 488
+      },
+      "AEGIS@3": {
+       "patient_zero": 0.312,
+       "singularity": 0.31,
+       "market_collapse": 0.378,
+       "n": 500
+      },
+      "DTO@0": {
+       "patient_zero": 0.308,
+       "singularity": 0.364,
+       "market_collapse": 0.328,
+       "n": 530
+      },
+      "DTO@1": {
+       "patient_zero": 0.33,
+       "singularity": 0.317,
+       "market_collapse": 0.354,
+       "n": 458
+      },
+      "DTO@2": {
+       "patient_zero": 0.272,
+       "singularity": 0.365,
+       "market_collapse": 0.363,
+       "n": 518
+      },
+      "DTO@3": {
+       "patient_zero": 0.291,
+       "singularity": 0.351,
+       "market_collapse": 0.358,
+       "n": 478
+      },
+      "HELIX@0": {
+       "patient_zero": 0.302,
+       "singularity": 0.294,
+       "market_collapse": 0.404,
+       "n": 470
+      },
+      "HELIX@1": {
+       "patient_zero": 0.284,
+       "singularity": 0.34,
+       "market_collapse": 0.376,
+       "n": 476
+      },
+      "HELIX@2": {
+       "patient_zero": 0.337,
+       "singularity": 0.316,
+       "market_collapse": 0.347,
+       "n": 510
+      },
+      "HELIX@3": {
+       "patient_zero": 0.289,
+       "singularity": 0.387,
+       "market_collapse": 0.325,
+       "n": 499
+      },
+      "MERIDIAN@0": {
+       "patient_zero": 0.28,
+       "singularity": 0.325,
+       "market_collapse": 0.396,
+       "n": 493
+      },
+      "MERIDIAN@1": {
+       "patient_zero": 0.354,
+       "singularity": 0.345,
+       "market_collapse": 0.301,
+       "n": 522
+      },
+      "MERIDIAN@2": {
+       "patient_zero": 0.293,
+       "singularity": 0.355,
+       "market_collapse": 0.351,
+       "n": 484
+      },
+      "MERIDIAN@3": {
+       "patient_zero": 0.295,
+       "singularity": 0.341,
+       "market_collapse": 0.363,
+       "n": 501
+      },
+      "OMNIDYNE@0": {
+       "patient_zero": 0.318,
+       "singularity": 0.352,
+       "market_collapse": 0.33,
+       "n": 494
+      },
+      "OMNIDYNE@1": {
+       "patient_zero": 0.3,
+       "singularity": 0.34,
+       "market_collapse": 0.36,
+       "n": 486
+      },
+      "OMNIDYNE@2": {
+       "patient_zero": 0.313,
+       "singularity": 0.322,
+       "market_collapse": 0.365,
+       "n": 521
+      },
+      "OMNIDYNE@3": {
+       "patient_zero": 0.297,
+       "singularity": 0.341,
+       "market_collapse": 0.363,
+       "n": 499
+      },
+      "PROMETHEUS@0": {
+       "patient_zero": 0.312,
+       "singularity": 0.345,
+       "market_collapse": 0.343,
+       "n": 525
+      },
+      "PROMETHEUS@1": {
+       "patient_zero": 0.285,
+       "singularity": 0.345,
+       "market_collapse": 0.37,
+       "n": 513
+      },
+      "PROMETHEUS@2": {
+       "patient_zero": 0.292,
+       "singularity": 0.342,
+       "market_collapse": 0.365,
+       "n": 479
+      },
+      "PROMETHEUS@3": {
+       "patient_zero": 0.344,
+       "singularity": 0.317,
+       "market_collapse": 0.338,
+       "n": 523
+      }
+     },
+     "max_trigger": [
+      "HELIX@0",
+      "market_collapse",
+      0.404,
+      470
+     ],
+     "max_trigger_n_ge_200": [
+      "HELIX@0",
+      "market_collapse",
+      0.404,
+      470
+     ]
+    },
+    "white_hat_seat": {
+     "rates": {
+      "ACOUSTIC@0": {
+       "patient_zero": 0.292,
+       "singularity": 0.34,
+       "market_collapse": 0.368,
+       "n": 503
+      },
+      "ACOUSTIC@1": {
+       "patient_zero": 0.307,
+       "singularity": 0.359,
+       "market_collapse": 0.334,
+       "n": 476
+      },
+      "ACOUSTIC@2": {
+       "patient_zero": 0.317,
+       "singularity": 0.321,
+       "market_collapse": 0.362,
+       "n": 483
+      },
+      "ACOUSTIC@3": {
+       "patient_zero": 0.313,
+       "singularity": 0.331,
+       "market_collapse": 0.356,
+       "n": 540
+      },
+      "CIPHER@0": {
+       "patient_zero": 0.307,
+       "singularity": 0.339,
+       "market_collapse": 0.354,
+       "n": 522
+      },
+      "CIPHER@1": {
+       "patient_zero": 0.311,
+       "singularity": 0.356,
+       "market_collapse": 0.333,
+       "n": 514
+      },
+      "CIPHER@2": {
+       "patient_zero": 0.298,
+       "singularity": 0.326,
+       "market_collapse": 0.377,
+       "n": 494
+      },
+      "CIPHER@3": {
+       "patient_zero": 0.304,
+       "singularity": 0.339,
+       "market_collapse": 0.357,
+       "n": 496
+      },
+      "OPERATOR@0": {
+       "patient_zero": 0.309,
+       "singularity": 0.362,
+       "market_collapse": 0.328,
+       "n": 469
+      },
+      "OPERATOR@1": {
+       "patient_zero": 0.285,
+       "singularity": 0.324,
+       "market_collapse": 0.39,
+       "n": 515
+      },
+      "OPERATOR@2": {
+       "patient_zero": 0.272,
+       "singularity": 0.347,
+       "market_collapse": 0.381,
+       "n": 530
+      },
+      "OPERATOR@3": {
+       "patient_zero": 0.32,
+       "singularity": 0.323,
+       "market_collapse": 0.357,
+       "n": 493
+      },
+      "PHREAKER@0": {
+       "patient_zero": 0.31,
+       "singularity": 0.341,
+       "market_collapse": 0.349,
+       "n": 481
+      },
+      "PHREAKER@1": {
+       "patient_zero": 0.314,
+       "singularity": 0.322,
+       "market_collapse": 0.363,
+       "n": 512
+      },
+      "PHREAKER@2": {
+       "patient_zero": 0.331,
+       "singularity": 0.337,
+       "market_collapse": 0.331,
+       "n": 543
+      },
+      "PHREAKER@3": {
+       "patient_zero": 0.285,
+       "singularity": 0.392,
+       "market_collapse": 0.323,
+       "n": 477
+      },
+      "PRODIGY@0": {
+       "patient_zero": 0.331,
+       "singularity": 0.339,
+       "market_collapse": 0.329,
+       "n": 495
+      },
+      "PRODIGY@1": {
+       "patient_zero": 0.298,
+       "singularity": 0.341,
+       "market_collapse": 0.361,
+       "n": 513
+      },
+      "PRODIGY@2": {
+       "patient_zero": 0.286,
+       "singularity": 0.349,
+       "market_collapse": 0.366,
+       "n": 476
+      },
+      "PRODIGY@3": {
+       "patient_zero": 0.315,
+       "singularity": 0.323,
+       "market_collapse": 0.363,
+       "n": 502
+      },
+      "SPOOK@0": {
+       "patient_zero": 0.283,
+       "singularity": 0.326,
+       "market_collapse": 0.391,
+       "n": 530
+      },
+      "SPOOK@1": {
+       "patient_zero": 0.315,
+       "singularity": 0.345,
+       "market_collapse": 0.34,
+       "n": 470
+      },
+      "SPOOK@2": {
+       "patient_zero": 0.327,
+       "singularity": 0.367,
+       "market_collapse": 0.306,
+       "n": 474
+      },
+      "SPOOK@3": {
+       "patient_zero": 0.291,
+       "singularity": 0.341,
+       "market_collapse": 0.368,
+       "n": 492
+      }
+     },
+     "max_trigger": [
+      "PHREAKER@3",
+      "singularity",
+      0.392,
+      477
+     ],
+     "max_trigger_n_ge_200": [
+      "PHREAKER@3",
+      "singularity",
+      0.392,
+      477
+     ]
+    }
+   },
+   "red_block_rate": 0.147,
+   "regain_share_of_spend": 0.2418,
+   "market_leader_bonus": {
+    "awarded_games": 0,
+    "winner_changed_over_awarded": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ],
+     "n": 0
+    },
+    "winner_changed_over_all": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0013
+     ],
+     "n": 3000
+    },
+    "paid_place_tied_over_awarded": {
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ],
+     "n": 0
+    },
+    "mean_survivor_secrets_before_bonus": 4.718,
+    "mean_survivor_bonus": 0,
+    "mean_bonus_by_place": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4": 0
+    }
+   },
+   "games_with_2plus_survivors": 2885,
+   "highest_share_survivor_wins": {
+    "rate": 0.3528,
+    "ci95": [
+     0.3383,
+     0.3675
+    ],
+    "n": 4133
+   },
+   "lowest_share_survivor_wins": {
+    "rate": 0.2288,
+    "ci95": [
+     0.2169,
+     0.241
+    ],
+    "n": 4660
+   },
+   "bonus_aware_edge": null,
+   "any_shields": {
+    "blue": 0.6335,
+    "red": 0.2182,
+    "green": 0.1483,
+    "total": 132153
+   },
+   "contested": {
+    "rounds": 55328,
+    "blue_left_open": 0.0647,
+    "red_chosen": 0.2178
+   },
+   "win_rate_by_blue_dice": {
+    "0": {
+     "rate": 0.1627,
+     "seats": 6590
+    },
+    "1": {
+     "rate": 0.3071,
+     "seats": 2678
+    },
+    "2+": {
+     "rate": 0.4046,
+     "seats": 2732
+    }
+   },
+   "win_rate_by_bot": {
+    "AccelerationistBot": {
+     "rate": 0.3367,
+     "seats": 2400
+    },
+    "AdaptiveBalancedBot": {
+     "rate": 0.1504,
+     "seats": 2400
+    },
+    "RecklessSaboteurBot": {
+     "rate": 0.0587,
+     "seats": 2400
+    },
+    "SecOpsTurtleBot": {
+     "rate": 0.2729,
+     "seats": 2400
+    },
+    "VentureGreedBot": {
+     "rate": 0.4313,
+     "seats": 2400
+    }
+   },
+   "tiebreak_decided_by": {
+    "secrets": 0.6923,
+    "market_share": 0.208,
+    "money": 0.053,
+    "sole_survivor": 0.0287,
+    "ready_colored_dice_count": 0.0133,
+    "patches": 0.0023,
+    "unpatched_dice_count": 0.0017,
+    "shared": 0.0007
+   },
+   "company_win_rates": {
+    "AEGIS": 0.2845,
+    "DTO": 0.401,
+    "HELIX": 0.1962,
+    "MERIDIAN": 0.2325,
+    "OMNIDYNE": 0.2003,
+    "PROMETHEUS": 0.1865
+   },
+   "company_win_spread_pts": 21.44,
+   "company_win_spread_ci95_bootstrap": [
+    18.9,
+    24.51
+   ],
+   "seed_log": {}
+  },
+  {
+   "cell": "V037",
+   "players": 4,
+   "games": 3000,
+   "end_reasons": {
+    "market_collapse": 0.2983,
+    "patient_zero": 0.29,
+    "singularity": 0.3957,
+    "total_wipeout": 0.016
+   },
+   "three_way_split": {
+    "patient_zero": {
+     "rate": 0.306,
+     "ci95": [
+      0.2898,
+      0.3227
+     ],
+     "n": 3000
+    },
+    "singularity": {
+     "rate": 0.3957,
+     "ci95": [
+      0.3783,
+      0.4133
+     ],
+     "n": 3000
+    },
+    "market_collapse": {
+     "rate": 0.2983,
+     "ci95": [
+      0.2822,
+      0.315
+     ],
+     "n": 3000
+    }
+   },
+   "total_wipeout_rate": {
+    "rate": 0.016,
+    "ci95": [
+     0.0121,
+     0.0211
+    ],
+    "n": 3000
+   },
+   "market_collapse_le_5_rounds": 0,
+   "rounds": {
+    "mean": 8.971,
+    "median": 9.0,
+    "stdev": 1.074
+   },
+   "by_setup": {
+    "v3_card": {
+     "rates": {
+      "CORRUPTED_KERNEL": {
+       "patient_zero": 0.34,
+       "singularity": 0.371,
+       "market_collapse": 0.289,
+       "n": 1451
+      },
+      "ZERO_DAY_OVERRIDE": {
+       "patient_zero": 0.274,
+       "singularity": 0.418,
+       "market_collapse": 0.307,
+       "n": 1549
+      }
+     },
+     "max_trigger": [
+      "ZERO_DAY_OVERRIDE",
+      "singularity",
+      0.418,
+      1549
+     ],
+     "max_trigger_n_ge_200": [
+      "ZERO_DAY_OVERRIDE",
+      "singularity",
+      0.418,
+      1549
+     ]
+    },
+    "company_seat": {
+     "rates": {
+      "AEGIS@0": {
+       "patient_zero": 0.307,
+       "singularity": 0.387,
+       "market_collapse": 0.305,
+       "n": 488
+      },
+      "AEGIS@1": {
+       "patient_zero": 0.314,
+       "singularity": 0.376,
+       "market_collapse": 0.31,
+       "n": 545
+      },
+      "AEGIS@2": {
+       "patient_zero": 0.305,
+       "singularity": 0.416,
+       "market_collapse": 0.279,
+       "n": 488
+      },
+      "AEGIS@3": {
+       "patient_zero": 0.318,
+       "singularity": 0.394,
+       "market_collapse": 0.288,
+       "n": 500
+      },
+      "DTO@0": {
+       "patient_zero": 0.302,
+       "singularity": 0.415,
+       "market_collapse": 0.283,
+       "n": 530
+      },
+      "DTO@1": {
+       "patient_zero": 0.328,
+       "singularity": 0.386,
+       "market_collapse": 0.286,
+       "n": 458
+      },
+      "DTO@2": {
+       "patient_zero": 0.282,
+       "singularity": 0.402,
+       "market_collapse": 0.317,
+       "n": 518
+      },
+      "DTO@3": {
+       "patient_zero": 0.312,
+       "singularity": 0.379,
+       "market_collapse": 0.31,
+       "n": 478
+      },
+      "HELIX@0": {
+       "patient_zero": 0.309,
+       "singularity": 0.345,
+       "market_collapse": 0.347,
+       "n": 470
+      },
+      "HELIX@1": {
+       "patient_zero": 0.277,
+       "singularity": 0.412,
+       "market_collapse": 0.311,
+       "n": 476
+      },
+      "HELIX@2": {
+       "patient_zero": 0.316,
+       "singularity": 0.367,
+       "market_collapse": 0.318,
+       "n": 510
+      },
+      "HELIX@3": {
+       "patient_zero": 0.299,
+       "singularity": 0.427,
+       "market_collapse": 0.275,
+       "n": 499
+      },
+      "MERIDIAN@0": {
+       "patient_zero": 0.274,
+       "singularity": 0.404,
+       "market_collapse": 0.323,
+       "n": 493
+      },
+      "MERIDIAN@1": {
+       "patient_zero": 0.331,
+       "singularity": 0.387,
+       "market_collapse": 0.282,
+       "n": 522
+      },
+      "MERIDIAN@2": {
+       "patient_zero": 0.312,
+       "singularity": 0.415,
+       "market_collapse": 0.273,
+       "n": 484
+      },
+      "MERIDIAN@3": {
+       "patient_zero": 0.281,
+       "singularity": 0.417,
+       "market_collapse": 0.301,
+       "n": 501
+      },
+      "OMNIDYNE@0": {
+       "patient_zero": 0.318,
+       "singularity": 0.407,
+       "market_collapse": 0.275,
+       "n": 494
+      },
+      "OMNIDYNE@1": {
+       "patient_zero": 0.305,
+       "singularity": 0.389,
+       "market_collapse": 0.307,
+       "n": 486
+      },
+      "OMNIDYNE@2": {
+       "patient_zero": 0.324,
+       "singularity": 0.393,
+       "market_collapse": 0.282,
+       "n": 521
+      },
+      "OMNIDYNE@3": {
+       "patient_zero": 0.297,
+       "singularity": 0.391,
+       "market_collapse": 0.313,
+       "n": 499
+      },
+      "PROMETHEUS@0": {
+       "patient_zero": 0.326,
+       "singularity": 0.411,
+       "market_collapse": 0.263,
+       "n": 525
+      },
+      "PROMETHEUS@1": {
+       "patient_zero": 0.281,
+       "singularity": 0.425,
+       "market_collapse": 0.294,
+       "n": 513
+      },
+      "PROMETHEUS@2": {
+       "patient_zero": 0.296,
+       "singularity": 0.382,
+       "market_collapse": 0.322,
+       "n": 479
+      },
+      "PROMETHEUS@3": {
+       "patient_zero": 0.329,
+       "singularity": 0.367,
+       "market_collapse": 0.304,
+       "n": 523
+      }
+     },
+     "max_trigger": [
+      "HELIX@3",
+      "singularity",
+      0.427,
+      499
+     ],
+     "max_trigger_n_ge_200": [
+      "HELIX@3",
+      "singularity",
+      0.427,
+      499
+     ]
+    },
+    "white_hat_seat": {
+     "rates": {
+      "ACOUSTIC@0": {
+       "patient_zero": 0.318,
+       "singularity": 0.394,
+       "market_collapse": 0.288,
+       "n": 503
+      },
+      "ACOUSTIC@1": {
+       "patient_zero": 0.298,
+       "singularity": 0.405,
+       "market_collapse": 0.296,
+       "n": 476
+      },
+      "ACOUSTIC@2": {
+       "patient_zero": 0.29,
+       "singularity": 0.387,
+       "market_collapse": 0.323,
+       "n": 483
+      },
+      "ACOUSTIC@3": {
+       "patient_zero": 0.333,
+       "singularity": 0.372,
+       "market_collapse": 0.294,
+       "n": 540
+      },
+      "CIPHER@0": {
+       "patient_zero": 0.301,
+       "singularity": 0.395,
+       "market_collapse": 0.305,
+       "n": 522
+      },
+      "CIPHER@1": {
+       "patient_zero": 0.321,
+       "singularity": 0.403,
+       "market_collapse": 0.276,
+       "n": 514
+      },
+      "CIPHER@2": {
+       "patient_zero": 0.291,
+       "singularity": 0.395,
+       "market_collapse": 0.314,
+       "n": 494
+      },
+      "CIPHER@3": {
+       "patient_zero": 0.3,
+       "singularity": 0.389,
+       "market_collapse": 0.31,
+       "n": 496
+      },
+      "OPERATOR@0": {
+       "patient_zero": 0.307,
+       "singularity": 0.426,
+       "market_collapse": 0.267,
+       "n": 469
+      },
+      "OPERATOR@1": {
+       "patient_zero": 0.303,
+       "singularity": 0.384,
+       "market_collapse": 0.313,
+       "n": 515
+      },
+      "OPERATOR@2": {
+       "patient_zero": 0.302,
+       "singularity": 0.404,
+       "market_collapse": 0.294,
+       "n": 530
+      },
+      "OPERATOR@3": {
+       "patient_zero": 0.288,
+       "singularity": 0.402,
+       "market_collapse": 0.31,
+       "n": 493
+      },
+      "PHREAKER@0": {
+       "patient_zero": 0.316,
+       "singularity": 0.374,
+       "market_collapse": 0.31,
+       "n": 481
+      },
+      "PHREAKER@1": {
+       "patient_zero": 0.305,
+       "singularity": 0.404,
+       "market_collapse": 0.291,
+       "n": 512
+      },
+      "PHREAKER@2": {
+       "patient_zero": 0.315,
+       "singularity": 0.376,
+       "market_collapse": 0.309,
+       "n": 543
+      },
+      "PHREAKER@3": {
+       "patient_zero": 0.304,
+       "singularity": 0.436,
+       "market_collapse": 0.26,
+       "n": 477
+      },
+      "PRODIGY@0": {
+       "patient_zero": 0.313,
+       "singularity": 0.398,
+       "market_collapse": 0.289,
+       "n": 495
+      },
+      "PRODIGY@1": {
+       "patient_zero": 0.288,
+       "singularity": 0.394,
+       "market_collapse": 0.318,
+       "n": 513
+      },
+      "PRODIGY@2": {
+       "patient_zero": 0.309,
+       "singularity": 0.405,
+       "market_collapse": 0.286,
+       "n": 476
+      },
+      "PRODIGY@3": {
+       "patient_zero": 0.303,
+       "singularity": 0.388,
+       "market_collapse": 0.309,
+       "n": 502
+      },
+      "SPOOK@0": {
+       "patient_zero": 0.283,
+       "singularity": 0.389,
+       "market_collapse": 0.328,
+       "n": 530
+      },
+      "SPOOK@1": {
+       "patient_zero": 0.321,
+       "singularity": 0.383,
+       "market_collapse": 0.296,
+       "n": 470
+      },
+      "SPOOK@2": {
+       "patient_zero": 0.329,
+       "singularity": 0.409,
+       "market_collapse": 0.262,
+       "n": 474
+      },
+      "SPOOK@3": {
+       "patient_zero": 0.305,
+       "singularity": 0.39,
+       "market_collapse": 0.305,
+       "n": 492
+      }
+     },
+     "max_trigger": [
+      "PHREAKER@3",
+      "singularity",
+      0.436,
+      477
+     ],
+     "max_trigger_n_ge_200": [
+      "PHREAKER@3",
+      "singularity",
+      0.436,
+      477
+     ]
+    }
+   },
+   "red_block_rate": 0.2086,
+   "regain_share_of_spend": 0.3656,
+   "market_leader_bonus": {
+    "awarded_games": 2952,
+    "winner_changed_over_awarded": {
+     "rate": 0.2392,
+     "ci95": [
+      0.2241,
+      0.2549
+     ],
+     "n": 2952
+    },
+    "winner_changed_over_all": {
+     "rate": 0.2353,
+     "ci95": [
+      0.2205,
+      0.2508
+     ],
+     "n": 3000
+    },
+    "paid_place_tied_over_awarded": {
+     "rate": 0.6155,
+     "ci95": [
+      0.5978,
+      0.6329
+     ],
+     "n": 2952
+    },
+    "mean_survivor_secrets_before_bonus": 4.873,
+    "mean_survivor_bonus": 1.107,
+    "mean_bonus_by_place": {
+     "1": 2,
+     "2": 1,
+     "3": 0,
+     "4": 0
+    }
+   },
+   "games_with_2plus_survivors": 2866,
+   "highest_share_survivor_wins": {
+    "rate": 0.4809,
+    "ci95": [
+     0.4661,
+     0.4956
+    ],
+    "n": 4415
+   },
+   "lowest_share_survivor_wins": {
+    "rate": 0.1339,
+    "ci95": [
+     0.1238,
+     0.1446
+    ],
+    "n": 4108
+   },
+   "bonus_aware_edge": null,
+   "any_shields": {
+    "blue": 0.5928,
+    "red": 0.3307,
+    "green": 0.0765,
+    "total": 129613
+   },
+   "contested": {
+    "rounds": 55575,
+    "blue_left_open": 0.177,
+    "red_chosen": 0.4018
+   },
+   "win_rate_by_blue_dice": {
+    "0": {
+     "rate": 0.1851,
+     "seats": 6669
+    },
+    "1": {
+     "rate": 0.2749,
+     "seats": 2574
+    },
+    "2+": {
+     "rate": 0.3838,
+     "seats": 2757
+    }
+   },
+   "win_rate_by_bot": {
+    "AccelerationistBot": {
+     "rate": 0.2929,
+     "seats": 2400
+    },
+    "AdaptiveBalancedBot": {
+     "rate": 0.1267,
+     "seats": 2400
+    },
+    "RecklessSaboteurBot": {
+     "rate": 0.096,
+     "seats": 2400
+    },
+    "SecOpsTurtleBot": {
+     "rate": 0.3019,
+     "seats": 2400
+    },
+    "VentureGreedBot": {
+     "rate": 0.4325,
+     "seats": 2400
+    }
+   },
+   "tiebreak_decided_by": {
+    "secrets": 0.7477,
+    "market_share": 0.148,
+    "money": 0.0577,
+    "sole_survivor": 0.0287,
+    "ready_colored_dice_count": 0.0113,
+    "unpatched_dice_count": 0.003,
+    "patches": 0.0027,
+    "shared": 0.001
+   },
+   "company_win_rates": {
+    "AEGIS": 0.335,
+    "DTO": 0.3435,
+    "HELIX": 0.2013,
+    "MERIDIAN": 0.2417,
+    "OMNIDYNE": 0.2028,
+    "PROMETHEUS": 0.176
+   },
+   "company_win_spread_pts": 16.75,
+   "company_win_spread_ci95_bootstrap": [
+    14.13,
+    19.28
+   ],
+   "seed_log": {
+    "bonus_changed_winner": [
+     407002,
+     407003,
+     407011,
+     407015,
+     407017,
+     407028,
+     407031,
+     407033,
+     407034,
+     407037,
+     407039,
+     407051,
+     407061,
+     407063,
+     407064,
+     407071,
+     407073,
+     407075,
+     407077,
+     407079,
+     407081,
+     407089,
+     407094,
+     407100,
+     407103,
+     407105,
+     407106,
+     407108,
+     407117,
+     407119,
+     407121,
+     407128,
+     407129,
+     407130,
+     407132,
+     407133,
+     407140,
+     407145,
+     407147,
+     407154,
+     407158,
+     407160,
+     407162,
+     407165,
+     407168,
+     407171,
+     407178,
+     407184,
+     407185,
+     407188
+    ]
+   }
+  },
+  {
+   "cell": "V037-ONE-AWARE",
+   "players": 4,
+   "games": 3000,
+   "end_reasons": {
+    "market_collapse": 0.384,
+    "patient_zero": 0.2403,
+    "singularity": 0.368,
+    "total_wipeout": 0.0077
+   },
+   "three_way_split": {
+    "patient_zero": {
+     "rate": 0.248,
+     "ci95": [
+      0.2329,
+      0.2638
+     ],
+     "n": 3000
+    },
+    "singularity": {
+     "rate": 0.368,
+     "ci95": [
+      0.3509,
+      0.3854
+     ],
+     "n": 3000
+    },
+    "market_collapse": {
+     "rate": 0.384,
+     "ci95": [
+      0.3668,
+      0.4015
+     ],
+     "n": 3000
+    }
+   },
+   "total_wipeout_rate": {
+    "rate": 0.0077,
+    "ci95": [
+     0.0051,
+     0.0115
+    ],
+    "n": 3000
+   },
+   "market_collapse_le_5_rounds": 0,
+   "rounds": {
+    "mean": 8.94,
+    "median": 9.0,
+    "stdev": 1.051
+   },
+   "by_setup": {
+    "v3_card": {
+     "rates": {
+      "CORRUPTED_KERNEL": {
+       "patient_zero": 0.274,
+       "singularity": 0.367,
+       "market_collapse": 0.359,
+       "n": 1451
+      },
+      "ZERO_DAY_OVERRIDE": {
+       "patient_zero": 0.224,
+       "singularity": 0.369,
+       "market_collapse": 0.407,
+       "n": 1549
+      }
+     },
+     "max_trigger": [
+      "ZERO_DAY_OVERRIDE",
+      "market_collapse",
+      0.407,
+      1549
+     ],
+     "max_trigger_n_ge_200": [
+      "ZERO_DAY_OVERRIDE",
+      "market_collapse",
+      0.407,
+      1549
+     ]
+    },
+    "company_seat": {
+     "rates": {
+      "AEGIS@0": {
+       "patient_zero": 0.256,
+       "singularity": 0.375,
+       "market_collapse": 0.369,
+       "n": 488
+      },
+      "AEGIS@1": {
+       "patient_zero": 0.237,
+       "singularity": 0.367,
+       "market_collapse": 0.396,
+       "n": 545
+      },
+      "AEGIS@2": {
+       "patient_zero": 0.252,
+       "singularity": 0.387,
+       "market_collapse": 0.361,
+       "n": 488
+      },
+      "AEGIS@3": {
+       "patient_zero": 0.24,
+       "singularity": 0.368,
+       "market_collapse": 0.392,
+       "n": 500
+      },
+      "DTO@0": {
+       "patient_zero": 0.226,
+       "singularity": 0.398,
+       "market_collapse": 0.375,
+       "n": 530
+      },
+      "DTO@1": {
+       "patient_zero": 0.24,
+       "singularity": 0.376,
+       "market_collapse": 0.384,
+       "n": 458
+      },
+      "DTO@2": {
+       "patient_zero": 0.237,
+       "singularity": 0.38,
+       "market_collapse": 0.382,
+       "n": 518
+      },
+      "DTO@3": {
+       "patient_zero": 0.262,
+       "singularity": 0.349,
+       "market_collapse": 0.389,
+       "n": 478
+      },
+      "HELIX@0": {
+       "patient_zero": 0.251,
+       "singularity": 0.319,
+       "market_collapse": 0.43,
+       "n": 470
+      },
+      "HELIX@1": {
+       "patient_zero": 0.235,
+       "singularity": 0.366,
+       "market_collapse": 0.399,
+       "n": 476
+      },
+      "HELIX@2": {
+       "patient_zero": 0.257,
+       "singularity": 0.355,
+       "market_collapse": 0.388,
+       "n": 510
+      },
+      "HELIX@3": {
+       "patient_zero": 0.224,
+       "singularity": 0.415,
+       "market_collapse": 0.361,
+       "n": 499
+      },
+      "MERIDIAN@0": {
+       "patient_zero": 0.223,
+       "singularity": 0.361,
+       "market_collapse": 0.416,
+       "n": 493
+      },
+      "MERIDIAN@1": {
+       "patient_zero": 0.308,
+       "singularity": 0.335,
+       "market_collapse": 0.356,
+       "n": 522
+      },
+      "MERIDIAN@2": {
+       "patient_zero": 0.236,
+       "singularity": 0.39,
+       "market_collapse": 0.374,
+       "n": 484
+      },
+      "MERIDIAN@3": {
+       "patient_zero": 0.244,
+       "singularity": 0.363,
+       "market_collapse": 0.393,
+       "n": 501
+      },
+      "OMNIDYNE@0": {
+       "patient_zero": 0.265,
+       "singularity": 0.381,
+       "market_collapse": 0.354,
+       "n": 494
+      },
+      "OMNIDYNE@1": {
+       "patient_zero": 0.228,
+       "singularity": 0.379,
+       "market_collapse": 0.393,
+       "n": 486
+      },
+      "OMNIDYNE@2": {
+       "patient_zero": 0.244,
+       "singularity": 0.361,
+       "market_collapse": 0.395,
+       "n": 521
+      },
+      "OMNIDYNE@3": {
+       "patient_zero": 0.248,
+       "singularity": 0.355,
+       "market_collapse": 0.397,
+       "n": 499
+      },
+      "PROMETHEUS@0": {
+       "patient_zero": 0.267,
+       "singularity": 0.37,
+       "market_collapse": 0.364,
+       "n": 525
+      },
+      "PROMETHEUS@1": {
+       "patient_zero": 0.236,
+       "singularity": 0.388,
+       "market_collapse": 0.376,
+       "n": 513
+      },
+      "PROMETHEUS@2": {
+       "patient_zero": 0.263,
+       "singularity": 0.334,
+       "market_collapse": 0.403,
+       "n": 479
+      },
+      "PROMETHEUS@3": {
+       "patient_zero": 0.27,
+       "singularity": 0.358,
+       "market_collapse": 0.373,
+       "n": 523
+      }
+     },
+     "max_trigger": [
+      "HELIX@0",
+      "market_collapse",
+      0.43,
+      470
+     ],
+     "max_trigger_n_ge_200": [
+      "HELIX@0",
+      "market_collapse",
+      0.43,
+      470
+     ]
+    },
+    "white_hat_seat": {
+     "rates": {
+      "ACOUSTIC@0": {
+       "patient_zero": 0.239,
+       "singularity": 0.362,
+       "market_collapse": 0.4,
+       "n": 503
+      },
+      "ACOUSTIC@1": {
+       "patient_zero": 0.239,
+       "singularity": 0.393,
+       "market_collapse": 0.368,
+       "n": 476
+      },
+      "ACOUSTIC@2": {
+       "patient_zero": 0.242,
+       "singularity": 0.354,
+       "market_collapse": 0.404,
+       "n": 483
+      },
+      "ACOUSTIC@3": {
+       "patient_zero": 0.265,
+       "singularity": 0.356,
+       "market_collapse": 0.38,
+       "n": 540
+      },
+      "CIPHER@0": {
+       "patient_zero": 0.249,
+       "singularity": 0.372,
+       "market_collapse": 0.379,
+       "n": 522
+      },
+      "CIPHER@1": {
+       "patient_zero": 0.249,
+       "singularity": 0.395,
+       "market_collapse": 0.356,
+       "n": 514
+      },
+      "CIPHER@2": {
+       "patient_zero": 0.235,
+       "singularity": 0.356,
+       "market_collapse": 0.409,
+       "n": 494
+      },
+      "CIPHER@3": {
+       "patient_zero": 0.252,
+       "singularity": 0.353,
+       "market_collapse": 0.395,
+       "n": 496
+      },
+      "OPERATOR@0": {
+       "patient_zero": 0.243,
+       "singularity": 0.399,
+       "market_collapse": 0.358,
+       "n": 469
+      },
+      "OPERATOR@1": {
+       "patient_zero": 0.235,
+       "singularity": 0.342,
+       "market_collapse": 0.423,
+       "n": 515
+      },
+      "OPERATOR@2": {
+       "patient_zero": 0.238,
+       "singularity": 0.37,
+       "market_collapse": 0.392,
+       "n": 530
+      },
+      "OPERATOR@3": {
+       "patient_zero": 0.243,
+       "singularity": 0.361,
+       "market_collapse": 0.396,
+       "n": 493
+      },
+      "PHREAKER@0": {
+       "patient_zero": 0.254,
+       "singularity": 0.374,
+       "market_collapse": 0.372,
+       "n": 481
+      },
+      "PHREAKER@1": {
+       "patient_zero": 0.256,
+       "singularity": 0.357,
+       "market_collapse": 0.387,
+       "n": 512
+      },
+      "PHREAKER@2": {
+       "patient_zero": 0.276,
+       "singularity": 0.361,
+       "market_collapse": 0.363,
+       "n": 543
+      },
+      "PHREAKER@3": {
+       "patient_zero": 0.249,
+       "singularity": 0.411,
+       "market_collapse": 0.34,
+       "n": 477
+      },
+      "PRODIGY@0": {
+       "patient_zero": 0.253,
+       "singularity": 0.376,
+       "market_collapse": 0.372,
+       "n": 495
+      },
+      "PRODIGY@1": {
+       "patient_zero": 0.253,
+       "singularity": 0.353,
+       "market_collapse": 0.394,
+       "n": 513
+      },
+      "PRODIGY@2": {
+       "patient_zero": 0.233,
+       "singularity": 0.376,
+       "market_collapse": 0.391,
+       "n": 476
+      },
+      "PRODIGY@3": {
+       "patient_zero": 0.239,
+       "singularity": 0.382,
+       "market_collapse": 0.378,
+       "n": 502
+      },
+      "SPOOK@0": {
+       "patient_zero": 0.251,
+       "singularity": 0.33,
+       "market_collapse": 0.419,
+       "n": 530
+      },
+      "SPOOK@1": {
+       "patient_zero": 0.255,
+       "singularity": 0.37,
+       "market_collapse": 0.374,
+       "n": 470
+      },
+      "SPOOK@2": {
+       "patient_zero": 0.262,
+       "singularity": 0.392,
+       "market_collapse": 0.346,
+       "n": 474
+      },
+      "SPOOK@3": {
+       "patient_zero": 0.238,
+       "singularity": 0.348,
+       "market_collapse": 0.415,
+       "n": 492
+      }
+     },
+     "max_trigger": [
+      "OPERATOR@1",
+      "market_collapse",
+      0.423,
+      515
+     ],
+     "max_trigger_n_ge_200": [
+      "OPERATOR@1",
+      "market_collapse",
+      0.423,
+      515
+     ]
+    }
+   },
+   "red_block_rate": 0.1552,
+   "regain_share_of_spend": 0.2581,
+   "market_leader_bonus": {
+    "awarded_games": 2977,
+    "winner_changed_over_awarded": {
+     "rate": 0.2583,
+     "ci95": [
+      0.2429,
+      0.2743
+     ],
+     "n": 2977
+    },
+    "winner_changed_over_all": {
+     "rate": 0.2563,
+     "ci95": [
+      0.241,
+      0.2723
+     ],
+     "n": 3000
+    },
+    "paid_place_tied_over_awarded": {
+     "rate": 0.6043,
+     "ci95": [
+      0.5866,
+      0.6217
+     ],
+     "n": 2977
+    },
+    "mean_survivor_secrets_before_bonus": 5.376,
+    "mean_survivor_bonus": 1.072,
+    "mean_bonus_by_place": {
+     "1": 2,
+     "2": 1,
+     "3": 0,
+     "4": 0
+    }
+   },
+   "games_with_2plus_survivors": 2912,
+   "highest_share_survivor_wins": {
+    "rate": 0.4949,
+    "ci95": [
+     0.4799,
+     0.51
+    ],
+    "n": 4237
+   },
+   "lowest_share_survivor_wins": {
+    "rate": 0.1233,
+    "ci95": [
+     0.1141,
+     0.1332
+    ],
+    "n": 4540
+   },
+   "bonus_aware_edge": {
+    "aware_win_credit": {
+     "mean": 0.3445,
+     "ci95": [
+      0.3275,
+      0.3615
+     ],
+     "n": 3000
+    },
+    "fair_share": 0.25,
+    "edge_pts": 9.45,
+    "edge_ci95_pts": [
+     7.75,
+     11.15
+    ]
+   },
+   "any_shields": {
+    "blue": 0.6287,
+    "red": 0.2351,
+    "green": 0.1362,
+    "total": 132698
+   },
+   "contested": {
+    "rounds": 56100,
+    "blue_left_open": 0.0829,
+    "red_chosen": 0.2465
+   },
+   "win_rate_by_blue_dice": {
+    "0": {
+     "rate": 0.1918,
+     "seats": 6626
+    },
+    "1": {
+     "rate": 0.2774,
+     "seats": 2637
+    },
+    "2+": {
+     "rate": 0.3645,
+     "seats": 2737
+    }
+   },
+   "win_rate_by_bot": {
+    "AccelerationistBot": {
+     "rate": 0.2892,
+     "seats": 2400
+    },
+    "AdaptiveBalancedBot": {
+     "rate": 0.1296,
+     "seats": 2400
+    },
+    "RecklessSaboteurBot": {
+     "rate": 0.0975,
+     "seats": 2400
+    },
+    "SecOpsTurtleBot": {
+     "rate": 0.325,
+     "seats": 2400
+    },
+    "VentureGreedBot": {
+     "rate": 0.4088,
+     "seats": 2400
+    }
+   },
+   "tiebreak_decided_by": {
+    "secrets": 0.7427,
+    "market_share": 0.173,
+    "money": 0.048,
+    "sole_survivor": 0.0217,
+    "ready_colored_dice_count": 0.0077,
+    "patches": 0.0033,
+    "unpatched_dice_count": 0.0027,
+    "shared": 0.001
+   },
+   "company_win_rates": {
+    "AEGIS": 0.3206,
+    "DTO": 0.3473,
+    "HELIX": 0.1882,
+    "MERIDIAN": 0.2702,
+    "OMNIDYNE": 0.1867,
+    "PROMETHEUS": 0.1868
+   },
+   "company_win_spread_pts": 16.05,
+   "company_win_spread_ci95_bootstrap": [
+    14.09,
+    19.41
+   ],
+   "seed_log": {
+    "bonus_changed_winner": [
+     407007,
+     407008,
+     407025,
+     407050,
+     407053,
+     407055,
+     407056,
+     407058,
+     407064,
+     407066,
+     407069,
+     407074,
+     407077,
+     407078,
+     407080,
+     407081,
+     407085,
+     407086,
+     407087,
+     407092,
+     407096,
+     407101,
+     407105,
+     407107,
+     407109,
+     407119,
+     407123,
+     407128,
+     407130,
+     407131,
+     407137,
+     407138,
+     407140,
+     407141,
+     407144,
+     407158,
+     407161,
+     407166,
+     407170,
+     407173,
+     407174,
+     407176,
+     407178,
+     407179,
+     407180,
+     407184,
+     407185,
+     407191,
+     407198,
+     407207
+    ]
+   }
+  }
+ ],
+ "deltas": {
+  "2": {
+   "V037 - V036": {
+    "patient_zero": -0.03,
+    "singularity": 0.1123,
+    "market_collapse": -0.0823,
+    "total_wipeout": 0.006,
+    "rounds": 0.298,
+    "red_block_rate": 0.0681,
+    "regain_share_of_spend": 0.1023,
+    "any_shields_blue": -0.0631,
+    "contested_blue_left_open": 0.1595,
+    "lowest_share_survivor_wins": -0.1157,
+    "company_win_spread_pts": -0.32
+   }
+  },
+  "3": {
+   "V037 - V036": {
+    "patient_zero": 0.0307,
+    "singularity": 0.0667,
+    "market_collapse": -0.0973,
+    "total_wipeout": 0.0073,
+    "rounds": 0.188,
+    "red_block_rate": 0.0585,
+    "regain_share_of_spend": 0.1314,
+    "any_shields_blue": -0.0403,
+    "contested_blue_left_open": 0.1118,
+    "lowest_share_survivor_wins": -0.1145,
+    "company_win_spread_pts": -3.66
+   }
+  },
+  "4": {
+   "V037 - V036": {
+    "patient_zero": 0.001,
+    "singularity": 0.0547,
+    "market_collapse": -0.0557,
+    "total_wipeout": 0.0063,
+    "rounds": 0.142,
+    "red_block_rate": 0.0616,
+    "regain_share_of_spend": 0.1238,
+    "any_shields_blue": -0.0407,
+    "contested_blue_left_open": 0.1123,
+    "lowest_share_survivor_wins": -0.0949,
+    "company_win_spread_pts": -4.69
+   }
+  }
+ },
+ "guardrails_v037": {
+  "2": {
+   "end_split_patient_zero": "pass",
+   "end_split_singularity_2p": "fail",
+   "end_split_market_collapse": "pass",
+   "highest_setup_trigger": "watch",
+   "rounds_mean": "pass",
+   "no_collapse_le_5_rounds": "pass",
+   "regain_share_of_spend": "pass",
+   "winner_changed_by_bonus": "pass",
+   "any_shields_on_blue": "pass",
+   "contested_blue_left_open": "pass",
+   "lowest_share_survivor_wins": 0.3264,
+   "total_wipeout": "pass",
+   "red_block_rate": "pass",
+   "company_spread_le_v036_plus_3": "pass",
+   "bonus_aware_edge_one_aware": "watch"
+  },
+  "3": {
+   "end_split_patient_zero": "pass",
+   "end_split_singularity": "watch",
+   "end_split_market_collapse": "watch",
+   "highest_setup_trigger": "watch",
+   "rounds_mean": "pass",
+   "no_collapse_le_5_rounds": "pass",
+   "regain_share_of_spend": "pass",
+   "winner_changed_by_bonus": "pass",
+   "any_shields_on_blue": "pass",
+   "contested_blue_left_open": "pass",
+   "lowest_share_survivor_wins": 0.2117,
+   "total_wipeout": "pass",
+   "red_block_rate": "pass",
+   "company_spread_le_v036_plus_3": "pass",
+   "bonus_aware_edge_one_aware": "watch"
+  },
+  "4": {
+   "end_split_patient_zero": "pass",
+   "end_split_singularity": "pass",
+   "end_split_market_collapse": "pass",
+   "highest_setup_trigger": "watch",
+   "rounds_mean": "pass",
+   "no_collapse_le_5_rounds": "pass",
+   "regain_share_of_spend": "pass",
+   "winner_changed_by_bonus": "pass",
+   "any_shields_on_blue": "pass",
+   "contested_blue_left_open": "pass",
+   "lowest_share_survivor_wins": 0.1339,
+   "total_wipeout": "pass",
+   "red_block_rate": "pass",
+   "company_spread_le_v036_plus_3": "pass",
+   "bonus_aware_edge_one_aware": "watch"
+  }
+ }
+}

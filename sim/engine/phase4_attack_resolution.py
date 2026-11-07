@@ -469,6 +469,7 @@ def resolve_player_defense_and_wear(
         "market_share_lost": ms_lost,
         "malware_fizzled": bool(unblocked_green > 0 and len(player.in_production_dice) == 0 and len(player.contractor_dice) == 0),
     }
+    _record_generic_shield_telemetry(player, player.last_defense_breakdown)
 
     # 8. Green Malware Resolution (no effect when In Production is empty, INV-MALWARE-FIZZLE-01)
     if six_phase:
@@ -702,3 +703,18 @@ def finalize_attack_resolution(engine: GameEngine, cr: CompileResult) -> None:
     apply_snowball_recycle(engine, cr.exited_cubes)
     expire_contractors(engine)
     check_end_triggers_after_attacks(engine)
+
+
+def _record_generic_shield_telemetry(player, b) -> None:
+    """v0.37.0 Generic shield / contested-round counters (spec §4.4). Telemetry only: nothing reads them in play."""
+    cs = b["color_shields"]
+    any_n = cs["any"]
+    for c in ("red", "blue", "green"):
+        player.any_shield_allocated_by_color[c] += b["any_allocated"][c]
+    rem = {c: max(0, b["effective_attacks"][c] - cs[c]) for c in ("red", "blue", "green")}
+    if any_n > 0 and rem["blue"] > 0 and rem["red"] > 0 and rem["blue"] + rem["red"] + rem["green"] > any_n:
+        player.contested_defense_rounds += 1
+        if b["any_allocated"]["blue"] < min(rem["blue"], any_n):
+            player.contested_blue_left_open += 1
+        if b["any_allocated"]["red"] > 0:
+            player.contested_red_chosen += 1

@@ -54,6 +54,11 @@ def serialize_end_game_result(controller: GameController, res: EndGameResult) ->
         "market_collapse_round": getattr(res, "market_collapse_round", None),
         "version_comparisons": list(getattr(res, "version_comparisons", []) or []),
         "tiebreak_decided_by": getattr(res, "tiebreak_decided_by", None),
+        # v0.37.0 Market Leader Bonus (rows carry secrets_before_bonus / market_leader_bonus / market_share_place)
+        "market_leader_bonus_awarded": bool(getattr(res, "market_leader_bonus_awarded", False)),
+        "market_leader_bonus_schedule": list(getattr(res, "market_leader_bonus_schedule", []) or []),
+        "pre_bonus_winner_ids": list(getattr(res, "pre_bonus_winner_ids", []) or []),
+        "market_leader_bonus_changed_winner": bool(getattr(res, "market_leader_bonus_changed_winner", False)),
     }
 
 

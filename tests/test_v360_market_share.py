@@ -143,10 +143,12 @@ class MSHarness(SixPhaseHarness):
 # ----------------------------------------------------------------------------------------------
 class TestConfig(unittest.TestCase):
     def test_ms01_resolution(self):
-        # Phase B: GameConfig() is the v0.36.0 ruleset; legacy_v035() is the v0.35.0 baseline.
-        self.assertEqual(GameConfig(), GameConfig.v036())
+        # v0.37 Phase B: GameConfig() is the v0.37.0 ruleset (v0.36 + Market Leader Bonus); legacy_v036() (alias
+        # v036()) is the v0.36.0 baseline; legacy_v035() is the v0.35.0 baseline.
+        self.assertEqual(GameConfig(), GameConfig.v037())
         for n in (2, 3, 4):
-            self.assertEqual(GameConfig(num_players=n), GameConfig.v036(num_players=n))
+            self.assertEqual(GameConfig(num_players=n), GameConfig.v037(num_players=n))
+            self.assertEqual(GameConfig.v036(num_players=n), GameConfig.legacy_v036(num_players=n))
         c = GameConfig.legacy_v035()
         self.assertEqual((c.red_mode, c.patents_mode, c.red_variant_set, c.tiebreak_order, c.any_shield_policy),
                          (RedMode.RANSOM, PatentsMode.PATENTS, RedVariantSet.V035, TiebreakOrder.V035,
@@ -981,8 +983,10 @@ class TestBotPolicy(MSHarness):
             e = GameEngine(GameConfig.v036(num_players=n), seed=1)
             for p in e.state.players:
                 self.assertEqual((p.secrets, p.market_share, p.market_share_max, p.market_share_min), (sec, ms, ms, ms))
-            e = GameEngine(GameConfig(num_players=n), seed=1)  # v0.36 default
+            e = GameEngine(GameConfig.legacy_v036(num_players=n), seed=1)  # v0.36 baseline (GameConfig() is v0.37)
             self.assertTrue(all((p.secrets, p.market_share) == (sec, ms) for p in e.state.players))
+            e = GameEngine(GameConfig(num_players=n), seed=1)  # v0.37 default: same Market Share, 9 / 8 / 9 Secrets
+            self.assertTrue(all((p.secrets, p.market_share) == ({2: 9, 3: 8, 4: 9}[n], ms) for p in e.state.players))
             e = GameEngine(GameConfig.legacy_v035(num_players=n), seed=1)
             self.assertTrue(all(p.market_share is None and p.secrets == 8 for p in e.state.players))
 

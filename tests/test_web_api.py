@@ -125,13 +125,13 @@ class TestWebAPI(unittest.TestCase):
     # 2. New Game Custom Player Counts (2P Resilience Buffer)
     # -------------------------------------------------------------------------
     def test_new_game_custom_player_counts(self) -> None:
-        """v0.36.0 web default: 7 / 7 / 8 Secrets, Market Share 17 / 18 / 18, 0 research (plan §11)."""
+        """v0.37.0 web default: 9 / 8 / 9 Secrets (FINDINGS §39), Market Share 17 / 18 / 18, 0 research."""
         # 2 Players
         res2p = self._post("/api/game/new", {"num_players": 2, "seed": 100})
         state2p = res2p["state"]
         self.assertEqual(len(state2p["players"]), 2)
         p0_2p = state2p["players"][0]
-        self.assertEqual(p0_2p["secrets"], 7)
+        self.assertEqual(p0_2p["secrets"], 9)
         self.assertEqual(p0_2p["market_share"], 17)
         self.assertEqual(p0_2p["patches"], 0)
 
@@ -140,7 +140,7 @@ class TestWebAPI(unittest.TestCase):
         state3p = res3p["state"]
         self.assertEqual(len(state3p["players"]), 3)
         p0_3p = state3p["players"][0]
-        self.assertEqual(p0_3p["secrets"], 7)
+        self.assertEqual(p0_3p["secrets"], 8)
         self.assertEqual(p0_3p["market_share"], 18)
         self.assertEqual(p0_3p["patches"], 0)
 
@@ -149,7 +149,7 @@ class TestWebAPI(unittest.TestCase):
         state4p = res4p["state"]
         self.assertEqual(len(state4p["players"]), 4)
         p0_4p = state4p["players"][0]
-        self.assertEqual(p0_4p["secrets"], 8)
+        self.assertEqual(p0_4p["secrets"], 9)
         self.assertEqual(p0_4p["market_share"], 18)
         self.assertEqual(p0_4p["patches"], 0)
         self.assertEqual(state4p["red_mode"], "MARKET_SHARE")

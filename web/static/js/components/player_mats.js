@@ -711,7 +711,7 @@ export function renderPlayerMats() {
             <span class="reserve-secrets-value ${p.secrets <= 2 ? 'critical' : ''}">${p.secrets}</span>
           </div>
           <div class="reserve-card-footer ${p.secrets <= 0 ? 'breach-alert' : ''}">
-            ${p.secrets <= 0 ? '<strong style="color: #ff0055;">TOTAL DATA BREACH (PATIENT ZERO)</strong>' : (state.is_market_share ? 'Start: 7 (2P/3P) | 8 (4P) — ≤0 = Total Breach' : 'Start: 8 — ≤0 = Total Breach')}
+            ${p.secrets <= 0 ? '<strong style="color: #ff0055;">TOTAL DATA BREACH (PATIENT ZERO)</strong>' : (state.starting_secrets !== undefined && state.starting_secrets !== null ? `Start: ${state.starting_secrets} — ≤0 = Total Breach` : 'Start: 8 — ≤0 = Total Breach')}
           </div>
         </div>
 
@@ -727,6 +727,7 @@ export function renderPlayerMats() {
           </div>
           <div class="reserve-card-footer ${p.market_share <= 0 ? 'breach-alert' : ''}">
             ${p.market_share <= 0 ? '<strong style="color: #ff0055;">MARKET COLLAPSE (FINAL ROUND)</strong>' : `−1 per unblocked Red | Regain: ${p.regain_cost} 🔬 each, +${p.regain_cap} / turn`}
+            ${state.is_market_leader_bonus && (state.market_leader_bonus_schedule || []).length ? `<br><span title="Market Leader Bonus: at game end, survivors gain Corporate Secrets by Market Share place (ties share the better place)">Game end: Market Leader Bonus ${state.market_leader_bonus_schedule.map((b, i) => `${i + 1}${["st", "nd", "rd"][i] || "th"} +${b}`).filter((t) => !t.endsWith("+0")).join(" · ")}</span>` : ''}
           </div>
         </div>` : ''}
 

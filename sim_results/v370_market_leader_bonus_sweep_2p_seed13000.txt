@@ -1,0 +1,4 @@
+2P V036            n= 3000 rounds=8.81 PZ=0.314 SING=0.349 MC=0.337 TW=0.073 chg=0.000 tied=0.000 anyBlue=0.633 blueOpen=0.070 loMSwin=0.441 redBlock=0.151 regain=0.262 edge=nan
+2P V037            n= 3000 rounds=9.12 PZ=0.287 SING=0.451 MC=0.262 TW=0.082 chg=0.131 tied=0.266 anyBlue=0.573 blueOpen=0.226 loMSwin=0.329 redBlock=0.217 regain=0.363 edge=nan
+2P guardrails (V037): {'end_split_patient_zero': 'pass', 'end_split_singularity_2p': 'watch', 'end_split_market_collapse': 'pass', 'highest_setup_trigger': 'watch', 'rounds_mean': 'pass', 'no_collapse_le_5_rounds': 'pass', 'regain_share_of_spend': 'pass', 'winner_changed_by_bonus': 'pass', 'any_shields_on_blue': 'pass', 'contested_blue_left_open': 'pass', 'lowest_share_survivor_wins': 0.3292, 'total_wipeout': 'pass', 'red_block_rate': 'pass', 'company_spread_le_v036_plus_3': 'pass'}
+wrote sim_results/v370_market_leader_bonus_sweep_2p_seed13000.json

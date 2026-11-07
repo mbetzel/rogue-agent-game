@@ -243,6 +243,11 @@ class PlayerState:
         self.red_blocked_color_total = 0
         self.red_blocked_any_total = 0
         self.red_unblocked_total = 0
+        # v0.37.0 Generic shield / contested-round telemetry (spec §4.4; telemetry only)
+        self.any_shield_allocated_by_color: Dict[str, int] = {"red": 0, "blue": 0, "green": 0}
+        self.contested_defense_rounds = 0
+        self.contested_blue_left_open = 0
+        self.contested_red_chosen = 0
         self.purchases_by_color: Dict[str, int] = {}  # Central Market purchases incl. Algorithmic Arbitrage
         self.player_id = player_id
         self.bot = bot
@@ -1029,6 +1034,12 @@ class EndGameResult:
     collapse_trigger_pids_were_secret_leaders: List[bool] = field(default_factory=list)
     market_collapse_context: Dict[str, Any] = field(default_factory=dict)
     double_version_fill_events: int = 0
+    # --- v0.37.0 Market Leader Bonus telemetry (INV-MLB-*) ---
+    market_leader_bonus_awarded: bool = False  # bonus enabled and not a Total Wipeout
+    market_leader_bonus_schedule: List[int] = field(default_factory=list)  # the padded schedule used
+    pre_bonus_winner_ids: List[int] = field(default_factory=list)
+    market_leader_bonus_changed_winner: bool = False
+    market_leader_bonus_tied_paid_place: bool = False
 
 
 @dataclass

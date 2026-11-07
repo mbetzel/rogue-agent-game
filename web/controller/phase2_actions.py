@@ -39,6 +39,15 @@ def enter_game_over(controller: GameController) -> None:
     else:
         if controller.state.end_reason == EndGameReason.MARKET_COLLAPSE:
             controller.event_log.append("MARKET COLLAPSE ending: the Final Round is complete.")
+        if getattr(end_res, "market_leader_bonus_awarded", False):
+            # v0.37.0: Market Leader Bonus by final Market Share place, before Corporate Secrets are compared
+            parts = [
+                f"{controller.player_meta[r['player_id']]['name']} {r['market_share_place']}"
+                f"{ {1: 'st', 2: 'nd', 3: 'rd'}.get(r['market_share_place'], 'th')} +{r['market_leader_bonus']}"
+                for r in sorted((r for r in end_res.rankings if r.get("market_share_place") is not None),
+                                key=lambda r: (r["market_share_place"], r["player_id"]))
+            ]
+            controller.event_log.append("MARKET LEADER BONUS (Corporate Secrets by Market Share place): " + ", ".join(parts) + ".")
         if end_res.is_shared_victory:
             winner = " & ".join(controller.player_meta[w]["name"] for w in end_res.winner_ids) + " (shared victory)"
         else:

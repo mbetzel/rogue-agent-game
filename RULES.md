@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.36.0)
+# Too Many Secrets — Rules Draft (v0.37.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -11,7 +11,7 @@ A mysterious autonomous cracking program—codenamed **Project: SETEC** (the "Ro
 
 Each player is a **White Hat Operative** contracted to defend a **Client Company's** infrastructure. Operatives assemble and upgrade customized hardware and software modules (represented by a custom dice pool), triage glitched subroutines through a CI/CD pipeline, and adapt to the escalating cryptographic threat. As SETEC’s autonomous compiler accelerates across versions, White Hat Operatives must balance expanding their revenue streams against upgrading their **Company Terminal Mat** and defending their **Market Share** before proprietary client data leaks.
 
-When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Secrets`) has their reputation incinerated, is raided by federal marshals, becomes **Patient Zero**, and is eliminated from contention. If any surviving player's **Market Share** falls to `0`, a **Market Collapse** makes the current round the last. Among the surviving White Hat Operatives, the player with the most **Corporate Secrets** wins (with Market Share, operational capital, ready modules, and research tokens serving as tiebreakers).
+When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Secrets`) has their reputation incinerated, is raided by federal marshals, becomes **Patient Zero**, and is eliminated from contention. If any surviving player's **Market Share** falls to `0`, a **Market Collapse** makes the current round the last. Among the surviving White Hat Operatives, the player with the most **Corporate Secrets** after the **Market Leader Bonus** wins (with Market Share, operational capital, ready modules, and research tokens serving as tiebreakers).
 
 > **Note on `[TUNE]` Tags:** Numbers marked `[TUNE]` are prototype baselines verified via Monte Carlo simulation sweeps.
 
@@ -39,7 +39,7 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
     * **Glitched Box** (corrupted modules quarantined for repairs)
     * **Scanned Box** (remediated modules completing verification before release)
     * **Hardware Throughput Limits** (Triage Bandwidth: Glitched $\to$ Scanned; Release Bandwidth: Scanned $\to$ Ready)
-  * **Market Share Track** (`0` up to your starting value of `17` at 2 players / `18` at 3–4 players `[TUNE]`; the starting value is also the maximum). Lowered by unblocked **Red Cubes** and *Customer Poaching*; regained with research through the **Public Relations Track** and with *Ad Campaign*. A surviving player at `0` triggers a **Market Collapse** (see Phase 4).
+  * **Market Share Track** (`0` up to your starting value of `17` at 2 players / `18` at 3–4 players `[TUNE]`; the starting value is also the maximum). Lowered by unblocked **Red Cubes** and *Customer Poaching*; regained with research through the **Public Relations Track** and with *Ad Campaign*. A surviving player at `0` triggers a **Market Collapse** (see Phase 4). At game end, survivors' final Market Share places earn the **Market Leader Bonus** (see Section 5).
   * **Terminal Hardware & R&D Upgrade Tracks (4 Independent Tracks, Levels 0 $\to$ 4):** Each step costs **`1 / 2 / 2 / 3 🔬`** to reach Level 1 / 2 / 3 / 4 `[TUNE]` (`8 🔬` per track). Levels 1 and 3 of every track carry a **Breakthrough**, resolved immediately when that level is reached (see Phase 6).
 
     | Track | Level 0 | Level 1 (Breakthrough) | Level 2 | Level 3 (Breakthrough) | Level 4 |
@@ -145,7 +145,7 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
    * **Client Company & White Hat Operative Assignment:** Randomly deal **1 Client Company Card** and **1 White Hat Dossier Card** to each player (drawn without replacement). Place your Company Card beside your **Company Terminal Mat** with all 3 Version slots (`v1.0`, `v2.0`, `v3.0`) toggled to **Available**. Every Client Company starts with the same hardware: all 4 tracks at **Level 0** (Defense Capacity `2`, Triage Bandwidth `2`, Release Bandwidth `4`, Public Relations: regain up to `1` Market Share per round at `2 🔬`). Client Companies grant no starting bonuses.
    * Place **3 Gray Legacy Dice + 1 Purple Specialist Die** into your **Ready for Release Zone** (rolls in Round 1).
    * Take **`$6` Starting Money**.
-   * **Corporate Secrets & Starting Research Tokens:** Take **`7` Corporate Secrets** at **2 and 3 players**, or **`8` Corporate Secrets** at **4 players** `[TUNE: v0.36.0]`, and **`0 🔬` Research Tokens**.
+   * **Corporate Secrets & Starting Research Tokens:** Take **`9` Corporate Secrets** at **2 players**, **`8`** at **3 players**, or **`9`** at **4 players** `[TUNE: v0.37.0]`, and **`0 🔬` Research Tokens**.
    * **Market Share:** Place your Market Share Marker on **`17`** at **2 players**, or **`18`** at **3 and 4 players** `[TUNE: v0.36.0]`. This starting value is also your maximum Market Share for the game.
 4. Randomly assign the **First Player Marker** (used to resolve Operations Turn order in Phase 6: Operations).
 
@@ -303,7 +303,7 @@ Surviving White Hat Operatives take clockwise **Operations Turns** starting with
 2. **Regain Market Share (Public Relations Track):**
    * Spend **`2 🔬`** `[TUNE]` for each **`+1` Market Share**, up to your current Public Relations limit this turn: **`1`** at Levels 0–1, **`2`** at Levels 2–3, **`3`** at Level 4 `[TUNE]`. A level bought earlier in the same turn applies to later regains.
    * Market Share can never go above your maximum (your starting value); you cannot spend research while at your maximum.
-   * You may regain Market Share during the Final Round (final Market Share is the first tiebreaker), but doing so does not cancel a Final Round already triggered.
+   * You may regain Market Share during the Final Round (final Market Share sets your **Market Leader Bonus** place and is the first tiebreaker), but doing so does not cancel a Final Round already triggered.
 3. **Paid `★` Actions:** Resolve *B2 Deep R&D Vault* or *Y1 Algorithmic Trading* Secret purchases rolled this round, and *R2 Ad Campaign* (pay `$2` → `+1` Market Share, once per *Ad Campaign* die that was In Production in Phase 3). *Ad Campaign* does not count toward your Public Relations limit, cannot raise Market Share above your maximum (you do not pay while at your maximum), and any unused *Ad Campaign* is lost at the end of your Operations Turn.
 4. **Purchase Software Module Dice (Limit `2` dice per turn `[TUNE]`):**
    * **Central Market:** Pay the `$` cost of any available Colored Die (**Red, Blue, Green, Yellow**) as printed on its active face-up **Variant Card** (`$4`–`$6`) and place it directly into your **Ready for Release Zone** (available to roll next round; purchases do not use Release Bandwidth).
@@ -322,7 +322,17 @@ When the game ends (via Singularity when `v3.0` fills, at the end of the **Final
 
 * **Standard Ending (1+ White Hat Operatives Survive):**
   * Any player who suffered a **Total Data Breach** (`<= 0 Secrets`) is **eliminated** as Patient Zero and cannot win.
-  * Surviving White Hat Operatives compare their **Corporate Secrets**. **Corporate Secrets are the sole source of victory points (`1 Secret = 1 Point`)**; Market Share, Money, Research tokens, and Software Module dice score `0 VP`. The surviving White Hat Operative with the **most Corporate Secrets wins!**
+  * **Market Leader Bonus:** First, place the surviving White Hat Operatives by final **Market Share** (highest first). Each gains bonus **Corporate Secrets** by place `[TUNE: v0.37.0]`:
+
+    | Players | 1st | 2nd | 3rd | 4th |
+    | :--- | :---: | :---: | :---: | :---: |
+    | 2 | `+2` | `0` | — | — |
+    | 3 | `+2` | `+1` | `0` | — |
+    | 4 | `+2` | `+1` | `0` | `0` |
+
+    * Tied players share the better place and each gain its bonus (e.g., two players tied for 1st both gain `+2`; the next player is 3rd). There is no further tiebreak for the bonus.
+    * Patient Zeros gain nothing and take no place; survivors below them move up. A sole survivor gains the 1st-place bonus.
+  * Surviving White Hat Operatives then compare their **Corporate Secrets** (held + Market Leader Bonus). **Corporate Secrets are the sole source of victory points (`1 Secret = 1 Point`)**; Market Share scores only through the Market Leader Bonus, and Money, Research tokens, and Software Module dice score `0 VP`. The surviving White Hat Operative with the **most Corporate Secrets wins!**
   * **Hierarchical Tiebreakers:** If surviving players are tied for Corporate Secrets, break ties using the following hierarchy:
     1. **Market Position:** Most final **Market Share**.
     2. **Operational Capital:** Most remaining **Money (`$`)**.
@@ -330,10 +340,10 @@ When the game ends (via Singularity when `v3.0` fills, at the end of the **Final
     4. **Hardware Readiness:** Most remaining **Research Tokens (`🔬`)**.
     5. **Reliability:** Fewest total dice in **Under Development** (least glitched/scanned pipeline debt).
     6. If still tied, victory is shared.
-  * A player at `0` Market Share after a **Market Collapse** is not eliminated and scores normally.
+  * A player at `0` Market Share after a **Market Collapse** is not eliminated, scores normally, and is placed by Market Share for the Market Leader Bonus like anyone else (players tied at `0` share a place).
 
 * **Total Wipeout Ending (All Players Breach):**
-  * Narrative victory belongs unconditionally to Project: SETEC (The Rogue Agent)!
+  * Narrative victory belongs unconditionally to Project: SETEC (The Rogue Agent)! No **Market Leader Bonus** is awarded.
   * To rank the human players, **breach depth is ignored**: players are ranked **only** by the standard **Hierarchical Tiebreakers** above (Market Share > Money > Active Colored Module Dice in Ready for Release > Research Tokens > Fewest Under Development Dice > shared). A player who breached earlier (e.g., in Phase 2) keeps the Market Share they had when they breached and does not outrank anyone by breach depth.
 
 ---
@@ -388,7 +398,6 @@ Each Version Card defines its Corruption Track (`4` spaces on `v1.0`, `5` spaces
 | **`v2.0`** (5) | *RaaS* | — | All lose `$2` | Add `1R, 1G` + Add `1K` | All lose `$2` & Add `1R` | Lose `$3` & `1 🔬` + Add `1K` | **Upgrade:** Add `1R` | — |
 | **`v2.0`** (5) | *Polymorphic Worm* | — | Lose `2 🔬` | Add `2G` + Add `1K` | All glitch `1` die & Add `1G` | Glitch `1` die + Add `1K` | **Upgrade:** Add `1R` | — |
 | **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 1B, 1G` | Lose `$3` & `1 🔬` + Add `1K` | Add `1R, 1B` | All glitch `1` die & Add `1B, 1K` | Return `1` Colored Die | **Singularity** |
-| **Market Collapse** | End Trigger | Checked at the end of **Phase 4** (after the **Patient Zero** check, and not after a **Total Wipeout**). If any surviving player has `0` **Market Share**, the current round becomes the **Final Round**. No one is eliminated and there is no other penalty; the player at `0` scores normally. If Patient Zero occurs in the same round, breached players are still eliminated. **Singularity** ends the game in Phase 2 before Market Collapse can be checked. |
 | **`v3.0`** (6) | *Corrupted Kernel* | — | Glitch `1` die + Add `1R, 1B` | Lose `$3` & `1 🔬` + Add `1K` | Add `1R, 1G` | Lose `1 Secret` + Add `1K` | Return `1` Colored Die | **Singularity:** Lose `1 Secret` |
 
 #### Profile 2: Aggressive Escalation Tracks (`4 / 5 / 6` Spaces — Heightened Economic Friction)
@@ -406,10 +415,10 @@ Each Version Card defines its Corruption Track (`4` spaces on `v1.0`, `5` spaces
 
 ### D. Client Companies & White Hat Dossiers Reference Appendix
 
-In `v0.36.0`, every Client Company starts with identical hardware (all 4 tracks at Level 0) and resources; player identity comes from the Institutional Override (Client Company) and the Signature Protocol (White Hat Dossier).
+In `v0.37.0`, every Client Company starts with identical hardware (all 4 tracks at Level 0) and resources; player identity comes from the Institutional Override (Client Company) and the Signature Protocol (White Hat Dossier).
 
 #### 1. The 6 Client Companies (`Company`) — Institutional Overrides
-Each player contracts with 1 enterprise Client Company for the duration of the match. Your company grants an Institutional Override that may be activated **once per SETEC Version** (`v1.0`, `v2.0`, `v3.0`); DTO *Slush Fund* is **once per game**. All companies start at Defense Capacity `2`, Triage Bandwidth `2`, Release Bandwidth `4`, all tracks Level 0, `$6`, `7` Secrets (2–3 players) or `8` Secrets (4 players), `17` Market Share (2 players) or `18` (3–4 players) and `0 🔬`:
+Each player contracts with 1 enterprise Client Company for the duration of the match. Your company grants an Institutional Override that may be activated **once per SETEC Version** (`v1.0`, `v2.0`, `v3.0`); DTO *Slush Fund* is **once per game**. All companies start at Defense Capacity `2`, Triage Bandwidth `2`, Release Bandwidth `4`, all tracks Level 0, `$6`, `9` Secrets (2 players), `8` (3 players) or `9` (4 players), `17` Market Share (2 players) or `18` (3–4 players) and `0 🔬`:
 
 | Company Code | Company Name | Sector | Institutional Override | Timing Window | Description | Flavor Quote |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -509,12 +518,12 @@ Players may freely combine any Client Company with any White Hat Operative ($6 \
 | **Money (`$` / Liquid Cash)** | Resource | Primary financial currency used to hire **White Contractor Dice**, trigger paid Star (`★`) abilities (including *Ad Campaign*), and purchase **Software Module Dice**. Gained or paid at the `v2.0` **Market Share** comparison (always to or from the bank; a shortfall is forgiven). Second game-end tiebreaker after Market Share. Money is uncapped and never drops below `$0`. |
 | **Research Tokens (`🔬`)** | Resource | Scientific/technical currency used to upgrade the 4 **Terminal Hardware Tracks** and to regain **Market Share** through the **Public Relations Track**. Uncapped storage across rounds. |
 | **Breakthrough** | Track Reward | A one-time reward printed at **Level 1** and **Level 3** of each **Terminal Hardware Track**, resolved immediately in **Phase 6: Operations** when that level is first reached (before the player's next operation; several levels bought in one turn resolve one at a time in order). Defense Grid / Release: L1 gain `1` Gray Legacy die, L3 gain `1` Corporate Secret. Triage: L1 gain `2` White Contractor dice, L3 optionally pay `$3` to replace `1` Gray Legacy die with a Central Market colored die. Public Relations: L1 gain `$3`, L3 gain the Purple die from the **Personal Reserve**. A Breakthrough that is declined or cannot be resolved is lost. New dice go to the **Ready for Release Zone**. |
-| **Corporate Secrets** | Resource / VP | Proprietary client data tokens representing a player's survival health and sole source of Victory Points (`1 Secret = 1 VP`). Lost to unblocked **Blue Cubes** and some **Corruption Track** spaces (never to **Red Cubes** or a lack of Money). Dropping to `<= 0` Corporate Secrets triggers an immediate **Total Data Breach (Patient Zero)**. Ties are broken by the **Hierarchical Tiebreakers** (Market Share first). |
+| **Corporate Secrets** | Resource / VP | Proprietary client data tokens representing a player's survival health and sole source of Victory Points (`1 Secret = 1 VP`). Lost to unblocked **Blue Cubes** and some **Corruption Track** spaces (never to **Red Cubes** or a lack of Money). Surviving players gain the **Market Leader Bonus** at game end, before Corporate Secrets are compared. Dropping to `<= 0` Corporate Secrets triggers an immediate **Total Data Breach (Patient Zero)**. Ties are broken by the **Hierarchical Tiebreakers** (Market Share first). |
 | **Triage Track & Triage Bandwidth** | Hardware Track | Hardware track (Levels `0 → 4`, step costs `1 / 2 / 2 / 3 🔬`) governing **Triage Bandwidth** (`2 / 2 / 3 / 3 / 4`), the maximum number of dice that can move from the **Glitched Box** to the **Scanned Box** during **Phase 5 Step 4 (Conveyor Triage)**. **Breakthroughs** at Levels 1 and 3. Level 4 also grants `+1 🔬` per die moved in Conveyor Triage beyond the 2nd. |
 | **Release Track & Release Bandwidth** | Hardware Track | Hardware track (Levels `0 → 4`, step costs `1 / 2 / 2 / 3 🔬`) governing **Release Bandwidth** (`4 / 4 / 5 / 5 / 6`), the maximum number of dice that can graduate from the **Scanned Box** to the **Ready for Release Zone** during **Phase 5 Step 3 (Scanned Graduation)**. Because surviving **In Production** dice return through the **Scanned Box**, it caps all dice returning to Ready from Scanned each round (purchases and **Breakthrough** dice bypass it). **Breakthroughs** at Levels 1 and 3. Level 4 also grants `1` extra free reroll in **Phase 1 Step 4**. |
 | **Defense Grid Track & Defense Grid Capacity (`defense_capacity`)** | Hardware Track | Hardware track (Levels `0 → 4`, step costs `1 / 2 / 2 / 3 🔬`) governing **Defense Grid Capacity** (`2 / 2 / 3 / 3 / 4`), the maximum total number of dice a player may assign to **Shield Slots** in **Phase 1 Step 5**. **Breakthroughs** at Levels 1 and 3. Level 4 also pays `+$1` per Attack Cube blocked in **Phase 4** (max `$3`), after damage. |
 | **Public Relations Track** | Hardware Track | Hardware track (Levels `0 → 4`, step costs `1 / 2 / 2 / 3 🔬`) setting how much **Market Share** a player may regain with research in **Phase 6: Operations**: up to `1` per round at Levels 0–1, `2` at Levels 2–3, `3` at Level 4, at `2 🔬` per `+1` `[TUNE]`; never above the player's maximum. **Breakthroughs** at Levels 1 and 3 (L1 gain `$3`, L3 gain the Purple die from the **Personal Reserve**). *(Replaces the Cryptographic Patents Track, retired in v0.36.0.)* |
-| **Market Share** | Resource / Track | A per-player track on the **Company Terminal Mat**. Starts at `17` (2 players) or `18` (3–4 players) `[TUNE]`, which is also its maximum; it cannot drop below `0`. Lowered by `1` per unblocked **Red Cube** in Phase 4 and by rivals' *Customer Poaching*; regained in Phase 6 through the **Public Relations Track** and *Ad Campaign*. Compared for Money when `v2.0`'s final space resolves, and the first game-end tiebreaker. A surviving player at `0` triggers a **Market Collapse**. Scores `0 VP`. |
+| **Market Share** | Resource / Track | A per-player track on the **Company Terminal Mat**. Starts at `17` (2 players) or `18` (3–4 players) `[TUNE]`, which is also its maximum; it cannot drop below `0`. Lowered by `1` per unblocked **Red Cube** in Phase 4 and by rivals' *Customer Poaching*; regained in Phase 6 through the **Public Relations Track** and *Ad Campaign*. Compared for Money when `v2.0`'s final space resolves, and the first game-end tiebreaker. A surviving player at `0` triggers a **Market Collapse**. Scores no VP directly; sets the **Market Leader Bonus** at game end. |
 
 ### 5. Software Module Dice, Faces & Market
 
@@ -551,8 +560,10 @@ Players may freely combine any Client Company with any White Hat Operative ($6 \
 | **Contractor Sacrifice** | Phase 1 / 2 / 4 Rule | When a **White Contractor Die** rolls an unresolved Glitch in Phase 1, is chosen to satisfy a Corruption glitch effect in Phase 2, or is chosen to absorb `1` unblocked **Green Malware** hit in Phase 4, it is discarded directly to the general supply instead of entering **Under Development**. |
 | **Total Data Breach (Patient Zero)** | Elimination / End Trigger | Triggered in **Phase 2** (Corruption Track) or **Phase 4** (attacks) when a player's **Corporate Secrets** drop to `0` or below (`<= 0`). That player becomes **Patient Zero**, is eliminated from winning, skips the remaining phases of the round, and triggers the **Final Round**. |
 | **Singularity** | End Trigger | Triggered in **Phase 2** when the final (`6th`) space of the `v3.0` **Corruption Track** is covered by a **Black Cube**. After resolving Space 6's printed effect, the game ends **immediately** at the end of Phase 2 (skipping Phases 3–6) and proceeds directly to victory scoring. |
-| **Total Wipeout Ending** | End Game Rule | Occurs if **all** players are **Patient Zero** at the end of **Phase 2** or **Phase 4**; the remaining phases are skipped (no **Market Collapse** check) and Project: SETEC wins narratively. Human players are ranked **only** by the standard **Hierarchical Tiebreakers** (Market Share > Money > Active Colored Module Dice in Ready for Release > Research Tokens > fewest dice Under Development > shared); breach depth is ignored. *(The former Net Wipeout Score is retired as of v0.34.0.)* |
+| **Total Wipeout Ending** | End Game Rule | Occurs if **all** players are **Patient Zero** at the end of **Phase 2** or **Phase 4**; the remaining phases are skipped (no **Market Collapse** check) and Project: SETEC wins narratively. Human players are ranked **only** by the standard **Hierarchical Tiebreakers** (Market Share > Money > Active Colored Module Dice in Ready for Release > Research Tokens > fewest dice Under Development > shared); breach depth is ignored and no **Market Leader Bonus** is awarded. *(The former Net Wipeout Score is retired as of v0.34.0.)* |
 | **Final Round** | End Game Rule | The round in which any player becomes **Patient Zero** or a **Market Collapse** occurs. Surviving players complete every remaining phase of that round, then proceed to victory scoring. Regaining Market Share in Phase 6 does not cancel it. |
+| **Market Collapse** | End Trigger | Checked at the end of **Phase 4** (after the **Patient Zero** check, and not after a **Total Wipeout**). If any surviving player has `0` **Market Share**, the current round becomes the **Final Round**. No one is eliminated and there is no other penalty; the player at `0` scores normally, including the **Market Leader Bonus** by place. If Patient Zero occurs in the same round, breached players are still eliminated. **Singularity** ends the game in Phase 2 before Market Collapse can be checked. |
+| **Market Leader Bonus** | End Game Rule | At game end (not a **Total Wipeout**), surviving players gain bonus **Corporate Secrets** by final **Market Share** place before Corporate Secrets are compared: 2 players: 1st `+2`; 3–4 players: 1st `+2`, 2nd `+1`; other places `0` `[TUNE]`. Tied players share the better place; **Patient Zeros** gain nothing and take no place; a sole survivor gains the 1st-place bonus. |
 
 ### 7. Retired Terms
 

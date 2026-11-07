@@ -515,6 +515,12 @@ class GameStateSerializer:
             "market_collapse_round": getattr(state, "market_collapse_round", None),
             "market_collapse_pids": list(getattr(state, "market_collapse_pids", [])),
             "end_triggers": list(getattr(state, "end_triggers", [])),
+            # Starting Corporate Secrets for this player count (before any Client Company bonus)
+            "starting_secrets": state.config.get_starting_secrets(len(state.players)),
+            # v0.37.0 Market Leader Bonus schedule for this player count ([] when disabled)
+            "is_market_leader_bonus": bool(getattr(state.config, "is_market_leader_bonus", False)),
+            "market_leader_bonus_schedule": list(state.config.market_leader_bonus_schedule(len(state.players))
+                                                 if hasattr(state.config, "market_leader_bonus_schedule") else []),
             # Temp Staffing & Contractors (v0.6 / v0.7)
             "contractor_supply": getattr(state, "contractor_supply", 12),
             "contractor_hire_cost": getattr(state.config, "contractor_hire_cost", 1),

@@ -357,11 +357,16 @@ export function renderCompiler() {
             <div class="seq-card-header">SECRETS VICTORY &amp; TIEBREAKERS</div>
             <div class="seq-card-body">
               <strong>Surviving White Hat Operatives Only</strong> (Patient Zero eliminated):<br>
-              <strong>Primary Victory Goal:</strong> Most <strong>Corporate Secrets</strong> held.<br>
-              <strong>Tiebreaker 1:</strong> Most remaining <strong>Money ($)</strong>.<br>
+              ${state.is_market_leader_bonus ? `<strong>Market Leader Bonus:</strong> survivors gain Corporate Secrets by final <strong>Market Share</strong> place (${(state.market_leader_bonus_schedule || []).map((b, i) => `${i + 1}${["st", "nd", "rd"][i] || "th"} +${b}`).filter((t) => !t.endsWith("+0")).join(", ")}; ties share the better place).<br>` : ""}
+              <strong>Primary Victory Goal:</strong> Most <strong>Corporate Secrets</strong>${state.is_market_leader_bonus ? " (held + Market Leader Bonus)" : " held"}.<br>
+              ${state.is_market_share ? `<strong>Tiebreaker 1:</strong> Highest <strong>Market Share</strong>.<br>
+              <strong>Tiebreaker 2:</strong> Most remaining <strong>Money ($)</strong>.<br>
+              <strong>Tiebreaker 3:</strong> Most <strong>Active Colored Module Dice</strong> in Ready for Release.<br>
+              <strong>Tiebreaker 4:</strong> Most remaining <strong>Research Tokens (🔬)</strong>.<br>
+              <strong>Tiebreaker 5:</strong> Fewest dice <strong>Under Development</strong>.<br>` : `<strong>Tiebreaker 1:</strong> Most remaining <strong>Money ($)</strong>.<br>
               <strong>Tiebreaker 2:</strong> Most owned <strong>Colored Dice</strong> (all zones).<br>
-              <strong>Tiebreaker 3:</strong> Most remaining <strong>Research Tokens (🔬)</strong>.<br>
-              <em>(Total Wipeout: ranked by the same tiebreakers).</em>
+              <strong>Tiebreaker 3:</strong> Most remaining <strong>Research Tokens (🔬)</strong>.<br>`}
+              <em>(Total Wipeout: ranked by the same tiebreakers${state.is_market_leader_bonus ? "; no Market Leader Bonus" : ""}).</em>
             </div>
           </div>
         </div>

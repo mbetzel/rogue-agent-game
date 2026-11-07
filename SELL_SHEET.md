@@ -9,7 +9,7 @@
 ## THE ELEVATOR PITCH
 It’s 1992. An autonomous cracking program codenamed **Project: SETEC** has broken loose across ARPANET relays and university mainframes. Each player directs a rival boutique white-hat security consultancy hired to protect corporate secrets. 
 
-Simultaneously roll and upgrade custom dice pools representing 90s hardware and software modules, patch burnt-out magnetic tape relays, and brace for the **Mainframe Compiler (Cube Tower)**. Cash-strapped firms can secretly siphon slush funds from the rogue protocol—injecting corrupted code into the tower and accelerating total cryptographic collapse in hopes of bankrupting their rivals first. When the dust settles, any firm that suffers a **Total Data Breach** becomes **Patient Zero** and is raided by federal marshals; the surviving consultancy with the highest **Portfolio Value** wins!
+Simultaneously roll and upgrade custom dice pools representing 90s hardware and software modules, patch burnt-out magnetic tape relays, and brace for the **Mainframe Compiler (Cube Tower)**. Cash-strapped firms can secretly siphon slush funds from the rogue protocol—injecting corrupted code into the tower and accelerating total cryptographic collapse in hopes of bankrupting their rivals first. When the dust settles, any firm that suffers a **Total Data Breach** becomes **Patient Zero** and is raided by federal marshals; the surviving White Hat Operative with the most **Corporate Secrets** after the **Market Leader Bonus** wins!
 
 ---
 

@@ -73,7 +73,7 @@ def _kamikaze(bots: List[Any]) -> None:
 
 # name -> (factory, config overrides, bot modifier, spec games per pod)
 CELLS: Dict[str, Tuple[Callable[..., GameConfig], Dict[str, Any], Optional[Callable[[List[Any]], None]], int]] = {
-    "V035": (GameConfig.legacy_v035, {}, None, 3000),  # GameConfig() is v0.36.0 since Phase B
+    "V035": (GameConfig.legacy_v035, {}, None, 3000),  # GameConfig() is v0.37.0; this script pins GameConfig.v036 / legacy_v035
     "V036": (GameConfig.v036, {}, None, 3000),
     "L4-RATE": (GameConfig.v036, _regain(2, 1), None, 1000),
     "L4-BOTH": (GameConfig.v036, _regain(3, 1), None, 1000),

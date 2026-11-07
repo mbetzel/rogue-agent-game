@@ -25,11 +25,23 @@ export function renderGameOverModal() {
   const content = document.getElementById("gameOverContent");
   if (!content) return;
 
+  // v0.37.0 Market Leader Bonus: shown only when it was awarded (not on a Total Wipeout or when disabled)
+  const mlb = !!res.market_leader_bonus_awarded;
+  const ordinal = (n) => n + (n % 10 === 1 && n % 100 !== 11 ? "st" : n % 10 === 2 && n % 100 !== 12 ? "nd" : n % 10 === 3 && n % 100 !== 13 ? "rd" : "th");
+  const bonusCell = (r) => {
+    if (r.market_share_place === null || r.market_share_place === undefined) return "—";
+    return `${ordinal(r.market_share_place)} · +${r.market_leader_bonus || 0}`;
+  };
+  const secretsCell = (r) => mlb && !r.is_patient_zero
+    ? `${r.secrets_before_bonus} + ${r.market_leader_bonus || 0} = ${r.secrets} Secrets`
+    : `${r.secrets} Secrets`;
+
   let rows = res.rankings.map((r) => `
     <tr style="border-bottom: 1px solid var(--border-color); text-align: left;">
       <td style="padding: 6px;">#${r.rank}</td>
       <td style="padding: 6px;">${r.bot_name}</td>
-      <td style="padding: 6px;">${r.secrets} Secrets${r.market_share !== null && r.market_share !== undefined ? ` · ${r.market_share} Market Share` : ""}</td>
+      <td style="padding: 6px;">${secretsCell(r)}${r.market_share !== null && r.market_share !== undefined ? ` · ${r.market_share} Market Share` : ""}</td>
+      ${mlb ? `<td style="padding: 6px;">${bonusCell(r)}</td>` : ""}
       <td style="padding: 6px;">${r.overflow_penalties}</td>
       <td style="padding: 6px; font-weight: 700; color: var(--accent-gold);">${r.net_score}</td>
       <td style="padding: 6px;">${r.is_patient_zero ? '<span style="color: #ff0055;">Breached</span>' : '<span style="color: #00ff88;">Survived</span>'}</td>
@@ -44,6 +56,7 @@ export function renderGameOverModal() {
     <p style="color: var(--text-dim); font-size: 0.85rem;">
       Concluded in Round ${res.total_rounds} | Trigger: ${res.end_reason.replace(/_/g, " ").toUpperCase()}
       ${(res.market_collapse_pids || []).length ? ` | Market Collapse in Round ${res.market_collapse_round}` : ""}
+      ${mlb ? ` | Market Leader Bonus: ${(res.market_leader_bonus_schedule || []).map((b, i) => [b, i]).filter(([b]) => b > 0).map(([b, i]) => `${ordinal(i + 1)} +${b}`).join(", ")}${res.market_leader_bonus_changed_winner ? " (changed the winner)" : ""}` : ""}
       ${res.tiebreak_decided_by && !["secrets", "sole_survivor"].includes(res.tiebreak_decided_by) ? ` | Tiebreak: ${res.tiebreak_decided_by.replace(/_/g, " ")}` : ""}
     </p>
 
@@ -53,6 +66,7 @@ export function renderGameOverModal() {
           <th style="padding: 6px;">Rank</th>
           <th style="padding: 6px;">White Hat Operative</th>
           <th style="padding: 6px;">Secrets</th>
+          ${mlb ? '<th style="padding: 6px;">Market Leader Bonus</th>' : ""}
           <th style="padding: 6px;">Overflow</th>
           <th style="padding: 6px;">Net Score</th>
           <th style="padding: 6px;">Status</th>

@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor
+from sim.engine.market_share import expected_market_leader_bonus
 
 if TYPE_CHECKING:
     from sim.engine.state import GameState, PlayerState
@@ -33,6 +34,10 @@ class MarketSharePolicy:
     danger_margin: int = 2
     red_buy_share_frac: float = 0.5  # Red purchase nudge below this fraction of max
     collapse_seeking: bool = False  # stress slice only (kamikaze watch); never on in acceptance cells
+    # v0.37.0 Market Leader Bonus valuation (spec §5; inert unless config.is_market_leader_bonus)
+    leader_bonus_aware: bool = True  # sweep can turn individual seats off
+    leader_bonus_time_weights: Tuple[float, float, float] = (0.3, 0.6, 1.0)  # current version index 0 / 1 / 2+
+    leader_bonus_final_round_weight: float = 1.0
 
 
 DEFAULT_POLICY = MarketSharePolicy()
@@ -50,6 +55,18 @@ def is_aware(state: Any) -> bool:
 def policy_for(bot: Any) -> MarketSharePolicy:
     pol = getattr(bot, "market_share_policy", None)
     return pol if isinstance(pol, MarketSharePolicy) else DEFAULT_POLICY
+
+
+def leader_bonus_active(player: Any, state: Any, pol: MarketSharePolicy) -> bool:
+    """v0.37.0: the Market Leader Bonus valuation applies (INV-MLB-BOT-01)."""
+    cfg = getattr(state, "config", None)
+    return bool(getattr(cfg, "is_market_leader_bonus", False) and is_aware(state) and pol.leader_bonus_aware)
+
+
+def leader_bonus_time_weight(state: Any, pol: MarketSharePolicy) -> float:
+    if getattr(state, "is_final_round", False):
+        return pol.leader_bonus_final_round_weight
+    return pol.leader_bonus_time_weights[min(2, int(state.current_version_index))]
 
 
 # ---------------------------------------------------------------------------
@@ -203,6 +220,13 @@ def marginal_block_value(color: CubeColor, rem: Dict[CubeColor, int], player: "P
         after = place(player, state, max(0, share - r + 1), rivals)
         if _improves_place(before, after):
             v += pol.comparison_weight * nc[1]
+    if leader_bonus_active(player, state, pol):
+        # v0.37.0 (spec §5.2): expected Market Leader Bonus gained by keeping this Market Share
+        sched = state.config.market_leader_bonus_schedule(len(state.players))
+        rivals = list(estimated_rival_shares(player, state, attack.get(CubeColor.RED, 0)).values())
+        d = (expected_market_leader_bonus(max(0, share - r + 1), rivals, sched)
+             - expected_market_leader_bonus(max(0, share - r), rivals, sched))
+        v += leader_bonus_time_weight(state, pol) * pol.blue_value * d
     return v
 
 
@@ -256,7 +280,29 @@ def choose_aegis_color(player: "PlayerState", qualifying: List[CubeColor], state
 # Phase 6: regain urgency, Ad Campaign, Red purchase nudge
 # ---------------------------------------------------------------------------
 def urgent_regain(player: "PlayerState", state: "GameState", pol: MarketSharePolicy, cap: int) -> int:
-    """Market Share steps the bot wants before any track upgrade (0..cap), spec §5.3 step 1."""
+    """Market Share steps the bot wants before any track upgrade (0..cap).
+
+    v0.36.0 urgency (``_urgent_regain_v036``), raised in v2.0+ / the Final Round to the smallest regain that
+    improves the expected Market Leader Bonus when the bonus is active (v0.37.0 spec §5.3)."""
+    k0 = _urgent_regain_v036(player, state, pol, cap)
+    if (not leader_bonus_active(player, state, pol) or player.market_share is None
+            or (state.current_version_index < 1 and not state.is_final_round)):
+        return k0
+    room = min(cap, player.market_share_max - player.market_share)
+    rivals = [int(p.market_share or 0) for p in state.players
+              if p.player_id != player.player_id and not p.is_patient_zero]
+    if not rivals:
+        return k0
+    sched = state.config.market_leader_bonus_schedule(len(state.players))
+    base = expected_market_leader_bonus(player.market_share, rivals, sched)
+    for k in range(1, room + 1):
+        if expected_market_leader_bonus(player.market_share + k, rivals, sched) > base:
+            return max(k0, k)
+    return k0
+
+
+def _urgent_regain_v036(player: "PlayerState", state: "GameState", pol: MarketSharePolicy, cap: int) -> int:
+    """v0.36.0 regain urgency, spec §5.3 step 1 (v360 spec)."""
     if player.market_share is None or player.market_share >= player.market_share_max or cap <= 0:
         return 0
     room = min(cap, player.market_share_max - player.market_share)
