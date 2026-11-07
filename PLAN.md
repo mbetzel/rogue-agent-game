@@ -20,7 +20,8 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
 - [ ] **Phase 48: Roster Upgrade — Lever A (bot-only, no rules change)**
   - [x] *Pre-SDLC Game Designer Scoping:* `docs/findings/lever_a_roster_upgrade_scoping.md` (situational push + dump for AdaptiveBalanced behind a `bot_pr_push` [TUNE-BOT] switch, default off). User decisions 2026-11-07 recorded in the doc.
   - [x] *1,200-game state log + threshold refinement (`game-designer`):* thresholds in scoping §3; User decisions on §9 recorded 2026-11-07.
-  - [ ] *Spec (`principal-engineer`) → implementation → review → sweep → assessment.*
+  - [x] *Spec (`principal-engineer`):* `docs/specs/lever_a_roster_upgrade_spec.md`; 6 open questions resolved by the User 2026-11-07.
+  - [ ] *Implementation (`senior-engineer`) → review → sweep → assessment.*
 - [x] **Phase 46: Market Leader Bonus (`v0.37.0` Baseline)**
   - [x] *Pre-SDLC Game Designer Modeling:* end-game Corporate Secrets by Market Share placement among survivors. 2P 1st +2; 3–4P 1st +2, 2nd +1; others 0. Ties share the better place; Patient Zeros excluded; no bonus on a Total Wipeout. Starting Secrets 9 / 8 / 9. Probe `scripts/explore_v360_share_placement_probe.py`; results `FINDINGS.md` §38.
   - [x] *User sign-off (2026-11-07):* package above; 2P +2 Secrets; new term **Market Leader Bonus**.
