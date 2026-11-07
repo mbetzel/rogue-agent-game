@@ -920,6 +920,12 @@ class GameState:
     corruption_track: int = 0
     pending_version_advance: bool = False
     overflow_black_cubes_on_next_track: int = 0
+    # Extra queued Version Switches beyond the first, when spillover fills a whole non-final track in the
+    # same compile (e.g. v1.0 -> v2.0 -> v3.0). The pending target is current + 1 + this value, and
+    # overflow_black_cubes_on_next_track counts cubes on that target's track.
+    pending_extra_version_advances: int = 0
+    # Telemetry: compiles in which spillover filled an entire non-final Version track.
+    multi_version_spill_events: int = 0
     staging_cup: Dict[CubeColor, int] = field(
         default_factory=lambda: {
             CubeColor.RED: 0,

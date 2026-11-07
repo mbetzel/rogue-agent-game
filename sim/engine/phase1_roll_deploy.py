@@ -148,23 +148,28 @@ def check_and_execute_start_of_round_version_transition(engine: GameEngine) -> b
     if not engine.state.pending_version_advance:
         return False
 
-    old_version_str = engine.state.active_version.version_str
-    engine.state.current_version_index += 1
-    new_version_str = engine.state.active_version.version_str
+    # Normally one switch; more when last round's spillover filled a whole track (v1.0 -> v2.0 -> v3.0).
+    # Each switch runs in sequence: forfeit the old override, unlock the new one, add its staging payload.
+    steps = 1 + engine.state.pending_extra_version_advances
+    for _ in range(steps):
+        old_version_str = engine.state.active_version.version_str
+        engine.state.current_version_index += 1
+        new_version_str = engine.state.active_version.version_str
 
-    # Forfeit unused old ability, unlock new ability
-    for p in engine.state.players:
-        p.mark_ability_forfeited(old_version_str)
-        p.unlock_version_ability(new_version_str)
+        # Forfeit unused old ability, unlock new ability
+        for p in engine.state.players:
+            p.mark_ability_forfeited(old_version_str)
+            p.unlock_version_ability(new_version_str)
 
-    # Add new version staging payload to staging cup
-    new_version = engine.state.active_version
-    for color, count in new_version.get_staging_payload(engine.config.num_players).items():
-        engine.state.staging_cup[color] = engine.state.staging_cup.get(color, 0) + count
+        # Add new version staging payload to staging cup
+        new_version = engine.state.active_version
+        for color, count in new_version.get_staging_payload(engine.config.num_players).items():
+            engine.state.staging_cup[color] = engine.state.staging_cup.get(color, 0) + count
 
     # Initialize new track with spilled-over cubes
     engine.state.corruption_track = engine.state.overflow_black_cubes_on_next_track
     engine.state.overflow_black_cubes_on_next_track = 0
+    engine.state.pending_extra_version_advances = 0
     engine.state.pending_version_advance = False
     return True
 

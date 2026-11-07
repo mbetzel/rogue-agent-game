@@ -499,6 +499,7 @@ class GameStateSerializer:
             "corruption_capacity": state.corruption_track_capacity,
             "pending_version_advance": getattr(state, "pending_version_advance", False),
             "overflow_black_cubes_on_next_track": getattr(state, "overflow_black_cubes_on_next_track", 0),
+            "pending_extra_version_advances": getattr(state, "pending_extra_version_advances", 0),
             "current_version_index": state.current_version_index,
             "active_version": active_version,
             "version_deck": version_deck_serialized,
