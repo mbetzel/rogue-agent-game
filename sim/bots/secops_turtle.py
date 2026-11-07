@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 from sim.config import CubeColor, DieColor, ShieldColor
 from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
 from sim.entities import ArchetypeCode, CompanyCode, WhiteHatCode
+from sim.bots.market_share_policy import MarketSharePolicy
 from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index, plan_final_round_repairs, is_six_phase_state, purple_purchasable
 
 if TYPE_CHECKING:
@@ -17,6 +18,7 @@ class SecOpsTurtleBot(BaseBot):
     """Paranoid defensive turtle: focuses on shields, heavy patching, and avoiding Dirty Income."""
 
     research_focus = ('DEFENSE', 'TRIAGE', 'RELEASE', 'PATENT')  # v0.35.0 research-aware policy
+    market_share_policy = MarketSharePolicy(red_danger_value=3.0, danger_margin=3)  # v0.36.0
 
     def __init__(self, bot_id: int) -> None:
         super().__init__(bot_id, name="SecOpsTurtleBot")

@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 from sim.config import CubeColor, DieColor, ShieldColor
 from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
 from sim.entities import ArchetypeCode, CompanyCode, WhiteHatCode
+from sim.bots.market_share_policy import MarketSharePolicy
 from sim.bots.base import BaseBot, Phase3ActionPlan, choose_backlash_die_index, plan_final_round_repairs, is_six_phase_state, purple_purchasable
 
 if TYPE_CHECKING:
@@ -17,6 +18,14 @@ class VentureGreedBot(BaseBot):
     """Greedy capitalist: maximizes Yellow dice, buys secrets, and minimizes shielding."""
 
     research_focus = ('PATENT', 'RELEASE', 'DEFENSE', 'TRIAGE')  # v0.35.0 research-aware policy
+    # v0.36.0 port (balance iteration 1, B1/B3): Public Relations Track last; default Market Share weights.
+    research_focus_v036 = ('RELEASE', 'DEFENSE', 'TRIAGE', 'PATENT')
+    market_share_policy = MarketSharePolicy()
+
+    @staticmethod
+    def _v036(player_state: PlayerState) -> bool:
+        """v0.36 port active (MARKET_SHARE only; v0.35 behaviour is untouched)."""
+        return bool(getattr(getattr(player_state, "config", None), "is_market_share", False))
 
     def __init__(self, bot_id: int) -> None:
         super().__init__(bot_id, name="VentureGreedBot")
@@ -142,6 +151,8 @@ class VentureGreedBot(BaseBot):
             face = die.current_face
             if not face:
                 continue
+            if self._v036(player_state) and face.is_shield:
+                continue  # v0.36: keep shields (no Patent Filing to rebuild lost Secrets)
             if face.is_glitch or (face.money == 0 and not face.is_star and not face.has_cash_option):
                 rerolls.append(idx)
         return rerolls
@@ -156,6 +167,8 @@ class VentureGreedBot(BaseBot):
     ) -> List[int]:
         rerolls: List[int] = []
         available_patches = player_state.patches
+        if self._v036(player_state):
+            return rerolls
         if player_state.secrets > 2 and player_state.money > 2:
             for idx, die in enumerate(rolled_dice):
                 if available_patches <= len(rerolls):
@@ -185,7 +198,10 @@ class VentureGreedBot(BaseBot):
             if not face or not face.is_choice:
                 continue
             if face.has_shield_option:
-                declarations[idx] = 0 if (blue_threat > 0 and player_state.secrets <= 2) else 1
+                if self._v036(player_state):
+                    declarations[idx] = 0 if blue_threat > 0 else 1  # v0.36: shield Blue normally
+                else:
+                    declarations[idx] = 0 if (blue_threat > 0 and player_state.secrets <= 2) else 1
             elif face.name == "+$1 / +1 🔬":
                 need_patch = (player_state.patches == 0 and len(player_state.unpatched_dice) > 0)
                 declarations[idx] = 1 if need_patch else 0
@@ -218,7 +234,7 @@ class VentureGreedBot(BaseBot):
                     assignments[idx] = ShieldColor.ANY
                 else:
                     assignments[idx] = face.shield_color
-            elif face.has_shield_option and blue_threat > 0 and player_state.secrets <= 2:
+            elif face.has_shield_option and blue_threat > 0 and (player_state.secrets <= 2 or self._v036(player_state)):
                 assignments[idx] = ShieldColor.BLUE
         return assignments
 
@@ -232,6 +248,9 @@ class VentureGreedBot(BaseBot):
         current_money = player_state.money
         is_final_round = getattr(game_state, "is_final_round", False)
         cash_cushion = 0 if is_final_round else 2
+        v036 = self._v036(player_state)
+        # v0.36: Money has no Patent route to Secrets, so paid Secret actions take no cushion
+        secret_cushion = 0 if v036 else cash_cushion
 
         active_ver = game_state.active_version.version_str
         is_omnidyne = has_company_override(player_state, CompanyCode.OMNIDYNE, legacy_bridge_enabled(game_state))
@@ -287,11 +306,11 @@ class VentureGreedBot(BaseBot):
 
         b2_cost = game_state.config.b2_secret_cost
         b2_cap = game_state.config.b2_secret_cap
-        if player_state.b2_available and (current_money >= b2_cost if is_final_round else (current_money - b2_cost >= cash_cushion)) and (b2_cap is None or player_state.secrets < b2_cap):
+        if player_state.b2_available and (current_money >= b2_cost if is_final_round else (current_money - b2_cost >= secret_cushion)) and (b2_cap is None or player_state.secrets < b2_cap):
             plan.use_b2_secret = True
             current_money -= b2_cost
 
-        if player_state.y1_available and (current_money >= 6 if is_final_round else (current_money - 6 >= cash_cushion)):
+        if player_state.y1_available and (current_money >= 6 if is_final_round else (current_money - 6 >= secret_cushion)):
             plan.use_y1_secret = True
             current_money -= 6
 
@@ -317,6 +336,15 @@ class VentureGreedBot(BaseBot):
                     plan.market_purchases.append(DieColor.BLUE)
                     current_money -= blue_cost
                     purchases += 1
+                elif v036:
+                    # v0.36: spend surplus on any affordable Central Market die (Blue shields first) instead of hoarding
+                    for c in (DieColor.BLUE, DieColor.GREEN, DieColor.RED, DieColor.YELLOW):
+                        cost = game_state.get_market_die_cost(c)
+                        if game_state.market.get(c, 0) > 0 and current_money - cost >= 0:
+                            plan.market_purchases.append(c)
+                            current_money -= cost
+                            purchases += 1
+                            break
 
         # Hardware Upgrades & Patents (v0.28.0)
         res_available = player_state.research_tokens

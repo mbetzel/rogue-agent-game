@@ -99,8 +99,29 @@ Chooser = Callable[["PlayerState", str, int, Optional[TriageUpgradeOptions]], Op
 # ----------------------------------------------------------------------------------------------
 # Costs / levels
 # ----------------------------------------------------------------------------------------------
+# v0.36.0: the Public Relations Track keeps the internal key "PATENT"
+TRACK_ALIASES = {"PUBLIC_RELATIONS": "PATENT", "PR": "PATENT"}
+
+
 def normalize_track(track: str) -> str:
-    return str(track).upper().strip()
+    t = str(track).upper().strip()
+    return TRACK_ALIASES.get(t, t)
+
+
+def track_display_name(config: Optional[GameConfig], track: str) -> str:
+    """Printed track name; the fourth track is the Public Relations Track under ``patents_mode=SHARE_REGAIN``."""
+    t = normalize_track(track)
+    if t == "PATENT":
+        if config is not None and getattr(config, "is_share_regain", False):
+            return "Public Relations Track"
+        return "Cryptographic Patents Track"
+    return {"DEFENSE": "Defense Grid Track", "TRIAGE": "Triage Track", "RELEASE": "Release Track"}.get(t, t.title())
+
+
+def regain_rate(config: GameConfig, player: PlayerState) -> tuple:
+    """(research cost per +1 Market Share, per-Operations-Turn cap) at the current Public Relations level."""
+    lvl = max(0, min(MAX_LEVEL, int(player.patent_level)))
+    return int(config.share_regain_cost_by_level[lvl]), int(config.share_regain_cap_by_level[lvl])
 
 
 def level_of(player: PlayerState, track: str) -> int:
@@ -355,4 +376,9 @@ def breakthrough_preview(player: PlayerState) -> Dict[str, Dict[str, Any]]:
             "next_upgrade_cost": player.get_track_upgrade_cost(t),
             "breakthrough": BREAKTHROUGH_TEXT.get((t, nxt)) if cfg is not None and cfg.is_v035_tracks else None,
         }
+        if t == "PATENT" and cfg is not None and getattr(cfg, "is_share_regain", False):
+            cost, cap = regain_rate(cfg, player)
+            out[t]["display_name"] = track_display_name(cfg, t)
+            out[t]["regain_cost"] = cost
+            out[t]["regain_cap"] = cap
     return out

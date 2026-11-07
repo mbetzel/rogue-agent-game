@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 from sim.config import CubeColor, DieColor, EndGameReason, ShieldColor
 from sim.entities import CorruptionSpace, Die
 from sim.engine.state import CompileResult
+from sim.engine import market_share
 
 if TYPE_CHECKING:
     from sim.engine.core import GameEngine
@@ -308,6 +309,7 @@ def execute_compiler_drop(engine: GameEngine, player_commitments: Commitments) -
     total_exited = sum(exited_cubes.values())
     buffer_overflow = total_exited == 0 and state.config.enable_buffer_overflow
     black_dropped = 0
+    cmp_start = len(state.version_comparisons)
 
     if buffer_overflow:
         state.last_round_buffer_overflow = True
@@ -343,6 +345,8 @@ def execute_compiler_drop(engine: GameEngine, player_commitments: Commitments) -
                             state.singularity_triggered = True
                             break
                     else:
+                        # v0.36.0: Market Share comparison after the final space resolves (INV-MS-CMP-TIMING-01)
+                        market_share.resolve_version_comparison(engine, state.active_version.version_str, False)
                         state.pending_version_advance = True
                         state.overflow_black_cubes_on_next_track = 0
             else:
@@ -352,6 +356,11 @@ def execute_compiler_drop(engine: GameEngine, player_commitments: Commitments) -
                 spill_idx = state.overflow_black_cubes_on_next_track
                 if next_ver.corruption_track and 1 <= spill_idx <= len(next_ver.corruption_track):
                     _resolve(next_ver.corruption_track[spill_idx - 1])
+                if next_ver_idx < len(state.version_deck) - 1 and spill_idx == next_ver.track_capacity:
+                    # Spillover covered the final space of a non-last version (spec §4.3, E6). The counter is
+                    # telemetry only (both modes); the comparison is a no-op under RANSOM.
+                    state.double_version_fill_events += 1
+                    market_share.resolve_version_comparison(engine, next_ver.version_str, True)
                 if next_ver_idx >= len(state.version_deck) - 1 and spill_idx >= next_ver.track_capacity:
                     state.current_version_index = next_ver_idx
                     state.corruption_track = spill_idx
@@ -375,6 +384,7 @@ def execute_compiler_drop(engine: GameEngine, player_commitments: Commitments) -
         buffer_overflow=buffer_overflow,
         black_dropped=black_dropped,
         breached_pids=breached,
+        version_comparisons=list(state.version_comparisons[cmp_start:]),
     )
 
 
@@ -391,14 +401,20 @@ def check_end_triggers_after_compiler(engine: GameEngine, cr: CompileResult) -> 
         state.end_reason = (
             EndGameReason.TOTAL_WIPEOUT if all(p.is_patient_zero for p in players) else EndGameReason.SINGULARITY
         )
+        if any(p.is_patient_zero for p in players):
+            market_share.add_end_trigger(state, "patient_zero")
+        market_share.add_end_trigger(state, state.end_reason.value)
         return
     if all(p.is_patient_zero for p in players):
         expire_contractors(engine)
         state.game_over = True
         state.is_final_round = False
         state.end_reason = EndGameReason.TOTAL_WIPEOUT
+        market_share.add_end_trigger(state, "patient_zero")
+        market_share.add_end_trigger(state, "total_wipeout")
         return
     if any(p.is_patient_zero for p in players):
+        market_share.add_end_trigger(state, "patient_zero")
         state.is_final_round = True
         state.end_reason = EndGameReason.PATIENT_ZERO
         if state.final_round_trigger_phase is None:

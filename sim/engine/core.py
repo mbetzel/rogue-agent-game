@@ -41,6 +41,7 @@ from sim.entities import (
     get_random_archetypes,
     get_random_companies,
     get_random_white_hats,
+    resolve_variant_cards,
 )
 from sim.tower import CubeTower
 from sim.engine.state import CompileResult, EndGameResult, GameState, PlayerState, RoundTelemetry
@@ -83,7 +84,7 @@ class GameEngine:
 
         self.rng = random.Random(seed)
         self.config = config
-        self.variant_cards = variant_cards or get_default_variant_cards()
+        self.variant_cards = resolve_variant_cards(variant_cards or get_default_variant_cards(), config.red_variant_set)
         self.version_deck = version_deck or get_default_version_deck(profile=config.corruption_track_profile)
 
         # Modular Setup Resolution (INV-SETUP-01..04)
@@ -185,6 +186,8 @@ class GameEngine:
                 upgrade_discount=comp.upgrade_discount if (comp and use_asym) else 0,
                 config=config,
             )
+            if config.is_market_share:
+                player.init_market_share(config.market_share_start(config.num_players))
             players.append(player)
 
         # Initialize Market: 2 * num_players dice per colored die (INV-PURPLE-02: Purple excluded from Central Market)
@@ -221,6 +224,7 @@ class GameEngine:
             next_die_id=next_die_id,
             rng=self.rng,
         )
+        self.state.first_player_index_start = first_player_index
 
         self._prime_compiler()
 
@@ -304,6 +308,8 @@ class GameEngine:
                 "unpatched_dice_count": len(p.glitched_dice) + len(p.scanned_dice),
                 "contractor_dice_count": len(p.contractor_dice),
                 "is_patient_zero": p.is_patient_zero,
+                # v0.36.0: only under MARKET_SHARE so default snapshots stay byte-identical
+                **({"market_share": p.market_share} if self.config.is_market_share else {}),
             }
             for p in self.state.players
         ]
@@ -331,11 +337,59 @@ class GameEngine:
         }
         for p in self.state.players:
             p.track_upgrades_this_round = []
+        self._ms_round_start = {
+            "players": {p.player_id: self._ms_counters(p) for p in self.state.players},
+            "r3": len(self.state.r3_events),
+            "cmp": len(self.state.version_comparisons),
+            "triggers": len(self.state.end_triggers),
+        }
+
+    @staticmethod
+    def _ms_counters(p: PlayerState) -> Dict[str, Any]:
+        return {
+            "incoming": p.red_incoming_total, "blocked_color": p.red_blocked_color_total,
+            "blocked_any": p.red_blocked_any_total, "unblocked": p.red_unblocked_total,
+            "share_lost": p.market_share_lost_red, "overflow": p.market_share_red_overflow,
+            "regain_count": p.market_share_regained, "regain_research": p.research_spent_regain,
+            "r2": p.market_share_gained_r2, "purchases": dict(p.purchases_by_color),
+        }
+
+    def _record_market_share_telemetry(self, tel: RoundTelemetry) -> None:
+        """v0.36.0 per-round Market Share / Red telemetry (spec §6.1). Telemetry only."""
+        start = getattr(self, "_ms_round_start", None)
+        if start is None:
+            return
+        s = self.state
+        ms = self.config.is_market_share
+        from sim.engine import research_tracks
+
+        for p in s.players:
+            c0 = start["players"].get(p.player_id) or self._ms_counters(p)
+            c1 = self._ms_counters(p)
+            tel.red_by_player[p.player_id] = {
+                k: c1[k] - c0[k] for k in ("incoming", "blocked_color", "blocked_any", "unblocked", "share_lost", "overflow")
+            }
+            tel.purchases_by_player[p.player_id] = {
+                k: v - c0["purchases"].get(k, 0) for k, v in c1["purchases"].items() if v - c0["purchases"].get(k, 0)
+            }
+            if ms:
+                cost, cap = research_tracks.regain_rate(self.config, p)
+                tel.regain_by_player[p.player_id] = {
+                    "count": c1["regain_count"] - c0["regain_count"],
+                    "research": c1["regain_research"] - c0["regain_research"],
+                    "cap": cap, "level": p.patent_level,
+                }
+                tel.r2_by_player[p.player_id] = c1["r2"] - c0["r2"]
+                tel.market_share_end_of_round[p.player_id] = p.market_share
+        tel.r3_events = [dict(e) for e in s.r3_events[start["r3"]:]]
+        tel.version_comparisons = [r.as_dict() for r in s.version_comparisons[start["cmp"]:]]
+        tel.end_triggers_this_round = list(s.end_triggers[start["triggers"]:])
 
     def _record_research_telemetry(self, tel: RoundTelemetry) -> None:
         start = getattr(self, "_research_round_start", None)
         if start is None:
             return
+        self._record_market_share_telemetry(tel)
         for p in self.state.players:
             earned0, bt0, rej0 = start.get(p.player_id, (0, 0, 0))
             tel.research_gained_by_player[p.player_id] = p.research_earned_total - earned0
@@ -389,6 +443,8 @@ class GameEngine:
         tel.phases_executed.append(4)
         tel.phase_snapshots[4] = self._snapshot_players()
         tel.player_snapshots = tel.phase_snapshots[4]
+        if self.config.is_market_share:
+            tel.market_share_after_p4 = {p.player_id: p.market_share for p in s.players}
         if s.game_over:
             return self._finalize_telemetry(tel, end_phase=4)
 

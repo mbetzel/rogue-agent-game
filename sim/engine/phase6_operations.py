@@ -3,6 +3,9 @@
 Buy dice (limit 2; purchases go directly to Ready for Release, O3), Terminal Hardware Track upgrades,
 Patent Filings, paid ``★`` actions (B2, Y1, P1, P3) and Prometheus *Algorithmic Arbitrage*; then pass
 the First Player Marker.
+
+v0.36.0 (``patents_mode=SHARE_REGAIN``): the Public Relations Track replaces Patent Filing with a Market Share
+regain step (research per +1, capped per Operations Turn by level); Ad Campaign (R2) is a paid ``★`` action.
 """
 
 from __future__ import annotations
@@ -28,7 +31,12 @@ def resolve_operations_plan(bot: BaseBot, player_state: PlayerState, state: Game
     plan = _resolve_raw_operations_plan(bot, player_state, state, rng)
     from sim.bots.research_policy import apply_research_policy
 
-    return apply_research_policy(bot, plan, player_state, state, rng)
+    plan = apply_research_policy(bot, plan, player_state, state, rng)
+    if getattr(state.config, "is_market_share", False):
+        from sim.bots.market_share_policy import apply_market_share_policy
+
+        plan = apply_market_share_policy(bot, plan, player_state, state)
+    return plan
 
 
 def _resolve_raw_operations_plan(bot: BaseBot, player_state: PlayerState, state: GameState, rng: random.Random) -> Phase3ActionPlan:
@@ -67,9 +75,14 @@ def execute_player_operations_turn(
 
     # v0.35.0: research first - track upgrades step by step, each Breakthrough resolving immediately
     # (INV-RT-BT-IMMEDIATE-01 / INV-RT-BT-ORDER-01), then Patent filings at the post-upgrade rate.
+    share_regain = bool(getattr(engine.config, "is_share_regain", False))
     if v035:
         execute_track_upgrades(engine, player, plan)
-        execute_patent_filings(player, getattr(plan, "patent_filings", 0))
+        if share_regain:
+            _reject_patent_filings(player, getattr(plan, "patent_filings", 0))
+            execute_share_regain(engine, player, getattr(plan, "share_regain", 0))
+        else:
+            execute_patent_filings(player, getattr(plan, "patent_filings", 0))
 
     # 1. Collect Income from ALL surviving dice in in_production_dice (legacy v0.33 only)
     if collect_income:
@@ -142,6 +155,7 @@ def execute_player_operations_turn(
             )
             engine.state.next_die_id += 1
             player.ready_for_release_dice.append(new_die)
+            player.record_purchase(free_color)
             player.mark_ability_used(active_ver)
             prometheus_discount_applied = True
 
@@ -212,6 +226,9 @@ def execute_player_operations_turn(
             # Always resolve diagnostics even if under_development_dice is empty (triggers fallback)
             resolve_phreaker_jumper_diagnostics(engine, player, diag_id, engine.rng)
 
+    # 3b. Ad Campaign (R2, v0.36.0): pay $X -> +Market Share; outside the Public Relations cap (INV-MS-R2-01)
+    execute_ad_campaigns(engine, player, getattr(plan, "use_r2_share", 0))
+
     # 4. Market Purchases (Limit 2 dice per turn; deliver directly to ready_for_release_dice)
     purchased_count = 1 if prometheus_discount_applied else 0
     purchases_list = list(plan.market_purchases)
@@ -253,6 +270,10 @@ def execute_player_operations_turn(
                 )
                 engine.state.next_die_id += 1
                 player.ready_for_release_dice.append(new_die)
+                player.record_purchase(color)
+
+    # Unused Ad Campaign actions are lost at the end of the Operations Turn
+    player.r2_actions_available = 0
 
     if v035:
         return
@@ -264,8 +285,12 @@ def execute_player_operations_turn(
         if cost is not None and player.research_tokens >= cost:
             player.upgrade_track(track)
 
-    # 6. Cryptographic Patent Filings (INV-PATENT-CONV-01)
+    # 6. Cryptographic Patent Filings (INV-PATENT-CONV-01) / v0.36 Public Relations regain
     patent_filings = getattr(plan, "patent_filings", 0)
+    if share_regain:
+        _reject_patent_filings(player, patent_filings)
+        execute_share_regain(engine, player, getattr(plan, "share_regain", 0))
+        patent_filings = 0
     while patent_filings > 0:
         cost = player.get_patent_cost()
         if player.research_tokens >= cost:
@@ -273,6 +298,56 @@ def execute_player_operations_turn(
             patent_filings -= 1
         else:
             break
+
+
+def _reject_patent_filings(player: PlayerState, filings: int) -> None:
+    """Under the Public Relations Track Patent Filing does not exist: planned filings are ignored and logged."""
+    if filings and filings > 0:
+        player.rejected_patent_filings = getattr(player, "rejected_patent_filings", 0) + int(filings)
+
+
+def execute_share_regain(engine: GameEngine, player: PlayerState, wanted: int) -> int:
+    """Public Relations Track Phase 6 step: regain Market Share (INV-MS-REGAIN-01).
+
+    Each +1 costs the research rate of the current level; at most ``cap[level]`` per Operations Turn; never
+    above the maximum. Cap and cost are re-read per step at the post-upgrade level (E15).
+    """
+    cfg = engine.config
+    player.regain_this_turn = 0
+    done = 0
+    if not cfg.is_share_regain or player.market_share is None:
+        return 0
+    while done < int(wanted or 0):
+        lvl = player.patent_level
+        cap = cfg.share_regain_cap_by_level[lvl]
+        cost = cfg.share_regain_cost_by_level[lvl]
+        if player.regain_this_turn >= cap or player.market_share >= player.market_share_max \
+                or player.research_tokens < cost:
+            break
+        player.research_tokens -= cost
+        player.research_spent_regain += cost
+        player.change_market_share(+1, "regain")
+        player.regain_this_turn += 1
+        done += 1
+    return done
+
+
+def execute_ad_campaigns(engine: GameEngine, player: PlayerState, wanted: int) -> int:
+    """Ad Campaign (R2): one paid action per R2 face In Production in Phase 3 (INV-MS-R2-01). Atomic at max."""
+    cfg = engine.config
+    used = 0
+    wanted = int(wanted or 0)
+    if not cfg.is_market_share or player.market_share is None:
+        return 0
+    while wanted > 0 and player.r2_actions_available > 0:
+        if player.money >= cfg.r2_share_cost and player.market_share < player.market_share_max:
+            player.money -= cfg.r2_share_cost
+            player.change_market_share(+cfg.r2_share_gain, "r2")
+            player.r2_uses += 1
+            used += 1
+        wanted -= 1
+        player.r2_actions_available -= 1
+    return used
 
 
 def _log_rejected_purple(player: PlayerState) -> None:

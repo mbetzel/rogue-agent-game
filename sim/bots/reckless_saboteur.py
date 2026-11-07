@@ -17,6 +17,8 @@ class RecklessSaboteurBot(BaseBot):
     """Chaos bot: forces extreme threat escalations and pushes for simultaneous total wipeout."""
 
     research_focus = ('PATENT', 'TRIAGE', 'RELEASE', 'DEFENSE')  # v0.35.0 research-aware policy
+    # v0.36.0 (SHARE_REGAIN only): Public Relations Track last (balance iteration 1, B3)
+    research_focus_v036 = ('TRIAGE', 'RELEASE', 'DEFENSE', 'PATENT')
 
     def __init__(self, bot_id: int) -> None:
         super().__init__(bot_id, name="RecklessSaboteurBot")

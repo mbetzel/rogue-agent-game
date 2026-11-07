@@ -5,6 +5,19 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
 ## Current Status
 - [x] **Rules Draft `v0.35.0`** captured in [RULES.md](./RULES.md)
 - [x] **Multi-Agent SDLC Pipeline** defined in Section 2 below
+- [ ] **Phase 44 (exploration): Red Rebalance — $2 Ransom, Block 2 Red, Red Choice Face**
+  - [x] *Pre-SDLC Game Designer Modeling:* proposal = $2 per unblocked Red cube; Red 1-pip face `Block 2 Red`; one Red `+$2` face becomes `+$1 / +1 🔬`; Blue, Green and ★ variants unchanged. Sim levers `red_ransom_per_cube` and `red_die_profile` (defaults = v0.35). Sweep `scripts/run_v360_red_rebalance_sweep.py` (1,500 games per pod). Results: `FINDINGS.md` §31.
+  - [x] *User decision on sweep results:* not adopted; superseded by Phase 45 (no `RULES.md` change).
+- [ ] **Phase 45: Red Rework — Market Share, Market Collapse & Patents Replacement (`v0.36.0` candidate)**
+  - [x] *Pre-SDLC Game Designer Modeling:* Red stops being a cash attack. Unblocked Red lowers Market Share; research regains it through a track that replaces Cryptographic Patents; Version changes compare Market Share for Money; Market Share 0 triggers Market Collapse (Final Round, no elimination). Starting Secrets 8 / 10 / 11. The probe gives an even three-way end-reason split (`FINDINGS.md` §32). Plan: `docs/explorations/2026_11_market_share_red_rework_plan.md`.
+  - [x] *User sign-off (2026-11-06):* $2 / $4 Version payouts via the bank, shortfall forgiven, shared-place ties; Market Share first tiebreaker; no Collapse penalty; free-choice `Any` shields; Red ★ set = Block + $2, buy back share, poach share; starting Secrets 8 / 10 / 11. New terms: Market Share, Market Collapse, Marketing, Market Manipulation, Public Relations Track.
+  - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/v360_market_share_red_rework_spec.md`; open questions resolved by the User 2026-11-06 (spec §15.1).
+  - [x] *Implementation (`senior-engineer`, sim only; `staff-engineer` APPROVED, 724 tests):* levers behind `red_mode` (defaults = v0.35.0; `GameConfig.v036()` / `legacy_v035()`), `sim/engine/market_share.py` (Version comparison, Customer Poaching, Market Collapse), Public Relations Track regain, Ad Campaign, free-choice Generic shields, Market Share-first tiebreakers, telemetry, `sim/bots/market_share_policy.py`. Phase 44 `red_die_profile` reverted (`red_ransom_per_cube` kept). v0.35 parity fixtures (`tests/fixtures/v035_parity/`, 2,700 games from clean `b1b1f11`) match for `GameConfig()` and `legacy_v035()`. `tests/test_v360_market_share.py` (MS-01..MS-50). Sweep script `scripts/run_v360_market_share_sweep.py`. `RULES.md` / `web/` / `pnp/` wait for balance sign-off.
+  - [x] *Sweep:* product-owner, 51,000 games (`docs/findings/v360_market_share_telemetry_report.md`).
+  - [x] *Balance iteration 1:* game-designer NOT APPROVED (VentureGreed broken; Collapse 20%). User decisions: Market Share 17 / 18 / 18, drop the v1.0 comparison, re-open starting Secrets (`FINDINGS.md` §33). Bot fixes reviewed and re-swept.
+  - [x] *Balance iteration 2:* game-designer APPROVED WITH TUNE; User approved starting Secrets 7 / 7 / 8, deferred company spread, and logged Release concentration as a bot artifact (`FINDINGS.md` §34).
+  - [ ] *Phase B:* RULES.md / glossary / CLAUDE.md, web, graphic-designer mat and cards.
+  - [ ] *Next phase:* Money → Secrets outlet (Y1 / B2 availability or pricing).
 - [x] **Phase 43: Research Track Rebalance — 5-Level Tracks, Breakthroughs & Flat Company Setup (`v0.35.0` Baseline)**
   - [x] *Pre-SDLC Game Designer Modeling:* v0.34.0 baseline is ~4 🔬 per player per game and almost no organic upgrades. Locked design: L0–L4 tracks costing 1/2/2/3 🔬; fixed Breakthroughs at L1/L3; stronger L4 capstones; Patents rates 2.0 / 1.5 / 1.0 🔬 per Secret; Emergency Hotfix and Passive Firewall removed; all companies start at L0. Plan: `docs/explorations/2026_11_research_track_rebalance_plan.md`. Signed off by User 2026-11-05.
   - [x] *Research Income Sweep (`game-designer`):* report `docs/findings/v350_research_income_sweep.md` (~12 🔬/game with new Gray faces + research-aware bots). User decisions 2026-11-05 recorded in the plan doc §6: Purple not purchasable (Patents L3 grants 2nd); Triage L3 = $3 Gray→colored die upgrade; all company setup bonuses removed; Slush Fund once per game; Defense L4 +$1/blocked cube (max $3); no Secret limit.
@@ -335,6 +348,7 @@ Pure Python 3 standard library (`dataclasses`, `random`, `statistics`, `argparse
 | **5. Modular Variants & Directives** | Version Directives (5a) × 15 Module Variants (5b) across 4P Pod A | Variance assessment, degenerate loop prevention, card tiering, win rate ceiling ($\le 38\%$), Singularity viability. |
 | **6. Asymmetric Version Payloads** | 4 Roadmap Combinations (Kinetic vs Contagion vs Singularity) across 4P, 3P, 2P | Pacing parity across roadmaps; Singularity occurrences $\ge 10\%$; 2P wipeout rate $\le 30\%$. |
 | **7. Archetype Tournament** | 6 Consultancy Archetypes across 4P, 3P, 2P Pods × Randomized Setups | Balanced win rates across archetypes ($\le 35\%$ in 4P); healthy push-your-luck timing forfeit rates (~10–25%); no single archetype immune to elimination. |
+| **8. Red Rebalance** | `red_ransom_per_cube ∈ {1, 2}` × `red_die_profile ∈ {V035, V036_RED}` across 2P/3P/4P | Red shields chosen meaningfully; Red die purchase share rises without dominating; Unpaid Ransom Leak rate and rounds stay within healthy ranges. |
 
 ---
 

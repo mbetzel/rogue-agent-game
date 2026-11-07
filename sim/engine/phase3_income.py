@@ -24,7 +24,9 @@ if TYPE_CHECKING:
 _STAR_NOTES = {
     "Y3": "Proprietary Training (+1 Secret → Glitched)",
     "B3": "Air-Gapped Backup (1 Glitched → Scanned)",
-    "R1": "Ransom Insurance (+$2)",
+    "R1": "Ransom Insurance (+$2)",  # label uses the active Red card's name (see _die_income_row)
+    "R2_MKT": "Ad Campaign (Phase 6: pay $2 for +1 Market Share)",
+    "R3_MKT": "Customer Poaching (take 1 Market Share)",
     "G1": "Self-Healing Kernel (+1 🔬)",
     "G2": "Universal Sandbox (+1 🔬)",
     "G3": "Live Reboot (+$1, +2 🔬)",
@@ -75,6 +77,9 @@ def _die_income_row(state: GameState, player: PlayerState, die: Die) -> Optional
             elif _is_operative(player, WhiteHatCode.SPOOK, legacy_bridge_enabled(state)):
                 money += 2
                 star_note = "Burn Notice (+$2)"
+        elif code == "R1":
+            card = (getattr(state, "variant_cards", None) or {}).get(DieColor.RED)
+            star_note = f"{card.name} (+$2)" if card is not None and card.code == "R1" else _STAR_NOTES.get(code)
         else:
             star_note = _STAR_NOTES.get(code)
     role = getattr(die, "production_role", None)
@@ -120,6 +125,14 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
             if eff.star_code == "Y3":
                 # Proprietary Training: move die to glitched_dice after collecting secret
                 dice_to_glitch.append(die)
+            elif eff.star_code == "R2_MKT" and engine.config.is_market_share:
+                # Ad Campaign: latch one paid Phase 6 action (INV-MS-R2-01)
+                player.r2_actions_available += 1
+            elif eff.star_code == "R3_MKT" and engine.config.is_market_share:
+                # Customer Poaching: resolved after all players' Income (market_share.resolve_poaches)
+                from sim.engine import market_share
+
+                market_share.queue_poach(engine, player, die.die_id)
             elif eff.star_code == "B3":
                 # Air-Gapped Backup (INV-B3-BACKUP-01): Move 1 die from glitched_dice to scanned_dice
                 if player.glitched_dice:
@@ -357,4 +370,15 @@ def execute_income(engine: GameEngine, player_commitments: Optional[Commitments]
         if player.is_patient_zero:
             continue
         results[player.player_id] = execute_player_income(engine, player)
+    finalize_income(engine)
     return results
+
+
+def finalize_income(engine: GameEngine) -> List[Dict[str, Any]]:
+    """v0.36.0: closing step of Phase 3, after every player's Income: resolve Customer Poaching (R3).
+
+    The web controller must call this once after all players' Income. No-op under RANSOM.
+    """
+    from sim.engine import market_share
+
+    return market_share.resolve_poaches(engine)

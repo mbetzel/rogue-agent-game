@@ -1,0 +1,47 @@
+2P V035         n= 3000 rounds=8.87 PZ=0.583 SING=0.417 MC=0.000 TW=0.160 redBlock=0.104 redBuy=0.146 regain=0.000 spread=13.8 tb=[('sole_survivor', 0.449), ('secrets', 0.325)]
+2P V036         n= 3000 rounds=8.64 PZ=0.434 SING=0.370 MC=0.196 TW=0.058 redBlock=0.151 redBuy=0.261 regain=0.371 spread=12.3 tb=[('secrets', 0.4427), ('sole_survivor', 0.401)]
+2P L4-RATE      n= 1000 rounds=8.71 PZ=0.425 SING=0.375 MC=0.200 TW=0.057 redBlock=0.153 redBuy=0.256 regain=0.365 spread=9.5 tb=[('secrets', 0.456), ('sole_survivor', 0.39)]
+2P L4-BOTH      n= 1000 rounds=8.71 PZ=0.427 SING=0.376 MC=0.197 TW=0.056 redBlock=0.152 redBuy=0.255 regain=0.371 spread=9.2 tb=[('secrets', 0.455), ('sole_survivor', 0.393)]
+2P PAYOUT-LOW   n= 1000 rounds=8.72 PZ=0.393 SING=0.378 MC=0.229 TW=0.049 redBlock=0.137 redBuy=0.242 regain=0.366 spread=10.5 tb=[('secrets', 0.473), ('sole_survivor', 0.371)]
+2P PAYOUT-HIGH  n= 1000 rounds=8.60 PZ=0.438 SING=0.369 MC=0.193 TW=0.058 redBlock=0.173 redBuy=0.273 regain=0.352 spread=12.5 tb=[('secrets', 0.443), ('sole_survivor', 0.408)]
+2P NO_PAYOUT    n= 1000 rounds=8.67 PZ=0.356 SING=0.384 MC=0.260 TW=0.045 redBlock=0.133 redBuy=0.262 regain=0.213 spread=12.0 tb=[('secrets', 0.52), ('sole_survivor', 0.332)]
+2P MS-2         n= 1000 rounds=8.56 PZ=0.423 SING=0.309 MC=0.268 TW=0.057 redBlock=0.162 redBuy=0.274 regain=0.374 spread=15.4 tb=[('secrets', 0.459), ('sole_survivor', 0.384)]
+2P MS+2         n= 1000 rounds=8.78 PZ=0.435 SING=0.429 MC=0.136 TW=0.057 redBlock=0.146 redBuy=0.252 regain=0.360 spread=7.7 tb=[('secrets', 0.457), ('sole_survivor', 0.401)]
+2P NAIVE        n= 1000 rounds=8.68 PZ=0.371 SING=0.363 MC=0.266 TW=0.037 redBlock=0.173 redBuy=0.193 regain=0.175 spread=11.1 tb=[('secrets', 0.536), ('sole_survivor', 0.352)]
+2P RANDOM_FOCUS n= 1000 rounds=8.72 PZ=0.420 SING=0.381 MC=0.199 TW=0.049 redBlock=0.156 redBuy=0.284 regain=0.354 spread=13.1 tb=[('secrets', 0.465), ('sole_survivor', 0.386)]
+2P KAMIKAZE     n= 1000 rounds=8.69 PZ=0.432 SING=0.369 MC=0.199 TW=0.058 redBlock=0.152 redBuy=0.259 regain=0.367 spread=9.2 tb=[('secrets', 0.454), ('sole_survivor', 0.397)]
+2P TIERS        n= 1000 rounds=8.62 PZ=0.396 SING=0.322 MC=0.282 TW=0.055 redBlock=0.072 redBuy=0.264 regain=0.387 spread=7.4 tb=[('secrets', 0.49), ('sole_survivor', 0.358)]
+3P V035         n= 3000 rounds=8.71 PZ=0.643 SING=0.357 MC=0.000 TW=0.058 redBlock=0.104 redBuy=0.138 regain=0.000 spread=16.2 tb=[('secrets', 0.667), ('sole_survivor', 0.169)]
+3P V036         n= 3000 rounds=8.77 PZ=0.414 SING=0.385 MC=0.201 TW=0.013 redBlock=0.144 redBuy=0.257 regain=0.350 spread=17.5 tb=[('secrets', 0.7537), ('market_share', 0.1643)]
+3P L4-RATE      n= 1000 rounds=8.76 PZ=0.416 SING=0.375 MC=0.209 TW=0.010 redBlock=0.139 redBuy=0.249 regain=0.351 spread=20.3 tb=[('secrets', 0.753), ('market_share', 0.166)]
+3P L4-BOTH      n= 1000 rounds=8.76 PZ=0.417 SING=0.379 MC=0.204 TW=0.010 redBlock=0.139 redBuy=0.247 regain=0.357 spread=20.1 tb=[('secrets', 0.75), ('market_share', 0.169)]
+3P PAYOUT-LOW   n= 1000 rounds=8.77 PZ=0.400 SING=0.374 MC=0.226 TW=0.010 redBlock=0.122 redBuy=0.232 regain=0.354 spread=23.9 tb=[('secrets', 0.77), ('market_share', 0.154)]
+3P PAYOUT-HIGH  n= 1000 rounds=8.65 PZ=0.450 SING=0.352 MC=0.198 TW=0.009 redBlock=0.164 redBuy=0.270 regain=0.335 spread=18.5 tb=[('secrets', 0.75), ('market_share', 0.16)]
+3P NO_PAYOUT    n= 1000 rounds=8.75 PZ=0.370 SING=0.356 MC=0.274 TW=0.009 redBlock=0.117 redBuy=0.241 regain=0.208 spread=20.3 tb=[('secrets', 0.763), ('market_share', 0.171)]
+3P MS-2         n= 1000 rounds=8.59 PZ=0.409 SING=0.291 MC=0.300 TW=0.011 redBlock=0.148 redBuy=0.263 regain=0.358 spread=20.5 tb=[('secrets', 0.755), ('market_share', 0.159)]
+3P MS+2         n= 1000 rounds=8.82 PZ=0.437 SING=0.425 MC=0.138 TW=0.012 redBlock=0.134 redBuy=0.242 regain=0.342 spread=19.9 tb=[('secrets', 0.758), ('market_share', 0.166)]
+3P NAIVE        n= 1000 rounds=8.70 PZ=0.372 SING=0.353 MC=0.275 TW=0.011 redBlock=0.157 redBuy=0.180 regain=0.167 spread=14.8 tb=[('secrets', 0.771), ('market_share', 0.164)]
+3P RANDOM_FOCUS n= 1000 rounds=8.82 PZ=0.392 SING=0.383 MC=0.225 TW=0.009 redBlock=0.147 redBuy=0.289 regain=0.332 spread=19.7 tb=[('secrets', 0.788), ('market_share', 0.129)]
+3P KAMIKAZE     n= 1000 rounds=8.73 PZ=0.422 SING=0.365 MC=0.213 TW=0.010 redBlock=0.139 redBuy=0.251 regain=0.351 spread=17.2 tb=[('secrets', 0.76), ('market_share', 0.159)]
+3P TIERS        n= 1000 rounds=8.67 PZ=0.393 SING=0.334 MC=0.273 TW=0.009 redBlock=0.062 redBuy=0.256 regain=0.380 spread=19.9 tb=[('secrets', 0.759), ('market_share', 0.159)]
+4P V035         n= 3000 rounds=8.59 PZ=0.685 SING=0.315 MC=0.000 TW=0.019 redBlock=0.108 redBuy=0.141 regain=0.000 spread=14.3 tb=[('secrets', 0.7647), ('sole_survivor', 0.0733)]
+4P V036         n= 3000 rounds=8.77 PZ=0.416 SING=0.368 MC=0.216 TW=0.002 redBlock=0.145 redBuy=0.267 regain=0.340 spread=19.5 tb=[('secrets', 0.7347), ('market_share', 0.1893)]
+4P L4-RATE      n= 1000 rounds=8.85 PZ=0.402 SING=0.390 MC=0.208 TW=0.001 redBlock=0.146 redBuy=0.261 regain=0.340 spread=20.0 tb=[('secrets', 0.729), ('market_share', 0.208)]
+4P L4-BOTH      n= 1000 rounds=8.86 PZ=0.401 SING=0.396 MC=0.203 TW=0.001 redBlock=0.146 redBuy=0.258 regain=0.346 spread=19.7 tb=[('secrets', 0.725), ('market_share', 0.211)]
+4P PAYOUT-LOW   n= 1000 rounds=8.81 PZ=0.397 SING=0.380 MC=0.223 TW=0.003 redBlock=0.131 redBuy=0.247 regain=0.343 spread=20.6 tb=[('secrets', 0.696), ('market_share', 0.232)]
+4P PAYOUT-HIGH  n= 1000 rounds=8.77 PZ=0.437 SING=0.342 MC=0.221 TW=0.002 redBlock=0.170 redBuy=0.280 regain=0.328 spread=15.5 tb=[('secrets', 0.729), ('market_share', 0.18)]
+4P NO_PAYOUT    n= 1000 rounds=8.85 PZ=0.352 SING=0.368 MC=0.280 TW=0.004 redBlock=0.125 redBuy=0.254 regain=0.209 spread=18.8 tb=[('secrets', 0.716), ('market_share', 0.206)]
+4P MS-2         n= 1000 rounds=8.69 PZ=0.384 SING=0.311 MC=0.305 TW=0.002 redBlock=0.155 redBuy=0.271 regain=0.352 spread=19.1 tb=[('secrets', 0.712), ('market_share', 0.204)]
+4P MS+2         n= 1000 rounds=8.93 PZ=0.406 SING=0.435 MC=0.159 TW=0.001 redBlock=0.140 redBuy=0.254 regain=0.335 spread=17.0 tb=[('secrets', 0.734), ('market_share', 0.179)]
+4P NAIVE        n= 1000 rounds=8.81 PZ=0.354 SING=0.364 MC=0.282 TW=0.002 redBlock=0.168 redBuy=0.194 regain=0.172 spread=15.7 tb=[('secrets', 0.712), ('market_share', 0.209)]
+4P RANDOM_FOCUS n= 1000 rounds=8.89 PZ=0.375 SING=0.382 MC=0.243 TW=0.001 redBlock=0.145 redBuy=0.296 regain=0.319 spread=19.9 tb=[('secrets', 0.776), ('market_share', 0.164)]
+4P KAMIKAZE     n= 1000 rounds=8.84 PZ=0.399 SING=0.382 MC=0.219 TW=0.001 redBlock=0.146 redBuy=0.263 regain=0.343 spread=18.8 tb=[('secrets', 0.73), ('market_share', 0.193)]
+4P TIERS        n= 1000 rounds=8.79 PZ=0.368 SING=0.352 MC=0.280 TW=0.001 redBlock=0.067 redBuy=0.262 regain=0.371 spread=15.4 tb=[('secrets', 0.689), ('market_share', 0.216)]
+2P guardrails: {'end_split_each_25_40': False, 'no_setup_trigger_above_55': True, 'mean_rounds_8_4_to_9_0': True, 'comparison_any_tie_below_50': False, 'regain_share_20_40': True, 'no_track_above_50_of_maxed': False, 'red_purchase_share_le_35': True, 'total_wipeout_le_c0': True, 'red_block_rate_delta': 0.047, 'red_purchase_share_delta': 0.1144, 'company_spread_le_c0': True, 'rounds_delta': -0.232, 'end_money_delta': 2.068, 'purchases_le_1_2x_no_payout': True}
+3P guardrails: {'end_split_each_25_40': False, 'no_setup_trigger_above_55': True, 'mean_rounds_8_4_to_9_0': True, 'comparison_any_tie_below_50': False, 'regain_share_20_40': True, 'no_track_above_50_of_maxed': False, 'red_purchase_share_le_35': True, 'total_wipeout_le_c0': True, 'red_block_rate_delta': 0.04, 'red_purchase_share_delta': 0.1187, 'company_spread_le_c0': False, 'rounds_delta': 0.057, 'end_money_delta': 1.925, 'purchases_le_1_2x_no_payout': True}
+4P guardrails: {'end_split_each_25_40': False, 'no_setup_trigger_above_55': True, 'mean_rounds_8_4_to_9_0': True, 'comparison_any_tie_below_50': False, 'regain_share_20_40': True, 'no_track_above_50_of_maxed': False, 'red_purchase_share_le_35': True, 'total_wipeout_le_c0': True, 'red_block_rate_delta': 0.0365, 'red_purchase_share_delta': 0.1253, 'company_spread_le_c0': False, 'rounds_delta': 0.178, 'end_money_delta': 1.86, 'purchases_le_1_2x_no_payout': True}
+wrote sim_results/v360_market_share_sweep.json
+
+real	1m0.274s
+user	0m0.198s
+sys	0m0.031s

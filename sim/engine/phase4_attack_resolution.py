@@ -3,17 +3,21 @@
 Passive Firewall, Two-Stage Defensive Blocking, Red / Blue / Green damage (incl. Aegis *Baffle Echo*
 and DTO *Slush Fund*), damage-conditional ``★`` faces (R2, R3, B1), Snowball Recycle, Contractor
 Expiration and the end-of-Phase-4 End Game Trigger check.
+
+v0.36.0 (``red_mode=MARKET_SHARE``): unblocked Red (Market Manipulation) lowers Market Share instead of
+costing Money; Stage 2 Generic shields may be the player's free choice (``any_shield_policy=FREE_CHOICE``);
+Market Collapse is checked after the Patient Zero / Total Wipeout logic.
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, AbstractSet, Callable, Dict, List, Optional, Tuple
 
-from sim.config import CubeColor, DieColor, EndGameReason, ShieldColor
+from sim.config import AnyShieldPolicy, CubeColor, DieColor, EndGameReason, RedVariantSet, ShieldColor
 from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
 from sim.entities import ArchetypeCode, CompanyCode, Die
 from sim.engine.state import ProductionRole
-from sim.engine import research_tracks
+from sim.engine import market_share, research_tracks
 
 if TYPE_CHECKING:
     from sim.engine.core import GameEngine
@@ -147,7 +151,8 @@ def _resolve_green_six_phase(
 
 def _pay_defense_l4(engine: GameEngine, player: PlayerState) -> int:
     """v0.35.0 Defense L4: +$1 per Red / Blue / Green Attack Cube blocked this Phase 4 (max $3), paid after
-    damage resolution so it cannot fund this round's Red ransom (OQ-9, INV-RT-DEF-L4-01)."""
+    damage resolution (OQ-9, INV-RT-DEF-L4-01): under RANSOM it cannot fund this round's Red ransom; under
+    MARKET_SHARE blocked Red still counts."""
     if player.is_patient_zero:
         return 0
     blocked = (getattr(player, "last_defense_breakdown", None) or {}).get("blocked", {})
@@ -183,6 +188,10 @@ def resolve_player_defense_and_wear(
     """
     active_ver = engine.state.active_version.version_str
     six_phase = malware_target_policy == MALWARE_POLICY_SIX_PHASE
+    if engine.config.is_market_share and engine.state.phase4_snapshot_round != engine.state.current_round:
+        # Snapshot once per Phase 4, before any player's Red resolves (bot rival projections)
+        engine.state.phase4_snapshot_round = engine.state.current_round
+        engine.state.phase4_market_share_start = {p.player_id: p.market_share for p in engine.state.players}
 
     # 1. Tally committed shields by color and generic ANY
     color_shields: Dict[ShieldColor, int] = {
@@ -216,14 +225,29 @@ def resolve_player_defense_and_wear(
             if aegis_color_override is not None:
                 chosen_color = aegis_color_override
             else:
-                chosen_color = player.bot.choose_aegis_override(
-                    player_state=player,
-                    qualifying_colors=qualifying,
-                    exited_cubes=exited_cubes,
-                    active_version_str=active_ver,
-                    rng=engine.rng,
-                    corruption_track=engine.state.corruption_track,
-                )
+                chosen_color = None
+                ms_hook = getattr(player.bot, "choose_aegis_override_market_share", None)
+                if engine.config.is_market_share and callable(ms_hook):
+                    # v0.36.0: Market Share-aware Baffle Echo valuation (remaining = after color shields)
+                    chosen_color = ms_hook(
+                        player_state=player,
+                        qualifying_colors=qualifying,
+                        game_state=engine.state,
+                        remaining={
+                            c: max(0, player_attacks.get(c, 0) - color_shields[ShieldColor(c.value)])
+                            for c in (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN)
+                        },
+                        attack=dict(player_attacks),
+                    )
+                if chosen_color is None:
+                    chosen_color = player.bot.choose_aegis_override(
+                        player_state=player,
+                        qualifying_colors=qualifying,
+                        exited_cubes=exited_cubes,
+                        active_version_str=active_ver,
+                        rng=engine.rng,
+                        corruption_track=engine.state.corruption_track,
+                    )
             if chosen_color in qualifying:
                 player_attacks[chosen_color] = max(0, player_attacks[chosen_color] - 1)
                 player.mark_ability_used(active_ver)
@@ -262,15 +286,38 @@ def resolve_player_defense_and_wear(
                     rem_blue = max(0, rem_blue - used)
                 elif c_color == CubeColor.GREEN:
                     rem_green = max(0, rem_green - used)
+    elif engine.config.any_shield_policy == AnyShieldPolicy.FREE_CHOICE:
+        # v0.36.0 free choice: the player picks the split; every available shield must block (INV-MS-ANY-SHIELD-01)
+        remaining = {CubeColor.RED: rem_red, CubeColor.BLUE: rem_blue, CubeColor.GREEN: rem_green}
+        if avail_any > 0 and sum(remaining.values()) > 0:
+            hook = getattr(player.bot, "choose_any_shield_allocation", None)
+            raw = hook(
+                player_state=player, remaining=dict(remaining), available_any=avail_any,
+                game_state=engine.state, attack=dict(player_attacks),
+            ) if callable(hook) else {}
+            fill_order = tuple(getattr(player.bot, "any_shield_fill_order", None)
+                               or (CubeColor.BLUE, CubeColor.RED, CubeColor.GREEN))
+            alloc = validate_any_shield_allocation(raw or {}, remaining, avail_any, fill_order)
+            for c_color, used in alloc.items():
+                any_allocated[c_color] += used
+                avail_any -= used
+            rem_red -= alloc[CubeColor.RED]
+            rem_blue -= alloc[CubeColor.BLUE]
+            rem_green -= alloc[CubeColor.GREEN]
     else:
+        ms_tiers = engine.config.is_market_share
         while avail_any > 0 and (rem_red + rem_blue + rem_green) > 0:
             # Tier 1: Blue Threat (prevent Secret loss)
             if rem_blue > 0:
                 rem_blue -= 1
                 avail_any -= 1
                 any_allocated[CubeColor.BLUE] += 1
-            # Tier 2: Red Threat if Cash < Red (prevent Unpaid Ransom Flat Leak)
-            elif rem_red > 0 and player.money < rem_red:
+            # Tier 2: Red Threat if Cash < Red (prevent Unpaid Ransom Flat Leak);
+            # under MARKET_SHARE: this Red would cause Market Collapse
+            elif rem_red > 0 and (
+                (player.market_share <= rem_red) if ms_tiers
+                else (player.money < rem_red * engine.config.red_ransom_per_cube)
+            ):
                 rem_red -= 1
                 avail_any -= 1
                 any_allocated[CubeColor.RED] += 1
@@ -291,26 +338,43 @@ def resolve_player_defense_and_wear(
     unblocked_blue = rem_blue
     unblocked_green = rem_green
 
-    # 6. Star face bonuses dependent on damage (R2, R3, B1)
+    # 6. Star face bonuses dependent on damage (R2, R3, B1). The v0.35 R2 / R3 bonuses exist only in the V035
+    # Red set (belt-and-braces: the Marketing cards use distinct codes R2_MKT / R3_MKT).
+    v035_red = engine.config.red_variant_set == RedVariantSet.V035
     for die in rolled_dice:
         if six_phase and die not in player.in_production_dice:
             continue  # only dice still In Production at Phase 4 (INV-SEQ-COMMIT-SYNC-01)
         face = die.effective_face or die.current_face
         if not face or not face.is_star:
             continue
-        if face.star_code == "R2" and unblocked_red == 0:
+        if face.star_code == "R2" and v035_red and unblocked_red == 0:
             player.money += 2
-        elif face.star_code == "R3" and exited_cubes.get(CubeColor.RED, 0) >= 3:
+        elif face.star_code == "R3" and v035_red and exited_cubes.get(CubeColor.RED, 0) >= 3:
             player.money += 1
         elif face.star_code == "B1" and exited_cubes.get(CubeColor.BLUE, 0) >= 1 and unblocked_blue == 0:
             player.money += 2
 
-    # 7. Red Ransomware Resolution (INV-RANSOM-FLAT-01)
+    # Red ledgers (both modes; telemetry only)
+    player.red_incoming_total += player_attacks[CubeColor.RED]
+    player.red_blocked_color_total += min(color_shields[ShieldColor.RED], player_attacks[CubeColor.RED])
+    player.red_blocked_any_total += any_allocated[CubeColor.RED]
+    player.red_unblocked_total += unblocked_red
+
+    # 7. Red resolution
     unpaid_ransom = 0
-    if unblocked_red > 0:
-        cash_paid = min(player.money, unblocked_red)
+    ms_before = player.market_share
+    ms_lost = 0
+    if engine.config.is_market_share:
+        # v0.36.0 Market Manipulation: -1 Market Share per unblocked Red cube; no Money / Secret change
+        # (INV-MS-RED-01); no Unpaid Ransom Leak.
+        if unblocked_red > 0:
+            ms_lost = -player.change_market_share(-unblocked_red, "red")
+    elif unblocked_red > 0:
+        # v0.35 Red Ransomware Resolution (INV-RANSOM-FLAT-01)
+        ransom_due = unblocked_red * engine.config.red_ransom_per_cube
+        cash_paid = min(player.money, ransom_due)
         player.money -= cash_paid
-        unpaid_ransom = unblocked_red - cash_paid
+        unpaid_ransom = ransom_due - cash_paid
 
     # Legacy Patch Ransom Absorption Flag (if explicitly enabled in GameConfig)
     if getattr(engine.state.config, "patch_ransom_absorption", False) and unpaid_ransom > 0 and player.patches > 0:
@@ -389,6 +453,9 @@ def resolve_player_defense_and_wear(
         "unpaid_ransom": unpaid_ransom,
         "flat_ransom_leak": bool(unpaid_ransom > 0),
         "ransom_secret_loss": ransom_secret_loss,
+        "market_share_before": ms_before,
+        "market_share_after": player.market_share,
+        "market_share_lost": ms_lost,
         "malware_fizzled": bool(unblocked_green > 0 and len(player.in_production_dice) == 0 and len(player.contractor_dice) == 0),
     }
 
@@ -498,18 +565,55 @@ def expire_contractors(engine: GameEngine, skip_pids: AbstractSet[int] = frozens
 
 
 def check_end_triggers_after_attacks(engine: GameEngine) -> None:
-    """End-of-Phase-4 trigger check (spec §4.2). Never sets Singularity."""
+    """End-of-Phase-4 trigger check (spec §4.2). Never sets Singularity.
+
+    v0.36.0: Market Collapse is checked after Patient Zero / Total Wipeout (INV-MS-COLLAPSE-PREC-01).
+    """
     state = engine.state
     if all(p.is_patient_zero for p in state.players):
         state.game_over = True
         state.is_final_round = False
         state.end_reason = EndGameReason.TOTAL_WIPEOUT
+        market_share.add_end_trigger(state, "patient_zero")
+        market_share.add_end_trigger(state, "total_wipeout")
     elif any(p.is_patient_zero for p in state.players):
+        market_share.add_end_trigger(state, "patient_zero")
         state.is_final_round = True
         if state.end_reason == EndGameReason.NONE:
             state.end_reason = EndGameReason.PATIENT_ZERO
         if state.final_round_trigger_phase is None:
             state.final_round_trigger_phase = 4
+    market_share.check_market_collapse(engine)
+
+
+def validate_any_shield_allocation(
+    raw: Dict[CubeColor, int],
+    remaining: Dict[CubeColor, int],
+    available_any: int,
+    fill_order: Tuple[CubeColor, ...] = (CubeColor.BLUE, CubeColor.RED, CubeColor.GREEN),
+) -> Dict[CubeColor, int]:
+    """Legalises a free-choice Generic shield split (INV-MS-ANY-SHIELD-01, E25).
+
+    Clamp each color to [0, remaining]; trim to ``available_any`` in Blue, Red, Green order; then back-fill in
+    ``fill_order`` until ``min(available_any, sum(remaining))`` shields are used (every available Generic shield
+    must block while unblocked cubes remain; the player chooses only the split).
+    """
+    colors = (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN)
+    alloc = {c: max(0, min(int(remaining.get(c, 0)), int((raw or {}).get(c, 0) or 0))) for c in colors}
+    budget = max(0, int(available_any))
+    for c in (CubeColor.BLUE, CubeColor.RED, CubeColor.GREEN):
+        alloc[c] = min(alloc[c], budget)
+        budget -= alloc[c]
+    target = min(max(0, int(available_any)), sum(max(0, int(remaining.get(c, 0))) for c in colors))
+    short = target - sum(alloc.values())
+    for c in tuple(fill_order) + colors:
+        if short <= 0:
+            break
+        add = min(short, int(remaining.get(c, 0)) - alloc[c])
+        if add > 0:
+            alloc[c] += add
+            short -= add
+    return alloc
 
 
 def execute_attack_resolution(

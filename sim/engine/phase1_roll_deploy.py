@@ -277,6 +277,7 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
 
         # Reset round star availability
         player.b2_available = False
+        player.r2_actions_available = 0  # v0.36.0 Ad Campaign (earned in Phase 3)
         player.y1_available = False
         player.p1_available = False
         player.p3_available = None

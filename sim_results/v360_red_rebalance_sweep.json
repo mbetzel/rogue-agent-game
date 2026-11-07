@@ -1,0 +1,498 @@
+{
+  "games_per_pod": 1500,
+  "seed": 42,
+  "results": [
+    {
+      "config": "V035",
+      "players": 2,
+      "games": 1500,
+      "mean_rounds": 8.894666666666666,
+      "median_rounds": 9.0,
+      "end_reasons": {
+        "total_wipeout": 0.161,
+        "patient_zero": 0.421,
+        "singularity": 0.418
+      },
+      "patient_zero_game_rate": 0.604,
+      "mean_final_secrets": 2.215,
+      "mean_final_money": 0.44066666666666665,
+      "market_buys_per_seat": {
+        "red": 0.16566666666666666,
+        "blue": 0.48933333333333334,
+        "green": 0.033,
+        "yellow": 0.44633333333333336,
+        "purple": 0.0
+      },
+      "red_share_of_market_buys": 0.1460476050543638,
+      "red_incoming_per_resolution": 2.0908050513022887,
+      "red_block_rate": 0.10443366489873729,
+      "red_blocked_by_color_shield_share": 0.056931140430146396,
+      "red_shield_value_per_resolution": 0.014009471191791634,
+      "ransom_paid_per_seat": 8.270666666666667,
+      "leak_rate_per_resolution": 0.32213891081294393,
+      "leaks_per_seat": 2.721,
+      "blue_unblocked_per_resolution": 0.6072217837411208,
+      "green_unblocked_per_resolution": 1.5646014206787688,
+      "company_win_rates": {
+        "AEGIS": 0.5445736434108527,
+        "DTO": 0.5687250996015937,
+        "HELIX": 0.4661508704061896,
+        "MERIDIAN": 0.5062370062370062,
+        "OMNIDYNE": 0.47101449275362317,
+        "PROMETHEUS": 0.4421157684630739
+      },
+      "company_win_spread_pts": 12.66093311385198
+    },
+    {
+      "config": "RANSOM2",
+      "players": 2,
+      "games": 1500,
+      "mean_rounds": 8.535333333333334,
+      "median_rounds": 9.0,
+      "end_reasons": {
+        "patient_zero": 0.503,
+        "total_wipeout": 0.197,
+        "singularity": 0.301
+      },
+      "patient_zero_game_rate": 0.7213333333333334,
+      "mean_final_secrets": 1.6763333333333332,
+      "mean_final_money": 0.194,
+      "market_buys_per_seat": {
+        "red": 0.11266666666666666,
+        "blue": 0.31666666666666665,
+        "green": 0.028666666666666667,
+        "yellow": 0.271,
+        "purple": 0.0
+      },
+      "red_share_of_market_buys": 0.1545496113397348,
+      "red_incoming_per_resolution": 2.018774382314694,
+      "red_block_rate": 0.1322718305889931,
+      "red_blocked_by_color_shield_share": 0.03332826053873079,
+      "red_shield_value_per_resolution": 0.010362483745123536,
+      "ransom_paid_per_seat": 10.498333333333333,
+      "leak_rate_per_resolution": 0.4524951235370611,
+      "leaks_per_seat": 3.7116666666666664,
+      "blue_unblocked_per_resolution": 0.584037711313394,
+      "green_unblocked_per_resolution": 1.5419782184655397,
+      "company_win_rates": {
+        "AEGIS": 0.5077519379844961,
+        "DTO": 0.6185258964143426,
+        "HELIX": 0.46131528046421666,
+        "MERIDIAN": 0.49584199584199584,
+        "OMNIDYNE": 0.4834368530020704,
+        "PROMETHEUS": 0.43313373253493015
+      },
+      "company_win_spread_pts": 18.53921638794125
+    },
+    {
+      "config": "REDDIE",
+      "players": 2,
+      "games": 1500,
+      "mean_rounds": 8.895333333333333,
+      "median_rounds": 9.0,
+      "end_reasons": {
+        "total_wipeout": 0.159,
+        "patient_zero": 0.423,
+        "singularity": 0.417
+      },
+      "patient_zero_game_rate": 0.604,
+      "mean_final_secrets": 2.2493333333333334,
+      "mean_final_money": 0.432,
+      "market_buys_per_seat": {
+        "red": 0.154,
+        "blue": 0.493,
+        "green": 0.034,
+        "yellow": 0.44633333333333336,
+        "purple": 0.0
+      },
+      "red_share_of_market_buys": 0.13660555884092254,
+      "red_incoming_per_resolution": 2.0901629641321073,
+      "red_block_rate": 0.10713409223914973,
+      "red_blocked_by_color_shield_share": 0.08,
+      "red_shield_value_per_resolution": 0.022451959120861776,
+      "ransom_paid_per_seat": 8.199,
+      "leak_rate_per_resolution": 0.32296886714280076,
+      "leaks_per_seat": 2.7283333333333335,
+      "blue_unblocked_per_resolution": 0.6062423548908968,
+      "green_unblocked_per_resolution": 1.5656394270607268,
+      "company_win_rates": {
+        "AEGIS": 0.560077519379845,
+        "DTO": 0.5727091633466136,
+        "HELIX": 0.46131528046421666,
+        "MERIDIAN": 0.49272349272349275,
+        "OMNIDYNE": 0.463768115942029,
+        "PROMETHEUS": 0.4471057884231537
+      },
+      "company_win_spread_pts": 12.56033749234599
+    },
+    {
+      "config": "PACKAGE",
+      "players": 2,
+      "games": 1500,
+      "mean_rounds": 8.537333333333333,
+      "median_rounds": 9.0,
+      "end_reasons": {
+        "patient_zero": 0.502,
+        "total_wipeout": 0.198,
+        "singularity": 0.3
+      },
+      "patient_zero_game_rate": 0.7193333333333334,
+      "mean_final_secrets": 1.6836666666666666,
+      "mean_final_money": 0.19766666666666666,
+      "market_buys_per_seat": {
+        "red": 0.10933333333333334,
+        "blue": 0.31566666666666665,
+        "green": 0.028,
+        "yellow": 0.271,
+        "purple": 0.0
+      },
+      "red_share_of_market_buys": 0.15101289134438306,
+      "red_incoming_per_resolution": 2.020394068657323,
+      "red_block_rate": 0.1343400627362664,
+      "red_blocked_by_color_shield_share": 0.04699895225265679,
+      "red_shield_value_per_resolution": 0.016494007718870607,
+      "ransom_paid_per_seat": 10.443333333333333,
+      "leak_rate_per_resolution": 0.45232581759089985,
+      "leaks_per_seat": 3.711333333333333,
+      "blue_unblocked_per_resolution": 0.5856185252894577,
+      "green_unblocked_per_resolution": 1.5422303473491774,
+      "company_win_rates": {
+        "AEGIS": 0.5106589147286822,
+        "DTO": 0.6284860557768924,
+        "HELIX": 0.4448742746615087,
+        "MERIDIAN": 0.5,
+        "OMNIDYNE": 0.4855072463768116,
+        "PROMETHEUS": 0.4311377245508982
+      },
+      "company_win_spread_pts": 19.734833122599422
+    },
+    {
+      "config": "V035",
+      "players": 3,
+      "games": 1500,
+      "mean_rounds": 8.689333333333334,
+      "median_rounds": 9.0,
+      "end_reasons": {
+        "patient_zero": 0.597,
+        "singularity": 0.338,
+        "total_wipeout": 0.065
+      },
+      "patient_zero_game_rate": 0.6953333333333334,
+      "mean_final_secrets": 2.5722222222222224,
+      "mean_final_money": 0.49133333333333334,
+      "market_buys_per_seat": {
+        "red": 0.16422222222222221,
+        "blue": 0.46244444444444444,
+        "green": 0.03666666666666667,
+        "yellow": 0.536,
+        "purple": 0.0
+      },
+      "red_share_of_market_buys": 0.13692792292014083,
+      "red_incoming_per_resolution": 2.0584434654919237,
+      "red_block_rate": 0.10422962684340913,
+      "red_blocked_by_color_shield_share": 0.05637132901941264,
+      "red_shield_value_per_resolution": 0.013589640902416232,
+      "ransom_paid_per_seat": 8.085777777777778,
+      "leak_rate_per_resolution": 0.31432385529301826,
+      "leaks_per_seat": 2.616222222222222,
+      "blue_unblocked_per_resolution": 0.5983713789881191,
+      "green_unblocked_per_resolution": 1.5386997730610066,
+      "company_win_rates": {
+        "AEGIS": 0.35741000467508177,
+        "DTO": 0.42587832047986296,
+        "HELIX": 0.3136482939632546,
+        "MERIDIAN": 0.3412903225806452,
+        "OMNIDYNE": 0.313179347826087,
+        "PROMETHEUS": 0.244338768115942
+      },
+      "company_win_spread_pts": 18.153955236392097
+    },
+    {
+      "config": "RANSOM2",
+      "players": 3,
+      "games": 1500,
+      "mean_rounds": 8.289333333333333,
+      "median_rounds": 9.0,
+      "end_reasons": {
+        "total_wipeout": 0.075,
+        "patient_zero": 0.683,
+        "singularity": 0.242
+      },
+      "patient_zero_game_rate": 0.7846666666666666,
+      "mean_final_secrets": 2.090888888888889,
+      "mean_final_money": 0.192,
+      "market_buys_per_seat": {
+        "red": 0.12044444444444445,
+        "blue": 0.31,
+        "green": 0.027333333333333334,
+        "yellow": 0.31866666666666665,
+        "purple": 0.0
+      },
+      "red_share_of_market_buys": 0.1551230681167716,
+      "red_incoming_per_resolution": 1.9794587092297016,
+      "red_block_rate": 0.13027625858925818,
+      "red_blocked_by_color_shield_share": 0.03993541442411195,
+      "red_shield_value_per_resolution": 0.01157529493407356,
+      "ransom_paid_per_seat": 10.274666666666667,
+      "leak_rate_per_resolution": 0.4448022206800833,
+      "leaks_per_seat": 3.560888888888889,
+      "blue_unblocked_per_resolution": 0.5799028452463567,
+      "green_unblocked_per_resolution": 1.4930187369882026,
+      "company_win_rates": {
+        "AEGIS": 0.38429172510518933,
+        "DTO": 0.43680377035132817,
+        "HELIX": 0.27602799650043747,
+        "MERIDIAN": 0.3445161290322581,
+        "OMNIDYNE": 0.3138586956521739,
+        "PROMETHEUS": 0.2416213768115942
+      },
+      "company_win_spread_pts": 19.518239353973396
+    },
+    {
+      "config": "REDDIE",
+      "players": 3,
+      "games": 1500,
+      "mean_rounds": 8.689333333333334,
+      "median_rounds": 9.0,
+      "end_reasons": {
+        "patient_zero": 0.599,
+        "singularity": 0.341,
+        "total_wipeout": 0.06
+      },
+      "patient_zero_game_rate": 0.6926666666666667,
+      "mean_final_secrets": 2.600888888888889,
+      "mean_final_money": 0.47888888888888886,
+      "market_buys_per_seat": {
+        "red": 0.15466666666666667,
+        "blue": 0.464,
+        "green": 0.035333333333333335,
+        "yellow": 0.5362222222222223,
+        "purple": 0.0
+      },
+      "red_share_of_market_buys": 0.1299477221807319,
+      "red_incoming_per_resolution": 2.059962606837607,
+      "red_block_rate": 0.1060486223662885,
+      "red_blocked_by_color_shield_share": 0.07494803765741533,
+      "red_shield_value_per_resolution": 0.021340811965811966,
+      "ransom_paid_per_seat": 8.047777777777778,
+      "leak_rate_per_resolution": 0.31517094017094016,
+      "leaks_per_seat": 2.6222222222222222,
+      "blue_unblocked_per_resolution": 0.5979967948717949,
+      "green_unblocked_per_resolution": 1.538888888888889,
+      "company_win_rates": {
+        "AEGIS": 0.3534361851332398,
+        "DTO": 0.4235218508997429,
+        "HELIX": 0.30577427821522307,
+        "MERIDIAN": 0.33806451612903227,
+        "OMNIDYNE": 0.31929347826086957,
+        "PROMETHEUS": 0.2561141304347826
+      },
+      "company_win_spread_pts": 16.740772046496033
+    },
+    {
+      "config": "PACKAGE",
+      "players": 3,
+      "games": 1500,
+      "mean_rounds": 8.293333333333333,
+      "median_rounds": 9.0,
+      "end_reasons": {
+        "total_wipeout": 0.074,
+        "patient_zero": 0.678,
+        "singularity": 0.248
+      },
+      "patient_zero_game_rate": 0.778,
+      "mean_final_secrets": 2.102888888888889,
+      "mean_final_money": 0.19088888888888889,
+      "market_buys_per_seat": {
+        "red": 0.11822222222222223,
+        "blue": 0.30866666666666664,
+        "green": 0.02666666666666667,
+        "yellow": 0.32022222222222224,
+        "purple": 0.0
+      },
+      "red_share_of_market_buys": 0.15278575531303848,
+      "red_incoming_per_resolution": 1.9798462093662383,
+      "red_block_rate": 0.13199663488502525,
+      "red_blocked_by_color_shield_share": 0.054599532611004885,
+      "red_shield_value_per_resolution": 0.01871026843960803,
+      "ransom_paid_per_seat": 10.187111111111111,
+      "leak_rate_per_resolution": 0.4457707575715515,
+      "leaks_per_seat": 3.5684444444444443,
+      "blue_unblocked_per_resolution": 0.5816561641173694,
+      "green_unblocked_per_resolution": 1.493545790189601,
+      "company_win_rates": {
+        "AEGIS": 0.3814866760168303,
+        "DTO": 0.4348757497857755,
+        "HELIX": 0.278652668416448,
+        "MERIDIAN": 0.3419354838709677,
+        "OMNIDYNE": 0.3172554347826087,
+        "PROMETHEUS": 0.24298007246376813
+      },
+      "company_win_spread_pts": 19.189567732200736
+    },
+    {
+      "config": "V035",
+      "players": 4,
+      "games": 1500,
+      "mean_rounds": 8.597333333333333,
+      "median_rounds": 9.0,
+      "end_reasons": {
+        "patient_zero": 0.663,
+        "singularity": 0.316,
+        "total_wipeout": 0.021
+      },
+      "patient_zero_game_rate": 0.718,
+      "mean_final_secrets": 2.9363333333333332,
+      "mean_final_money": 0.5378333333333334,
+      "market_buys_per_seat": {
+        "red": 0.16166666666666665,
+        "blue": 0.4255,
+        "green": 0.04133333333333333,
+        "yellow": 0.5698333333333333,
+        "purple": 0.0
+      },
+      "red_share_of_market_buys": 0.1349095966620306,
+      "red_incoming_per_resolution": 2.0451039773874418,
+      "red_block_rate": 0.10619582601141232,
+      "red_blocked_by_color_shield_share": 0.055963558612996185,
+      "red_shield_value_per_resolution": 0.013951140722794266,
+      "ransom_paid_per_seat": 8.0005,
+      "leak_rate_per_resolution": 0.31055925701594994,
+      "leaks_per_seat": 2.5636666666666668,
+      "blue_unblocked_per_resolution": 0.5866141732283464,
+      "green_unblocked_per_resolution": 1.514778921865536,
+      "company_win_rates": {
+        "AEGIS": 0.28158667972575907,
+        "DTO": 0.35678391959798994,
+        "HELIX": 0.20503597122302158,
+        "MERIDIAN": 0.21791044776119403,
+        "OMNIDYNE": 0.24417426545086118,
+        "PROMETHEUS": 0.1943081452404318
+      },
+      "company_win_spread_pts": 16.247577435755815
+    },
+    {
+      "config": "RANSOM2",
+      "players": 4,
+      "games": 1500,
+      "mean_rounds": 8.165333333333333,
+      "median_rounds": 8.0,
+      "end_reasons": {
+        "patient_zero": 0.747,
+        "singularity": 0.219,
+        "total_wipeout": 0.034
+      },
+      "patient_zero_game_rate": 0.806,
+      "mean_final_secrets": 2.5153333333333334,
+      "mean_final_money": 0.22083333333333333,
+      "market_buys_per_seat": {
+        "red": 0.117,
+        "blue": 0.2855,
+        "green": 0.03233333333333333,
+        "yellow": 0.3308333333333333,
+        "purple": 0.0
+      },
+      "red_share_of_market_buys": 0.15280801044841097,
+      "red_incoming_per_resolution": 1.95393975117361,
+      "red_block_rate": 0.1352000689521429,
+      "red_blocked_by_color_shield_share": 0.03514224240975376,
+      "red_shield_value_per_resolution": 0.010967728353998694,
+      "ransom_paid_per_seat": 10.199166666666667,
+      "leak_rate_per_resolution": 0.4393406732206387,
+      "leaks_per_seat": 3.4783333333333335,
+      "blue_unblocked_per_resolution": 0.5622802770351346,
+      "green_unblocked_per_resolution": 1.4646022356482749,
+      "company_win_rates": {
+        "AEGIS": 0.28795298726738494,
+        "DTO": 0.35829145728643214,
+        "HELIX": 0.17574511819116137,
+        "MERIDIAN": 0.22587064676616916,
+        "OMNIDYNE": 0.24569402228976697,
+        "PROMETHEUS": 0.20510304219823355
+      },
+      "company_win_spread_pts": 18.254633909527076
+    },
+    {
+      "config": "REDDIE",
+      "players": 4,
+      "games": 1500,
+      "mean_rounds": 8.594666666666667,
+      "median_rounds": 9.0,
+      "end_reasons": {
+        "patient_zero": 0.658,
+        "singularity": 0.318,
+        "total_wipeout": 0.024
+      },
+      "patient_zero_game_rate": 0.714,
+      "mean_final_secrets": 2.9535,
+      "mean_final_money": 0.5298333333333334,
+      "market_buys_per_seat": {
+        "red": 0.15283333333333332,
+        "blue": 0.42933333333333334,
+        "green": 0.0415,
+        "yellow": 0.5688333333333333,
+        "purple": 0.0
+      },
+      "red_share_of_market_buys": 0.1281621243885395,
+      "red_incoming_per_resolution": 2.0480817794298876,
+      "red_block_rate": 0.10894868709187398,
+      "red_blocked_by_color_shield_share": 0.07632412856496153,
+      "red_shield_value_per_resolution": 0.021778217741772563,
+      "ransom_paid_per_seat": 7.9275,
+      "leak_rate_per_resolution": 0.31293561486090626,
+      "leaks_per_seat": 2.5816666666666666,
+      "blue_unblocked_per_resolution": 0.5854057657730459,
+      "green_unblocked_per_resolution": 1.5166569021596397,
+      "company_win_rates": {
+        "AEGIS": 0.28256611165524,
+        "DTO": 0.3577889447236181,
+        "HELIX": 0.20503597122302158,
+        "MERIDIAN": 0.20796019900497512,
+        "OMNIDYNE": 0.24772036474164133,
+        "PROMETHEUS": 0.1987242394504416
+      },
+      "company_win_spread_pts": 15.906470527317651
+    },
+    {
+      "config": "PACKAGE",
+      "players": 4,
+      "games": 1500,
+      "mean_rounds": 8.18,
+      "median_rounds": 8.0,
+      "end_reasons": {
+        "patient_zero": 0.748,
+        "singularity": 0.22,
+        "total_wipeout": 0.032
+      },
+      "patient_zero_game_rate": 0.802,
+      "mean_final_secrets": 2.5215,
+      "mean_final_money": 0.2185,
+      "market_buys_per_seat": {
+        "red": 0.1125,
+        "blue": 0.28583333333333333,
+        "green": 0.0315,
+        "yellow": 0.3313333333333333,
+        "purple": 0.0
+      },
+      "red_share_of_market_buys": 0.14779943069848916,
+      "red_incoming_per_resolution": 1.9589550670421587,
+      "red_block_rate": 0.137108281211445,
+      "red_blocked_by_color_shield_share": 0.051486697965571204,
+      "red_shield_value_per_resolution": 0.01794796351561515,
+      "ransom_paid_per_seat": 10.0875,
+      "leak_rate_per_resolution": 0.4401874658484301,
+      "leaks_per_seat": 3.4908333333333332,
+      "blue_unblocked_per_resolution": 0.5629229540582573,
+      "green_unblocked_per_resolution": 1.4695262914547518,
+      "company_win_rates": {
+        "AEGIS": 0.30264446620959845,
+        "DTO": 0.3542713567839196,
+        "HELIX": 0.1736896197327852,
+        "MERIDIAN": 0.21840796019900496,
+        "OMNIDYNE": 0.24316109422492402,
+        "PROMETHEUS": 0.20608439646712462
+      },
+      "company_win_spread_pts": 18.058173705113436
+    }
+  ]
+}

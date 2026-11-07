@@ -1,0 +1,24 @@
+2P start 16 regain off: rounds 8.21  patient_zero 32%  singularity 19%  market_collapse 50%  
+2P start 19 regain off: rounds 8.55  patient_zero 35%  singularity 31%  market_collapse 34%  
+2P start 22 regain off: rounds 8.76  patient_zero 37%  singularity 40%  market_collapse 23%  
+2P start 25 regain off: rounds 8.88  patient_zero 38%  singularity 49%  market_collapse 13%  
+2P start 16 regain on : rounds 8.30  patient_zero 35%  singularity 21%  market_collapse 45%  
+2P start 19 regain on : rounds 8.57  patient_zero 38%  singularity 32%  market_collapse 31%  
+2P start 22 regain on : rounds 8.78  patient_zero 40%  singularity 44%  market_collapse 16%  
+2P start 25 regain on : rounds 8.88  patient_zero 41%  singularity 50%  market_collapse 9%  
+3P start 16 regain off: rounds 7.83  patient_zero 44%  singularity 11%  market_collapse 45%  
+3P start 19 regain off: rounds 8.10  patient_zero 45%  singularity 18%  market_collapse 36%  
+3P start 22 regain off: rounds 8.32  patient_zero 49%  singularity 28%  market_collapse 24%  
+3P start 25 regain off: rounds 8.46  patient_zero 51%  singularity 35%  market_collapse 14%  
+3P start 16 regain on : rounds 7.89  patient_zero 44%  singularity 12%  market_collapse 44%  
+3P start 19 regain on : rounds 8.20  patient_zero 46%  singularity 22%  market_collapse 32%  
+3P start 22 regain on : rounds 8.40  patient_zero 49%  singularity 30%  market_collapse 21%  
+3P start 25 regain on : rounds 8.50  patient_zero 51%  singularity 36%  market_collapse 13%  
+4P start 16 regain off: rounds 7.77  patient_zero 51%  singularity 10%  market_collapse 39%  
+4P start 19 regain off: rounds 8.01  patient_zero 53%  singularity 17%  market_collapse 29%  
+4P start 22 regain off: rounds 8.18  patient_zero 55%  singularity 25%  market_collapse 20%  
+4P start 25 regain off: rounds 8.31  patient_zero 56%  singularity 33%  market_collapse 11%  
+4P start 16 regain on : rounds 7.79  patient_zero 53%  singularity 12%  market_collapse 35%  
+4P start 19 regain on : rounds 8.02  patient_zero 55%  singularity 18%  market_collapse 27%  
+4P start 22 regain on : rounds 8.18  patient_zero 56%  singularity 25%  market_collapse 19%  
+4P start 25 regain on : rounds 8.30  patient_zero 57%  singularity 34%  market_collapse 9%  
