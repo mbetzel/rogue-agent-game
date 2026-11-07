@@ -2110,3 +2110,39 @@ The 46–47% is the worst case, where every bot chases the bonus. With one bonus
 **Decisions (User, 2026-11-07):** keep option A (starting Secrets 9 / 8 / 9; 2P 1st +2; 3–4P 1st +2, 2nd +1). Move the 2P Singularity guardrail to pass ≤ 43%, watch 43–48%, fail > 48%. The game-designer's notes on 2-Secret overturns and the 11–13% winner-changed baseline are adopted as watch / baseline values.
 
 **Status: approved for Phase B (RULES.md v0.37.0, glossary, `GameConfig()` default, web, PnP).**
+
+## 40. Phase 47 Reference Bot Assessment and Kamikaze Market Collapse Check (no rules change)
+
+Question (User, 2026-11-07): is the reference bot fit as the "competent player" check, what does it say about §36–§38, and does its win after its own Market Collapse trigger (195 of 1,200 v0.37 ref1 games) show a kamikaze strategy? Sources: `sim_results/reference_bot/validation_report.md`; game-designer report [docs/findings/v370_reference_bot_assessment.md](docs/findings/v370_reference_bot_assessment.md). Extra probe: the validation seeds replayed with per-round Market Share / Secrets telemetry, 3P, 1,200 games per cell, plus a Market Collapse-off counterfactual (scratch only).
+
+**Bot verdict: fit.** ref1 edge over fair share: +33 / +36 points at 3P (v0.36 / v0.37), well past the +10 gate. Mixed seats sit at fair share. Limits: it only chooses among moves the existing policies propose; rollouts are played by scripted policies; only Phase 4 shields and Phase 6 spending are searched.
+
+**§36–§38 re-judged:**
+- Blue-first stands, softened: ref still puts ~49% of blocks on Blue but blocks Red more (Red block rate 0.29 vs rivals 0.22 at v0.37).
+- §37 root cause stands: ref regains less Market Share than rivals (1.31 vs 2.06) and still wins.
+- "Tanking pays" was a bot artifact (see below).
+- Public Relations-first still loses (ref Public Relations Track 0.65–0.77).
+
+| Kamikaze check, 3P ref1 | v0.36 | v0.37 |
+|---|---|---|
+| ref at 0 when Market Collapse triggered (others at 0 too / alone) | 432 (390 / 42) | 375 (316 / 59) |
+| ...ref won | 236 | 195 |
+| ref Secrets lead at trigger in those wins | +3.8 (never behind) | +7.5 (behind 0.5%) |
+| ref wins when it alone triggers | 40% (17/42) | 37% (22/59) |
+| Market Share lost to Red, ref / rivals | 16.7 / 17.8 | 16.4 / 17.7 |
+| ref win with Market Collapse off (counterfactual) | 64.5% (−2.1) | 66.7% (−2.4) |
+| Singularity with Market Collapse off | 83% | 84% |
+
+**Takeaways:**
+1. No kamikaze strategy. The ref seat loses *less* Market Share than rivals, is usually at 0 together with everyone else (shared Red cubes), and wins those games because it already leads on Secrets. Alone at 0 it wins only at about fair share.
+2. Market Collapse is not what the ref's edge depends on (−2.4 points when switched off). Collapse is doing its pacing job: without it Singularity takes ~83% of endings.
+3. Watch item: under v0.37 the ref is strictly lowest on Market Share the round before trigger in 43% of its at-0 games (v0.36: 26%). It trades Public Relations for Secrets, a legitimate trade that confirms §37.
+4. Archetypes: VentureGreed leads (51% at 3P v0.37) on economy and Blue defense, not a rule exploit; the ref seat holds it to 32%. SecOpsTurtle rises 26 → 39% under the Market Leader Bonus (intended). RecklessSaboteur Patient Zero 10% at 3P. No other degenerate pattern.
+
+**Candidate levers (none decided):** A. no change (recommended); B. a larger 3–4P Market Leader Bonus gap ([TUNE]); C. cheaper Public Relations regain ([TUNE], small expected effect); D. a Secrets penalty at 0 Market Share (new rule and likely new term, needs User approval; Unpaid Ransom Leak risk); E. remove Market Collapse (shown only as a counterfactual; breaks pacing).
+
+**Open questions for User:** adopt one Mixed seat in every sweep and a ref1 edge check on every rule candidate? Close the kamikaze concern (lever A)? Add "Public Relations push" and "Market Share dump" candidates to the bot portfolio?
+
+**Status: analysis recorded (game-designer, 2026-11-07). No RULES.md, PnP, web or sim change.**
+
+**Decisions (User, 2026-11-07):** adopt the roster rule (one Mixed seat in every routine sweep; ref1, 3P, 1,200 games, as the edge check on every rule candidate). Close the kamikaze Market Collapse concern with lever A (no rule change). Add "Public Relations push" and "Market Share dump" as reference-bot candidates so future no-exploit results cover those lines.
