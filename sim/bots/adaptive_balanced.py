@@ -17,6 +17,16 @@ class AdaptiveBalancedBot(BaseBot):
     """Balanced bot: monitors threat levels, hedges shields, patches worn dice, and buys counters."""
 
     research_focus = ('TRIAGE', 'DEFENSE', 'RELEASE', 'PATENT')  # v0.35.0 research-aware policy
+    pr_push_capable = True  # lever A windows (inert unless config.bot_pr_push)
+
+    def choose_any_shield_allocation(self, player_state, remaining, available_any, game_state, attack):
+        """Lever A: Generic shield split in the push / dump window (start-of-Phase-4 Market Share)."""
+        from sim.bots import pr_push_policy as prp
+
+        w = prp.window(self, player_state, game_state, phase4=True, hook="phase4")
+        if w == prp.NONE:
+            return super().choose_any_shield_allocation(player_state, remaining, available_any, game_state, attack)
+        return prp.windowed_any_shield_allocation(w, player_state, remaining, available_any, game_state, attack, self)
 
     def __init__(self, bot_id: int) -> None:
         super().__init__(bot_id, name="AdaptiveBalancedBot")
@@ -308,9 +318,10 @@ class AdaptiveBalancedBot(BaseBot):
             plan.use_omnidyne_override = True
             plan.use_phreaker_ability = True
 
-        preferred_colors = [DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]
-        if threats[CubeColor.RED] > threats[CubeColor.BLUE]:
-            preferred_colors = [DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW]
+        from sim.bots import pr_push_policy as prp
+
+        windowed = prp.window(self, player_state, game_state, hook="prometheus") != prp.NONE
+        preferred_colors = prp.preferred_colors(self, player_state, game_state, threats, hook="prometheus")
 
         is_prometheus = has_company_override(player_state, CompanyCode.PROMETHEUS, legacy_bridge_enabled(game_state))
         if (
@@ -318,7 +329,8 @@ class AdaptiveBalancedBot(BaseBot):
             and player_state.is_ability_available(active_ver)
         ):
             discounted_colors = []
-            candidate_pool = preferred_colors + [DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]
+            candidate_pool = list(preferred_colors) if windowed else (
+                preferred_colors + [DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW])
             for c in candidate_pool:
                 if c not in [dc[0] for dc in discounted_colors] and game_state.market.get(c, 0) > 0:
                     base_cost = game_state.get_market_die_cost(c)
@@ -407,9 +419,7 @@ class AdaptiveBalancedBot(BaseBot):
                 current_money -= purple_cost
                 purchases += 1
 
-            preferred_colors = [DieColor.BLUE, DieColor.RED, DieColor.GREEN, DieColor.YELLOW]
-            if threats[CubeColor.RED] > threats[CubeColor.BLUE]:
-                preferred_colors = [DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW]
+            preferred_colors = prp.preferred_colors(self, player_state, game_state, threats, hook="market")
 
             for color in preferred_colors:
                 if purchases >= game_state.config.max_market_purchases_per_turn:

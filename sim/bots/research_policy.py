@@ -173,6 +173,30 @@ def apply_research_policy(bot: Any, plan: Any, player: PlayerState, state: GameS
             plan.prometheus_discount_die_color = None
     if getattr(bot, "research_aware", True):
         ms_pol = getattr(bot, "market_share_policy", None)
+        from sim.bots import pr_push_policy as prp  # lazy (H-LA-4)
+
+        w = prp.window(bot, player, state, hook="research")
+        if w != prp.NONE and getattr(cfg, "is_share_regain", False):
+            # Lever A (spec §4.2): push = one Public Relations Track step, regain, other tracks; dump = no
+            # Public Relations Track and no regain. Push without an affordable step falls through with the
+            # push policy (H-LA-3).
+            focus = policy_for_bot(bot, state, rng).focus_order
+            ups = None
+            regain = 0
+            if w == prp.PUSH:
+                p = cfg.bot_pr_push_params
+                if (player.patent_level < p.push_pr_cap and player.research_tokens <= p.push_max_research
+                        and player.research_tokens >= cfg.track_step_costs[player.patent_level]):
+                    ups, regain = prp.ordered_research(player, state, True, focus, pr_cap=p.push_pr_cap)
+                else:
+                    ms_pol = prp.PR_PUSH_POLICY
+            else:
+                ups, regain = prp.ordered_research(player, state, False, focus)
+            if ups is not None:
+                plan.track_upgrades = ups
+                plan.patent_filings = 0
+                plan.share_regain = regain
+                return plan
         upgrades, filings, regain = plan_research3(policy_for_bot(bot, state, rng), player, state, cfg, ms_pol)
         plan.track_upgrades = upgrades
         plan.patent_filings = filings

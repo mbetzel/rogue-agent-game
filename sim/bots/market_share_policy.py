@@ -341,7 +341,9 @@ def apply_market_share_policy(bot: Any, plan: Any, player: "PlayerState", state:
     cfg = state.config
     if not getattr(cfg, "is_market_share", False) or player.market_share is None:
         return plan
-    pol = policy_for(bot)
+    from sim.bots import pr_push_policy as prp  # lazy (H-LA-4)
+
+    pol = prp.effective_policy(bot, player, state, hook="nudge")  # lever A window (NONE = policy_for(bot))
     aware = is_aware(state)
     cushion = 0  # Ad Campaign: used whenever affordable (balance iteration 1, B4)
 

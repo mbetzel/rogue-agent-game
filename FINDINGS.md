@@ -2157,3 +2157,41 @@ Question (User, 2026-11-07): is the reference bot fit as the "competent player" 
 | 13 | 78.6 | +9.5 | 77.6 | 321 (51) | 75% | 40% |
 
 Both lines contribute (overlapping, not additive). Push is undervalued Red blocking and Public Relations, and it pays mainly by keeping the ref off 0 when Market Collapse triggers. Dump trades Market Share for Secrets and is stronger with Collapse off, so it is not kamikaze. §40 "no kamikaze" and §38 "Public Relations-first loses" both stand; §38 is refined to "situational Public Relations wins". Candidate levers (none decided): A bot update only (recommended); B larger Market Leader Bonus gap [TUNE]; C stronger Red [TUNE]; D Secrets penalty at 0 Market Share (new term, needs User approval). No RULES.md, PnP, web or sim change.
+
+## 41. Phase 48 Lever A Post-Telemetry Assessment (bot-only, no rules change)
+
+Question (User, 2026-11-07): did lever A (situational Public Relations push / Market Share dump for AdaptiveBalanced, Blue-safe split, default `PrPushParams` kept by User decision) make the roster play closer to competent? Should `bot_pr_push=True` become the default roster, and which scope should the ref1 edge check use? Is VentureGreed's >40% win rate a rules or a bot problem? Sources: `sim_results/lever_a/sweep/sweep_report.md`, `docs/findings/lever_a_regression_diagnosis.md`; report [docs/findings/v370_lever_a_assessment.md](docs/findings/v370_lever_a_assessment.md). Extra probes (scratch, 4 procs): ref1 3P switch off on the current tree (300 games, 300/300 identical to the 13-member file), ref1 2P switch off (600 games, heads-up).
+
+**Correction:** the sweep compared ref1 "on" with the 11-member 69.1% file. The true switch-off baseline (13 members) is **78.6%**.
+
+| ref1, 3P, 1,200 | ref win % | edge | Δ vs off |
+|---|---|---|---|
+| 13 members, off | 78.6 | +45 | — |
+| on, scope `all` | 77.1 | +44 | −1.5 |
+| on, scope `non_reference` | 71.2 | +38 | −7.4 |
+
+| Check | Off | On | Result |
+|---|---|---|---|
+| AdaptiveBalanced 2P / 3P / 4P | 39.1 / 17.2 / 8.8 | 51.2 / 26.5 / 16.1 | PASS |
+| Patient Zero Δ 2P / 3P / 4P | — | −0.3 / −0.3 / −1.3 | PASS (≤ +2) |
+| Mixed seat 3P | 34.2 | 32.7 | PASS |
+| Max archetype 3P | 51.2 (Vent) | 48.8 (Vent) | FAIL, pre-existing |
+
+**Verdict: lever A met its goal (partial on the edge).** Every guardrail passes at 2/3/4P, AdaptiveBalanced gains 7–12 points, and the edge fell +45 → +38 (inside the scoping estimate +37 to +42). It stopped short of +35 because only AdaptiveBalanced learned the lines (the ref faces it in 40% of pods), the Phase 6 comfortable-leader dump is out of scope, and the search keeps a real tactical edge. Scope `all` hides the drop because the ref's fallback and rollouts improve too. The reference bot remains a valid competent-player check (2P heads-up 88%, Mixed at fair share).
+
+**Proposed roster rule (needs User sign-off):** rule probes and routine sweeps use `bot_pr_push=True` with default `PrPushParams`, the `_bot_classes()` rotation and one Mixed seat; the edge check is ref1, 3P, 1,200 games, `bot_pr_push_scope="non_reference"`, reference 71.2% (+38), flag at ±5 points or below +10. Historical fixtures pin `bot_pr_push=False`.
+
+**VentureGreed (3P 51.2 off / 48.8 on; 2P 59.0): a bot problem.** Heads-up against the ref at 2P it wins 20% (ref 80%, n = 120); with the ref at a 3P table it falls to 29–32%. It is the ref's hardest opponent (ref 59% with it vs 79% without), so its economy line (Yellow-first, paid Secrets with no cushion, light shielding) is strong, not degenerate; the other scripts answer it badly. Watch item: 2P spread. Candidate levers (none decided): V1 teach another archetype VG's paid-Secret timing [TUNE-BOT]; V2 re-define the 40% guardrail to also require ref1 holding the archetype below fair share; V3 add a second competent seat to the rotation; V4 dearer Money → Secret actions [TUNE] (scratch B2-only probe inconclusive); V5 larger 2P Market Leader Bonus [TUNE]. No new game term proposed.
+
+**Follow-up:** `scripts/run_reference_bot_validation.py` output names include `_params` but not the `--pr-params` values, so runs with different overrides overwrite each other. Add a hash or `key=value` tag (engineering).
+
+**Open questions for User:** adopt the roster rule above? Close Phase 48 at +38 or open a Phase 6 comfortable-leader dump lever? Accept the VentureGreed "bot problem" diagnosis and pick V1/V2/V3? Re-baseline sweep reports to the 13-member 78.6% file? Schedule the script naming fix?
+
+**Status: analysis recorded (game-designer, 2026-11-07). No RULES.md, PnP, web or sim change.**
+
+**Decisions (User, 2026-11-07):**
+1. Roster rule adopted: every rule probe and routine sweep uses `bot_pr_push=True` with default `PrPushParams`, the `_bot_classes()` rotation and one Mixed seat. The edge check on every rule candidate is ref1, 3P, 1,200 games, seeds `42+300000+idx`, `bot_pr_push_scope="non_reference"`, reference value 71.2% (+38). Flag if it moves more than ±5 points or falls below +10. Historical fixtures pin `bot_pr_push=False`.
+2. Phase 48 closed at +38; the Phase 6 comfortable-leader dump is not pursued now.
+3. VentureGreed diagnosis accepted (bot problem). Lever V2 adopted: the 40% archetype guardrail fails only if ref1 also cannot hold that archetype below fair share. V1 kept for later; V3–V5 not pursued.
+4. Sweep reports re-baseline to the 13-member switch-off ref1 value (78.6%).
+5. Fix `run_reference_bot_validation.py` output naming so `--pr-params` runs don't overwrite each other.
