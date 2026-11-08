@@ -155,17 +155,6 @@ class BaseBot:
         self.bot_id = bot_id
         self.name = name
 
-    def choose_hotfix_rerolls(
-        self,
-        player_state: PlayerState,
-        rolled_dice: List[Die],
-        staging_cubes: Dict[CubeColor, int],
-        stuck_cubes: Dict[CubeColor, int],
-        rng: random.Random,
-    ) -> List[int]:
-        """Returns the indices of rolled dice to reroll using available patch tokens (legacy v0.5)."""
-        return []
-
     def choose_contractor_hires(
         self,
         player_state: PlayerState,
@@ -189,59 +178,6 @@ class BaseBot:
     ) -> List[int]:
         """Returns indices of active_dice to reroll (must be unlocked)."""
         return []
-
-    def choose_debug_unlocks(
-        self,
-        player_state: PlayerState,
-        active_dice: List[Die],
-        staging_cubes: Dict[CubeColor, int],
-        stuck_cubes: Dict[CubeColor, int],
-        directive_code: str,
-        rng: random.Random,
-    ) -> List[int]:
-        """DEPRECATED in v0.23.0. Phase 1 debug unlocks have been removed.
-
-        Always returns an empty list. All wrench spending decisions are consolidated
-        into choose_fast_patches() in Phase 3 Part 3B.
-        """
-        return []
-
-    def choose_glitch_demotion(
-        self,
-        player_state: PlayerState,
-        glitch_die: Optional[Die] = None,
-        active_dice: Optional[List[Die]] = None,
-        validated_commitments: Optional[Dict[int, ShieldColor]] = None,
-        rng: Optional[random.Random] = None,
-    ) -> Optional[Die]:
-        """Chooses a die to sacrifice/demote for Glitch Backlash Routine.
-
-        Default heuristic per RULES.md (v0.19.0):
-        1. Sacrifice a White contractor die first (if available in player_state.contractor_dice).
-        2. Else demote lowest cost uncommitted die in player_state.ready_dice, Gray first.
-        """
-        if player_state.contractor_dice:
-            return player_state.contractor_dice[0]
-
-        if not player_state.ready_dice:
-            return None
-
-        commitments = validated_commitments or {}
-        dice_pool = active_dice or player_state.ready_dice
-
-        def get_demotion_key(d: Die) -> Tuple[int, int, int]:
-            is_committed = 0
-            if d in dice_pool:
-                try:
-                    idx = dice_pool.index(d)
-                    if idx in commitments:
-                        is_committed = 1
-                except ValueError:
-                    pass
-            is_gray = 0 if d.color == DieColor.GRAY else 1
-            return (is_committed, is_gray, getattr(d, "cost", 0))
-
-        return min(player_state.ready_dice, key=get_demotion_key)
 
     # =========================================================================
     # Company Institutional Overrides (Once-per-Version)
@@ -397,15 +333,6 @@ class BaseBot:
                     best_choice = (idx, f)
         return best_choice
 
-    def choose_prometheus_override(
-        self,
-        player_state: PlayerState,
-        game_state: Any,
-        rng: random.Random,
-    ) -> str:
-        """Returns 'DISCOUNT' or 'CASH' for Prometheus Algorithmic Arbitrage."""
-        return "DISCOUNT" if player_state.money >= 2 else "CASH"
-
     # =========================================================================
     # White Hat Signature Protocols (Purple Face 6)
     # =========================================================================
@@ -424,11 +351,8 @@ class BaseBot:
     # =========================================================================
     choose_operator_ability = choose_meridian_override
     choose_phreaker_ability = choose_omnidyne_override
-    choose_acoustic_ability = choose_aegis_override
-    choose_spook_ability = choose_dto_override
     choose_prodigy_ability = choose_helix_override
     choose_prodigy_face_override = choose_helix_face_override
-    choose_cipher_ability = choose_prometheus_override
 
     def choose_malware_sacrifice(
         self,
@@ -507,45 +431,6 @@ class BaseBot:
             elif face.has_shield_option and blue_threat > 0:
                 assignments[idx] = ShieldColor.BLUE
         return assignments
-
-    def choose_shield_wear_order(
-        self,
-        player_state: PlayerState,
-        color: ShieldColor,
-        assigned_dice: List[Die],
-        cubes_to_absorb: Optional[int] = None,
-    ) -> List[Die]:
-        """Returns assigned shield dice ordered by absorption priority.
-
-        Default heuristics:
-        1. Prioritize White contractor dice (immune to wear, returns to supply at round end).
-        2. Prioritize B3 (Air-Gapped Backup) next if other ready dice are available to be sacrificed.
-        3. Lowest VP die next (preserves valuable dice in Ready zone).
-        4. Lowest cost die next.
-        """
-        def wear_priority_key(d: Die) -> Tuple[int, int, int, int]:
-            is_white = 0 if d.color == DieColor.WHITE else 1
-            face = d.effective_face or d.current_face
-            has_other_ready = any(rd.die_id != d.die_id for rd in player_state.ready_dice)
-            is_b3 = 0 if (face and face.star_code == "B3" and has_other_ready) else 1
-            return (is_white, is_b3, d.vp, d.cost)
-
-        return sorted(assigned_dice, key=wear_priority_key)
-
-    def choose_b3_sacrificial_die(
-        self,
-        player_state: PlayerState,
-        other_ready_dice: List[Die],
-    ) -> Die:
-        """Picks a sacrificial ready die to move to Unpatched instead of B3 when B3 blocks damage.
-
-        Default heuristic: picks lowest VP die, preferring Gray starter dice.
-        """
-        def sacrifice_key(d: Die) -> Tuple[int, int, int]:
-            is_gray = 0 if d.color == DieColor.GRAY else 1
-            return (is_gray, d.vp, d.cost)
-
-        return min(other_ready_dice, key=sacrifice_key)
 
     def choose_dice_to_glitch(
         self,
@@ -803,15 +688,6 @@ class BaseBot:
 
         scored_candidates.sort(key=lambda item: item[0])
         return [d for _, d in scored_candidates[:count]]
-
-    def choose_fast_patches(
-        self,
-        player_state: PlayerState,
-        game_state: GameState,
-        rng: random.Random,
-    ) -> List[int]:
-        """Deprecated in v0.29.0: Fast-patching is excised (INV-FASTPATCH-EXCISE-01)."""
-        return []
 
     def take_operations_actions(
         self,

@@ -80,7 +80,7 @@ class SecOpsTurtleBot(BaseBot):
     ) -> bool:
         return any(d.is_locked for d in active_dice)
 
-    def choose_acoustic_ability(
+    def choose_aegis_override(
         self,
         player_state: PlayerState,
         qualifying_colors: List[CubeColor],
@@ -97,7 +97,7 @@ class SecOpsTurtleBot(BaseBot):
             return CubeColor.RED
         return qualifying_colors[0]
 
-    def choose_spook_ability(
+    def choose_dto_override(
         self,
         player_state: PlayerState,
         secrets_at_risk: int,
@@ -111,22 +111,6 @@ class SecOpsTurtleBot(BaseBot):
 
     choose_meridian_override = choose_operator_ability
     choose_helix_override = choose_prodigy_ability
-    choose_aegis_override = choose_acoustic_ability
-    choose_dto_override = choose_spook_ability
-
-    def choose_debug_unlocks(
-        self,
-        player_state: PlayerState,
-        active_dice: List[Die],
-        staging_cubes: Dict[CubeColor, int],
-        stuck_cubes: Dict[CubeColor, int],
-        directive_code: str,
-        rng: random.Random,
-    ) -> List[int]:
-        """DEPRECATED in v0.23.0. Delegated to BaseBot (always returns [])."""
-        return super().choose_debug_unlocks(
-            player_state, active_dice, staging_cubes, stuck_cubes, directive_code, rng
-        )
 
     def choose_yahtzee_rerolls(
         self,
@@ -146,24 +130,6 @@ class SecOpsTurtleBot(BaseBot):
                 continue
             face = die.current_face
             if face and (face.is_glitch or (not face.is_shield and not face.has_shield_option)):
-                rerolls.append(idx)
-        return rerolls
-
-    def choose_hotfix_rerolls(
-        self,
-        player_state: PlayerState,
-        rolled_dice: List[Die],
-        staging_cubes: Dict[CubeColor, int],
-        stuck_cubes: Dict[CubeColor, int],
-        rng: random.Random,
-    ) -> List[int]:
-        rerolls: List[int] = []
-        available_patches = player_state.patches
-        for idx, die in enumerate(rolled_dice):
-            if available_patches <= len(rerolls):
-                break
-            face = die.current_face
-            if face and not face.is_shield and not face.has_shield_option:
                 rerolls.append(idx)
         return rerolls
 

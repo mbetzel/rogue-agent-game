@@ -1,0 +1,45 @@
+== v036_ref1_C_s  win 77.8±2.4  ends market_collapse 72.3 singularity 22.6 patient_zero 5.1  rounds 8.71
+   ref at0@MC 471 (won 364) alone 50 (won 33)  lead@trigger +1.65  behind 72
+   lostRed ref/riv 16.07/17.82  regained 0.44/1.44  PR 0.97/0.38  finalMS 2.37/1.62
+   MLB places 1:60.2 2:28.0 3:11.8  blocks R/B/G 32.2/51.3/16.5  Redblockrate 0.26
+   choice P4 push 14.8 dump 10.0 | P6 push 6.8 dump 3.3
+== v037_ref1_A_nocollap  win 68.0±2.6  ends singularity 82.9 patient_zero 15.6 total_wipeout 1.5  rounds 9.75
+   ref at0@MC 0 (won 0) alone 0 (won 0)  lead@trigger +0.00  behind 0
+   lostRed ref/riv 16.08/18.07  regained 0.97/2.12  PR 1.03/0.20  finalMS 2.89/2.05
+   MLB places 1:71.4 2:19.9 3:6.3 None:2.3  blocks R/B/G 41.9/47.2/11.0  Redblockrate 0.31
+   choice P4 push 20.3 dump 0.0 | P6 push 8.4 dump 0.0
+== v037_ref1_A_s  win 74.2±2.5  ends market_collapse 58.2 singularity 34.4 patient_zero 7.2 total_wipeout 0.1  rounds 8.99
+   ref at0@MC 254 (won 137) alone 35 (won 14)  lead@trigger +1.04  behind 66
+   lostRed ref/riv 15.54/17.82  regained 0.98/2.01  PR 0.95/0.21  finalMS 3.44/2.19
+   MLB places 1:77.6 2:17.0 3:5.2 None:0.2  blocks R/B/G 41.9/46.9/11.3  Redblockrate 0.33
+   choice P4 push 20.2 dump 0.0 | P6 push 7.2 dump 0.0
+== v037_ref1_B_nocollap  win 78.6±2.3  ends singularity 84.3 patient_zero 15.7  rounds 9.75
+   ref at0@MC 0 (won 0) alone 0 (won 0)  lead@trigger +0.00  behind 0
+   lostRed ref/riv 16.56/18.02  regained 0.85/2.16  PR 0.64/0.18  finalMS 2.29/2.14
+   MLB places 1:63.8 2:26.4 3:9.8  blocks R/B/G 31.3/52.0/16.7  Redblockrate 0.24
+   choice P4 push 0.0 dump 22.1 | P6 push 0.0 dump 10.1
+== v037_ref1_B_s  win 76.3±2.4  ends patient_zero 6.3 market_collapse 58.2 singularity 35.4 total_wipeout 0.1  rounds 8.99
+   ref at0@MC 446 (won 311) alone 94 (won 46)  lead@trigger +2.54  behind 49
+   lostRed ref/riv 16.16/17.73  regained 0.87/2.08  PR 0.62/0.20  finalMS 2.71/2.35
+   MLB places 1:63.0 2:25.6 3:11.3 None:0.1  blocks R/B/G 34.0/49.5/16.5  Redblockrate 0.28
+   choice P4 push 0.0 dump 14.5 | P6 push 0.0 dump 9.7
+== v037_ref1_C_nocollap  win 77.6±2.4  ends singularity 83.8 patient_zero 16.1 total_wipeout 0.2  rounds 9.75
+   ref at0@MC 0 (won 0) alone 0 (won 0)  lead@trigger +0.00  behind 0
+   lostRed ref/riv 16.01/18.06  regained 0.66/2.12  PR 0.94/0.20  finalMS 2.65/2.06
+   MLB places 1:72.0 2:19.5 3:8.0 None:0.5  blocks R/B/G 36.9/49.5/13.6  Redblockrate 0.28
+   choice P4 push 14.2 dump 13.8 | P6 push 7.3 dump 7.5
+== v037_ref1_C_s  win 78.6±2.3  ends market_collapse 57.7 singularity 35.8 patient_zero 6.5  rounds 9.00
+   ref at0@MC 321 (won 225) alone 51 (won 26)  lead@trigger +2.13  behind 48
+   lostRed ref/riv 15.51/17.79  regained 0.68/2.02  PR 0.89/0.20  finalMS 3.16/2.24
+   MLB places 1:74.8 2:18.6 3:6.5 None:0.1  blocks R/B/G 39.6/47.3/13.1  Redblockrate 0.32
+   choice P4 push 14.9 dump 8.8 | P6 push 6.6 dump 7.3
+== v037_ref1_D11_nocollap  win 66.7±2.7  ends patient_zero 15.3 singularity 84.3 total_wipeout 0.3  rounds 9.75
+   ref at0@MC 0 (won 0) alone 0 (won 0)  lead@trigger +0.00  behind 0
+   lostRed ref/riv 16.85/17.99  regained 1.31/2.12  PR 0.66/0.19  finalMS 2.46/2.14
+   MLB places 1:64.8 2:25.8 3:8.9 None:0.6  blocks R/B/G 36.3/49.2/14.5  Redblockrate 0.27
+   choice P4 push 0.0 dump 0.0 | P6 push 0.0 dump 0.0
+== v037_ref1_D11_s  win 69.1±2.6  ends patient_zero 7.2 market_collapse 57.2 singularity 35.4 total_wipeout 0.2  rounds 9.00
+   ref at0@MC 375 (won 195) alone 59 (won 22)  lead@trigger +1.22  behind 93
+   lostRed ref/riv 16.39/17.72  regained 1.31/2.06  PR 0.65/0.20  finalMS 2.92/2.34
+   MLB places 1:63.9 2:25.4 3:10.5 None:0.2  blocks R/B/G 36.2/49.0/14.8  Redblockrate 0.29
+   choice P4 push 0.0 dump 0.0 | P6 push 0.0 dump 0.0
