@@ -6,6 +6,9 @@ Public Relations Track level, Market Share, Market Leader Bonus place, Market Co
 Telemetry is captured by wrapping phase4 resolve_player_attack for the top-level engine only
 (search rollouts on clones are ignored).
 
+Defaults (FINDINGS §41 roster rule): ``--pr-push on --pr-push-scope non_reference``; pass ``--pr-push off`` /
+``--pr-push-scope all`` for the historical roster. Existing outputs are never replaced without ``--overwrite``.
+
 Usage: python3 scripts/run_reference_bot_validation.py --config v037 --cells ref1 --players 3 --games 1200
 
 Lever A (docs/specs/lever_a_roster_upgrade_spec.md §8): ``--pr-push on`` builds the config with
@@ -47,13 +50,20 @@ def _install_hook():
 def make_config(cfg_name, players, pr_push=False, pr_params=None, pr_scope="all"):
     from sim.config import GameConfig, PrPushParams
     kw = dict(num_players=players)
-    if pr_push:
-        kw["bot_pr_push"] = True
+    kw["bot_pr_push"] = bool(pr_push)  # explicit either way: never inherit a roster default silently
     if pr_params:
         kw["bot_pr_push_params"] = PrPushParams(**pr_params)
     if pr_scope != "all":
         kw["bot_pr_push_scope"] = pr_scope
     return getattr(GameConfig, cfg_name)(**kw)
+
+
+def output_name(cfg_name, cell, players, games, pr_push, pr_params, pr_scope):
+    """``{config}[_push][_p-<overrides>][_nonref]_{cell}_{P}p_{games}.json`` (sim/run_naming.py)."""
+    from sim.run_naming import overrides_tag, scope_tag
+    ov = overrides_tag(pr_params)
+    tag = ("_push" if pr_push else "") + (f"_p-{ov}" if ov else "") + scope_tag(pr_scope)
+    return f"{cfg_name}{tag}_{cell}_{players}p_{games}.json"
 
 
 def build_engine(cfg_name, cell, players, seed, pr_push=False, pr_params=None, pr_scope="all"):
@@ -116,30 +126,38 @@ def main(argv=None):
     ap.add_argument("--players", default="3")
     ap.add_argument("--games", type=int, default=600)
     ap.add_argument("--procs", type=int, default=8)
-    ap.add_argument("--pr-push", choices=("off", "on"), default="off")
+    ap.add_argument("--pr-push", choices=("off", "on"), default="on",
+                    help="roster rule (FINDINGS §41): on by default; 'off' for the historical v0.37 roster")
     ap.add_argument("--pr-params", default=None, help="JSON object of PrPushParams overrides")
-    ap.add_argument("--pr-push-scope", choices=("all", "non_reference"), default="all",
-                    help="GameConfig.bot_pr_push_scope (non_reference: reference fallback/rollouts keep old behaviour)")
+    ap.add_argument("--pr-push-scope", choices=("all", "non_reference"), default="non_reference",
+                    help="GameConfig.bot_pr_push_scope, default non_reference for the ref1 edge check (non_reference: reference fallback/rollouts keep old behaviour)")
+    ap.add_argument("--overwrite", action="store_true", help="allow replacing existing output files")
     a = ap.parse_args(argv)
     pr_push = a.pr_push == "on"
     pr_params = json.loads(a.pr_params) if a.pr_params else None
     make_config(a.config, 3, pr_push, pr_params, a.pr_push_scope)  # fail fast on an illegal cell (ValueError)
-    tag = ("_push" if pr_push else "") + ("_params" if pr_params else "") + (
-        "_nonref" if a.pr_push_scope == "non_reference" else "")
+    from sim.run_naming import guard_overwrite
     os.makedirs(OUT, exist_ok=True)
-    for P in [int(x) for x in a.players.split(",")]:
-        for cell in a.cells.split(","):
+    players_list = [int(x) for x in a.players.split(",")]
+    cells = a.cells.split(",")
+    for P in players_list:  # check every target up front so a long run never dies (or clobbers) midway
+        for cell in cells:
+            guard_overwrite(os.path.join(OUT, output_name(a.config, cell, P, a.games, pr_push, pr_params,
+                                                          a.pr_push_scope)), a.overwrite)
+    for P in players_list:
+        for cell in cells:
             tasks = [(a.config, cell, P, 42 + P * 100000 + i, pr_push, pr_params, a.pr_push_scope) for i in range(a.games)]
             t0 = time.perf_counter()
             with Pool(a.procs) as pool:
                 rows = pool.map(play, tasks, chunksize=1)
             wall = time.perf_counter() - t0
             errs = [r for r in rows if r["error"]]
-            fn = os.path.join(OUT, f"{a.config}{tag}_{cell}_{P}p_{a.games}.json")
+            fn = os.path.join(OUT, output_name(a.config, cell, P, a.games, pr_push, pr_params, a.pr_push_scope))
+            guard_overwrite(fn, a.overwrite)
             with open(fn, "w") as fh:
                 json.dump({"wall_s": wall, "pr_push": pr_push, "pr_params": pr_params,
                        "pr_push_scope": a.pr_push_scope, "games": rows}, fh)
-            print(f"{a.config}{tag} {cell} {P}P {a.games}g wall {wall:.1f}s errors {len(errs)}", flush=True)
+            print(f"{os.path.basename(fn)} {cell} {P}P {a.games}g wall {wall:.1f}s errors {len(errs)}", flush=True)
             for e in errs[:3]:
                 print(e["seed"], e["error"])
     return 0

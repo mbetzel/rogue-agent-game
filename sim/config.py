@@ -482,6 +482,14 @@ class GameConfig:
         return cls.legacy_v036(**overrides)
 
     @classmethod
+    def v037_roster(cls, **overrides) -> "GameConfig":
+        """Default roster for rule probes and routine sweeps (FINDINGS §41): v0.37 + ``bot_pr_push=True``
+        with default ``PrPushParams``. ``GameConfig()`` / ``v037()`` keep ``bot_pr_push=False`` for parity."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v037(**overrides)
+
+    @classmethod
     def legacy_v035(cls, **overrides) -> "GameConfig":
         """v0.35.0 baseline (today's defaults). Exists now so the parity test survives a later default flip."""
         overrides.setdefault("red_mode", RedMode.RANSOM)

@@ -142,6 +142,15 @@ def summarise(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     )
 
 
+def output_name(players: int, games: int, scope: str = "all", cells: Optional[str] = None,
+                pr_push: bool = True) -> str:
+    """``sweep[_off][_nonref][_c-<cells>]_{P}p_{games}.json``; long cell lists fall back to a sha1 tag."""
+    from sim.run_naming import overrides_tag, scope_tag
+    c = overrides_tag({"cells": cells}) if cells else ""
+    c = c[len("cells="):] if c.startswith("cells=") else c
+    return f"sweep{'' if pr_push else '_off'}{scope_tag(scope)}{f'_c-{c}' if c else ''}_{players}p_{games}.json"
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--games", type=int, default=600)
@@ -150,13 +159,20 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument("--cells", default=None, help="comma list of cell names (default: all)")
     ap.add_argument("--pr-push-scope", choices=("all", "non_reference"), default="all",
                     help="GameConfig.bot_pr_push_scope (no reference seats here, so only recorded)")
-    ap.add_argument("--out", default=os.path.join(OUT, "sweep_3p_600.json"))
+    ap.add_argument("--pr-push", choices=("off", "on"), default="on",
+                    help="bot_pr_push for ad-hoc JSON cells ('{...}' in --cells); roster rule default on (FINDINGS §41)")
+    ap.add_argument("--out", default=None,
+                    help="default: sim_results/lever_a/<name from push/scope/cells/players/games>.json")
+    ap.add_argument("--overwrite", action="store_true", help="allow replacing an existing output file")
     a = ap.parse_args(argv)
+    from sim.run_naming import guard_overwrite
+    a.out = a.out or os.path.join(OUT, output_name(a.players, a.games, a.pr_push_scope, a.cells, a.pr_push == "on"))
+    guard_overwrite(a.out, a.overwrite)
     cells = build_cells()
     if a.cells:
         want = a.cells.split(";") if ";" in a.cells else a.cells.split(",")
         cells = [c for c in cells if c[0] in want] + [
-            (w, True, json.loads(w)) for w in want if w.startswith("{")]
+            (w, a.pr_push == "on", json.loads(w)) for w in want if w.startswith("{")]
     out_rows = []
     skipped = []
     seen = {}
@@ -190,6 +206,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 print(r["seed"], r["error"])
                 break
     os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
+    guard_overwrite(a.out, a.overwrite)
     with open(a.out, "w") as fh:
         json.dump({"players": a.players, "games": a.games, "cells": out_rows, "skipped": skipped}, fh, indent=1)
     return 0
