@@ -149,7 +149,7 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
                 if target_die is not None:
                     player.glitched_dice.remove(target_die)
                     _reset(target_die)
-                    secret_faces.bank(engine.config, player, target_die)
+                    secret_faces.bank(engine.config, player, target_die, engine.state)
                     player.scanned_dice.append(target_die)
             elif eff.star_code == "B3":
                 # Air-Gapped Backup (INV-B3-BACKUP-01): Move 1 die from glitched_dice to scanned_dice
@@ -269,7 +269,7 @@ def resolve_phreaker_jumper_diagnostics(
         target = secret_faces.best_pending(cfg, player, die_id)
         player.glitched_dice.remove(target)
         _reset(target)
-        secret_faces.bank(cfg, player, target)
+        secret_faces.bank(cfg, player, target, engine.state)
         player.scanned_dice.append(target)
         return Face(name=f"Processing Box -> Scanned Box (die {target.die_id})")
     if cfg.power_profile == "V038_DRAFT":

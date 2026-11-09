@@ -268,6 +268,13 @@ class PlayerState:
         self.market_share_gained_face = 0  # Red F1 / R1 (outside the Public Relations limit)
         self.company_color: Optional[str] = None
         self.colored_dice_owned_by_round: List[Dict[str, int]] = []
+        # RSP-1 (spec §14.5.4 / §14.5.5). Plain ints / dicts so fast_clone copies them.
+        self.processing_entry_counter = 0  # per-player Processing Box entry sequence (OLDEST_FIRST triage)
+        self.red_secrets_banked = 0
+        self.red_payout_places: Dict[str, int] = {}
+        self.red_payout_secrets = 0
+        self.red_processing_wait_rounds = 0  # stall diagnostic: sum of rounds a banked Red die sat pending
+        self.red_processing_wait_count = 0
         self.player_id = player_id
         self.bot = bot
         self.money = money
@@ -1072,6 +1079,15 @@ class EndGameResult:
     pre_bonus_winner_ids: List[int] = field(default_factory=list)
     market_leader_bonus_changed_winner: bool = False
     market_leader_bonus_tied_paid_place: bool = False
+    # --- RSP-1 Red Secret payout telemetry (spec §14.5.5); filled only when an RSP-1 lever is on ---
+    red_secret_payouts: List[Dict[str, Any]] = field(default_factory=list)
+    red_secret_payouts_fired: int = 0
+    rounds_with_multi_red_banks: int = 0
+    red_banks_by_round: List[int] = field(default_factory=list)
+    red_secret_payout_end_fired: bool = False
+    red_secret_payout_end_awards: Dict[int, int] = field(default_factory=dict)
+    red_pending_at_end: int = 0
+    other_pending_at_end: int = 0
 
 
 @dataclass
@@ -1149,6 +1165,13 @@ class GameState:
     phase4_market_share_start: Dict[int, Optional[int]] = field(default_factory=dict)
     phase4_snapshot_round: Optional[int] = None
     _pending_poaches: List[Tuple[int, int]] = field(default_factory=list)  # (player_id, die_id), Phase 3
+    # --- RSP-1 Red Secret payout (spec §14.5.3 / §14.5.5). Plain values: fast_clone copies them. ---
+    red_secret_banked_this_round: bool = False  # reset at Phase 1 entry
+    red_secrets_banked_this_round: int = 0
+    red_bankers_this_round: List[int] = field(default_factory=list)
+    red_secret_payouts: List[Dict[str, Any]] = field(default_factory=list)  # one record per round fired
+    red_secret_payouts_fired: int = 0
+    red_banks_by_round: List[int] = field(default_factory=list)  # index = round - 1
 
     def __post_init__(self) -> None:
         self.tower = CubeTower(self.config)

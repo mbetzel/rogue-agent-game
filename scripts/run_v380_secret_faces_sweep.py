@@ -119,7 +119,7 @@ def check_overrides_effective(config_name: str, roster: str, players: int, overr
                         "(ineffective override; pass --allow-noop to run anyway)")
 
 
-CONFIGS = ("v038", "v038_roster", "v038b", "v037", "v037_roster")
+CONFIGS = ("v038", "v038_roster", "v038b", "v038c", "v037", "v037_roster")
 ROSTERS = ("mixed1", "archetypes")
 
 
@@ -193,6 +193,12 @@ def play(task) -> Dict[str, Any]:
             "max_glitched_slots": r.get("max_glitched_slots", 0),
             "zero_capacity_rounds": r.get("zero_capacity_rounds", 0),
             "purchases_by_color": dict(r.get("purchases_by_color", {})),
+            # RSP-1 (spec §14.5.5); 0 / {} on configs without the RSP-1 levers
+            "red_secrets_banked": r.get("red_secrets_banked", 0),
+            "red_payout_secrets": r.get("red_payout_secrets", 0),
+            "red_payout_places": dict(r.get("red_payout_places", {})),
+            "red_wait_rounds": r.get("red_processing_wait_rounds", 0),
+            "red_wait_count": r.get("red_processing_wait_count", 0),
         })
     winners = [x for x in rows if x["win"]]
     return {
@@ -203,6 +209,10 @@ def play(task) -> Dict[str, Any]:
         "winner_company_colors": [x["company_color"] for x in winners],
         "winner_paths": [x["path"] for x in winners],
         "winner_secrets": [x["secrets"] for x in winners],
+        "red_secret_payouts_fired": getattr(res, "red_secret_payouts_fired", 0),
+        "red_secret_payout_end_fired": bool(getattr(res, "red_secret_payout_end_fired", False)),
+        "rounds_with_multi_red_banks": getattr(res, "rounds_with_multi_red_banks", 0),
+        "red_pending_at_end": getattr(res, "red_pending_at_end", 0),
         "seats": rows,
     }
 
@@ -262,7 +272,31 @@ def summarise(records: List[Dict[str, Any]], config_name: str, roster: str, play
     win_secrets = [s for g in records for s in g["winner_secrets"]]
     exits = {c: [g["cube_exits"][c] for g in records] for c in ("red", "blue", "green")}
     by_rounds = sorted(records, key=lambda g: (g["rounds"], g["seed"]))
+    # RSP-1 (spec §14.5.5)
+    payout_secrets = sum(x["red_payout_secrets"] for x in seats_all)
+    face_secrets = banked
+    pw_hits = pw_n = 0
+    for g in records:
+        top = max((x["red_payout_secrets"] for x in g["seats"]), default=0)
+        if top > 0:
+            pw_n += 1
+            leaders = {x["player_id"] for x in g["seats"] if x["red_payout_secrets"] == top}
+            pw_hits += bool(leaders & set(g["winner_ids"]))
+    wait_n = sum(x["red_wait_count"] for x in seats_all)
+    rsp1 = {
+        "payouts_per_game": round(sum(g["red_secret_payouts_fired"] for g in records) / games, 3) if games else None,
+        "end_payout_rate": rate(sum(1 for g in records if g["red_secret_payout_end_fired"]), games),
+        "multi_red_bank_round_share": rate(sum(g["rounds_with_multi_red_banks"] for g in records), sum(rounds)),
+        "red_secrets_banked_per_seat": round(sum(x["red_secrets_banked"] for x in seats_all) / nseat, 3),
+        "payout_secrets_per_seat": round(payout_secrets / nseat, 3),
+        "payout_vs_face_secret_share": (round(payout_secrets / (payout_secrets + face_secrets), 4)
+                                        if payout_secrets + face_secrets else 0.0),
+        "payout_leader_is_winner_rate": rate(pw_hits, pw_n),
+        "red_mean_wait_rounds": round(sum(x["red_wait_rounds"] for x in seats_all) / wait_n, 3) if wait_n else None,
+        "red_pending_at_end_per_game": round(sum(g["red_pending_at_end"] for g in records) / games, 3) if games else None,
+    }
     return {
+        "rsp1": rsp1,
         "config": config_name, "roster": roster, "overrides": {str(k): v for k, v in overrides.items()},
         "players": players, "games": games, "path_rule": PATH_RULE,
         "endings": {k: round(v / games, 4) for k, v in sorted(Counter(g["end_reason"] for g in records).items())},

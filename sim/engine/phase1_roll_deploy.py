@@ -196,6 +196,8 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
     player_commitments: List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]] = []
     v038 = secret_faces.enabled(engine.config)
     slots_on = secret_faces.slots_enabled(engine.config)
+    if v038:
+        secret_faces.reset_round_flags(engine.state)  # RSP-1 per-round Red bank flag (INV-RSP-01b)
     if v038 or slots_on:
         for player in engine.state.players:
             if not player.is_patient_zero:
@@ -576,7 +578,7 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
                 # v0.38 Step 5b: Secret face -> Processing Box (no other output)
                 if die in player.ready_for_release_dice:
                     player.ready_for_release_dice.remove(die)
-                secret_faces.enter_processing_box(player, die)
+                secret_faces.enter_processing_box(player, die, engine.state.current_round)
             elif face and face.is_glitch:
                 if die.color == DieColor.WHITE:
                     # White Contractor with glitch: discarded to supply

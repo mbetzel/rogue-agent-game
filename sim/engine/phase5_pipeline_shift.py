@@ -89,7 +89,7 @@ def apply_hotfix_bypass(
                 chosen_idx = _best_colored_glitched_index(player)
         die = player.glitched_dice.pop(chosen_idx)
         reset_die_for_pipeline(die)
-        secret_faces.bank(engine.config, player, die)  # v0.38: banks (yield at Phase 5 step 1); no-op otherwise
+        secret_faces.bank(engine.config, player, die, engine.state)  # v0.38: banks (yield at Phase 5 step 1); no-op otherwise
         player.ready_for_release_dice.append(die)
         player.mark_ability_used(active_ver)
         moved.append(die)
@@ -103,7 +103,7 @@ def apply_hotfix_bypass(
             h_idx = _best_colored_glitched_index(player)
         die = player.glitched_dice.pop(h_idx)
         reset_die_for_pipeline(die)
-        secret_faces.bank(engine.config, player, die)
+        secret_faces.bank(engine.config, player, die, engine.state)
         player.ready_for_release_dice.append(die)
         moved.append(die)
     return moved
@@ -236,7 +236,11 @@ def conveyor_triage_v038(engine: GameEngine, player: PlayerState) -> List[Die]:
     n = min(len(player.glitched_dice), player.triage_bandwidth)
     if n <= 0:
         return []
-    raw = player.bot.choose_triage_order(player, list(player.glitched_dice), engine.state)
+    if engine.config.triage_order_rule == "OLDEST_FIRST":
+        # RSP-1 (spec §14.5.4, INV-RSP-06): entry order, the bot hook is not called
+        raw = secret_faces.triage_order(engine.config, player, player.glitched_dice)
+    else:
+        raw = player.bot.choose_triage_order(player, list(player.glitched_dice), engine.state)
     order: List[Die] = []
     for d in list(raw or []) + secret_faces.default_triage_order(engine.config, player, player.glitched_dice):
         if any(d is x for x in player.glitched_dice) and not any(d is x for x in order):
@@ -245,7 +249,7 @@ def conveyor_triage_v038(engine: GameEngine, player: PlayerState) -> List[Die]:
     for d in moved:
         player.glitched_dice.remove(d)
         reset_die_for_pipeline(d)
-        secret_faces.bank(engine.config, player, d)
+        secret_faces.bank(engine.config, player, d, engine.state)
         player.scanned_dice.append(d)
     return moved
 
@@ -295,6 +299,10 @@ def execute_pipeline_shift(engine: GameEngine) -> Dict[int, PipelineShiftRecord]
         if player.is_patient_zero:
             continue
         out[player.player_id] = execute_player_pipeline_shift(engine, player)
+    # RSP-1 Phase 5 end hook (spec §14.5.3 step 2): lives inside the phase function so _run_round_six_phase and
+    # fast_clone.resume_round need no change (they call this function).
+    if secret_faces.enabled(engine.config):
+        secret_faces.fire_round_payout(engine.config, engine.state)
     return out
 
 

@@ -41,6 +41,9 @@ def secret_yield(cfg: "GameConfig", p: "PlayerState", color: Any) -> int:
     """Corporate Secrets a pending die of ``color`` would bank right now (spec §7.5)."""
     color = DieColor(color) if not isinstance(color, DieColor) else color
     if color == DieColor.RED:
+        flat = getattr(cfg, "red_secret_owner_yield", None)
+        if flat is not None:  # RSP-1 (spec §14.5.1): flat owner yield, Market Share tiers ignored
+            return int(flat)
         share = int(p.market_share or 0)
         for min_share, y in cfg.secret_yield_red_tiers:
             if share >= min_share:
@@ -72,20 +75,44 @@ def default_triage_order(cfg: "GameConfig", p: "PlayerState", dice: Iterable["Di
 # ---------------------------------------------------------------------------
 # Processing Box entry / exit
 # ---------------------------------------------------------------------------
-def enter_processing_box(p: "PlayerState", die: "Die") -> None:
+def triage_order(cfg: "GameConfig", p: "PlayerState", dice: Iterable["Die"]) -> List["Die"]:
+    """RSP-1 ``triage_order_rule="OLDEST_FIRST"`` (spec §14.5.4): Processing Box entry order (stable on ties)."""
+    return sorted(dice, key=lambda d: int(getattr(d, "processing_entry_seq", 0)))
+
+
+def enter_processing_box(p: "PlayerState", die: "Die", round_no: int = 0) -> None:
     """A die showing the Secret face after rerolls (Phase 1 Step 5b)."""
     die.secret_pending = True
+    p.processing_entry_counter += 1
+    die.processing_entry_seq = p.processing_entry_counter
+    die.processing_entry_round = int(round_no)
     k = _ckey(die.color)
     p.secret_faces_rolled[k] = p.secret_faces_rolled.get(k, 0) + 1
     p.glitched_dice.append(die)
 
 
-def bank(cfg: "GameConfig", p: "PlayerState", die: "Die") -> int:
+def bank(cfg: "GameConfig", p: "PlayerState", die: "Die", state: Any = None) -> int:
     """Banks the Secret of a die leaving the Processing Box (INV-SF-01: once per visit). Returns Secrets gained.
-    Call *after* removing the die from ``glitched_dice``; a die without ``secret_pending`` yields 0."""
+    Call *after* removing the die from ``glitched_dice``; a die without ``secret_pending`` yields 0.
+
+    RSP-1 (spec §14.5.3 step 1): a Red bank sets ``state.red_secret_banked_this_round`` (the Red Secret payout
+    fires later, at the end of Phase 5; ``bank`` never awards payout Secrets, INV-RSP-01)."""
     if not getattr(die, "secret_pending", False):
         return 0
     y = secret_yield(cfg, p, die.color)
+    if die.color == DieColor.RED:
+        p.red_secrets_banked += 1
+        if die.processing_entry_round and state is not None:
+            p.red_processing_wait_rounds += int(state.current_round) - int(die.processing_entry_round)
+            p.red_processing_wait_count += 1
+        if state is not None:
+            state.red_secret_banked_this_round = True
+            state.red_secrets_banked_this_round += 1
+            state.red_bankers_this_round.append(p.player_id)
+            rb = state.red_banks_by_round
+            while len(rb) < int(state.current_round):
+                rb.append(0)
+            rb[int(state.current_round) - 1] += 1
     die.secret_pending = False
     k = _ckey(die.color)
     p.secret_faces_banked[k] = p.secret_faces_banked.get(k, 0) + 1
@@ -144,6 +171,51 @@ def clean_slots(p: "PlayerState", n: int, how: str) -> int:
                 "graduation": "slots_cleared_by_graduation"}[how]
         setattr(p, attr, getattr(p, attr) + done)
     return done
+
+
+def reset_round_flags(state: Any) -> None:
+    """RSP-1 Phase 1 entry (spec §14.5.3 step 1, INV-RSP-01b)."""
+    state.red_secret_banked_this_round = False
+    state.red_secrets_banked_this_round = 0
+    state.red_bankers_this_round = []
+
+
+def red_secret_payout_awards(cfg: "GameConfig", state: Any) -> dict:
+    """player_id -> (place, Secrets) for the non-Patient-Zero players by current Market Share (ties share the better
+    place; schedule by starting player count). Pure; {} when the payout is off or nobody survives."""
+    from sim.engine.market_share import market_leader_bonus_awards
+
+    sched = cfg.red_secret_payout_schedule(len(state.players))
+    shares = {q.player_id: int(q.market_share or 0) for q in state.players if not q.is_patient_zero}
+    if not sched or not shares:
+        return {}
+    return market_leader_bonus_awards(shares, sched)
+
+
+def fire_round_payout(cfg: "GameConfig", state: Any) -> bool:
+    """RSP-1 Phase 5 end hook (spec §14.5.3 step 2): at most one Red Secret payout per round, iff a Red Secret
+    was banked this round. Credits ``gain_secrets(k, "red_secret_payout")``."""
+    if not cfg.is_red_secret_payout or not state.red_secret_banked_this_round:
+        return False
+    awards = red_secret_payout_awards(cfg, state)
+    if not awards:
+        return False
+    by_pid = {q.player_id: q for q in state.players}
+    shares, places, gains = {}, {}, {}
+    for pid, (place, k) in sorted(awards.items()):
+        q = by_pid[pid]
+        shares[pid], places[pid], gains[pid] = int(q.market_share or 0), place, k
+        q.red_payout_places[str(place)] = q.red_payout_places.get(str(place), 0) + 1
+        if k > 0:
+            q.gain_secrets(k, "red_secret_payout")
+            q.red_payout_secrets += k
+    state.red_secret_payouts.append({
+        "round": int(state.current_round), "red_banks_this_round": int(state.red_secrets_banked_this_round),
+        "banker_pids": sorted(set(state.red_bankers_this_round)),
+        "shares": shares, "places": places, "gains": gains,
+    })
+    state.red_secret_payouts_fired += 1
+    return True
 
 
 def record_round_start(p: "PlayerState") -> None:

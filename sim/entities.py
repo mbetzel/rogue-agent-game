@@ -169,6 +169,8 @@ class Die:
     chosen_choice_index: Optional[int] = None
     production_role: Optional[Any] = None
     secret_pending: bool = False  # v0.38: in the Processing Box from a Secret face (atomic: fast_clone fast path)
+    processing_entry_seq: int = 0  # RSP-1: per-player Processing Box entry order (OLDEST_FIRST triage)
+    processing_entry_round: int = 0  # RSP-1: round the die entered the Processing Box (stall telemetry)
 
     def roll(self, rng: random.Random) -> Face:
         """Roll the die and record the rolled face."""
@@ -1369,7 +1371,7 @@ def create_colored_die(
             }
             die_cost = default_costs.get(color, 4)
 
-    if face_profile in ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT"):
+    if face_profile in ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3"):
         return _create_colored_die_v038(color, die_id, variant_card, star_face, var_code, die_cost, face_profile)
 
     if color == DieColor.RED:
@@ -1471,12 +1473,15 @@ def _create_colored_die_v038(color: DieColor, die_id: int, variant_card: Optiona
         faces = [_choice(Face(CLEAN_SLOT_NAME, clean_slots=1), Face("+$1", money=1)),
                  Face(name="+1 🔬", patches=1), Face(name="+2 🔬", patches=2),
                  _choice(Face("+1 🔬", patches=1), Face("+$1", money=1)), SECRET_FACE, star_face]
-    elif color == DieColor.YELLOW and profile in ("V038_YELLOW_MS", "V038_YELLOW_MS_ALT"):
+    elif color == DieColor.YELLOW and profile in ("V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3"):
         y = lambda: _choice(Face("+$2", money=2), Face("+1 🔬", patches=1))  # noqa: E731
-        f1 = (Face(name="+2 Market Share", market_share=2) if profile == "V038_YELLOW_MS"
-              else Face(name="+$1 & +1 Market Share", money=1, market_share=1))
+        f1 = (Face(name="+$1 & +1 Market Share", money=1, market_share=1) if profile == "V038_YELLOW_MS_ALT"
+              else Face(name="+2 Market Share", market_share=2))
+        # RSP-1 (spec §14.5.1): _F3 swaps F3 "+$3" for "+$1 & +1 Market Share"
+        f3 = (Face(name="+$1 & +1 Market Share", money=1, market_share=1) if profile == "V038_YELLOW_MS_F3"
+              else Face(name="+$3", money=3))
         faces = [f1, _choice(Face("+1 Market Share", market_share=1), Face("+1 🔬", patches=1)),
-                 Face(name="+$3", money=3), y(), y(), star_face]
+                 f3, y(), y(), star_face]
     elif color == DieColor.YELLOW:
         y = lambda: _choice(Face("+$2", money=2), Face("+1 🔬", patches=1))  # noqa: E731
         faces = [Face(name="+$3", money=3), y(), y(), Face(name="+$1 & +1 🔬", money=1, patches=1), y(), star_face]

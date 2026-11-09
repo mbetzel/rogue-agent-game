@@ -910,3 +910,414 @@ class TestCandidate2(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ---------------------------------------------------------------------------
+# RSP-1 (spec §14.5, FINDINGS §43.4): GameConfig.v038c(), once-per-round Red Secret payout
+# ---------------------------------------------------------------------------
+V038C = GameConfig.v038c
+
+
+def _eng_c(n=3, seed=1, bots=None, **cfg):
+    bots = bots or [BaseBot(i) for i in range(n)]
+    comps = (CompanyCode.PROMETHEUS, CompanyCode.MERIDIAN, CompanyCode.DTO, CompanyCode.HELIX)[:n]
+    whs = (WhiteHatCode.OPERATOR, WhiteHatCode.ACOUSTIC, WhiteHatCode.SPOOK, WhiteHatCode.CIPHER)[:n]
+    return GameEngine(V038C(num_players=n, **cfg), bots, seed=seed, variant_cards=_cards(),
+                      companies=[COMPANIES[c] for c in comps], white_hats=[WHITE_HATS[w] for w in whs])
+
+
+def _clear(eng):
+    for q in eng.state.players:
+        q.glitched_dice, q.scanned_dice, q.in_production_dice = [], [], []
+
+
+def _pend(eng, p, color, round_no=None):
+    d = _die(eng, color)
+    sf.enter_processing_box(p, d, eng.state.current_round if round_no is None else round_no)
+    return d
+
+
+def _shares(eng, vals):
+    for q, v in zip(eng.state.players, vals):
+        q.market_share = v
+
+
+def _secrets(eng):
+    return [q.secrets for q in eng.state.players]
+
+
+def _delta(before, eng):
+    return [a - b for a, b in zip(_secrets(eng), before)]
+
+
+class TestRSP1(unittest.TestCase):
+    # 1. parity
+    def test_rsp01_v038b_parity_fixtures(self):
+        from tests.fixtures.v038b_parity import capture as c
+
+        for name in c.CONFIGS:
+            for sc in c.SCENARIOS:
+                for n in c.PLAYER_COUNTS:
+                    with open(c.fixture_path(name, sc, n), encoding="utf-8") as fh:
+                        golden = json.load(fh)
+                    for seed in c.SEEDS:
+                        got = json.loads(json.dumps(c.run_scenario(c.config_factory(name), sc, n, seed),
+                                                    sort_keys=True))
+                        self.assertEqual(got, golden[str(seed)], f"{name} {sc} {n}P {seed}")
+
+    def test_rsp01_levers_off_by_default(self):
+        for fac in (GameConfig, GameConfig.v037, V038, GameConfig.v038b):
+            c = fac(num_players=3)
+            self.assertIsNone(c.red_secret_owner_yield)
+            self.assertEqual(c.red_secret_payout_by_player_count, {})
+            self.assertFalse(c.red_secret_payout_at_end or c.is_red_secret_payout)
+            self.assertEqual(c.triage_order_rule, "BOT")
+
+    def test_preset_values(self):
+        for n, ms, sched in ((2, 16, (3, 1)), (3, 16, (3, 1, 0)), (4, 17, (3, 1, 0, 0))):
+            c = V038C(num_players=n)
+            self.assertEqual((c.market_share_start(), c.red_secret_payout_schedule(), c.red_secret_owner_yield),
+                             (ms, sched, 1))
+            self.assertEqual(c.get_starting_secrets(), {2: 3, 3: 4, 4: 4}[n])
+            self.assertTrue(c.red_secret_payout_at_end)
+            self.assertEqual((c.market_leader_bonus_schedule(), c.version_share_payout), ((), {}))
+            self.assertEqual((c.die_face_profile, c.triage_order_rule), ("V038_YELLOW_MS_F3", "OLDEST_FIRST"))
+            self.assertTrue(c.market_collapse_enabled)
+            self.assertFalse(c.bot_pr_push)
+
+    # 2. owner yield
+    def test_rsp02_owner_yield_flat(self):
+        eng = _eng_c()
+        p = eng.state.players[0]
+        for share in (16, 5, 0):
+            p.market_share = share
+            self.assertEqual(sf.secret_yield(eng.config, p, DieColor.RED), 1)
+
+    # 3 / 4. places
+    def _single_bank(self, n, shares):
+        eng = _eng_c(n=n)
+        _clear(eng)
+        _shares(eng, shares)
+        _pend(eng, eng.state.players[1], DieColor.RED)
+        s0 = _secrets(eng)
+        p5.execute_pipeline_shift(eng)
+        return eng, _delta(s0, eng)
+
+    def test_rsp03_single_bank_places(self):
+        eng, d = self._single_bank(3, (10, 7, 7))
+        self.assertEqual(d, [3, 1 + 1, 1])  # banker (seat 1) +1 owner yield +1 2nd place
+        self.assertEqual(eng.state.red_secret_payouts_fired, 1)
+        rec = eng.state.red_secret_payouts[0]
+        self.assertEqual((rec["banker_pids"], rec["gains"], rec["red_banks_this_round"]), ([1], {0: 3, 1: 1, 2: 1}, 1))
+        self.assertEqual(eng.state.players[1].secrets_by_source["secret_face_red"], 1)
+        self.assertEqual(eng.state.players[0].secrets_by_source["red_secret_payout"], 3)
+
+    def test_rsp04_ties(self):
+        _, d = self._single_bank(3, (9, 9, 4))
+        self.assertEqual(d, [3, 3 + 1, 0])
+        _, d = self._single_bank(4, (8, 6, 6, 2))
+        self.assertEqual(d, [3, 1 + 1, 1, 0])
+
+    # 5. several Red banks -> one payout
+    def test_rsp05_one_payout_per_round(self):
+        for owners, phase3 in (((0, 0), False), ((0, 2), False), ((0, 1), True)):
+            eng = _eng_c()
+            _clear(eng)
+            _shares(eng, (10, 7, 4))
+            dice = [_pend(eng, eng.state.players[pid], DieColor.RED) for pid in owners]
+            s0 = _secrets(eng)
+            if phase3:  # first one banked in Phase 3 (B3 / Jumper Diagnostics path)
+                p = eng.state.players[owners[0]]
+                p.glitched_dice.remove(dice[0])
+                sf.bank(eng.config, p, dice[0], eng.state)
+                self.assertEqual(eng.state.red_secret_payouts_fired, 0)  # bank() never pays out
+            p5.execute_pipeline_shift(eng)
+            self.assertEqual(eng.state.red_secret_payouts_fired, 1, owners)
+            self.assertEqual(eng.state.red_secret_payouts[0]["red_banks_this_round"], 2)
+            own = [sum(1 for o in owners if o == pid) for pid in range(3)]
+            self.assertEqual(_delta(s0, eng), [3 + own[0], 1 + own[1], 0 + own[2]])
+
+    def test_rsp05b_payout_reads_post_phase4_share(self):
+        eng = _eng_c()
+        _clear(eng)
+        _shares(eng, (10, 9, 4))
+        p0 = eng.state.players[0]
+        d = _pend(eng, p0, DieColor.RED)
+        p0.glitched_dice.remove(d)
+        sf.bank(eng.config, p0, d, eng.state)  # Phase 3
+        attack = {CubeColor.RED: 2, CubeColor.BLUE: 0, CubeColor.GREEN: 0}
+        p4.resolve_player_defense_and_wear(eng, p0, [], {}, attack, dict(attack), "",
+                                           malware_target_policy=p4.MALWARE_POLICY_SIX_PHASE)
+        self.assertEqual(p0.market_share, 8)
+        s0 = _secrets(eng)
+        p5.execute_pipeline_shift(eng)
+        self.assertEqual(_delta(s0, eng), [1, 3, 0])
+
+    def test_rsp05c_no_bank_no_payout_and_reset(self):
+        eng = _eng_c()
+        _clear(eng)
+        _pend(eng, eng.state.players[0], DieColor.PURPLE)
+        s0 = _secrets(eng)
+        p5.execute_pipeline_shift(eng)
+        self.assertEqual(eng.state.red_secret_payouts_fired, 0)
+        self.assertEqual(_delta(s0, eng), [1, 0, 0])
+        eng.state.red_secret_banked_this_round = True
+        eng.state.red_secrets_banked_this_round = 3
+        _phase1(eng, {})
+        self.assertFalse(eng.state.red_secret_banked_this_round)
+        self.assertEqual(eng.state.red_secrets_banked_this_round, 0)
+
+    # 6 / 8. recipients
+    def test_rsp06_patient_zero_banker_excluded(self):
+        eng = _eng_c()
+        _clear(eng)
+        _shares(eng, (10, 7, 4))
+        p0 = eng.state.players[0]
+        d = _pend(eng, p0, DieColor.RED)
+        p0.glitched_dice.remove(d)
+        sf.bank(eng.config, p0, d, eng.state)
+        p0.is_patient_zero = True
+        s0 = _secrets(eng)
+        p5.execute_pipeline_shift(eng)
+        self.assertEqual(_delta(s0, eng), [0, 3, 1])
+        self.assertNotIn(0, eng.state.red_secret_payouts[0]["gains"])
+
+    def test_rsp08_sole_survivor(self):
+        eng = _eng_c()
+        _clear(eng)
+        _shares(eng, (0, 7, 12))
+        eng.state.players[1].is_patient_zero = eng.state.players[2].is_patient_zero = True
+        _pend(eng, eng.state.players[0], DieColor.RED)
+        s0 = _secrets(eng)
+        p5.execute_pipeline_shift(eng)
+        self.assertEqual(_delta(s0, eng), [1 + 3, 0, 0])  # 0 Market Share still scores by place
+
+    # 7. Phase 3 bank paths and early ending
+    def test_rsp07_phase3_jumper_and_b3_set_flag(self):
+        eng = _eng_c()
+        _clear(eng)
+        p = eng.state.players[0]
+        _pend(eng, p, DieColor.RED)
+        p3.resolve_phreaker_jumper_diagnostics(eng, p)
+        self.assertTrue(eng.state.red_secret_banked_this_round)
+        self.assertEqual(eng.state.red_secret_payouts_fired, 0)
+        eng = _eng_c()
+        eng.state.variant_cards = _cards(blue="B3")
+        _clear(eng)
+        p = eng.state.players[0]
+        _pend(eng, p, DieColor.RED)
+        b3 = _die(eng, DieColor.BLUE)
+        b3.current_face = next(f for f in b3.faces if f.is_star)
+        p.in_production_dice = [b3]
+        p3.collect_player_production_income(eng, p)
+        self.assertTrue(eng.state.red_secret_banked_this_round)
+        eng.state.game_over = True  # e.g. Total Wipeout in Phase 4: Phase 5 never resolves
+        self.assertEqual(p5.execute_pipeline_shift(eng), {})
+        self.assertEqual(eng.state.red_secret_payouts_fired, 0)
+
+    # 9. end payout
+    def test_rsp09_end_payout(self):
+        for reason, fires in ((EndGameReason.SINGULARITY, True), (EndGameReason.PATIENT_ZERO, True),
+                              (EndGameReason.ROUND_LIMIT, True), (EndGameReason.MARKET_COLLAPSE, False)):
+            eng = _eng_c()
+            _shares(eng, (10, 7, 4))
+            eng.state.end_reason = reason
+            res = evaluate_end_game(eng)
+            rows = {r["player_id"]: r for r in res.rankings}
+            got = [rows[i]["secrets"] - rows[i]["secrets_before_bonus"] for i in range(3)]
+            self.assertEqual(got, [3, 1, 0] if fires else [0, 0, 0], reason)
+            self.assertEqual(res.red_secret_payout_end_fired, fires)
+            if fires:
+                self.assertEqual(rows[0]["secrets_by_source"]["red_secret_payout_end"], 3)
+                self.assertEqual(rows[0]["red_secret_payout_end"], 3)
+            self.assertEqual(evaluate_end_game(eng).rankings, res.rankings)  # pure / idempotent
+        eng = _eng_c()
+        for q in eng.state.players:
+            q.is_patient_zero = True
+        eng.state.end_reason = EndGameReason.TOTAL_WIPEOUT
+        res = evaluate_end_game(eng)
+        self.assertFalse(res.red_secret_payout_end_fired)
+        self.assertTrue(all(r["secrets"] == r["secrets_before_bonus"] for r in res.rankings))
+        # Market Collapse Final Round: the Phase 5 payout still fires
+        eng = _eng_c()
+        _clear(eng)
+        eng.state.is_final_round = True
+        eng.state.end_reason = EndGameReason.MARKET_COLLAPSE
+        _shares(eng, (0, 7, 4))
+        _pend(eng, eng.state.players[2], DieColor.RED)
+        p5.execute_pipeline_shift(eng)
+        self.assertEqual(eng.state.red_secret_payouts_fired, 1)
+        # off-lever: no end payout
+        eng = _eng_c(red_secret_payout_at_end=False)
+        eng.state.end_reason = EndGameReason.SINGULARITY
+        self.assertFalse(evaluate_end_game(eng).red_secret_payout_end_fired)
+
+    # 10. stranded / lost dice set nothing
+    def test_rsp10_stranded_and_lost(self):
+        eng = _eng_c()
+        _clear(eng)
+        p = eng.state.players[0]
+        d = _pend(eng, p, DieColor.RED)
+        p.glitched_dice.remove(d)
+        sf.lose_pending(p, d)
+        _pend(eng, p, DieColor.RED)
+        eng.state.end_reason = EndGameReason.SINGULARITY
+        res = evaluate_end_game(eng)
+        self.assertFalse(eng.state.red_secret_banked_this_round)
+        self.assertEqual(eng.state.red_secret_payouts_fired, 0)
+        row = next(r for r in res.rankings if r["player_id"] == 0)
+        self.assertEqual((row["stranded_dice"], row["red_pending_at_end"], row["red_secrets_banked"]), (1, 1, 0))
+
+    # 11. oldest first
+    def test_rsp11_oldest_first(self):
+        class NoHook(BaseBot):
+            def choose_triage_order(self, *a, **k):
+                raise AssertionError("hook must not be called under OLDEST_FIRST")
+
+        eng = _eng_c(bots=[NoHook(0), BaseBot(1), BaseBot(2)])
+        _clear(eng)
+        p = eng.state.players[0]
+        p.triage_bandwidth = 2
+        purple = _pend(eng, p, DieColor.PURPLE, round_no=3)
+        red4 = _pend(eng, p, DieColor.RED, round_no=4)
+        blue4 = _pend(eng, p, DieColor.BLUE, round_no=4)
+        p.glitched_dice = [blue4, red4, purple]  # list order shuffled: entry seq rules
+        moved = p5.conveyor_triage_v038(eng, p)
+        self.assertEqual(moved, [purple, red4])
+        self.assertEqual(p.glitched_dice, [blue4])
+        self.assertLess(purple.processing_entry_seq, red4.processing_entry_seq)
+        # v038b keeps the bot hook
+        eng = _engine()
+        self.assertEqual(eng.config.triage_order_rule, "BOT")
+
+    # 12. Yellow F3
+    def test_rsp12_yellow_f3(self):
+        eng = _eng_c()
+        y = _die(eng, DieColor.YELLOW)
+        self.assertEqual((y.faces[0].market_share, y.faces[2].money, y.faces[2].market_share), (2, 1, 1))
+        self.assertFalse(any(f.secrets_pending or f.is_shield for f in y.faces))
+        p = eng.state.players[0]
+        self.assertEqual(p.market_share_max, 16)
+        p.market_share = 16
+        y.current_face = y.faces[2]
+        p.in_production_dice = [y]
+        m0 = p.money
+        p3.collect_player_production_income(eng, p)
+        self.assertEqual((p.market_share, p.money - m0, p.regain_this_turn), (16, 1, 0))
+        p.market_share = 10
+        p3.collect_player_production_income(eng, p)
+        self.assertEqual((p.market_share, p.regain_this_turn), (11, 0))
+
+    # 13. validation
+    def test_rsp13_validation(self):
+        bad = [dict(red_secret_owner_yield=-1), dict(red_secret_payout_by_player_count={3: (1, 3)}),
+               dict(red_secret_payout_by_player_count={3: (3, 1, 0, 0)}),
+               dict(red_secret_payout_by_player_count={3: (3, -1)}),
+               dict(red_secret_payout_by_player_count={5: (3,)}),
+               dict(red_secret_payout_by_player_count={}, red_secret_payout_at_end=True),
+               dict(triage_order_rule="NEWEST")]
+        for kw in bad:
+            with self.assertRaises(ValueError, msg=kw):
+                V038C(num_players=3, **kw)
+        for kw in (dict(red_secret_owner_yield=1), dict(red_secret_payout_by_player_count={3: (3, 1)}),
+                   dict(triage_order_rule="OLDEST_FIRST")):
+            with self.assertRaises(ValueError, msg=kw):
+                GameConfig.v037(**kw)
+        V038C(market_leader_bonus_by_player_count={3: (2, 1)}, version_share_payout={"v2.0": 4})  # ablation ok
+
+    # 14. sweep --set
+    def test_rsp14_sweep_set_starting_secrets(self):
+        from scripts import run_v380_secret_faces_sweep as sw
+
+        ov = sw._parse_overrides(['starting_secrets_by_player_count={"2":2,"3":3,"4":4}'], "v038c")
+        self.assertEqual(ov, {"starting_secrets_by_player_count": {2: 2, 3: 3, 4: 4}})
+        for n in (2, 3, 4):
+            eng = sw.build_engine("v038c", "mixed1", n, 0, ov)
+            self.assertEqual(eng.config.get_starting_secrets(), {2: 2, 3: 3, 4: 4}[n])
+            self.assertEqual(eng.config.red_secret_owner_yield, 1)
+        self.assertIn("v038c", sw.CONFIGS)
+        rec = sw.play(("v038c", "mixed1", 3, 0, {}))
+        self.assertIn("red_secret_payouts_fired", rec)
+
+    # 15. fast_clone / determinism
+    def test_rsp15_fast_clone_and_determinism(self):
+        from tests.test_reference_bot import SnapAtEngine, _summary
+        from tests.fixtures.v035_parity import capture
+
+        flagged = 0
+        for n in (2, 3, 4):
+            for seed in range(10):
+                for phase in (1, 4, 6):
+                    cls = type("E", (SnapAtEngine,), {"want": (2 + seed % 3, phase)})
+                    with mock.patch("sim.engine.GameEngine", cls):
+                        e = capture.build_engine(V038C, "setup", n, seed)
+                    real = e.run_game()
+                    if e.kept is None:
+                        continue
+                    flagged += bool(e.kept.engine.state.red_secret_banked_this_round)
+                    c, com, cr = fast_clone.from_snapshot(e.kept)
+                    fast_clone.resume_round(c, phase, com, cr)
+                    got = c.run_game() if not c.state.game_over else c.evaluate_end_game()
+                    self.assertEqual(_summary(got), _summary(real), f"{n}P seed {seed} phase {phase}")
+                    self.assertEqual(got.red_secret_payouts, real.red_secret_payouts)
+                    self.assertEqual([r["secrets_by_source"] for r in got.rankings],
+                                     [r["secrets_by_source"] for r in real.rankings])
+        self.assertGreater(flagged, 0)  # some clones were taken with the flag set (Phase 4 / 6 snapshots)
+        for seed in range(4):
+            a, b = capture.build_engine(V038C, "setup", 3, seed), capture.build_engine(V038C, "setup", 3, seed)
+            ra, rb = a.run_game(), b.run_game()
+            self.assertEqual((ra.rankings, ra.red_secret_payouts), (rb.rankings, rb.red_secret_payouts))
+            self.assertEqual(a.rng.getstate(), b.rng.getstate())
+
+    # 16. bot valuation
+    def test_rsp16_bot_valuation(self):
+        from sim.bots import market_share_policy as msp
+        from sim.engine.market_share import expected_market_leader_bonus
+
+        for share, rivals, sched in ((9, [9, 4], (3, 1, 0)), (5, [8, 6, 6], (3, 1, 0, 0)), (3, [3], (3, 1))):
+            self.assertEqual(msp.expected_payout_value(share, rivals, sched),
+                             expected_market_leader_bonus(share, rivals, sched))
+        eng = _eng_c()
+        st = eng.state
+        self.assertTrue(msp.payout_active(st.players[0], st, msp.DEFAULT_POLICY))
+        self.assertGreater(msp.expected_red_payouts_remaining(st), 1.0)  # >= end payout
+        _shares(eng, (8, 9, 4))
+        p = st.players[0]
+        self.assertGreater(sfp.share_value(p, st, 2), sfp.share_value(p, st, 0) + 2 * sfp.SHARE_VALUE)
+        self.assertGreater(sfp.expected_bank_value(p, st, DieColor.RED, 0),
+                           sfp.SECRET_VALUE * 1 * sfp.bank_probability(p, st, 0))  # payout share added
+        b = _engine()  # v038 / v038b: payout valuation inert
+        self.assertFalse(msp.payout_active(b.state.players[0], b.state, msp.DEFAULT_POLICY))
+        self.assertEqual(msp.expected_red_payouts_remaining(b.state), 0.0)
+
+    # invariants over full games
+    def test_rsp_invariants_full_games(self):
+        from tests.fixtures.v035_parity.capture import build_engine
+
+        for n in (2, 3, 4):
+            for seed in range(25):
+                eng = build_engine(V038C, "setup", n, seed)
+                res = eng.run_game()
+                cap = eng.config.market_share_start()
+                rb = res.red_banks_by_round
+                self.assertLessEqual(res.red_secret_payouts_fired, res.total_rounds + 1)  # INV-RSP-01b
+                self.assertEqual(res.red_secret_payouts_fired, len(res.red_secret_payouts))
+                reached5 = {t.round_number for t in res.telemetry_history if 5 in t.phases_executed}
+                fired = [r["round"] for r in res.red_secret_payouts]
+                self.assertEqual(len(fired), len(set(fired)))  # at most one per round
+                self.assertEqual(set(fired), {r for r in reached5 if rb[r - 1] > 0})  # INV-RSP-01
+                for rec in res.red_secret_payouts:  # INV-RSP-02
+                    sched = eng.config.red_secret_payout_schedule()
+                    for pid, place in rec["places"].items():
+                        self.assertEqual(rec["gains"][pid], sched[place - 1] if place <= len(sched) else 0)
+                self.assertEqual(res.red_secret_payout_end_fired,  # INV-RSP-04
+                                 not res.is_total_wipeout and res.end_reason != EndGameReason.MARKET_COLLAPSE)
+                self.assertEqual(res.version_comparisons, [])  # INV-RSP-05
+                for r in res.rankings:
+                    self.assertEqual(r["market_leader_bonus"], 0)
+                    self.assertEqual(r["secrets_by_source"].get("secret_face_red", 0), r["red_secrets_banked"])  # INV-RSP-03
+                    self.assertTrue(0 <= r["market_share"] <= cap and r["market_share_min"] >= 0)  # INV-RSP-08
+                for t in res.telemetry_history:
+                    for snaps in t.phase_snapshots.values():
+                        for s in snaps:
+                            self.assertTrue(0 <= s["market_share"] <= cap)

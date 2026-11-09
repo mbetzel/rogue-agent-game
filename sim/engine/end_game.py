@@ -84,7 +84,25 @@ def _return_held_contractors(engine: GameEngine) -> None:
             p.hired_contractor_count = 0
 
 
-def _v038_row(cfg: Any, p: Any, bonus: int) -> Dict[str, Any]:
+def _rsp1_on(cfg: Any) -> bool:
+    return bool(getattr(cfg, "is_red_secret_payout", False)) or getattr(cfg, "red_secret_owner_yield", None) is not None
+
+
+def _rsp1_row(p: Any, end_award: int) -> Dict[str, Any]:
+    """RSP-1 per-player telemetry (spec §14.5.5); only emitted when an RSP-1 lever is on (v038b rows unchanged)."""
+    return {
+        "red_secrets_banked": p.red_secrets_banked,
+        "red_payout_places": dict(p.red_payout_places),
+        "red_payout_secrets": p.red_payout_secrets + end_award,
+        "red_secret_payout_end": end_award,
+        "red_processing_wait_rounds": p.red_processing_wait_rounds,
+        "red_processing_wait_count": p.red_processing_wait_count,
+        "red_pending_at_end": sum(1 for d in p.glitched_dice if d.secret_pending and d.color == DieColor.RED),
+        "other_pending_at_end": sum(1 for d in p.glitched_dice if d.secret_pending and d.color != DieColor.RED),
+    }
+
+
+def _v038_row(cfg: Any, p: Any, bonus: int, end_award: int = 0) -> Dict[str, Any]:
     """v0.38 telemetry (spec §7.7 / §11). Pure: stranded Secrets are counted, never scored (INV-SF-02), so a
     repeated ``evaluate_end_game`` call gives the same rows."""
     from sim.engine import secret_faces
@@ -93,7 +111,11 @@ def _v038_row(cfg: Any, p: Any, bonus: int) -> Dict[str, Any]:
     by_source = dict(p.secrets_by_source)
     if bonus:
         by_source["market_leader_bonus"] = by_source.get("market_leader_bonus", 0) + bonus
+    if end_award:
+        by_source["red_secret_payout_end"] = by_source.get("red_secret_payout_end", 0) + end_award
+    row = _rsp1_row(p, end_award) if _rsp1_on(cfg) else {}
     return {
+        **row,
         "secrets_by_source": by_source,
         "secret_faces_rolled": dict(p.secret_faces_rolled),
         "secret_faces_banked": dict(p.secret_faces_banked),
@@ -129,12 +151,23 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
     survivor_shares = {p.player_id: int(p.market_share or 0) for p in players if not p.is_patient_zero}
     places = market_share_places(survivor_shares) if cfg.is_market_share and not all_patient_zero else {}
     awards = market_leader_bonus_awards(survivor_shares, bonus_schedule) if bonus_on else {}
+    # RSP-1 end payout (spec §14.5.3 step 7, INV-RSP-04): after the contractor return and (telemetry-only) stranded
+    # pass, before ranking; final Market Share; skipped on a Market Collapse end or a Total Wipeout. Like the Market
+    # Leader Bonus it lives in the ranking rows only (PlayerState.secrets untouched: repeat calls are pure).
+    end_payout_on = (bool(getattr(cfg, "red_secret_payout_at_end", False)) and not all_patient_zero
+                     and engine.state.end_reason != EndGameReason.MARKET_COLLAPSE)
+    end_awards = {}
+    if end_payout_on:
+        from sim.engine import secret_faces
+
+        end_awards = secret_faces.red_secret_payout_awards(cfg, engine.state)
 
     rankings: List[Dict] = []
 
     for p in players:
         bonus = awards.get(p.player_id, (None, 0))[1]
-        final_secrets = p.secrets + bonus
+        end_award = end_awards.get(p.player_id, (None, 0))[1]
+        final_secrets = p.secrets + bonus + end_award
         # Portfolio Value (v0.19.0: Pure Corporate Secrets Victory Scoring):
         # 1 VP per Secret. Software modules and cash have 0 direct VP.
         portfolio_value = max(0, final_secrets) * cfg.vp_per_secret
@@ -241,7 +274,7 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
                 "company_code": getattr(getattr(p.company, "code", None), "value", None),
                 "white_hat_code": getattr(getattr(p.white_hat, "code", None), "value", None),
                 "seat": p.player_id,
-                **(_v038_row(cfg, p, bonus) if getattr(cfg, "secret_face_enabled", False) else {}),
+                **(_v038_row(cfg, p, bonus, end_award) if getattr(cfg, "secret_face_enabled", False) else {}),
             }
         )
 
@@ -356,4 +389,23 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
         pre_bonus_winner_ids=pre_bonus_winner_ids,
         market_leader_bonus_changed_winner=changed_winner,
         market_leader_bonus_tied_paid_place=tied_paid_place,
+        **(_rsp1_game_fields(engine, end_payout_on and bool(end_awards), end_awards) if _rsp1_on(cfg) else {}),
     )
+
+
+def _rsp1_game_fields(engine: GameEngine, end_fired: bool, end_awards: Dict[int, Tuple[int, int]]) -> Dict[str, Any]:
+    """RSP-1 per-game telemetry (spec §14.5.5)."""
+    s = engine.state
+    rb = list(s.red_banks_by_round) + [0] * max(0, int(s.current_round) - len(s.red_banks_by_round))
+    return {
+        "red_secret_payouts": [dict(r) for r in s.red_secret_payouts],
+        "red_secret_payouts_fired": s.red_secret_payouts_fired,
+        "rounds_with_multi_red_banks": sum(1 for x in rb if x >= 2),
+        "red_banks_by_round": rb,
+        "red_secret_payout_end_fired": end_fired,
+        "red_secret_payout_end_awards": {pid: k for pid, (_, k) in sorted(end_awards.items())},
+        "red_pending_at_end": sum(1 for p in s.players for d in p.glitched_dice
+                                  if d.secret_pending and d.color == DieColor.RED),
+        "other_pending_at_end": sum(1 for p in s.players for d in p.glitched_dice
+                                    if d.secret_pending and d.color != DieColor.RED),
+    }

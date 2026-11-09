@@ -19,6 +19,9 @@ v0.38 (spec v380 §10): every Secret face / Processing Box / Glitched Shield Slo
 functions (Phase 1 round-start reset, Phase 5 step 3b graduation clear, end-game stranded pass in
 ``evaluate_end_game``), so ``_run_round_six_phase`` and this tail are unchanged; the new PlayerState fields are
 plain ints / dicts / lists and ``Die.secret_pending`` is atomic, so the ``Die`` fast path stays valid.
+RSP-1 (spec §14.5.3 step 10): the Phase 1 Red-bank flag reset lives in ``phase1_roll_deploy.execute_phase_1`` and
+the Red Secret payout hook at the end of ``phase5_pipeline_shift.execute_pipeline_shift``, so this tail is again
+unchanged (drift guard ``test_rb07_v038c_*``); the new GameState / Die fields are plain values.
 """
 
 from __future__ import annotations

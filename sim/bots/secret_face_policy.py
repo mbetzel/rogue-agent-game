@@ -47,7 +47,26 @@ def bank_probability(player: "PlayerState", state: "GameState", queue_pos: int) 
 
 
 def expected_bank_value(player: "PlayerState", state: "GameState", color: Any, queue_pos: int) -> float:
+    cfg = state.config
+    if getattr(cfg, "is_red_secret_payout", False) and DieColor(color) == DieColor.RED:
+        return red_secret_face_value(player, state) * bank_probability(player, state, queue_pos) * SECRET_VALUE
     return sf.secret_yield(state.config, player, color) * bank_probability(player, state, queue_pos) * SECRET_VALUE
+
+
+def red_secret_face_value(player: "PlayerState", state: "GameState") -> float:
+    """RSP-1 (spec §14.5.6): owner yield + q x expected payout at the own share, q = P(no other Red bank this
+    round) — the marginal payout this die enables. In Corporate Secrets, before the bank probability."""
+    from sim.bots import market_share_policy as msp
+
+    sched = state.config.red_secret_payout_schedule(len(state.players))
+    rivals = [int(q.market_share or 0) for q in state.players
+              if q.player_id != player.player_id and not q.is_patient_zero]
+    q = 1.0
+    for o in state.players:
+        if o.player_id != player.player_id:
+            q *= 1.0 - msp.p_red_bank(o, state)
+    own = sf.secret_yield(state.config, player, DieColor.RED)
+    return own + q * msp.expected_payout_value(int(player.market_share or 0), rivals, sched)
 
 
 def share_value(player: "PlayerState", state: Optional["GameState"], n: int, share: Optional[int] = None) -> float:
@@ -82,6 +101,8 @@ def share_value(player: "PlayerState", state: Optional["GameState"], n: int, sha
                   if q.player_id != player.player_id and not q.is_patient_zero]
         d = expected_market_leader_bonus(share + gain, rivals, sched) - expected_market_leader_bonus(share, rivals, sched)
         v += msp.leader_bonus_time_weight(state, pol) * SECRET_VALUE * d
+    if msp.payout_active(player, state, pol):
+        v += SECRET_VALUE * msp.payout_share_delta(player, state, share, share + gain)  # RSP-1 (spec §14.5.6)
     return v
 
 
@@ -198,6 +219,8 @@ def _pending(player: "PlayerState", color: DieColor) -> int:
 
 def _red_tier_drop(cfg: Any, share: int) -> int:
     """Red yield lost when Market Share drops from ``share`` to ``share - 1``."""
+    if getattr(cfg, "red_secret_owner_yield", None) is not None:
+        return 0  # RSP-1: flat owner yield, no tiers
     def y(s: int) -> int:
         for m, v in cfg.secret_yield_red_tiers:
             if s >= m:
@@ -253,7 +276,7 @@ def color_score(bot: Any, player: "PlayerState", state: "GameState", color: DieC
     cfg = state.config
     die = create_colored_die(color=color, die_id=-1, variant_card=state.variant_cards.get(color),
                              face_profile=cfg.die_face_profile)
-    if color == DieColor.YELLOW and cfg.die_face_profile in ("V038_YELLOW_MS", "V038_YELLOW_MS_ALT"):
+    if color == DieColor.YELLOW and cfg.die_face_profile in ("V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3"):
         v = yellow_ms_score(player, state, die)
     else:
         v = mean_reroll_value(player, state, die, len(player.glitched_dice))

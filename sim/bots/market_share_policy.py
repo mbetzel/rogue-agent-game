@@ -63,6 +63,75 @@ def leader_bonus_active(player: Any, state: Any, pol: MarketSharePolicy) -> bool
     return bool(getattr(cfg, "is_market_leader_bonus", False) and is_aware(state) and pol.leader_bonus_aware)
 
 
+# ---------------------------------------------------------------------------
+# RSP-1 Red Secret payout valuation (spec §14.5.6). Pure, no RNG; inert unless the payout schedule is non-empty.
+# ---------------------------------------------------------------------------
+def payout_active(player: Any, state: Any, pol: MarketSharePolicy) -> bool:
+    cfg = getattr(state, "config", None)
+    return bool(getattr(cfg, "is_red_secret_payout", False) and is_aware(state) and pol.leader_bonus_aware)
+
+
+def expected_payout_value(share: int, rival_shares: Any, schedule: Any) -> float:
+    """``expected_market_leader_bonus`` generalised to any place schedule (same tie handling)."""
+    return expected_market_leader_bonus(share, rival_shares, schedule)
+
+
+def estimated_rounds_left(state: Any) -> int:
+    """Rounds left including the current one: remaining Version-track space / observed Corruption fill rate,
+    clamped to [1, max_rounds - current_round + 1]. [TUNE-BOT] (no prior pacing helper existed).
+    Ignores Patient Zero / Market Collapse endings, so it is an upper-side estimate."""
+    if getattr(state, "is_final_round", False):
+        return 1
+    rnd = max(1, int(state.current_round))
+    cap_left = max(0, int(state.corruption_track_capacity) - int(state.corruption_track))
+    filled = int(state.corruption_track)
+    for i, v in enumerate(state.version_deck):
+        if i < state.current_version_index:
+            filled += int(v.track_capacity)
+        elif i > state.current_version_index:
+            cap_left += int(v.track_capacity)
+    # observed fill per completed round, floored at 2 cubes / round (round-1 calibration vs v038c games) [TUNE-BOT]
+    rate = max(2.0, filled / max(1, rnd - 1))
+    est = int(-(-cap_left // rate)) if cap_left > 0 else 1
+    return max(1, min(est, int(state.config.max_rounds) - rnd + 1))
+
+
+def p_red_bank(q: Any, state: Any) -> float:
+    """Per-round chance seat ``q`` banks a Red Secret: Red dice owned x 1/6 (capped at 1), or 1 with one pending."""
+    if q.is_patient_zero:
+        return 0.0
+    if any(getattr(d, "secret_pending", False) and d.color == DieColor.RED for d in q.glitched_dice):
+        return 1.0
+    reds = sum(1 for d in q.total_dice if d.color == DieColor.RED)
+    return min(1.0, reds / 6.0)
+
+
+def expected_red_payouts_remaining(state: Any) -> float:
+    """E_in (remaining rounds with >= 1 Red bank) + P_end (end payout unless a Market Collapse looks likely)."""
+    if not getattr(state.config, "is_red_secret_payout", False):
+        return 0.0
+    miss = 1.0
+    for q in state.players:
+        miss *= 1.0 - p_red_bank(q, state)
+    e_in = estimated_rounds_left(state) * (1.0 - miss)
+    p_end = 0.0
+    if state.config.red_secret_payout_at_end:
+        low = any(int(q.market_share or 0) <= 2 for q in state.players if not q.is_patient_zero)
+        p_end = 0.5 if (low and state.config.market_collapse_enabled) else 1.0
+    return e_in + p_end
+
+
+def payout_share_delta(player: Any, state: Any, before: int, after: int, rivals: Any = None) -> float:
+    """Δ expected payout value x (E_in + P_end), in Corporate Secrets."""
+    sched = state.config.red_secret_payout_schedule(len(state.players))
+    if rivals is None:
+        rivals = [int(q.market_share or 0) for q in state.players
+                  if q.player_id != player.player_id and not q.is_patient_zero]
+    rivals = list(rivals)
+    d = expected_payout_value(after, rivals, sched) - expected_payout_value(before, rivals, sched)
+    return d * expected_red_payouts_remaining(state)
+
+
 def leader_bonus_time_weight(state: Any, pol: MarketSharePolicy) -> float:
     if getattr(state, "is_final_round", False):
         return pol.leader_bonus_final_round_weight
@@ -237,6 +306,10 @@ def _marginal_block_value_v037(color: CubeColor, rem: Dict[CubeColor, int], play
         d = (expected_market_leader_bonus(max(0, share - r + 1), rivals, sched)
              - expected_market_leader_bonus(max(0, share - r), rivals, sched))
         v += leader_bonus_time_weight(state, pol) * pol.blue_value * d
+    if payout_active(player, state, pol):
+        # RSP-1 (spec §14.5.6): Red Secret payouts kept by this Market Share (no rival-denial term)
+        rivals = list(estimated_rival_shares(player, state, attack.get(CubeColor.RED, 0)).values())
+        v += pol.blue_value * payout_share_delta(player, state, max(0, share - r), max(0, share - r + 1), rivals)
     return v
 
 
@@ -295,6 +368,16 @@ def urgent_regain(player: "PlayerState", state: "GameState", pol: MarketSharePol
     v0.36.0 urgency (``_urgent_regain_v036``), raised in v2.0+ / the Final Round to the smallest regain that
     improves the expected Market Leader Bonus when the bonus is active (v0.37.0 spec §5.3)."""
     k0 = _urgent_regain_v036(player, state, pol, cap)
+    if payout_active(player, state, pol) and player.market_share is not None:
+        # RSP-1 (spec §14.5.6): largest regain whose payout value covers its research cost
+        room = min(cap, player.market_share_max - player.market_share)
+        cost = int(state.config.share_regain_cost_by_level.get(player.patent_level, 2))
+        best = k0
+        for k in range(1, room + 1):
+            gain = pol.blue_value * payout_share_delta(player, state, player.market_share, player.market_share + k)
+            if gain >= k * cost:
+                best = max(best, k)
+        return best
     if (not leader_bonus_active(player, state, pol) or player.market_share is None
             or (state.current_version_index < 1 and not state.is_final_round)):
         return k0
