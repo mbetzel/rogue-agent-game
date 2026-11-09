@@ -38,6 +38,7 @@ class MarketSharePolicy:
     leader_bonus_aware: bool = True  # sweep can turn individual seats off
     leader_bonus_time_weights: Tuple[float, float, float] = (0.3, 0.6, 1.0)  # current version index 0 / 1 / 2+
     leader_bonus_final_round_weight: float = 1.0
+    payout_round_discount: float = 0.75  # [TUNE-BOT] RSP-1 per-round discount gamma on future Red Secret payouts
 
 
 DEFAULT_POLICY = MarketSharePolicy()
@@ -79,7 +80,8 @@ def expected_payout_value(share: int, rival_shares: Any, schedule: Any) -> float
 def estimated_rounds_left(state: Any) -> int:
     """Rounds left including the current one: remaining Version-track space / observed Corruption fill rate,
     clamped to [1, max_rounds - current_round + 1]. [TUNE-BOT] (no prior pacing helper existed).
-    Ignores Patient Zero / Market Collapse endings, so it is an upper-side estimate."""
+    Ignores Patient Zero / Market Collapse endings, so it is biased high; the RSP-1 payout valuation absorbs
+    that bias with ``MarketSharePolicy.payout_round_discount`` (gamma) rather than correcting this estimate."""
     if getattr(state, "is_final_round", False):
         return 1
     rnd = max(1, int(state.current_round))
@@ -106,30 +108,35 @@ def p_red_bank(q: Any, state: Any) -> float:
     return min(1.0, reds / 6.0)
 
 
-def expected_red_payouts_remaining(state: Any) -> float:
-    """E_in (remaining rounds with >= 1 Red bank) + P_end (end payout unless a Market Collapse looks likely)."""
+def expected_red_payouts_remaining(state: Any, pol: Optional[MarketSharePolicy] = None) -> float:
+    """Discounted E_in (sum_{t<R} gamma^t x P(>= 1 Red bank)) + P_end x gamma^R (end payout; 0.5 if a Market
+    Collapse looks likely). gamma = ``pol.payout_round_discount``; gamma = 1.0 is the undiscounted R x p + P_end."""
     if not getattr(state.config, "is_red_secret_payout", False):
         return 0.0
+    gamma = (pol or DEFAULT_POLICY).payout_round_discount
     miss = 1.0
     for q in state.players:
         miss *= 1.0 - p_red_bank(q, state)
-    e_in = estimated_rounds_left(state) * (1.0 - miss)
+    p = 1.0 - miss
+    r = estimated_rounds_left(state)
+    e_in = p * (r if gamma == 1.0 else (1.0 - gamma ** r) / (1.0 - gamma))
     p_end = 0.0
     if state.config.red_secret_payout_at_end:
         low = any(int(q.market_share or 0) <= 2 for q in state.players if not q.is_patient_zero)
-        p_end = 0.5 if (low and state.config.market_collapse_enabled) else 1.0
+        p_end = (0.5 if (low and state.config.market_collapse_enabled) else 1.0) * gamma ** r
     return e_in + p_end
 
 
-def payout_share_delta(player: Any, state: Any, before: int, after: int, rivals: Any = None) -> float:
-    """Δ expected payout value x (E_in + P_end), in Corporate Secrets."""
+def payout_share_delta(player: Any, state: Any, before: int, after: int, rivals: Any = None,
+                       pol: Optional[MarketSharePolicy] = None) -> float:
+    """Δ expected payout value x discounted (E_in + P_end), in Corporate Secrets."""
     sched = state.config.red_secret_payout_schedule(len(state.players))
     if rivals is None:
         rivals = [int(q.market_share or 0) for q in state.players
                   if q.player_id != player.player_id and not q.is_patient_zero]
     rivals = list(rivals)
     d = expected_payout_value(after, rivals, sched) - expected_payout_value(before, rivals, sched)
-    return d * expected_red_payouts_remaining(state)
+    return d * expected_red_payouts_remaining(state, pol)
 
 
 def leader_bonus_time_weight(state: Any, pol: MarketSharePolicy) -> float:
@@ -309,7 +316,7 @@ def _marginal_block_value_v037(color: CubeColor, rem: Dict[CubeColor, int], play
     if payout_active(player, state, pol):
         # RSP-1 (spec §14.5.6): Red Secret payouts kept by this Market Share (no rival-denial term)
         rivals = list(estimated_rival_shares(player, state, attack.get(CubeColor.RED, 0)).values())
-        v += pol.blue_value * payout_share_delta(player, state, max(0, share - r), max(0, share - r + 1), rivals)
+        v += pol.blue_value * payout_share_delta(player, state, max(0, share - r), max(0, share - r + 1), rivals, pol)
     return v
 
 
@@ -374,7 +381,7 @@ def urgent_regain(player: "PlayerState", state: "GameState", pol: MarketSharePol
         cost = int(state.config.share_regain_cost_by_level.get(player.patent_level, 2))
         best = k0
         for k in range(1, room + 1):
-            gain = pol.blue_value * payout_share_delta(player, state, player.market_share, player.market_share + k)
+            gain = pol.blue_value * payout_share_delta(player, state, player.market_share, player.market_share + k, None, pol)
             if gain >= k * cost:
                 best = max(best, k)
         return best

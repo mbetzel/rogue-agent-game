@@ -1290,6 +1290,41 @@ class TestRSP1(unittest.TestCase):
         self.assertFalse(msp.payout_active(b.state.players[0], b.state, msp.DEFAULT_POLICY))
         self.assertEqual(msp.expected_red_payouts_remaining(b.state), 0.0)
 
+    def test_rsp17_payout_discount(self):
+        from dataclasses import replace
+        from unittest import mock
+        from sim.bots import market_share_policy as msp
+
+        eng = _eng_c()
+        st = eng.state
+        miss = 1.0
+        for q in st.players:
+            miss *= 1.0 - msp.p_red_bank(q, st)
+        p = 1.0 - miss
+        r = msp.estimated_rounds_left(st)
+        g = msp.DEFAULT_POLICY.payout_round_discount
+        self.assertEqual(g, 0.75)
+        want = p * sum(g ** t for t in range(r)) + (g ** r) * (
+            0.5 if (any(int(q.market_share or 0) <= 2 for q in st.players if not q.is_patient_zero)
+                    and st.config.market_collapse_enabled) else 1.0) * (1 if st.config.red_secret_payout_at_end else 0)
+        self.assertAlmostEqual(msp.expected_red_payouts_remaining(st), want)
+        # gamma = 1.0 reproduces the undiscounted R x p + P_end
+        one = replace(msp.DEFAULT_POLICY, payout_round_discount=1.0)
+        p_end1 = 0.0
+        if st.config.red_secret_payout_at_end:
+            low = any(int(q.market_share or 0) <= 2 for q in st.players if not q.is_patient_zero)
+            p_end1 = 0.5 if (low and st.config.market_collapse_enabled) else 1.0
+        self.assertAlmostEqual(msp.expected_red_payouts_remaining(st, one), r * p + p_end1)
+        # large R: E_in -> p / (1 - gamma)
+        with mock.patch.object(msp, "estimated_rounds_left", return_value=200):
+            e = msp.expected_red_payouts_remaining(st)
+            self.assertAlmostEqual(e, p / (1.0 - g) + p_end1 * g ** 200, places=6)
+            self.assertAlmostEqual(msp.expected_red_payouts_remaining(st, one), 200 * p + p_end1, places=6)
+        # gated off under v038b
+        b = _engine()
+        self.assertEqual(msp.expected_red_payouts_remaining(b.state), 0.0)
+        self.assertEqual(msp.expected_red_payouts_remaining(b.state, one), 0.0)
+
     # invariants over full games
     def test_rsp_invariants_full_games(self):
         from tests.fixtures.v035_parity.capture import build_engine

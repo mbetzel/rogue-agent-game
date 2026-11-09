@@ -102,7 +102,7 @@ def share_value(player: "PlayerState", state: Optional["GameState"], n: int, sha
         d = expected_market_leader_bonus(share + gain, rivals, sched) - expected_market_leader_bonus(share, rivals, sched)
         v += msp.leader_bonus_time_weight(state, pol) * SECRET_VALUE * d
     if msp.payout_active(player, state, pol):
-        v += SECRET_VALUE * msp.payout_share_delta(player, state, share, share + gain)  # RSP-1 (spec §14.5.6)
+        v += SECRET_VALUE * msp.payout_share_delta(player, state, share, share + gain, None, pol)  # RSP-1 (spec §14.5.6)
     return v
 
 
