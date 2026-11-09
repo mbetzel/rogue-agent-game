@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./sim_results/**/*.json)",
+      "Read(./tests/fixtures/**)",
+      "Read(./pnp/**/*.pdf)",
+      "Read(./web/node_modules/**)"
+    ]
+  }
+}
