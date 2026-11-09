@@ -132,17 +132,19 @@ def main(argv=None):
     ap.add_argument("--pr-push-scope", choices=("all", "non_reference"), default="non_reference",
                     help="GameConfig.bot_pr_push_scope, default non_reference for the ref1 edge check (non_reference: reference fallback/rollouts keep old behaviour)")
     ap.add_argument("--overwrite", action="store_true", help="allow replacing existing output files")
+    ap.add_argument("--out-dir", default=OUT, help="output directory (default sim_results/reference_bot/)")
     a = ap.parse_args(argv)
+    out_dir = a.out_dir
     pr_push = a.pr_push == "on"
     pr_params = json.loads(a.pr_params) if a.pr_params else None
     make_config(a.config, 3, pr_push, pr_params, a.pr_push_scope)  # fail fast on an illegal cell (ValueError)
     from sim.run_naming import guard_overwrite
-    os.makedirs(OUT, exist_ok=True)
+    os.makedirs(out_dir, exist_ok=True)
     players_list = [int(x) for x in a.players.split(",")]
     cells = a.cells.split(",")
     for P in players_list:  # check every target up front so a long run never dies (or clobbers) midway
         for cell in cells:
-            guard_overwrite(os.path.join(OUT, output_name(a.config, cell, P, a.games, pr_push, pr_params,
+            guard_overwrite(os.path.join(out_dir, output_name(a.config, cell, P, a.games, pr_push, pr_params,
                                                           a.pr_push_scope)), a.overwrite)
     for P in players_list:
         for cell in cells:
@@ -152,7 +154,7 @@ def main(argv=None):
                 rows = pool.map(play, tasks, chunksize=1)
             wall = time.perf_counter() - t0
             errs = [r for r in rows if r["error"]]
-            fn = os.path.join(OUT, output_name(a.config, cell, P, a.games, pr_push, pr_params, a.pr_push_scope))
+            fn = os.path.join(out_dir, output_name(a.config, cell, P, a.games, pr_push, pr_params, a.pr_push_scope))
             guard_overwrite(fn, a.overwrite)
             with open(fn, "w") as fh:
                 json.dump({"wall_s": wall, "pr_push": pr_push, "pr_params": pr_params,

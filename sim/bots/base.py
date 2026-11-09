@@ -152,6 +152,10 @@ class BaseBot:
     market_color_preference: Tuple[DieColor, ...] = ()
     # Lever A (sim/bots/pr_push_policy.py): only AdaptiveBalanced opts in; inert unless config.bot_pr_push
     pr_push_capable: bool = False
+    # v0.38 Secret faces (sim/bots/secret_face_policy.py): purchase colour bias, Secret-face chasing, Company colour
+    secret_face_color_bias: Dict[DieColor, float] = {}
+    secret_face_chaser: bool = False
+    follows_company_color: bool = False
 
     def __init__(self, bot_id: int, name: str = "BaseBot") -> None:
         self.bot_id = bot_id
@@ -870,6 +874,40 @@ class BaseBot:
 
         return msp.default_any_shield_allocation(player_state, remaining, available_any, game_state, attack,
                                                  msp.policy_for(self))
+
+    def choose_slot_cleaners(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        candidates: List[int],
+        glitched_slots: int,
+        game_state: Optional[GameState] = None,
+    ) -> List[int]:
+        """v0.38 Phase 1 Step 5c: indices (from ``candidates``, dice showing a shield-icon face) to place on glitched
+        shield slots; each cleans 1 slot and goes to the Scanned Box (a White Contractor is discarded)."""
+        from sim.bots import secret_face_policy
+
+        return secret_face_policy.choose_slot_cleaners(player_state, active_dice, candidates, glitched_slots,
+                                                       game_state)
+
+    def choose_helix_face_override_v038(
+        self, player_state: PlayerState, active_dice: List[Die], game_state: GameState
+    ) -> Optional[Tuple[int, Face]]:
+        """v0.38 Brute-Force Bypass face choice (the Secret face is allowed, OQ-10)."""
+        from sim.bots import secret_face_policy
+
+        return secret_face_policy.helix_face_override(player_state, active_dice, game_state)
+
+    def choose_triage_order(
+        self,
+        player_state: PlayerState,
+        dice: List[Die],
+        game_state: Optional[GameState] = None,
+    ) -> List[Die]:
+        """v0.38 Conveyor Triage / Air-Gapped Backup order: highest current Secret yield first, then lowest die_id."""
+        from sim.bots import secret_face_policy
+
+        return secret_face_policy.choose_triage_order(player_state, dice, game_state)
 
     def choose_poach_target(self, player_state: PlayerState, game_state: GameState, tied_pids: List[int]) -> int:
         """v0.36.0 Customer Poaching tie: default most Corporate Secrets, then first clockwise from the actor."""

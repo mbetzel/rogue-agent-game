@@ -192,6 +192,16 @@ def _green_value(player: "PlayerState", pol: MarketSharePolicy) -> float:
 def marginal_block_value(color: CubeColor, rem: Dict[CubeColor, int], player: "PlayerState", state: "GameState",
                          attack: Dict[CubeColor, int], pol: MarketSharePolicy) -> float:
     """Value of blocking one more cube of ``color`` given the currently unblocked counts ``rem``."""
+    v = _marginal_block_value_v037(color, rem, player, state, attack, pol)
+    if getattr(state.config, "secret_face_enabled", False):
+        from sim.bots import secret_face_policy
+
+        return secret_face_policy.marginal_block_value(color, rem, player, state, attack, v)
+    return v
+
+
+def _marginal_block_value_v037(color: CubeColor, rem: Dict[CubeColor, int], player: "PlayerState",
+                               state: "GameState", attack: Dict[CubeColor, int], pol: MarketSharePolicy) -> float:
     r = int(rem.get(color, 0))
     if r <= 0:
         return float("-inf")

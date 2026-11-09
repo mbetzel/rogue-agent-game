@@ -84,6 +84,37 @@ def _return_held_contractors(engine: GameEngine) -> None:
             p.hired_contractor_count = 0
 
 
+def _v038_row(cfg: Any, p: Any, bonus: int) -> Dict[str, Any]:
+    """v0.38 telemetry (spec §7.7 / §11). Pure: stranded Secrets are counted, never scored (INV-SF-02), so a
+    repeated ``evaluate_end_game`` call gives the same rows."""
+    from sim.engine import secret_faces
+
+    n_stranded, s_stranded = secret_faces.stranded(cfg, p)
+    by_source = dict(p.secrets_by_source)
+    if bonus:
+        by_source["market_leader_bonus"] = by_source.get("market_leader_bonus", 0) + bonus
+    return {
+        "secrets_by_source": by_source,
+        "secret_faces_rolled": dict(p.secret_faces_rolled),
+        "secret_faces_banked": dict(p.secret_faces_banked),
+        "secret_yield_hist": {k: dict(v) for k, v in p.secret_yield_hist.items()},
+        "stranded_dice": n_stranded,
+        "stranded_secrets": s_stranded,
+        "secrets_lost_returned": p.secrets_lost_returned,
+        "glitched_shield_slots": p.glitched_shield_slots,
+        "slots_glitched_by_source": dict(p.slots_glitched_by_source),
+        "slots_cleaned_by_die": p.slots_cleaned_by_die,
+        "slots_cleaned_by_face": p.slots_cleaned_by_face,
+        "slots_cleared_by_graduation": p.slots_cleared_by_graduation,
+        "max_glitched_slots": p.max_glitched_slots,
+        "zero_capacity_rounds": p.zero_capacity_rounds,
+        "market_share_gained_face": p.market_share_gained_face,
+        "company_color": p.company_color,
+        "colored_dice_owned_by_round": [dict(r) for r in p.colored_dice_owned_by_round],
+        "processing_box_count": len(p.glitched_dice),
+    }
+
+
 def evaluate_end_game(engine: GameEngine) -> EndGameResult:
     cfg = engine.config
     _return_held_contractors(engine)
@@ -210,6 +241,7 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
                 "company_code": getattr(getattr(p.company, "code", None), "value", None),
                 "white_hat_code": getattr(getattr(p.white_hat, "code", None), "value", None),
                 "seat": p.player_id,
+                **(_v038_row(cfg, p, bonus) if getattr(cfg, "secret_face_enabled", False) else {}),
             }
         )
 

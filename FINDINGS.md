@@ -2195,3 +2195,117 @@ Question (User, 2026-11-07): did lever A (situational Public Relations push / Ma
 3. VentureGreed diagnosis accepted (bot problem). Lever V2 adopted: the 40% archetype guardrail fails only if ref1 also cannot hold that archetype below fair share. V1 kept for later; V3–V5 not pursued.
 4. Sweep reports re-baseline to the 13-member switch-off ref1 value (78.6%).
 5. Fix `run_reference_bot_validation.py` output naming so `--pr-params` runs don't overwrite each other.
+
+## 42. Pre-SDLC Exploration: Secret Faces, Processing Box & Company Starting Die (package locked, no rules change yet)
+
+Question (User, 2026-11-07): every player is hit equally and only Secrets score, so every seat plays the same Blue-first game. Money and research are not enough of an engine, and Red and Green are "other things to juggle". Make the engine feed Secrets, so each player's dice decide which cubes hurt them. Sources: scratchpad probes (hooks / a standalone model, not rules code): `exposure_probe.py`, `colored_probe.py`, `yield_model.py`, `cube_cost.py`, `tune_probe.py`, `blue0_probe.py`, `grid_probe.py`, `grid2.py`.
+
+**Step 1 — asymmetric cube impact (rejected).** Per-player colour→effect profiles were tested first (v0.37 roster, 3P, 2,400 games, random version deals). Cube exits per game vary with the v1/v2 deal (Red 11.7–23.6, Blue 10.8–16.4, Green 10.5–20.1). With the same defence, moving Secret theft from Blue to Red costs 12.0 vs 1.7 Secrets under Script Kiddie + RaaS (94% breach). Blue is the scarcest colour on purpose. The User kept the shared threat (like *Moon Colony Bloodbath*): divergence should come from what players build.
+
+**Step 2 — baseline (v0.37 roster, 3P, 1,200 games).** Seats own 0.7 / 1.3 / 1.7 / 2.3 colored dice in rounds 2 / 4 / 6 / 8 but have only ~0.8 In Production. Mix: Blue 35%, Red 32%, Yellow 23%, Green 10%. Non-Blue Secret gains net +0.08 per seat (§36).
+
+**Step 3 — Secret-yield model.** Single seat with scripted priorities, real tower draws from Step 1, calibrated so v0.37-like rules give Blue losses 3.96 (sim ~3.8) and 2.1 colored dice bought (sim ~2.3). It is ~1 Secret more generous than the full sim. No win rates.
+
+| 3P, final Secrets at start 6 (no Market Collapse unless noted) | Red | Blue | Green | Mixed | Diverse | Red / Green cube cost to owner (r3) |
+|---|---|---|---|---|---|---|
+| First settled rules (Blue 1 + 2 Breakthroughs + bonus, cap 3; Green 2; Red 2/1/0 at 12/6) | 8.2 | 11.8 | 6.5 | 7.1 | — | 0.34 / 0.69 |
+| Blue 0 + Breakthroughs + bonus; Red 3/2/1/0 at 14/10/6 | 10.6 | 9.5 | 6.5 | 5.7 | 7.4 | 0.56 / 0.67 |
+| One Blue research space (Defense Grid L3) | 10.6 | 10.6 | 6.5 | 7.4 | 8.4 | 0.56 / 0.67 |
+| + Green base 3 | 10.6 | 10.6 | 9.3 | 7.6 | 8.6 | 0.56 / 0.65 |
+| + 12-point track (tiers 10/7/4) | 8.3 | 10.8 | 9.4 | 7.2 | 7.8 | 0.69 / 0.67 |
+| + Company die replaces a Gray | 11.9 | 13.9 | 14.2 | 10.5 | 11.0 | 0.92 / 0.75 |
+
+Red tiers on the package (start 5): 12 track 10/7/4 → Red seat 10.9, cube cost 0.95; **12 track 9/5/1 → 12.8, 0.85**; 14 track 11/7/3 → 12.8, 0.85; 18 track 14/10/6 → 13.7, 0.74. Blue costs ~1.0 for every seat. Today Red and Green cost ~0.
+
+**Package at start 4 (12 track 9/5/1):** Red 11.8, Blue 11.8, Green 12.1, Mixed 8.9, Diverse 9.6, starting die only 6.4. Breach per seat at 3 / 4 starting Secrets: specialists 6–8% / 3–4%, Mixed 11% / 6.5%. v0.37-like reference in the model: ~10% at 8.
+
+**Takeaways:**
+1. Secret faces make the engine score: specialist paths earn 7–10 Secrets per game vs ~0 today, and each colour's cubes now cost its owners 0.75–0.92 Secrets against Blue's 1.0 for everyone. The tower stays equal for all; the payoff now depends on your dice.
+2. Glitched Shield Slots with one free clear per Phase 5 graduation never take a seat's last shield slot (lingering, not compounding).
+3. The Triage Bandwidth cap rarely binds (≤1.1% of colored dice blocked from chasing); Money is the real limit at these ownership levels.
+4. Blue's research faces paid for its own yield (11.8, far ahead); a single +1 research space fixed it.
+5. Specialising still beats spreading by ~2 Secrets. The model has no competition for dice (6 per colour at 3P, two Companies per colour), which only the full sim can test.
+6. Yellow-first (fuel) is the weakest path in isolation. Watch item.
+7. Market Collapse off: 3P sim endings 58% Singularity / 37% Patient Zero / 5% Total Wipeout, games +0.3 rounds. Check the 2P Singularity guardrail (pass ≤ 43%).
+
+**Locked package (User, 2026-11-07):**
+- **Secret face** (new term, provisional): Face 5 on Red, Blue, Green and Purple dice. The die goes to the **Processing Box** (new term, provisional; replaces the Glitched Box; Under Development = Processing Box → Scanned Box). The Secret is gained when Phase 5 Conveyor Triage moves the die out; dice still in the Processing Box at game end lose their Secret. Free rerolls stay. **Glitched Box** and the **Glitch face** are retired.
+- **Yields:** Red 3 / 2 / 1 / 0 at Market Share 9+ / 5–8 / 1–4 / 0. Blue 1, +1 if you blocked at least 1 Blue cube that round, +1 at Defense Grid Level 3 (max 3). Green 3 minus your Glitched Shield Slots (min 0). Purple 1.
+- **Market Share:** 12-point track (start and max 12). Market Collapse removed as an end trigger.
+- **Defence:** colored dice have no shield faces; all shields are `Block 1 Any` from Gray, White and Purple dice.
+- **Yellow:** fuel die (choice faces such as `$` / research), no Secret face, no shields.
+- **Glitched Shield Slots** (provisional term): unblocked Green cubes and the "glitch X dice" Corruption spaces glitch slots. A die placed to clean a slot goes to the Scanned Box. Once per Phase 5, if at least 1 die graduates to Ready for Release, clear 1 slot. White Contractor glitch faces discard the die.
+- **Company starting die:** each Client Company names a Red, Blue or Green starting die (two Companies per colour). It replaces 1 starting Gray; the Triage Level 1 Breakthrough gives a Gray die (replacing its 2 White Contractors).
+- **Starting Secrets:** 4–5 at 3P for the full sim probe; 2P / 4P to be fitted.
+- **Draft (to be confirmed by the probe):** die faces, Variant Card rework and power retargets as proposed to the User 2026-11-07. Red F1 `+1 Market Share / +$1`; Blue takes the research faces; Green F1 `Clean 1 Glitched Shield Slot / +$1`. R1 `+$2 & +1 Market Share`; B1 `+1 🔬` (+`$2` on no Blue damage); B2 pay-`$4` only; B3 moves Processing → Scanned in Phase 3; G1 / G2 clean slots + 🔬; Y3 goes to the Scanned Box. *Magnetic Splice* and *Jumper Diagnostics* move a die out of the Processing Box (banking its Secret). *Brute-Force Bypass* becomes +1 free reroll and set 1 die to any non-Star face. *Arbitrary Code Execution* may need to exclude the Secret face.
+
+**Implementation plan (pending SDLC kick-off):**
+1. **Glossary approval:** confirm Secret face, Processing Box and Glitched Shield Slot; retire Glitched Box and Glitch face; update the Market Share / Market Collapse entries.
+2. **Spec (`principal-engineer`):** `GameConfig` levers for each part of the package (Secret faces, yields, 12-point track, Market Collapse off, no colored shields, Yellow fuel, Glitched Shield Slots with graduation clear, Company starting die, Breakthrough changes), with the v0.37 path kept for parity.
+3. **Implementation (`senior-engineer`) + review (`staff-engineer`):** engine, die faces, Variant Cards, powers; bot policies for chasing Secret faces, colour-aware Any-shield splits and purchases. Tests: banking at triage, stranded dice on Singularity, yield tiers, slot clear, starting die.
+4. **Sweep (`product-owner`):** 2/3/4P with the roster rule, starting Secrets 3–6, full guardrails (endings, Total Wipeout, rounds, archetype spread), win rate by Company colour and by path, and the ref1 edge check.
+5. **Balance assessment (`game-designer`):** confirm the model's results with real competition for dice; tune tiers, Green base and starting Secrets.
+6. **Phase B:** RULES.md, PnP and web after sign-off (`graphic-designer` for the Company Terminal Mat and dice).
+
+**Glossary decisions (User, 2026-11-07):** Secret face, Processing Box and Glitched Shield Slot are approved as final terms, and Glitched Box is retired. The `Glitch` face stays on White Contractor dice only (it discards the die); colored dice no longer have it. Phase B retires Color-Specific Shield, Red / Blue / Green Shields, Two-Stage Defensive Blocking and Market Collapse (as an end trigger). The sim keeps the v0.37 path behind levers for parity.
+
+**Status: package locked for the full sim probe (User, 2026-11-07). No RULES.md, PnP, web or sim change.**
+
+## 43. Phase 49 Sweep & Balance Assessment (`v0.38` candidate): NOT APPROVED
+
+Sources: `sim_results/v380_secret_faces/sweep_report.md` (15 cells × 1,200 games, roster mixed1, ref1 3P 1,200), `docs/findings/v380_balance_assessment.md` (probes P0–P11, 600 games per cell).
+
+- **Works:** stranded Secrets ~3%; no round with zero shield capacity; Total Wipeout ≤1% at 3P/4P; 8.8–9.6 rounds; ref1 non_reference 78.2% ≈ the v0.37 13-member portfolio (78.6%).
+- **2P Singularity** 63–82% at S3–S6 (guardrail ≤48%). Each starting Secret moves only ~5–6 pts. Only the P9 stack (S3 + Green base 2 + Purple yield 0) reaches 46.0%, with 8.2% Total Wipeout.
+- **3P/4P Singularity** 45–75%; P11 (S4 + Green base 2 + Market Leader Bonus 4-2) gives 49.5% / 46.5%.
+- **Archetype spread** 46–53 pts. The lever A push/dump line accounts for 11–16 pts (P1, bot artifact); the rest (~1.6× fair share) is a rule effect: Company-colour commitment and free 0 Market Share.
+- **0 Market Share is a degenerate stable state:** 28–31% of seats end there. Red cubes then do nothing, so all shields go to Blue/Green, and Red dice keep paying. ref1 ends at 0 in 82.7% of games and wins 77.3% of those. A bigger Market Leader Bonus barely helps (P10).
+- **Red path** strongest (61 / 46 / 38% at 2/3/4P); Red tiers 2/2/1/0 (P2) trim it. **Yellow path** weak (31 / 13 / 5%): Yellow cannot turn Money into Secrets (face-design gap).
+- **Tooling bug:** `--set corruption_track_capacity_by_player_count` is silently ignored (P4 identical to P0).
+
+**User decisions pending (assessment doc):** (1) 2P Singularity guardrail with Market Collapse off; (2) a cost for 0 Market Share (Market Collapse back / Red-at-0 cost / none); (3) Red tiers 2/2/1/0 and Green base 2; (4) starting Secrets per player count; (5) Yellow redesign; (6) lever A line for all archetypes or none in rule sweeps; (7) fix the `--set` bug.
+
+**User decisions (2026-11-08) on §43:** (1)+(2) bring Market Collapse back as an end trigger (Final Round, no elimination) under v0.38; the 2P Singularity ≤48% guardrail stays. (4) Starting Secrets 2P 3 / 3P 4 / 4P 4 for the next candidate. (5) Yellow will be redesigned (design discussion open). (7) Fix the `--set corruption_track_capacity_by_player_count` bug. (3) yields and (6) the lever A bot line: pending, after explanation.
+**User decisions (2026-11-08, cont.):** (6) lever A push/dump line off for all archetypes in rule sweeps. (3) User concern: Red 2/2/1/0 makes the top tier meaningless; proposed 2/1/0/−1 instead (under discussion). (5) Yellow direction: Market Share generator, e.g. one `+2 Market Share` face and one `+1 Market Share / +1 🔬` face (to be modelled). Green cube resolution and late-game Green pressure are open for discussion.
+**User decisions (2026-11-08, cont.):** Red Secret face yield stays 3 / 2 / 1 / 0 with raised thresholds: Market Share 11–12 / 7–10 / 3–6 / 0–2 (2/1/0/−1 rejected: a Secret-costing face is a dead roll and echoes the retired Unpaid Ransom Leak). Green resolution accepted as is (glitches the slot for later rounds; dice already placed unaffected); a per-round slot-glitch cap is added as an off-by-default lever. Green base 3 vs 2 left to the probe.
+
+### 43.1 Candidate 2 probes (`v038b`): APPROVED WITH TUNE
+
+Source: `docs/findings/v380_balance_assessment.md` "Candidate 2" (probes Q0–Q6, R1–R2; 600 games per cell; noise ±2 pts on endings, ±4–6 pts on archetype and path rates).
+- Market Collapse dominates in v038b (41–49%, 7.8–8.0 rounds). Cause: the 12-point start, not the new Red thresholds (Q4 ±2 pts).
+- **Recommended C2 (R1):** v038b + starting Market Share 14 + Market Leader Bonus 2P +4 / 3–4P +4, +2. Endings (2P / 3P / 4P): Market Collapse 29.5 / 32.2 / 31.0%, Singularity 34.8 / 30.3 / 26.7% (2P guardrail met), Patient Zero 32–42%; rounds 8.24 / 8.25 / 7.94; spread 41 / 31 / 32 pts; AdaptiveBalanced 69 / 48 / 42%.
+- Green base 2 rejected (Green path 21 / 13% at 3P/4P). The slot cap of 2 is inert. Yellow MS vs MS_ALT are within noise.
+- **Yellow still weak** (16% / 10% at 3P / 4P): Yellow seats end with the lowest Market Share, since Red exits strip their income-phase gains. They bank 2.5–3 fewer Secret-face Secrets. Bot purchase scoring values Yellow as Money (selection bias toward weak bots).
+- **User decisions pending:** C2 adoption; Green base 3; slot cap; Yellow profile; Yellow bot fix vs rules probe; 4P 7.9 rounds; 2P spread.
+**User decisions (2026-11-08) on §43.1:** (1) adopt C2: v038b + starting Market Share 14 at all player counts + Market Leader Bonus 2P +4 / 3–4P +4, +2, for the 1,200-game confirm sweep and the ref1 check. (2) Green base 3. (3) Keep `glitched_slots_per_round_cap` in code, default off, out of the rules. (4) Yellow F1 stays `+2 Market Share` for now. (5) Fix bot Yellow valuation first, then re-measure. (6) Accept 4P 7.9 rounds for now. (7) Accept the 2P spread for now; re-check with ref1 at 2P.
+
+### 43.2 C2 confirm sweep (`v038b`, 1,200 games per pod)
+
+Source: `sim_results/v380_secret_faces/c2/sweep_report.md`. Endings (2P / 3P / 4P): Singularity 33.8 / 27.4 / 25.3%, Patient Zero 33.7 / 39.6 / 39.9%, Market Collapse 29.1 / 32.8 / 34.6%, Total Wipeout 3.4 / 0.2 / 0.2%. Rounds 8.15 / 8.16 / 7.92. 2P Singularity guardrail met. Archetype spread 35.7 / 38.2 / 33.3 pts (v037 26.9 / 36.1 / 34.1); AdaptiveBalanced 68.9 / 53.2 / 43.3%. Company Red leads by 8–13 pts at 3P/4P; Yellow path 39.4 / 20.8 / 12.1%. ref1 non_reference (lever A off, as the preset): 3P 84.1%, 2P 92.4%. The comparable baseline is 78.6% (switch-off), since rule sweeps run with lever A off. Correction: the first sweep's v037 rows omitted Market Collapse (2P 25.0 / 3P 20.9 / 4P 27.1%).
+
+### 43.3 C2 assessment: APPROVED WITH TUNE (`docs/findings/v380_balance_assessment.md` "C2 confirm", probes T1–T4)
+- ref1 rise (3P 84.1 / 2P 92.4%) is a bot skill gap, not an exploit. The ref seat alone triggers Market Collapse in 4–5% of games, at no more than its normal win rate. It is the only seat that blocks Red and climbs Public Relations. With lever A on for the rivals, ref still wins 79.2%.
+- Red Company lead is a rule effect: the yield of 3 at 11+ stacks with Red F1 `+1 Market Share`. T4 (Red 2/2/1/0) flattens the Company lead but moves the 3P lead to the Green path (49%). Note: the User already rejected 2/2/1/0 (dead top tier).
+- 4P Market Share 15 (T2): 7.92 → 8.01 rounds. Lever A on for all bots (T1) rejected (spread 47–52). Market Leader Bonus `+3, +1` (T3) trims the 3P spread 38 → 32.
+- Yellow unchanged by any probe (9–21%). Orchestrator note: the Yellow bot purchase scoring was already moved off Money in §14.4; the remaining gap is mostly roster selection (VentureGreed / RecklessSaboteur).
+**User decisions (2026-11-08) on §43.3:** (1) ref1 rise accepted as a bot skill gap; C2 values become the v0.38 ref1 baseline (3P 84.1%, 2P 92.4%). (3) Starting Market Share 15 at 4P. (4) Market Leader Bonus 3–4P trimmed to `+3, +1` (2P stays +4). (5) Yellow needs a rules fix (design open). (6) 2P archetype spread ~36 accepted. (2) Red to be rethought (design open). (7) C2.1 sweep and Phase B wait until Red and Yellow are resolved.
+
+### 43.4 Red rethink: shared Market Share payout (User design, 2026-11-09; pre-SDLC, not modelled yet)
+- Red Secret face no longer pays its owner by Market Share tier. Each Red die that leaves a Processing Box advances a shared table counter by 1. Every *n* Red dice banked, a payout fires: all surviving players score by Market Share place (draft: 1st 3 / 2nd 1 / others 0 Corporate Secrets; ties share the better place).
+- This payout replaces both the `v2.0` Market Share comparison (Money) and the Market Leader Bonus. One more payout fires at game end, except when the game ends by Market Collapse (and, as now, not on a Total Wipeout).
+- No new glossary term yet; the counter will need a name (User to approve).
+- Open for modelling: owner reward per Red die banked (+1 Corporate Secret vs none); *n* per player count; payout in Secrets only or Secrets + Money; stalling (holding Red dice in the Processing Box); Yellow as the Market Share die under this rule.
+- **Model results (game-designer, 2026-11-09; scratchpad patch over v038b, 600 games per cell; assessment doc "Red shared payout"):** Red banking volume is low (1.3–4.3 per game), so n = 2 gives only 1.0–1.7 payouts and n = 3 is near inert. Recommended "RSP-1": owner +1 Corporate Secret per Red Secret; n = 1 (every Red Secret banked fires a payout); payout 1st +3 / 2nd +1 in Secrets only; end payout except on Market Collapse / Total Wipeout; starting Market Share 16 / 16 / 17; Yellow F3 → `+$1 & +1 Market Share`; oldest-first Conveyor Triage (anti-stall). Result (2P / 3P / 4P): Market Collapse 36 / 41 / 38%, Singularity 44 / 42 / 44%, Patient Zero 18 / 16 / 18%; rounds 8.55–8.69; archetype spread 25–28; Company colours within ~6 pts; Yellow path 39 / 24 / 16%. With owner 0, Red is unplayable (7–24%); folding Money in changes ≤3 pts. Stalling is analytically real for a trailing Red owner (ref1 not run; bots not payout-aware). With n = 1 no counter is needed.
+- **User decision (2026-11-09): RSP-1 adopted** as the next v0.38 candidate. Package (on top of C2 / v038b):
+  - Owner +1 Corporate Secret per Red Secret banked (replaces the Red tiers).
+  - Every Red Secret banked fires a payout: survivors score 1st +3 / 2nd +1 / others 0 Corporate Secrets by Market Share place; ties share the better place.
+  - One end payout, except on Market Collapse / Total Wipeout.
+  - Market Leader Bonus and the `v2.0` Market Share comparison removed.
+  - Starting Market Share 16 / 16 / 17.
+  - Yellow F3 `+$1 & +1 Market Share`.
+  - Conveyor Triage takes Processing Box dice oldest first.
+  - Starting Secrets 3 / 4 / 4, with 2 / 3 / 4 probed in the sweep.
+  - Bot work: payout-aware Market Share valuation (blocking, Public Relations Track) and a ref1 rollout for the new rule.
+  - No counter, so no new term. Glossary impact for Phase B: Market Leader Bonus and the v2.0 comparison retired; the payout needs rules wording within existing terms (confirm with the User if a name is wanted).
+- **Payout timing A/B (game-designer, 2026-11-09; `docs/findings/rsp1_ab_model.py`, results `rsp1_ab_results.json`; 600 games per cell, seeds 42–641, Yellow F3 corrected, oldest-first triage):** A = payout per Red Secret banked, B = at most one payout per round (end of Phase 5, if any Red Secret banked that round; Market Share after Phase 4). Rounds with ≥2 Red banks 0.9 / 1.9 / 4.0% (2P / 3P / 4P); payouts per game A 1.98 / 2.54 / 3.50 vs B 1.89 / 2.36 / 3.09. End reasons (~41 Singularity / 19 Patient Zero / 39 Market Collapse), rounds 8.5–8.7, Company colours and archetype spread unchanged (±0.02). Red path 4P .26 → .24. Carried forward in both: Market Collapse ~39% is high; Yellow path still weakest (0.66–0.71 of fair share) even with F3 corrected, so the earlier Yellow figures in this section did not include F3; a trailing player's Red bank feeds the leader; 2P lead snowball.
+- **User decision (2026-11-09): variant B adopted.** Owner +1 Corporate Secret for every Red Secret banked; the Market Share place payout fires at most once per round, at the end of Phase 5. Spec §14.5 updated.

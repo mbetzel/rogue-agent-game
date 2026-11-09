@@ -121,6 +121,15 @@ class Face:
     is_glitch: bool = False
     is_choice: bool = False
     choices: Tuple[Face, ...] = ()
+    # v0.38.0 candidate (spec v380 §4.1). ``secrets_pending`` marks the Secret face (banked on Processing Box exit;
+    # not ``secrets``, which is Y3's immediate Phase 3 Secret). Defaults keep every v0.37 face unchanged.
+    secrets_pending: bool = False
+    market_share: int = 0
+    clean_slots: int = 0
+
+    @property
+    def is_secret_face(self) -> bool:
+        return self.secrets_pending
 
     @property
     def is_shield(self) -> bool:
@@ -159,6 +168,7 @@ class Die:
     is_locked: bool = False
     chosen_choice_index: Optional[int] = None
     production_role: Optional[Any] = None
+    secret_pending: bool = False  # v0.38: in the Processing Box from a Secret face (atomic: fast_clone fast path)
 
     def roll(self, rng: random.Random) -> Face:
         """Roll the die and record the rolled face."""
@@ -1321,8 +1331,13 @@ def create_colored_die(
     reserve_cost: Optional[int] = None,
     cost: Optional[int] = None,
     gray_profile: Optional[str] = "V035_D1",
+    face_profile: Optional[str] = "V037",
 ) -> Die:
-    """Creates a colored die of the specified color with dynamic cost (v0.26.0 Baseline)."""
+    """Creates a colored die of the specified color with dynamic cost (v0.26.0 Baseline).
+
+    ``face_profile="V038_DRAFT"`` uses the v0.38 candidate tables (Secret face on Face 5, no colored shields;
+    spec v380 §4.2). Gray and White dice are unchanged by the profile.
+    """
     if color == DieColor.GRAY:
         return create_gray_die(die_id, gray_profile)
     if color == DieColor.WHITE:
@@ -1353,6 +1368,9 @@ def create_colored_die(
                 DieColor.PURPLE: 4,
             }
             die_cost = default_costs.get(color, 4)
+
+    if face_profile in ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT"):
+        return _create_colored_die_v038(color, die_id, variant_card, star_face, var_code, die_cost, face_profile)
 
     if color == DieColor.RED:
         faces = [
@@ -1429,6 +1447,79 @@ def create_colored_die(
         return Die(die_id=die_id, color=color, cost=die_cost, vp=0, faces=faces, variant_code="PURPLE_STAR")
 
     raise ValueError(f"Unsupported die color: {color}")
+
+
+SECRET_FACE = Face(name="Secret", secrets_pending=True)
+CLEAN_SLOT_NAME = "Clean 1 Glitched Shield Slot"
+
+
+def _choice(a: Face, b: Face) -> Face:
+    return Face(name=f"{a.name} / {b.name}", is_choice=True, choices=(a, b))
+
+
+def _create_colored_die_v038(color: DieColor, die_id: int, variant_card: Optional[VariantCard], star_face: Face,
+                             var_code: Optional[str], die_cost: int, profile: str = "V038_DRAFT") -> Die:
+    """spec v380 §4.2 ``V038_DRAFT`` tables [TUNE]."""
+    if color == DieColor.RED:
+        faces = [_choice(Face("+1 Market Share", market_share=1), Face("+$1", money=1)),
+                 Face(name="+$2", money=2), Face(name="+$2", money=2), Face(name="+$2", money=2),
+                 SECRET_FACE, star_face]
+    elif color == DieColor.BLUE:
+        faces = [Face(name="+1 🔬", patches=1), Face(name="+1 🔬", patches=1), Face(name="+$1", money=1),
+                 _choice(Face("+1 🔬", patches=1), Face("+$1", money=1)), SECRET_FACE, star_face]
+    elif color == DieColor.GREEN:
+        faces = [_choice(Face(CLEAN_SLOT_NAME, clean_slots=1), Face("+$1", money=1)),
+                 Face(name="+1 🔬", patches=1), Face(name="+2 🔬", patches=2),
+                 _choice(Face("+1 🔬", patches=1), Face("+$1", money=1)), SECRET_FACE, star_face]
+    elif color == DieColor.YELLOW and profile in ("V038_YELLOW_MS", "V038_YELLOW_MS_ALT"):
+        y = lambda: _choice(Face("+$2", money=2), Face("+1 🔬", patches=1))  # noqa: E731
+        f1 = (Face(name="+2 Market Share", market_share=2) if profile == "V038_YELLOW_MS"
+              else Face(name="+$1 & +1 Market Share", money=1, market_share=1))
+        faces = [f1, _choice(Face("+1 Market Share", market_share=1), Face("+1 🔬", patches=1)),
+                 Face(name="+$3", money=3), y(), y(), star_face]
+    elif color == DieColor.YELLOW:
+        y = lambda: _choice(Face("+$2", money=2), Face("+1 🔬", patches=1))  # noqa: E731
+        faces = [Face(name="+$3", money=3), y(), y(), Face(name="+$1 & +1 🔬", money=1, patches=1), y(), star_face]
+    elif color == DieColor.PURPLE:
+        faces = [Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
+                 Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY),
+                 Face(name="+$2", money=2), Face(name="+$1 & +1 🔬", money=1, patches=1), SECRET_FACE,
+                 Face(name="Purple ★", is_star=True, star_code="PURPLE_STAR")]
+        return Die(die_id=die_id, color=color, cost=die_cost, vp=0, faces=faces, variant_code="PURPLE_STAR")
+    else:
+        raise ValueError(f"Unsupported die color: {color}")
+    return Die(die_id=die_id, color=color, cost=die_cost, vp=0, faces=faces, variant_code=var_code)
+
+
+def _v038_star(card: VariantCard, description: str, **face_kw: Any) -> VariantCard:
+    face = dataclasses.replace(card.star_face, block_amount=0, shield_color=None, **face_kw)
+    return dataclasses.replace(card, description=description, star_face=face)
+
+
+def apply_variant_profile(variant_cards: Dict[DieColor, VariantCard], profile: Optional[str]) -> Dict[DieColor, VariantCard]:
+    """spec v380 §5: ``V038_DRAFT`` Variant Card texts (costs unchanged; every colour-specific Block removed).
+    ``"V037"`` returns the mapping unchanged (same object)."""
+    if profile != "V038_DRAFT":
+        return variant_cards
+    out = dict(variant_cards)
+    for color, card in variant_cards.items():
+        code = card.code
+        if code == "R1":
+            out[color] = _v038_star(card, "Gain +$2 and +1 Market Share.", money=2, market_share=1)
+        elif code == "B1":
+            out[color] = _v038_star(card, "Gain +1 🔬; if 1+ Blue cubes exit the tower and you take 0 Blue damage in "
+                                          "Phase 4, gain +$2 (this die must still be In Production).", patches=1)
+        elif code == "B2":
+            out[color] = _v038_star(card, "Pay $4 during Phase 6: Operations to gain +1 Corporate Secret.")
+        elif code == "B3":
+            out[color] = _v038_star(card, "In Phase 3: Income, move 1 die from your Processing Box to your Scanned "
+                                          "Box (banking its Secret).")
+        elif code in ("G1", "G2"):
+            out[color] = _v038_star(card, f"{CLEAN_SLOT_NAME} and gain +1 🔬.", patches=1, clean_slots=1)
+        elif code == "Y3":
+            out[color] = dataclasses.replace(
+                card, description="Gain +1 Corporate Secret, then move this die to the Scanned Box.")
+    return out
 
 
 # =====================================================================

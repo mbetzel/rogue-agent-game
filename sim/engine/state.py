@@ -249,6 +249,25 @@ class PlayerState:
         self.contested_blue_left_open = 0
         self.contested_red_chosen = 0
         self.purchases_by_color: Dict[str, int] = {}  # Central Market purchases incl. Algorithmic Arbitrage
+        # v0.38.0 candidate (spec v380 §3.2 / §11). Plain ints / dicts / lists so fast_clone copies them.
+        self.glitched_shield_slots = 0
+        self.slots_glitched_this_round = 0  # §14.3 glitched_slots_per_round_cap
+        self.blocked_blue_this_round = 0
+        self.slot_clear_used_this_phase5 = False
+        self.secrets_by_source: Dict[str, int] = {}  # ledger only (gains positive, losses negative)
+        self.secret_faces_rolled: Dict[str, int] = {}
+        self.secret_faces_banked: Dict[str, int] = {}
+        self.secret_yield_hist: Dict[str, Dict[str, int]] = {}
+        self.secrets_lost_returned = 0
+        self.slots_glitched_by_source: Dict[str, int] = {}
+        self.slots_cleaned_by_die = 0
+        self.slots_cleaned_by_face = 0
+        self.slots_cleared_by_graduation = 0
+        self.max_glitched_slots = 0
+        self.zero_capacity_rounds = 0
+        self.market_share_gained_face = 0  # Red F1 / R1 (outside the Public Relations limit)
+        self.company_color: Optional[str] = None
+        self.colored_dice_owned_by_round: List[Dict[str, int]] = []
         self.player_id = player_id
         self.bot = bot
         self.money = money
@@ -367,11 +386,24 @@ class PlayerState:
             self.market_share_regained += actual
         elif source == "r2":
             self.market_share_gained_r2 += actual
+        elif source == "face":
+            self.market_share_gained_face += actual
         else:
             raise ValueError(f"unknown Market Share source {source!r}")
         if self.market_share_min is None or after < self.market_share_min:
             self.market_share_min = after
         return actual
+
+    def gain_secrets(self, amount: int, source: str) -> None:
+        """Corporate Secrets change with a ledger entry (telemetry only; behaviour = ``secrets += amount``)."""
+        self.secrets += amount
+        if amount:
+            self.secrets_by_source[source] = self.secrets_by_source.get(source, 0) + amount
+
+    @property
+    def processing_box(self) -> List[Die]:
+        """v0.38 name of the first Under Development box (the sim attribute stays ``glitched_dice``)."""
+        return self.glitched_dice
 
     def record_purchase(self, color: Any) -> None:
         key = getattr(color, "value", color)

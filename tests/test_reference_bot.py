@@ -164,6 +164,27 @@ class TestFastClone(unittest.TestCase):
                     got = c.run_game() if not c.state.game_over else c.evaluate_end_game()
                     self.assertEqual(_summary(got), _summary(real), f"{n}P seed {seed} phase {phase}")
 
+    def test_rb07_v038_replay_reproduces_real_game(self):
+        """RB-07 extended to the v0.38 candidate (spec v380 §10): Processing Box banking, slot cleaning and the
+        Phase 5 graduation clear must replay identically through ``resume_round``."""
+        from tests.fixtures.v035_parity import capture
+
+        for n in (2, 3, 4):
+            for seed in range(30):
+                for phase in (1, 4, 6):
+                    cls = type("E", (SnapAtEngine,), {"want": (2 + seed % 3, phase)})
+                    with mock.patch("sim.engine.GameEngine", cls):
+                        e = capture.build_engine(GameConfig.v038, "setup", n, seed)
+                    real = e.run_game()
+                    if e.kept is None:
+                        continue
+                    c, com, cr = fast_clone.from_snapshot(e.kept)
+                    fast_clone.resume_round(c, phase, com, cr)
+                    got = c.run_game() if not c.state.game_over else c.evaluate_end_game()
+                    self.assertEqual(_summary(got), _summary(real), f"v038 {n}P seed {seed} phase {phase}")
+                    self.assertEqual([(r["secrets_by_source"], r["stranded_secrets"]) for r in got.rankings],
+                                     [(r["secrets_by_source"], r["stranded_secrets"]) for r in real.rankings])
+
 
 def zlib_seed(*parts):
     import zlib

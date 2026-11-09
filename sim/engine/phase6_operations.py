@@ -36,6 +36,10 @@ def resolve_operations_plan(bot: BaseBot, player_state: PlayerState, state: Game
         from sim.bots.market_share_policy import apply_market_share_policy
 
         plan = apply_market_share_policy(bot, plan, player_state, state)
+    if getattr(state.config, "secret_face_enabled", False):
+        from sim.bots.secret_face_policy import adjust_purchases
+
+        plan = adjust_purchases(bot, plan, player_state, state)
     return plan
 
 
@@ -137,6 +141,7 @@ def execute_player_operations_turn(
                 player.money -= discounted_cost
                 player.personal_purple_reserve -= 1
                 new_die = create_colored_die(
+                    face_profile=engine.config.die_face_profile,
                     color=DieColor.PURPLE,
                     die_id=engine.state.next_die_id,
                     reserve_cost=player.get_purple_reserve_cost(),
@@ -149,6 +154,7 @@ def execute_player_operations_turn(
             player.money -= discounted_cost
             engine.state.market[free_color] -= 1
             new_die = create_colored_die(
+                face_profile=engine.config.die_face_profile,
                 color=free_color,
                 die_id=engine.state.next_die_id,
                 variant_card=engine.state.variant_cards.get(free_color),
@@ -176,14 +182,14 @@ def execute_player_operations_turn(
             and (engine.config.b2_secret_cap is None or player.secrets < engine.config.b2_secret_cap)
         ):
             player.money -= engine.config.b2_secret_cost
-            player.secrets += 1
+            player.gain_secrets(1, "b2")
             player.b2_available = False
 
     if plan.use_y1_secret and player.y1_available:
         # Reverses +$4 from P1 and pays $2 for +1 Secret (net -$2)
         if player.money >= 6:
             player.money -= 6
-            player.secrets += 1
+            player.gain_secrets(1, "y1")
             player.y1_available = False
 
     if (
@@ -251,6 +257,7 @@ def execute_player_operations_turn(
                 player.personal_purple_reserve -= 1
                 purchased_count += 1
                 new_die = create_colored_die(
+                    face_profile=engine.config.die_face_profile,
                     color=DieColor.PURPLE,
                     die_id=engine.state.next_die_id,
                     reserve_cost=cost,
@@ -264,6 +271,7 @@ def execute_player_operations_turn(
                 engine.state.market[color] -= 1
                 purchased_count += 1
                 new_die = create_colored_die(
+                    face_profile=engine.config.die_face_profile,
                     color=color,
                     die_id=engine.state.next_die_id,
                     variant_card=engine.state.variant_cards.get(color),

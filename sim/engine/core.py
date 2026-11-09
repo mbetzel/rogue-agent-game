@@ -42,6 +42,7 @@ from sim.entities import (
     get_random_companies,
     get_random_white_hats,
     resolve_variant_cards,
+    apply_variant_profile,
 )
 from sim.tower import CubeTower
 from sim.engine.state import CompileResult, EndGameResult, GameState, PlayerState, RoundTelemetry
@@ -85,6 +86,7 @@ class GameEngine:
         self.rng = random.Random(seed)
         self.config = config
         self.variant_cards = resolve_variant_cards(variant_cards or get_default_variant_cards(), config.red_variant_set)
+        self.variant_cards = apply_variant_profile(self.variant_cards, config.variant_profile)  # v0.38 (§5)
         self.version_deck = version_deck or get_default_version_deck(profile=config.corruption_track_profile)
 
         # Modular Setup Resolution (INV-SETUP-01..04)
@@ -137,12 +139,25 @@ class GameEngine:
         next_die_id = 1
         starting_cash_bonus = 1 if self.version_deck[0].directive_code == "DATA_SCRAPER" else 0
 
+        company_dice_taken: Dict[DieColor, int] = {}
         for i, bot in enumerate(bots):
             ready_for_release_dice: List[Die] = []
-            # 1. Add 3 Gray Legacy Dice (INV-START-POOL-01)
-            for _ in range(config.starting_gray_dice):
+            comp_for_die = self.companies[i] if i < len(self.companies) else None
+            company_color: Optional[DieColor] = None
+            if config.company_starting_die_enabled and comp_for_die is not None:
+                company_color = DieColor(config.company_starting_colors[comp_for_die.code.value].lower())
+            # 1. Add 3 Gray Legacy Dice (INV-START-POOL-01); v0.38: one fewer when a Company starting die replaces it
+            for _ in range(config.starting_gray_dice - (1 if company_color is not None else 0)):
                 ready_for_release_dice.append(create_gray_die(next_die_id, config.gray_face_profile))
                 next_die_id += 1
+            # 1b. v0.38 Company starting die (after Grays, before Purple; from the Central Market supply, OQ-5)
+            if company_color is not None:
+                ready_for_release_dice.append(create_colored_die(
+                    color=company_color, die_id=next_die_id, variant_card=self.variant_cards.get(company_color),
+                    face_profile=config.die_face_profile,
+                ))
+                next_die_id += 1
+                company_dice_taken[company_color] = company_dice_taken.get(company_color, 0) + 1
 
             # 2. Add 1 Purple Proprietary Specialist Die (INV-START-POOL-01)
             wh = self.white_hats[i] if i < len(self.white_hats) else None
@@ -152,6 +167,7 @@ class GameEngine:
                 die_id=next_die_id,
                 reserve_cost=purple_reserve_cost,
                 cost=0,
+                face_profile=config.die_face_profile,
             )
             ready_for_release_dice.append(starter_purple)
             next_die_id += 1
@@ -188,6 +204,9 @@ class GameEngine:
             )
             if config.is_market_share:
                 player.init_market_share(config.market_share_start(config.num_players))
+            if config.secret_face_enabled:
+                player.secrets_by_source["starting"] = player.secrets
+                player.company_color = company_color.value if company_color is not None else None
             players.append(player)
 
         # Initialize Market: 2 * num_players dice per colored die (INV-PURPLE-02: Purple excluded from Central Market)
@@ -198,6 +217,8 @@ class GameEngine:
             DieColor.GREEN: market_per_color,
             DieColor.YELLOW: market_per_color,
         }
+        for color, n in company_dice_taken.items():
+            market[color] -= n  # v0.38: Company starting dice come from the Central Market supply
 
         # Staging Cup: payload from starting v1.0 card
         staging_cup: Dict[CubeColor, int] = {

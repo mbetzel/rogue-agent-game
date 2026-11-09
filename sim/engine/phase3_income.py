@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Un
 from sim.config import DieColor
 from sim.entities import ArchetypeCode, Face, WhiteHatCode, has_signature_protocol, legacy_bridge_enabled
 from sim.engine.state import IncomeRecord
+from sim.engine import secret_faces
 
 if TYPE_CHECKING:
     from sim.engine.core import GameEngine
@@ -83,7 +84,9 @@ def _die_income_row(state: GameState, player: PlayerState, die: Die) -> Optional
         else:
             star_note = _STAR_NOTES.get(code)
     role = getattr(die, "production_role", None)
+    extra = {"market_share": eff.market_share} if eff.market_share else {}  # v0.38 Red F1 / R1 only
     return {
+        **extra,
         "die_id": die.die_id,
         "color": die.color.value,
         "face_name": eff.name,
@@ -105,6 +108,8 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
     """
     record = IncomeRecord()
     dice_to_glitch: List[Die] = []
+    dice_to_scan: List[Die] = []
+    v038_cards = engine.config.variant_profile == "V038_DRAFT"
 
     for die in list(player.in_production_dice):
         row = _die_income_row(engine.state, player, die)
@@ -114,17 +119,21 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
         base_research = row["research"] - row.get("protocol_research", 0)
         player.gain_research(base_research, row.get("research_source", "income"))
         player.gain_research(row.get("protocol_research", 0), "signature_protocol")
-        player.secrets += row["secrets"]
+        player.gain_secrets(row["secrets"], "y3")
         record.money += row["money"]
         record.research += row["research"]
         record.secrets += row["secrets"]
         record.details.append(row)
+        if row.get("market_share") and engine.config.is_market_share:
+            # v0.38 Red F1 / R1: Phase 3 income, clamped at the maximum, outside the Public Relations limit
+            player.change_market_share(+row["market_share"], "face")
 
         eff = die.effective_face or die.current_face
         if eff.is_star:
             if eff.star_code == "Y3":
                 # Proprietary Training: move die to glitched_dice after collecting secret
-                dice_to_glitch.append(die)
+                # (v0.38 Variant profile: to the Scanned Box)
+                (dice_to_scan if v038_cards else dice_to_glitch).append(die)
             elif eff.star_code == "R2_MKT" and engine.config.is_market_share:
                 # Ad Campaign: latch one paid Phase 6 action (INV-MS-R2-01)
                 player.r2_actions_available += 1
@@ -133,6 +142,15 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
                 from sim.engine import market_share
 
                 market_share.queue_poach(engine, player, die.die_id)
+            elif eff.star_code == "B3" and secret_faces.enabled(engine.config):
+                # v0.38 Air-Gapped Backup: 1 die Processing Box -> Scanned Box, banking its Secret (Phase-3 state)
+                order = player.bot.choose_triage_order(player, list(player.glitched_dice), engine.state)
+                target_die = _first_valid(order, player.glitched_dice)
+                if target_die is not None:
+                    player.glitched_dice.remove(target_die)
+                    _reset(target_die)
+                    secret_faces.bank(engine.config, player, target_die)
+                    player.scanned_dice.append(target_die)
             elif eff.star_code == "B3":
                 # Air-Gapped Backup (INV-B3-BACKUP-01): Move 1 die from glitched_dice to scanned_dice
                 if player.glitched_dice:
@@ -155,8 +173,28 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
             player.in_production_dice.remove(die)
             die.production_role = None
             player.glitched_dice.append(die)
+    for die in dice_to_scan:
+        if die in player.in_production_dice:
+            player.in_production_dice.remove(die)
+            _reset(die)
+            player.scanned_dice.append(die)
 
     return record
+
+
+def _reset(d: Die) -> None:
+    d.production_role = None
+    d.is_locked = False
+    d.chosen_choice_index = None
+    d.current_face = None
+
+
+def _first_valid(order: Any, pool: List[Die]) -> Optional[Die]:
+    ids = {id(d) for d in pool}
+    for d in order or []:
+        if id(d) in ids:
+            return d
+    return pool[0] if pool else None
 
 
 collect_production_income = collect_player_production_income
@@ -205,7 +243,10 @@ def resolve_spook_burn_notice(
     if target_die.color in engine.state.market:
         engine.state.market[target_die.color] += 1
     # If Purple, die is scrapped and not returned to market
-    player.secrets += 1
+    from sim.engine import secret_faces
+
+    secret_faces.lose_pending(player, target_die)
+    player.gain_secrets(1, "burn_notice")
     return True
 
 
@@ -219,8 +260,22 @@ def resolve_phreaker_jumper_diagnostics(
     """Phreaker Face 6 Protocol (Jumper Diagnostics):
     Rolls 1 die currently in Under Development; harvests rolled cash/patches; die remains in place.
     INV-PHREAKER-FALLBACK-01: If Under Development is empty, yields +$1 cash fallback immediately.
+
+    v0.38 (``power_profile="V038_DRAFT"``, §14.2 OQ-8): move 1 die Processing Box -> Scanned Box, banking its
+    Secret; if the Processing Box is empty, roll 1 Scanned Box die (stays in place); if both are empty, +$1.
     """
-    ud_dice = player.under_development_dice
+    cfg = engine.config
+    if cfg.power_profile == "V038_DRAFT" and player.glitched_dice:
+        target = secret_faces.best_pending(cfg, player, die_id)
+        player.glitched_dice.remove(target)
+        _reset(target)
+        secret_faces.bank(cfg, player, target)
+        player.scanned_dice.append(target)
+        return Face(name=f"Processing Box -> Scanned Box (die {target.die_id})")
+    if cfg.power_profile == "V038_DRAFT":
+        ud_dice = list(player.scanned_dice)
+    else:
+        ud_dice = player.under_development_dice
     if not ud_dice:
         # Fallback: grant +$1 cash directly to player
         player.money += 1

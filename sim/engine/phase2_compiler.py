@@ -138,6 +138,10 @@ def return_player_colored_dice_step2a(
                 break
         if not removed:
             return False
+        if getattr(die, "secret_pending", False):
+            from sim.engine import secret_faces
+
+            secret_faces.lose_pending(player, die)  # v0.38: a returned Processing Box die loses its Secret
         if die in rolled_dice:
             idx = rolled_dice.index(die)
             commitments.pop(idx, None)
@@ -202,8 +206,13 @@ def resolve_corruption_space(
         CubeColor.GREEN: exited_cubes.get(CubeColor.GREEN, 0),
     }
 
-    # 4. Demote Dice
-    if space.demote_dice > 0:
+    # 4. Demote Dice (v0.38 Glitched Shield Slots: glitch X shield slots instead; no die moves)
+    if space.demote_dice > 0 and getattr(engine.config, "glitched_shield_slots_enabled", False):
+        from sim.engine import secret_faces
+
+        for player, _rolled, _commitments in player_commitments:
+            secret_faces.glitch_slots(player, space.demote_dice, "corruption")
+    elif space.demote_dice > 0:
         for player, rolled_dice, commitments in player_commitments:
             demote_player_dice_step2a(
                 player, rolled_dice, commitments, space.demote_dice, threat_strengths, engine=engine
@@ -221,7 +230,7 @@ def resolve_corruption_space(
     # 6. Lose Secrets
     if space.lose_secrets > 0:
         for player in engine.state.players:
-            player.secrets -= space.lose_secrets
+            player.gain_secrets(-space.lose_secrets, "corruption")
             if player.secrets <= 0:
                 player.is_patient_zero = True
                 if player.elimination_round is None:
