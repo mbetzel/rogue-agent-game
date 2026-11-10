@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.37.0)
+# Too Many Secrets — Rules Draft (v0.38.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -9,9 +9,9 @@
 
 A mysterious autonomous cracking program—codenamed **Project: SETEC** (the "Rogue Agent")—has broken loose across telecommunications relays and university mainframes. Recompiling its malicious subroutines each round through an acoustic mainframe compiler, SETEC aggressively probes commercial networks to manipulate markets, corrupt system hardware, and exfiltrate proprietary client data.
 
-Each player is a **White Hat Operative** contracted to defend a **Client Company's** infrastructure. Operatives assemble and upgrade customized hardware and software modules (represented by a custom dice pool), triage glitched subroutines through a CI/CD pipeline, and adapt to the escalating cryptographic threat. As SETEC’s autonomous compiler accelerates across versions, White Hat Operatives must balance expanding their revenue streams against upgrading their **Company Terminal Mat** and defending their **Market Share** before proprietary client data leaks.
+Each player is a **White Hat Operative** contracted to defend a **Client Company's** infrastructure. Operatives assemble and upgrade customized hardware and software modules (represented by a custom dice pool), process recovered secrets through a CI/CD pipeline, and adapt to the escalating cryptographic threat. As SETEC’s autonomous compiler accelerates across versions, White Hat Operatives must balance expanding their revenue streams against upgrading their **Company Terminal Mat** and defending their **Market Share** before proprietary client data leaks.
 
-When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Secrets`) has their reputation incinerated, is raided by federal marshals, becomes **Patient Zero**, and is eliminated from contention. If any surviving player's **Market Share** falls to `0`, a **Market Collapse** makes the current round the last. Among the surviving White Hat Operatives, the player with the most **Corporate Secrets** after the **Market Leader Bonus** wins (with Market Share, operational capital, ready modules, and research tokens serving as tiebreakers).
+When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Secrets`) has their reputation incinerated, is raided by federal marshals, becomes **Patient Zero**, and is eliminated from contention. If any surviving player's **Market Share** falls to `0`, a **Market Collapse** makes the current round the last. Among the surviving White Hat Operatives, the player with the most **Corporate Secrets** wins; Secret faces on your dice and the **Market Leader Bonus** (by Market Share place) are the main ways to gain them (with Market Share, operational capital, ready modules, and research tokens serving as tiebreakers).
 
 > **Note on `[TUNE]` Tags:** Numbers marked `[TUNE]` are prototype baselines verified via Monte Carlo simulation sweeps.
 
@@ -25,7 +25,7 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
 * **Compiler Cubes (4 Colors):**
   * **Red Cubes (Market Manipulation):** Lowers your **Market Share** by `1` per unblocked cube (no Money or Corporate Secrets are lost).
   * **Blue Cubes (Spyware / Data Exfiltration):** Directly steals **Corporate Secrets**.
-  * **Green Cubes (Malware / Logic Bombs):** Infiltrates active systems, **glitching** 1 die from In Production into Under Development per unblocked cube (denying its income).
+  * **Green Cubes (Malware / Logic Bombs):** Infiltrates your Defense Grid, turning 1 shield slot into a **Glitched Shield Slot** per unblocked cube (it cannot hold a shield until cleaned).
   * **Black Cubes (Corrupted Code / Master Key Search):** Advances the active **Version Corruption Track** toward cryptographic Singularity.
 * **SETEC Version Deck (`v1.0`, `v2.0`, `v3.0`):** Setup cards defining the threat's starting payload (`v1.0`) and each version's bespoke **Corruption Track** (where every space triggers a game-wide hazard or injects new cubes into the compiler).
 
@@ -34,22 +34,22 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
   * **Ready for Release Zone** (online modules staged and ready to roll at round start)
   * **In Production Area** (active deployed modules for the current round):
     * **Income Slot** (modules producing cash and research revenue)
-    * **Shield Slots** (`Red Shields`, `Blue Shields`, `Green Shields`, subject to **Defense Grid Capacity**)
-  * **Under Development Pipeline** (vulnerability triage conveyor):
-    * **Glitched Box** (corrupted modules quarantined for repairs)
-    * **Scanned Box** (remediated modules completing verification before release)
-    * **Hardware Throughput Limits** (Triage Bandwidth: Glitched $\to$ Scanned; Release Bandwidth: Scanned $\to$ Ready)
-  * **Market Share Track** (`0` up to your starting value of `17` at 2 players / `18` at 3–4 players `[TUNE]`; the starting value is also the maximum). Lowered by unblocked **Red Cubes** and *Customer Poaching*; regained with research through the **Public Relations Track** and with *Ad Campaign*. A surviving player at `0` triggers a **Market Collapse** (see Phase 4). At game end, survivors' final Market Share places earn the **Market Leader Bonus** (see Section 5).
+    * **Shield Slots** (`Block 1 Any` shields only, subject to **Defense Grid Capacity**; a **Glitched Shield Slot** cannot hold a shield)
+  * **Under Development Pipeline** (secret-processing conveyor):
+    * **Processing Box** (dice that rolled a **Secret face**, waiting to deliver their Secret)
+    * **Scanned Box** (modules completing verification before release)
+    * **Hardware Throughput Limits** (Triage Bandwidth: Processing $\to$ Scanned; Release Bandwidth: Scanned $\to$ Ready)
+  * **Market Share Track** (`0` up to your starting value of `13` at 2 players / `16` at 3 players / `17` at 4 players `[TUNE: v0.38.0]`; the starting value is also the maximum). Lowered by unblocked **Red Cubes** and *Customer Poaching*; raised by Red and Yellow Market Share faces, *Brand Protection* and *Ad Campaign*, and regained with research through the **Public Relations Track**. A surviving player at `0` triggers a **Market Collapse** (see Phase 4). Market Share places earn the **Market Leader Bonus** (see Phase 5 and Section 5).
   * **Terminal Hardware & R&D Upgrade Tracks (4 Independent Tracks, Levels 0 $\to$ 4):** Each step costs **`1 / 2 / 2 / 3 🔬`** to reach Level 1 / 2 / 3 / 4 `[TUNE]` (`8 🔬` per track). Levels 1 and 3 of every track carry a **Breakthrough**, resolved immediately when that level is reached (see Phase 6).
 
     | Track | Level 0 | Level 1 (Breakthrough) | Level 2 | Level 3 (Breakthrough) | Level 4 |
     | :--- | :--- | :--- | :--- | :--- | :--- |
     | **Defense Grid Track** | Defense Capacity `2` | Gain `1` Gray Legacy die | Capacity `3` | Gain `1` Corporate Secret | Capacity `4` + `+$1` per Attack Cube blocked in Phase 4 (max `$3`) `[TUNE]` |
-    | **Triage Track** | Triage Bandwidth `2` | Gain `2` White Contractor dice | Bandwidth `3` | Pay `$3` `[TUNE]`: replace `1` Gray Legacy die with a Central Market colored die of your choice | Bandwidth `4` + `+1 🔬` per die moved in Conveyor Triage beyond the 2nd |
+    | **Triage Track** | Triage Bandwidth `2` | Gain `1` Gray Legacy die | Bandwidth `3` | Pay `$3` `[TUNE]`: replace `1` Gray Legacy die with a Central Market colored die of your choice | Bandwidth `4` + `+1 🔬` per die moved in Conveyor Triage beyond the 2nd |
     | **Release Track** | Release Bandwidth `4` | Gain `1` Gray Legacy die | Bandwidth `5` | Gain `1` Corporate Secret | Bandwidth `6` + `1` extra free reroll in Phase 1 Step 4 |
-    | **Public Relations Track** | Regain up to `1` Market Share per round at `2 🔬` each `[TUNE]` | Gain `$3` | Regain up to `2` per round `[TUNE]` | Gain your 2nd Purple die (from your Personal Reserve) | Regain up to `3` per round `[TUNE]` |
+    | **Public Relations Track** | Regain up to `1` Market Share per round at `3 🔬` each `[TUNE]` | Gain `$3` | Regain up to `2` per round `[TUNE]` | Gain your 2nd Purple die (from your Personal Reserve) | Regain up to `3` per round `[TUNE]` |
 
-    *(As on the other tracks, a Breakthrough level keeps the value of the level below it: the Public Relations limit is `1` at Levels 0–1, `2` at Levels 2–3 and `3` at Level 4, always at `2 🔬` per `+1` Market Share. See Phase 6.)*
+    *(As on the other tracks, a Breakthrough level keeps the value of the level below it: the Public Relations limit is `1` at Levels 0–1, `2` at Levels 2–3 and `3` at Level 4, always at `3 🔬` per `+1` Market Share. See Phase 6.)*
 
   * **Personal Reserve** (1 holding slot for your 2nd Purple Proprietary Specialist die, released only by the Public Relations Level 3 Breakthrough)
   * **Institutional Override Track (`v1.0`, `v2.0`, `v3.0`)**: 3 tracking slots for once-per-version Client Company powers (DTO *Slush Fund* is once per game)
@@ -73,7 +73,7 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
 |  | - Face 6 Signature Protocol    |  |  | 2. IN PRODUCTION (Deployed Dice)                                      |  |
 |  | - Personal Reserve (Purple):   |  |  |  +-----------------------------+  +---------------------------------+  |  |
 |  |   [Die 2: Public Rel. L3]      |  |  |  | INCOME (Cash / Research / ★) |  | DEFENSE GRID (Shield Slots)     |  |  |
-|  +--------------------------------+  |  |  |                             |  | [Red]    [Blue]   [Green]        |  |  |
+|  +--------------------------------+  |  |  |                             |  | [Shield] [Shield] [Shield] [ ]   |  |  |
 |                                      |  |  |                             |  +---------------------------------+  |  |
 |  +--------------------------------+  |  |  |                             |  | [EMBEDDED SHIELD UPGRADE]       |  |  |
 |  | CORPORATE SECRETS TRACK (VP)   |  |  |  |                             |  | L0: Cap 2 | L1 (1🔬): ★ Gray     |  |  |
@@ -85,8 +85,8 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
 |  | RESEARCH TOKENS (🔬 UNCAPPED)   |  |  +-----------------------------------------------------------------------+  |
 |  | (Storage Bank)                 |  |  | 3. UNDER DEVELOPMENT (Offline Pipeline)                               |  |
 |  +--------------------------------+  |  |  +-------------------+  [EMBEDDED TRIAGE]     +--------------------+  |  |
-|                                      |  |  | GLITCHED BOX      |  L0: 2 | L1: ★ 2 White | SCANNED BOX        |  |  |
-|  +--------------------------------+  |  |  | (Quarantined)     |  L2: 3 | L3: ★ $3 swap| (Validated)        |  |  |
+|                                      |  |  | PROCESSING BOX    |  L0: 2 | L1: ★ Gray    | SCANNED BOX        |  |  |
+|  +--------------------------------+  |  |  | (Secret faces)    |  L2: 3 | L3: ★ $3 swap| (Validated)        |  |  |
 |  | LIQUID CASH ($)                |  |  |  |                   |  L4: 4 + 🔬/die >2     |                    |  |  |
 |  | (Storage Bank)                 |  |  |  |                   |                        |                    |  |  |
 |  +--------------------------------+  |  |  |                   |  ----------> --------->|                    |  |  |
@@ -95,17 +95,17 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
 |  | PUBLIC RELATIONS TRACK         |  |                                                                             |
 |  | L0: +1 Share/rnd | L1: ★ $3    |  |                                                                             |
 |  | L2: +2 Share | L3: ★ Purple    |  |                                                                             |
-|  | L4: +3 Share | 2🔬 per +1       |  |                                                                             |
+|  | L4: +3 Share | 3🔬 per +1       |  |                                                                             |
 |  +--------------------------------+  |                                                                             |
 |                                      |                                                                             |
 |  +--------------------------------+  |                                                                             |
 |  | MARKET SHARE (MAX = START)     |  |                                                                             |
-|  | [18][17][16][15][14][13][12]   |  |                                                                             |
+|  | [17][16][15][14][13][12]       |  |                                                                             |
 |  | [11][10][ 9][ 8][ 7][ 6][ 5]   |  |                                                                             |
 |  | [ 4][ 3][ 2][ 1][0: COLLAPSE]  |  |                                                                             |
 |  +--------------------------------+  +-----------------------------------------------------------------------------+
 ```
-* **6 Client Company Cards** (Enterprise clients contracting the White Hat Operative; each grants an Institutional Override. Every company starts with the same hardware and resources):
+* **6 Client Company Cards** (Enterprise clients contracting the White Hat Operative; each grants an Institutional Override and names the color of your starting colored die — Red, Blue or Green, see Section 6D. Every company starts with the same hardware and resources):
   * **Meridian Financial Trust** (*Banking Infrastructure / Redundant Crew*)
   * **Omnidyne Systems** (*Tech Giant / Magnetic Splice*)
   * **Aegis Defense Relay** (*Security Firm / Baffle Echo*)
@@ -119,16 +119,16 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
   * **The Spook** (*Covert Intelligence Specialist / Burn Notice*)
   * **The Prodigy** (*Autonomous Exploit Hacker / Arbitrary Code Execution*)
   * **The Cipher** (*Distributed Ledger Architect / Algorithmic Parity*)
-* **20 Gray "Legacy Code" Dice** (3 per player at setup, up to 5 per player via the Defense Grid and Release Level 1 Breakthroughs; safe baseline: 0 Glitches)
+* **20 Gray "Legacy Code" Dice** (2 per player at setup, more via the Defense Grid, Triage and Release Level 1 Breakthroughs; safe baseline: no Glitch or Secret face)
 * **12 White "Contractor" Dice** (Temporary freelance phreakers / night-shift operators for hire in Phase 1; high risk: 2 Glitches)
 * **Colored Software Module Dice:**
-  * **4 Central Market Colors (`2 × Players` dice per color; universal format: 4 core faces, 1 Face 5 Glitch, 1 Face 6 Star `★`):**
+  * **4 Central Market Colors (`2 × Players` dice per color; Red, Blue and Green: 4 core faces, Face 5 **Secret face**, Face 6 Star `★`; Yellow: 5 core faces and Face 6 Star `★`, no Secret face):**
     * **Red Dice** — *Marketing* (`$4–$5`, determined by face-up Variant Card)
     * **Blue Dice** — *Firewall / Data Vault* (`$4–$6`, determined by face-up Variant Card)
     * **Green Dice** — *Antivirus / Auto-Patcher* (`$4–$5`, determined by face-up Variant Card)
     * **Yellow Dice** — *Commercial AI (High Revenue / Fast Capital)* (`$5–$6`, determined by face-up Variant Card)
   * **Purple Proprietary Specialist Dice (`2` dice per player: 1 in Ready for Release, 1 in Personal Reserve):**
-    * **Purple Dice** — *Proprietary Specialist / Black-Hat AI* (not purchasable; your 2nd Purple die is gained only from the Public Relations Level 3 Breakthrough, and a Purple die lost to an effect is not replaced; standardized high-reliability baseline + bespoke White Hat Signature Protocols)
+    * **Purple Dice** — *Proprietary Specialist / Black-Hat AI* (not purchasable; your 2nd Purple die is gained only from the Public Relations Level 3 Breakthrough, and a Purple die lost to an effect is not replaced; standardized high-reliability baseline with a Face 5 **Secret face** + bespoke White Hat Signature Protocols)
 * **Software Module Variant Cards:** Multiple cards per market die color (**Red, Blue, Green, Yellow**); **1 card per color** is used each game to define that color's Special (`★`) Face 6. *(Purple dice do not use market variant cards; their Face 6 triggers the player's bespoke Signature Protocol).*
 * **Money Tokens (`$`)**, **Corporate Secret Tokens**, **Research Tokens (`🔬`)** *(uncapped; styled as magnetic tape data spools / cryptographic research notes)*, **1 Market Share Marker per player**, and a **First Player Marker**.
 
@@ -142,11 +142,11 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
    * Place the starting cubes listed on the `v1.0` card into the **Staging Cup** (baseline: `1 Red, 1 Blue, 1 Green, 0 Black`). *(The first Black Cube enters the Staging Cup during Round 1 Phase 1's Autonomous Protocol Pulse; all subsequent cube injections from SETEC come directly from Corruption Track spaces).*
 2. **Software Market & Personal Reserves:** For each of the **4 Central Market Colors** (**Red, Blue, Green, Yellow**), shuffle its Variant Cards, place **1 Variant Card** face-up in the center, and stack **`2 × Players`** dice of that color on it. *(Purple dice are completely removed from the central market supply).* Place **`1` Purple Proprietary Specialist Die** onto the **Personal Reserve** slot of each player's **Company Terminal Mat**.
 3. **Player Setup (Each White Hat Operative):**
-   * **Client Company & White Hat Operative Assignment:** Randomly deal **1 Client Company Card** and **1 White Hat Dossier Card** to each player (drawn without replacement). Place your Company Card beside your **Company Terminal Mat** with all 3 Version slots (`v1.0`, `v2.0`, `v3.0`) toggled to **Available**. Every Client Company starts with the same hardware: all 4 tracks at **Level 0** (Defense Capacity `2`, Triage Bandwidth `2`, Release Bandwidth `4`, Public Relations: regain up to `1` Market Share per round at `2 🔬`). Client Companies grant no starting bonuses.
-   * Place **3 Gray Legacy Dice + 1 Purple Specialist Die** into your **Ready for Release Zone** (rolls in Round 1).
+   * **Client Company & White Hat Operative Assignment:** Randomly deal **1 Client Company Card** and **1 White Hat Dossier Card** to each player (drawn without replacement). Place your Company Card beside your **Company Terminal Mat** with all 3 Version slots (`v1.0`, `v2.0`, `v3.0`) toggled to **Available**. Every Client Company starts with the same hardware: all 4 tracks at **Level 0** (Defense Capacity `2`, Triage Bandwidth `2`, Release Bandwidth `4`, Public Relations: regain up to `1` Market Share per round at `3 🔬`). Apart from the color of your starting colored die (below), Client Companies grant no starting bonuses.
+   * Place **2 Gray Legacy Dice + 1 starting colored die + 1 Purple Specialist Die** into your **Ready for Release Zone** (rolls in Round 1). The starting colored die is the color named by your Client Company (Red: Meridian, Prometheus; Blue: DTO, Aegis; Green: Omnidyne, Helix `[TUNE]`); take it from that color's Central Market stack (it uses that color's face-up Variant Card).
    * Take **`$6` Starting Money**.
-   * **Corporate Secrets & Starting Research Tokens:** Take **`9` Corporate Secrets** at **2 players**, **`8`** at **3 players**, or **`9`** at **4 players** `[TUNE: v0.37.0]`, and **`0 🔬` Research Tokens**.
-   * **Market Share:** Place your Market Share Marker on **`17`** at **2 players**, or **`18`** at **3 and 4 players** `[TUNE: v0.36.0]`. This starting value is also your maximum Market Share for the game.
+   * **Corporate Secrets & Starting Research Tokens:** Take **`3` Corporate Secrets** at **2 players**, **`4`** at **3 players**, or **`4`** at **4 players** `[TUNE: v0.38.0]`, and **`0 🔬` Research Tokens**.
+   * **Market Share:** Place your Market Share Marker on **`13`** at **2 players**, **`16`** at **3 players**, or **`17`** at **4 players** `[TUNE: v0.38.0]`. This starting value is also your maximum Market Share for the game.
 4. Randomly assign the **First Player Marker** (used to resolve Operations Turn order in Phase 6: Operations).
 
 ---
@@ -179,18 +179,20 @@ Each player’s contracting Client Company provides a powerful Institutional Ove
 4. **Yahtzee Rerolls (Simultaneous Pure Rerolls):**
    * Each player may perform up to **`2` free rerolls** of any subset of their rolled dice (3 rolls total). At **Release Track Level 4**, you get **`1` extra free reroll** (applied after any effect that reduces your free rerolls).
    * Between rerolls, players may set aside (keep) any dice, or pick previously kept dice back up for subsequent rerolls.
-   * **Glitch Faces:**
-     * Any die that rolls a **`Glitch`** face is glitched immediately and cannot be rerolled during your free rerolls.
-     * *(Institutional Override Timing: Contracting **Helix Biomedical Consortium** may trigger Brute-Force Bypass here to freely reroll glitched dice and turn 1 rolled die to any legal non-Star face of choice).*
-     * *(Signature Protocol Timing: Rolling Face 6 `Purple ★` triggers **The Operator's** Contingent Staffing to roll 1 free White Contractor die into your active pool, or **The Prodigy's** Arbitrary Code Execution to turn 1 other rolled die to any legal non-Star face).*
+   * **Glitch Faces (White Contractor dice only):** A White Contractor die that rolls a **`Glitch`** face cannot be rerolled during your free rerolls.
+   * **Secret Faces:** A **Secret face** (Face 5 on Red, Blue, Green and Purple dice) is a normal face during rerolls: you may keep it or reroll it.
+     * *(Institutional Override Timing: Contracting **Helix Biomedical Consortium** may trigger Brute-Force Bypass here: gain `1` extra free reroll this phase, you may include Glitch dice in your free rerolls, and turn 1 rolled die to any legal non-Star face of its color, including the Secret face).*
+     * *(Signature Protocol Timing: Rolling Face 6 `Purple ★` triggers **The Operator's** Contingent Staffing to roll 1 free White Contractor die into your active pool, or **The Prodigy's** Arbitrary Code Execution to turn 1 other rolled die to any legal non-Star face of its color other than the Secret face).*
 5. **Assign Dice to In Production (Simultaneous):**
    * After all rerolls are finished, resolve all remaining dice:
-     * **Unresolved Glitches:** Any die still showing an unresolved **`Glitch`** face moves **immediately** to the **Glitched Box** in your **Under Development** pipeline. *(A glitch only glitches the specific rolled die that failed; it produces 0 outputs).* **Contractor Sacrifice:** If a White Contractor die rolls an unresolved Glitch, it is immediately discarded to the general supply instead of entering Under Development.
+     * **Unresolved Glitches (Contractor Sacrifice):** A White Contractor die still showing **`Glitch`** is discarded to the general supply (it produces 0 outputs).
+     * **Secret Faces $\to$ Processing Box:** Any die showing a **Secret face** moves **immediately** to the **Processing Box** in your **Under Development** pipeline and produces no other output. It delivers its Secret when it leaves the Processing Box (see Phase 5 and *Secret Face Yields* below).
+     * **Clean Glitched Shield Slots:** First, each die showing a `Clean 1 Glitched Shield Slot` face (Green Face 1, *G1*, *G2*) cleans 1 of your **Glitched Shield Slots** and stays In Production (*G1* / *G2* still pay their `+1 🔬` in Phase 3; Green Face 1 used to clean pays nothing). Then you may place any die showing a `Block 1 Any` face on a Glitched Shield Slot to clean it: that die produces no output and moves at once to your **Scanned Box** (a White Contractor die is discarded to the general supply instead). Dice showing a `★`, a Secret face or a face without a shield cannot clean a slot this way.
      * **Assign to In Production (Defense Grid Capacity Enforcement):** Place all remaining active dice into the appropriate slots of your **In Production** area:
-       * **Shield Slots & Defense Grid Capacity:** Assign dice showing `Block 1 Red`, `Block 1 Blue`, `Block 1 Green`, or `Block 1 Any` to their corresponding **Red Shields**, **Blue Shields**, or **Green Shields** slots. **Hardware Limit:** The total number of dice assigned across all Shield slots cannot exceed your Company Terminal Mat's current **`defense_capacity`** (`2` baseline, upgradable to `3` and `4`). Any rolled die displaying shields that exceeds your capacity cannot block and must be placed into the Income slot (producing `0` output if it has no income face). Any die with a dual output (e.g., Red Star R1 `Block 1 Red` + `+$2`) assigned to a shield slot counts toward defense capacity.
-       * **Income Slot:** Assign all other dice (producing `$`, `🔬`, or non-shield `★` abilities) to the **Income** slot.
-       * **Choice Faces (`/`):** If a die shows a choice between a Shield and Income (e.g. `Block 1 Blue / +1 🔬`), the player commits it now to either Blue Shields (subject to defense capacity) or Income.
-       * **Generic (`Any`) Shields** (including rolled White Contractor shields) are deployed directly to the Defense Grid as flexible Generic ANY shields (`v0.31.0`). Players do not pre-commit them to a specific cube color in Phase 1; generic shields absorb threat reactively in Phase 4: Attack Resolution.
+       * **Shield Slots & Defense Grid Capacity:** Assign dice showing `Block 1 Any` to your Shield slots. **Hardware Limit:** The number of dice assigned to Shield slots cannot exceed your current **`defense_capacity`** (`2` baseline, upgradable to `3` and `4`) minus your **Glitched Shield Slots** (minimum `0`). Any rolled die displaying a shield that exceeds this cannot block and must be placed into the Income slot (producing `0` output if it has no income face).
+       * **Income Slot:** Assign all other dice (producing `$`, `🔬`, Market Share, or non-shield `★` abilities) to the **Income** slot.
+       * **Choice Faces (`/`):** If a die shows a choice (e.g. `+1 Market Share / +$1`), the player commits it now to one option.
+       * **Generic (`Any`) Shields** (including rolled White Contractor shields) are not pre-committed to a cube color in Phase 1; they absorb threat reactively in Phase 4: Attack Resolution. No shield is tied to a single cube color.
 
 ---
 
@@ -204,23 +206,17 @@ Move exited **Black Cubes** from the tray onto the next empty space(s) of the ac
   * **Add Cubes (`+X Red/Blue/Green/Black`):** Take the specified cubes from the general supply and place into the **Staging Cup** (Mode A — Next Round Priming baseline `[TUNE]`).
   * **All Players Lose `$X`:** Each player loses up to `$X` from their supply (minimum `$0`; unpaid cash loss from a corruption space does *not* drain research or secrets).
   * **All Players Lose `X 🔬`:** Each player loses up to `X` Research Tokens from their supply (minimum `0`).
-  * **All Players Glitch `X` Dice:** Each player must move `X` dice of their choice from **In Production** to the **Glitched Box** in **Under Development**. Players have **free choice of any dice in In Production** (there is no forced priority requiring Income dice to be glitched before Shields; redundant shields whose threat color did not drop may be freely sacrificed to preserve income dice). If a Shield die is moved, its shield commitment is removed immediately. A die glitched here produces `0` outputs in Phase 3.
-  * **All Players Return `X` Colored Dice:** Each player who owns at least 1 Colored Module Die (across Under Development, In Production, or Ready for Release) must return up to `X` Colored Module Dice of their choice to the Market supply. *(Gray starter dice cannot be returned).*
+  * **(All Players) Glitch `X` Dice:** Each affected player turns `X` of their shield slots into **Glitched Shield Slots** (up to their Defense Grid Capacity; excess has no effect). No dice move. Shields already placed this round still block in Phase 4; a Glitched Shield Slot reduces your capacity from your next Phase 1.
+  * **All Players Return `X` Colored Dice:** Each player who owns at least 1 Colored Module Die (across Under Development, In Production, or Ready for Release) must return up to `X` Colored Module Dice of their choice to the Market supply. *(Gray starter dice cannot be returned).* A returned die in the **Processing Box** loses its Secret.
   * **All Players Lose `X` Corporate Secrets:** Each player immediately loses `X` Corporate Secrets (checking for Patient Zero at `<= 0` Secrets).
 * **Version Advance & Track Spillover (`v1.0 → v2.0` or `v2.0 → v3.0`):** When the final space of `v1.0` (`4th` space) or `v2.0` (`5th` space) is filled and resolved:
   1. The final space's printed effect executes immediately (including any **Total Data Breach** it causes).
-  2. **`v2.0` only — Market Share comparison:** right after the final (`5th`) space of `v2.0` resolves, and before any spillover Black cubes cover `v3.0` spaces, compare the **Market Share** of all players who are not **Patient Zero** (see below). There is no comparison when `v1.0` fills.
-  3. Any excess Black cubes dropped in the same compile step **immediately spill over** onto the next Version's Corruption Track (starting at Space 1), triggering each newly covered space's printed effect in sequence. *(If spillover from `v1.0` fills `v2.0` in the same compile, the comparison happens as soon as `v2.0`'s final space resolves.)*
-  4. The **active version card remains the current version** for the remainder of the current round.
-  5. The current version's Institutional Override **remains usable** through **Phases 3–6**. The upcoming version's Institutional Override is not unlocked yet.
-  6. At the **start of the subsequent round** (in Phase 1 Step 1), the version transition officially takes effect: unspent overrides from the old version are forfeited, and the new version's override unlocks to Available.
-* **Market Share Comparison (`v2.0 → v3.0`, once per game):** Compare the Market Share of every player who is not Patient Zero. A player who became Patient Zero earlier in this Phase 2, including from `v2.0`'s final space itself, takes no part. This happens before Phase 3: Income, so a player who pays the bank pays from the Money they hold now.
-  * **Highest Market Share:** each player with (or tied for) the highest Market Share gains **`$4`** `[TUNE]` from the bank. The bank always pays in full.
-  * **Lowest Market Share:** each player with (or tied for) the lowest Market Share pays **`$4`** `[TUNE]` to the bank, or all of their Money if they have less. **Any shortfall is forgiven**: Money never drops below `$0`, and no Corporate Secrets are lost.
-  * All Money goes through the bank; players never pay each other. Players between the highest and lowest are unaffected.
-  * If every compared player has the same Market Share, or only one player is compared, nothing happens.
-  * There is no comparison when `v3.0` fills (Singularity) and none at game end.
-* **Singularity (`v3.0` Track Fills):** When the final (`6th`) space of `v3.0` is covered by a Black cube, resolve that space's printed effect (e.g., *Corrupted Kernel* `Lose 1 Secret`), and **Singularity is triggered—the game ends IMMEDIATELY at the end of Phase 2!** **Phases 3–6 are skipped** (no income is collected); all surviving non-Contractor dice in **In Production** return to **Ready for Release**, all White Contractor dice return to the general supply, and players proceed directly to **Section 5: End Game & Victory Scoring**.
+  2. Any excess Black cubes dropped in the same compile step **immediately spill over** onto the next Version's Corruption Track (starting at Space 1), triggering each newly covered space's printed effect in sequence.
+  3. The **active version card remains the current version** for the remainder of the current round.
+  4. The current version's Institutional Override **remains usable** through **Phases 3–6**. The upcoming version's Institutional Override is not unlocked yet.
+  5. At the **start of the subsequent round** (in Phase 1 Step 1), the version transition officially takes effect: unspent overrides from the old version are forfeited, and the new version's override unlocks to Available.
+  6. There is no Market Share comparison for Money when a version fills (removed in v0.38.0).
+* **Singularity (`v3.0` Track Fills):** When the final (`6th`) space of `v3.0` is covered by a Black cube, resolve that space's printed effect (e.g., *Corrupted Kernel* `Lose 1 Secret`), and **Singularity is triggered—the game ends IMMEDIATELY at the end of Phase 2!** **Phases 3–6 are skipped** (no income is collected and no Secrets leave the Processing Box); all surviving non-Contractor dice in **In Production** return to **Ready for Release**, all White Contractor dice return to the general supply, and players proceed directly to **Section 5: End Game & Victory Scoring** (the game-end **Market Leader Bonus** is awarded).
 
 #### Compile Buffer Overflow (Empty Tray)
 If **`0 cubes of any color`** exit the tower into the tray this phase:
@@ -236,13 +232,14 @@ If **`0 cubes of any color`** exit the tower into the tray this phase:
 
 ### Phase 3: Income (Simultaneous)
 
-Every surviving player simultaneously collects all **`$` Money tokens**, **Research Tokens (`🔬`)**, and immediate `★` outputs from **all dice still in In Production** (both the **Income** slot and the **Shield** slots), **including White Contractor dice** (e.g., a Contractor's `+$1` face pays now). *(Dice glitched in Phase 1, or glitched or returned by Corruption Track effects in Phase 2, are no longer In Production and produce 0 outputs).*
-* **Star outputs resolved here:** *R1 Brand Protection* (`+$2`), *Y2 Cloud Monopoly* (bonus cash), *B3 Air-Gapped Backup* (move `1` die from your **Glitched Box** to your **Scanned Box**), and *Y3 Proprietary Training* (`+1 Corporate Secret`, then this die moves to the **Glitched Box**). Each *R2 Ad Campaign* die still In Production now earns you `1` use of its paid action in this round's Phase 6.
+Every surviving player simultaneously collects all **`$` Money tokens**, **Research Tokens (`🔬`)**, and immediate `★` outputs from **all dice still in In Production** (both the **Income** slot and the **Shield** slots), **including White Contractor dice** (e.g., a Contractor's `+$1` face pays now). *(Dice that went to the Processing Box or the Scanned Box in Phase 1, or were returned by Corruption Track effects in Phase 2, are no longer In Production and produce 0 outputs).*
+* **Market Share faces resolve here:** Red Face 1 (`+1 Market Share` option) and Yellow Market Share faces raise your Market Share now. They cannot raise it above your maximum and do not count toward your Public Relations limit.
+* **Star outputs resolved here:** *R1 Brand Protection* (`+$2 & +1 Market Share`, same limits), *Y2 Cloud Monopoly* (bonus cash), *B3 Air-Gapped Backup* (move `1` die from your **Processing Box** to your **Scanned Box**; it delivers its Secret now, see *Secret Face Yields*), and *Y3 Proprietary Training* (`+1 Corporate Secret`, then this die moves to the **Scanned Box**). Each *R2 Ad Campaign* die still In Production now earns you `1` use of its paid action in this round's Phase 6.
 * **Customer Poaching (after all players' Income):** Once every player has collected Income, resolve each *R3 Customer Poaching* die still In Production, going clockwise from the **First Player** (one die at a time if a player has several):
   * Take **`1` Market Share** from the surviving rival with the **most Market Share** (not Patient Zero, and above `0`). If several rivals are tied for the most, you choose among them. If no rival has Market Share above `0`, nothing happens.
   * That rival loses `1` Market Share and you gain `1`. Your Market Share cannot go above your maximum: if you are already at your maximum, the rival still loses `1` and you gain nothing.
   * Re-check which rival has the most Market Share before each Customer Poaching die. A rival taken to `0` causes a **Market Collapse** at the end of Phase 4.
-* *(Signature Protocol Timing: each Face 6 `Purple ★` die **still In Production** triggers its Signature Protocol once — **The Phreaker's** Jumper Diagnostics [roll 1 offline die in Under Development; if Under Development is empty, collect +$1 cash], **The Acoustic's** Resonance Sensor [+$1 cash per distinct exit tray color], **The Spook's** Burn Notice [+$2 cash and optional die burn for +1 Secret], or **The Cipher's** Algorithmic Parity [+$2 cash & +1 🔬 Research Token]. Two `Purple ★` dice trigger the protocol twice; Burn Notice may not target the same die twice. A `Purple ★` die that left In Production in Phase 2 triggers nothing. Burn Notice may target a die that is In Production; that die no longer blocks in Phase 4).*
+* *(Signature Protocol Timing: each Face 6 `Purple ★` die **still In Production** triggers its Signature Protocol once — **The Phreaker's** Jumper Diagnostics [move 1 die from your Processing Box to your Scanned Box, delivering its Secret now; if your Processing Box is empty, roll 1 Scanned Box die and collect only its `$` and `🔬` output (it stays in place); if Under Development is empty, collect +$1 cash], **The Acoustic's** Resonance Sensor [+$1 cash per distinct exit tray color], **The Spook's** Burn Notice [+$2 cash and optional die burn for +1 Secret], or **The Cipher's** Algorithmic Parity [+$2 cash & +1 🔬 Research Token]. Two `Purple ★` dice trigger the protocol twice; Burn Notice may not target the same die twice. A `Purple ★` die that left In Production in Phase 2 triggers nothing. Burn Notice may target a die that is In Production; that die no longer blocks in Phase 4).*
 
 ---
 
@@ -253,19 +250,15 @@ Calculate the total attack strength of **Red**, **Blue**, and **Green** from exi
 
 Each surviving player simultaneously resolves all three colors against their committed Shields still in **In Production** (a player who became **Patient Zero** in Phase 2 is not attacked):
 
-1. **Two-Stage Defensive Blocking (`v0.31.0`):**
-   * **Stage 1 (Color-Specific Shields):** Each die assigned to a specific color defense blocks **1 cube** of that color (or 2 cubes for `Block 2`).
-   * **Stage 2 (Reactive Generic ANY Shields):** After Stage 1, you choose how your available `Block 1 Any` shields are split across the remaining unblocked Red, Blue and Green cubes. **Every available `Any` shield must block while any unblocked cube remains**: you choose only the split, and you cannot hold a shield back.
-   * Dice assigned to shields (both color and generic ANY) absorb attacks cleanly and remain deployed in **In Production** (unless subsequently glitched by unblocked Green Malware).
+1. **Blocking:**
+   * Every shield is a `Block 1 Any` shield. You choose how your available shields are split across the Red, Blue and Green cubes. **Every available `Any` shield must block while any unblocked cube remains**: you choose only the split, and you cannot hold a shield back.
+   * Dice assigned to shields absorb attacks cleanly and remain deployed in **In Production**. Remember how many Blue cubes you blocked this round (it raises Blue Secret face yields in Phase 5; cubes ignored by *Baffle Echo* were not blocked).
 2. **Unblocked Damage:**
    * **Red (Market Manipulation):** Lower your **Market Share** by **`1`** per unblocked Red cube (Market Share cannot drop below `0`; any excess has no further effect). Red cubes never cost Money or Corporate Secrets.
    * **Blue (Spyware / Data Exfiltration):** Lose **`1` Corporate Secret** per unblocked Blue cube.
    * *(Institutional Override Timing: Contracting **Department of Telecommunications Oversight [DTO]** may trigger Slush Fund during damage calculation to absorb up to 2 Corporate Secret loss from Blue cubes for free; **once per game**, and you choose whether to use it when it would apply).*
-   * **Green (Malware / Logic Bombs):** For each unblocked Green cube, move **`1` active die from In Production** to the **Glitched Box** in your **Under Development** pipeline! *(This round's income was already collected in Phase 3; a glitched die is unavailable until it clears the CI/CD Pipeline.)*
-     * **Defensive Shield Sacrifice:** Defending players may choose to glitch a die currently in a Shield slot (one that already blocked this round) instead of an Income die.
-     * **Contractor Sacrifice:** You may choose to discard **1 active White Contractor die** to the general supply instead of glitching a permanent module die.
-     * If you have **no dice in In Production** (or all active dice have already glitched), excess unblocked Green malware has no effect—no dice are removed or destroyed from Under Development or Ready for Release.
-   * **Damage-Conditional `★` Outputs:** *B1 Honeypot Telemetry* bonuses are evaluated now, **only for dice still In Production** (a die glitched or returned in Phase 2, or removed in Phase 3, does not pay).
+   * **Green (Malware / Logic Bombs):** For each unblocked Green cube, turn **`1` of your shield slots** into a **Glitched Shield Slot**. No die moves. You cannot have more Glitched Shield Slots than your Defense Grid Capacity; excess unblocked Green has no effect. Glitched Shield Slots stay glitched until cleaned (Phase 1 Step 5, Phase 5 Step 3); a new slot gained from the Defense Grid Track arrives clean.
+   * **Damage-Conditional `★` Outputs:** *B1 Honeypot Telemetry* bonuses are evaluated now, **only for dice still In Production** (a die returned in Phase 2, or removed in Phase 3, does not pay).
    * **Patient Zero Check:** If your Corporate Secrets reach **`0` (or below)**, you suffer a **Total Data Breach** and become **Patient Zero**.
    * **Defense Grid Level 4:** After your damage has resolved, gain **`+$1` per Attack Cube** (`Red`, `Blue`, or `Green`) your shields blocked this phase (max **`$3`**) `[TUNE]`. Cubes ignored by *Baffle Echo* were not blocked and do not count. Blocked Red cubes count.
 3. **Snowball Recycle & Contractor Expiration:** Place **all exited Red, Blue, and Green cubes** from the tray back into the **Staging Cup** for next round. All White Contractor dice (whether they blocked, sacrificed, or remained unused) return to the general supply.
@@ -282,11 +275,24 @@ Each surviving player simultaneously resolves all three colors against their com
 ### Phase 5: CI/CD Pipeline Shift (Simultaneous)
 
 All surviving players simultaneously update their terminal pipeline in this order:
-1. **Magnetic Splice:** *(Institutional Override Timing: Contracting **Omnidyne Systems** may trigger Magnetic Splice here to move 1 die from Glitched directly to Ready for Release for free).*
+1. **Magnetic Splice:** *(Institutional Override Timing: Contracting **Omnidyne Systems** may trigger Magnetic Splice here to move 1 die of your choice from your Processing Box directly to Ready for Release for free; it delivers its Secret now).*
 2. **Production Return:** Move **all surviving dice** from **In Production** (Income and Shields) to your **Scanned Box**.
-3. **Scanned Graduation (Hardware Throughput Limit):** Move up to **`release_bandwidth` dice of your choice** (`4` baseline, upgradable to `5` and `6`) from the **Scanned Box** to your **Ready for Release Zone**. You may graduate fewer. Any remaining dice stay in the Scanned Box.
-4. **Conveyor Triage (Hardware Throughput Limit):** Move up to **`triage_bandwidth` dice of your choice** (`2` baseline, upgradable to `3` and `4`) from the **Glitched Box** into the **Scanned Box**. *(Dice triaged now graduate no earlier than next round's Phase 5.)* At **Triage Track Level 4**, gain **`+1 🔬`** for each die you move beyond the 2nd (up to `+2 🔬` at Bandwidth `4`).
-   * **Hardware Throughput Limits:** Throughput is strictly governed by your Triage and Release hardware bandwidths; excess glitched dice remain quarantined in the Glitched Box, and excess scanned dice remain in the Scanned Box.
+3. **Scanned Graduation (Hardware Throughput Limit):** Move up to **`release_bandwidth` dice of your choice** (`4` baseline, upgradable to `5` and `6`) from the **Scanned Box** to your **Ready for Release Zone**. You may graduate fewer. Any remaining dice stay in the Scanned Box. If at least `1` die graduated, clean `1` of your **Glitched Shield Slots** (once per Phase 5) `[TUNE]`.
+4. **Conveyor Triage (Hardware Throughput Limit):** Move up to **`triage_bandwidth` dice** (`2` baseline, upgradable to `3` and `4`) from the **Processing Box** into the **Scanned Box**, **oldest first**: dice leave in the order they entered the Processing Box (any color; dice that entered together leave in roll order). You do not choose. Each die delivers its Secret as it moves (see *Secret Face Yields*). *(Dice triaged now graduate no earlier than next round's Phase 5.)* At **Triage Track Level 4**, gain **`+1 🔬`** for each die you move beyond the 2nd (up to `+2 🔬` at Bandwidth `4`).
+   * **Hardware Throughput Limits:** Throughput is strictly governed by your Triage and Release hardware bandwidths; excess dice remain in the Processing Box (keeping their Secret for a later round), and excess scanned dice remain in the Scanned Box.
+5. **Market Leader Bonus (end of Phase 5):** If at least `1` Secret face on a **Red** die was delivered this round (by any player, in Phase 3 or Phase 5), award the **Market Leader Bonus** once (see below). Several Red Secret faces in one round still give one award.
+
+#### Secret Face Yields `[TUNE]`
+A die showing a **Secret face** delivers its Secret when it leaves the **Processing Box** (Conveyor Triage, *Magnetic Splice*, *Jumper Diagnostics*, *B3 Air-Gapped Backup*): its owner gains **Corporate Secrets** by the die's color, using the game state at that moment:
+* **Red:** `+2`.
+* **Blue:** `+1`, plus `1` if you blocked at least `1` Blue cube this round, plus `1` if your Defense Grid Track is at Level 3 or higher (maximum `+3`). A Blue die leaving in Phase 3 gets no block bonus (Phase 4 has not happened yet).
+* **Green:** `+3` minus your **Glitched Shield Slots** (minimum `0`), counted after Step 3's slot cleaning.
+* **Purple:** `+1`.
+
+A die returned to the supply from the Processing Box, or still in the Processing Box when the game ends, delivers nothing.
+
+#### Market Leader Bonus
+Place every player who is not **Patient Zero** by their **Market Share** at that moment (highest first). Each gains **Corporate Secrets** by place `[TUNE: v0.38.0]`: **1st `+3`, 2nd `+1`, other places `0`** at every player count. Tied players share the better place and each gain its award (e.g., two players tied for 1st both gain `+3`; the next player is 3rd). Patient Zeros gain nothing and take no place; a sole survivor takes 1st; a player at `0` Market Share is placed like anyone else. It is awarded at the end of Phase 5 in any round with a Red Secret face delivered (including the Final Round) and once more at game end (Section 5).
 
 ---
 
@@ -296,15 +302,15 @@ Surviving White Hat Operatives take clockwise **Operations Turns** starting with
 1. **Terminal Hardware Track Upgrades:**
    * Spend Research Tokens (`🔬`) to raise any of your 4 tracks one level at a time: **`1 🔬`** to reach Level 1, **`2 🔬`** for Level 2, **`2 🔬`** for Level 3, **`3 🔬`** for Level 4 `[TUNE]` (no discounts; unlimited upgrades per turn as long as tokens are available). See the track table in Section 2.
    * **Breakthroughs (Levels 1 and 3):** When a track reaches Level 1 or Level 3, its **Breakthrough** resolves **immediately**, before your next operation. If you raise several levels in one turn, resolve them one level at a time, in the order you buy them (e.g. `$3` from the Public Relations Level 1 Breakthrough can pay for a Triage Level 3 Breakthrough bought afterwards). Each Breakthrough happens only once, the first time you reach that level.
-     * New dice from a Breakthrough (Gray Legacy, Central Market colored or Purple) go to your **Ready for Release Zone** and do not use Release Bandwidth. The `2` White Contractor dice from the Triage Level 1 Breakthrough join your rolling pool next round and expire at the end of that round's Phase 4 like any contractor; they do not count toward Progressive Contractor Pricing or the `3`-hire limit. If fewer than `2` White Contractor dice remain in the supply, gain what is left.
-     * **Triage Level 3 Breakthrough (optional):** Pay **`$3`** `[TUNE]` to return `1` Gray Legacy die you own (from your Ready for Release Zone, Scanned Box or Glitched Box) to the box and take `1` die of any Central Market color with stock left (it uses that color's active Variant Card). The new die goes to your Ready for Release Zone. The `$3` is flat (not the Variant Card price), is not a purchase (it does not count toward your 2-dice limit), and cannot be discounted by *Algorithmic Arbitrage*. If you can't pay, own no Gray Legacy die, or every Central Market stack is empty, or you decline, the Breakthrough is lost (it cannot be claimed later).
+     * New dice from a Breakthrough (Gray Legacy, Central Market colored or Purple) go to your **Ready for Release Zone** and do not use Release Bandwidth.
+     * **Triage Level 3 Breakthrough (optional):** Pay **`$3`** `[TUNE]` to return `1` Gray Legacy die you own (from your Ready for Release Zone, Scanned Box or Processing Box) to the box and take `1` die of any Central Market color with stock left (it uses that color's active Variant Card). The new die goes to your Ready for Release Zone. The `$3` is flat (not the Variant Card price), is not a purchase (it does not count toward your 2-dice limit), and cannot be discounted by *Algorithmic Arbitrage*. If you can't pay, own no Gray Legacy die, or every Central Market stack is empty, or you decline, the Breakthrough is lost (it cannot be claimed later).
      * **Public Relations Level 3 Breakthrough:** Move the Purple die from your Personal Reserve to your Ready for Release Zone.
    * Defense Capacity applies from next round's Phase 1; Triage and Release Bandwidth apply from next round's Phase 5; Level 4 effects apply from the next phase in which they are used.
 2. **Regain Market Share (Public Relations Track):**
-   * Spend **`2 🔬`** `[TUNE]` for each **`+1` Market Share**, up to your current Public Relations limit this turn: **`1`** at Levels 0–1, **`2`** at Levels 2–3, **`3`** at Level 4 `[TUNE]`. A level bought earlier in the same turn applies to later regains.
+   * Spend **`3 🔬`** `[TUNE]` for each **`+1` Market Share**, up to your current Public Relations limit this turn: **`1`** at Levels 0–1, **`2`** at Levels 2–3, **`3`** at Level 4 `[TUNE]`. A level bought earlier in the same turn applies to later regains.
    * Market Share can never go above your maximum (your starting value); you cannot spend research while at your maximum.
-   * You may regain Market Share during the Final Round (final Market Share sets your **Market Leader Bonus** place and is the first tiebreaker), but doing so does not cancel a Final Round already triggered.
-3. **Paid `★` Actions:** Resolve *B2 Deep R&D Vault* or *Y1 Algorithmic Trading* Secret purchases rolled this round, and *R2 Ad Campaign* (pay `$2` → `+1` Market Share, once per *Ad Campaign* die that was In Production in Phase 3). *Ad Campaign* does not count toward your Public Relations limit, cannot raise Market Share above your maximum (you do not pay while at your maximum), and any unused *Ad Campaign* is lost at the end of your Operations Turn.
+   * You may regain Market Share during the Final Round (final Market Share sets your game-end **Market Leader Bonus** place and is the first tiebreaker), but doing so does not cancel a Final Round already triggered.
+3. **Paid `★` Actions:** Resolve *B2 Deep R&D Vault* (pay `$4` → `+1` Corporate Secret) or *Y1 Algorithmic Trading* Secret purchases rolled this round, and *R2 Ad Campaign* (pay `$2` → `+1` Market Share, once per *Ad Campaign* die that was In Production in Phase 3). *Ad Campaign* does not count toward your Public Relations limit, cannot raise Market Share above your maximum (you do not pay while at your maximum), and any unused *Ad Campaign* is lost at the end of your Operations Turn.
 4. **Purchase Software Module Dice (Limit `2` dice per turn `[TUNE]`):**
    * **Central Market:** Pay the `$` cost of any available Colored Die (**Red, Blue, Green, Yellow**) as printed on its active face-up **Variant Card** (`$4`–`$6`) and place it directly into your **Ready for Release Zone** (available to roll next round; purchases do not use Release Bandwidth).
    * Purple Proprietary Specialist dice cannot be purchased.
@@ -322,23 +328,17 @@ When the game ends (via Singularity when `v3.0` fills, at the end of the **Final
 
 * **Standard Ending (1+ White Hat Operatives Survive):**
   * Any player who suffered a **Total Data Breach** (`<= 0 Secrets`) is **eliminated** as Patient Zero and cannot win.
-  * **Market Leader Bonus:** First, place the surviving White Hat Operatives by final **Market Share** (highest first). Each gains bonus **Corporate Secrets** by place `[TUNE: v0.37.0]`:
-
-    | Players | 1st | 2nd | 3rd | 4th |
-    | :--- | :---: | :---: | :---: | :---: |
-    | 2 | `+2` | `0` | — | — |
-    | 3 | `+2` | `+1` | `0` | — |
-    | 4 | `+2` | `+1` | `0` | `0` |
-
-    * Tied players share the better place and each gain its bonus (e.g., two players tied for 1st both gain `+2`; the next player is 3rd). There is no further tiebreak for the bonus.
-    * Patient Zeros gain nothing and take no place; survivors below them move up. A sole survivor gains the 1st-place bonus.
-  * Surviving White Hat Operatives then compare their **Corporate Secrets** (held + Market Leader Bonus). **Corporate Secrets are the sole source of victory points (`1 Secret = 1 Point`)**; Market Share scores only through the Market Leader Bonus, and Money, Research tokens, and Software Module dice score `0 VP`. The surviving White Hat Operative with the **most Corporate Secrets wins!**
+  * **Processing Box at game end:** Dice still in your **Processing Box** deliver nothing (their Secrets are lost).
+  * **Market Leader Bonus (game end):** First, award the **Market Leader Bonus** once more by final **Market Share** (see Phase 5): 1st `+3`, 2nd `+1`, other places `0` `[TUNE: v0.38.0]` at every player count. It is awarded on every ending except a **Total Wipeout** (Singularity, Patient Zero and Market Collapse endings all award it), in addition to any award at the end of the last round's Phase 5.
+    * Tied players share the better place and each gain its award (e.g., two players tied for 1st both gain `+3`; the next player is 3rd). There is no further tiebreak for the bonus.
+    * Patient Zeros gain nothing and take no place; survivors below them move up. A sole survivor takes 1st.
+  * Surviving White Hat Operatives then compare their **Corporate Secrets**. **Corporate Secrets are the sole source of victory points (`1 Secret = 1 Point`)**; Market Share scores only through the Market Leader Bonus, and Money, Research tokens, and Software Module dice score `0 VP`. The surviving White Hat Operative with the **most Corporate Secrets wins!**
   * **Hierarchical Tiebreakers:** If surviving players are tied for Corporate Secrets, break ties using the following hierarchy:
     1. **Market Position:** Most final **Market Share**.
     2. **Operational Capital:** Most remaining **Money (`$`)**.
     3. **Active Infrastructure:** Most **Active Colored Module Dice** in your **Ready for Release Zone** (Gray starter dice and White contractor dice do not count).
     4. **Hardware Readiness:** Most remaining **Research Tokens (`🔬`)**.
-    5. **Reliability:** Fewest total dice in **Under Development** (least glitched/scanned pipeline debt).
+    5. **Reliability:** Fewest total dice in **Under Development** (Processing Box + Scanned Box).
     6. If still tied, victory is shared.
   * A player at `0` Market Share after a **Market Collapse** is not eliminated, scores normally, and is placed by Market Share for the Market Leader Bonus like anyone else (players tied at `0` share a place).
 
