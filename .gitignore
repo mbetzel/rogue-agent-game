@@ -8,6 +8,8 @@ venv/
 .env
 .idea/
 .vscode/
+.claude/worktrees/
+.claude/settings.local.json
 
 # Telemetry data dumps & temporary logs
 data/
