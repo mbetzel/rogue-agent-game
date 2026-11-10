@@ -484,3 +484,5 @@ Still pending User:
 6. **Oldest first ignores die colour.** *Default:* yes, all dice by entry order.
 
 **§14.5.9 resolution (User, 2026-11-09):** all remaining open questions accepted at their recommended defaults — Q1 no name (sim prose "Red Secret payout", provisional; confirm before Phase B rules wording); Q2 end payout skipped only when Market Collapse is the primary `end_reason`; Q3 Market Share maximum = start (16 / 16 / 17); Q4 Magnetic Splice / Jumper Diagnostics keep player choice; Q5 survivors at end of Phase 5, schedule by starting player count; Q6 oldest-first ignores die colour.
+
+**§14.5.10 Amendment (User, 2026-11-09; FINDINGS §43.5):** the end payout also fires when the game ends by Market Collapse; it is skipped only on a Total Wipeout. New lever `red_secret_payout_skip_on_collapse: bool = True` (keeps the current behaviour for parity); `v038c()` sets it `False`. Bot valuation: `expected_red_payouts_remaining` drops the low-share 0.5 end-payout factor when the lever is off (end payout probability = γ^R only). Tests: Market Collapse end with payout on/off; Total Wipeout still skips; INV text for the end payout updated.
