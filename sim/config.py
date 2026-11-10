@@ -4,12 +4,34 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum, IntEnum
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 _ALL_TRACK_LEVELS = (0, 1, 2, 3, 4)
 # v0.37.0 [TUNE] (FINDINGS §38 / §39): Market Leader Bonus by Market Share place, and starting Corporate Secrets
 V037_MARKET_LEADER_BONUS = {2: (2, 0), 3: (2, 1, 0), 4: (2, 1, 0, 0)}
 V037_STARTING_SECRETS = {2: 9, 3: 8, 4: 9}
+# --- v0.38.0 candidate (docs/specs/v380_secret_faces_processing_box_spec.md) ---
+V038_COMPANY_STARTING_COLORS = {  # [TUNE] OQ-4 (User 2026-11-07)
+    "MERIDIAN": "RED", "PROMETHEUS": "RED",
+    "DTO": "BLUE", "AEGIS": "BLUE",
+    "OMNIDYNE": "GREEN", "HELIX": "GREEN",
+}
+V038_STARTING_SECRETS = {2: 5, 3: 5, 4: 5}  # [TUNE] OQ-1 (User 2026-11-07)
+V038_MARKET_SHARE_START = {2: 12, 3: 12, 4: 12}
+V038_PR_REGAIN_COST = 3  # [TUNE] OQ-9 follow-up: 3 research per +1 Market Share (v0.37: 2)
+_FACE_PROFILES = ("V037", "V038_DRAFT")
+# die_face_profile only: V038_DRAFT with the candidate-2 Yellow table (spec §14.3); _ALT = F1 "+$1 & +1 Market Share"
+# _F3 = V038_YELLOW_MS with Yellow F3 "+$1 & +1 Market Share" (spec §14.5.1, RSP-1)
+V038_DIE_FACE_PROFILES = ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3")
+_DIE_FACE_PROFILES = ("V037",) + V038_DIE_FACE_PROFILES
+V038B_STARTING_SECRETS = {2: 3, 3: 4, 4: 4}  # [TUNE] §14.3
+V038B_RED_TIERS = ((11, 3), (7, 2), (3, 1), (0, 0))  # [TUNE] §14.3
+V038B_MARKET_SHARE_START = {2: 14, 3: 14, 4: 14}  # [TUNE] §14.4 (start = max)
+V038B_MARKET_LEADER_BONUS = {2: (4, 0), 3: (4, 2, 0), 4: (4, 2, 0, 0)}  # [TUNE] §14.4
+V038C_MARKET_SHARE_START = {2: 13, 3: 16, 4: 17}  # [TUNE] §14.5.2 / FINDINGS §43.5 (start = max)
+V038C_RED_SECRET_PAYOUT = {2: (3, 1), 3: (3, 1, 0), 4: (3, 1, 0, 0)}  # [TUNE] §14.5.2
+_TRIAGE_ORDER_RULES = ("BOT", "OLDEST_FIRST")
+_TRIAGE_L1_MODES = ("WHITE_CONTRACTORS", "GRAY_DIE")
 
 
 class CubeColor(str, Enum):
@@ -372,6 +394,37 @@ class GameConfig:
     # "all" (default): every capable seat windows. "non_reference" (measurement mode, spec amendment 3): the
     # reference bot's fallback / portfolio members and every rollout clone keep the old AdaptiveBalanced behaviour.
     bot_pr_push_scope: str = "all"
+    # --- v0.38.0 Secret faces / Processing Box (INV-SF-*). Defaults reproduce v0.37.0 bit-identically. ---
+    secret_face_enabled: bool = False
+    die_face_profile: str = "V037"  # "V037" | "V038_DRAFT" | "V038_YELLOW_MS" | "V038_YELLOW_MS_ALT" | "V038_YELLOW_MS_F3" (spec §4, §14.3, §14.5)
+    variant_profile: str = "V037"  # "V037" | "V038_DRAFT" (Variant Card texts, spec §5)
+    power_profile: str = "V037"  # "V037" | "V038_DRAFT" (Magnetic Splice, Jumper Diagnostics, Brute-Force Bypass, §6)
+    # [TUNE] Red Secret yield by Market Share: (min_share, yield), highest first, last threshold 0.
+    secret_yield_red_tiers: Tuple[Tuple[int, int], ...] = ((9, 3), (5, 2), (1, 1), (0, 0))
+    secret_yield_blue_base: int = 1  # [TUNE]
+    secret_yield_blue_block_bonus: int = 1  # [TUNE] owner blocked >= 1 Blue cube in the banking round
+    secret_yield_blue_grid_l3_bonus: int = 1  # [TUNE] Defense Grid Level >= 3
+    secret_yield_blue_cap: int = 3  # [TUNE]
+    secret_yield_green_base: int = 3  # [TUNE] minus the owner's Glitched Shield Slots, min 0
+    secret_yield_purple: int = 1  # [TUNE]
+    glitched_shield_slots_enabled: bool = False
+    slot_graduation_clear: int = 1  # [TUNE] slots cleared once per Phase 5 if >= 1 die graduates
+    company_starting_die_enabled: bool = False
+    company_starting_colors: Dict[str, str] = field(default_factory=dict)  # CompanyCode -> "RED"|"BLUE"|"GREEN"
+    triage_l1_breakthrough: str = "WHITE_CONTRACTORS"  # "WHITE_CONTRACTORS" (v0.37) | "GRAY_DIE"
+    ace_allows_secret_face: bool = False
+    # [TUNE] §14.3: max Glitched Shield Slots a player can receive per round from all sources (None = uncapped)
+    glitched_slots_per_round_cap: Optional[int] = None  # Arbitrary Code Execution may target the Secret face (OQ-10: no)
+    # --- RSP-1 (spec §14.5, FINDINGS §43.4). All off by default = v038b bit-identical. ---
+    # None = Red yield from secret_yield_red_tiers; an int = flat Red Secret yield to the owner.
+    red_secret_owner_yield: Optional[int] = None
+    # [TUNE] player count -> Corporate Secrets by Market Share place; the "Red Secret payout" (provisional sim label)
+    # fires at most once per round at the end of Phase 5 if >= 1 Red Secret was banked that round. None/{} = off.
+    red_secret_payout_by_player_count: Optional[Dict[int, Tuple[int, ...]]] = None
+    red_secret_payout_at_end: bool = False  # one more payout at game end (not on a Total Wipeout; see next lever)
+    # spec §14.5.10: True (default, parity) skips the end payout on a Market Collapse end too; v038c() sets False.
+    red_secret_payout_skip_on_collapse: bool = True
+    triage_order_rule: str = "BOT"  # "BOT" (choose_triage_order hook) | "OLDEST_FIRST" (Processing Box entry order)
 
     def __post_init__(self) -> None:
         if not isinstance(self.bot_pr_push_params, PrPushParams):
@@ -440,6 +493,7 @@ class GameConfig:
             self.slush_fund_once_per_game = v035
         if self.level2_perks_enabled is None:
             self.level2_perks_enabled = not v035
+        self._validate_v038()
         if self.starting_secrets_by_player_count is None:
             # NOTE: resolved once at construction. Re-assigning round_sequence later does NOT
             # re-resolve this dict; use GameConfig.legacy_v033() or pass round_sequence to __init__.
@@ -490,6 +544,148 @@ class GameConfig:
         return cls.v037(**overrides)
 
     @classmethod
+    def v038(cls, **overrides) -> "GameConfig":
+        """v0.38.0 candidate (FINDINGS §42, spec v380): Secret faces, Processing Box banking, Glitched Shield Slots,
+        12-point Market Share without Market Collapse, Company starting die, Triage L1 Gray die, 5/5/5 Secrets,
+        Public Relations regain 3 research per +1 Market Share. On top of ``v037()``."""
+        for k, v in (
+            ("secret_face_enabled", True), ("die_face_profile", "V038_DRAFT"), ("variant_profile", "V038_DRAFT"),
+            ("power_profile", "V038_DRAFT"), ("glitched_shield_slots_enabled", True),
+            ("company_starting_die_enabled", True), ("company_starting_colors", dict(V038_COMPANY_STARTING_COLORS)),
+            ("triage_l1_breakthrough", "GRAY_DIE"), ("market_share_start_by_player_count", dict(V038_MARKET_SHARE_START)),
+            ("market_collapse_enabled", False), ("any_shield_policy", AnyShieldPolicy.FREE_CHOICE),
+            ("starting_secrets_by_player_count", dict(V038_STARTING_SECRETS)),
+            ("share_regain_cost_by_level", {lvl: V038_PR_REGAIN_COST for lvl in _ALL_TRACK_LEVELS}),
+        ):
+            overrides.setdefault(k, v)
+        return cls.v037(**overrides)
+
+    @classmethod
+    def v038b(cls, **overrides) -> "GameConfig":
+        """v0.38 candidate 2 (spec §14.3, FINDINGS §43): ``v038()`` + Market Collapse on, starting Secrets 3/4/4,
+        Red tiers 11/7/3, Yellow profile ``V038_YELLOW_MS``; §14.4: Market Share 14 (start = max), Market Leader
+        Bonus 2P +4 / 3-4P +4, +2; no lever A bot switches (``bot_pr_push=False``).
+        ``v038()`` / ``v038_roster()`` are unchanged so the first sweep reproduces."""
+        for k, v in (("market_collapse_enabled", True), ("starting_secrets_by_player_count", dict(V038B_STARTING_SECRETS)),
+                     ("secret_yield_red_tiers", V038B_RED_TIERS), ("die_face_profile", "V038_YELLOW_MS"),
+                     ("bot_pr_push", False),
+                     ("market_share_start_by_player_count", dict(V038B_MARKET_SHARE_START)),
+                     ("market_leader_bonus_by_player_count", dict(V038B_MARKET_LEADER_BONUS))):
+            overrides.setdefault(k, v)
+        return cls.v038(**overrides)
+
+    @classmethod
+    def v038c(cls, **overrides) -> "GameConfig":
+        """v0.38 candidate 3, RSP-1 (spec §14.5, FINDINGS §43.4): ``v038b()`` + Red Secret owner yield +2 (User, 2026-11-09, §43.5), the Red
+        Secret payout (at most once per round at the end of Phase 5; 1st +3 / 2nd +1) plus one end payout, Market
+        Leader Bonus and v2.0 comparison removed, Market Share 13 / 16 / 17 (start = max), Yellow F3
+        ``+$1 & +1 Market Share``, oldest-first Conveyor Triage. Starting Secrets 3 / 4 / 4."""
+        for k, v in (("red_secret_owner_yield", 2),
+                     ("red_secret_payout_by_player_count", dict(V038C_RED_SECRET_PAYOUT)),
+                     ("red_secret_payout_at_end", True), ("red_secret_payout_skip_on_collapse", False),
+                     ("market_leader_bonus_by_player_count", {}), ("version_share_payout", {}),
+                     ("market_share_start_by_player_count", dict(V038C_MARKET_SHARE_START)),
+                     ("die_face_profile", "V038_YELLOW_MS_F3"), ("triage_order_rule", "OLDEST_FIRST"),
+                     ("starting_secrets_by_player_count", dict(V038B_STARTING_SECRETS))):
+            overrides.setdefault(k, v)
+        return cls.v038b(**overrides)
+
+    @classmethod
+    def v038_roster(cls, **overrides) -> "GameConfig":
+        """``v038()`` + the ``v037_roster()`` bot switches (lever A push on, default params)."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v038(**overrides)
+
+    def _validate_v038(self) -> None:
+        """spec §2.2. Called from __post_init__ after red_mode / any_shield_policy resolve."""
+        if self.die_face_profile not in _DIE_FACE_PROFILES:
+            raise ValueError(f"die_face_profile must be one of {_DIE_FACE_PROFILES}, got {self.die_face_profile!r}")
+        cap = self.glitched_slots_per_round_cap
+        if cap is not None and (isinstance(cap, bool) or not isinstance(cap, int) or cap < 0):
+            raise ValueError("glitched_slots_per_round_cap must be None or an int >= 0")
+        for name in ("variant_profile", "power_profile"):
+            if getattr(self, name) not in _FACE_PROFILES:
+                raise ValueError(f"{name} must be one of {_FACE_PROFILES}, got {getattr(self, name)!r}")
+        if self.triage_l1_breakthrough not in _TRIAGE_L1_MODES:
+            raise ValueError(f"triage_l1_breakthrough must be one of {_TRIAGE_L1_MODES}")
+        if self.secret_face_enabled:
+            bad = []
+            if self.die_face_profile not in V038_DIE_FACE_PROFILES:
+                bad.append(f"die_face_profile in {V038_DIE_FACE_PROFILES}")
+            if self.red_mode != RedMode.MARKET_SHARE:
+                bad.append("red_mode=MARKET_SHARE")
+            if self.round_sequence != RoundSequence.SIX_PHASE:
+                bad.append("round_sequence=SIX_PHASE")
+            if not self.glitched_shield_slots_enabled:
+                bad.append("glitched_shield_slots_enabled=True")
+            if self.dirty_income_enabled:
+                bad.append("dirty_income_enabled=False")
+            if bad:
+                raise ValueError(f"secret_face_enabled requires {', '.join(bad)}")
+        elif self.die_face_profile in V038_DIE_FACE_PROFILES:
+            raise ValueError("die_face_profile='V038_DRAFT' requires secret_face_enabled (Face 5 would be dead)")
+        if self.glitched_shield_slots_enabled and self.round_sequence != RoundSequence.SIX_PHASE:
+            raise ValueError("glitched_shield_slots_enabled requires round_sequence=SIX_PHASE")
+        tiers = tuple(tuple(t) for t in self.secret_yield_red_tiers)
+        if (not tiers or any(len(t) != 2 for t in tiers)
+                or any(tiers[i][0] <= tiers[i + 1][0] for i in range(len(tiers) - 1))
+                or tiers[-1][0] != 0 or any(y < 0 for _, y in tiers)):
+            raise ValueError("secret_yield_red_tiers: strictly descending thresholds ending at 0, yields >= 0")
+        self.secret_yield_red_tiers = tiers
+        for name in ("secret_yield_blue_base", "secret_yield_blue_block_bonus", "secret_yield_blue_grid_l3_bonus",
+                     "secret_yield_blue_cap", "secret_yield_green_base", "secret_yield_purple", "slot_graduation_clear"):
+            if int(getattr(self, name)) < 0:
+                raise ValueError(f"{name} must be >= 0")
+        if self.secret_yield_blue_cap < self.secret_yield_blue_base:
+            raise ValueError("secret_yield_blue_cap must be >= secret_yield_blue_base")
+        if self.company_starting_die_enabled:
+            missing = [c for c in ("MERIDIAN", "OMNIDYNE", "AEGIS", "DTO", "HELIX", "PROMETHEUS")
+                       if self.company_starting_colors.get(c) not in ("RED", "BLUE", "GREEN")]
+            if missing:
+                raise ValueError(f"company_starting_colors must map every Client Company to RED/BLUE/GREEN: {missing}")
+            if self.starting_gray_dice < 1:
+                raise ValueError("company_starting_die_enabled requires starting_gray_dice >= 1")
+        self._validate_rsp1()
+
+    def _validate_rsp1(self) -> None:
+        """spec §14.5.1 validation."""
+        y = self.red_secret_owner_yield
+        if y is not None:
+            if isinstance(y, bool) or not isinstance(y, int) or y < 0:
+                raise ValueError("red_secret_owner_yield must be None or an int >= 0")
+            if not self.secret_face_enabled:
+                raise ValueError("red_secret_owner_yield requires secret_face_enabled")
+        raw = self.red_secret_payout_by_player_count
+        self.red_secret_payout_by_player_count = self._normalize_place_schedule(
+            {} if raw is None else raw, "red_secret_payout", max_len_is_n=True)
+        if self.red_secret_payout_by_player_count:
+            if not self.secret_face_enabled or not self.is_market_share:
+                raise ValueError("red_secret_payout_by_player_count requires secret_face_enabled and red_mode=MARKET_SHARE")
+        if self.red_secret_payout_at_end and not self.is_red_secret_payout:
+            raise ValueError("red_secret_payout_at_end requires a non-empty red_secret_payout_by_player_count")
+        if self.triage_order_rule not in _TRIAGE_ORDER_RULES:
+            raise ValueError(f"triage_order_rule must be one of {_TRIAGE_ORDER_RULES}, got {self.triage_order_rule!r}")
+        if self.triage_order_rule == "OLDEST_FIRST" and not self.secret_face_enabled:
+            raise ValueError("triage_order_rule='OLDEST_FIRST' requires secret_face_enabled")
+
+    def red_secret_payout_schedule(self, num_players: Optional[int] = None) -> Tuple[int, ...]:
+        """Red Secret payout by place (index 0 = 1st), padded with 0 / truncated to the player count; () when off."""
+        n = num_players if num_players is not None else self.num_players
+        sched = self.red_secret_payout_by_player_count.get(n, ())
+        if not any(b > 0 for b in sched):
+            return ()
+        return tuple(sched[:n]) + (0,) * max(0, n - len(sched))
+
+    @property
+    def is_red_secret_payout(self) -> bool:
+        return any(any(b > 0 for b in s) for s in self.red_secret_payout_by_player_count.values())
+
+    @property
+    def is_secret_faces(self) -> bool:
+        return bool(self.secret_face_enabled)
+
+    @classmethod
     def legacy_v035(cls, **overrides) -> "GameConfig":
         """v0.35.0 baseline (today's defaults). Exists now so the parity test survives a later default flip."""
         overrides.setdefault("red_mode", RedMode.RANSOM)
@@ -529,24 +725,31 @@ class GameConfig:
         return self.market_share_start_by_player_count.get(n, self.market_share_start_by_player_count.get(4, 18))
 
     def _validate_market_leader_bonus(self, ms: bool) -> None:
-        raw = self.market_leader_bonus_by_player_count
+        norm = self._normalize_place_schedule(self.market_leader_bonus_by_player_count, "market_leader_bonus")
+        if not ms and any(any(b > 0 for b in sched) for sched in norm.values()):
+            raise ValueError("market_leader_bonus requires red_mode=MARKET_SHARE")
+        self.market_leader_bonus_by_player_count = norm
+
+    @staticmethod
+    def _normalize_place_schedule(raw: Any, label: str, max_len_is_n: bool = False) -> Dict[int, Tuple[int, ...]]:
+        """Shape rules shared by the Market Leader Bonus and the Red Secret payout schedules."""
         if not isinstance(raw, dict):
-            raise ValueError("market_leader_bonus_by_player_count must be a dict of player count -> schedule")
+            raise ValueError(f"{label}_by_player_count must be a dict of player count -> schedule")
         norm: Dict[int, Tuple[int, ...]] = {}
         for n, sched in raw.items():
             if isinstance(n, bool) or not isinstance(n, int) or not 2 <= n <= 4:
-                raise ValueError(f"market_leader_bonus player-count keys must be 2..4, got {n!r}")
+                raise ValueError(f"{label} player-count keys must be 2..4, got {n!r}")
             if not isinstance(sched, (tuple, list)) or any(
                     isinstance(b, bool) or not isinstance(b, int) for b in sched):
-                raise ValueError(f"market_leader_bonus schedule for {n}P must be a tuple/list of ints, got {sched!r}")
+                raise ValueError(f"{label} schedule for {n}P must be a tuple/list of ints, got {sched!r}")
             if any(b < 0 for b in sched):
-                raise ValueError(f"market_leader_bonus schedule for {n}P has a negative entry: {sched!r}")
+                raise ValueError(f"{label} schedule for {n}P has a negative entry: {sched!r}")
             if any(sched[i] < sched[i + 1] for i in range(len(sched) - 1)):
-                raise ValueError(f"market_leader_bonus schedule for {n}P must be non-increasing: {sched!r}")
-            if any(b > 0 for b in sched) and not ms:
-                raise ValueError("market_leader_bonus requires red_mode=MARKET_SHARE")
+                raise ValueError(f"{label} schedule for {n}P must be non-increasing: {sched!r}")
+            if max_len_is_n and len(sched) > n:
+                raise ValueError(f"{label} schedule for {n}P is longer than the player count: {sched!r}")
             norm[int(n)] = tuple(int(b) for b in sched)
-        self.market_leader_bonus_by_player_count = norm
+        return norm
 
     def market_leader_bonus_schedule(self, num_players: Optional[int] = None) -> Tuple[int, ...]:
         """Bonus by place (index 0 = 1st), padded with 0 / truncated to the player count. () when disabled."""

@@ -14,7 +14,7 @@
   <header class="app-header">
     <div class="brand-section">
       <div class="app-title">ROGUE AGENT</div>
-      <div class="version-badge">v0.35.0 RULES BASELINE</div>
+      <div class="version-badge">v0.38.0 RULES</div>
     </div>
 
     <div class="game-status-bar">
@@ -153,6 +153,15 @@
           style="padding: 8px; background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); border-radius: 4px;">
       </div>
 
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <label style="font-size: 0.85rem; color: var(--text-dim);">Rules Version:</label>
+        <select id="modalRulesVersion"
+          style="padding: 8px; background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); border-radius: 4px;">
+          <option value="v0.38.0" selected>v0.38.0 (Secret faces, Processing Box, Market Leader Bonus)</option>
+          <option value="v0.37.0">v0.37.0 (previous rules)</option>
+        </select>
+      </div>
+
       <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
         <input type="checkbox" id="modalRandomizeCards" checked style="cursor: pointer; width: 16px; height: 16px;">
         <label for="modalRandomizeCards" style="font-size: 0.85rem; color: #fff; cursor: pointer;">Randomize Variant (★)
@@ -173,7 +182,8 @@
           const seed = document.getElementById('modalSeed').value;
           const randomizeCards = document.getElementById('modalRandomizeCards').checked;
           const enableAsym = document.getElementById('modalEnableAsym').checked;
-          startNewGame(count, null, seed, randomizeCards, company, enableAsym);
+          const rulesVersion = document.getElementById('modalRulesVersion').value;
+          startNewGame(count, null, seed, randomizeCards, company, enableAsym, rulesVersion);
         ">Launch Match</button>
       </div>
     </div>
@@ -206,7 +216,7 @@
         <div class="cube-effect-item">
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <span class="cube-badge red">Red (Market Manipulation)</span>
-            <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Red Shield or Any Shield</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Generic (Any) Shield</span>
           </div>
           <p>Each unblocked cube lowers your <strong>Market Share</strong> by 1 (never below 0). Any surviving player
             at <strong>0 Market Share</strong> after Phase 4 triggers <strong>Market Collapse</strong>: this round is the
@@ -216,7 +226,7 @@
         <div class="cube-effect-item">
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <span class="cube-badge blue">Blue (Spyware)</span>
-            <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Blue Shield or Any Shield</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Generic (Any) Shield</span>
           </div>
           <p>Directly exfiltrates data: lose <strong>1 Corporate Secret</strong> per unblocked cube. Reaching <strong>0
               (or fewer) Secrets</strong> immediately triggers a <strong>Total Data Breach (Patient Zero)</strong>!</p>
@@ -225,11 +235,12 @@
         <div class="cube-effect-item">
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <span class="cube-badge green">Malware (Logic Bombs)</span>
-            <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Green Shield or Any Shield</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Generic (Any) Shield</span>
           </div>
-          <p>Corrupts systems: for each unblocked cube, move <strong>1 active die from In Production</strong> (Income or
-            Shields) to your <strong>Glitched Box</strong> in Under Development (or sacrifice a White Contractor). If In
-            Production is empty, excess malware <strong>has 0 effect</strong> (no dice destroyed)!</p>
+          <p>Corrupts systems: each unblocked cube turns <strong>1 of your shield slots</strong> into a <strong>Glitched
+            Shield Slot</strong> (no die moves). A Glitched Shield Slot cannot hold a shield, and each one lowers your Green
+            <strong>Secret face</strong> yield by 1. You can never have more Glitched Shield Slots than your Defense Grid
+            Capacity; extra Green cubes have no effect. Clean slots in Phase 1 or Phase 5.</p>
         </div>
 
         <div class="cube-effect-item">

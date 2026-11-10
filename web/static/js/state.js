@@ -11,6 +11,7 @@ export let patchCashSelected = false;
 export let cipherDiscountSelected = false;
 export let selectedRerollIndices = new Set();
 export let selectedChoiceDeclarations = {};
+export const selectedSlotCleaners = new Set(); // Phase 1: rolled-pool indices of Block 1 Any dice placed on a Glitched Shield Slot
 export let selectedGlitchDieIds = new Set();
 export let selectedAnyAllocations = [];
 export let selectedGraduateIds = null; // Phase 5: Set of die ids (null = not yet initialised from server default)
@@ -49,6 +50,7 @@ export function sanitizeSelectionState(newState) {
   // 1. Phase 1 reroll / commitment state
   if (newState.phase !== 1 || !human.has_rolled || human.has_committed) {
     selectedRerollIndices.clear();
+    selectedSlotCleaners.clear();
     selectedCommitments = {};
     for (const k of Object.keys(selectedChoiceDeclarations)) {
       delete selectedChoiceDeclarations[k];
@@ -177,8 +179,14 @@ export function clearSelectedRerolls() {
   selectedRerollIndices.clear();
 }
 
+export function toggleSlotCleaner(idx) {
+  if (selectedSlotCleaners.has(idx)) selectedSlotCleaners.delete(idx);
+  else selectedSlotCleaners.add(idx);
+}
+
 export function resetCommitments() {
   selectedCommitments = {};
+  selectedSlotCleaners.clear();
 }
 
 export function getHumanPlayerId() {

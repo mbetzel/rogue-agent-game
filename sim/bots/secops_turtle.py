@@ -18,6 +18,7 @@ class SecOpsTurtleBot(BaseBot):
     """Paranoid defensive turtle: focuses on shields, heavy patching, and avoiding Dirty Income."""
 
     research_focus = ('DEFENSE', 'TRIAGE', 'RELEASE', 'PATENT')  # v0.35.0 research-aware policy
+    secret_face_color_bias = {DieColor.BLUE: 1.0}  # v0.38 flavour: Blue / Purple
     market_share_policy = MarketSharePolicy(red_danger_value=3.0, danger_margin=3)  # v0.36.0
 
     def __init__(self, bot_id: int) -> None:

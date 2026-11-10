@@ -2,6 +2,7 @@
 Purple not purchasable, Slush Fund once per game and the new Gray Legacy faces (spec R-01..R-32)."""
 
 from __future__ import annotations
+from tests.web_legacy import use_v037_rules
 
 import json
 import os
@@ -709,6 +710,7 @@ class TestResearchPolicy(unittest.TestCase):
         self.assertEqual(adjust_declared_choices(p.bot, p, [g], {0: 0}, GameConfig.legacy_v034()), {0: 0})
 
 
+@use_v037_rules
 class TestWebV035(unittest.TestCase):
     def test_r31_web_round_trip(self):
         from web.game_controller import GameController

@@ -422,7 +422,7 @@ def resolve_player_defense_and_wear(
             potential_secret_loss -= cash_absorb
 
     if potential_secret_loss > 0:
-        player.secrets -= potential_secret_loss
+        player.gain_secrets(-potential_secret_loss, "blue_damage")
 
     player.money = max(0, player.money)
 
@@ -471,7 +471,18 @@ def resolve_player_defense_and_wear(
     }
     _record_generic_shield_telemetry(player, player.last_defense_breakdown)
 
+    # v0.38: Blue cubes blocked this round (Baffle Echo-ignored cubes never count; they are not in player_attacks)
+    if getattr(engine.config, "secret_face_enabled", False):
+        player.blocked_blue_this_round += player_attacks[CubeColor.BLUE] - unblocked_blue
+
     # 8. Green Malware Resolution (no effect when In Production is empty, INV-MALWARE-FIZZLE-01)
+    if six_phase and getattr(engine.config, "glitched_shield_slots_enabled", False):
+        # v0.38: each unblocked Green cube glitches 1 shield slot (capped at capacity); no die moves
+        from sim.engine import secret_faces
+
+        secret_faces.glitch_slots(player, unblocked_green, "green_cube")
+        _pay_defense_l4(engine, player)
+        return
     if six_phase:
         # Six-phase: bot/human-chosen targets; never sets pending_unblocked_green (INV-SEQ-NO-SNAPSHOT-01)
         _resolve_green_six_phase(engine, player, unblocked_green, malware_target_selector)

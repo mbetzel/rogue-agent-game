@@ -20,6 +20,7 @@ from sim.entities import (
     create_gray_die,
     get_archetype_by_code,
 )
+from tests.web_legacy import use_v037_rules
 from web.server import RogueAgentRequestHandler, create_server
 
 
@@ -32,6 +33,7 @@ def _pause_in_phase5(controller, pid):
     controller.subphase = "choose_graduates"
     controller.pending_graduation = {pid: _needs_choice(controller, controller.state.players[pid])}
 
+@use_v037_rules
 class TestPhase20Sync(unittest.TestCase):
     """Tests for Phase 20 state synchronization, player selection agency, and rule ordering fixes."""
 

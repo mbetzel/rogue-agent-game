@@ -17,6 +17,7 @@ class AccelerationistBot(BaseBot):
     """Rushes corruption and Singularity by weaponizing the Cube Tower and taking Dirty Income."""
 
     research_focus = ('RELEASE', 'PATENT', 'TRIAGE', 'DEFENSE')  # v0.35.0 research-aware policy
+    secret_face_color_bias = {DieColor.GREEN: 1.0}  # v0.38 flavour: Green
 
     def __init__(self, bot_id: int) -> None:
         super().__init__(bot_id, name="AccelerationistBot")

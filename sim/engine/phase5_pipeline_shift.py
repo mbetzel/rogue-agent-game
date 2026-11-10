@@ -16,6 +16,7 @@ from sim.config import DieColor
 from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
 from sim.entities import ArchetypeCode, CompanyCode
 from sim.engine.state import PipelineShiftRecord
+from sim.engine import secret_faces
 
 if TYPE_CHECKING:
     from sim.engine.core import GameEngine
@@ -81,9 +82,14 @@ def apply_hotfix_bypass(
                     chosen_idx = i
                     break
         if chosen_idx is None:
-            chosen_idx = _best_colored_glitched_index(player)
+            if secret_faces.enabled(engine.config):
+                best = secret_faces.best_pending(engine.config, player)
+                chosen_idx = next(i for i, d in enumerate(player.glitched_dice) if d is best)
+            else:
+                chosen_idx = _best_colored_glitched_index(player)
         die = player.glitched_dice.pop(chosen_idx)
         reset_die_for_pipeline(die)
+        secret_faces.bank(engine.config, player, die, engine.state)  # v0.38: banks (yield at Phase 5 step 1); no-op otherwise
         player.ready_for_release_dice.append(die)
         player.mark_ability_used(active_ver)
         moved.append(die)
@@ -97,6 +103,7 @@ def apply_hotfix_bypass(
             h_idx = _best_colored_glitched_index(player)
         die = player.glitched_dice.pop(h_idx)
         reset_die_for_pipeline(die)
+        secret_faces.bank(engine.config, player, die, engine.state)
         player.ready_for_release_dice.append(die)
         moved.append(die)
     return moved
@@ -214,6 +221,39 @@ def conveyor_triage(player: PlayerState) -> List[Die]:
     return moved
 
 
+def graduation_slot_clear(engine: GameEngine, player: PlayerState, graduated: int) -> int:
+    """v0.38 step 3b: once per Phase 5, if >= 1 die graduated, clear ``slot_graduation_clear`` slot(s)."""
+    player.slot_clear_used_this_phase5 = False
+    if graduated <= 0 or player.glitched_shield_slots <= 0:
+        return 0
+    player.slot_clear_used_this_phase5 = True
+    return secret_faces.clean_slots(player, engine.config.slot_graduation_clear, "graduation")
+
+
+def conveyor_triage_v038(engine: GameEngine, player: PlayerState) -> List[Die]:
+    """v0.38 step 4: up to ``triage_bandwidth`` dice of the player's choice Processing Box -> Scanned Box,
+    banking each pending Secret at the current yield (default order: highest yield, then lowest die_id)."""
+    n = min(len(player.glitched_dice), player.triage_bandwidth)
+    if n <= 0:
+        return []
+    if engine.config.triage_order_rule == "OLDEST_FIRST":
+        # RSP-1 (spec §14.5.4, INV-RSP-06): entry order, the bot hook is not called
+        raw = secret_faces.triage_order(engine.config, player, player.glitched_dice)
+    else:
+        raw = player.bot.choose_triage_order(player, list(player.glitched_dice), engine.state)
+    order: List[Die] = []
+    for d in list(raw or []) + secret_faces.default_triage_order(engine.config, player, player.glitched_dice):
+        if any(d is x for x in player.glitched_dice) and not any(d is x for x in order):
+            order.append(d)
+    moved = order[:n]
+    for d in moved:
+        player.glitched_dice.remove(d)
+        reset_die_for_pipeline(d)
+        secret_faces.bank(engine.config, player, d, engine.state)
+        player.scanned_dice.append(d)
+    return moved
+
+
 def execute_player_pipeline_shift(
     engine: GameEngine,
     player: PlayerState,
@@ -229,7 +269,12 @@ def execute_player_pipeline_shift(
         rec.returned_to_scanned_ids = [d.die_id for d in production_return_to_scanned(engine, player)]
     rec.graduated_ids = [d.die_id for d in graduate_scanned(engine, player, graduate_die_ids)]
     rec.held_in_scanned = len(player.scanned_dice)
-    rec.triaged_ids = [d.die_id for d in conveyor_triage(player)]
+    if secret_faces.slots_enabled(engine.config):
+        graduation_slot_clear(engine, player, len(rec.graduated_ids))
+    if secret_faces.enabled(engine.config):
+        rec.triaged_ids = [d.die_id for d in conveyor_triage_v038(engine, player)]
+    else:
+        rec.triaged_ids = [d.die_id for d in conveyor_triage(player)]
     pay_triage_l4(engine, player, len(rec.triaged_ids))
     return rec
 
@@ -254,6 +299,10 @@ def execute_pipeline_shift(engine: GameEngine) -> Dict[int, PipelineShiftRecord]
         if player.is_patient_zero:
             continue
         out[player.player_id] = execute_player_pipeline_shift(engine, player)
+    # RSP-1 Phase 5 end hook (spec §14.5.3 step 2): lives inside the phase function so _run_round_six_phase and
+    # fast_clone.resume_round need no change (they call this function).
+    if secret_faces.enabled(engine.config):
+        secret_faces.fire_round_payout(engine.config, engine.state)
     return out
 
 

@@ -14,7 +14,14 @@ loop imports this module, so games without a reference seat are unaffected (INV-
 
 ``resume_round`` re-implements the tail of ``GameEngine._run_round_six_phase`` (``core.py``) from Phase 1,
 Phase 4 or Phase 6, without telemetry. Any edit to ``_run_round_six_phase`` must be mirrored here
-(drift guard: RB-07 in ``tests/test_reference_bot.py``).
+(drift guard: RB-07 in ``tests/test_reference_bot.py``, extended to v0.38 by ``test_rb07_v038_*``).
+v0.38 (spec v380 §10): every Secret face / Processing Box / Glitched Shield Slot step lives inside the phase
+functions (Phase 1 round-start reset, Phase 5 step 3b graduation clear, end-game stranded pass in
+``evaluate_end_game``), so ``_run_round_six_phase`` and this tail are unchanged; the new PlayerState fields are
+plain ints / dicts / lists and ``Die.secret_pending`` is atomic, so the ``Die`` fast path stays valid.
+RSP-1 (spec §14.5.3 step 10): the Phase 1 Red-bank flag reset lives in ``phase1_roll_deploy.execute_phase_1`` and
+the Red Secret payout hook at the end of ``phase5_pipeline_shift.execute_pipeline_shift``, so this tail is again
+unchanged (drift guard ``test_rb07_v038c_*``); the new GameState / Die fields are plain values.
 """
 
 from __future__ import annotations

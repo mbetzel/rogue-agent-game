@@ -9,7 +9,7 @@ from sim.config import CubeColor, DieColor, ShieldColor
 from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
 from sim.entities import ArchetypeCode, CompanyCode, WhiteHatCode, Die, Face, create_white_die
 from sim.engine.state import ProductionRole
-from sim.engine import research_tracks
+from sim.engine import research_tracks, secret_faces
 from sim.bots import research_policy
 
 if TYPE_CHECKING:
@@ -20,9 +20,9 @@ if TYPE_CHECKING:
 def get_face_signature(face: Optional[Face]) -> Optional[Tuple]:
     """Returns a hashable signature representing the printed output of a face.
 
-    Glitches return None and can never form Hash Matches.
+    Glitches and Secret faces return None and can never form Hash Matches.
     """
-    if face is None or face.is_glitch:
+    if face is None or face.is_glitch or face.secrets_pending:
         return None
     return (
         face.name,
@@ -54,7 +54,7 @@ def detect_hash_matches_with_cipher(
 
     for d in dice:
         eff = d.effective_face
-        if not eff or eff.is_glitch:
+        if not eff or eff.is_glitch or eff.secrets_pending:
             continue
         if is_cipher and eff.is_star and eff.star_code == "PURPLE_STAR":
             purple_star_wildcards += 1
@@ -107,6 +107,10 @@ def resolve_prodigy_purple_star_override(
         if choice is not None:
             target_idx, target_face = choice
 
+    cfg = getattr(player, "config", None)
+    if (target_face is not None and target_face.secrets_pending
+            and not getattr(cfg, "ace_allows_secret_face", False)):
+        return False  # v0.38 (OQ-10): Arbitrary Code Execution may not set the Secret face
     if target_idx is not None and target_face is not None:
         if 0 <= target_idx < len(active_dice) and not target_face.is_star:
             if target_idx not in purple_star_indices:
@@ -174,7 +178,20 @@ def check_and_execute_start_of_round_version_transition(engine: GameEngine) -> b
     return True
 
 
-def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]]:
+def execute_phase_1(
+    engine: GameEngine,
+    player_ids: Optional[set] = None,
+    prelude: bool = True,
+) -> List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]]:
+    """Phase 1 for every surviving player. Web hook: ``player_ids`` restricts the run to those players (the bots) and
+    ``prelude=False`` skips the once-per-round steps (version switch, locks, Pulse, round flags), which the caller
+    already ran. Defaults are the simulation behaviour, unchanged."""
+    if prelude:
+        _phase1_prelude(engine)
+    return _phase1_players(engine, player_ids, prelude)
+
+
+def _phase1_prelude(engine: GameEngine) -> None:
     # Start-of-round version switch execution (INV-VER-SWITCH-01)
     check_and_execute_start_of_round_version_transition(engine)
 
@@ -189,15 +206,32 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
         engine.state.staging_cup.get(CubeColor.BLACK, 0) + pulse_count
     )
 
-    player_commitments: List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]] = []
+    round_start_hooks(engine)
 
+
+def round_start_hooks(engine: GameEngine) -> None:
+    """v0.38 round-start flags and telemetry (Phase 1 entry)."""
+    v038 = secret_faces.enabled(engine.config)
+    slots_on = secret_faces.slots_enabled(engine.config)
+    if v038:
+        secret_faces.reset_round_flags(engine.state)  # RSP-1 per-round Red bank flag (INV-RSP-01b)
+    if v038 or slots_on:
+        for player in engine.state.players:
+            if not player.is_patient_zero:
+                secret_faces.record_round_start(player)
+
+
+def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool):
+    v038 = secret_faces.enabled(engine.config)
+    slots_on = secret_faces.slots_enabled(engine.config)
+    player_commitments: List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]] = []
     staging_copy = dict(engine.state.staging_cup)
     stuck_copy = engine.state.tower.get_stuck_copy()
 
     # 2. Temp Staffing (Contractor Hiring)
     active_ver = engine.state.active_version.version_str
     for player in engine.state.players:
-        if player.is_patient_zero:
+        if player.is_patient_zero or (player_ids is not None and player.player_id not in player_ids):
             continue
 
         if not player.contractor_dice:
@@ -277,7 +311,7 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
 
     # 3. Roll Active Pool, Yahtzee Rerolls, Outputs, Commit Defenses
     for player in engine.state.players:
-        if player.is_patient_zero:
+        if player.is_patient_zero or (player_ids is not None and player.player_id not in player_ids):
             continue
 
         # Reset round star availability
@@ -342,6 +376,9 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
             if use_helix:
                 helix_active = True
                 player.mark_ability_used(active_ver)
+                if engine.config.power_profile == "V038_DRAFT":
+                    max_free_rerolls += 1  # v0.38 Brute-Force Bypass: +1 free reroll this phase
+                    base_free_rerolls += 1
 
         # Pure Rerolls: ZERO debug actions, ZERO patch deductions
         rerolls_remaining = max_free_rerolls
@@ -360,6 +397,11 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
                 _, reroll_indices = reroll_res
             else:
                 reroll_indices = reroll_res or []
+            if v038:
+                from sim.bots import secret_face_policy
+
+                reroll_indices = secret_face_policy.adjust_rerolls(
+                    player.bot, player, active_dice, list(reroll_indices), engine.state, rerolls_remaining)
 
             # Filter reroll indices: Helix/Prodigy override may reroll locked dice; standard players cannot
             if helix_active:
@@ -399,7 +441,15 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
             _evaluate_locks(active_dice)
 
         # Helix face override (Brute-Force Bypass)
-        if helix_active:
+        if helix_active and v038:
+            override = player.bot.choose_helix_face_override_v038(player, active_dice, engine.state)
+            if override:
+                die_idx, target_face = override
+                if 0 <= die_idx < len(active_dice) and not target_face.is_star and target_face in active_dice[die_idx].faces:
+                    active_dice[die_idx].current_face = target_face
+                    active_dice[die_idx].is_locked = False
+                    active_dice[die_idx].chosen_choice_index = None
+        elif helix_active:
             override = player.bot.choose_helix_face_override(
                 player_state=player,
                 active_dice=active_dice,
@@ -430,6 +480,11 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
         declared_choices = research_policy.adjust_declared_choices(
             player.bot, player, active_dice, declared_choices, engine.config
         )
+        if v038 or slots_on:
+            from sim.bots import secret_face_policy
+
+            declared_choices = secret_face_policy.adjust_declared_choices(
+                player.bot, player, active_dice, declared_choices, engine.state)
         shield_commitments = player.bot.commit_shields(
             player_state=player,
             rolled_dice=active_dice,
@@ -443,7 +498,7 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
         validated_commitments: Dict[int, ShieldColor] = {}
         for idx, die in enumerate(active_dice):
             face = die.current_face
-            if not face or face.is_glitch:
+            if not face or face.is_glitch or face.secrets_pending:
                 continue
 
             if face.is_choice:
@@ -475,8 +530,33 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
                     elif face.shield_color == ShieldColor.ANY:
                         validated_commitments[idx] = ShieldColor.ANY
 
+        # v0.38 Step 5c: clean Glitched Shield Slots (Green F1 / G1 / G2 faces, then shield-icon dice placed on a
+        # glitched slot, which go to the Scanned Box / are discarded) before shields fill the effective capacity.
+        slot_cleaner_ids: set = set()
+        shield_capacity = player.defense_capacity
+        if slots_on:
+            for idx, die in enumerate(active_dice):
+                eff = die.effective_face  # choice index already synced by the validation pass above
+                if eff is not None and eff.clean_slots > 0:
+                    secret_faces.clean_slots(player, eff.clean_slots, "face")
+            if player.glitched_shield_slots > 0:
+                cand = [i for i in validated_commitments
+                        if active_dice[i].current_face is not None and active_dice[i].current_face.has_shield_option]
+                raw = player.bot.choose_slot_cleaners(player, active_dice, list(cand), player.glitched_shield_slots,
+                                                      engine.state)
+                for i in raw or []:
+                    if player.glitched_shield_slots <= 0:
+                        break
+                    if i in cand and i not in slot_cleaner_ids:
+                        slot_cleaner_ids.add(i)
+                        validated_commitments.pop(i, None)
+                        secret_faces.clean_slots(player, 1, "die")
+            shield_capacity = secret_faces.effective_capacity(player)
+            if shield_capacity == 0:
+                player.zero_capacity_rounds += 1
+
         # Enforce Defense Grid Shield Capacity (INV-DEF-CAP-01, INV-FLEX-SHIELD-01)
-        if len(validated_commitments) > player.defense_capacity:
+        if len(validated_commitments) > shield_capacity:
             priority_map = {
                 ShieldColor.BLUE: 0,
                 ShieldColor.ANY: 1,
@@ -487,7 +567,7 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
                 validated_commitments.items(),
                 key=lambda item: priority_map.get(item[1], 4),
             )
-            allowed = dict(sorted_items[:player.defense_capacity])
+            allowed = dict(sorted_items[:shield_capacity])
             rejected_indices = set(validated_commitments.keys()) - set(allowed.keys())
             validated_commitments = allowed
             for r_idx in rejected_indices:
@@ -502,7 +582,26 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
 
         for idx, die in enumerate(active_dice):
             face = die.current_face
-            if face and face.is_glitch:
+            if idx in slot_cleaner_ids:
+                # v0.38: the die placed on a glitched slot produces nothing and leaves In Production at once
+                die.production_role = None
+                die.is_locked = False
+                die.chosen_choice_index = None
+                die.current_face = None
+                if die.color == DieColor.WHITE:
+                    if die in player.contractor_dice:
+                        player.contractor_dice.remove(die)
+                    engine.state.contractor_supply += 1
+                else:
+                    if die in player.ready_for_release_dice:
+                        player.ready_for_release_dice.remove(die)
+                    player.scanned_dice.append(die)
+            elif face and face.secrets_pending:
+                # v0.38 Step 5b: Secret face -> Processing Box (no other output)
+                if die in player.ready_for_release_dice:
+                    player.ready_for_release_dice.remove(die)
+                secret_faces.enter_processing_box(player, die, engine.state.current_round)
+            elif face and face.is_glitch:
                 if die.color == DieColor.WHITE:
                     # White Contractor with glitch: discarded to supply
                     if die in player.contractor_dice:
@@ -562,7 +661,8 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
         # INCOME DELAY INVARIANT: No money, patch, or secret face outputs collected in Phase 1!
         player_commitments.append((player, list(surviving_active), new_commitments))
 
-    engine.state.active_phase1_locks.clear()
+    if prelude:
+        engine.state.active_phase1_locks.clear()
     return player_commitments
 
 

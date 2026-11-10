@@ -10,6 +10,7 @@ from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldCol
 from sim.engine import market_share
 from sim.engine.state import ProductionRole
 from sim.entities import Face
+from tests.web_legacy import use_v037_rules
 from web.game_controller import GameController
 
 R3_MKT = Face(name="R3: Customer Poaching", is_star=True, star_code="R3_MKT")
@@ -59,6 +60,7 @@ def _drive(gc: GameController, max_steps: int = 2000, on_phase=None) -> dict:
     raise AssertionError("game did not finish")
 
 
+@use_v037_rules
 class TestWebV036(unittest.TestCase):
     def test_default_is_v036(self):
         gc = GameController()

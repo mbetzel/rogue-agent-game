@@ -18,6 +18,7 @@ class VentureGreedBot(BaseBot):
     """Greedy capitalist: maximizes Yellow dice, buys secrets, and minimizes shielding."""
 
     research_focus = ('PATENT', 'RELEASE', 'DEFENSE', 'TRIAGE')  # v0.35.0 research-aware policy
+    secret_face_color_bias = {DieColor.YELLOW: 1.0, DieColor.RED: 0.5}  # v0.38 flavour: Yellow / Red
     # v0.36.0 port (balance iteration 1, B1/B3): Public Relations Track last; default Market Share weights.
     research_focus_v036 = ('RELEASE', 'DEFENSE', 'TRIAGE', 'PATENT')
     market_share_policy = MarketSharePolicy()

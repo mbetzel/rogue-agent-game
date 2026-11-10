@@ -17,6 +17,7 @@ class AdaptiveBalancedBot(BaseBot):
     """Balanced bot: monitors threat levels, hedges shields, patches worn dice, and buys counters."""
 
     research_focus = ('TRIAGE', 'DEFENSE', 'RELEASE', 'PATENT')  # v0.35.0 research-aware policy
+    follows_company_color = True  # v0.38 flavour: Company starting colour first
     pr_push_capable = True  # lever A windows (inert unless config.bot_pr_push)
 
     def choose_any_shield_allocation(self, player_state, remaining, available_any, game_state, attack):

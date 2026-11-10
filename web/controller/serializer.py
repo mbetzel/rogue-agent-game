@@ -31,8 +31,33 @@ if TYPE_CHECKING:
 
 from web.schemas import GameStateSerializer
 
-def serialize_end_game_result(controller: GameController, res: EndGameResult) -> Dict[str, Any]:
+def _game_end_bonus(controller: GameController, res: EndGameResult) -> Dict[str, Any]:
+    """v0.38.0 game-end Market Leader Bonus (RSP-1 end payout) in the shape the end screen reads; also folds the
+    v0.37.0 bonus in so one ``end_bonus`` column covers both rulesets."""
+    cfg = controller.state.config
+    end_fired = bool(getattr(res, "red_secret_payout_end_fired", False))
+    awarded = bool(getattr(res, "market_leader_bonus_awarded", False)) or end_fired
+    per_player = {}
+    for r in res.rankings:
+        end_award = int(r.get("red_secret_payout_end", 0) or 0)
+        r["end_bonus"] = int(r.get("market_leader_bonus", 0) or 0) + end_award
+        if "red_payout_secrets" in r:
+            r["round_bonus_total"] = int(r["red_payout_secrets"]) - end_award
+        per_player[r["player_id"]] = r["end_bonus"]
+    schedule = (list(getattr(res, "market_leader_bonus_schedule", []) or [])
+                or (list(cfg.red_secret_payout_schedule(len(controller.state.players))) if end_fired else []))
     return {
+        "game_end_bonus_awarded": awarded,
+        "game_end_bonus_schedule": schedule,
+        "red_secret_payouts_fired": int(getattr(res, "red_secret_payouts_fired", 0) or 0),
+        "stranded_note": any(int(r.get("stranded_dice", 0) or 0) > 0 for r in res.rankings),
+    }
+
+
+def serialize_end_game_result(controller: GameController, res: EndGameResult) -> Dict[str, Any]:
+    extra = _game_end_bonus(controller, res)
+    return {
+        **extra,
         "end_reason": res.end_reason.value if isinstance(res.end_reason, EndGameReason) else str(res.end_reason),
         "total_rounds": res.total_rounds,
         "winner_id": res.winner_id,
@@ -125,6 +150,7 @@ def get_full_state(controller: GameController) -> Dict[str, Any]:
         "action_capabilities": controller.get_action_capabilities(primary_human),
         "event_log": list(reversed(controller.event_log[-50:])),  # Most recent first
         "final_result": controller.final_result,
+        "last_round_bonus": getattr(controller, "last_round_bonus", None),
     }
 
     return GameStateSerializer.serialize_game_state(controller.state, controller_meta)

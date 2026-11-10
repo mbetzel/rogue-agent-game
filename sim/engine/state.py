@@ -249,6 +249,32 @@ class PlayerState:
         self.contested_blue_left_open = 0
         self.contested_red_chosen = 0
         self.purchases_by_color: Dict[str, int] = {}  # Central Market purchases incl. Algorithmic Arbitrage
+        # v0.38.0 candidate (spec v380 §3.2 / §11). Plain ints / dicts / lists so fast_clone copies them.
+        self.glitched_shield_slots = 0
+        self.slots_glitched_this_round = 0  # §14.3 glitched_slots_per_round_cap
+        self.blocked_blue_this_round = 0
+        self.slot_clear_used_this_phase5 = False
+        self.secrets_by_source: Dict[str, int] = {}  # ledger only (gains positive, losses negative)
+        self.secret_faces_rolled: Dict[str, int] = {}
+        self.secret_faces_banked: Dict[str, int] = {}
+        self.secret_yield_hist: Dict[str, Dict[str, int]] = {}
+        self.secrets_lost_returned = 0
+        self.slots_glitched_by_source: Dict[str, int] = {}
+        self.slots_cleaned_by_die = 0
+        self.slots_cleaned_by_face = 0
+        self.slots_cleared_by_graduation = 0
+        self.max_glitched_slots = 0
+        self.zero_capacity_rounds = 0
+        self.market_share_gained_face = 0  # Red F1 / R1 (outside the Public Relations limit)
+        self.company_color: Optional[str] = None
+        self.colored_dice_owned_by_round: List[Dict[str, int]] = []
+        # RSP-1 (spec §14.5.4 / §14.5.5). Plain ints / dicts so fast_clone copies them.
+        self.processing_entry_counter = 0  # per-player Processing Box entry sequence (OLDEST_FIRST triage)
+        self.red_secrets_banked = 0
+        self.red_payout_places: Dict[str, int] = {}
+        self.red_payout_secrets = 0
+        self.red_processing_wait_rounds = 0  # stall diagnostic: sum of rounds a banked Red die sat pending
+        self.red_processing_wait_count = 0
         self.player_id = player_id
         self.bot = bot
         self.money = money
@@ -367,11 +393,24 @@ class PlayerState:
             self.market_share_regained += actual
         elif source == "r2":
             self.market_share_gained_r2 += actual
+        elif source == "face":
+            self.market_share_gained_face += actual
         else:
             raise ValueError(f"unknown Market Share source {source!r}")
         if self.market_share_min is None or after < self.market_share_min:
             self.market_share_min = after
         return actual
+
+    def gain_secrets(self, amount: int, source: str) -> None:
+        """Corporate Secrets change with a ledger entry (telemetry only; behaviour = ``secrets += amount``)."""
+        self.secrets += amount
+        if amount:
+            self.secrets_by_source[source] = self.secrets_by_source.get(source, 0) + amount
+
+    @property
+    def processing_box(self) -> List[Die]:
+        """v0.38 name of the first Under Development box (the sim attribute stays ``glitched_dice``)."""
+        return self.glitched_dice
 
     def record_purchase(self, color: Any) -> None:
         key = getattr(color, "value", color)
@@ -1040,6 +1079,15 @@ class EndGameResult:
     pre_bonus_winner_ids: List[int] = field(default_factory=list)
     market_leader_bonus_changed_winner: bool = False
     market_leader_bonus_tied_paid_place: bool = False
+    # --- RSP-1 Red Secret payout telemetry (spec §14.5.5); filled only when an RSP-1 lever is on ---
+    red_secret_payouts: List[Dict[str, Any]] = field(default_factory=list)
+    red_secret_payouts_fired: int = 0
+    rounds_with_multi_red_banks: int = 0
+    red_banks_by_round: List[int] = field(default_factory=list)
+    red_secret_payout_end_fired: bool = False
+    red_secret_payout_end_awards: Dict[int, int] = field(default_factory=dict)
+    red_pending_at_end: int = 0
+    other_pending_at_end: int = 0
 
 
 @dataclass
@@ -1117,6 +1165,13 @@ class GameState:
     phase4_market_share_start: Dict[int, Optional[int]] = field(default_factory=dict)
     phase4_snapshot_round: Optional[int] = None
     _pending_poaches: List[Tuple[int, int]] = field(default_factory=list)  # (player_id, die_id), Phase 3
+    # --- RSP-1 Red Secret payout (spec §14.5.3 / §14.5.5). Plain values: fast_clone copies them. ---
+    red_secret_banked_this_round: bool = False  # reset at Phase 1 entry
+    red_secrets_banked_this_round: int = 0
+    red_bankers_this_round: List[int] = field(default_factory=list)
+    red_secret_payouts: List[Dict[str, Any]] = field(default_factory=list)  # one record per round fired
+    red_secret_payouts_fired: int = 0
+    red_banks_by_round: List[int] = field(default_factory=list)  # index = round - 1
 
     def __post_init__(self) -> None:
         self.tower = CubeTower(self.config)

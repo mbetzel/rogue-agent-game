@@ -11,7 +11,7 @@ import {
   doReroll,
   doDebugUnlock,
   doRoll,
-  doHotfix,
+  doOverrideFace,
   doCommit,
   doCompile,
   doConfirmIncome,
@@ -84,7 +84,7 @@ window.doHireContractors = doHireContractors;
 window.doReroll = doReroll;
 window.doDebugUnlock = doDebugUnlock;
 window.doRoll = doRoll;
-window.doHotfix = doHotfix;
+window.doOverrideFace = doOverrideFace;
 window.doCommit = doCommit;
 window.doCompile = doCompile;
 window.doConfirmIncome = doConfirmIncome;

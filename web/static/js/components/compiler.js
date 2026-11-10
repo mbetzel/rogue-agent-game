@@ -25,7 +25,7 @@ export function renderCompiler() {
   const activeVerIdx = state.current_version_index !== undefined ? state.current_version_index : 0;
   const versionDeck = state.version_deck || [];
   const v1 = versionDeck[0] || state.active_version || { name: "Script Kiddie", version_str: "v1.0", staging_payload: { red: 2, blue: 2, green: 2 } };
-  const v2 = versionDeck[1] || { name: "Ransomware-as-a-Service", version_str: "v2.0", staging_payload: {} };
+  const v2 = versionDeck[1] || { name: "RaaS", version_str: "v2.0", staging_payload: {} };
   const v3 = versionDeck[2] || { name: "Zero-Day Override", version_str: "v3.0", staging_payload: {} };
 
   const playerCount = state.players ? state.players.length : 4;
@@ -220,7 +220,7 @@ export function renderCompiler() {
                   <div class="exit-pocket red-pocket">
                     <div class="pocket-color-tag" title="Phase 4: Attack Resolution">PHASE 4: RED</div>
                     <div class="pocket-val">${(res.exited_cubes || {}).red || 0}</div>
-                    <div class="pocket-sub">${state.is_market_share ? 'Market Manipulation' : 'Ransomware'}</div>
+                    <div class="pocket-sub">Market Manipulation</div>
                   </div>
                   <div class="exit-pocket blue-pocket">
                     <div class="pocket-color-tag" title="Phase 4: Attack Resolution">PHASE 4: BLUE</div>
@@ -236,7 +236,7 @@ export function renderCompiler() {
               }
               return `
                 <div class="exit-pocket black-pocket"><div class="pocket-color-tag" title="Phase 2: Compiler Drop &amp; Corruption">PHASE 2: BLACK</div><div class="pocket-val">0</div><div class="pocket-sub">Corruption</div></div>
-                <div class="exit-pocket red-pocket"><div class="pocket-color-tag" title="Phase 4: Attack Resolution">PHASE 4: RED</div><div class="pocket-val">0</div><div class="pocket-sub">${state.is_market_share ? 'Market Manipulation' : 'Ransomware'}</div></div>
+                <div class="exit-pocket red-pocket"><div class="pocket-color-tag" title="Phase 4: Attack Resolution">PHASE 4: RED</div><div class="pocket-val">0</div><div class="pocket-sub">Market Manipulation</div></div>
                 <div class="exit-pocket blue-pocket"><div class="pocket-color-tag" title="Phase 4: Attack Resolution">PHASE 4: BLUE</div><div class="pocket-val">0</div><div class="pocket-sub">Spyware</div></div>
                 <div class="exit-pocket green-pocket"><div class="pocket-color-tag" title="Phase 4: Attack Resolution">PHASE 4: GREEN</div><div class="pocket-val">0</div><div class="pocket-sub">Malware</div></div>
               `;
@@ -254,32 +254,27 @@ export function renderCompiler() {
             </div>
           </div>
           <div class="cube-threat-row red-row">
-            ${state.is_market_share ? `
             <span class="threat-pill red">◆ RED // MARKET MANIPULATION</span>
             <div class="threat-row-text">
-              <strong>Blocks: Red / Any Shield.</strong> Lose 1 Market Share per unblocked Red (never below 0). <em>Market Collapse: any surviving player at 0 Market Share after Phase 4 makes this the Final Round.</em>
-            </div>` : `
-            <span class="threat-pill red">◆ RED // RANSOMWARE</span>
-            <div class="threat-row-text">
-              <strong>Blocks: Red / Any Shield.</strong> Lose $1 per unblocked Red. <em>Flat Leak Penalty: if any unpaid ransom remains (shortfall &gt; $0), lose a flat 1 Corporate Secret!</em>
-            </div>`}
+              <strong>Blocks: Generic (Any) Shield.</strong> Lose 1 Market Share per unblocked Red (never below 0). <em>Market Collapse: any surviving player at 0 Market Share after Phase 4 makes this the Final Round.</em>
+            </div>
           </div>
           <div class="cube-threat-row blue-row">
             <span class="threat-pill blue">● BLUE // SPYWARE</span>
             <div class="threat-row-text">
-              <strong>Blocks: Blue / Any Shield.</strong> Lose 1 Corporate Secret per unblocked Blue. <strong>Reaching ≤ 0 Secrets triggers Total Data Breach (Patient Zero)!</strong>
+              <strong>Blocks: Generic (Any) Shield.</strong> Lose 1 Corporate Secret per unblocked Blue. <strong>Reaching ≤ 0 Secrets triggers Total Data Breach (Patient Zero)!</strong>
             </div>
           </div>
           <div class="cube-threat-row green-row">
             <span class="threat-pill green">▲ GREEN // MALWARE</span>
             <div class="threat-row-text">
-              <strong>Blocks: Green / Any Shield.</strong> Move 1 active die from In Production → Glitched Box per unblocked Green (or sacrifice White Contractor). <em>Empty In Production = 0 effect!</em>
+              <strong>Blocks: Generic (Any) Shield.</strong> Each unblocked Green turns 1 shield slot into a <strong>Glitched Shield Slot</strong> (no die moves; max = Defense Grid Capacity). <em>Each Glitched Shield Slot lowers your Green Secret face yield by 1.</em>
             </div>
           </div>
         </div>
 
         <div class="wear-recycle-summary-box">
-          <strong>SHIELD PERSISTENCE:</strong> Permanent Shields blocking attacks remain in In Production (unless glitched by unblocked Green Malware). Contractors return to supply.<br>
+          <strong>SHIELD PERSISTENCE:</strong> Shields blocking attacks stay In Production and return through the Scanned Box in Phase 5. Contractors return to supply.<br>
           <strong>RECYCLE:</strong> Exited Red, Blue, and Green cubes recycle back into the Staging Cup.
         </div>
       </div>
@@ -300,8 +295,8 @@ export function renderCompiler() {
               <strong>0. Version Transition:</strong> Apply queued Version upgrade at start of round.<br>
               <strong>1. Pulse:</strong> Add +1 Black → Staging Cup.<br>
               <strong>2. Staffing:</strong> Hire White Contractors ($1 / $2 / $3, max 3).<br>
-              <strong>3. Roll & Rerolls:</strong> Roll Ready for Release + Contractors. Up to 2 free rerolls of unlocked dice (⚠️ Glitches lock immediately).<br>
-              <strong>4. Triage & Deploy:</strong> Glitched dice → Glitched Box. Deploy Shields (up to Defense Capacity) & Income dice to In Production.
+              <strong>3. Roll & Rerolls:</strong> Roll Ready for Release + Contractors. Up to 2 free rerolls (a Secret face may be kept or rerolled; a White Contractor Glitch locks).<br>
+              <strong>4. Assign Dice:</strong> Secret faces → Processing Box. Clean Glitched Shield Slots, then deploy Any shields (up to Defense Grid Capacity minus Glitched Shield Slots) &amp; Income dice to In Production.
             </div>
           </div>
 
@@ -328,7 +323,7 @@ export function renderCompiler() {
           <div class="seq-card">
             <div class="seq-card-header">PHASE 4: ATTACK RESOLUTION (Simultaneous)</div>
             <div class="seq-card-body">
-              Two-Stage Defensive Blocking → Red / Blue / Green damage → Defense L4 payout.<br>
+              Split your Generic (Any) shields across the exited cubes → Red / Blue / Green damage → Defense L4 payout.<br>
               <strong>Snowball Recycle</strong> exited R/B/G → Staging Cup; <strong>Contractor Expiration</strong>; End Check.
             </div>
           </div>
@@ -337,10 +332,11 @@ export function renderCompiler() {
           <div class="seq-card">
             <div class="seq-card-header">PHASE 5: CI/CD PIPELINE SHIFT (Simultaneous)</div>
             <div class="seq-card-body">
-              1. <strong>Magnetic Splice:</strong> Glitched → Ready (Omnidyne).<br>
+              1. <strong>Magnetic Splice:</strong> Processing Box → Ready for Release (Omnidyne), banking its Secret.<br>
               2. <strong>Production Return:</strong> In Production → Scanned Box.<br>
-              3. <strong>Scanned Graduation:</strong> Scanned → Ready (≤ Release Bandwidth, your choice).<br>
-              4. <strong>Conveyor Triage:</strong> Glitched → Scanned (≤ Triage Bandwidth).
+              3. <strong>Scanned Graduation:</strong> Scanned → Ready (≤ Release Bandwidth, your choice); clean 1 Glitched Shield Slot if any die graduated.<br>
+              4. <strong>Conveyor Triage:</strong> Processing Box → Scanned, oldest first (≤ Triage Bandwidth), banking Secret face yields.<br>
+              ${state.is_round_leader_bonus ? `5. <strong>Market Leader Bonus:</strong> if a Red Secret face was banked this round (${(state.round_leader_bonus_schedule || []).map((b, i) => `${i + 1}${["st", "nd", "rd"][i] || "th"} +${b}`).filter((t) => !t.endsWith("+0")).join(", ")} by Market Share place).` : ""}
             </div>
           </div>
 
@@ -357,8 +353,8 @@ export function renderCompiler() {
             <div class="seq-card-header">SECRETS VICTORY &amp; TIEBREAKERS</div>
             <div class="seq-card-body">
               <strong>Surviving White Hat Operatives Only</strong> (Patient Zero eliminated):<br>
-              ${state.is_market_leader_bonus ? `<strong>Market Leader Bonus:</strong> survivors gain Corporate Secrets by final <strong>Market Share</strong> place (${(state.market_leader_bonus_schedule || []).map((b, i) => `${i + 1}${["st", "nd", "rd"][i] || "th"} +${b}`).filter((t) => !t.endsWith("+0")).join(", ")}; ties share the better place).<br>` : ""}
-              <strong>Primary Victory Goal:</strong> Most <strong>Corporate Secrets</strong>${state.is_market_leader_bonus ? " (held + Market Leader Bonus)" : " held"}.<br>
+              ${bonusSchedule() ? `<strong>Market Leader Bonus:</strong> survivors gain Corporate Secrets by final <strong>Market Share</strong> place (${bonusSchedule()}; ties share the better place)${state.is_round_leader_bonus ? ", also at the end of Phase 5 in any round a Red Secret face was banked" : ""}.<br>` : ""}
+              <strong>Primary Victory Goal:</strong> Most <strong>Corporate Secrets</strong>${bonusSchedule() ? " (held + Market Leader Bonus)" : " held"}. Dice still in the Processing Box at game end yield nothing.<br>
               ${state.is_market_share ? `<strong>Tiebreaker 1:</strong> Highest <strong>Market Share</strong>.<br>
               <strong>Tiebreaker 2:</strong> Most remaining <strong>Money ($)</strong>.<br>
               <strong>Tiebreaker 3:</strong> Most <strong>Active Colored Module Dice</strong> in Ready for Release.<br>
@@ -366,7 +362,7 @@ export function renderCompiler() {
               <strong>Tiebreaker 5:</strong> Fewest dice <strong>Under Development</strong>.<br>` : `<strong>Tiebreaker 1:</strong> Most remaining <strong>Money ($)</strong>.<br>
               <strong>Tiebreaker 2:</strong> Most owned <strong>Colored Dice</strong> (all zones).<br>
               <strong>Tiebreaker 3:</strong> Most remaining <strong>Research Tokens (🔬)</strong>.<br>`}
-              <em>(Total Wipeout: ranked by the same tiebreakers${state.is_market_leader_bonus ? "; no Market Leader Bonus" : ""}).</em>
+              <em>(Total Wipeout: ranked by the same tiebreakers${bonusSchedule() ? "; no Market Leader Bonus" : ""}).</em>
             </div>
           </div>
         </div>
@@ -374,6 +370,11 @@ export function renderCompiler() {
 
     </div>
   `;
+}
+
+function bonusSchedule() {
+  const sched = state.is_round_leader_bonus ? state.round_leader_bonus_schedule : (state.is_market_leader_bonus ? state.market_leader_bonus_schedule : []);
+  return (sched || []).map((b, i) => `${i + 1}${["st", "nd", "rd"][i] || "th"} +${b}`).filter((t) => !t.endsWith("+0")).join(", ");
 }
 
 // v0.36.0: Market Share comparison when a Version's final space is covered (bank payout; v2.0 only by default)

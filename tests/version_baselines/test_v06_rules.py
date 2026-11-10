@@ -20,6 +20,7 @@ Covers all 16 technical test cases from the Principal Engineer specification:
 """
 
 from __future__ import annotations
+from tests.web_legacy import use_v037_rules
 
 import random
 import unittest
@@ -50,6 +51,7 @@ from web.game_controller import GameController
 from web.schemas import GameStateSerializer
 
 
+@use_v037_rules
 class TestV06Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     # 1. GameConfig Parameters

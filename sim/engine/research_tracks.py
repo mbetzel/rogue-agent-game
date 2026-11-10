@@ -232,6 +232,7 @@ def _resolve_triage_l3(engine: GameEngine, player: PlayerState, choice: Optional
         color=color,
         die_id=_new_die_id(engine),
         variant_card=engine.state.variant_cards.get(color),
+        face_profile=engine.config.die_face_profile,
     )
     player.ready_for_release_dice.append(new_die)
     player.triage_l3_upgrade_color = color.value
@@ -263,8 +264,12 @@ def resolve_breakthrough(
         player.ready_for_release_dice.append(die)
         rec.detail = {"die_id": die.die_id}
     elif t in ("DEFENSE", "RELEASE") and level == 3:
-        player.secrets += 1
+        player.gain_secrets(1, "breakthrough")
         rec.detail = {"secrets": 1}
+    elif t == "TRIAGE" and level == 1 and cfg.triage_l1_breakthrough == "GRAY_DIE":
+        die = create_gray_die(_new_die_id(engine), cfg.gray_face_profile)  # v0.38: 1 Gray Legacy die
+        player.ready_for_release_dice.append(die)
+        rec.detail = {"die_id": die.die_id}
     elif t == "TRIAGE" and level == 1:
         want = int(cfg.triage_l1_contractors)
         n = max(0, min(want, engine.state.contractor_supply))
@@ -286,7 +291,8 @@ def resolve_breakthrough(
     elif t == "PATENT" and level == 3:
         if player.personal_purple_reserve > 0:
             player.personal_purple_reserve -= 1
-            die = create_colored_die(color=DieColor.PURPLE, die_id=_new_die_id(engine), cost=0)
+            die = create_colored_die(color=DieColor.PURPLE, die_id=_new_die_id(engine), cost=0,
+                                     face_profile=cfg.die_face_profile)
             player.ready_for_release_dice.append(die)
             rec.detail = {"die_id": die.die_id}
         else:
@@ -376,6 +382,8 @@ def breakthrough_preview(player: PlayerState) -> Dict[str, Dict[str, Any]]:
             "next_upgrade_cost": player.get_track_upgrade_cost(t),
             "breakthrough": BREAKTHROUGH_TEXT.get((t, nxt)) if cfg is not None and cfg.is_v035_tracks else None,
         }
+        if (t, nxt) == ("TRIAGE", 1) and getattr(cfg, "triage_l1_breakthrough", "") == "GRAY_DIE":
+            out[t]["breakthrough"] = "Gain 1 Gray Legacy die"
         if t == "PATENT" and cfg is not None and getattr(cfg, "is_share_regain", False):
             cost, cap = regain_rate(cfg, player)
             out[t]["display_name"] = track_display_name(cfg, t)

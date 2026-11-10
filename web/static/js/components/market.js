@@ -7,47 +7,31 @@ import { state, cipherDiscountSelected } from "../state.js";
 import { doBuy } from "../api.js";
 
 const MARKET_BASE_SPECS = {
-  red: {
-    title: "RED // MARKETING",
-    symbol: "◆",
-    baseCost: 5,
-    row1: "⚀ 1 Red Shield | ⚁-⚃ +$2",
-    row2: "⚄ ⚠️ Glitch | ⚅ ★ Variant",
-    warning: null,
-  },
-  blue: {
-    title: "BLUE // FIREWALL",
-    symbol: "●",
-    baseCost: 5,
-    row1: "⚀ 1 Blue Shield | ⚁ +1 🔬 | ⚂ +$1",
-    row2: "⚃ 1 Blue / 1 🔬 | ⚄ ⚠️ Glitch | ⚅ ★ Variant",
-    warning: null,
-  },
-  green: {
-    title: "GREEN // ANTIVIRUS",
-    symbol: "▲",
-    baseCost: 5,
-    row1: "⚀ 1 Green Shield | ⚁ +1 🔬 | ⚂ +2 🔬",
-    row2: "⚃ 1 🔬 / +$1 | ⚄ ⚠️ Glitch | ⚅ ★ Variant",
-    warning: null,
-  },
-  yellow: {
-    title: "YELLOW // COMM.",
-    symbol: "⬡",
-    baseCost: 6,
-    row1: "⚀ +$3 | ⚁-⚂ +$2",
-    row2: "⚃ +$1 & +1 🔬 | ⚄ ⚠️ Glitch | ⚅ ★ Variant",
-    warning: null,
-  },
-  purple: {
-    title: "PURPLE // BLK-HAT",
-    symbol: "▼",
-    baseCost: 4,
-    row1: "⚀-⚁ Block 1 Any | ⚂ +$2",
-    row2: "⚃ +$1 & +1 🔬 | ⚄ ⚠️ Glitch | ⚅ ★ Variant",
-    warning: null,
-  },
+  red: { title: "RED // MARKETING", symbol: "◆" },
+  blue: { title: "BLUE // FIREWALL", symbol: "●" },
+  green: { title: "GREEN // ANTIVIRUS", symbol: "▲" },
+  yellow: { title: "YELLOW // COMM.", symbol: "⬡" },
+  purple: { title: "PURPLE // BLK-HAT", symbol: "▼" },
 };
+
+const DIE_GLYPHS = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+
+/** Two text rows (faces 1-3, faces 4-6) from the printed faces the server sends for the active ruleset. */
+function faceRows(color) {
+  const names = (state && state.die_faces && state.die_faces[color]) || [];
+  const fmt = (i) => `${DIE_GLYPHS[i]} ${names[i] === "Secret" ? "Secret face" : names[i]}`;
+  if (names.length < 6) return ["", ""];
+  return [[0, 1, 2].map(fmt).join(" | "), [3, 4, 5].map(fmt).join(" | ")];
+}
+
+function secretNote(color) {
+  const y = (state && state.secret_yields) || {};
+  if (!state || !state.is_secret_faces || color === "yellow") return null;
+  if (color === "red") return `Secret face: +${y.red} Corporate Secrets when it leaves the Processing Box`;
+  if (color === "blue") return `Secret face: +${y.blue_base} (+${y.blue_block} if you blocked a Blue cube, +${y.blue_grid} at Defense Grid Level 3+; max ${y.blue_cap})`;
+  if (color === "green") return `Secret face: ${y.green_base} minus your Glitched Shield Slots`;
+  return `Secret face: +${y.purple} Corporate Secret`;
+}
 
 export function renderMarket() {
   if (!state || !state.market) return;
@@ -85,7 +69,7 @@ export function renderMarket() {
         <span>WHITE CONTRACTOR SUPPLY (12 DICE TOTAL — ${state.contractor_supply || 0} IN POOL)</span>
       </div>
       <div class="contractor-rules-note">
-        Phase 1 Staffing | Max 3/Round | Pays income in Phase 3 | Returns to supply after Phase 4 | Never enters Under Development
+        Phase 1 Staffing | Max 3/Round | Pays income in Phase 3 | Returns to supply after Phase 4 | Never enters the Processing Box
       </div>
     </div>
     <div class="contractor-cost-tiers">
@@ -102,7 +86,7 @@ export function renderMarket() {
         <span class="tier-cost">$3</span>
       </div>
       <div class="contractor-faces-summary">
-        <strong>Faces:</strong> ⚀⚁⚂ Block 1 Any &nbsp;|&nbsp; ⚃ +$1 &nbsp;|&nbsp; ⚄⚅ ⚠️ Glitch (0 output, discarded to supply)
+        <strong>Faces:</strong> ⚀⚁⚂ Block 1 Any &nbsp;|&nbsp; ⚃ +$1 &nbsp;|&nbsp; ⚄⚅ ⚠️ Glitch (0 output, discarded to supply; the only Glitch faces)
       </div>
     </div>
   `;
@@ -116,7 +100,9 @@ export function renderMarket() {
     const item = state.market[color];
     if (!item) continue;
 
-    const spec = MARKET_BASE_SPECS[color];
+    const spec = { ...MARKET_BASE_SPECS[color] };
+    [spec.row1, spec.row2] = faceRows(color);
+    spec.warning = secretNote(color);
     const baseCanBuy = Boolean(state.action_capabilities && state.action_capabilities.can_buy && state.action_capabilities.can_buy[color]);
     const cipherCanBuy = Boolean(state.action_capabilities && state.action_capabilities.can_cipher_buy && state.action_capabilities.can_cipher_buy[color]);
     const canBuy = cipherDiscountSelected ? cipherCanBuy : baseCanBuy;

@@ -26,7 +26,7 @@ const TRACK_STRIPS = [
   { key: "patent", label: "📜 PATENTS", color: "#c084fc", rgb: "192,132,252",
     steps: ["2 🔬 → 1 Secret", "★ +$3", "3 🔬 → 2 Secrets", "★ 2nd Purple die", "1 🔬 → 1 Secret"] },
 ];
-// v0.36.0: the fourth track is the Public Relations Track (Phase 6: spend 2 🔬 per +1 Market Share, limit per turn).
+// v0.36.0: the fourth track is the Public Relations Track (Phase 6: spend research per +1 Market Share, limit per turn).
 const PUBLIC_RELATIONS_STRIP = { key: "patent", label: "📣 PUBLIC RELATIONS", color: "#c084fc", rgb: "192,132,252",
   steps: ["+1 Market Share / turn (2 🔬)", "★ +$3 · +1 / turn", "+2 Market Share / turn", "★ 2nd Purple die · +2 / turn", "+3 Market Share / turn"] };
 const TRACK_STRIPS_V034 = {
@@ -36,9 +36,19 @@ const TRACK_STRIPS_V034 = {
   patent: ["4 🔬 → 1 Secret", "3 🔬 → 1 Secret", "2 🔬 → 1 Secret"],
 };
 
+// v0.38.0 step texts (GLOSSARY.md: Triage 2/2/3/3/4, Release 4/4/5/5/6, Defense Grid 2/2/3/3/4; Breakthroughs at L1 / L3)
+function v038Strip(t, p) {
+  const regain = p.regain_cost || 3;
+  if (t.key === "triage") return { ...t, steps: ["Bandwidth 2", "★ +1 Gray Legacy die", "Bandwidth 3", "★ $3: Gray → Market die", "Bandwidth 4 + 🔬 per die beyond 2nd"] };
+  if (t.key === "defense") return { ...t, steps: ["Capacity 2", "★ +1 Gray Legacy die", "Capacity 3", "★ +1 Secret · Blue Secret face +1", "Capacity 4 + $1 per block (max $3)"] };
+  if (t.key === "patent") return { ...t, steps: [`+1 Market Share / turn (${regain} 🔬)`, "★ +$3 · +1 / turn", "+2 Market Share / turn", "★ 2nd Purple die · +2 / turn", "+3 Market Share / turn"] };
+  return t;
+}
+
 function renderTrackStrips(p) {
   const maxLvl = p.max_track_level === 2 ? 2 : 4;
-  const strips = state.is_share_regain ? TRACK_STRIPS.map((t) => (t.key === "patent" ? PUBLIC_RELATIONS_STRIP : t)) : TRACK_STRIPS;
+  let strips = state.is_share_regain ? TRACK_STRIPS.map((t) => (t.key === "patent" ? PUBLIC_RELATIONS_STRIP : t)) : TRACK_STRIPS;
+  if (state.is_secret_faces) strips = strips.map((t) => v038Strip(t, p));
   const cards = strips.map((t) => {
     const lvl = p[`${t.key}_level`] || 0;
     const steps = maxLvl === 4 ? t.steps : TRACK_STRIPS_V034[t.key];
@@ -79,7 +89,7 @@ const COMPANIES_DATA = {
     timing: "P1: STAFFING",
     description: "Once per Rogue Agent Version, hire up to 2 White Contractor dice for free during Phase 1 Staffing.",
     themeColor: "#f59e0b",
-    startingSetupDesc: "Def Cap 2, Triage 2, Release 4, +$2 Starting Cash ($8 total).",
+    startingSetupDesc: "Def Cap 2, Triage 2, Release 4; Red starting die.",
   },
   OMNIDYNE: {
     code: "OMNIDYNE",
@@ -87,9 +97,9 @@ const COMPANIES_DATA = {
     sector: "Industrial Automation",
     overrideName: "Magnetic Splice",
     timing: "P5: PIPELINE SHIFT",
-    description: "Once per Rogue Agent Version, move 1 die from your Glitched Box directly to Ready for Release for free (bypassing Scanned Box).",
+    description: "Once per Rogue Agent Version, move 1 die from your Processing Box directly to Ready for Release for free (bypassing Scanned Box); it banks its Secret now.",
     themeColor: "#4ade80",
-    startingSetupDesc: "Def Cap 1, Triage Lvl 1 (Bandwidth 3), Release Lvl 1 (Bandwidth 5).",
+    startingSetupDesc: "Def Cap 2, Triage 2, Release 4; Green starting die.",
   },
   AEGIS: {
     code: "AEGIS",
@@ -99,7 +109,7 @@ const COMPANIES_DATA = {
     timing: "P4: ATTACK RESOLUTION",
     description: "Once per Rogue Agent Version, ignore 1 attack cube (Red, Blue, or Green) when resolving compiler damage for yourself this round.",
     themeColor: "#38bdf8",
-    startingSetupDesc: "Defense Lvl 1 (3 Shields Cap), Triage 1, Release 3.",
+    startingSetupDesc: "Def Cap 2, Triage 2, Release 4; Blue starting die.",
   },
   DTO: {
     code: "DTO",
@@ -109,7 +119,7 @@ const COMPANIES_DATA = {
     timing: "P4: ATTACK RESOLUTION",
     description: "Once per game, absorb up to 2 Corporate Secret loss (from Blue Spyware) for free without paying cash.",
     themeColor: "#a855f7",
-    startingSetupDesc: "Def Cap 2, Triage 2, Release 4, +1 Corporate Secret.",
+    startingSetupDesc: "Def Cap 2, Triage 2, Release 4; Blue starting die.",
   },
   HELIX: {
     code: "HELIX",
@@ -117,9 +127,9 @@ const COMPANIES_DATA = {
     sector: "Genomic R&D",
     overrideName: "Brute-Force Bypass",
     timing: "P1: REROLLS",
-    description: "Once per Rogue Agent Version, during Phase 1 rerolls, include locked dice for free and turn 1 rolled die to any legal non-Star face.",
+    description: "Once per Rogue Agent Version, during Phase 1 rerolls, gain 1 extra free reroll, include Glitch dice in your rerolls, and turn 1 rolled die to any legal non-Star face of its color (the Secret face is allowed).",
     themeColor: "#f43f5e",
-    startingSetupDesc: "Def Cap 2, Triage 2, Release 4.",
+    startingSetupDesc: "Def Cap 2, Triage 2, Release 4; Green starting die.",
   },
   PROMETHEUS: {
     code: "PROMETHEUS",
@@ -127,9 +137,9 @@ const COMPANIES_DATA = {
     sector: "Think Tank",
     overrideName: "Algorithmic Arbitrage",
     timing: "P6: OPERATIONS",
-    description: "Once per Rogue Agent Version: Mode A: $2 discount on purchasing 1 Colored or Purple Specialist Die; Mode B: Gain +$3 cash payout directly.",
+    description: "Once per Rogue Agent Version: buy 1 Central Market Colored Die at a $2 discount, or gain +$2 cash from the bank.",
     themeColor: "#00d4ff",
-    startingSetupDesc: "Def Cap 2, Triage 2, Release 4, -1 🔬 Track Upgrade Discount.",
+    startingSetupDesc: "Def Cap 2, Triage 2, Release 4; Red starting die.",
   },
 };
 
@@ -150,8 +160,8 @@ const WHITE_HATS_DATA = {
     role: "Hardware Tinkerer // Emergency Relays",
     flavor: "A strip of Mylar splicing tape and a 2600-Hz whistle will fix what ten grand of silicon can't.",
     protocolName: "Jumper Diagnostics",
-    protocolDesc: "When rolled on Purple ★, immediately roll 1 offline die in Under Development and apply its Cash/Research/Secret yield (or gain +$1 Cash fallback if pipeline is empty).",
-    passiveDesc: "Diagnostic jumper triggers on any offline die in Glitched or Scanned Box.",
+    protocolDesc: "Phase 3 Income, when rolled on Purple ★: move 1 die from your Processing Box to your Scanned Box, banking its Secret now. If the Processing Box is empty, roll 1 Scanned Box die and collect its $ / 🔬 (it stays in place); if Under Development is empty, gain +$1.",
+    passiveDesc: "Diagnostic jumper triggers on an offline die in the Processing Box or Scanned Box.",
     themeColor: "#4ade80",
   },
   ACOUSTIC: {
@@ -180,7 +190,7 @@ const WHITE_HATS_DATA = {
     role: "Reckless Hacker // Lock Bypassing",
     flavor: "Locked memory is just a polite suggestion from someone who left debug interrupts enabled.",
     protocolName: "Zero-Day Override",
-    protocolDesc: "Phase 1 Rerolls: Turn any 1 other rolled die to any legal non-Star face of choice.",
+    protocolDesc: "Phase 1, when rolled on Purple ★: turn 1 other rolled die to any legal non-Star face of its color other than the Secret face.",
     passiveDesc: "Deterministic face manipulation during Phase 1 Roll & Deploy.",
     themeColor: "#f43f5e",
   },
@@ -421,6 +431,8 @@ export function renderPlayerMats() {
     const contractorCount = (!p.has_rolled && p.contractor_dice) ? p.contractor_dice.length : 0;
     const readyCount = readyDiceList.length + contractorCount;
 
+    const slotsGlitched = p.glitched_shield_slots || 0;
+    const effCap = p.effective_defense_capacity !== undefined ? p.effective_defense_capacity : (p.defense_capacity || 2);
     const redShieldDice = (p.shield_slots && p.shield_slots.red && p.shield_slots.red.length)
       ? p.shield_slots.red
       : ((p.production_slots && p.production_slots.red_shield) || []);
@@ -540,11 +552,11 @@ export function renderPlayerMats() {
               <div class="zone-subtext">
                 ${isActivelyRolling 
                   ? (p.is_human && state.phase === 1 
-                      ? `Free Rerolls: <strong>${p.rerolls_remaining || 0}</strong>/2 | Click unlocked dice to reroll | Glitches lock immediately` 
-                      : `Phase 1 Rolling | Glitches lock immediately → Glitched Box`)
+                      ? `Free Rerolls: <strong>${p.rerolls_remaining || 0}</strong>/${p.max_rerolls || 2} | Click dice to reroll (a Secret face may be kept or rerolled) | Contractor Glitches lock` 
+                      : `Phase 1 Rolling | Secret faces → Processing Box after rerolls`)
                   : (p.has_committed 
                       ? (readyCount > 0 ? 'Dice ready for next round' : 'All dice deployed to In Production | Scanned dice graduate here in Phase 5 (≤ Release Bandwidth)')
-                      : 'Start: 3 Gray + 1 Purple Specialist Die | Phase 1: Roll all Ready + hired Contractors | Offline dice do not roll')}
+                      : 'Start: 2 Gray + 1 Company colored die + 1 Purple Specialist Die | Phase 1: Roll all Ready + hired Contractors | Offline dice do not roll')}
               </div>
             </div>
             ${isActivelyRolling ? `
@@ -554,16 +566,16 @@ export function renderPlayerMats() {
             <div class="dice-tray ready-tray" id="ready_tray_${p.player_id}"></div>
           </div>
 
-          <!-- Zone 2: In Production (Income slot + Red, Blue, Green Shield slots) -->
+          <!-- Zone 2: In Production (Income slot + Defense Grid of Generic (Any) shields) -->
           <div class="operational-zone production-zone-panel" style="border: 1px solid rgba(56, 189, 248, 0.3); background: rgba(15, 23, 42, 0.4); border-radius: 6px; padding: 10px; margin-bottom: 12px;">
             <div class="zone-header-strip">
               <div class="zone-title-wrap">
                 <span class="zone-name" style="color: #38bdf8;">IN PRODUCTION</span>
                 <span class="zone-count-badge">(${(p.in_production_dice || []).length})</span>
-                <span class="zone-count-badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-size: 0.7rem;">SHIELDS: ${redShieldDice.length + blueShieldDice.length + greenShieldDice.length + anyShieldDice.length}/${p.defense_capacity || 2} CAP</span>
+                <span class="zone-count-badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-size: 0.7rem;">SHIELDS: ${redShieldDice.length + blueShieldDice.length + greenShieldDice.length + anyShieldDice.length}/${effCap} CAP</span>
               </div>
               <div class="zone-subtext">
-                Income: Collect $, 🔬, ★ in Phase 3 | Defense Capacity: max ${p.defense_capacity || 2} shields (Flexible Firewall Ready)${p.defense_level >= 4 && p.max_track_level === 4 ? ' | Defense L4: +$1 per blocked Attack Cube (max $3)' : ''}
+                Income: Collect $, 🔬, ★ in Phase 3 | Defense Grid Capacity: max ${effCap} shields${slotsGlitched > 0 ? ` (${p.defense_capacity || 2} minus ${slotsGlitched} Glitched Shield Slot${slotsGlitched > 1 ? 's' : ''})` : ''}${p.defense_level >= 4 && p.max_track_level === 4 ? ' | Defense L4: +$1 per blocked Attack Cube (max $3)' : ''}
               </div>
             </div>
 
@@ -589,25 +601,26 @@ export function renderPlayerMats() {
                   <div class="shield-title">
                     <span class="shield-symbol" style="color: #38bdf8;">🛡️</span>
                     <span style="color: #38bdf8;">DEFENSE GRID</span>
-                    <span class="shield-count">(${redShieldDice.length + blueShieldDice.length + greenShieldDice.length + anyShieldDice.length}/${p.defense_capacity || 2} CAP)</span>
+                    <span class="shield-count">(${redShieldDice.length + blueShieldDice.length + greenShieldDice.length + anyShieldDice.length}/${effCap} CAP)</span>
+                    ${slotsGlitched > 0 ? `<span class="shield-count" style="color: #f43f5e;" title="Glitched Shield Slots cannot hold a shield and lower Green Secret face yields">⚠️ ${slotsGlitched} GLITCHED SHIELD SLOT${slotsGlitched > 1 ? 'S' : ''}</span>` : ''}
                   </div>
                   <div style="font-size: 0.65rem; color: var(--text-dim);">
-                    ${state.is_market_share ? 'Red (Market Manipulation)' : 'Red (Ransom)'} | Blue (Spyware) | Green (Malware) | Any
+                    Generic (Any) shields only
                   </div>
                 </div>
-                <div class="shield-desc-sub1">Active Shields Committed Against Compiler Threats</div>
-                <div class="shield-desc-sub2">Absorbs cleanly in Phase 4; unblocked attacks inflict penalties.</div>
+                <div class="shield-desc-sub1">Generic (Any) Shields Against Compiler Threats</div>
+                <div class="shield-desc-sub2">In Phase 4 you split them across the exited Red, Blue and Green cubes.</div>
                 <div class="shield-slots-tray defense-grid-unified-tray" id="defense_grid_${p.player_id}" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 36px; padding: 4px; background: rgba(0,0,0,0.2); border-radius: 4px;"></div>
               </div>
             </div>
 
             <!-- Shield Persistence Note -->
             <div class="wear-transition-caption" style="margin-top: 8px;">
-              <span style="color: #4ade80;">Permanent shields blocking attacks remain deployed in In Production (unless glitched by unblocked Green Malware).</span>
+              <span style="color: #4ade80;">Shields stay In Production through Phase 4, then return through the Scanned Box in Phase 5.</span>
             </div>
           </div>
 
-          <!-- Zone 3: Under Development (Two-stage conveyor: Glitched Box -> Scanned Box) -->
+          <!-- Zone 3: Under Development (Processing Box -> Scanned Box) -->
           <div class="operational-zone pipeline-zone-panel" style="border: 1px solid rgba(244, 63, 94, 0.3); background: rgba(15, 23, 42, 0.4); border-radius: 6px; padding: 10px; margin-bottom: 12px;">
             <div class="zone-header-strip">
               <div class="zone-title-wrap">
@@ -616,19 +629,19 @@ export function renderPlayerMats() {
                 <span class="zone-count-badge" style="background: rgba(244, 63, 94, 0.2); color: #f43f5e; font-size: 0.7rem;">TRIAGE: ${p.triage_bandwidth || 2}/RND | RELEASE: ${p.release_bandwidth || 4}/RND</span>
               </div>
               <div class="zone-subtext">
-                Two-Stage Conveyor: Glitched Box → Scanned Box → Ready for Release${p.triage_level >= 4 && p.max_track_level === 4 ? ' | Triage L4: +1 🔬 per die moved beyond the 2nd' : ''}
+                Processing Box → Scanned Box → Ready for Release${p.triage_level >= 4 && p.max_track_level === 4 ? ' | Triage L4: +1 🔬 per die moved beyond the 2nd' : ''}
               </div>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
-              <!-- Glitched Box -->
+              <!-- Processing Box -->
               <div style="border: 1px solid rgba(244, 63, 94, 0.4); background: rgba(244, 63, 94, 0.08); border-radius: 6px; padding: 8px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                  <span style="font-weight: 600; color: #f43f5e; font-size: 0.85rem;">⚠️ GLITCHED BOX (${(p.glitched_dice || []).length})</span>
-                  <span style="font-size: 0.75rem; color: var(--text-dim);">Quarantined Pipeline</span>
+                  <span style="font-weight: 600; color: #f43f5e; font-size: 0.85rem;">🔒 PROCESSING BOX (${(p.glitched_dice || []).length})</span>
+                  <span style="font-size: 0.75rem; color: var(--text-dim);">Secret faces, oldest first</span>
                 </div>
                 <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 6px;">
-                  Shifts to Scanned Box at round end (Triage Bandwidth: ${p.triage_bandwidth || 2})
+                  Conveyor Triage in Phase 5 moves up to ${p.triage_bandwidth || 2} dice to the Scanned Box, oldest first, banking each Secret face yield
                 </div>
                 <div class="dice-tray" id="glitched_tray_${p.player_id}" style="min-height: 48px;"></div>
               </div>
@@ -696,7 +709,7 @@ export function renderPlayerMats() {
             <span class="reserve-currency-value" style="color: #c084fc;">${p.research_tokens !== undefined ? p.research_tokens : p.patches}</span>
           </div>
           <div class="reserve-card-footer">
-            Hardware Upgrades | ${p.patent_track_name || 'Cryptographic Patents'}
+            Hardware Upgrades | ${p.patent_track_name || 'Public Relations Track'}
           </div>
         </div>
 
@@ -711,7 +724,7 @@ export function renderPlayerMats() {
             <span class="reserve-secrets-value ${p.secrets <= 2 ? 'critical' : ''}">${p.secrets}</span>
           </div>
           <div class="reserve-card-footer ${p.secrets <= 0 ? 'breach-alert' : ''}">
-            ${p.secrets <= 0 ? '<strong style="color: #ff0055;">TOTAL DATA BREACH (PATIENT ZERO)</strong>' : (state.starting_secrets !== undefined && state.starting_secrets !== null ? `Start: ${state.starting_secrets} — ≤0 = Total Breach` : 'Start: 8 — ≤0 = Total Breach')}
+            ${p.secrets <= 0 ? '<strong style="color: #ff0055;">TOTAL DATA BREACH (PATIENT ZERO)</strong>' : (state.starting_secrets !== undefined && state.starting_secrets !== null ? `Start: ${state.starting_secrets} — ≤0 = Total Breach` : '≤0 = Total Breach')}
           </div>
         </div>
 
@@ -727,7 +740,13 @@ export function renderPlayerMats() {
           </div>
           <div class="reserve-card-footer ${p.market_share <= 0 ? 'breach-alert' : ''}">
             ${p.market_share <= 0 ? '<strong style="color: #ff0055;">MARKET COLLAPSE (FINAL ROUND)</strong>' : `−1 per unblocked Red | Regain: ${p.regain_cost} 🔬 each, +${p.regain_cap} / turn`}
-            ${state.is_market_leader_bonus && (state.market_leader_bonus_schedule || []).length ? `<br><span title="Market Leader Bonus: at game end, survivors gain Corporate Secrets by Market Share place (ties share the better place)">Game end: Market Leader Bonus ${state.market_leader_bonus_schedule.map((b, i) => `${i + 1}${["st", "nd", "rd"][i] || "th"} +${b}`).filter((t) => !t.endsWith("+0")).join(" · ")}</span>` : ''}
+            ${(() => {
+              const sched = state.is_round_leader_bonus ? state.round_leader_bonus_schedule : (state.is_market_leader_bonus ? state.market_leader_bonus_schedule : []);
+              if (!sched || !sched.length) return '';
+              const txt = sched.map((b, i) => `${i + 1}${["st", "nd", "rd"][i] || "th"} +${b}`).filter((t) => !t.endsWith("+0")).join(" · ");
+              const when = state.is_round_leader_bonus ? "after Phase 5 when a Red Secret face was banked, and at game end" : "at game end";
+              return `<br><span title="Market Leader Bonus: survivors gain Corporate Secrets by Market Share place (ties share the better place)">Market Leader Bonus (${when}): ${txt}</span>`;
+            })()}
           </div>
         </div>` : ''}
 
@@ -790,6 +809,7 @@ export function renderPlayerMats() {
           if (isLocked) badgeHtml += `<span class="badge-locked">🔒 LOCKED</span> `;
           if (isGlitch) badgeHtml += `<span class="badge-glitch">⚠️ GLITCH</span> `;
           if (isChoice) badgeHtml += `<span class="badge-choice">CHOICE</span> `;
+          if (d.current_face && d.current_face.secrets_pending) badgeHtml += `<span class="badge-choice">🔒 SECRET → PROCESSING BOX</span> `;
 
           let faceNameDisplay = faceName;
           if (d.effective_face && d.chosen_choice_index !== null && d.chosen_choice_index !== undefined) {
@@ -915,14 +935,15 @@ export function renderPlayerMats() {
       }
     }
 
-    // Glitched Box Tray
+    // Processing Box Tray (oldest first; the first Triage Bandwidth dice move in Phase 5)
     const glitchedTray = terminalMat.querySelector(`#glitched_tray_${p.player_id}`);
     if (glitchedTray) {
-      (p.glitched_dice || []).forEach((d) => {
+      (p.processing_box_dice || p.glitched_dice || []).forEach((d, i) => {
         const chip = document.createElement("div");
         chip.className = `die-chip ${d.color}`;
-        chip.title = "Glitched: shifts to Scanned Box via Triage Bandwidth at end of round";
-        chip.innerHTML = `<span>${d.color.toUpperCase()}</span>`;
+        const nextUp = d.will_triage !== undefined ? d.will_triage : i < (p.triage_bandwidth || 2);
+        chip.title = `Secret face (entered #${d.processing_entry_seq}): banks ${d.secret_yield !== undefined ? '+' + d.secret_yield : 'its yield'} Corporate Secrets when it leaves the Processing Box${nextUp ? " (next Conveyor Triage)" : ""}`;
+        chip.innerHTML = `<span>${d.color.toUpperCase()} <span class="badge-choice">#${i + 1}${d.secret_yield !== undefined ? ` · +${d.secret_yield} Secrets` : ''}</span>${nextUp ? ' <span class="badge-contractor">NEXT</span>' : ''}</span>`;
         glitchedTray.appendChild(chip);
       });
     }
