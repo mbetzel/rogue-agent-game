@@ -28,7 +28,7 @@ V038B_STARTING_SECRETS = {2: 3, 3: 4, 4: 4}  # [TUNE] §14.3
 V038B_RED_TIERS = ((11, 3), (7, 2), (3, 1), (0, 0))  # [TUNE] §14.3
 V038B_MARKET_SHARE_START = {2: 14, 3: 14, 4: 14}  # [TUNE] §14.4 (start = max)
 V038B_MARKET_LEADER_BONUS = {2: (4, 0), 3: (4, 2, 0), 4: (4, 2, 0, 0)}  # [TUNE] §14.4
-V038C_MARKET_SHARE_START = {2: 16, 3: 16, 4: 17}  # [TUNE] §14.5.2 / FINDINGS §43.4 (start = max)
+V038C_MARKET_SHARE_START = {2: 13, 3: 16, 4: 17}  # [TUNE] §14.5.2 / FINDINGS §43.5 (start = max)
 V038C_RED_SECRET_PAYOUT = {2: (3, 1), 3: (3, 1, 0), 4: (3, 1, 0, 0)}  # [TUNE] §14.5.2
 _TRIAGE_ORDER_RULES = ("BOT", "OLDEST_FIRST")
 _TRIAGE_L1_MODES = ("WHITE_CONTRACTORS", "GRAY_DIE")
@@ -574,11 +574,11 @@ class GameConfig:
 
     @classmethod
     def v038c(cls, **overrides) -> "GameConfig":
-        """v0.38 candidate 3, RSP-1 (spec §14.5, FINDINGS §43.4): ``v038b()`` + Red Secret owner yield +1, the Red
+        """v0.38 candidate 3, RSP-1 (spec §14.5, FINDINGS §43.4): ``v038b()`` + Red Secret owner yield +2 (User, 2026-11-09, §43.5), the Red
         Secret payout (at most once per round at the end of Phase 5; 1st +3 / 2nd +1) plus one end payout, Market
-        Leader Bonus and v2.0 comparison removed, Market Share 16 / 16 / 17 (start = max), Yellow F3
+        Leader Bonus and v2.0 comparison removed, Market Share 13 / 16 / 17 (start = max), Yellow F3
         ``+$1 & +1 Market Share``, oldest-first Conveyor Triage. Starting Secrets 3 / 4 / 4."""
-        for k, v in (("red_secret_owner_yield", 1),
+        for k, v in (("red_secret_owner_yield", 2),
                      ("red_secret_payout_by_player_count", dict(V038C_RED_SECRET_PAYOUT)),
                      ("red_secret_payout_at_end", True), ("market_leader_bonus_by_player_count", {}),
                      ("version_share_payout", {}),

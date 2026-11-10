@@ -919,6 +919,7 @@ V038C = GameConfig.v038c
 
 
 def _eng_c(n=3, seed=1, bots=None, **cfg):
+    cfg.setdefault("red_secret_owner_yield", 1)  # most RSP tests pin yield 1; the v038c preset default is 2
     bots = bots or [BaseBot(i) for i in range(n)]
     comps = (CompanyCode.PROMETHEUS, CompanyCode.MERIDIAN, CompanyCode.DTO, CompanyCode.HELIX)[:n]
     whs = (WhiteHatCode.OPERATOR, WhiteHatCode.ACOUSTIC, WhiteHatCode.SPOOK, WhiteHatCode.CIPHER)[:n]
@@ -974,10 +975,10 @@ class TestRSP1(unittest.TestCase):
             self.assertEqual(c.triage_order_rule, "BOT")
 
     def test_preset_values(self):
-        for n, ms, sched in ((2, 16, (3, 1)), (3, 16, (3, 1, 0)), (4, 17, (3, 1, 0, 0))):
+        for n, ms, sched in ((2, 13, (3, 1)), (3, 16, (3, 1, 0)), (4, 17, (3, 1, 0, 0))):
             c = V038C(num_players=n)
             self.assertEqual((c.market_share_start(), c.red_secret_payout_schedule(), c.red_secret_owner_yield),
-                             (ms, sched, 1))
+                             (ms, sched, 2))
             self.assertEqual(c.get_starting_secrets(), {2: 3, 3: 4, 4: 4}[n])
             self.assertTrue(c.red_secret_payout_at_end)
             self.assertEqual((c.market_leader_bonus_schedule(), c.version_share_payout), ((), {}))
@@ -987,11 +988,13 @@ class TestRSP1(unittest.TestCase):
 
     # 2. owner yield
     def test_rsp02_owner_yield_flat(self):
-        eng = _eng_c()
-        p = eng.state.players[0]
-        for share in (16, 5, 0):
-            p.market_share = share
-            self.assertEqual(sf.secret_yield(eng.config, p, DieColor.RED), 1)
+        self.assertEqual(V038C(num_players=3).red_secret_owner_yield, 2)  # preset default (FINDINGS §43.5)
+        for y in (1, 2):
+            eng = _eng_c(red_secret_owner_yield=y)
+            p = eng.state.players[0]
+            for share in (16, 5, 0):
+                p.market_share = share
+                self.assertEqual(sf.secret_yield(eng.config, p, DieColor.RED), y)
 
     # 3 / 4. places
     def _single_bank(self, n, shares):
@@ -1219,7 +1222,7 @@ class TestRSP1(unittest.TestCase):
         for kw in bad:
             with self.assertRaises(ValueError, msg=kw):
                 V038C(num_players=3, **kw)
-        for kw in (dict(red_secret_owner_yield=1), dict(red_secret_payout_by_player_count={3: (3, 1)}),
+        for kw in (dict(red_secret_owner_yield=2), dict(red_secret_payout_by_player_count={3: (3, 1)}),
                    dict(triage_order_rule="OLDEST_FIRST")):
             with self.assertRaises(ValueError, msg=kw):
                 GameConfig.v037(**kw)
@@ -1234,7 +1237,7 @@ class TestRSP1(unittest.TestCase):
         for n in (2, 3, 4):
             eng = sw.build_engine("v038c", "mixed1", n, 0, ov)
             self.assertEqual(eng.config.get_starting_secrets(), {2: 2, 3: 3, 4: 4}[n])
-            self.assertEqual(eng.config.red_secret_owner_yield, 1)
+            self.assertEqual(eng.config.red_secret_owner_yield, 2)
         self.assertIn("v038c", sw.CONFIGS)
         rec = sw.play(("v038c", "mixed1", 3, 0, {}))
         self.assertIn("red_secret_payouts_fired", rec)
@@ -1350,7 +1353,7 @@ class TestRSP1(unittest.TestCase):
                 self.assertEqual(res.version_comparisons, [])  # INV-RSP-05
                 for r in res.rankings:
                     self.assertEqual(r["market_leader_bonus"], 0)
-                    self.assertEqual(r["secrets_by_source"].get("secret_face_red", 0), r["red_secrets_banked"])  # INV-RSP-03
+                    self.assertEqual(r["secrets_by_source"].get("secret_face_red", 0), r["red_secrets_banked"] * eng.config.red_secret_owner_yield)  # INV-RSP-03
                     self.assertTrue(0 <= r["market_share"] <= cap and r["market_share_min"] >= 0)  # INV-RSP-08
                 for t in res.telemetry_history:
                     for snaps in t.phase_snapshots.values():

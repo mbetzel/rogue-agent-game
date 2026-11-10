@@ -388,6 +388,7 @@ Validation additions: `red_secret_payout_by_player_count` non-empty **and** a no
 
 ### 14.5.2 Preset `v038c()`
 Name: `v038c` — follows the candidate letter sequence (`v038b` = C2); RSP-1 is candidate 3. Docstring cites §14.5 / FINDINGS §43.4.
+(User, 2026-11-09: owner yield 2; 2P starting Market Share 13 — FINDINGS §43.5.) The code block below shows the original §43.4 values; the locked preset is `red_secret_owner_yield=2`, `V038C_MARKET_SHARE_START = {2: 13, 3: 16, 4: 17}`.
 ```python
 V038C_MARKET_SHARE_START = {2: 16, 3: 16, 4: 17}     # [TUNE] §43.4 (start = max)
 V038C_RED_SECRET_PAYOUT  = {2: (3, 1), 3: (3, 1, 0), 4: (3, 1, 0, 0)}  # [TUNE]
