@@ -25,23 +25,24 @@ export function renderGameOverModal() {
   const content = document.getElementById("gameOverContent");
   if (!content) return;
 
-  // v0.37.0 Market Leader Bonus: shown only when it was awarded (not on a Total Wipeout or when disabled)
-  const mlb = !!res.market_leader_bonus_awarded;
+  // Market Leader Bonus at game end: shown only when it was awarded (not on a Total Wipeout or when disabled)
+  const mlb = !!res.game_end_bonus_awarded;
   const ordinal = (n) => n + (n % 10 === 1 && n % 100 !== 11 ? "st" : n % 10 === 2 && n % 100 !== 12 ? "nd" : n % 10 === 3 && n % 100 !== 13 ? "rd" : "th");
   const bonusCell = (r) => {
     if (r.market_share_place === null || r.market_share_place === undefined) return "—";
-    return `${ordinal(r.market_share_place)} · +${r.market_leader_bonus || 0}`;
+    return `${ordinal(r.market_share_place)} · +${r.end_bonus || 0}`;
   };
   const secretsCell = (r) => mlb && !r.is_patient_zero
-    ? `${r.secrets_before_bonus} + ${r.market_leader_bonus || 0} = ${r.secrets} Secrets`
+    ? `${r.secrets_before_bonus} + ${r.end_bonus || 0} = ${r.secrets} Secrets`
     : `${r.secrets} Secrets`;
+  const stranded = (r) => (r.stranded_dice || 0) > 0 ? ` · ${r.stranded_dice} die${r.stranded_dice > 1 ? "s" : ""} left in the Processing Box (no Secrets)` : "";
 
   let rows = res.rankings.map((r) => `
     <tr style="border-bottom: 1px solid var(--border-color); text-align: left;">
       <td style="padding: 6px;">#${r.rank}</td>
       <td style="padding: 6px;">${r.bot_name}</td>
-      <td style="padding: 6px;">${secretsCell(r)}${r.market_share !== null && r.market_share !== undefined ? ` · ${r.market_share} Market Share` : ""}</td>
-      ${mlb ? `<td style="padding: 6px;">${bonusCell(r)}</td>` : ""}
+      <td style="padding: 6px;">${secretsCell(r)}${r.market_share !== null && r.market_share !== undefined ? ` · ${r.market_share} Market Share` : ""}${stranded(r)}</td>
+      ${mlb ? `<td style="padding: 6px;">${bonusCell(r)}${r.round_bonus_total ? ` <span style="color: var(--text-dim);">(+${r.round_bonus_total} earlier)</span>` : ""}</td>` : ""}
       <td style="padding: 6px;">${r.overflow_penalties}</td>
       <td style="padding: 6px; font-weight: 700; color: var(--accent-gold);">${r.net_score}</td>
       <td style="padding: 6px;">${r.is_patient_zero ? '<span style="color: #ff0055;">Breached</span>' : '<span style="color: #00ff88;">Survived</span>'}</td>
@@ -56,7 +57,7 @@ export function renderGameOverModal() {
     <p style="color: var(--text-dim); font-size: 0.85rem;">
       Concluded in Round ${res.total_rounds} | Trigger: ${res.end_reason.replace(/_/g, " ").toUpperCase()}
       ${(res.market_collapse_pids || []).length ? ` | Market Collapse in Round ${res.market_collapse_round}` : ""}
-      ${mlb ? ` | Market Leader Bonus: ${(res.market_leader_bonus_schedule || []).map((b, i) => [b, i]).filter(([b]) => b > 0).map(([b, i]) => `${ordinal(i + 1)} +${b}`).join(", ")}${res.market_leader_bonus_changed_winner ? " (changed the winner)" : ""}` : ""}
+      ${mlb ? ` | Market Leader Bonus: ${(res.game_end_bonus_schedule || []).map((b, i) => [b, i]).filter(([b]) => b > 0).map(([b, i]) => `${ordinal(i + 1)} +${b}`).join(", ")}${res.market_leader_bonus_changed_winner ? " (changed the winner)" : ""}` : ""}
       ${res.tiebreak_decided_by && !["secrets", "sole_survivor"].includes(res.tiebreak_decided_by) ? ` | Tiebreak: ${res.tiebreak_decided_by.replace(/_/g, " ")}` : ""}
     </p>
 

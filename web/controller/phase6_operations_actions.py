@@ -279,7 +279,7 @@ def execute_bot_operations(controller: GameController, player: PlayerState, meta
         cost = player.get_patent_cost()
         if player.research_tokens >= cost:
             player.file_patent()
-            controller.event_log.append(f"{meta['name']} (Bot) filed Cryptographic Patent (+1 Secret).")
+            controller.event_log.append(f"{meta['name']} (Bot) converted research into (+1 Secret).")
             patent_filings -= 1
         else:
             break
@@ -385,7 +385,7 @@ def buy_die(
     _require_no_pending_breakthrough(controller, player_id)
     color = DieColor(color_str.lower())
     if color == DieColor.PURPLE and not controller.state.config.purple_purchasable:
-        raise ValueError("Purple dice cannot be purchased; your 2nd Purple die comes from the Patents Level 3 Breakthrough")
+        raise ValueError("Purple dice cannot be purchased; your 2nd Purple die comes from the Public Relations Track Level 3 Breakthrough")
     if color == DieColor.PURPLE:
         base_cost = player.get_purple_reserve_cost() if hasattr(player, "get_purple_reserve_cost") else (
             getattr(player.white_hat, "reserve_cost", 4) if getattr(player, "white_hat", None) else 4
@@ -417,6 +417,7 @@ def buy_die(
         meta["purchases_this_turn"] += 1
 
         new_die = create_colored_die(
+            face_profile=controller.state.config.die_face_profile,
             color=DieColor.PURPLE,
             die_id=controller.state.next_die_id,
             reserve_cost=player.get_purple_reserve_cost() if hasattr(player, "get_purple_reserve_cost") else 4,
@@ -445,6 +446,7 @@ def buy_die(
     meta["purchases_this_turn"] += 1
 
     new_die = create_colored_die(
+        face_profile=controller.state.config.die_face_profile,
         color=color,
         die_id=controller.state.next_die_id,
         variant_card=controller.state.variant_cards.get(color),
@@ -942,7 +944,7 @@ def file_cryptographic_patent(
     v0.35 ruleset only: under the Public Relations Track there is no Patent Filing (use ``regain_market_share``).
     """
     if controller.state.config.is_share_regain:
-        raise ValueError("No Patent Filing under the Public Relations Track: spend research to regain Market Share instead")
+        raise ValueError("Research converts to Market Share on the Public Relations Track in this ruleset: use Regain Market Share instead")
     if controller.phase != int(RoundPhase.OPERATIONS):
         raise ValueError(f"Cannot file cryptographic patents in phase {controller.phase}")
     if player_id != controller.active_player_index:
@@ -966,12 +968,12 @@ def file_cryptographic_patent(
 
     if controller.state.config.is_v035_tracks:
         controller.event_log.append(
-            f"{meta['name']} filed Cryptographic Patent (+{gain} Secret{'s' if gain != 1 else ''}) for {cost} 🔬."
+            f"{meta['name']} converted research into (+{gain} Secret{'s' if gain != 1 else ''}) for {cost} 🔬."
         )
     else:
         cash_note = " and +$1 cash" if player.patent_level >= 2 else ""
         controller.event_log.append(
-            f"{meta['name']} filed Cryptographic Patent (+1 Secret{cash_note}) for {cost} 🔬."
+            f"{meta['name']} converted research into (+1 Secret{cash_note}) for {cost} 🔬."
         )
     return controller.get_full_state()
 

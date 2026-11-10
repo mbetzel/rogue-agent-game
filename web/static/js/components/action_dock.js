@@ -19,6 +19,8 @@ import {
   selectedRerollIndices,
   clearSelectedRerolls,
   selectedChoiceDeclarations,
+  selectedSlotCleaners,
+  toggleSlotCleaner,
   selectedGlitchDieIds,
   toggleSelectedGlitchDieId,
   clearSelectedGlitchDieIds,
@@ -35,6 +37,7 @@ import {
   doHireContractors,
   doRoll,
   doReroll,
+  doOverrideFace,
   doCommit,
   doCompile,
   doConfirmIncome,
@@ -139,7 +142,7 @@ export function renderActionDock() {
       if (unresolvedGlitches > 0) {
         const glitchWarn = document.createElement("div");
         glitchWarn.className = "glitch-warning";
-        glitchWarn.innerHTML = `<span>⚠️ ${unresolvedGlitches} Unresolved Hardware Glitch${unresolvedGlitches > 1 ? "es" : ""}: Committing routes glitched dice to the Glitched Box (White Contractors are discarded to supply).</span>`;
+        glitchWarn.innerHTML = `<span>⚠️ ${unresolvedGlitches} unresolved Glitch${unresolvedGlitches > 1 ? "es" : ""}: a White Contractor that still shows Glitch is discarded to the supply.</span>`;
         controls.appendChild(glitchWarn);
       }
 
@@ -150,7 +153,7 @@ export function renderActionDock() {
       rerollInfo.style.fontSize = "0.8rem";
       rerollInfo.style.color = "#38bdf8";
       rerollInfo.style.fontWeight = "600";
-      rerollInfo.innerText = `Rerolls: ${rerollsLeft}/${maxRerolls} left | Click unlocked dice to reroll | Glitches lock immediately`;
+      rerollInfo.innerText = `Rerolls: ${rerollsLeft}/${maxRerolls} left | Click dice to reroll (a Secret face may be kept or rerolled) | Contractor Glitches lock`;
       controls.appendChild(rerollInfo);
 
       if (caps.can_reroll && selectedRerollIndices.size > 0) {
@@ -162,7 +165,7 @@ export function renderActionDock() {
         rerollBtn.className = "action-btn btn-accent";
         if (hasLockedSelected) {
           rerollBtn.style.borderColor = "#38bdf8";
-          rerollBtn.innerText = `Reroll Selected (${selectedRerollIndices.size}) [⚡ Prodigy Bypass]`;
+          rerollBtn.innerText = `Reroll Selected (${selectedRerollIndices.size}) [⚡ Brute-Force Bypass]`;
           rerollBtn.onclick = () => doReroll(true);
         } else {
           rerollBtn.innerText = `Reroll Selected (${selectedRerollIndices.size})`;
@@ -171,8 +174,35 @@ export function renderActionDock() {
         controls.appendChild(rerollBtn);
       }
 
+      if (caps.can_override_face_helix) buildOverridePanel(controls, human, "helix");
+      if (caps.can_override_face_prodigy) buildOverridePanel(controls, human, "prodigy");
+
       // Clean up stale commitments and choice declarations for dice that changed after reroll
       const rolled = human.rolled_pool || [];
+      Array.from(selectedSlotCleaners).forEach((i) => {
+        const f = rolled[i] && rolled[i].current_face;
+        if (!f || !f.is_shield) selectedSlotCleaners.delete(i);
+      });
+
+      // Defense Grid capacity line (Glitched Shield Slots lower it; cleaning raises it again before shields are placed)
+      if (state.is_glitched_slots) {
+        let faceCleans = 0;
+        rolled.forEach((d, i) => {
+          const f = d.current_face;
+          if (!f || f.is_glitch || f.secrets_pending) return;
+          const eff = f.is_choice ? (f.choices || [])[selectedChoiceDeclarations[i] !== undefined ? selectedChoiceDeclarations[i] : 0] : f;
+          if (eff && eff.clean_slots) faceCleans += eff.clean_slots;
+        });
+        const glitchedNow = Math.max(0, (human.glitched_shield_slots || 0) - faceCleans - selectedSlotCleaners.size);
+        const capNow = Math.max(0, (human.defense_capacity || 2) - glitchedNow);
+        const capInfo = document.createElement("span");
+        capInfo.style.fontSize = "0.8rem";
+        capInfo.style.color = glitchedNow > 0 ? "#f43f5e" : "#4ade80";
+        capInfo.style.fontWeight = "600";
+        capInfo.innerText = `Defense Grid: ${human.defense_capacity || 2} capacity − ${glitchedNow} Glitched Shield Slot${glitchedNow === 1 ? "" : "s"} = ${capNow} shield${capNow === 1 ? "" : "s"}`
+          + ((human.glitched_shield_slots || 0) > 0 ? ` | Tick "clean a slot" on a Block 1 Any die to clean one (no output; the die goes to the Scanned Box)` : "");
+        controls.appendChild(capInfo);
+      }
       Object.keys(selectedCommitments).forEach((idxStr) => {
         const i = parseInt(idxStr, 10);
         if (!rolled[i] || !rolled[i].current_face || (!rolled[i].current_face.is_shield && !rolled[i].current_face.has_shield_option)) {
@@ -190,6 +220,16 @@ export function renderActionDock() {
       rolled.forEach((d, idx) => {
         const face = d.current_face;
         if (!face || face.is_glitch) return;
+
+        if (face.secrets_pending) {
+          const noteWrap = document.createElement("div");
+          noteWrap.style.fontSize = "0.8rem";
+          const yNow = (human.secret_yield_now || {})[d.color];
+          const colStr = `var(--color-${d.color})`;
+          noteWrap.innerHTML = `<span style="color: ${colStr};">Die #${idx + 1} (${d.color.toUpperCase()}):</span> <span style="background: rgba(244, 63, 94, 0.15); border: 1px solid #f43f5e; color: #fda4af; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">🔒 SECRET FACE → PROCESSING BOX${yNow !== undefined ? ` (+${yNow} Corporate Secrets if it left now)` : ""}</span>`;
+          controls.appendChild(noteWrap);
+          return;
+        }
 
         if (face.is_choice) {
           const wrap = document.createElement("div");
@@ -303,7 +343,20 @@ export function renderActionDock() {
           } else if (face.shield_color === "any") {
             selectedCommitments[idx] = "any";
             const colStr = d.color === "white" ? "#f8fafc" : `var(--color-${d.color})`;
-            wrap.innerHTML = `<span style="color: ${colStr};">Die #${idx + 1} (${d.color}):</span> <span style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">🛡️ FLEXIBLE ANY SHIELD</span>`;
+            wrap.innerHTML = `<span style="color: ${colStr};">Die #${idx + 1} (${d.color}):</span> <span style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">🛡️ GENERIC (ANY) SHIELD</span>`;
+            if (state.is_glitched_slots && (human.glitched_shield_slots || 0) > 0 && !face.is_star) {
+              const cl = document.createElement("label");
+              cl.style.fontSize = "0.75rem";
+              cl.style.color = "#fda4af";
+              const cb = document.createElement("input");
+              cb.type = "checkbox";
+              cb.checked = selectedSlotCleaners.has(idx);
+              cb.disabled = !cb.checked && selectedSlotCleaners.size >= (human.glitched_shield_slots || 0);
+              cb.onchange = () => { toggleSlotCleaner(idx); renderActionDock(); };
+              cl.appendChild(cb);
+              cl.appendChild(document.createTextNode(" clean a Glitched Shield Slot"));
+              wrap.appendChild(cl);
+            }
           } else {
             selectedCommitments[idx] = face.shield_color;
             wrap.innerHTML = `<span style="color: var(--color-${face.shield_color});">Die #${idx + 1} (${face.shield_color.toUpperCase()})</span>`;
@@ -452,7 +505,7 @@ export function renderActionDock() {
           die_id: null,
           color: "gray",
           face_name: "Block 1 Any",
-          label: `Flexible Shield #${anyShieldUnits.length + 1}`,
+          label: `Any Shield #${anyShieldUnits.length + 1}`,
         });
       }
 
@@ -537,7 +590,7 @@ export function renderActionDock() {
 
       const unblockedGreen = liveUnblockedGreen;
       let candidates = attackRes.candidate_glitch_dice || (greenInfo.candidate_dice) || [];
-      if (!candidates || candidates.length === 0) {
+      if ((!candidates || candidates.length === 0) && greenInfo.glitched_shield_slots === undefined) {
         const fallbackCandidates = [];
         (human.contractor_dice || []).forEach((d) => {
           fallbackCandidates.push({
@@ -609,7 +662,7 @@ export function renderActionDock() {
           const needed = actualRequired - selectedGlitchDieIds.size;
           btnText = `Select ${needed} Die to Glitch (${selectedGlitchDieIds.size}/${actualRequired})`;
         } else {
-          btnText = `✓ Confirm & Move ${actualRequired} Selected Die${actualRequired > 1 ? 's' : ''} to Glitched Box`;
+          btnText = `✓ Confirm & Move ${actualRequired} Selected Die${actualRequired > 1 ? 's' : ''} to Under Development`;
         }
       }
 
@@ -624,7 +677,7 @@ export function renderActionDock() {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="background: rgba(168, 85, 247, 0.25); color: #d8b4fe; border: 1px solid #a855f7; font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">🛡️ ANY SHIELD ASSIGNMENT</span>
-                <span style="font-size: 0.8rem; font-weight: 700; color: #f3e8ff;">CHOOSE TARGET THREAT COLOR FOR ${anyShieldCount} FLEXIBLE SHIELD${anyShieldCount > 1 ? 'S' : ''}</span>
+                <span style="font-size: 0.8rem; font-weight: 700; color: #f3e8ff;">CHOOSE THE CUBE COLOR EACH OF YOUR ${anyShieldCount} GENERIC (ANY) SHIELD${anyShieldCount > 1 ? 'S' : ''} BLOCKS</span>
               </div>
               <span style="font-size: 0.72rem; color: #cbd5e1;">
                 Unblocked before Any: <strong>${remRedStage1}R</strong> · <strong>${remBlueStage1}B</strong> · <strong>${remGreenStage1}G</strong>
@@ -671,7 +724,7 @@ export function renderActionDock() {
                 <span class="confirm-malware-title">LOGIC BOMB INFECTION (${unblockedGreen} Unblocked Green Cube${unblockedGreen > 1 ? 's' : ''})</span>
               </div>
               <span class="confirm-malware-sub">
-                You took unblocked malware damage! Click below to select <strong>${actualRequired}</strong> active module${actualRequired > 1 ? 's' : ''} to move to the <strong>Glitched Box</strong> (or sacrifice a White Contractor). This round's income was already collected in Phase 3, so a glitch only delays that die.
+                You took unblocked malware damage! Click below to select <strong>${actualRequired}</strong> active module${actualRequired > 1 ? 's' : ''} to move to <strong>Under Development</strong> (or sacrifice a White Contractor). This round's income was already collected in Phase 3, so a glitch only delays that die.
               </span>
             </div>
             <div class="confirm-malware-grid">
@@ -682,9 +735,9 @@ export function renderActionDock() {
                 if (c.is_contractor) {
                   consequenceText = "Contractor Sacrifice: Discard to supply (saves permanent modules)";
                 } else if (c.is_shield) {
-                  consequenceText = "Defensive Shield Sacrifice: moves to Glitched Box (its block still counts)";
+                  consequenceText = "Shield die: moves to Under Development (its block still counts)";
                 } else {
-                  consequenceText = "Moves to Glitched Box (income already collected in Phase 3)";
+                  consequenceText = "Moves to Under Development (income already collected in Phase 3)";
                 }
                 return `
                   <div class="malware-die-card ${c.color} ${isSel ? 'selected' : ''}" data-die-id="${c.die_id}">
@@ -700,6 +753,23 @@ export function renderActionDock() {
                   </div>
                 `;
               }).join("")}
+            </div>
+          </div>
+        `;
+      } else if (unblockedGreen > 0 && greenInfo.glitched_shield_slots !== undefined) {
+        const room = Math.max(0, (greenInfo.defense_capacity || 0) - (greenInfo.glitched_shield_slots || 0));
+        const newSlots = Math.min(unblockedGreen, room);
+        malwareHtml = `
+          <div class="confirm-malware-panel">
+            <div class="confirm-malware-hdr">
+              <div class="confirm-malware-title-row">
+                <span class="confirm-malware-badge">⚠️ GLITCHED SHIELD SLOTS</span>
+                <span class="confirm-malware-title">${unblockedGreen} Unblocked Green Cube${unblockedGreen > 1 ? 's' : ''}</span>
+              </div>
+              <span class="confirm-malware-sub">
+                ${newSlots > 0 ? `<strong>${newSlots}</strong> of your shield slots will become Glitched Shield Slots (no die moves; ${greenInfo.glitched_shield_slots || 0} already glitched of ${greenInfo.defense_capacity || 0} capacity).` : 'All of your shield slots are already glitched: the excess has no effect.'}
+                A Glitched Shield Slot cannot hold a shield and lowers your Green Secret face yield by 1. Clean slots in Phase 1 or Phase 5.
+              </span>
             </div>
           </div>
         `;
@@ -723,10 +793,10 @@ export function renderActionDock() {
         <div class="confirm-income-header">
           <div class="confirm-income-title-wrap">
             <span class="confirm-badge">PHASE 4: ATTACK RESOLUTION</span>
-            <span class="confirm-income-title">TWO-STAGE DEFENSIVE BLOCKING SUMMARY</span>
+            <span class="confirm-income-title">GENERIC (ANY) SHIELD DEFENSE SUMMARY</span>
           </div>
           <span style="font-size: 0.72rem; color: var(--text-dim); font-family: monospace;">
-            Round ${state.current_round} // Allocate Any shields and Green targets before damage resolves
+            Round ${state.current_round} // Split your Any shields across the exited cubes before damage resolves
           </span>
         </div>
 
@@ -741,7 +811,7 @@ export function renderActionDock() {
             </div>
             ${anyShieldCount > 0 ? `
               <div class="confirm-threat-row" style="background: rgba(168, 85, 247, 0.1); border-left: 3px solid #a855f7; padding-left: 6px;">
-                <span style="color: #c084fc; font-weight: 700;">🛡️ ANY // FLEXIBLE</span>
+                <span style="color: #c084fc; font-weight: 700;">🛡️ ANY // GENERIC</span>
                 <span>${anyShieldCount} shield${anyShieldCount > 1 ? 's' : ''} -> Blocking <strong>${userAnyAlloc.red}R · ${userAnyAlloc.blue}B · ${userAnyAlloc.green}G</strong></span>
               </div>
             ` : ''}
@@ -750,8 +820,8 @@ export function renderActionDock() {
               <span>${blackCubes} cube${blackCubes === 1 ? '' : 's'} -> Track space ${state.corruption_track || 0}</span>
             </div>
             <div class="confirm-threat-row">
-              <span style="color: var(--color-red); font-weight: 700;">◆ RED // ${state.is_market_share ? 'MARKET MANIPULATION' : 'RANSOMWARE'}</span>
-              <span>${redInfo.cubes} exited vs ${liveBlockedRed} blocked -> ${liveUnblockedRed > 0 && state.is_market_share ? `<strong style="color: #f43f5e;">-${Math.min(liveUnblockedRed, humanThreat.market_share || 0)} Market Share${(humanThreat.market_share || 0) - liveUnblockedRed <= 0 ? ' (MARKET COLLAPSE!)' : ''}</strong>` : liveUnblockedRed > 0 ? (liveFlatLeak ? `<strong style="color: #f43f5e;">-${liveUnblockedRed} Cash (Flat -1 Secret Leak!)</strong>` : `<strong style="color: #f43f5e;">-${liveUnblockedRed} Cash</strong>`) : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
+              <span style="color: var(--color-red); font-weight: 700;">◆ RED // MARKET MANIPULATION</span>
+              <span>${redInfo.cubes} exited vs ${liveBlockedRed} blocked -> ${liveUnblockedRed > 0 ? `<strong style="color: #f43f5e;">-${Math.min(liveUnblockedRed, humanThreat.market_share || 0)} Market Share${(humanThreat.market_share || 0) - liveUnblockedRed <= 0 ? ' (MARKET COLLAPSE!)' : ''}</strong>` : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
             </div>
             <div class="confirm-threat-row">
               <span style="color: var(--color-blue); font-weight: 700;">● BLUE // SPYWARE</span>
@@ -759,7 +829,7 @@ export function renderActionDock() {
             </div>
             <div class="confirm-threat-row">
               <span style="color: var(--color-green); font-weight: 700;">▲ GREEN // MALWARE</span>
-              <span>${greenInfo.cubes} exited vs ${liveBlockedGreen} blocked -> ${liveUnblockedGreen > 0 ? (actualRequired === 0 ? '<strong style="color: #4ade80;">0 effect (Empty Production)</strong>' : `<strong style="color: #f43f5e;">${liveUnblockedGreen} Unblocked Malware</strong>`) : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
+              <span>${greenInfo.cubes} exited vs ${liveBlockedGreen} blocked -> ${liveUnblockedGreen > 0 ? (greenInfo.glitched_shield_slots !== undefined ? `<strong style="color: #f43f5e;">${Math.min(liveUnblockedGreen, Math.max(0, (greenInfo.defense_capacity || 0) - (greenInfo.glitched_shield_slots || 0)))} Glitched Shield Slot${liveUnblockedGreen > 1 ? 's' : ''}</strong>` : (actualRequired === 0 ? '<strong style="color: #4ade80;">0 effect (Empty Production)</strong>' : `<strong style="color: #f43f5e;">${liveUnblockedGreen} Unblocked Malware</strong>`)) : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
             </div>
           </div>
 
@@ -790,7 +860,7 @@ export function renderActionDock() {
 
         <div class="confirm-action-bar">
           <span style="font-size: 0.75rem; color: var(--text-dim);">
-            Confirming resolves Red / Blue / Green damage. Glitched dice move to the <strong>Glitched Box</strong>; contractors expire at the end of Phase 4.
+            Confirming resolves Red / Blue / Green damage. Unblocked Green cubes turn shield slots into <strong>Glitched Shield Slots</strong>; contractors expire at the end of Phase 4.
           </span>
           ${(humanThreat.aegis && humanThreat.aegis.available) ? `
             <select id="aegisEchoSelect" style="padding: 4px 8px;" title="Aegis Baffle Echo (Institutional Override, once per Version)">
@@ -1137,7 +1207,7 @@ export function renderActionDock() {
       controls.appendChild(prBtn);
     }
 
-    // Cryptographic Patents (INV-PATENT-CONV-01) - v0.35 ruleset only
+    // Research-to-Secret conversion (INV-PATENT-CONV-01) - v0.35 ruleset only
     const patCost = caps.patent_cost || 4;
     const canPat = caps.can_file_patent || false;
     const patBtn = document.createElement("button");
@@ -1274,6 +1344,7 @@ function renderIncomePanel(controls, human, caps) {
   const ownedColored = []
     .concat(human.in_production_dice || [], human.glitched_dice || [], human.scanned_dice || [], human.ready_for_release_dice || [])
     .filter((d) => d.color !== "gray" && d.color !== "white");
+  const pbox = human.processing_box_dice || [];
   const ud = [].concat(human.glitched_dice || [], human.scanned_dice || []);
 
   panel.innerHTML = `
@@ -1324,9 +1395,11 @@ function renderIncomePanel(controls, human, caps) {
   if (caps.can_phreaker_diagnostics) {
     diagSelect = document.createElement("select");
     diagSelect.style.padding = "4px 8px";
-    diagSelect.innerHTML = ud.length > 0
-      ? ud.map((d) => `<option value="${d.die_id}">Jumper Diagnostics: roll ${d.color.toUpperCase()} #${d.die_id}</option>`).join("")
-      : `<option value="">Jumper Diagnostics: empty Under Development (+$1)</option>`;
+    diagSelect.innerHTML = pbox.length > 0
+      ? pbox.map((d) => `<option value="${d.die_id}">Jumper Diagnostics: Processing Box ${d.color.toUpperCase()} #${d.die_id} → Scanned Box (+${d.secret_yield} Secrets now)</option>`).join("")
+      : ((human.scanned_dice || []).length > 0
+        ? (human.scanned_dice || []).map((d) => `<option value="${d.die_id}">Jumper Diagnostics: roll Scanned Box ${d.color.toUpperCase()} #${d.die_id}</option>`).join("")
+        : `<option value="">Jumper Diagnostics: empty Under Development (+$1)</option>`);
     bar.appendChild(diagSelect);
   }
   const btn = document.createElement("button");
@@ -1374,7 +1447,7 @@ function renderGraduationPanel(controls, human, caps) {
         <span class="confirm-income-title">SCANNED GRADUATION (${chosen.size} / ${pend.n} — Release Bandwidth ${pend.release_bandwidth})</span>
       </div>
       <span style="font-size: 0.72rem; color: var(--text-dim);">
-        Magnetic Splice → In Production → Scanned Box → Ready for Release (≤ Release Bandwidth, your choice; fewer is allowed) → Glitched → Scanned (≤ Triage Bandwidth)
+        Magnetic Splice → In Production → Scanned Box → Ready for Release (≤ Release Bandwidth, your choice; fewer is allowed) → Conveyor Triage: Processing Box → Scanned Box (≤ Triage Bandwidth, oldest first, no choice)
       </span>
     </div>
     <div class="confirm-malware-grid">
@@ -1384,6 +1457,16 @@ function renderGraduationPanel(controls, human, caps) {
           <div class="malware-die-status">${chosen.has(c.die_id) ? "✓ GRADUATES TO READY" : "○ Held in Scanned Box"}</div>
         </div>`).join("")}
     </div>
+    ${(pend.processing_box || []).length > 0 ? `
+    <div class="confirm-income-card" style="border-color: rgba(244, 63, 94, 0.4); margin-top: 8px;">
+      <div class="confirm-income-card-hdr">
+        <span style="color: #fda4af;">CONVEYOR TRIAGE (PROCESSING BOX, OLDEST FIRST)</span>
+        <span>Triage Bandwidth ${pend.triage_bandwidth}</span>
+      </div>
+      <div class="confirm-dice-chips">
+        ${pend.processing_box.map((d, i) => `<span class="confirm-die-chip ${d.color}"><strong>#${i + 1} ${d.color.toUpperCase()}:</strong> +${d.yield} Secrets${d.will_triage ? " (moves this phase)" : " (stays)"}</span>`).join("")}
+      </div>
+    </div>` : ""}
     <div class="confirm-action-bar" id="gradActionBar"></div>
   `;
   panel.querySelectorAll(".malware-die-card").forEach((card) => {
@@ -1394,27 +1477,77 @@ function renderGraduationPanel(controls, human, caps) {
   });
   const bar = panel.querySelector("#gradActionBar");
   let spliceSelect = null;
-  let hotfixSelect = null;
-  const glitched = pend.glitched || [];
+  const glitched = pend.processing_box || pend.glitched || [];
   if (pend.splice_available && glitched.length > 0) {
     spliceSelect = document.createElement("select");
     spliceSelect.innerHTML = `<option value="">Magnetic Splice: decline</option>` +
-      glitched.map((d) => `<option value="${d.die_id}">Magnetic Splice: ${d.color.toUpperCase()} #${d.die_id} → Ready</option>`).join("");
+      glitched.map((d) => `<option value="${d.die_id}">Magnetic Splice: ${d.color.toUpperCase()} #${d.die_id} → Ready for Release${d.yield !== undefined ? ` (+${d.yield} Secrets now)` : ""}</option>`).join("");
     bar.appendChild(spliceSelect);
-  }
-  if (pend.hotfix_available && glitched.length > 0) {
-    hotfixSelect = document.createElement("select");
-    hotfixSelect.innerHTML = glitched.map((d) => `<option value="${d.die_id}">Emergency Hotfix: ${d.color.toUpperCase()} #${d.die_id} → Ready</option>`).join("");
-    bar.appendChild(hotfixSelect);
   }
   const btn = document.createElement("button");
   btn.className = "action-btn btn-confirm-income";
   btn.innerText = `✓ Confirm Pipeline Shift (${chosen.size} graduate${chosen.size === 1 ? "" : "s"})`;
   btn.onclick = () => {
     const spliceId = spliceSelect && spliceSelect.value !== "" ? parseInt(spliceSelect.value, 10) : null;
-    const hotfixId = hotfixSelect && hotfixSelect.value !== "" ? parseInt(hotfixSelect.value, 10) : null;
-    doChooseGraduates(Array.from(chosen), spliceId, hotfixId);
+    doChooseGraduates(Array.from(chosen), spliceId);
   };
   bar.appendChild(btn);
   controls.appendChild(panel);
+}
+
+
+/** Brute-Force Bypass (Helix) / Arbitrary Code Execution (Prodigy): turn one rolled die to a legal non-Star face. */
+function buildOverridePanel(controls, human, source) {
+  const rolled = human.rolled_pool || [];
+  if (rolled.length === 0) return;
+  const wrap = document.createElement("div");
+  wrap.style.display = "inline-flex";
+  wrap.style.alignItems = "center";
+  wrap.style.gap = "6px";
+  wrap.style.flexWrap = "wrap";
+  const styleSel = (el) => {
+    el.style.padding = "4px 8px";
+    el.style.background = "var(--bg-card)";
+    el.style.color = "#fff";
+    el.style.border = "1px solid var(--border-color)";
+    el.style.borderRadius = "4px";
+  };
+  const label = document.createElement("span");
+  label.style.fontSize = "0.8rem";
+  label.style.color = "#38bdf8";
+  label.innerText = source === "helix"
+    ? "⚡ Brute-Force Bypass (+1 free reroll; set 1 die to any non-Star face, Secret face allowed):"
+    : "⚡ Arbitrary Code Execution (set 1 other die to any non-Star, non-Secret face):";
+  const dieSel = document.createElement("select");
+  styleSel(dieSel);
+  rolled.forEach((d, i) => {
+    const o = document.createElement("option");
+    o.value = String(i);
+    o.innerText = `Die #${i + 1} ${d.color.toUpperCase()} (${d.current_face ? d.current_face.name : "?"})`;
+    dieSel.appendChild(o);
+  });
+  const faceSel = document.createElement("select");
+  styleSel(faceSel);
+  const fillFaces = () => {
+    faceSel.innerHTML = "";
+    const d = rolled[parseInt(dieSel.value, 10)];
+    (d.faces || []).forEach((f, fi) => {
+      if (f.is_star) return;
+      if (source === "prodigy" && f.secrets_pending) return;
+      const o = document.createElement("option");
+      o.value = String(fi);
+      o.innerText = f.secrets_pending ? "Secret face" : f.name;
+      faceSel.appendChild(o);
+    });
+  };
+  dieSel.onchange = fillFaces;
+  fillFaces();
+  const btn = document.createElement("button");
+  btn.className = "action-btn";
+  btn.style.borderColor = "#38bdf8";
+  btn.style.color = "#38bdf8";
+  btn.innerText = "Apply";
+  btn.onclick = () => doOverrideFace(parseInt(dieSel.value, 10), parseInt(faceSel.value, 10), source);
+  [label, dieSel, faceSel, btn].forEach((el) => wrap.appendChild(el));
+  controls.appendChild(wrap);
 }

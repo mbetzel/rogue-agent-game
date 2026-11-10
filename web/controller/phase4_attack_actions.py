@@ -98,9 +98,16 @@ def _threat_summary(controller: GameController, pid: int, attack: Dict[CubeColor
         red.update(unpaid_ransom=0, flat_leak=False, market_share=player.market_share,
                    market_share_max=player.market_share_max,
                    market_share_lost=bd.get("market_share_lost", 0) if bd else min(player.market_share or 0, red["unblocked"]))
-    green.update(fizzled=bd.get("malware_fizzled", False) if bd else (green["unblocked"] > 0 and not player.in_production_dice),
-                 pending_glitches=0 if resolved else green["unblocked"],
-                 candidate_dice=[] if resolved else _candidate_dice(player, income_rows))
+    if getattr(cfg, "glitched_shield_slots_enabled", False):
+        # v0.38.0: an unblocked Green cube glitches 1 shield slot (no die moves, nothing to choose)
+        room = max(0, player.defense_capacity - player.glitched_shield_slots)
+        green.update(fizzled=False, pending_glitches=0, candidate_dice=[],
+                     slots_glitched_now=0 if resolved else min(green["unblocked"], room),
+                     glitched_shield_slots=player.glitched_shield_slots, defense_capacity=player.defense_capacity)
+    else:
+        green.update(fizzled=bd.get("malware_fizzled", False) if bd else (green["unblocked"] > 0 and not player.in_production_dice),
+                     pending_glitches=0 if resolved else green["unblocked"],
+                     candidate_dice=[] if resolved else _candidate_dice(player, income_rows))
     qualifying = [] if resolved or not cr else [
         c.value for c in p4.aegis_qualifying_colors(controller.engine, player, attack, cr.exited_cubes)
     ]

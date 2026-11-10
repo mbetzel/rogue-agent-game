@@ -109,6 +109,7 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     randomize_cards = bool(data.get("randomize_cards", False))
                     enable_corporate_asymmetry = bool(data.get("enable_corporate_asymmetry", True))
                     research_track_model = data.get("research_track_model") or data.get("ruleset")
+                    rules_version = data.get("rules_version")
 
                     state = self.controller.new_game(
                         num_players=num_players,
@@ -117,6 +118,7 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                         randomize_cards=randomize_cards,
                         enable_corporate_asymmetry=enable_corporate_asymmetry,
                         research_track_model=research_track_model,
+                        rules_version=rules_version,
                     )
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
@@ -170,7 +172,19 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     pid = get_target_pid(default_to_human=True)
                     commitments = data.get("commitments", {})
                     choice_declarations = data.get("choice_declarations", None)
-                    state = self.controller.commit_defenses(pid, commitments, choice_declarations)
+                    slot_cleaners = data.get("slot_cleaner_indices", None)
+                    state = self.controller.commit_defenses(pid, commitments, choice_declarations, slot_cleaners)
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
+                elif clean_path == "/api/game/action/override_face":
+                    pid = get_target_pid(default_to_human=True)
+                    if "die_index" not in data or "face_index" not in data:
+                        payload, code = error_response("Missing required fields 'die_index' and 'face_index'", 400)
+                        self._send_json_response(payload, code)
+                        return
+                    state = self.controller.override_face(
+                        pid, int(data["die_index"]), int(data["face_index"]), str(data.get("source", "helix")))
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
 

@@ -32,27 +32,31 @@ def enter_game_over(controller: GameController) -> None:
     controller.subphase = "game_over"
     end_res = controller.engine.evaluate_end_game()
     controller.final_result = controller._serialize_end_game_result(end_res)
-    if controller.state.end_reason == EndGameReason.TOTAL_WIPEOUT:
+    reason = controller.state.end_reason
+    if reason == EndGameReason.TOTAL_WIPEOUT:
         controller.event_log.append("TOTAL WIPEOUT! All corporations suffered Total Breach simultaneously.")
-    elif controller.state.end_reason == EndGameReason.SINGULARITY:
-        controller.event_log.append("SINGULARITY REACHED! Project: SETEC completed v3.0 compilation. Game Over!")
+        return
+    if reason == EndGameReason.SINGULARITY:
+        controller.event_log.append(
+            "SINGULARITY REACHED! Project: SETEC completed v3.0 compilation. Game Over! "
+            "(Dice still in a Processing Box yield nothing.)")
+    elif reason == EndGameReason.MARKET_COLLAPSE:
+        controller.event_log.append("MARKET COLLAPSE ending: the Final Round is complete.")
+    fr = controller.final_result or {}
+    if fr.get("game_end_bonus_awarded"):
+        # Market Leader Bonus by final Market Share place, before Corporate Secrets are compared
+        parts = [
+            f"{controller.player_meta[r['player_id']]['name']} {r['market_share_place']}"
+            f"{ {1: 'st', 2: 'nd', 3: 'rd'}.get(r['market_share_place'], 'th')} +{r['end_bonus']}"
+            for r in sorted((r for r in end_res.rankings if r.get("market_share_place") is not None),
+                            key=lambda r: (r["market_share_place"], r["player_id"]))
+        ]
+        controller.event_log.append("MARKET LEADER BONUS (Corporate Secrets by Market Share place): " + ", ".join(parts) + ".")
+    if end_res.is_shared_victory:
+        winner = " & ".join(controller.player_meta[w]["name"] for w in end_res.winner_ids) + " (shared victory)"
     else:
-        if controller.state.end_reason == EndGameReason.MARKET_COLLAPSE:
-            controller.event_log.append("MARKET COLLAPSE ending: the Final Round is complete.")
-        if getattr(end_res, "market_leader_bonus_awarded", False):
-            # v0.37.0: Market Leader Bonus by final Market Share place, before Corporate Secrets are compared
-            parts = [
-                f"{controller.player_meta[r['player_id']]['name']} {r['market_share_place']}"
-                f"{ {1: 'st', 2: 'nd', 3: 'rd'}.get(r['market_share_place'], 'th')} +{r['market_leader_bonus']}"
-                for r in sorted((r for r in end_res.rankings if r.get("market_share_place") is not None),
-                                key=lambda r: (r["market_share_place"], r["player_id"]))
-            ]
-            controller.event_log.append("MARKET LEADER BONUS (Corporate Secrets by Market Share place): " + ", ".join(parts) + ".")
-        if end_res.is_shared_victory:
-            winner = " & ".join(controller.player_meta[w]["name"] for w in end_res.winner_ids) + " (shared victory)"
-        else:
-            winner = controller.player_meta[end_res.winner_id]["name"] if end_res.winner_id is not None else "None"
-        controller.event_log.append(f"MATCH CONCLUDED! Winner: {winner}.")
+        winner = controller.player_meta[end_res.winner_id]["name"] if end_res.winner_id is not None else "None"
+    controller.event_log.append(f"MATCH CONCLUDED! Winner: {winner}.")
 
 
 def compile_drop(controller: GameController) -> Dict[str, Any]:

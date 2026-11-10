@@ -31,10 +31,12 @@ from typing import Any, Dict
 
 from sim.config import CubeColor, DieColor, ShieldColor
 from sim.entities import Die, Face
+from tests.web_legacy import use_v037_rules
 from web.game_controller import GameController
 from web.server import RogueAgentRequestHandler, create_server
 
 
+@use_v037_rules
 class TestWebAPI(unittest.TestCase):
     """Integration and Unit Test Suite for Rogue Agent Web Architecture."""
 

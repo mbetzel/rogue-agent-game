@@ -20,11 +20,13 @@ from sim.engine.phase1_boot import execute_phase_1
 from sim.engine.phase3_ops import execute_phase_3
 from sim.entities import Die, Face, create_gray_die
 from sim.bots.base import BaseBot, Phase3ActionPlan
+from tests.web_legacy import use_v037_rules
 from web.controller.core import GameController
 from web.controller.serializer import complete_round
 from web.schemas import GameStateSerializer
 
 
+@use_v037_rules
 class TestModelCPatches(unittest.TestCase):
     """Test suite for Model C: End-of-Round Cleanup Cap for Patches."""
 

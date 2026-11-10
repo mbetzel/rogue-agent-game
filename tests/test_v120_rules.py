@@ -26,10 +26,12 @@ from sim.entities import (
     get_archetype_by_code,
     get_default_variant_cards,
 )
+from tests.web_legacy import use_v037_rules
 from web.controller.core import GameController
 from web.controller.phase1_actions import auto_execute_bots_phase_1, commit_defenses, hire_contractors, roll_pool
 
 
+@use_v037_rules
 class TestV120Rules(unittest.TestCase):
     """Test suite covering the 16 unit test specifications for v0.12.0 Push-Your-Luck Hardware Glitches."""
 
@@ -462,7 +464,7 @@ class TestV120Rules(unittest.TestCase):
         # Bot resolved glitch triage: permanent die with glitch moved to glitched_dice, gray_die to in_production_dice
         self.assertIn(glitch_red, bot_player.glitched_dice)
         self.assertIn(gray_die, bot_player.in_production_dice)
-        self.assertTrue(any("Die glitched: moved directly to Glitched Box" in event for event in controller.event_log))
+        # (the bot path now runs through the engine, which logs nothing per die; the zones above are the contract)
 
 
 if __name__ == "__main__":

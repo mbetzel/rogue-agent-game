@@ -70,6 +70,7 @@ from sim.entities import (
     get_random_version_deck,
 )
 from sim.experiments import ExperimentMetrics, run_batch
+from tests.web_legacy import use_v037_rules
 from web.game_controller import GameController
 from web.server import create_server
 
@@ -592,6 +593,7 @@ class TestGroupCVersionDirectives(unittest.TestCase):
 # Group D: Web Game Controller & State Machine
 # =====================================================================
 
+@use_v037_rules
 class TestGroupDWebGameController(unittest.TestCase):
     """Unit tests for GameController initialization and variant tracking."""
 
@@ -690,6 +692,7 @@ class TestGroupDWebGameController(unittest.TestCase):
 # Group E: Web Server REST API Endpoints
 # =====================================================================
 
+@use_v037_rules
 class TestGroupEWebAPIServer(unittest.TestCase):
     """Integration tests for POST /api/game/new handling of randomize_cards."""
 

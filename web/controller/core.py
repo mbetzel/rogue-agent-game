@@ -17,6 +17,7 @@ from sim.bots import (
 from sim.config import ROUND_PHASE_NAMES, CubeColor, DieColor, EndGameReason, GameConfig, RoundPhase, ResearchTrackModel, RoundSequence, ShieldColor
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
 from sim.engine import research_tracks
+from sim.engine import phase1_roll_deploy
 from sim.engine.phase1_roll_deploy import check_and_execute_start_of_round_version_transition
 from sim.entities import (
     AbilityStatus,
@@ -62,6 +63,10 @@ from web.controller import (
 from web.controller import phase3_actions  # noqa: E402,F401
 
 
+WEB_DEFAULT_RULES_VERSION = "v0.38.0"
+WEB_RULES_VERSIONS = ("v0.38.0", "v0.37.0")
+
+
 class GameController:
     """Manages the full game lifecycle and the v0.34 six-phase turn state machine.
 
@@ -82,6 +87,7 @@ class GameController:
         self.last_income_result: Dict[int, Dict[str, Any]] = {}
         self.last_attack_result: Optional[Dict[str, Any]] = None
         self.last_pipeline_result: Dict[int, Dict[str, Any]] = {}
+        self.last_round_bonus: Optional[Dict[str, Any]] = None
         self.pending_graduation: Dict[int, Dict[str, Any]] = {}
         self.final_result: Optional[Dict[str, Any]] = None
         self.operations_turn_queue: List[int] = []
@@ -110,6 +116,24 @@ class GameController:
             raise RuntimeError("Game has not been initialized. Call new_game() first.")
         return self.engine.state
 
+    @staticmethod
+    def _build_config(num_players: int, enable_corporate_asymmetry: bool, research_track_model: Any,
+                      rules_version: Optional[str]) -> GameConfig:
+        """Web ruleset: v0.38.0 (``GameConfig.v038c()``) by default; ``"v0.37.0"`` keeps the previous rules.
+
+        An explicit legacy ``research_track_model`` (the old ``ruleset`` field) selects the pre-v0.37 plain config.
+        """
+        common = dict(num_players=num_players, enable_corporate_asymmetry=enable_corporate_asymmetry,
+                      round_sequence=RoundSequence.SIX_PHASE)  # the web is SIX_PHASE only (OQ-7)
+        if research_track_model is not None:
+            return GameConfig(research_track_model=research_track_model, **common)
+        version = str(rules_version or WEB_DEFAULT_RULES_VERSION).lower().lstrip("v")
+        if version in ("0.38.0", "0.38", "038c"):
+            return GameConfig.v038c(**common)
+        if version in ("0.37.0", "0.37"):
+            return GameConfig(research_track_model=ResearchTrackModel.V035_FIVE_LEVEL, **common)
+        raise ValueError(f"Unknown rules_version {rules_version!r}; expected 'v0.38.0' or 'v0.37.0'")
+
     def new_game(
         self,
         num_players: int = 4,
@@ -123,18 +147,13 @@ class GameController:
         white_hats: Optional[List[WhiteHat]] = None,
         enable_corporate_asymmetry: bool = True,
         research_track_model: Any = None,
+        rules_version: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Creates and initializes a new game match."""
         if not (1 <= num_players <= 4):
             raise ValueError(f"Player count must be between 1 and 4, got {num_players}")
 
-        config = GameConfig(
-            num_players=num_players,
-            enable_corporate_asymmetry=enable_corporate_asymmetry,
-            round_sequence=RoundSequence.SIX_PHASE,  # the web is SIX_PHASE only (OQ-7)
-            # v0.35.0 tracks by default; V034_THREE_LEVEL kept for comparison
-            research_track_model=research_track_model or ResearchTrackModel.V035_FIVE_LEVEL,
-        )
+        config = self._build_config(num_players, enable_corporate_asymmetry, research_track_model, rules_version)
         rng = random.Random(seed)
 
         # Default bots pool
@@ -308,6 +327,7 @@ class GameController:
         self.last_income_result = {}
         self.last_attack_result = None
         self.last_pipeline_result = {}
+        self.last_round_bonus = None
         self.pending_graduation = {}
         self.pending_breakthrough = {}
         self.final_result = None
@@ -324,6 +344,7 @@ class GameController:
         self.round_commitments = []
         self.compile_result = None
         self.attack_resolved_pids = set()
+        self.last_round_bonus = None
 
         # Start-of-round version switch execution (INV-VER-SWITCH-01)
         check_and_execute_start_of_round_version_transition(self.engine)
@@ -346,6 +367,9 @@ class GameController:
                 f"Phase 1 Corruption Locks active this round: {sorted(self.state.active_phase1_locks)}."
             )
 
+        # v0.38 round-start flags (Red Secret banked flag, per-round Blue block / slot counters)
+        phase1_roll_deploy.round_start_hooks(self.engine)
+
         # Reset per-round metadata for all players
         for i, p in enumerate(self.state.players):
             max_rerolls = research_tracks.free_rerolls_for(self.state.config, p, self.state.config.default_free_rerolls)
@@ -361,6 +385,8 @@ class GameController:
             meta["locked_reroll_indices"] = []
             meta["hired_contractors"] = 0
             meta["prodigy_active"] = False
+            meta["helix_override_used"] = False
+            meta["ace_uses"] = 0
             meta["rerolls_remaining"] = max_rerolls
             meta["max_rerolls"] = max_rerolls
             # Contractors expired at the end of Phase 4; any still held are Triage L1 Breakthrough
@@ -416,8 +442,12 @@ class GameController:
         player_id: int,
         commitments: Dict[int, ShieldColor | str],
         choice_declarations: Optional[Dict[int, int]] = None,
+        slot_cleaner_indices: Optional[List[int]] = None,
     ) -> Dict[str, Any]:
-        return phase1_actions.commit_defenses(self, player_id, commitments, choice_declarations)
+        return phase1_actions.commit_defenses(self, player_id, commitments, choice_declarations, slot_cleaner_indices)
+
+    def override_face(self, player_id: int, die_index: int, face_index: int, source: str = "helix") -> Dict[str, Any]:
+        return phase1_actions.override_face(self, player_id, die_index, face_index, source)
 
     def _auto_execute_bots_phase_1(self) -> None:
         phase1_actions.auto_execute_bots_phase_1(self)

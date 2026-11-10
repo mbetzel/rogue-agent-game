@@ -178,7 +178,20 @@ def check_and_execute_start_of_round_version_transition(engine: GameEngine) -> b
     return True
 
 
-def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]]:
+def execute_phase_1(
+    engine: GameEngine,
+    player_ids: Optional[set] = None,
+    prelude: bool = True,
+) -> List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]]:
+    """Phase 1 for every surviving player. Web hook: ``player_ids`` restricts the run to those players (the bots) and
+    ``prelude=False`` skips the once-per-round steps (version switch, locks, Pulse, round flags), which the caller
+    already ran. Defaults are the simulation behaviour, unchanged."""
+    if prelude:
+        _phase1_prelude(engine)
+    return _phase1_players(engine, player_ids, prelude)
+
+
+def _phase1_prelude(engine: GameEngine) -> None:
     # Start-of-round version switch execution (INV-VER-SWITCH-01)
     check_and_execute_start_of_round_version_transition(engine)
 
@@ -193,7 +206,11 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
         engine.state.staging_cup.get(CubeColor.BLACK, 0) + pulse_count
     )
 
-    player_commitments: List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]] = []
+    round_start_hooks(engine)
+
+
+def round_start_hooks(engine: GameEngine) -> None:
+    """v0.38 round-start flags and telemetry (Phase 1 entry)."""
     v038 = secret_faces.enabled(engine.config)
     slots_on = secret_faces.slots_enabled(engine.config)
     if v038:
@@ -203,13 +220,18 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
             if not player.is_patient_zero:
                 secret_faces.record_round_start(player)
 
+
+def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool):
+    v038 = secret_faces.enabled(engine.config)
+    slots_on = secret_faces.slots_enabled(engine.config)
+    player_commitments: List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]] = []
     staging_copy = dict(engine.state.staging_cup)
     stuck_copy = engine.state.tower.get_stuck_copy()
 
     # 2. Temp Staffing (Contractor Hiring)
     active_ver = engine.state.active_version.version_str
     for player in engine.state.players:
-        if player.is_patient_zero:
+        if player.is_patient_zero or (player_ids is not None and player.player_id not in player_ids):
             continue
 
         if not player.contractor_dice:
@@ -289,7 +311,7 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
 
     # 3. Roll Active Pool, Yahtzee Rerolls, Outputs, Commit Defenses
     for player in engine.state.players:
-        if player.is_patient_zero:
+        if player.is_patient_zero or (player_ids is not None and player.player_id not in player_ids):
             continue
 
         # Reset round star availability
@@ -639,7 +661,8 @@ def execute_phase_1(engine: GameEngine) -> List[Tuple[PlayerState, List[Die], Di
         # INCOME DELAY INVARIANT: No money, patch, or secret face outputs collected in Phase 1!
         player_commitments.append((player, list(surviving_active), new_commitments))
 
-    engine.state.active_phase1_locks.clear()
+    if prelude:
+        engine.state.active_phase1_locks.clear()
     return player_commitments
 
 

@@ -38,6 +38,26 @@ ARCHETYPE_FLAVOR: Dict[str, Dict[str, str]] = {
 }
 
 
+# v0.38.0 card texts (RULES_APPENDIX.md section D); the simulation entities still carry the v0.37 wording.
+V038_COMPANY_TEXT: Dict[str, str] = {
+    "OMNIDYNE": "Move 1 die of your choice from your Processing Box directly to your Ready for Release Zone for free "
+                "(bypassing Scanned); it banks its Secret now.",
+    "DTO": "Absorb up to 2 Corporate Secret loss from unblocked Blue Spyware for free (once per game). Any additional "
+           "Secret loss applies as normal.",
+    "HELIX": "Gain 1 extra free reroll this phase, and you may include any number of Glitch dice in your free rerolls. "
+             "In addition, turn 1 of your rolled dice to any legal non-Star face of its color (the Secret face is allowed).",
+    "PROMETHEUS": "Purchase 1 Colored Die from the Central Market at a $2 discount (minimum cost $0), OR gain an "
+                  "immediate +$2 cash payout from the bank.",
+}
+V038_WHITE_HAT_TEXT: Dict[str, str] = {
+    "PHREAKER": "When Purple ★ is rolled, move 1 die from your Processing Box to your Scanned Box, banking its Secret "
+                "now. If your Processing Box is empty, roll 1 Scanned Box die and collect its $ / 🔬 output (the die "
+                "stays in place); if Under Development is empty, collect +$1 cash.",
+    "PRODIGY": "When Purple ★ is rolled, turn 1 other rolled die in your active pool to any legal non-Star face of that "
+               "die's color other than the Secret face.",
+}
+
+
 def _patent_track_name(config: Any) -> str:
     from sim.engine import research_tracks
 
@@ -79,6 +99,10 @@ class GameStateSerializer:
             "has_cash_option": getattr(face, "has_cash_option", False),
             "has_shield_option": getattr(face, "has_shield_option", False),
             "has_patch_option": getattr(face, "has_patch_option", False),
+            # v0.38.0
+            "secrets_pending": bool(getattr(face, "secrets_pending", False)),
+            "clean_slots": int(getattr(face, "clean_slots", 0)),
+            "market_share": int(getattr(face, "market_share", 0)),
         }
 
     @staticmethod
@@ -94,6 +118,8 @@ class GameStateSerializer:
             "current_face": GameStateSerializer.serialize_face(die.current_face),
             "chosen_choice_index": getattr(die, "chosen_choice_index", None),
             "effective_face": GameStateSerializer.serialize_face(die.effective_face),
+            "secret_pending": bool(getattr(die, "secret_pending", False)),
+            "processing_entry_seq": int(getattr(die, "processing_entry_seq", 0)),
             "production_role": (
                 die.production_role.value
                 if hasattr(getattr(die, "production_role", None), "value")
@@ -243,6 +269,60 @@ class GameStateSerializer:
         """Returns player Corporate Secrets for v0.19.0 Pure Secrets Victory Scoring."""
         return player.secrets
 
+    @staticmethod
+    def _company_with_start(company: Optional[Dict[str, Any]], player: PlayerState, config: Any) -> Optional[Dict[str, Any]]:
+        """v0.38.0: every Client Company starts identically except the colour of its starting colored die."""
+        if company is not None and getattr(config, "secret_face_enabled", False) and company["code"] in V038_COMPANY_TEXT:
+            company = dict(company, description=V038_COMPANY_TEXT[company["code"]])
+        if company is not None and getattr(config, "company_starting_die_enabled", False) and getattr(player, "company_color", None):
+            company = dict(company)
+            company["starting_setup_desc"] = (
+                f"Def Cap {company['starting_defense_capacity']}, Triage {company['starting_triage_bandwidth']}, "
+                f"Release {company['starting_release_bandwidth']}; 2 Gray + Purple + {str(player.company_color).capitalize()} starting dice")
+        return company
+
+    @staticmethod
+    def _secret_yield_now(player: PlayerState, config: Any) -> Dict[str, int]:
+        from sim.engine import secret_faces
+
+        if not secret_faces.enabled(config):
+            return {}
+        return {c.value: secret_faces.secret_yield(config, player, c) for c in secret_faces.SECRET_COLORS}
+
+    @staticmethod
+    def _white_hat_text(wh: Optional[Dict[str, Any]], config: Any) -> Optional[Dict[str, Any]]:
+        if wh is not None and getattr(config, "secret_face_enabled", False) and wh["code"] in V038_WHITE_HAT_TEXT:
+            wh = dict(wh, description=V038_WHITE_HAT_TEXT[wh["code"]])
+        return wh
+
+    @staticmethod
+    def _die_face_names(config: Any) -> Dict[str, List[str]]:
+        """Printed face names per die type for the active ruleset (Market board and rules reference)."""
+        from sim.entities import create_colored_die, create_gray_die, create_white_die
+
+        out: Dict[str, List[str]] = {}
+        profile = getattr(config, "die_face_profile", "V037")
+        for color in (DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW, DieColor.PURPLE):
+            die = create_colored_die(color=color, die_id=0, face_profile=profile, reserve_cost=4)
+            out[color.value] = [("Variant (★)" if f.is_star else f.name) for f in die.faces]
+        out["gray"] = [f.name for f in create_gray_die(0, getattr(config, "gray_face_profile", "V035_D1")).faces]
+        out["white"] = [f.name for f in create_white_die(0).faces]
+        return out
+
+    @classmethod
+    def _processing_box(cls, player: PlayerState, config: Any) -> List[Dict[str, Any]]:
+        from sim.engine import secret_faces
+
+        on = secret_faces.enabled(config)
+        dice = secret_faces.triage_order(config, player, player.glitched_dice) if on else list(player.glitched_dice)
+        out = []
+        for i, d in enumerate(dice):
+            row = cls.serialize_die(d)
+            row["secret_yield"] = secret_faces.die_yield(config, player, d) if on else 0
+            row["will_triage"] = i < getattr(player, "triage_bandwidth", 2)
+            out.append(row)
+        return out
+
     @classmethod
     def serialize_player(
         cls,
@@ -275,7 +355,7 @@ class GameStateSerializer:
             d for d in (rolled_pool or [])
             if d.die_id not in unpatched_ids
         ]
-        rolled_dice = [cls.serialize_die(d) for d in active_rolled_dice]
+        rolled_dice = [cls.serialize_die(d, include_faces=True) for d in active_rolled_dice]
 
         if has_rolled:
             active_rolled_ids = {d.die_id for d in active_rolled_dice}
@@ -314,8 +394,9 @@ class GameStateSerializer:
             "name": name,
             "is_human": is_human,
             "bot_archetype": bot_archetype,
-            "company": cls.serialize_company(effective_company(getattr(player, "company", None), config)),
-            "white_hat": cls.serialize_white_hat(getattr(player, "white_hat", None)),
+            "company": cls._company_with_start(
+                cls.serialize_company(effective_company(getattr(player, "company", None), config)), player, config),
+            "white_hat": cls._white_hat_text(cls.serialize_white_hat(getattr(player, "white_hat", None)), config),
             "archetype": cls.serialize_archetype_card(getattr(player, "archetype", None)),
             "ability_v1_status": (
                 player.ability_v1_status.value
@@ -382,6 +463,12 @@ class GameStateSerializer:
             "ready_for_release_dice": [cls.serialize_die(d) for d in player.ready_for_release_dice],
             "in_production_dice": [cls.serialize_die(d) for d in player.in_production_dice],
             "glitched_dice": [cls.serialize_die(d) for d in player.glitched_dice],
+            # v0.38.0 Processing Box (same zone as ``glitched_dice``), oldest first, with each die's current yield
+            "processing_box_dice": cls._processing_box(player, config),
+            "glitched_shield_slots": int(getattr(player, "glitched_shield_slots", 0)),
+            "secret_yield_now": cls._secret_yield_now(player, config),
+            "effective_defense_capacity": max(0, getattr(player, "defense_capacity", 2) - int(getattr(player, "glitched_shield_slots", 0))),
+            "company_color": getattr(player, "company_color", None),
             "scanned_dice": [cls.serialize_die(d) for d in player.scanned_dice],
             "production_slots": {
                 "income": [cls.serialize_die(d) for d in player.income_dice],
@@ -519,6 +606,21 @@ class GameStateSerializer:
             "starting_secrets": state.config.get_starting_secrets(len(state.players)),
             # v0.37.0 Market Leader Bonus schedule for this player count ([] when disabled)
             "is_market_leader_bonus": bool(getattr(state.config, "is_market_leader_bonus", False)),
+            # v0.38.0: Secret faces / Processing Box / Glitched Shield Slots / Market Leader Bonus on Red Secret banks
+            "rules_version": "v0.38.0" if getattr(state.config, "secret_face_enabled", False) else "v0.37.0",
+            "is_secret_faces": bool(getattr(state.config, "secret_face_enabled", False)),
+            "is_glitched_slots": bool(getattr(state.config, "glitched_shield_slots_enabled", False)),
+            "is_round_leader_bonus": bool(getattr(state.config, "is_red_secret_payout", False)),
+            "round_leader_bonus_schedule": list(state.config.red_secret_payout_schedule(len(state.players))
+                                                if getattr(state.config, "is_red_secret_payout", False) else []),
+            "red_secret_banked_this_round": bool(getattr(state, "red_secret_banked_this_round", False)),
+            "last_round_bonus": controller_meta.get("last_round_bonus"),
+            "secret_yields": {
+                "red": state.config.red_secret_owner_yield if state.config.red_secret_owner_yield is not None else None,
+                "blue_base": state.config.secret_yield_blue_base, "blue_block": state.config.secret_yield_blue_block_bonus,
+                "blue_grid": state.config.secret_yield_blue_grid_l3_bonus, "blue_cap": state.config.secret_yield_blue_cap,
+                "green_base": state.config.secret_yield_green_base, "purple": state.config.secret_yield_purple,
+            },
             "market_leader_bonus_schedule": list(state.config.market_leader_bonus_schedule(len(state.players))
                                                  if hasattr(state.config, "market_leader_bonus_schedule") else []),
             # Temp Staffing & Contractors (v0.6 / v0.7)
@@ -552,6 +654,7 @@ class GameStateSerializer:
             "pending_graduation": controller_meta.get("pending_graduation", {}),
             # Market
             "market": market_serialized,
+            "die_faces": cls._die_face_names(state.config),
             # Players
             "players": players_serialized,
             # Action Dock Capabilities for the active human player

@@ -10,9 +10,11 @@ import unittest
 
 from sim.config import GameConfig
 from tests.test_v360_web import _drive
+from tests.web_legacy import use_v037_rules
 from web.game_controller import GameController
 
 
+@use_v037_rules
 class TestWebV037(unittest.TestCase):
     def test_default_is_v037(self):
         for n, sec in ((2, 9), (3, 8), (4, 9)):
@@ -61,7 +63,7 @@ class TestWebV037(unittest.TestCase):
         path = os.path.join(os.path.dirname(__file__), "..", "web", "static", "js", "components", "modals.js")
         with open(path, encoding="utf-8") as fh:
             js = fh.read()
-        self.assertIn("const mlb = !!res.market_leader_bonus_awarded;", js)
+        self.assertIn("const mlb = !!res.game_end_bonus_awarded;", js)
         self.assertIn("${mlb ? '<th style=\"padding: 6px;\">Market Leader Bonus</th>' : \"\"}", js)
         self.assertIn("secrets_before_bonus", js)
 

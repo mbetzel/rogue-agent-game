@@ -52,6 +52,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
                 kept_patches += d.current_face.patches
     avail_patches = player.patches + max(0, kept_patches - meta.get("spent_from_kept", 0))
 
+    v038 = bool(getattr(controller.state.config, "secret_face_enabled", False))
     can_roll = (controller.phase == 1 and not meta["has_rolled"] and not is_eliminated)
     already_hired = meta.get("hired_contractors", 0)
     max_contractors = controller.state.config.contractor_max_hire
@@ -176,6 +177,13 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     )
 
     rolled_pool = meta.get("rolled_pool", [])
+    in_roll = bool(controller.phase == 1 and meta["has_rolled"] and not meta["has_committed"] and not is_eliminated)
+    purple_stars = [i for i, d in enumerate(rolled_pool)
+                    if d.current_face and d.current_face.is_star and d.current_face.star_code == "PURPLE_STAR"]
+    can_override_helix = bool(in_roll and is_prodigy and not meta.get("helix_override_used")
+                              and (meta.get("prodigy_active", False) or ability_avail))
+    can_override_ace = bool(in_roll and has_signature_protocol(player, WhiteHatCode.PRODIGY, legacy_bridge_enabled(controller))
+                            and len(purple_stars) > meta.get("ace_uses", 0))
     can_prodigy = bool(
         controller.phase == 1
         and meta["has_rolled"]
@@ -183,7 +191,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         and not is_eliminated
         and is_prodigy
         and (meta.get("prodigy_active", False) or ability_avail)
-        and meta.get("rerolls_remaining", 0) > 0
+        and (meta.get("rerolls_remaining", 0) > 0 or v038)  # v0.38 Brute-Force Bypass adds a free reroll
         and len(rolled_pool) > 0
     )
     can_reroll = (
@@ -197,7 +205,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             or (is_prodigy and (meta.get("prodigy_active", False) or ability_avail) and len(rolled_pool) > 0)
         )
     )
-    can_hotfix = (controller.phase == 1 and meta["has_rolled"] and not meta["has_committed"] and avail_patches > 0 and not is_eliminated)
+    can_hotfix = (not v038 and controller.phase == 1 and meta["has_rolled"] and not meta["has_committed"] and avail_patches > 0 and not is_eliminated)
     can_commit = (controller.phase == 1 and meta["has_rolled"] and not meta["has_committed"] and not is_eliminated)
     can_compile = (controller.phase == 2 and controller.subphase == "ready_for_compile")
 
@@ -438,6 +446,10 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         # Archetype capabilities
         "can_operator": can_operator,
         "can_prodigy": can_prodigy,
+        "can_override_face_helix": can_override_helix,
+        "can_override_face_prodigy": can_override_ace,
+        "glitched_shield_slots": int(getattr(player, "glitched_shield_slots", 0)),
+        "effective_defense_capacity": max(0, player.defense_capacity - int(getattr(player, "glitched_shield_slots", 0))),
         "can_phreaker": can_phreaker,
         "can_phreaker_diagnostics": can_phreaker_diagnostics,
         "can_cipher_buy": can_cipher_buy,

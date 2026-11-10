@@ -18,9 +18,11 @@ from sim.entities import (
     create_gray_die,
     get_all_variant_cards,
 )
+from tests.web_legacy import use_v037_rules
 from web.controller.core import GameController
 
 
+@use_v037_rules
 class TestV320BlueVariants(unittest.TestCase):
     """Test suite verifying v0.32.0 Blue Variant Rebalance invariants (TEST-V320-01 through TEST-V320-13)."""
 

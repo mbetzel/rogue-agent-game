@@ -13,6 +13,7 @@ import {
   selectedRerollIndices,
   clearSelectedRerolls,
   selectedChoiceDeclarations,
+  selectedSlotCleaners,
   setCipherDiscountSelected,
   getHumanPlayerId,
 } from "./state.js";
@@ -95,13 +96,15 @@ export async function startNewGame(
   seed = null,
   randomizeCards = true,
   company = null,
-  enableCorporateAsymmetry = true
+  enableCorporateAsymmetry = true,
+  rulesVersion = null
 ) {
   const payload = {
     num_players: numPlayers,
     randomize_cards: Boolean(randomizeCards),
     enable_corporate_asymmetry: Boolean(enableCorporateAsymmetry),
   };
+  if (rulesVersion) payload.rules_version = rulesVersion;
   if (customPlayers) {
     payload.players = customPlayers;
     if (company && company !== "RANDOM" && payload.players.length > 0) {
@@ -170,11 +173,16 @@ export async function doRoll() {
   }
 }
 
-export async function doHotfix(dieIndex) {
-  const newState = await apiCall("/api/game/action/hotfix", "POST", { player_id: getHumanPlayerId(), die_index: dieIndex });
+// Phase 1: Brute-Force Bypass (source "helix") / Arbitrary Code Execution (source "prodigy")
+export async function doOverrideFace(dieIndex, faceIndex, source = "helix") {
+  const newState = await apiCall("/api/game/action/override_face", "POST", {
+    player_id: getHumanPlayerId(),
+    die_index: dieIndex,
+    face_index: faceIndex,
+    source: source,
+  });
   if (newState) {
     setState(newState);
-    delete selectedCommitments[dieIndex];
     notifyRender();
   }
 }
@@ -184,6 +192,7 @@ export async function doCommit() {
     player_id: getHumanPlayerId(),
     commitments: selectedCommitments,
     choice_declarations: selectedChoiceDeclarations,
+    slot_cleaner_indices: Array.from(selectedSlotCleaners),
   });
   if (newState) {
     setState(newState);
@@ -241,17 +250,14 @@ export async function doConfirmAttacks(glitchDieIds = [], anyShieldAllocations =
   }
 }
 
-// Phase 5: CI/CD Pipeline Shift (Scanned Graduation <= Release Bandwidth; Hotfix / Splice targets)
-export async function doChooseGraduates(graduateDieIds = [], spliceDieId = null, hotfixDieId = null) {
+// Phase 5: CI/CD Pipeline Shift (Scanned Graduation <= Release Bandwidth; Magnetic Splice target)
+export async function doChooseGraduates(graduateDieIds = [], spliceDieId = null) {
   const payload = {
     player_id: getHumanPlayerId(),
     graduate_die_ids: graduateDieIds,
   };
   if (spliceDieId !== null && spliceDieId !== undefined) {
     payload.splice_die_id = spliceDieId;
-  }
-  if (hotfixDieId !== null && hotfixDieId !== undefined) {
-    payload.hotfix_die_id = hotfixDieId;
   }
   const newState = await apiCall("/api/game/action/choose_graduates", "POST", payload);
   if (newState) {
