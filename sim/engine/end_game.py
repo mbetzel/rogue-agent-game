@@ -152,10 +152,12 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
     places = market_share_places(survivor_shares) if cfg.is_market_share and not all_patient_zero else {}
     awards = market_leader_bonus_awards(survivor_shares, bonus_schedule) if bonus_on else {}
     # RSP-1 end payout (spec §14.5.3 step 7, INV-RSP-04): after the contractor return and (telemetry-only) stranded
-    # pass, before ranking; final Market Share; skipped on a Market Collapse end or a Total Wipeout. Like the Market
+    # pass, before ranking; final Market Share; skipped on a Total Wipeout, and on a Market Collapse end
+    # unless red_secret_payout_skip_on_collapse is False (spec §14.5.10). Like the Market
     # Leader Bonus it lives in the ranking rows only (PlayerState.secrets untouched: repeat calls are pure).
     end_payout_on = (bool(getattr(cfg, "red_secret_payout_at_end", False)) and not all_patient_zero
-                     and engine.state.end_reason != EndGameReason.MARKET_COLLAPSE)
+                     and not (bool(getattr(cfg, "red_secret_payout_skip_on_collapse", True))
+                              and engine.state.end_reason == EndGameReason.MARKET_COLLAPSE))
     end_awards = {}
     if end_payout_on:
         from sim.engine import secret_faces

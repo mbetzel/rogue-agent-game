@@ -421,7 +421,9 @@ class GameConfig:
     # [TUNE] player count -> Corporate Secrets by Market Share place; the "Red Secret payout" (provisional sim label)
     # fires at most once per round at the end of Phase 5 if >= 1 Red Secret was banked that round. None/{} = off.
     red_secret_payout_by_player_count: Optional[Dict[int, Tuple[int, ...]]] = None
-    red_secret_payout_at_end: bool = False  # one more payout at game end (not on Market Collapse / Total Wipeout)
+    red_secret_payout_at_end: bool = False  # one more payout at game end (not on a Total Wipeout; see next lever)
+    # spec §14.5.10: True (default, parity) skips the end payout on a Market Collapse end too; v038c() sets False.
+    red_secret_payout_skip_on_collapse: bool = True
     triage_order_rule: str = "BOT"  # "BOT" (choose_triage_order hook) | "OLDEST_FIRST" (Processing Box entry order)
 
     def __post_init__(self) -> None:
@@ -580,8 +582,8 @@ class GameConfig:
         ``+$1 & +1 Market Share``, oldest-first Conveyor Triage. Starting Secrets 3 / 4 / 4."""
         for k, v in (("red_secret_owner_yield", 2),
                      ("red_secret_payout_by_player_count", dict(V038C_RED_SECRET_PAYOUT)),
-                     ("red_secret_payout_at_end", True), ("market_leader_bonus_by_player_count", {}),
-                     ("version_share_payout", {}),
+                     ("red_secret_payout_at_end", True), ("red_secret_payout_skip_on_collapse", False),
+                     ("market_leader_bonus_by_player_count", {}), ("version_share_payout", {}),
                      ("market_share_start_by_player_count", dict(V038C_MARKET_SHARE_START)),
                      ("die_face_profile", "V038_YELLOW_MS_F3"), ("triage_order_rule", "OLDEST_FIRST"),
                      ("starting_secrets_by_player_count", dict(V038B_STARTING_SECRETS))):

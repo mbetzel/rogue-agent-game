@@ -110,7 +110,7 @@ def p_red_bank(q: Any, state: Any) -> float:
 
 def expected_red_payouts_remaining(state: Any, pol: Optional[MarketSharePolicy] = None) -> float:
     """Discounted E_in (sum_{t<R} gamma^t x P(>= 1 Red bank)) + P_end x gamma^R (end payout; 0.5 if a Market
-    Collapse looks likely). gamma = ``pol.payout_round_discount``; gamma = 1.0 is the undiscounted R x p + P_end."""
+    Collapse looks likely and the end payout is skipped on Collapse). gamma = ``pol.payout_round_discount``; gamma = 1.0 is the undiscounted R x p + P_end."""
     if not getattr(state.config, "is_red_secret_payout", False):
         return 0.0
     gamma = (pol or DEFAULT_POLICY).payout_round_discount
@@ -123,7 +123,8 @@ def expected_red_payouts_remaining(state: Any, pol: Optional[MarketSharePolicy] 
     p_end = 0.0
     if state.config.red_secret_payout_at_end:
         low = any(int(q.market_share or 0) <= 2 for q in state.players if not q.is_patient_zero)
-        p_end = (0.5 if (low and state.config.market_collapse_enabled) else 1.0) * gamma ** r
+        skip = getattr(state.config, "red_secret_payout_skip_on_collapse", True)  # §14.5.10: paid on a Collapse too if False
+        p_end = (0.5 if (skip and low and state.config.market_collapse_enabled) else 1.0) * gamma ** r
     return e_in + p_end
 
 

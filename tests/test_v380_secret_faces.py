@@ -1121,7 +1121,7 @@ class TestRSP1(unittest.TestCase):
     # 9. end payout
     def test_rsp09_end_payout(self):
         for reason, fires in ((EndGameReason.SINGULARITY, True), (EndGameReason.PATIENT_ZERO, True),
-                              (EndGameReason.ROUND_LIMIT, True), (EndGameReason.MARKET_COLLAPSE, False)):
+                              (EndGameReason.ROUND_LIMIT, True), (EndGameReason.MARKET_COLLAPSE, True)):  # v038c: lever off (§14.5.10)
             eng = _eng_c()
             _shares(eng, (10, 7, 4))
             eng.state.end_reason = reason
@@ -1141,6 +1141,18 @@ class TestRSP1(unittest.TestCase):
         res = evaluate_end_game(eng)
         self.assertFalse(res.red_secret_payout_end_fired)
         self.assertTrue(all(r["secrets"] == r["secrets_before_bonus"] for r in res.rankings))
+        # lever on (legacy behaviour): skipped on Market Collapse, still paid on Singularity; v038b-era presets keep True
+        self.assertTrue(GameConfig().red_secret_payout_skip_on_collapse)
+        self.assertFalse(V038C().red_secret_payout_skip_on_collapse)
+        for skip, reason, fires in ((True, EndGameReason.MARKET_COLLAPSE, False), (False, EndGameReason.MARKET_COLLAPSE, True),
+                                    (True, EndGameReason.SINGULARITY, True), (False, EndGameReason.TOTAL_WIPEOUT, False)):
+            eng = _eng_c(red_secret_payout_skip_on_collapse=skip)
+            _shares(eng, (10, 7, 4))
+            if reason == EndGameReason.TOTAL_WIPEOUT:
+                for q in eng.state.players:
+                    q.is_patient_zero = True
+            eng.state.end_reason = reason
+            self.assertEqual(evaluate_end_game(eng).red_secret_payout_end_fired, fires, (skip, reason))
         # Market Collapse Final Round: the Phase 5 payout still fires
         eng = _eng_c()
         _clear(eng)
@@ -1289,6 +1301,17 @@ class TestRSP1(unittest.TestCase):
         self.assertGreater(sfp.share_value(p, st, 2), sfp.share_value(p, st, 0) + 2 * sfp.SHARE_VALUE)
         self.assertGreater(sfp.expected_bank_value(p, st, DieColor.RED, 0),
                            sfp.SECRET_VALUE * 1 * sfp.bank_probability(p, st, 0))  # payout share added
+        # §14.5.10 bot p_end: low share + Collapse on -> 0.5 x gamma^R only while the end payout skips on Collapse
+        from dataclasses import replace
+        pol = replace(msp.DEFAULT_POLICY, payout_round_discount=1.0)
+        _shares(eng, (1, 9, 8))
+        for skip in (True, False):
+            st.config.red_secret_payout_skip_on_collapse = skip
+            st.config.red_secret_payout_at_end = False
+            base = msp.expected_red_payouts_remaining(st, pol)
+            st.config.red_secret_payout_at_end = True
+            self.assertAlmostEqual(msp.expected_red_payouts_remaining(st, pol) - base, 0.5 if skip else 1.0)
+        _shares(eng, (8, 9, 4))
         b = _engine()  # v038 / v038b: payout valuation inert
         self.assertFalse(msp.payout_active(b.state.players[0], b.state, msp.DEFAULT_POLICY))
         self.assertEqual(msp.expected_red_payouts_remaining(b.state), 0.0)
@@ -1349,7 +1372,7 @@ class TestRSP1(unittest.TestCase):
                     for pid, place in rec["places"].items():
                         self.assertEqual(rec["gains"][pid], sched[place - 1] if place <= len(sched) else 0)
                 self.assertEqual(res.red_secret_payout_end_fired,  # INV-RSP-04
-                                 not res.is_total_wipeout and res.end_reason != EndGameReason.MARKET_COLLAPSE)
+                                 not res.is_total_wipeout)  # v038c: also on Market Collapse (§14.5.10)
                 self.assertEqual(res.version_comparisons, [])  # INV-RSP-05
                 for r in res.rankings:
                     self.assertEqual(r["market_leader_bonus"], 0)
