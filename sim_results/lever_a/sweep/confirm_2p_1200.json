@@ -1,0 +1,362 @@
+{
+ "players": 2,
+ "games": 1200,
+ "cells": [
+  {
+   "games": 1200,
+   "errors": 0,
+   "adaptive_balanced_win_pct": 39.0625,
+   "adaptive_balanced_win_ci95": [
+    34.80110218321234,
+    43.497580691513605
+   ],
+   "win_pct": {
+    "AccelerationistBot": 57.5,
+    "AdaptiveBalancedBot": 39.0625,
+    "RecklessSaboteurBot": 41.666666666666664,
+    "SecOpsTurtleBot": 52.8125,
+    "VentureGreedBot": 58.958333333333336
+   },
+   "end_trigger_pct": {
+    "market_collapse": 64.08333333333333,
+    "patient_zero": 4.0,
+    "singularity": 34.25,
+    "total_wipeout": 0.6666666666666666
+   },
+   "total_wipeout_pct": 0.6666666666666666,
+   "avg_rounds": 8.973333333333333,
+   "window_decisions": {
+    "phase4": {
+     "none": 3796
+    },
+    "prometheus": {
+     "none": 8326
+    },
+    "market": {
+     "none": 3869
+    },
+    "research": {
+     "none": 4163
+    },
+    "nudge": {
+     "none": 4163
+    }
+   },
+   "ab_secrets_lost_blue": 3.89375,
+   "all_secrets_lost_blue": 3.6216666666666666,
+   "max_other_win": 58.958333333333336,
+   "cell": "off",
+   "bot_pr_push": false,
+   "params": {
+    "push_min_share": 6,
+    "push_low_gap": 7,
+    "push_top_gap": 3,
+    "push_max_version": 1,
+    "push_secrets_band": 2,
+    "push_pr_cap": 1,
+    "push_max_research": 2,
+    "dump_max_share": 5,
+    "dump_top_gap": 2,
+    "dump_threat_margin": 2,
+    "dump_condition": "share_only",
+    "push_blue_slack": 0
+   },
+   "dump_condition": "share_only",
+   "scope": "all",
+   "wall_s": 1.0522055350011215
+  },
+  {
+   "games": 1200,
+   "errors": 0,
+   "adaptive_balanced_win_pct": 51.25,
+   "adaptive_balanced_win_ci95": [
+    46.7861821382816,
+    55.693968390321125
+   ],
+   "win_pct": {
+    "AccelerationistBot": 57.5,
+    "AdaptiveBalancedBot": 51.25,
+    "RecklessSaboteurBot": 37.916666666666664,
+    "SecOpsTurtleBot": 44.375,
+    "VentureGreedBot": 58.958333333333336
+   },
+   "end_trigger_pct": {
+    "market_collapse": 64.33333333333333,
+    "patient_zero": 3.6666666666666665,
+    "singularity": 34.166666666666664,
+    "total_wipeout": 0.5
+   },
+   "total_wipeout_pct": 0.5,
+   "avg_rounds": 8.975833333333334,
+   "window_decisions": {
+    "phase4": {
+     "push": 2916,
+     "none": 702,
+     "dump": 191
+    },
+    "prometheus": {
+     "push": 6064,
+     "none": 962,
+     "dump": 1314
+    },
+    "market": {
+     "push": 3032,
+     "none": 470,
+     "dump": 370
+    },
+    "research": {
+     "push": 3032,
+     "none": 481,
+     "dump": 657
+    },
+    "nudge": {
+     "push": 3032,
+     "none": 481,
+     "dump": 657
+    }
+   },
+   "ab_secrets_lost_blue": 3.277083333333333,
+   "all_secrets_lost_blue": 3.49,
+   "max_other_win": 58.958333333333336,
+   "cell": "on",
+   "bot_pr_push": true,
+   "params": {
+    "push_min_share": 6,
+    "push_low_gap": 7,
+    "push_top_gap": 3,
+    "push_max_version": 1,
+    "push_secrets_band": 2,
+    "push_pr_cap": 1,
+    "push_max_research": 2,
+    "dump_max_share": 5,
+    "dump_top_gap": 2,
+    "dump_threat_margin": 2,
+    "dump_condition": "share_only",
+    "push_blue_slack": 0
+   },
+   "dump_condition": "share_only",
+   "scope": "all",
+   "wall_s": 0.9850862319581211
+  },
+  {
+   "games": 1200,
+   "errors": 0,
+   "adaptive_balanced_win_pct": 51.041666666666664,
+   "adaptive_balanced_win_ci95": [
+    46.57908077754813,
+    55.487711329620836
+   ],
+   "win_pct": {
+    "AccelerationistBot": 57.5,
+    "AdaptiveBalancedBot": 51.041666666666664,
+    "RecklessSaboteurBot": 38.125,
+    "SecOpsTurtleBot": 44.375,
+    "VentureGreedBot": 58.958333333333336
+   },
+   "end_trigger_pct": {
+    "market_collapse": 64.41666666666667,
+    "patient_zero": 3.6666666666666665,
+    "singularity": 34.083333333333336,
+    "total_wipeout": 0.5
+   },
+   "total_wipeout_pct": 0.5,
+   "avg_rounds": 8.975833333333334,
+   "window_decisions": {
+    "phase4": {
+     "push": 2938,
+     "none": 681,
+     "dump": 191
+    },
+    "prometheus": {
+     "push": 6138,
+     "none": 890,
+     "dump": 1314
+    },
+    "market": {
+     "push": 3069,
+     "none": 434,
+     "dump": 369
+    },
+    "research": {
+     "push": 3069,
+     "none": 445,
+     "dump": 657
+    },
+    "nudge": {
+     "push": 3069,
+     "none": 445,
+     "dump": 657
+    }
+   },
+   "ab_secrets_lost_blue": 3.28125,
+   "all_secrets_lost_blue": 3.4904166666666665,
+   "max_other_win": 58.958333333333336,
+   "cell": "push_top_gap=4",
+   "bot_pr_push": true,
+   "params": {
+    "push_min_share": 6,
+    "push_low_gap": 7,
+    "push_top_gap": 4,
+    "push_max_version": 1,
+    "push_secrets_band": 2,
+    "push_pr_cap": 1,
+    "push_max_research": 2,
+    "dump_max_share": 5,
+    "dump_top_gap": 2,
+    "dump_threat_margin": 2,
+    "dump_condition": "share_only",
+    "push_blue_slack": 0
+   },
+   "dump_condition": "share_only",
+   "scope": "all",
+   "wall_s": 0.9860920330975205
+  },
+  {
+   "games": 1200,
+   "errors": 0,
+   "adaptive_balanced_win_pct": 51.458333333333336,
+   "adaptive_balanced_win_ci95": [
+    46.99336030515549,
+    55.90014864488104
+   ],
+   "win_pct": {
+    "AccelerationistBot": 57.5,
+    "AdaptiveBalancedBot": 51.458333333333336,
+    "RecklessSaboteurBot": 37.708333333333336,
+    "SecOpsTurtleBot": 44.375,
+    "VentureGreedBot": 58.958333333333336
+   },
+   "end_trigger_pct": {
+    "market_collapse": 64.33333333333333,
+    "patient_zero": 3.6666666666666665,
+    "singularity": 34.166666666666664,
+    "total_wipeout": 0.5
+   },
+   "total_wipeout_pct": 0.5,
+   "avg_rounds": 8.975,
+   "window_decisions": {
+    "phase4": {
+     "push": 2973,
+     "none": 643,
+     "dump": 191
+    },
+    "prometheus": {
+     "push": 6190,
+     "none": 834,
+     "dump": 1314
+    },
+    "market": {
+     "push": 3095,
+     "none": 406,
+     "dump": 370
+    },
+    "research": {
+     "push": 3095,
+     "none": 417,
+     "dump": 657
+    },
+    "nudge": {
+     "push": 3095,
+     "none": 417,
+     "dump": 657
+    }
+   },
+   "ab_secrets_lost_blue": 3.279166666666667,
+   "all_secrets_lost_blue": 3.4891666666666667,
+   "max_other_win": 58.958333333333336,
+   "cell": "push_secrets_band=3",
+   "bot_pr_push": true,
+   "params": {
+    "push_min_share": 6,
+    "push_low_gap": 7,
+    "push_top_gap": 3,
+    "push_max_version": 1,
+    "push_secrets_band": 3,
+    "push_pr_cap": 1,
+    "push_max_research": 2,
+    "dump_max_share": 5,
+    "dump_top_gap": 2,
+    "dump_threat_margin": 2,
+    "dump_condition": "share_only",
+    "push_blue_slack": 0
+   },
+   "dump_condition": "share_only",
+   "scope": "all",
+   "wall_s": 1.035273234010674
+  },
+  {
+   "games": 1200,
+   "errors": 0,
+   "adaptive_balanced_win_pct": 51.875,
+   "adaptive_balanced_win_ci95": [
+    47.40794716459186,
+    56.31227862831227
+   ],
+   "win_pct": {
+    "AccelerationistBot": 57.5,
+    "AdaptiveBalancedBot": 51.875,
+    "RecklessSaboteurBot": 37.5,
+    "SecOpsTurtleBot": 44.166666666666664,
+    "VentureGreedBot": 58.958333333333336
+   },
+   "end_trigger_pct": {
+    "market_collapse": 64.08333333333333,
+    "patient_zero": 3.75,
+    "singularity": 34.333333333333336,
+    "total_wipeout": 0.5833333333333334
+   },
+   "total_wipeout_pct": 0.5833333333333334,
+   "avg_rounds": 8.9875,
+   "window_decisions": {
+    "phase4": {
+     "push": 2917,
+     "none": 760,
+     "dump": 142
+    },
+    "prometheus": {
+     "push": 6064,
+     "none": 1176,
+     "dump": 1122
+    },
+    "market": {
+     "push": 3032,
+     "none": 577,
+     "dump": 277
+    },
+    "research": {
+     "push": 3032,
+     "none": 588,
+     "dump": 561
+    },
+    "nudge": {
+     "push": 3032,
+     "none": 588,
+     "dump": 561
+    }
+   },
+   "ab_secrets_lost_blue": 3.4208333333333334,
+   "all_secrets_lost_blue": 3.5320833333333335,
+   "max_other_win": 58.958333333333336,
+   "cell": "dump_max_share=4",
+   "bot_pr_push": true,
+   "params": {
+    "push_min_share": 6,
+    "push_low_gap": 7,
+    "push_top_gap": 3,
+    "push_max_version": 1,
+    "push_secrets_band": 2,
+    "push_pr_cap": 1,
+    "push_max_research": 2,
+    "dump_max_share": 4,
+    "dump_top_gap": 2,
+    "dump_threat_margin": 2,
+    "dump_condition": "share_only",
+    "push_blue_slack": 0
+   },
+   "dump_condition": "share_only",
+   "scope": "all",
+   "wall_s": 1.033259035088122
+  }
+ ],
+ "skipped": []
+}

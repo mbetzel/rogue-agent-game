@@ -1,0 +1,362 @@
+{
+ "players": 3,
+ "games": 1200,
+ "cells": [
+  {
+   "games": 1200,
+   "errors": 0,
+   "adaptive_balanced_win_pct": 17.15277777777778,
+   "adaptive_balanced_win_ci95": [
+    14.575325568156652,
+    20.078886071516997
+   ],
+   "win_pct": {
+    "AccelerationistBot": 43.05555555555556,
+    "AdaptiveBalancedBot": 17.15277777777778,
+    "RecklessSaboteurBot": 16.38888888888889,
+    "SecOpsTurtleBot": 38.81944444444444,
+    "VentureGreedBot": 51.25
+   },
+   "end_trigger_pct": {
+    "market_collapse": 62.75,
+    "patient_zero": 9.416666666666666,
+    "singularity": 34.166666666666664,
+    "total_wipeout": 0.08333333333333333
+   },
+   "total_wipeout_pct": 0.08333333333333333,
+   "avg_rounds": 8.994166666666667,
+   "window_decisions": {
+    "phase4": {
+     "none": 5634
+    },
+    "prometheus": {
+     "none": 12416
+    },
+    "market": {
+     "none": 5776
+    },
+    "research": {
+     "none": 6208
+    },
+    "nudge": {
+     "none": 6208
+    }
+   },
+   "ab_secrets_lost_blue": 3.529166666666667,
+   "all_secrets_lost_blue": 3.403611111111111,
+   "max_other_win": 51.25,
+   "cell": "off",
+   "bot_pr_push": false,
+   "params": {
+    "push_min_share": 6,
+    "push_low_gap": 7,
+    "push_top_gap": 3,
+    "push_max_version": 1,
+    "push_secrets_band": 2,
+    "push_pr_cap": 1,
+    "push_max_research": 2,
+    "dump_max_share": 5,
+    "dump_top_gap": 2,
+    "dump_threat_margin": 2,
+    "dump_condition": "share_only",
+    "push_blue_slack": 0
+   },
+   "dump_condition": "share_only",
+   "scope": "all",
+   "wall_s": 1.3606819449923933
+  },
+  {
+   "games": 1200,
+   "errors": 0,
+   "adaptive_balanced_win_pct": 26.458333333333332,
+   "adaptive_balanced_win_ci95": [
+    23.36731724630251,
+    29.799231899256405
+   ],
+   "win_pct": {
+    "AccelerationistBot": 39.861111111111114,
+    "AdaptiveBalancedBot": 26.458333333333332,
+    "RecklessSaboteurBot": 14.791666666666666,
+    "SecOpsTurtleBot": 36.80555555555556,
+    "VentureGreedBot": 48.75
+   },
+   "end_trigger_pct": {
+    "market_collapse": 62.583333333333336,
+    "patient_zero": 9.083333333333334,
+    "singularity": 33.666666666666664,
+    "total_wipeout": 0.3333333333333333
+   },
+   "total_wipeout_pct": 0.3333333333333333,
+   "avg_rounds": 8.995,
+   "window_decisions": {
+    "phase4": {
+     "push": 4447,
+     "none": 966,
+     "dump": 213
+    },
+    "prometheus": {
+     "push": 9292,
+     "none": 1432,
+     "dump": 1714
+    },
+    "market": {
+     "push": 4644,
+     "none": 707,
+     "dump": 426
+    },
+    "research": {
+     "push": 4646,
+     "none": 716,
+     "dump": 857
+    },
+    "nudge": {
+     "push": 4646,
+     "none": 716,
+     "dump": 857
+    }
+   },
+   "ab_secrets_lost_blue": 3.129166666666667,
+   "all_secrets_lost_blue": 3.313888888888889,
+   "max_other_win": 48.75,
+   "cell": "on",
+   "bot_pr_push": true,
+   "params": {
+    "push_min_share": 6,
+    "push_low_gap": 7,
+    "push_top_gap": 3,
+    "push_max_version": 1,
+    "push_secrets_band": 2,
+    "push_pr_cap": 1,
+    "push_max_research": 2,
+    "dump_max_share": 5,
+    "dump_top_gap": 2,
+    "dump_threat_margin": 2,
+    "dump_condition": "share_only",
+    "push_blue_slack": 0
+   },
+   "dump_condition": "share_only",
+   "scope": "all",
+   "wall_s": 1.3057964919134974
+  },
+  {
+   "games": 1200,
+   "errors": 0,
+   "adaptive_balanced_win_pct": 26.458333333333332,
+   "adaptive_balanced_win_ci95": [
+    23.36731724630251,
+    29.799231899256405
+   ],
+   "win_pct": {
+    "AccelerationistBot": 39.861111111111114,
+    "AdaptiveBalancedBot": 26.458333333333332,
+    "RecklessSaboteurBot": 14.791666666666666,
+    "SecOpsTurtleBot": 36.80555555555556,
+    "VentureGreedBot": 48.75
+   },
+   "end_trigger_pct": {
+    "market_collapse": 62.583333333333336,
+    "patient_zero": 9.083333333333334,
+    "singularity": 33.666666666666664,
+    "total_wipeout": 0.3333333333333333
+   },
+   "total_wipeout_pct": 0.3333333333333333,
+   "avg_rounds": 8.995,
+   "window_decisions": {
+    "phase4": {
+     "push": 4448,
+     "none": 966,
+     "dump": 213
+    },
+    "prometheus": {
+     "push": 9312,
+     "none": 1412,
+     "dump": 1714
+    },
+    "market": {
+     "push": 4654,
+     "none": 697,
+     "dump": 426
+    },
+    "research": {
+     "push": 4656,
+     "none": 706,
+     "dump": 857
+    },
+    "nudge": {
+     "push": 4656,
+     "none": 706,
+     "dump": 857
+    }
+   },
+   "ab_secrets_lost_blue": 3.1277777777777778,
+   "all_secrets_lost_blue": 3.3136111111111113,
+   "max_other_win": 48.75,
+   "cell": "push_top_gap=4",
+   "bot_pr_push": true,
+   "params": {
+    "push_min_share": 6,
+    "push_low_gap": 7,
+    "push_top_gap": 4,
+    "push_max_version": 1,
+    "push_secrets_band": 2,
+    "push_pr_cap": 1,
+    "push_max_research": 2,
+    "dump_max_share": 5,
+    "dump_top_gap": 2,
+    "dump_threat_margin": 2,
+    "dump_condition": "share_only",
+    "push_blue_slack": 0
+   },
+   "dump_condition": "share_only",
+   "scope": "all",
+   "wall_s": 1.3563594639999792
+  },
+  {
+   "games": 1200,
+   "errors": 0,
+   "adaptive_balanced_win_pct": 26.458333333333332,
+   "adaptive_balanced_win_ci95": [
+    23.36731724630251,
+    29.799231899256405
+   ],
+   "win_pct": {
+    "AccelerationistBot": 39.861111111111114,
+    "AdaptiveBalancedBot": 26.458333333333332,
+    "RecklessSaboteurBot": 14.791666666666666,
+    "SecOpsTurtleBot": 36.666666666666664,
+    "VentureGreedBot": 48.888888888888886
+   },
+   "end_trigger_pct": {
+    "market_collapse": 62.416666666666664,
+    "patient_zero": 9.083333333333334,
+    "singularity": 33.75,
+    "total_wipeout": 0.3333333333333333
+   },
+   "total_wipeout_pct": 0.3333333333333333,
+   "avg_rounds": 8.994166666666667,
+   "window_decisions": {
+    "phase4": {
+     "push": 4523,
+     "none": 887,
+     "dump": 211
+    },
+    "prometheus": {
+     "push": 9554,
+     "none": 1168,
+     "dump": 1708
+    },
+    "market": {
+     "push": 4775,
+     "none": 575,
+     "dump": 426
+    },
+    "research": {
+     "push": 4777,
+     "none": 584,
+     "dump": 854
+    },
+    "nudge": {
+     "push": 4777,
+     "none": 584,
+     "dump": 854
+    }
+   },
+   "ab_secrets_lost_blue": 3.136111111111111,
+   "all_secrets_lost_blue": 3.313888888888889,
+   "max_other_win": 48.888888888888886,
+   "cell": "push_secrets_band=3",
+   "bot_pr_push": true,
+   "params": {
+    "push_min_share": 6,
+    "push_low_gap": 7,
+    "push_top_gap": 3,
+    "push_max_version": 1,
+    "push_secrets_band": 3,
+    "push_pr_cap": 1,
+    "push_max_research": 2,
+    "dump_max_share": 5,
+    "dump_top_gap": 2,
+    "dump_threat_margin": 2,
+    "dump_condition": "share_only",
+    "push_blue_slack": 0
+   },
+   "dump_condition": "share_only",
+   "scope": "all",
+   "wall_s": 1.3415542650036514
+  },
+  {
+   "games": 1200,
+   "errors": 0,
+   "adaptive_balanced_win_pct": 25.76388888888889,
+   "adaptive_balanced_win_ci95": [
+    22.70390674426727,
+    29.081124676971843
+   ],
+   "win_pct": {
+    "AccelerationistBot": 40.416666666666664,
+    "AdaptiveBalancedBot": 25.76388888888889,
+    "RecklessSaboteurBot": 14.791666666666666,
+    "SecOpsTurtleBot": 36.666666666666664,
+    "VentureGreedBot": 49.02777777777778
+   },
+   "end_trigger_pct": {
+    "market_collapse": 62.333333333333336,
+    "patient_zero": 9.166666666666666,
+    "singularity": 33.916666666666664,
+    "total_wipeout": 0.3333333333333333
+   },
+   "total_wipeout_pct": 0.3333333333333333,
+   "avg_rounds": 9.005,
+   "window_decisions": {
+    "phase4": {
+     "push": 4447,
+     "none": 1043,
+     "dump": 143
+    },
+    "prometheus": {
+     "push": 9292,
+     "none": 1734,
+     "dump": 1430
+    },
+    "market": {
+     "push": 4644,
+     "none": 845,
+     "dump": 300
+    },
+    "research": {
+     "push": 4646,
+     "none": 867,
+     "dump": 715
+    },
+    "nudge": {
+     "push": 4646,
+     "none": 867,
+     "dump": 715
+    }
+   },
+   "ab_secrets_lost_blue": 3.2736111111111112,
+   "all_secrets_lost_blue": 3.3533333333333335,
+   "max_other_win": 49.02777777777778,
+   "cell": "dump_max_share=4",
+   "bot_pr_push": true,
+   "params": {
+    "push_min_share": 6,
+    "push_low_gap": 7,
+    "push_top_gap": 3,
+    "push_max_version": 1,
+    "push_secrets_band": 2,
+    "push_pr_cap": 1,
+    "push_max_research": 2,
+    "dump_max_share": 4,
+    "dump_top_gap": 2,
+    "dump_threat_margin": 2,
+    "dump_condition": "share_only",
+    "push_blue_slack": 0
+   },
+   "dump_condition": "share_only",
+   "scope": "all",
+   "wall_s": 1.360734962974675
+  }
+ ],
+ "skipped": []
+}

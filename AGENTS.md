@@ -12,16 +12,17 @@ Follow this workflow across sessions:
    - If a new term appears necessary, **ask and confirm with the user first** before adding it to the glossary and introducing the terminology into the codebase.
 4. **Enforce Multi-Agent SDLC (scaled to the change):** For **rule or mechanics changes** (anything touching `RULES.md`, `[TUNE]` baselines, or balance), once the pre-SDLC analysis and plan are signed off, route work through the subagents in `.claude/agents/` (`principal-engineer` → `senior-engineer` ↔ `staff-engineer` → `product-owner` ↔ `game-designer` + `graphic-designer`). Keep strict separation between design, implementation, review, scenario runs, balance validation and asset design.
    - **Lightweight path:** sim bugfixes with no rules change, script and tooling tweaks, doc syncs and glossary checks can be done directly in the main session, with no subagent chain.
-   - Hand each subagent a short brief (goal, files, cited sections) instead of letting it re-derive context, and ask for a compact handoff back.
+   - **Antigravity Subagent Mapping:** In Antigravity, register each role on demand via `define_subagent` using the prompt in `.claude/agents/<role>.md` (set `EnableWriteTools: false` for `staff-engineer`; `EnableWriteTools: true` for roles that write specs, code, reports, or PnP assets) and launch via `invoke_subagent` (`Model: "pro"` for `game-designer`, `principal-engineer`, `staff-engineer`; `Model: "inherit"` or `"flash"` for `senior-engineer`, `product-owner`, `graphic-designer`).
+   - Hand each subagent a short brief (goal, files, cited sections) instead of letting it re-derive context, and ask for a compact handoff back (≤ 300 words).
 5. **Keep Documentation Synchronized:**
    - Update `RULES.md` whenever game mechanics or `[TUNE]` baselines change.
    - Update `PLAN.md` (status checkboxes & upcoming experiments) before and after implementation milestones.
    - Record Monte Carlo experiment outputs, balance takeaways, and rule iteration rationale in `FINDINGS.md`. When it grows past ~8 sections, move the oldest into `docs/archive/` and keep the numbering. Move completed `PLAN.md` phases into `docs/archive/PLAN_completed_phases.md`.
 
 ## Context Budget
-- Read large docs by section: `grep -n '^## '` first, then read only the line range you need. Never read a whole `RULES.md` / `FINDINGS.md` just to check one fact.
+- Read large docs by section: find headings first (or `grep -n '^## '`), then use `read_file` with `StartLine` and `EndLine` for only the line range you need. Never read a whole `RULES.md` / `FINDINGS.md` just to check one fact, and never spawn a shell command just to read or edit files.
 - Don't open `docs/archive/**` unless a task cites a specific archived section (e.g. `FINDINGS.md §31` → `docs/archive/FINDINGS_s01-s35.md`).
-- Don't read raw sweep JSON (`sim_results/**/*.json`), `tests/fixtures/**` or PDFs. Use script summaries and pass `-q`-style quiet flags to tests and sweeps.
+- Don't read raw sweep JSON (`sim_results/**/*.json`), `tests/fixtures/**`, `web/node_modules/**`, or PDFs (`pnp/**/*.pdf`). Use script summaries and pass `-q`-style quiet flags to tests and sweeps.
 - Use memory notes for the current phase status instead of re-reading history.
 
 ## Core Design Pillars

@@ -1,0 +1,16 @@
+{
+  "context-budget-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "read_file|view_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python check_read_budget.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
