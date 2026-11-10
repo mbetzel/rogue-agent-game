@@ -6,8 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python check_read_budget.py",
-            "timeout": 5
+            "command": "bash -c \"if [ -e /etc/os-release ]; then exec python3 check_read_budget.py; else exec wsl -e python3 check_read_budget.py; fi\"",
+            "timeout": 10
           }
         ]
       }

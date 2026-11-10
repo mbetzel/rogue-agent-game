@@ -29,7 +29,7 @@ _STAR_NOTES = {
     "R2_MKT": "Ad Campaign (Phase 6: pay $2 for +1 Market Share)",
     "R3_MKT": "Customer Poaching (take 1 Market Share)",
     "G1": "Self-Healing Kernel (+1 🔬)",
-    "G2": "Universal Sandbox (+1 🔬)",
+    "G2": "Universal Sandbox (+2 🔬)",
     "G3": "Live Reboot (+$1, +2 🔬)",
 }
 
@@ -81,6 +81,21 @@ def _die_income_row(state: GameState, player: PlayerState, die: Die) -> Optional
         elif code == "R1":
             card = (getattr(state, "variant_cards", None) or {}).get(DieColor.RED)
             star_note = f"{card.name} (+$2)" if card is not None and card.code == "R1" else _STAR_NOTES.get(code)
+        elif code == "G2":
+            is_v038 = (
+                getattr(state.config, "variant_profile", None) == "V038_DRAFT"
+                or getattr(state.config, "glitched_shield_slots_enabled", False)
+            )
+            if is_v038:
+                g = getattr(player, "glitched_shield_slots", 0)
+                bonus = g * getattr(state.config, "g2_glitch_bonus", 1)
+                research = getattr(state.config, "g2_base_research", eff.patches) + bonus
+                if g > 0:
+                    star_note = f"Universal Sandbox (+{research} 🔬, incl. +{bonus} from {g} glitched slots)"
+                else:
+                    star_note = f"Universal Sandbox (+{research} 🔬)"
+            else:
+                star_note = f"Universal Sandbox (+{research} 🔬)"
         else:
             star_note = _STAR_NOTES.get(code)
     role = getattr(die, "production_role", None)

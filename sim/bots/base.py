@@ -561,6 +561,8 @@ class BaseBot:
                     score += 4
                 elif ms_output and sc in ("R2_MKT", "R3_MKT"):
                     score += 2  # v0.36.0: worth ~1 Market Share
+                elif sc == "G2":
+                    score += 2 * getattr(player, "glitched_shield_slots", 0)
             return score
 
         # 1. Color-specific shields: allocate needed absorption to White/high-value shields first

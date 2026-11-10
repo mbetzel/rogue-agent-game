@@ -121,6 +121,11 @@ def face_value(player: "PlayerState", face: Optional["Face"], state: Optional["G
         v += SHIELD_VALUE * face.block_amount
     if face.is_star:
         v += 1.5
+        if getattr(face, "star_code", None) == "G2":
+            if state is not None and getattr(state.config, "variant_profile", None) == "V038_DRAFT":
+                glitches = getattr(player, "glitched_shield_slots", 0)
+                multiplier = getattr(state.config, "g2_glitch_bonus", 1)
+                v += RESEARCH_VALUE * glitches * multiplier
     return v
 
 

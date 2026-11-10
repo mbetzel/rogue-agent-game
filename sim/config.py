@@ -425,6 +425,9 @@ class GameConfig:
     # spec §14.5.10: True (default, parity) skips the end payout on a Market Collapse end too; v038c() sets False.
     red_secret_payout_skip_on_collapse: bool = True
     triage_order_rule: str = "BOT"  # "BOT" (choose_triage_order hook) | "OLDEST_FIRST" (Processing Box entry order)
+    # --- Green G2 Universal Sandbox [TUNE] (Phase 50) ---
+    g2_base_research: int = 2   # Base Phase 3 research output on G2 Universal Sandbox face
+    g2_glitch_bonus: int = 1    # Phase 3 research bonus per active Glitched Shield Slot
 
     def __post_init__(self) -> None:
         if not isinstance(self.bot_pr_push_params, PrPushParams):
@@ -637,6 +640,10 @@ class GameConfig:
                      "secret_yield_blue_cap", "secret_yield_green_base", "secret_yield_purple", "slot_graduation_clear"):
             if int(getattr(self, name)) < 0:
                 raise ValueError(f"{name} must be >= 0")
+        for name in ("g2_base_research", "g2_glitch_bonus"):
+            val = getattr(self, name)
+            if isinstance(val, bool) or not isinstance(val, int) or val < 0:
+                raise ValueError(f"{name} must be an int >= 0, got {val!r}")
         if self.secret_yield_blue_cap < self.secret_yield_blue_base:
             raise ValueError("secret_yield_blue_cap must be >= secret_yield_blue_base")
         if self.company_starting_die_enabled:

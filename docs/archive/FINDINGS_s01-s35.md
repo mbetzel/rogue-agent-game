@@ -1,6 +1,6 @@
-# FINDINGS Archive — Sections §1–§35
+# FINDINGS Archive — Sections §1–§36
 
-Archived from `FINDINGS.md` on 2026-11-09 to keep the live file small. Section numbers are unchanged, so `FINDINGS.md §N` references for N ≤ 35 resolve here.
+Archived from `FINDINGS.md` on 2026-11-09/10 to keep the live file small. Section numbers are unchanged, so `FINDINGS.md §N` references for N ≤ 36 resolve here.
 
 ## 1. Executive Summary & Active Baseline (`v0.13.0`)
 
@@ -1928,3 +1928,41 @@ The six-phase compiler (`sim/engine/phase2_compiler.py`) stopped spillover at v2
 - **Frequency (v0.35 sweep setup, `GameConfig()` V035, seeds `42 + n*100000 + idx`, 1,000 games per pod):** **0 / 1,000** occurrences in 2P, 3P and 4P each. All 3,000 game fingerprints (rounds, end reason, winners, full rankings) match the pre-fix engine. Across the 26,223 compiles, at most 4 Black cubes exited in one compile and at most 3 spilled past a filled track. Filling v2.0 by spillover needs ≥ 6 in one compile. In every v1.0 compile, the Black cubes in the Staging Cup and tower were at least 3 short of that, so the case is possible under the rules but practically unreachable under current tuning. The fix only matters for future levers that raise Black cube volume.
 - **Decision (User, 2026-11-06):** keep the engine fix; no RULES.md cap or clarification for this hypothetical.
 - **v0.36 coordination:** the spec's §4.3 "known limitation / do not fix" note no longer applies. Its spillover-branch comparison hook falls exactly where the new non-final-fill arm runs (`spill_idx == next_ver.track_capacity` on a non-final target), and `double_version_fill_events` matches `multi_version_spill_events`.
+
+## 36. Pre-SDLC Exploration: Blue Defense Agency (no rules change)
+
+Question (User, 2026-11-06): blocking Blue always comes first, so defense "plays itself", and v0.36 has no repeatable Secrets engine. Probes (hooks only, not rules code; `GameConfig.v036`, current bot roster, seeds `42 + n*100000 + idx`, 600 games per pod): `scripts/explore_v360_blue_pressure_probe.py`, `scripts/explore_v360_topoff_probe.py`, `scripts/explore_v360_blue_block2_probe.py`.
+
+**Diagnosis (baseline, per seat per game):**
+
+| | 2P | 3P | 4P |
+|---|---|---|---|
+| Block rate Red / Blue / Green | 15 / 67 / 12% | 15 / 68 / 12% | 15 / 67 / 12% |
+| Any shields spent on Blue | 63% | 63% | 62% |
+| Contested Any splits (Blue covered first) | 66% of attack rounds (94%) | 66% (94%) | 67% (94%) |
+| Start → final Secrets; lost to Blue | 7 → 3.12; 3.96 | 7 → 3.29; 3.79 | 8 → 4.17; 3.94 |
+| All other Secret gains minus Corruption losses | +0.08 | +0.07 | +0.11 |
+
+1. **Final Secrets ≈ starting Secrets − Blue losses.** Blue defense is effectively the score. A Blue cube costs a permanent VP; Red and Green cost recoverable resources, so Blue-first is always correct. (Bots fill Blue first by policy, but the scoring math backs it.)
+2. Patient Zero seats lose 7.5–8.7 Secrets to Blue vs 3.1–3.4 for survivors.
+
+**Idea 3 — L4 top-off** (once per round in Phase 6, any track at L4: pay X 🔬 for +1 Corporate Secret; working name only, no glossary term):
+- Research income is ~1.3 🔬 per round per seat; 42–44% of seats reach one L4 track, around round 4–5.
+- Bots that convert only leftover research rarely use it (2–8% of seats).
+- A top-off-aware bot (tops off before other spending; prices the first repairable Blue cube each round at X 🔬): at 3 🔬, 27% of seats use it, about 1.75 Secrets per user. Endings stay within ~3 points of baseline, rounds unchanged. One aware seat vs current bots wins 50.2 / 37.2 / 27.7% (fair share 50 / 33 / 25%). At 2 🔬: 40.7% at 3P and 31.1% at 4P, too strong.
+- Starting Secrets −1 with top-off pushes Patient Zero to 37–41%: keep 7 / 7 / 8.
+- **Agency barely moves:** Blue left open on purpose in contested splits goes from ~6% to 7–8% (8–9% at 2 🔬). A repairable Blue (3 🔬) still costs more than Red (2 🔬 regain) or Green, and the L4 gate arrives late.
+
+**Idea 2 — Block 2 Blue faces** (A: Face 1 → Block 2 Blue; C: Faces 1 and 4 → Block 2 Blue):
+- Blue lost per seat falls by 0.2–0.4 (3P: 3.79 → 3.59 / 3.42); Any shields on Blue 63% → 61 / 60%; endings shift 1–3 points.
+- Small because seats own only 0.75–0.86 Blue dice and see Blue block faces 2 times in 6, vs ~1.5 Blue cubes per round.
+- **Must-buy risk:** win rate by Blue dice owned (0 / 2+) at 4P goes from 17 / 39% to 13 / 47% (C). Partly correlational; bots' buying logic does not know Blue got stronger.
+
+**Not simulated:** idea 1 (lower a track for a Secret — a late lifeline, would lower Patient Zero endings), idea 4 (new track — Patents again), idea 5 (Market Share → Secrets thresholds — the −1 side brings back the Unpaid Ransom Leak; shared Red cubes push toward Total Wipeouts).
+
+**Takeaways:**
+1. Making Blue cheaper to block (idea 2) or to recover from (idea 3) leaves Blue the costliest cube to take, so Blue-first stays correct. Real shield-split agency likely needs Red or Green damage to hurt more.
+2. Idea 3 at 3 🔬 is worth keeping as a Secrets engine and strategic path (pacing-neutral, modest edge). Idea 2 is at most a small tuning option.
+3. Sim/rules mismatch: `sim/engine/phase4_attack_resolution.py` lets DTO *Slush Fund* pay `$1` per extra Secret beyond the free 2; RULES.md has no such rule.
+
+**Status: exploration recorded (User, 2026-11-07). No RULES.md, PnP or web change. Next candidate: probe costlier Red / Green damage.**

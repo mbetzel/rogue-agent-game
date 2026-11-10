@@ -358,9 +358,9 @@ VARIANT_CARDS: List[VariantCardSpec] = [
     VariantCardSpec(
         'G2', 'green', 'GREEN // ANTIVIRUS', '$4',
         '{PIP1} Clean/$1 | {PIP2} +1{RESEARCH} | {PIP3} +2{RESEARCH}', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
-        'Universal Sandbox', 'P1 CLEAN + P3 INCOME',
-        '**Clean 1 Glitched Shield Slot** (Phase 1 Step 5) **AND** gain **+1 {RESEARCH}** in Phase 3: Income. *(Identical to G1 for now.)*',
-        'Sandbox: cleans a slot & yields Research.',
+        'Universal Sandbox', 'P3 INCOME',
+        'Gain **+2 {RESEARCH}**, plus **+1 {RESEARCH}** for each of your **Glitched Shield Slots** in Phase 3: Income.',
+        'Sandbox: generates research from quarantined glitches.',
     ),
     VariantCardSpec(
         'G3', 'green', 'GREEN // ANTIVIRUS', '$4',

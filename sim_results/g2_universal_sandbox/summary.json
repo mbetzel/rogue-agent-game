@@ -1,0 +1,2965 @@
+{
+  "seed0": 42,
+  "games_per_cell": 600,
+  "elapsed_sec": 25.65,
+  "cells": [
+    {
+      "profile": "STANDARD",
+      "players": 2,
+      "green_mode": "RANDOM",
+      "games": 600,
+      "avg_rounds": 8.41,
+      "min_rounds": 1,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.42,
+        "patient_zero_total": 0.1867,
+        "patient_zero_survivor": 0.1867,
+        "total_wipeout": 0.03,
+        "market_collapse": 0.3633,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.352,
+      "green_purchases_per_game": 0.705,
+      "green_buyer_seat_share": 0.2117,
+      "green_buyer_win_rate": 0.5118,
+      "green_path_seat_share": 0.125,
+      "green_path_win_rate": 0.5533,
+      "company_color_win_rate": {
+        "blue": 0.4716,
+        "green": 0.4864,
+        "red": 0.5436
+      },
+      "company_color_seats": {
+        "blue": 405,
+        "green": 405,
+        "red": 390
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.4947,
+        "DTO": 0.4516,
+        "HELIX": 0.522,
+        "MERIDIAN": 0.538,
+        "OMNIDYNE": 0.45,
+        "PROMETHEUS": 0.5485
+      },
+      "company_code_seats": {
+        "AEGIS": 188,
+        "DTO": 217,
+        "HELIX": 205,
+        "MERIDIAN": 184,
+        "OMNIDYNE": 200,
+        "PROMETHEUS": 206
+      },
+      "g1_activations": 174,
+      "g2_activations": 257,
+      "g3_activations": 248,
+      "g2_activations_per_game": 0.428,
+      "g2_mean_research": 2.6031,
+      "g2_mean_g": 0.6031,
+      "g2_g_pmf": {
+        "0": 0.5564,
+        "1": 0.3035,
+        "2": 0.1206,
+        "3": 0.0195
+      },
+      "slots_cleaned_face_per_seat": 0.347,
+      "max_glitched_slots_avg": 2.102,
+      "outliers": {
+        "shortest": [
+          [
+            87,
+            1,
+            "patient_zero"
+          ],
+          [
+            494,
+            1,
+            "patient_zero"
+          ],
+          [
+            579,
+            1,
+            "patient_zero"
+          ],
+          [
+            48,
+            2,
+            "patient_zero"
+          ],
+          [
+            53,
+            2,
+            "total_wipeout"
+          ]
+        ],
+        "longest": [
+          [
+            622,
+            11,
+            "singularity"
+          ],
+          [
+            588,
+            11,
+            "singularity"
+          ],
+          [
+            572,
+            11,
+            "singularity"
+          ],
+          [
+            560,
+            11,
+            "singularity"
+          ],
+          [
+            546,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": [
+          53,
+          96,
+          123,
+          214,
+          216,
+          249,
+          303,
+          328,
+          334,
+          347
+        ]
+      }
+    },
+    {
+      "profile": "STANDARD",
+      "players": 2,
+      "green_mode": "G1",
+      "games": 600,
+      "avg_rounds": 8.337,
+      "min_rounds": 1,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.39,
+        "patient_zero_total": 0.2,
+        "patient_zero_survivor": 0.2,
+        "total_wipeout": 0.035,
+        "market_collapse": 0.375,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.199,
+      "green_purchases_per_game": 0.398,
+      "green_buyer_seat_share": 0.1258,
+      "green_buyer_win_rate": 0.4636,
+      "green_path_seat_share": 0.1117,
+      "green_path_win_rate": 0.4776,
+      "company_color_win_rate": {
+        "blue": 0.4988,
+        "green": 0.484,
+        "red": 0.5179
+      },
+      "company_color_seats": {
+        "blue": 405,
+        "green": 405,
+        "red": 390
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.4947,
+        "DTO": 0.5023,
+        "HELIX": 0.4927,
+        "MERIDIAN": 0.5272,
+        "OMNIDYNE": 0.475,
+        "PROMETHEUS": 0.5097
+      },
+      "company_code_seats": {
+        "AEGIS": 188,
+        "DTO": 217,
+        "HELIX": 205,
+        "MERIDIAN": 184,
+        "OMNIDYNE": 200,
+        "PROMETHEUS": 206
+      },
+      "g1_activations": 538,
+      "g2_activations": 0,
+      "g3_activations": 0,
+      "g2_activations_per_game": 0.0,
+      "g2_mean_research": null,
+      "g2_mean_g": null,
+      "g2_g_pmf": {},
+      "slots_cleaned_face_per_seat": 0.426,
+      "max_glitched_slots_avg": 2.072,
+      "outliers": {
+        "shortest": [
+          [
+            87,
+            1,
+            "patient_zero"
+          ],
+          [
+            494,
+            1,
+            "patient_zero"
+          ],
+          [
+            579,
+            1,
+            "patient_zero"
+          ],
+          [
+            48,
+            2,
+            "patient_zero"
+          ],
+          [
+            53,
+            2,
+            "total_wipeout"
+          ]
+        ],
+        "longest": [
+          [
+            588,
+            11,
+            "singularity"
+          ],
+          [
+            578,
+            11,
+            "singularity"
+          ],
+          [
+            572,
+            11,
+            "singularity"
+          ],
+          [
+            560,
+            11,
+            "singularity"
+          ],
+          [
+            540,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": [
+          53,
+          96,
+          214,
+          216,
+          218,
+          249,
+          291,
+          303,
+          323,
+          328
+        ]
+      }
+    },
+    {
+      "profile": "STANDARD",
+      "players": 2,
+      "green_mode": "G2",
+      "games": 600,
+      "avg_rounds": 8.39,
+      "min_rounds": 1,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.4267,
+        "patient_zero_total": 0.185,
+        "patient_zero_survivor": 0.185,
+        "total_wipeout": 0.0333,
+        "market_collapse": 0.355,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.398,
+      "green_purchases_per_game": 0.795,
+      "green_buyer_seat_share": 0.2425,
+      "green_buyer_win_rate": 0.4914,
+      "green_path_seat_share": 0.1267,
+      "green_path_win_rate": 0.5263,
+      "company_color_win_rate": {
+        "blue": 0.4593,
+        "green": 0.4914,
+        "red": 0.5513
+      },
+      "company_color_seats": {
+        "blue": 405,
+        "green": 405,
+        "red": 390
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.484,
+        "DTO": 0.4378,
+        "HELIX": 0.5024,
+        "MERIDIAN": 0.5326,
+        "OMNIDYNE": 0.48,
+        "PROMETHEUS": 0.568
+      },
+      "company_code_seats": {
+        "AEGIS": 188,
+        "DTO": 217,
+        "HELIX": 205,
+        "MERIDIAN": 184,
+        "OMNIDYNE": 200,
+        "PROMETHEUS": 206
+      },
+      "g1_activations": 0,
+      "g2_activations": 644,
+      "g3_activations": 0,
+      "g2_activations_per_game": 1.073,
+      "g2_mean_research": 2.6071,
+      "g2_mean_g": 0.6071,
+      "g2_g_pmf": {
+        "0": 0.5559,
+        "1": 0.2981,
+        "2": 0.1304,
+        "3": 0.014,
+        "4": 0.0016
+      },
+      "slots_cleaned_face_per_seat": 0.295,
+      "max_glitched_slots_avg": 2.103,
+      "outliers": {
+        "shortest": [
+          [
+            87,
+            1,
+            "patient_zero"
+          ],
+          [
+            494,
+            1,
+            "patient_zero"
+          ],
+          [
+            579,
+            1,
+            "patient_zero"
+          ],
+          [
+            48,
+            2,
+            "patient_zero"
+          ],
+          [
+            53,
+            2,
+            "total_wipeout"
+          ]
+        ],
+        "longest": [
+          [
+            622,
+            11,
+            "singularity"
+          ],
+          [
+            588,
+            11,
+            "singularity"
+          ],
+          [
+            572,
+            11,
+            "singularity"
+          ],
+          [
+            560,
+            11,
+            "singularity"
+          ],
+          [
+            546,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": [
+          53,
+          96,
+          123,
+          184,
+          214,
+          216,
+          249,
+          297,
+          328,
+          334
+        ]
+      }
+    },
+    {
+      "profile": "STANDARD",
+      "players": 2,
+      "green_mode": "G3",
+      "games": 600,
+      "avg_rounds": 8.357,
+      "min_rounds": 1,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.4117,
+        "patient_zero_total": 0.195,
+        "patient_zero_survivor": 0.195,
+        "total_wipeout": 0.03,
+        "market_collapse": 0.3633,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.439,
+      "green_purchases_per_game": 0.878,
+      "green_buyer_seat_share": 0.2542,
+      "green_buyer_win_rate": 0.5115,
+      "green_path_seat_share": 0.13,
+      "green_path_win_rate": 0.5769,
+      "company_color_win_rate": {
+        "blue": 0.4494,
+        "green": 0.5111,
+        "red": 0.541
+      },
+      "company_color_seats": {
+        "blue": 405,
+        "green": 405,
+        "red": 390
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.4734,
+        "DTO": 0.4286,
+        "HELIX": 0.5171,
+        "MERIDIAN": 0.5326,
+        "OMNIDYNE": 0.505,
+        "PROMETHEUS": 0.5485
+      },
+      "company_code_seats": {
+        "AEGIS": 188,
+        "DTO": 217,
+        "HELIX": 205,
+        "MERIDIAN": 184,
+        "OMNIDYNE": 200,
+        "PROMETHEUS": 206
+      },
+      "g1_activations": 0,
+      "g2_activations": 0,
+      "g3_activations": 821,
+      "g2_activations_per_game": 0.0,
+      "g2_mean_research": null,
+      "g2_mean_g": null,
+      "g2_g_pmf": {},
+      "slots_cleaned_face_per_seat": 0.298,
+      "max_glitched_slots_avg": 2.099,
+      "outliers": {
+        "shortest": [
+          [
+            87,
+            1,
+            "patient_zero"
+          ],
+          [
+            494,
+            1,
+            "patient_zero"
+          ],
+          [
+            579,
+            1,
+            "patient_zero"
+          ],
+          [
+            48,
+            2,
+            "patient_zero"
+          ],
+          [
+            53,
+            2,
+            "total_wipeout"
+          ]
+        ],
+        "longest": [
+          [
+            622,
+            11,
+            "singularity"
+          ],
+          [
+            588,
+            11,
+            "singularity"
+          ],
+          [
+            585,
+            11,
+            "singularity"
+          ],
+          [
+            572,
+            11,
+            "singularity"
+          ],
+          [
+            546,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": [
+          53,
+          54,
+          123,
+          214,
+          216,
+          249,
+          297,
+          328,
+          334,
+          347
+        ]
+      }
+    },
+    {
+      "profile": "STANDARD",
+      "players": 3,
+      "green_mode": "RANDOM",
+      "games": 600,
+      "avg_rounds": 8.293,
+      "min_rounds": 2,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.4433,
+        "patient_zero_total": 0.3433,
+        "patient_zero_survivor": 0.3433,
+        "total_wipeout": 0.005,
+        "market_collapse": 0.2083,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.394,
+      "green_purchases_per_game": 1.182,
+      "green_buyer_seat_share": 0.2256,
+      "green_buyer_win_rate": 0.3571,
+      "green_path_seat_share": 0.1378,
+      "green_path_win_rate": 0.4355,
+      "company_color_win_rate": {
+        "blue": 0.3344,
+        "green": 0.3323,
+        "red": 0.3333
+      },
+      "company_color_seats": {
+        "blue": 601,
+        "green": 623,
+        "red": 576
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.3241,
+        "DTO": 0.3441,
+        "HELIX": 0.3477,
+        "MERIDIAN": 0.3401,
+        "OMNIDYNE": 0.3178,
+        "PROMETHEUS": 0.3262
+      },
+      "company_code_seats": {
+        "AEGIS": 290,
+        "DTO": 311,
+        "HELIX": 302,
+        "MERIDIAN": 297,
+        "OMNIDYNE": 321,
+        "PROMETHEUS": 279
+      },
+      "g1_activations": 337,
+      "g2_activations": 375,
+      "g3_activations": 405,
+      "g2_activations_per_game": 0.625,
+      "g2_mean_research": 2.5147,
+      "g2_mean_g": 0.5147,
+      "g2_g_pmf": {
+        "0": 0.6,
+        "1": 0.3067,
+        "2": 0.0747,
+        "3": 0.016,
+        "4": 0.0027
+      },
+      "slots_cleaned_face_per_seat": 0.358,
+      "max_glitched_slots_avg": 2.113,
+      "outliers": {
+        "shortest": [
+          [
+            52,
+            2,
+            "patient_zero"
+          ],
+          [
+            57,
+            2,
+            "patient_zero"
+          ],
+          [
+            72,
+            2,
+            "patient_zero"
+          ],
+          [
+            78,
+            2,
+            "patient_zero"
+          ],
+          [
+            122,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            638,
+            11,
+            "singularity"
+          ],
+          [
+            617,
+            11,
+            "singularity"
+          ],
+          [
+            610,
+            11,
+            "singularity"
+          ],
+          [
+            561,
+            11,
+            "singularity"
+          ],
+          [
+            553,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": [
+          91,
+          279,
+          288
+        ]
+      }
+    },
+    {
+      "profile": "STANDARD",
+      "players": 3,
+      "green_mode": "G1",
+      "games": 600,
+      "avg_rounds": 8.265,
+      "min_rounds": 2,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.4317,
+        "patient_zero_total": 0.3717,
+        "patient_zero_survivor": 0.3717,
+        "total_wipeout": 0.0083,
+        "market_collapse": 0.1883,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.253,
+      "green_purchases_per_game": 0.758,
+      "green_buyer_seat_share": 0.1522,
+      "green_buyer_win_rate": 0.3248,
+      "green_path_seat_share": 0.1272,
+      "green_path_win_rate": 0.3712,
+      "company_color_win_rate": {
+        "blue": 0.3494,
+        "green": 0.3242,
+        "red": 0.3264
+      },
+      "company_color_seats": {
+        "blue": 601,
+        "green": 623,
+        "red": 576
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.369,
+        "DTO": 0.3312,
+        "HELIX": 0.3212,
+        "MERIDIAN": 0.3165,
+        "OMNIDYNE": 0.3271,
+        "PROMETHEUS": 0.3369
+      },
+      "company_code_seats": {
+        "AEGIS": 290,
+        "DTO": 311,
+        "HELIX": 302,
+        "MERIDIAN": 297,
+        "OMNIDYNE": 321,
+        "PROMETHEUS": 279
+      },
+      "g1_activations": 924,
+      "g2_activations": 0,
+      "g3_activations": 0,
+      "g2_activations_per_game": 0.0,
+      "g2_mean_research": null,
+      "g2_mean_g": null,
+      "g2_g_pmf": {},
+      "slots_cleaned_face_per_seat": 0.455,
+      "max_glitched_slots_avg": 2.097,
+      "outliers": {
+        "shortest": [
+          [
+            52,
+            2,
+            "patient_zero"
+          ],
+          [
+            57,
+            2,
+            "patient_zero"
+          ],
+          [
+            122,
+            2,
+            "patient_zero"
+          ],
+          [
+            173,
+            2,
+            "patient_zero"
+          ],
+          [
+            200,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            638,
+            11,
+            "singularity"
+          ],
+          [
+            585,
+            11,
+            "singularity"
+          ],
+          [
+            561,
+            11,
+            "singularity"
+          ],
+          [
+            553,
+            11,
+            "singularity"
+          ],
+          [
+            547,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": [
+          91,
+          239,
+          279,
+          362,
+          475
+        ]
+      }
+    },
+    {
+      "profile": "STANDARD",
+      "players": 3,
+      "green_mode": "G2",
+      "games": 600,
+      "avg_rounds": 8.317,
+      "min_rounds": 2,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.4583,
+        "patient_zero_total": 0.33,
+        "patient_zero_survivor": 0.33,
+        "total_wipeout": 0.0017,
+        "market_collapse": 0.21,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.436,
+      "green_purchases_per_game": 1.308,
+      "green_buyer_seat_share": 0.2561,
+      "green_buyer_win_rate": 0.3536,
+      "green_path_seat_share": 0.1511,
+      "green_path_win_rate": 0.3971,
+      "company_color_win_rate": {
+        "blue": 0.3311,
+        "green": 0.3435,
+        "red": 0.3247
+      },
+      "company_color_seats": {
+        "blue": 601,
+        "green": 623,
+        "red": 576
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.3207,
+        "DTO": 0.3408,
+        "HELIX": 0.3444,
+        "MERIDIAN": 0.3131,
+        "OMNIDYNE": 0.3427,
+        "PROMETHEUS": 0.3369
+      },
+      "company_code_seats": {
+        "AEGIS": 290,
+        "DTO": 311,
+        "HELIX": 302,
+        "MERIDIAN": 297,
+        "OMNIDYNE": 321,
+        "PROMETHEUS": 279
+      },
+      "g1_activations": 0,
+      "g2_activations": 1101,
+      "g3_activations": 0,
+      "g2_activations_per_game": 1.835,
+      "g2_mean_research": 2.5595,
+      "g2_mean_g": 0.5595,
+      "g2_g_pmf": {
+        "0": 0.5749,
+        "1": 0.3061,
+        "2": 0.1054,
+        "3": 0.0118,
+        "4": 0.0018
+      },
+      "slots_cleaned_face_per_seat": 0.316,
+      "max_glitched_slots_avg": 2.112,
+      "outliers": {
+        "shortest": [
+          [
+            52,
+            2,
+            "patient_zero"
+          ],
+          [
+            57,
+            2,
+            "patient_zero"
+          ],
+          [
+            72,
+            2,
+            "patient_zero"
+          ],
+          [
+            122,
+            2,
+            "patient_zero"
+          ],
+          [
+            173,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            638,
+            11,
+            "singularity"
+          ],
+          [
+            627,
+            11,
+            "singularity"
+          ],
+          [
+            617,
+            11,
+            "singularity"
+          ],
+          [
+            610,
+            11,
+            "singularity"
+          ],
+          [
+            578,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": [
+          288
+        ]
+      }
+    },
+    {
+      "profile": "STANDARD",
+      "players": 3,
+      "green_mode": "G3",
+      "games": 600,
+      "avg_rounds": 8.322,
+      "min_rounds": 2,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.4433,
+        "patient_zero_total": 0.36,
+        "patient_zero_survivor": 0.36,
+        "total_wipeout": 0.0017,
+        "market_collapse": 0.195,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.512,
+      "green_purchases_per_game": 1.535,
+      "green_buyer_seat_share": 0.2844,
+      "green_buyer_win_rate": 0.3613,
+      "green_path_seat_share": 0.155,
+      "green_path_win_rate": 0.4014,
+      "company_color_win_rate": {
+        "blue": 0.3278,
+        "green": 0.3483,
+        "red": 0.3229
+      },
+      "company_color_seats": {
+        "blue": 601,
+        "green": 623,
+        "red": 576
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.3276,
+        "DTO": 0.328,
+        "HELIX": 0.3543,
+        "MERIDIAN": 0.3434,
+        "OMNIDYNE": 0.3427,
+        "PROMETHEUS": 0.3011
+      },
+      "company_code_seats": {
+        "AEGIS": 290,
+        "DTO": 311,
+        "HELIX": 302,
+        "MERIDIAN": 297,
+        "OMNIDYNE": 321,
+        "PROMETHEUS": 279
+      },
+      "g1_activations": 0,
+      "g2_activations": 0,
+      "g3_activations": 1456,
+      "g2_activations_per_game": 0.0,
+      "g2_mean_research": null,
+      "g2_mean_g": null,
+      "g2_g_pmf": {},
+      "slots_cleaned_face_per_seat": 0.349,
+      "max_glitched_slots_avg": 2.119,
+      "outliers": {
+        "shortest": [
+          [
+            52,
+            2,
+            "patient_zero"
+          ],
+          [
+            57,
+            2,
+            "patient_zero"
+          ],
+          [
+            72,
+            2,
+            "patient_zero"
+          ],
+          [
+            78,
+            2,
+            "patient_zero"
+          ],
+          [
+            122,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            638,
+            11,
+            "singularity"
+          ],
+          [
+            617,
+            11,
+            "singularity"
+          ],
+          [
+            610,
+            11,
+            "singularity"
+          ],
+          [
+            586,
+            11,
+            "singularity"
+          ],
+          [
+            553,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": [
+          356
+        ]
+      }
+    },
+    {
+      "profile": "STANDARD",
+      "players": 4,
+      "green_mode": "RANDOM",
+      "games": 600,
+      "avg_rounds": 8.315,
+      "min_rounds": 2,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.4833,
+        "patient_zero_total": 0.3517,
+        "patient_zero_survivor": 0.3517,
+        "total_wipeout": 0.0,
+        "market_collapse": 0.165,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.493,
+      "green_purchases_per_game": 1.972,
+      "green_buyer_seat_share": 0.2687,
+      "green_buyer_win_rate": 0.2651,
+      "green_path_seat_share": 0.1621,
+      "green_path_win_rate": 0.3188,
+      "company_color_win_rate": {
+        "blue": 0.218,
+        "green": 0.2769,
+        "red": 0.2544
+      },
+      "company_color_seats": {
+        "blue": 789,
+        "green": 809,
+        "red": 802
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.23,
+        "DTO": 0.2057,
+        "HELIX": 0.2872,
+        "MERIDIAN": 0.2475,
+        "OMNIDYNE": 0.267,
+        "PROMETHEUS": 0.2612
+      },
+      "company_code_seats": {
+        "AEGIS": 400,
+        "DTO": 389,
+        "HELIX": 397,
+        "MERIDIAN": 400,
+        "OMNIDYNE": 412,
+        "PROMETHEUS": 402
+      },
+      "g1_activations": 428,
+      "g2_activations": 584,
+      "g3_activations": 637,
+      "g2_activations_per_game": 0.973,
+      "g2_mean_research": 2.6062,
+      "g2_mean_g": 0.6062,
+      "g2_g_pmf": {
+        "0": 0.5531,
+        "1": 0.3031,
+        "2": 0.1284,
+        "3": 0.0154
+      },
+      "slots_cleaned_face_per_seat": 0.397,
+      "max_glitched_slots_avg": 2.082,
+      "outliers": {
+        "shortest": [
+          [
+            72,
+            2,
+            "patient_zero"
+          ],
+          [
+            148,
+            2,
+            "patient_zero"
+          ],
+          [
+            239,
+            2,
+            "patient_zero"
+          ],
+          [
+            276,
+            2,
+            "patient_zero"
+          ],
+          [
+            325,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            594,
+            11,
+            "singularity"
+          ],
+          [
+            591,
+            11,
+            "singularity"
+          ],
+          [
+            588,
+            11,
+            "singularity"
+          ],
+          [
+            572,
+            11,
+            "singularity"
+          ],
+          [
+            563,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": []
+      }
+    },
+    {
+      "profile": "STANDARD",
+      "players": 4,
+      "green_mode": "G1",
+      "games": 600,
+      "avg_rounds": 8.218,
+      "min_rounds": 2,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.4617,
+        "patient_zero_total": 0.3617,
+        "patient_zero_survivor": 0.3617,
+        "total_wipeout": 0.0,
+        "market_collapse": 0.1767,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.29,
+      "green_purchases_per_game": 1.16,
+      "green_buyer_seat_share": 0.1696,
+      "green_buyer_win_rate": 0.2039,
+      "green_path_seat_share": 0.1392,
+      "green_path_win_rate": 0.2844,
+      "company_color_win_rate": {
+        "blue": 0.2395,
+        "green": 0.2633,
+        "red": 0.2469
+      },
+      "company_color_seats": {
+        "blue": 789,
+        "green": 809,
+        "red": 802
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.2475,
+        "DTO": 0.2314,
+        "HELIX": 0.2972,
+        "MERIDIAN": 0.245,
+        "OMNIDYNE": 0.2306,
+        "PROMETHEUS": 0.2488
+      },
+      "company_code_seats": {
+        "AEGIS": 400,
+        "DTO": 389,
+        "HELIX": 397,
+        "MERIDIAN": 400,
+        "OMNIDYNE": 412,
+        "PROMETHEUS": 402
+      },
+      "g1_activations": 1234,
+      "g2_activations": 0,
+      "g3_activations": 0,
+      "g2_activations_per_game": 0.0,
+      "g2_mean_research": null,
+      "g2_mean_g": null,
+      "g2_g_pmf": {},
+      "slots_cleaned_face_per_seat": 0.472,
+      "max_glitched_slots_avg": 2.053,
+      "outliers": {
+        "shortest": [
+          [
+            72,
+            2,
+            "patient_zero"
+          ],
+          [
+            148,
+            2,
+            "patient_zero"
+          ],
+          [
+            154,
+            2,
+            "patient_zero"
+          ],
+          [
+            239,
+            2,
+            "patient_zero"
+          ],
+          [
+            276,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            597,
+            11,
+            "singularity"
+          ],
+          [
+            594,
+            11,
+            "singularity"
+          ],
+          [
+            591,
+            11,
+            "singularity"
+          ],
+          [
+            585,
+            11,
+            "singularity"
+          ],
+          [
+            578,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": []
+      }
+    },
+    {
+      "profile": "STANDARD",
+      "players": 4,
+      "green_mode": "G2",
+      "games": 600,
+      "avg_rounds": 8.38,
+      "min_rounds": 2,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.495,
+        "patient_zero_total": 0.335,
+        "patient_zero_survivor": 0.335,
+        "total_wipeout": 0.0,
+        "market_collapse": 0.17,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.543,
+      "green_purchases_per_game": 2.173,
+      "green_buyer_seat_share": 0.2988,
+      "green_buyer_win_rate": 0.2706,
+      "green_path_seat_share": 0.1629,
+      "green_path_win_rate": 0.3043,
+      "company_color_win_rate": {
+        "blue": 0.2421,
+        "green": 0.2608,
+        "red": 0.2469
+      },
+      "company_color_seats": {
+        "blue": 789,
+        "green": 809,
+        "red": 802
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.2525,
+        "DTO": 0.2314,
+        "HELIX": 0.2594,
+        "MERIDIAN": 0.225,
+        "OMNIDYNE": 0.2621,
+        "PROMETHEUS": 0.2687
+      },
+      "company_code_seats": {
+        "AEGIS": 400,
+        "DTO": 389,
+        "HELIX": 397,
+        "MERIDIAN": 400,
+        "OMNIDYNE": 412,
+        "PROMETHEUS": 402
+      },
+      "g1_activations": 0,
+      "g2_activations": 1655,
+      "g3_activations": 0,
+      "g2_activations_per_game": 2.758,
+      "g2_mean_research": 2.6036,
+      "g2_mean_g": 0.6036,
+      "g2_g_pmf": {
+        "0": 0.5511,
+        "1": 0.3069,
+        "2": 0.1311,
+        "3": 0.0091,
+        "4": 0.0018
+      },
+      "slots_cleaned_face_per_seat": 0.359,
+      "max_glitched_slots_avg": 2.103,
+      "outliers": {
+        "shortest": [
+          [
+            72,
+            2,
+            "patient_zero"
+          ],
+          [
+            148,
+            2,
+            "patient_zero"
+          ],
+          [
+            239,
+            2,
+            "patient_zero"
+          ],
+          [
+            276,
+            2,
+            "patient_zero"
+          ],
+          [
+            325,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            630,
+            11,
+            "singularity"
+          ],
+          [
+            591,
+            11,
+            "singularity"
+          ],
+          [
+            583,
+            11,
+            "singularity"
+          ],
+          [
+            581,
+            11,
+            "singularity"
+          ],
+          [
+            572,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": []
+      }
+    },
+    {
+      "profile": "STANDARD",
+      "players": 4,
+      "green_mode": "G3",
+      "games": 600,
+      "avg_rounds": 8.323,
+      "min_rounds": 2,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.5017,
+        "patient_zero_total": 0.3383,
+        "patient_zero_survivor": 0.3383,
+        "total_wipeout": 0.0,
+        "market_collapse": 0.16,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.636,
+      "green_purchases_per_game": 2.543,
+      "green_buyer_seat_share": 0.3408,
+      "green_buyer_win_rate": 0.2689,
+      "green_path_seat_share": 0.1671,
+      "green_path_win_rate": 0.3242,
+      "company_color_win_rate": {
+        "blue": 0.2351,
+        "green": 0.2651,
+        "red": 0.2494
+      },
+      "company_color_seats": {
+        "blue": 789,
+        "green": 809,
+        "red": 802
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.26,
+        "DTO": 0.2095,
+        "HELIX": 0.2746,
+        "MERIDIAN": 0.245,
+        "OMNIDYNE": 0.2561,
+        "PROMETHEUS": 0.2537
+      },
+      "company_code_seats": {
+        "AEGIS": 400,
+        "DTO": 389,
+        "HELIX": 397,
+        "MERIDIAN": 400,
+        "OMNIDYNE": 412,
+        "PROMETHEUS": 402
+      },
+      "g1_activations": 0,
+      "g2_activations": 0,
+      "g3_activations": 2020,
+      "g2_activations_per_game": 0.0,
+      "g2_mean_research": null,
+      "g2_mean_g": null,
+      "g2_g_pmf": {},
+      "slots_cleaned_face_per_seat": 0.356,
+      "max_glitched_slots_avg": 2.095,
+      "outliers": {
+        "shortest": [
+          [
+            72,
+            2,
+            "patient_zero"
+          ],
+          [
+            139,
+            2,
+            "patient_zero"
+          ],
+          [
+            148,
+            2,
+            "patient_zero"
+          ],
+          [
+            239,
+            2,
+            "patient_zero"
+          ],
+          [
+            276,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            606,
+            11,
+            "singularity"
+          ],
+          [
+            588,
+            11,
+            "singularity"
+          ],
+          [
+            563,
+            11,
+            "singularity"
+          ],
+          [
+            560,
+            11,
+            "singularity"
+          ],
+          [
+            553,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": []
+      }
+    },
+    {
+      "profile": "AGGRESSIVE",
+      "players": 2,
+      "green_mode": "RANDOM",
+      "games": 600,
+      "avg_rounds": 8.313,
+      "min_rounds": 1,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.4067,
+        "patient_zero_total": 0.225,
+        "patient_zero_survivor": 0.225,
+        "total_wipeout": 0.0183,
+        "market_collapse": 0.35,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.318,
+      "green_purchases_per_game": 0.637,
+      "green_buyer_seat_share": 0.1975,
+      "green_buyer_win_rate": 0.5105,
+      "green_path_seat_share": 0.125,
+      "green_path_win_rate": 0.5,
+      "company_color_win_rate": {
+        "blue": 0.4667,
+        "green": 0.4963,
+        "red": 0.5385
+      },
+      "company_color_seats": {
+        "blue": 405,
+        "green": 405,
+        "red": 390
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.5,
+        "DTO": 0.4378,
+        "HELIX": 0.5073,
+        "MERIDIAN": 0.5326,
+        "OMNIDYNE": 0.485,
+        "PROMETHEUS": 0.5437
+      },
+      "company_code_seats": {
+        "AEGIS": 188,
+        "DTO": 217,
+        "HELIX": 205,
+        "MERIDIAN": 184,
+        "OMNIDYNE": 200,
+        "PROMETHEUS": 206
+      },
+      "g1_activations": 189,
+      "g2_activations": 235,
+      "g3_activations": 237,
+      "g2_activations_per_game": 0.392,
+      "g2_mean_research": 2.8426,
+      "g2_mean_g": 0.8426,
+      "g2_g_pmf": {
+        "0": 0.5064,
+        "1": 0.2,
+        "2": 0.2468,
+        "3": 0.0383,
+        "4": 0.0085
+      },
+      "slots_cleaned_face_per_seat": 0.398,
+      "max_glitched_slots_avg": 2.124,
+      "outliers": {
+        "shortest": [
+          [
+            87,
+            1,
+            "patient_zero"
+          ],
+          [
+            494,
+            1,
+            "patient_zero"
+          ],
+          [
+            579,
+            1,
+            "patient_zero"
+          ],
+          [
+            53,
+            2,
+            "total_wipeout"
+          ],
+          [
+            62,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            588,
+            11,
+            "singularity"
+          ],
+          [
+            576,
+            11,
+            "singularity"
+          ],
+          [
+            572,
+            11,
+            "singularity"
+          ],
+          [
+            547,
+            11,
+            "singularity"
+          ],
+          [
+            546,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": [
+          48,
+          53,
+          216,
+          221,
+          246,
+          303,
+          328,
+          347,
+          469,
+          481
+        ]
+      }
+    },
+    {
+      "profile": "AGGRESSIVE",
+      "players": 2,
+      "green_mode": "G1",
+      "games": 600,
+      "avg_rounds": 8.227,
+      "min_rounds": 1,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.3867,
+        "patient_zero_total": 0.2433,
+        "patient_zero_survivor": 0.2433,
+        "total_wipeout": 0.0167,
+        "market_collapse": 0.3533,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.181,
+      "green_purchases_per_game": 0.362,
+      "green_buyer_seat_share": 0.1167,
+      "green_buyer_win_rate": 0.5,
+      "green_path_seat_share": 0.1292,
+      "green_path_win_rate": 0.4387,
+      "company_color_win_rate": {
+        "blue": 0.4938,
+        "green": 0.4691,
+        "red": 0.5385
+      },
+      "company_color_seats": {
+        "blue": 405,
+        "green": 405,
+        "red": 390
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.5213,
+        "DTO": 0.47,
+        "HELIX": 0.4829,
+        "MERIDIAN": 0.5489,
+        "OMNIDYNE": 0.455,
+        "PROMETHEUS": 0.5291
+      },
+      "company_code_seats": {
+        "AEGIS": 188,
+        "DTO": 217,
+        "HELIX": 205,
+        "MERIDIAN": 184,
+        "OMNIDYNE": 200,
+        "PROMETHEUS": 206
+      },
+      "g1_activations": 520,
+      "g2_activations": 0,
+      "g3_activations": 0,
+      "g2_activations_per_game": 0.0,
+      "g2_mean_research": null,
+      "g2_mean_g": null,
+      "g2_g_pmf": {},
+      "slots_cleaned_face_per_seat": 0.482,
+      "max_glitched_slots_avg": 2.099,
+      "outliers": {
+        "shortest": [
+          [
+            87,
+            1,
+            "patient_zero"
+          ],
+          [
+            494,
+            1,
+            "patient_zero"
+          ],
+          [
+            579,
+            1,
+            "patient_zero"
+          ],
+          [
+            53,
+            2,
+            "total_wipeout"
+          ],
+          [
+            62,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            588,
+            11,
+            "singularity"
+          ],
+          [
+            560,
+            11,
+            "singularity"
+          ],
+          [
+            547,
+            11,
+            "singularity"
+          ],
+          [
+            538,
+            11,
+            "singularity"
+          ],
+          [
+            520,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": [
+          53,
+          184,
+          185,
+          216,
+          291,
+          303,
+          328,
+          347,
+          469,
+          481
+        ]
+      }
+    },
+    {
+      "profile": "AGGRESSIVE",
+      "players": 2,
+      "green_mode": "G2",
+      "games": 600,
+      "avg_rounds": 8.3,
+      "min_rounds": 1,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.3967,
+        "patient_zero_total": 0.23,
+        "patient_zero_survivor": 0.23,
+        "total_wipeout": 0.0217,
+        "market_collapse": 0.3517,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.362,
+      "green_purchases_per_game": 0.723,
+      "green_buyer_seat_share": 0.2308,
+      "green_buyer_win_rate": 0.4838,
+      "green_path_seat_share": 0.1375,
+      "green_path_win_rate": 0.5333,
+      "company_color_win_rate": {
+        "blue": 0.4741,
+        "green": 0.4988,
+        "red": 0.5282
+      },
+      "company_color_seats": {
+        "blue": 405,
+        "green": 405,
+        "red": 390
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.516,
+        "DTO": 0.4378,
+        "HELIX": 0.4878,
+        "MERIDIAN": 0.5109,
+        "OMNIDYNE": 0.51,
+        "PROMETHEUS": 0.5437
+      },
+      "company_code_seats": {
+        "AEGIS": 188,
+        "DTO": 217,
+        "HELIX": 205,
+        "MERIDIAN": 184,
+        "OMNIDYNE": 200,
+        "PROMETHEUS": 206
+      },
+      "g1_activations": 0,
+      "g2_activations": 616,
+      "g3_activations": 0,
+      "g2_activations_per_game": 1.027,
+      "g2_mean_research": 2.8344,
+      "g2_mean_g": 0.8344,
+      "g2_g_pmf": {
+        "0": 0.4886,
+        "1": 0.237,
+        "2": 0.2305,
+        "3": 0.039,
+        "4": 0.0049
+      },
+      "slots_cleaned_face_per_seat": 0.333,
+      "max_glitched_slots_avg": 2.139,
+      "outliers": {
+        "shortest": [
+          [
+            87,
+            1,
+            "patient_zero"
+          ],
+          [
+            494,
+            1,
+            "patient_zero"
+          ],
+          [
+            579,
+            1,
+            "patient_zero"
+          ],
+          [
+            53,
+            2,
+            "total_wipeout"
+          ],
+          [
+            62,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            588,
+            11,
+            "singularity"
+          ],
+          [
+            578,
+            11,
+            "singularity"
+          ],
+          [
+            576,
+            11,
+            "singularity"
+          ],
+          [
+            572,
+            11,
+            "singularity"
+          ],
+          [
+            551,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": [
+          48,
+          53,
+          184,
+          216,
+          218,
+          221,
+          328,
+          347,
+          384,
+          433
+        ]
+      }
+    },
+    {
+      "profile": "AGGRESSIVE",
+      "players": 2,
+      "green_mode": "G3",
+      "games": 600,
+      "avg_rounds": 8.323,
+      "min_rounds": 1,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.405,
+        "patient_zero_total": 0.2167,
+        "patient_zero_survivor": 0.2167,
+        "total_wipeout": 0.0183,
+        "market_collapse": 0.36,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.409,
+      "green_purchases_per_game": 0.818,
+      "green_buyer_seat_share": 0.2483,
+      "green_buyer_win_rate": 0.5134,
+      "green_path_seat_share": 0.13,
+      "green_path_win_rate": 0.5513,
+      "company_color_win_rate": {
+        "blue": 0.4617,
+        "green": 0.5086,
+        "red": 0.5308
+      },
+      "company_color_seats": {
+        "blue": 405,
+        "green": 405,
+        "red": 390
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.4947,
+        "DTO": 0.4332,
+        "HELIX": 0.4927,
+        "MERIDIAN": 0.538,
+        "OMNIDYNE": 0.525,
+        "PROMETHEUS": 0.5243
+      },
+      "company_code_seats": {
+        "AEGIS": 188,
+        "DTO": 217,
+        "HELIX": 205,
+        "MERIDIAN": 184,
+        "OMNIDYNE": 200,
+        "PROMETHEUS": 206
+      },
+      "g1_activations": 0,
+      "g2_activations": 0,
+      "g3_activations": 776,
+      "g2_activations_per_game": 0.0,
+      "g2_mean_research": null,
+      "g2_mean_g": null,
+      "g2_g_pmf": {},
+      "slots_cleaned_face_per_seat": 0.333,
+      "max_glitched_slots_avg": 2.13,
+      "outliers": {
+        "shortest": [
+          [
+            87,
+            1,
+            "patient_zero"
+          ],
+          [
+            494,
+            1,
+            "patient_zero"
+          ],
+          [
+            579,
+            1,
+            "patient_zero"
+          ],
+          [
+            53,
+            2,
+            "total_wipeout"
+          ],
+          [
+            62,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            588,
+            11,
+            "singularity"
+          ],
+          [
+            576,
+            11,
+            "singularity"
+          ],
+          [
+            560,
+            11,
+            "singularity"
+          ],
+          [
+            551,
+            11,
+            "singularity"
+          ],
+          [
+            546,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": [
+          48,
+          53,
+          216,
+          246,
+          297,
+          328,
+          347,
+          401,
+          469,
+          481
+        ]
+      }
+    },
+    {
+      "profile": "AGGRESSIVE",
+      "players": 3,
+      "green_mode": "RANDOM",
+      "games": 600,
+      "avg_rounds": 8.185,
+      "min_rounds": 2,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.4317,
+        "patient_zero_total": 0.3633,
+        "patient_zero_survivor": 0.3633,
+        "total_wipeout": 0.0067,
+        "market_collapse": 0.1983,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.359,
+      "green_purchases_per_game": 1.078,
+      "green_buyer_seat_share": 0.2139,
+      "green_buyer_win_rate": 0.3532,
+      "green_path_seat_share": 0.1511,
+      "green_path_win_rate": 0.4044,
+      "company_color_win_rate": {
+        "blue": 0.3511,
+        "green": 0.3307,
+        "red": 0.3177
+      },
+      "company_color_seats": {
+        "blue": 601,
+        "green": 623,
+        "red": 576
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.3448,
+        "DTO": 0.3569,
+        "HELIX": 0.3444,
+        "MERIDIAN": 0.2896,
+        "OMNIDYNE": 0.3178,
+        "PROMETHEUS": 0.3477
+      },
+      "company_code_seats": {
+        "AEGIS": 290,
+        "DTO": 311,
+        "HELIX": 302,
+        "MERIDIAN": 297,
+        "OMNIDYNE": 321,
+        "PROMETHEUS": 279
+      },
+      "g1_activations": 308,
+      "g2_activations": 366,
+      "g3_activations": 344,
+      "g2_activations_per_game": 0.61,
+      "g2_mean_research": 2.765,
+      "g2_mean_g": 0.765,
+      "g2_g_pmf": {
+        "0": 0.5137,
+        "1": 0.2514,
+        "2": 0.194,
+        "3": 0.0383,
+        "4": 0.0027
+      },
+      "slots_cleaned_face_per_seat": 0.407,
+      "max_glitched_slots_avg": 2.161,
+      "outliers": {
+        "shortest": [
+          [
+            52,
+            2,
+            "patient_zero"
+          ],
+          [
+            57,
+            2,
+            "patient_zero"
+          ],
+          [
+            72,
+            2,
+            "patient_zero"
+          ],
+          [
+            78,
+            2,
+            "patient_zero"
+          ],
+          [
+            122,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            638,
+            11,
+            "singularity"
+          ],
+          [
+            617,
+            11,
+            "singularity"
+          ],
+          [
+            586,
+            11,
+            "singularity"
+          ],
+          [
+            574,
+            11,
+            "singularity"
+          ],
+          [
+            561,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": [
+          91,
+          294,
+          439,
+          542
+        ]
+      }
+    },
+    {
+      "profile": "AGGRESSIVE",
+      "players": 3,
+      "green_mode": "G1",
+      "games": 600,
+      "avg_rounds": 8.173,
+      "min_rounds": 2,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.4183,
+        "patient_zero_total": 0.3833,
+        "patient_zero_survivor": 0.3833,
+        "total_wipeout": 0.0117,
+        "market_collapse": 0.1867,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.219,
+      "green_purchases_per_game": 0.657,
+      "green_buyer_seat_share": 0.1333,
+      "green_buyer_win_rate": 0.35,
+      "green_path_seat_share": 0.1311,
+      "green_path_win_rate": 0.3686,
+      "company_color_win_rate": {
+        "blue": 0.3744,
+        "green": 0.3178,
+        "red": 0.3073
+      },
+      "company_color_seats": {
+        "blue": 601,
+        "green": 623,
+        "red": 576
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.3586,
+        "DTO": 0.3891,
+        "HELIX": 0.3411,
+        "MERIDIAN": 0.2795,
+        "OMNIDYNE": 0.296,
+        "PROMETHEUS": 0.3369
+      },
+      "company_code_seats": {
+        "AEGIS": 290,
+        "DTO": 311,
+        "HELIX": 302,
+        "MERIDIAN": 297,
+        "OMNIDYNE": 321,
+        "PROMETHEUS": 279
+      },
+      "g1_activations": 896,
+      "g2_activations": 0,
+      "g3_activations": 0,
+      "g2_activations_per_game": 0.0,
+      "g2_mean_research": null,
+      "g2_mean_g": null,
+      "g2_g_pmf": {},
+      "slots_cleaned_face_per_seat": 0.503,
+      "max_glitched_slots_avg": 2.155,
+      "outliers": {
+        "shortest": [
+          [
+            52,
+            2,
+            "patient_zero"
+          ],
+          [
+            57,
+            2,
+            "patient_zero"
+          ],
+          [
+            122,
+            2,
+            "patient_zero"
+          ],
+          [
+            173,
+            2,
+            "patient_zero"
+          ],
+          [
+            200,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            638,
+            11,
+            "singularity"
+          ],
+          [
+            610,
+            11,
+            "singularity"
+          ],
+          [
+            599,
+            11,
+            "singularity"
+          ],
+          [
+            574,
+            11,
+            "singularity"
+          ],
+          [
+            561,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": [
+          91,
+          239,
+          294,
+          344,
+          362,
+          475,
+          542
+        ]
+      }
+    },
+    {
+      "profile": "AGGRESSIVE",
+      "players": 3,
+      "green_mode": "G2",
+      "games": 600,
+      "avg_rounds": 8.245,
+      "min_rounds": 2,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.4533,
+        "patient_zero_total": 0.3533,
+        "patient_zero_survivor": 0.3533,
+        "total_wipeout": 0.0067,
+        "market_collapse": 0.1867,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.412,
+      "green_purchases_per_game": 1.237,
+      "green_buyer_seat_share": 0.2528,
+      "green_buyer_win_rate": 0.3473,
+      "green_path_seat_share": 0.1522,
+      "green_path_win_rate": 0.3942,
+      "company_color_win_rate": {
+        "blue": 0.3611,
+        "green": 0.3274,
+        "red": 0.3108
+      },
+      "company_color_seats": {
+        "blue": 601,
+        "green": 623,
+        "red": 576
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.3552,
+        "DTO": 0.3666,
+        "HELIX": 0.3113,
+        "MERIDIAN": 0.2896,
+        "OMNIDYNE": 0.3427,
+        "PROMETHEUS": 0.3333
+      },
+      "company_code_seats": {
+        "AEGIS": 290,
+        "DTO": 311,
+        "HELIX": 302,
+        "MERIDIAN": 297,
+        "OMNIDYNE": 321,
+        "PROMETHEUS": 279
+      },
+      "g1_activations": 0,
+      "g2_activations": 1047,
+      "g3_activations": 0,
+      "g2_activations_per_game": 1.745,
+      "g2_mean_research": 2.8099,
+      "g2_mean_g": 0.8099,
+      "g2_g_pmf": {
+        "0": 0.4737,
+        "1": 0.2751,
+        "2": 0.2197,
+        "3": 0.0306,
+        "4": 0.001
+      },
+      "slots_cleaned_face_per_seat": 0.36,
+      "max_glitched_slots_avg": 2.177,
+      "outliers": {
+        "shortest": [
+          [
+            52,
+            2,
+            "patient_zero"
+          ],
+          [
+            57,
+            2,
+            "patient_zero"
+          ],
+          [
+            72,
+            2,
+            "patient_zero"
+          ],
+          [
+            122,
+            2,
+            "patient_zero"
+          ],
+          [
+            200,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            638,
+            11,
+            "singularity"
+          ],
+          [
+            617,
+            11,
+            "singularity"
+          ],
+          [
+            599,
+            11,
+            "singularity"
+          ],
+          [
+            586,
+            11,
+            "singularity"
+          ],
+          [
+            574,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": [
+          169,
+          294,
+          340,
+          439
+        ]
+      }
+    },
+    {
+      "profile": "AGGRESSIVE",
+      "players": 3,
+      "green_mode": "G3",
+      "games": 600,
+      "avg_rounds": 8.3,
+      "min_rounds": 2,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.45,
+        "patient_zero_total": 0.3483,
+        "patient_zero_survivor": 0.3483,
+        "total_wipeout": 0.0083,
+        "market_collapse": 0.1933,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.479,
+      "green_purchases_per_game": 1.437,
+      "green_buyer_seat_share": 0.2844,
+      "green_buyer_win_rate": 0.375,
+      "green_path_seat_share": 0.1578,
+      "green_path_win_rate": 0.4085,
+      "company_color_win_rate": {
+        "blue": 0.3378,
+        "green": 0.3499,
+        "red": 0.3108
+      },
+      "company_color_seats": {
+        "blue": 601,
+        "green": 623,
+        "red": 576
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.3448,
+        "DTO": 0.3312,
+        "HELIX": 0.3411,
+        "MERIDIAN": 0.2963,
+        "OMNIDYNE": 0.3583,
+        "PROMETHEUS": 0.3262
+      },
+      "company_code_seats": {
+        "AEGIS": 290,
+        "DTO": 311,
+        "HELIX": 302,
+        "MERIDIAN": 297,
+        "OMNIDYNE": 321,
+        "PROMETHEUS": 279
+      },
+      "g1_activations": 0,
+      "g2_activations": 0,
+      "g3_activations": 1375,
+      "g2_activations_per_game": 0.0,
+      "g2_mean_research": null,
+      "g2_mean_g": null,
+      "g2_g_pmf": {},
+      "slots_cleaned_face_per_seat": 0.4,
+      "max_glitched_slots_avg": 2.193,
+      "outliers": {
+        "shortest": [
+          [
+            52,
+            2,
+            "patient_zero"
+          ],
+          [
+            57,
+            2,
+            "patient_zero"
+          ],
+          [
+            72,
+            2,
+            "patient_zero"
+          ],
+          [
+            78,
+            2,
+            "patient_zero"
+          ],
+          [
+            122,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            638,
+            11,
+            "singularity"
+          ],
+          [
+            617,
+            11,
+            "singularity"
+          ],
+          [
+            586,
+            11,
+            "singularity"
+          ],
+          [
+            585,
+            11,
+            "singularity"
+          ],
+          [
+            574,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": [
+          107,
+          139,
+          279,
+          294,
+          551
+        ]
+      }
+    },
+    {
+      "profile": "AGGRESSIVE",
+      "players": 4,
+      "green_mode": "RANDOM",
+      "games": 600,
+      "avg_rounds": 8.298,
+      "min_rounds": 2,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.4583,
+        "patient_zero_total": 0.3733,
+        "patient_zero_survivor": 0.3733,
+        "total_wipeout": 0.0,
+        "market_collapse": 0.1683,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.437,
+      "green_purchases_per_game": 1.747,
+      "green_buyer_seat_share": 0.2487,
+      "green_buyer_win_rate": 0.2312,
+      "green_path_seat_share": 0.1642,
+      "green_path_win_rate": 0.3325,
+      "company_color_win_rate": {
+        "blue": 0.2332,
+        "green": 0.2559,
+        "red": 0.2606
+      },
+      "company_color_seats": {
+        "blue": 789,
+        "green": 809,
+        "red": 802
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.26,
+        "DTO": 0.2057,
+        "HELIX": 0.2746,
+        "MERIDIAN": 0.265,
+        "OMNIDYNE": 0.2379,
+        "PROMETHEUS": 0.2562
+      },
+      "company_code_seats": {
+        "AEGIS": 400,
+        "DTO": 389,
+        "HELIX": 397,
+        "MERIDIAN": 400,
+        "OMNIDYNE": 412,
+        "PROMETHEUS": 402
+      },
+      "g1_activations": 438,
+      "g2_activations": 536,
+      "g3_activations": 571,
+      "g2_activations_per_game": 0.893,
+      "g2_mean_research": 2.806,
+      "g2_mean_g": 0.806,
+      "g2_g_pmf": {
+        "0": 0.4701,
+        "1": 0.2873,
+        "2": 0.209,
+        "3": 0.0336
+      },
+      "slots_cleaned_face_per_seat": 0.447,
+      "max_glitched_slots_avg": 2.139,
+      "outliers": {
+        "shortest": [
+          [
+            72,
+            2,
+            "patient_zero"
+          ],
+          [
+            148,
+            2,
+            "patient_zero"
+          ],
+          [
+            239,
+            2,
+            "patient_zero"
+          ],
+          [
+            276,
+            2,
+            "patient_zero"
+          ],
+          [
+            325,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            630,
+            11,
+            "singularity"
+          ],
+          [
+            591,
+            11,
+            "singularity"
+          ],
+          [
+            578,
+            11,
+            "singularity"
+          ],
+          [
+            560,
+            11,
+            "singularity"
+          ],
+          [
+            525,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": []
+      }
+    },
+    {
+      "profile": "AGGRESSIVE",
+      "players": 4,
+      "green_mode": "G1",
+      "games": 600,
+      "avg_rounds": 8.257,
+      "min_rounds": 2,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.4333,
+        "patient_zero_total": 0.3883,
+        "patient_zero_survivor": 0.3883,
+        "total_wipeout": 0.0033,
+        "market_collapse": 0.175,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.253,
+      "green_purchases_per_game": 1.012,
+      "green_buyer_seat_share": 0.1525,
+      "green_buyer_win_rate": 0.1776,
+      "green_path_seat_share": 0.1412,
+      "green_path_win_rate": 0.3363,
+      "company_color_win_rate": {
+        "blue": 0.2395,
+        "green": 0.2571,
+        "red": 0.2531
+      },
+      "company_color_seats": {
+        "blue": 789,
+        "green": 809,
+        "red": 802
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.27,
+        "DTO": 0.2082,
+        "HELIX": 0.2897,
+        "MERIDIAN": 0.27,
+        "OMNIDYNE": 0.2257,
+        "PROMETHEUS": 0.2363
+      },
+      "company_code_seats": {
+        "AEGIS": 400,
+        "DTO": 389,
+        "HELIX": 397,
+        "MERIDIAN": 400,
+        "OMNIDYNE": 412,
+        "PROMETHEUS": 402
+      },
+      "g1_activations": 1186,
+      "g2_activations": 0,
+      "g3_activations": 0,
+      "g2_activations_per_game": 0.0,
+      "g2_mean_research": null,
+      "g2_mean_g": null,
+      "g2_g_pmf": {},
+      "slots_cleaned_face_per_seat": 0.53,
+      "max_glitched_slots_avg": 2.116,
+      "outliers": {
+        "shortest": [
+          [
+            72,
+            2,
+            "patient_zero"
+          ],
+          [
+            148,
+            2,
+            "patient_zero"
+          ],
+          [
+            154,
+            2,
+            "patient_zero"
+          ],
+          [
+            239,
+            2,
+            "patient_zero"
+          ],
+          [
+            276,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            632,
+            11,
+            "singularity"
+          ],
+          [
+            630,
+            11,
+            "singularity"
+          ],
+          [
+            591,
+            11,
+            "singularity"
+          ],
+          [
+            583,
+            11,
+            "singularity"
+          ],
+          [
+            540,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": [
+          423,
+          513
+        ]
+      }
+    },
+    {
+      "profile": "AGGRESSIVE",
+      "players": 4,
+      "green_mode": "G2",
+      "games": 600,
+      "avg_rounds": 8.327,
+      "min_rounds": 2,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.465,
+        "patient_zero_total": 0.3833,
+        "patient_zero_survivor": 0.3833,
+        "total_wipeout": 0.0,
+        "market_collapse": 0.1517,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.501,
+      "green_purchases_per_game": 2.005,
+      "green_buyer_seat_share": 0.2921,
+      "green_buyer_win_rate": 0.2454,
+      "green_path_seat_share": 0.1721,
+      "green_path_win_rate": 0.3123,
+      "company_color_win_rate": {
+        "blue": 0.2471,
+        "green": 0.2571,
+        "red": 0.2456
+      },
+      "company_color_seats": {
+        "blue": 789,
+        "green": 809,
+        "red": 802
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.28,
+        "DTO": 0.2134,
+        "HELIX": 0.2519,
+        "MERIDIAN": 0.2325,
+        "OMNIDYNE": 0.2621,
+        "PROMETHEUS": 0.2587
+      },
+      "company_code_seats": {
+        "AEGIS": 400,
+        "DTO": 389,
+        "HELIX": 397,
+        "MERIDIAN": 400,
+        "OMNIDYNE": 412,
+        "PROMETHEUS": 402
+      },
+      "g1_activations": 0,
+      "g2_activations": 1603,
+      "g3_activations": 0,
+      "g2_activations_per_game": 2.672,
+      "g2_mean_research": 2.8459,
+      "g2_mean_g": 0.8459,
+      "g2_g_pmf": {
+        "0": 0.4566,
+        "1": 0.2776,
+        "2": 0.2314,
+        "3": 0.0318,
+        "4": 0.0025
+      },
+      "slots_cleaned_face_per_seat": 0.427,
+      "max_glitched_slots_avg": 2.144,
+      "outliers": {
+        "shortest": [
+          [
+            72,
+            2,
+            "patient_zero"
+          ],
+          [
+            148,
+            2,
+            "patient_zero"
+          ],
+          [
+            239,
+            2,
+            "patient_zero"
+          ],
+          [
+            276,
+            2,
+            "patient_zero"
+          ],
+          [
+            325,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            630,
+            11,
+            "singularity"
+          ],
+          [
+            627,
+            11,
+            "singularity"
+          ],
+          [
+            597,
+            11,
+            "singularity"
+          ],
+          [
+            591,
+            11,
+            "singularity"
+          ],
+          [
+            583,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": []
+      }
+    },
+    {
+      "profile": "AGGRESSIVE",
+      "players": 4,
+      "green_mode": "G3",
+      "games": 600,
+      "avg_rounds": 8.272,
+      "min_rounds": 2,
+      "max_rounds": 11,
+      "endings": {
+        "singularity": 0.4683,
+        "patient_zero_total": 0.3667,
+        "patient_zero_survivor": 0.3667,
+        "total_wipeout": 0.0,
+        "market_collapse": 0.165,
+        "round_limit": 0.0
+      },
+      "green_purchases_per_seat": 0.566,
+      "green_purchases_per_game": 2.263,
+      "green_buyer_seat_share": 0.3187,
+      "green_buyer_win_rate": 0.2614,
+      "green_path_seat_share": 0.1704,
+      "green_path_win_rate": 0.3178,
+      "company_color_win_rate": {
+        "blue": 0.2421,
+        "green": 0.2509,
+        "red": 0.2569
+      },
+      "company_color_seats": {
+        "blue": 789,
+        "green": 809,
+        "red": 802
+      },
+      "company_code_win_rate": {
+        "AEGIS": 0.255,
+        "DTO": 0.2288,
+        "HELIX": 0.2569,
+        "MERIDIAN": 0.2575,
+        "OMNIDYNE": 0.2451,
+        "PROMETHEUS": 0.2562
+      },
+      "company_code_seats": {
+        "AEGIS": 400,
+        "DTO": 389,
+        "HELIX": 397,
+        "MERIDIAN": 400,
+        "OMNIDYNE": 412,
+        "PROMETHEUS": 402
+      },
+      "g1_activations": 0,
+      "g2_activations": 0,
+      "g3_activations": 1871,
+      "g2_activations_per_game": 0.0,
+      "g2_mean_research": null,
+      "g2_mean_g": null,
+      "g2_g_pmf": {},
+      "slots_cleaned_face_per_seat": 0.413,
+      "max_glitched_slots_avg": 2.145,
+      "outliers": {
+        "shortest": [
+          [
+            72,
+            2,
+            "patient_zero"
+          ],
+          [
+            139,
+            2,
+            "patient_zero"
+          ],
+          [
+            148,
+            2,
+            "patient_zero"
+          ],
+          [
+            239,
+            2,
+            "patient_zero"
+          ],
+          [
+            276,
+            2,
+            "patient_zero"
+          ]
+        ],
+        "longest": [
+          [
+            606,
+            11,
+            "singularity"
+          ],
+          [
+            591,
+            11,
+            "singularity"
+          ],
+          [
+            585,
+            11,
+            "singularity"
+          ],
+          [
+            563,
+            11,
+            "singularity"
+          ],
+          [
+            560,
+            11,
+            "singularity"
+          ]
+        ],
+        "total_wipeout_seeds": []
+      }
+    }
+  ]
+}

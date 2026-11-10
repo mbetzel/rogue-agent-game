@@ -1519,8 +1519,15 @@ def apply_variant_profile(variant_cards: Dict[DieColor, VariantCard], profile: O
         elif code == "B3":
             out[color] = _v038_star(card, "In Phase 3: Income, move 1 die from your Processing Box to your Scanned "
                                           "Box (banking its Secret).")
-        elif code in ("G1", "G2"):
+        elif code == "G1":
             out[color] = _v038_star(card, f"{CLEAN_SLOT_NAME} and gain +1 🔬.", patches=1, clean_slots=1)
+        elif code == "G2":
+            out[color] = _v038_star(
+                card,
+                "Gain +2 🔬, plus +1 🔬 for each of your Glitched Shield Slots.",
+                patches=2,
+                clean_slots=0,
+            )
         elif code == "Y3":
             out[color] = dataclasses.replace(
                 card, description="Gain +1 Corporate Secret, then move this die to the Scanned Box.")

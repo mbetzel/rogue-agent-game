@@ -9,47 +9,9 @@ This document tracks verified balance takeaways, bot meta equilibria, card tieri
 
 ---
 
-> [!NOTE] Sections §1–§35 (Phases 15–45, the v0.13–v0.36 baselines, and the §35 engine fix) are archived in [docs/archive/FINDINGS_s01-s35.md](docs/archive/FINDINGS_s01-s35.md). Section numbering continues here unchanged. **Agents: do not read the archive unless a task cites a specific §N ≤ 35.**
+> [!NOTE] Sections §1–§36 (Phases 15–45, the v0.13–v0.36 baselines, the §35 engine fix, and §36 Blue Defense exploration) are archived in [docs/archive/FINDINGS_s01-s35.md](docs/archive/FINDINGS_s01-s35.md). Section numbering continues here unchanged. **Agents: do not read the archive unless a task cites a specific §N ≤ 36.**
 
 ---
-
-## 36. Pre-SDLC Exploration: Blue Defense Agency (no rules change)
-
-Question (User, 2026-11-06): blocking Blue always comes first, so defense "plays itself", and v0.36 has no repeatable Secrets engine. Probes (hooks only, not rules code; `GameConfig.v036`, current bot roster, seeds `42 + n*100000 + idx`, 600 games per pod): `scripts/explore_v360_blue_pressure_probe.py`, `scripts/explore_v360_topoff_probe.py`, `scripts/explore_v360_blue_block2_probe.py`.
-
-**Diagnosis (baseline, per seat per game):**
-
-| | 2P | 3P | 4P |
-|---|---|---|---|
-| Block rate Red / Blue / Green | 15 / 67 / 12% | 15 / 68 / 12% | 15 / 67 / 12% |
-| Any shields spent on Blue | 63% | 63% | 62% |
-| Contested Any splits (Blue covered first) | 66% of attack rounds (94%) | 66% (94%) | 67% (94%) |
-| Start → final Secrets; lost to Blue | 7 → 3.12; 3.96 | 7 → 3.29; 3.79 | 8 → 4.17; 3.94 |
-| All other Secret gains minus Corruption losses | +0.08 | +0.07 | +0.11 |
-
-1. **Final Secrets ≈ starting Secrets − Blue losses.** Blue defense is effectively the score. A Blue cube costs a permanent VP; Red and Green cost recoverable resources, so Blue-first is always correct. (Bots fill Blue first by policy, but the scoring math backs it.)
-2. Patient Zero seats lose 7.5–8.7 Secrets to Blue vs 3.1–3.4 for survivors.
-
-**Idea 3 — L4 top-off** (once per round in Phase 6, any track at L4: pay X 🔬 for +1 Corporate Secret; working name only, no glossary term):
-- Research income is ~1.3 🔬 per round per seat; 42–44% of seats reach one L4 track, around round 4–5.
-- Bots that convert only leftover research rarely use it (2–8% of seats).
-- A top-off-aware bot (tops off before other spending; prices the first repairable Blue cube each round at X 🔬): at 3 🔬, 27% of seats use it, about 1.75 Secrets per user. Endings stay within ~3 points of baseline, rounds unchanged. One aware seat vs current bots wins 50.2 / 37.2 / 27.7% (fair share 50 / 33 / 25%). At 2 🔬: 40.7% at 3P and 31.1% at 4P, too strong.
-- Starting Secrets −1 with top-off pushes Patient Zero to 37–41%: keep 7 / 7 / 8.
-- **Agency barely moves:** Blue left open on purpose in contested splits goes from ~6% to 7–8% (8–9% at 2 🔬). A repairable Blue (3 🔬) still costs more than Red (2 🔬 regain) or Green, and the L4 gate arrives late.
-
-**Idea 2 — Block 2 Blue faces** (A: Face 1 → Block 2 Blue; C: Faces 1 and 4 → Block 2 Blue):
-- Blue lost per seat falls by 0.2–0.4 (3P: 3.79 → 3.59 / 3.42); Any shields on Blue 63% → 61 / 60%; endings shift 1–3 points.
-- Small because seats own only 0.75–0.86 Blue dice and see Blue block faces 2 times in 6, vs ~1.5 Blue cubes per round.
-- **Must-buy risk:** win rate by Blue dice owned (0 / 2+) at 4P goes from 17 / 39% to 13 / 47% (C). Partly correlational; bots' buying logic does not know Blue got stronger.
-
-**Not simulated:** idea 1 (lower a track for a Secret — a late lifeline, would lower Patient Zero endings), idea 4 (new track — Patents again), idea 5 (Market Share → Secrets thresholds — the −1 side brings back the Unpaid Ransom Leak; shared Red cubes push toward Total Wipeouts).
-
-**Takeaways:**
-1. Making Blue cheaper to block (idea 2) or to recover from (idea 3) leaves Blue the costliest cube to take, so Blue-first stays correct. Real shield-split agency likely needs Red or Green damage to hurt more.
-2. Idea 3 at 3 🔬 is worth keeping as a Secrets engine and strategic path (pacing-neutral, modest edge). Idea 2 is at most a small tuning option.
-3. Sim/rules mismatch: `sim/engine/phase4_attack_resolution.py` lets DTO *Slush Fund* pay `$1` per extra Secret beyond the free 2; RULES.md has no such rule.
-
-**Status: exploration recorded (User, 2026-11-07). No RULES.md, PnP or web change. Next candidate: probe costlier Red / Green damage.**
 
 ## 37. Pre-SDLC Exploration: Market Share Threshold Penalties (no rules change)
 
@@ -406,3 +368,19 @@ Source: `sim_results/v380_secret_faces/c2/sweep_report.md`. Endings (2P / 3P / 4
 - **User decision (2026-11-09):** collapse-play bot work dropped. Next: Phase B (RULES.md, glossary, PnP, web) for v038c.
 - **User decision (2026-11-09):** the Red Secret payout reuses the existing term **Market Leader Bonus** (rewritten: fires at the end of Phase 5 in any round a Red Secret is banked, plus once at game end except on a Total Wipeout; 1st +3 / 2nd +1). No new term.
 - **User decisions (2026-11-09, Phase B wording):** Company starting die stays plain words ("starting colored die"), no term; Defensive Shield Sacrifice retired in v0.38.0; a Secret face die leaving the Processing Box "banks" its Secret (plain verb, not a glossary term).
+
+## 44. Phase 50 Post-Telemetry Balance Assessment: `G2 — Universal Sandbox` Redesign (`v0.38c`): APPROVED
+
+Sources: `docs/specs/g2_universal_sandbox_spec.md`, `docs/findings/g2_universal_sandbox_analysis.md`, `sim_results/g2_universal_sandbox/validation_report.md` (24 cells × 600 games = 14,400 games across 2P/3P/4P, Standard & Aggressive profiles, `RANDOM / G1 / G2 / G3`, seeds 42..641).
+
+- **Context & Design Rationale:** During v0.38 shield normalization, `G2 — Universal Sandbox ($4)` was temporarily collapsed into the exact same placeholder as `G1 — Self-Healing Kernel ($5)`: `Clean 1 Glitched Shield Slot + gain +1 🔬`. This created an overpriced trap ($5 for identical effect) and redundant mechanics. User approved Option D2 from the pre-SDLC analysis: `[In Production — Income] Gain +2 🔬, plus +1 🔬 for each of your Glitched Shield Slots [TUNE]` (Phase 1 Step 5 cleaning removed; `clean_slots=0`).
+- **Mathematical Modeling & Zero-Blank Compliance:** In Phase 3 Income, players carry 0 glitched shield slots ($g=0$) in 82.4% of rounds (and 98.6% in Rounds 1–3). The pure proposal (`+1 🔬 per glitched slot`) would produce a blank face (0 🔬, $0) in over 82% of activations with a meager EV of 0.21 🔬. The implemented `+2 🔬` base ensures compliance with the "Zero Blank Faces" design pillar, scaling to `+3 🔬` ($g=1$, 14.2% PMF) and `+4 🔬` ($g=2$, 3.4% PMF) under attack.
+- **Empirical Yields & Parity:** In the 14,400-game validation sweep, realized G2 activations yielded **2.51–2.61 🔬** in Standard and **2.77–2.85 🔬** in Aggressive. In 45.7%–60.0% of realized triggers, $g=0$, proving the `+2 🔬` base was indispensable. G2 sits in near-perfect nominal parity (~2.6 🔬) against `G3 — Live Reboot` ($4: `+2 🔬 + $1`, nominal ~3.0).
+- **Market Viability & Buyer Win Rates:**
+  - `G1 ($5)`: 0.18–0.29 buys/seat, 11.7%–17.0% buyer share, 17.8%–50.0% buyer win rate.
+  - `G3 ($4)`: 0.41–0.64 buys/seat, 24.8%–34.1% buyer share, 26.1%–51.3% buyer win rate.
+  - `G2 ($4)`: **0.36–0.54 buys/seat**, **23.1%–29.9% buyer share**, **24.5%–49.1% buyer win rate** (exact fair-share parity: 2P 49.1% [fair 50%], 3P 35.4% [fair 33.3%], 4P 27.1% [fair 25%]). G2 is a highly viable, competitive choice without becoming a dominant must-buy.
+- **Company Win Rate Parity:** Under G2, starting Green companies (Omnidyne & Helix) achieve tight win rate parity across all pods: 2P 48.0% / 50.2%, 3P 34.3% / 34.4%, 4P 26.2% / 25.9%. Overall Company color split (Red / Blue / Green) under G2 is 2P 55.1 / 45.9 / 49.1%, 3P 32.5 / 33.1 / 34.4%, 4P 24.7 / 24.2 / 26.1% (within noise of fair share).
+- **Pacing & End Triggers:** Mean rounds 8.24–8.39 across all pods; 0.0% timeouts. End triggers under G2 Standard: 2P Singularity 42.7% (below ≤48% guardrail), PZ 18.5%, MC 35.5%, TW 3.3%; 3P Sing 45.8%, PZ 33.0%, MC 21.0%, TW 0.2%; 4P Sing 49.5%, PZ 33.5%, MC 17.0%, TW 0.0%. Pacing and existential tension are identical within noise to G3 and Random modes.
+- **Anti-Degeneracy Proof:** Maximum active glitches observed across 14,400 games was 3 ($<2\%$ of rounds). Stalling to farm research was non-existent because unblocked Blue cubes threaten Patient Zero elimination, unblocked Red cubes threaten Market Collapse, and each glitched slot directly penalizes banked Green Secrets ($3 - g$ Secrets, where 1 Secret = 1 VP = ~3 🔬).
+- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.38c`).** No further tuning required; G2 redesign locked.

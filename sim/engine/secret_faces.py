@@ -162,7 +162,7 @@ def glitch_slots(p: "PlayerState", n: int, source: str) -> int:
 
 
 def clean_slots(p: "PlayerState", n: int, how: str) -> int:
-    """Cleans up to ``n`` glitched slots. ``how``: ``"die"`` (placement), ``"face"`` (Green F1 / G1 / G2),
+    """Cleans up to ``n`` glitched slots. ``how``: ``"die"`` (placement), ``"face"`` (Green F1 / G1),
     ``"graduation"`` (Phase 5 step 3b)."""
     done = min(max(0, int(n)), int(p.glitched_shield_slots))
     if done:

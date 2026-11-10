@@ -35,7 +35,7 @@ Split out of `RULES.md`; this file is canonical for Section 6.
   * *B3 — Air-Gapped Backup (`$4`):* `[In Production — Income]` move `1` die from your **Processing Box** to your **Scanned Box** in Phase 3, banking its Secret `[TUNE]`.
 * **Green `★` Variants:**
   * *G1 — Self-Healing Kernel (`$5`):* `Clean 1 Glitched Shield Slot` (in Phase 1 Step 5) + `[In Production — Income]` gain `+1 🔬`.
-  * *G2 — Universal Sandbox (`$4`):* `Clean 1 Glitched Shield Slot` (in Phase 1 Step 5) + `[In Production — Income]` gain `+1 🔬`. *(Identical to G1 for now `[TUNE]`.)*
+  * *G2 — Universal Sandbox (`$4`):* `[In Production — Income]` Gain `+2 🔬`, plus `+1 🔬` for each of your **Glitched Shield Slots** `[TUNE]`.
   * *G3 — Live Reboot (`$4`):* `[In Production — Income]` Gain `+2 🔬` + `+$1`.
 * **Yellow `★` Variants:**
   * *Y1 — Algorithmic Trading (`$6`):* `[In Production — Income]` Gain `+$4`, **OR** `[Phase 6 — Operations]` pay `$2` in Phase 6 to gain `+1 Corporate Secret`.
