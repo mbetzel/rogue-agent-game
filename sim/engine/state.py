@@ -150,6 +150,11 @@ class PlayerState:
     ability_v1_status: AbilityStatus = AbilityStatus.AVAILABLE
     ability_v2_status: AbilityStatus = AbilityStatus.LOCKED
     ability_v3_status: AbilityStatus = AbilityStatus.LOCKED
+    market_share: Optional[int] = None
+    market_share_max: Optional[int] = None
+    market_share_min: Optional[int] = None
+    market_share_start: Optional[int] = None
+    market_share_peak: Optional[int] = None
 
     def __init__(
         self,
@@ -225,6 +230,7 @@ class PlayerState:
         self.market_share_max: Optional[int] = None
         self.market_share_min: Optional[int] = None
         self.market_share_start: Optional[int] = None
+        self.market_share_peak: Optional[int] = None
         self.market_share_lost_red = 0  # actual decrease from Red (after floor clamp)
         self.market_share_red_overflow = 0  # unblocked Red beyond the floor (telemetry only)
         self.market_share_lost_poach = 0  # Customer Poaching taken from this player
@@ -369,13 +375,18 @@ class PlayerState:
         self.purple_star_count = purple_star_count
 
     # --- v0.36.0 Market Share (INV-MS-LEDGER-01) ---
-    def init_market_share(self, start: int) -> None:
-        self.market_share = self.market_share_max = self.market_share_min = self.market_share_start = int(start)
+    def init_market_share(self, start: int, max_share: Optional[int] = None) -> None:
+        """Initializes Market Share, decoupling starting marker position from track ceiling.
+
+        If max_share is None, defaults to start (preserving legacy test and fixture behavior).
+        """
+        self.market_share = self.market_share_min = self.market_share_start = self.market_share_peak = int(start)
+        self.market_share_max = int(max_share) if max_share is not None else int(start)
 
     def change_market_share(self, delta: int, source: str) -> int:
         """Applies a Market Share change clamped to [0, max]; updates ledgers; returns the actual change.
 
-        ``source`` is one of ``"red"``, ``"poach_lost"``, ``"poach_gained"``, ``"regain"``, ``"r2"``.
+        ``source`` is one of ``"red"``, ``"poach_lost"``, ``"poach_gained"``, ``"regain"``, ``"r2"``, ``"face"``.
         """
         if self.market_share is None:
             return 0
@@ -400,6 +411,8 @@ class PlayerState:
             raise ValueError(f"unknown Market Share source {source!r}")
         if self.market_share_min is None or after < self.market_share_min:
             self.market_share_min = after
+        if self.market_share_peak is None or after > self.market_share_peak:
+            self.market_share_peak = after
         return actual
 
     def gain_secrets(self, amount: int, source: str) -> None:

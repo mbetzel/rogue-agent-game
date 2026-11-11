@@ -203,7 +203,9 @@ class GameEngine:
                 config=config,
             )
             if config.is_market_share:
-                player.init_market_share(config.market_share_start(config.num_players))
+                start_ms = config.market_share_start(config.num_players)
+                max_ms = config.get_market_share_max(config.num_players)
+                player.init_market_share(start=start_ms, max_share=max_ms)
             if config.secret_face_enabled:
                 player.secrets_by_source["starting"] = player.secrets
                 player.company_color = company_color.value if company_color is not None else None

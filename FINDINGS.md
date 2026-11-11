@@ -417,3 +417,36 @@ Sources: `docs/findings/early_game_pressure_modeling.md`, `docs/findings/c2_gree
     All color win rates remain within healthy competitive bounds without any single dominant color.
   - **Early Round Pressure ("Tutorialization"):** In Round 1, players face an average of 1.4 incoming attack cubes with only 1 active clean Shield Slot. Players must make meaningful trade-offs from Turn 1: whether to dedicate their starter die to blocking, take damage, or accept a glitched slot penalty.
 - **Official Balance Verdict: OFFICIALLY APPROVED (`v0.38d`).** Package `v0.38d` meets all design pillars, tension targets, and balance criteria.
+
+## 46. Phase 52 Post-Telemetry Balance Assessment: Unified Market Share Track & Headroom Architecture (`v0.38e`): APPROVED
+
+Sources: `docs/specs/market_share_headroom_spec.md`, `sim_results/market_share_headroom/validation_report.md` (3,600 games across 2P/3P/4P, seeds 42..1241).
+
+- **Context & Design Flaw in Baseline (`v0.38d`):** In `v0.38d`, a player's starting Market Share was coupled to the track ceiling (`start == max` = 13 at 2P, 16 at 3P, 17 at 4P). This zero-headroom architecture violated Core Design Pillar 3 ("Zero Blank Faces"):
+  1. Red Face 1 (`+1 Market Share / +$1`) choice rate collapsed to **0.0%** for Market Share in Round 1 (100% forced into `+$1`).
+  2. Yellow Face 1 (`+2 Market Share`) was a completely blank face ($0, 0 🔬, 0 MS). Yellow Face 2 collapsed into forced research, while Yellow Face 3 and *Brand Protection* (R1 ★) wasted their `+1 Market Share` component.
+  3. The Public Relations Track was mechanically locked in early rounds until unblocked Red cubes inflicted damage.
+- **Architectural Solution (Candidate A4 — Unified Max 20 + Calibrated Headroom):**
+  - Central board track unified with a single physical ceiling of **20** (`market_share_max = 20`) across all player counts (21 cells: 0 to 20).
+  - Calibrated starting positions: **13** at 2P (+7 headroom), **16** at 3P (+4 headroom), and **16** at 4P (+4 headroom, unified with 3P).
+  - Hard clamping strictly enforced: floor at `0` (triggers Market Collapse check post-Phase 4), ceiling at `20`.
+- **Validation Against Core Design Pillars (3,600 Games):**
+  1. **Zero Blank Faces Restored (INV-MS-HEADROOM-08 & INV-MS-HEADROOM-01/02):**
+     - In Round 1, Red Face 1 selection of `+1 Market Share` over `+$1` jumped from **0.0% to 100.0%** across all player counts (target `> 30.0%`).
+     - Round 1 players at maximum track dropped from **53.8%–73.3%** in baseline to **0.0%**. In Round 2, players at max remained at **0.0%** (2P) and **0.1%** (3P/4P), completely eliminating early ceiling congestion (target `< 5.0%`).
+     - Headroom actively utilized: **42.5%** (2P), **54.2%** (3P), and **56.2%** (4P) of players climbed above their starting position during the game, with **1.6%–14.4%** reaching the 20 ceiling. Mean peak Market Share reached 13.89 (2P), 17.20 (3P), and 17.25 (4P). Yellow Market Share faces and PR research conversions are fully functional from Round 1.
+  2. **Macro Pacing Preserved:**
+     - Mean rounds played: **8.72** (2P), **9.12** (3P), and **8.90** (4P). Exactly inside the target 8.7–9.1 round window (baseline was 8.73, 8.89, 8.94).
+     - Timeouts / Limit Hits: **0 (0.0%)** across all 3,600 games.
+  3. **Tri-Modal End Trigger Diversity:**
+     - **Singularity:** 35.7% (2P), 45.2% (3P), 39.3% (4P) — all within the $\le 48\%$ guardrail.
+     - **Patient Zero:** 20.3% (2P), 27.2% (3P), 29.3% (4P) — existential breach threat remains active.
+     - **Market Collapse:** 42.0% (2P), 27.1% (3P), 31.3% (4P) — healthy economic endgame pressure.
+     - **Total Wipeout:** 2.00% (2P), 0.50% (3P), 0.00% (4P) — suitably rare edge catastrophe.
+  4. **Company & Color Balance Equity:**
+     - Starting Color Win Rates: 2P Red 56.4% / Blue 43.4% / Green 50.2% (fair 50.0%); 3P Red 39.3% / Blue 27.1% / Green 33.7% (fair 33.3%); 4P Red 33.0% / Blue 18.1% / Green 24.0% (fair 25.0%). Red starter companies enjoy early positioning agency for the Market Leader Bonus, but counter-play remains viable across Blue and Green rosters without runaway imbalance.
+     - Bot Archetype Hierarchy: AdaptiveBalancedBot (40.8%–58.5%) leads; SecOpsTurtleBot (26.4%–56.5%) and VentureGreedBot (30.3%–53.4%) demonstrate competitive diversity.
+  5. **Invariants & Mechanical Robustness:**
+     - Invariants `INV-MS-HEADROOM-01` through `08` fully validated.
+     - Floor at 0 and ceiling at 20 respected with zero overflow exceptions across all matches. Outlier seeds confirmed clean resolution on early wipeouts (seeds 87/1146 via PZ) and long engine games (seeds 254/400/650 via Singularity at Round 13).
+- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.38e`).** The headroom architecture resolves all dead face and PR track lockout defects without perturbing game length or threat curves. The candidate is approved for baseline lock and Phase B documentation / PnP asset sync.

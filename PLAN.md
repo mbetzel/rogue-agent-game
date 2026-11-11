@@ -43,7 +43,16 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Code Review Gate (`staff-engineer`):* APPROVED with follow-up telemetry key added to sweep scripts. Full suite 958 passed, 0 failed, 2 skipped.
   - [x] *Validation Sweep (`product-owner`):* `sim_results/v380d_c2_green_clean/validation_report.md` (3,600 games across 2P/3P/4P, Standard and Aggressive bots, seeds 42..641, 0 errors).
   - [x] *Balance Sign-off (`game-designer`):* `FINDINGS.md` §45. Game length 8.73–8.94 rounds, 36–42% Singularity, 19–31% Patient Zero, 26–43% Market Collapse. Passive graduation clean eradicated (0.00); Green company win rate stabilized at 38.9% (3P). APPROVED.
-  - [ ] *PnP Asset Update (`graphic-designer`):* `pnp/generate_pnp.py` updated and PDFs regenerated.
+  - [x] *PnP Asset Update (`graphic-designer`):* `pnp/generate_pnp.py` updated and PDFs regenerated.
+- [x] **Phase 52: Market Share Track & Headroom Architecture (Package `v0.38e`)**
+  - [x] *Pre-SDLC Game Designer Modeling:* `docs/findings/market_share_early_pressure_analysis.md` (5,200 games + 50k tower drops across 2P/3P/4P). Evaluated headroom, -2 Red damage, and company starting asymmetry. -2 Red rejected (spikes Market Collapse to 68% in R3–5); asymmetry rejected (2:1 win rate skew). Candidate A4 (Unified Max 20, starts 13 at 2P / 16 at 3P/4P) recommended.
+  - [x] *User Sign-Off (2026-11-11):* Option A (Unified Max 20) with starts at 13 (2P) and 16 (3P & 4P unified) approved. Rejection of -2 Red damage and company asymmetry confirmed.
+  - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/market_share_headroom_spec.md`.
+  - [x] *Implementation (`senior-engineer`):* `sim/config.py` (`v038e`, `DEFAULT_MARKET_SHARE_MAX=20`, `V038E_MARKET_SHARE_START`), `sim/engine/state.py` (decoupled `init_market_share` + `market_share_peak`), `sim/engine/core.py`, `sim/bots/secret_face_policy.py`, `sim/bots/market_share_policy.py`, `tests/test_market_share_headroom.py` (10/10 passed).
+  - [x] *Code Review Gate (`staff-engineer`):* APPROVED (full regression clean, backward compatibility verified).
+  - [x] *Validation Sweep (`product-owner`):* `sim_results/market_share_headroom/validation_report.md` (3,600 games across 2P/3P/4P, seeds 42..1241). R1 Red F1 choice selection jumped from 0.0% to 100.0%; R1 ceiling congestion dropped from 54–73% to 0.0%; pacing 8.72–9.12 rounds; 0 timeouts.
+  - [x] *Balance Sign-Off (`game-designer`):* `FINDINGS.md` §46. Zero Blank Faces restored; pacing and tri-modal end triggers healthy. APPROVED.
+  - [x] *PnP Asset Update (`graphic-designer`):* `pnp/generate_pnp.py` updated to 3x7 (21-cell) Central Market Share Track and PDFs regenerated.
 - [x] **Completed phases (Phases 1–46, 48)** are archived in [docs/archive/PLAN_completed_phases.md](docs/archive/PLAN_completed_phases.md), along with the legacy v0.3-era Sections 3–5 (code architecture, experiment matrix, SDLC checklist).
 
 ---
