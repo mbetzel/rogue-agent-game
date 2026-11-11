@@ -126,7 +126,7 @@ class RecklessSaboteurBot(BaseBot):
             if die.is_locked:
                 continue
             face = die.current_face
-            if face and (face.is_glitch or (face.money < 1 and not face.has_cash_option and not face.is_shield and not face.has_shield_option)):
+            if face and (face.is_glitch or (face.money < 1 and not face.has_cash_option and not face.is_shield and not face.has_shield_option and (face.secrets == 0 or face.is_star))):
                 rerolls.append(idx)
         return rerolls
 

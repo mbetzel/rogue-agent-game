@@ -208,7 +208,7 @@ class AdaptiveBalancedBot(BaseBot):
 
             if not face.is_shield and not face.has_shield_option and not threats_covered:
                 rerolls.append(idx)
-            elif not face.is_star and not face.is_shield and not face.has_shield_option and not face.has_cash_option and face.money <= 1 and face.patches == 0:
+            elif not face.is_star and not face.is_shield and not face.has_shield_option and not face.has_cash_option and face.money <= 1 and face.patches == 0 and face.secrets == 0:
                 rerolls.append(idx)
         return rerolls
 

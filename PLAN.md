@@ -53,6 +53,13 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Validation Sweep (`product-owner`):* `sim_results/v380e_secret_simplification/validation_report.md` (3,600 games across 2P/3P/4P, seeds 42..1241, 0 errors). Pacing 8.84–9.04 rounds; Singularity 37–46%, Patient Zero 18–29%, Market Collapse 25–43%, Total Wipeout <= 1.6%. Invariant checks: 100% Red=2, Green=2, Purple=1, Blue in {2, 3}.
   - [x] *Balance Sign-off (`game-designer`):* `FINDINGS.md` §46. APPROVED (`v0.38e`).
   - [x] *Asset & Web Synchronization (`graphic-designer` & Main Agent):* `GLOSSARY.md`, `RULES_APPENDIX.md`, `pnp/generate_pnp.py` (PDFs regenerated), and `web/` components updated.
+- [x] **Phase 53: Blue Module Die Rebalance (`v0.38f`)**
+  - [x] *Pre-SDLC Game Designer Modeling:* Converted Blue Faces 1 & 2 from `+1 🔬` to unconditional `+1 Corporate Secret` directly awarded in Phase 3. Eliminates research overlap with Green, creates a distinct "Firewall / Data Vault" thematic profile (50% secret density), eliminates early-game Blue Company survival lag, and models a +0.133 $/roll EV lift.
+  - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/v380f_blue_dice_rebalance_spec.md` with invariants INV-V38F-01..08.
+  - [x] *Implementation (`senior-engineer`):* `sim/config.py` (`v038f()`, `v038f_roster()`), `sim/entities.py`, `sim/engine/phase3_income.py`, `sim/bots/*`, `RULES.md`, `RULES_APPENDIX.md`, `tests/test_v380f_blue_dice_rebalance.py`.
+  - [x] *Code Review Gate (`staff-engineer`):* APPROVED (full test suite passing, backwards parity preserved).
+  - [x] *Validation Sweep (`product-owner`):* `sim_results/v380f_blue_dice_rebalance/validation_report.md` (3,600 games across 2P/3P/4P, seeds 42..1241, 0 errors). Game length 8.93 / 9.44 / 9.26 rounds; Singularity 46.8%, Market Collapse 33.6%, Patient Zero 19.2%, Total Wipeout 0.42%. Blue Company win rates: 49.1% (2P), 33.4% (3P), 25.3% (4P). Market purchases per seat up +75% to +99%.
+  - [x] *Balance Sign-off (`game-designer`):* `FINDINGS.md` §47. Theoretical parity achieved; healthy triad stability; APPROVED (`v0.38f`).
 - [x] **Completed phases (Phases 1–46, 48)** are archived in [docs/archive/PLAN_completed_phases.md](docs/archive/PLAN_completed_phases.md), along with the legacy v0.3-era Sections 3–5 (code architecture, experiment matrix, SDLC checklist).
 
 ---

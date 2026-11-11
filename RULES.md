@@ -124,7 +124,7 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
 * **Colored Software Module Dice:**
   * **4 Central Market Colors (`2 × Players` dice per color; Red, Blue and Green: 4 core faces, Face 5 **Secret face**, Face 6 Star `★`; Yellow: 5 core faces and Face 6 Star `★`, no Secret face):**
     * **Red Dice** — *Marketing* (`$4–$5`, determined by face-up Variant Card)
-    * **Blue Dice** — *Firewall / Data Vault* (`$4–$6`, determined by face-up Variant Card)
+    * **Blue Dice** — *Firewall / Data Vault* (`$4–$6`, determined by face-up Variant Card; provides direct Corporate Secrets on Faces 1 & 2, cash/research choices, and hardware-synergized Secret banking on Face 5)
     * **Green Dice** — *Antivirus / Auto-Patcher* (`$4–$5`, determined by face-up Variant Card)
     * **Yellow Dice** — *Commercial AI (High Revenue / Fast Capital)* (`$5–$6`, determined by face-up Variant Card)
   * **Purple Proprietary Specialist Dice (`2` dice per player: 1 in Ready for Release, 1 in Personal Reserve):**
@@ -232,7 +232,7 @@ If **`0 cubes of any color`** exit the tower into the tray this phase:
 
 ### Phase 3: Income (Simultaneous)
 
-Every surviving player simultaneously collects all **`$` Money tokens**, **Research Tokens (`🔬`)**, and immediate `★` outputs from **all dice still in In Production** (both the **Income** slot and the **Shield** slots), **including White Contractor dice** (e.g., a Contractor's `+$1` face pays now). *(Dice that went to the Processing Box or the Scanned Box in Phase 1, or were returned by Corruption Track effects in Phase 2, are no longer In Production and produce 0 outputs).*
+Every surviving player simultaneously collects all **`$` Money tokens**, **Research Tokens (`🔬`)**, **Corporate Secrets** (Blue Faces 1 & 2), and immediate `★` outputs from **all dice still in In Production** (both the **Income** slot and the **Shield** slots), **including White Contractor dice** (e.g., a Contractor's `+$1` face pays now). *(Dice that went to the Processing Box or the Scanned Box in Phase 1, or were returned by Corruption Track effects in Phase 2, are no longer In Production and produce 0 outputs).*
 * **Market Share faces resolve here:** Red Face 1 (`+1 Market Share` option) and Yellow Market Share faces raise your Market Share now. They cannot raise it above your maximum and do not count toward your Public Relations limit.
 * **Star outputs resolved here:** *R1 Brand Protection* (`+$2 & +1 Market Share`, same limits), *Y2 Cloud Monopoly* (bonus cash), *B3 Air-Gapped Backup* (move `1` die from your **Processing Box** to your **Scanned Box**; it banks its Secret now, see *Secret Face Yields*), and *Y3 Proprietary Training* (`+1 Corporate Secret`, then this die moves to the **Scanned Box**). Each *R2 Ad Campaign* die still In Production now earns you `1` use of its paid action in this round's Phase 6.
 * **Customer Poaching (after all players' Income):** Once every player has collected Income, resolve each *R3 Customer Poaching* die still In Production, going clockwise from the **First Player** (one die at a time if a player has several):

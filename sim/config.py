@@ -22,7 +22,7 @@ V038_PR_REGAIN_COST = 3  # [TUNE] OQ-9 follow-up: 3 research per +1 Market Share
 _FACE_PROFILES = ("V037", "V038_DRAFT")
 # die_face_profile only: V038_DRAFT with the candidate-2 Yellow table (spec §14.3); _ALT = F1 "+$1 & +1 Market Share"
 # _F3 = V038_YELLOW_MS with Yellow F3 "+$1 & +1 Market Share" (spec §14.5.1, RSP-1)
-V038_DIE_FACE_PROFILES = ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D")
+V038_DIE_FACE_PROFILES = ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D", "V038F")
 _DIE_FACE_PROFILES = ("V037",) + V038_DIE_FACE_PROFILES
 V038B_STARTING_SECRETS = {2: 3, 3: 4, 4: 4}  # [TUNE] §14.3
 V038B_RED_TIERS = ((11, 3), (7, 2), (3, 1), (0, 0))  # [TUNE] §14.3
@@ -665,6 +665,29 @@ class GameConfig:
         overrides.setdefault("bot_pr_push", True)
         overrides.setdefault("bot_pr_push_params", PrPushParams())
         return cls.v038e(**overrides)
+
+    @classmethod
+    def v038f(cls, **overrides) -> "GameConfig":
+        """v0.38 candidate 6 (Blue Module Die Rebalance: Direct Corporate Secrets on Faces 1 & 2).
+        Inherits all v0.38e rules (C2 setup, 1 starting glitched slot, Shogun Baffle physics,
+        Green triage clean, Red owner yield +2 + Market Leader Bonus trigger, Blue Defense Grid L3 trigger),
+        and introduces die_face_profile="V038F":
+        - Blue Face 1: +1 Corporate Secret
+        - Blue Face 2: +1 Corporate Secret
+        - Blue Face 3: +$1
+        - Blue Face 4: +1 🔬 / +$1
+        - Blue Face 5: Secret face (+2 baseline, +1 if Defense Grid >= L3)
+        - Blue Face 6: Blue ★ (Variant Card)
+        """
+        overrides.setdefault("die_face_profile", "V038F")
+        return cls.v038e(**overrides)
+
+    @classmethod
+    def v038f_roster(cls, **overrides) -> "GameConfig":
+        """``v038f()`` + the ``v037_roster()`` bot switches (lever A push on, default params)."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v038f(**overrides)
 
     @classmethod
     def v038_roster(cls, **overrides) -> "GameConfig":

@@ -11,7 +11,7 @@ Split out of `RULES.md`; this file is canonical for Section 6.
 | **Gray (Legacy)** | Starter (2) / Breakthrough | `Block 1 Any` | `Block 1 Any` | `+$1 & +1 🔬` | `+$1 / +1 🔬` | `+$1 / +1 🔬` | `+1 🔬` `[TUNE]` |
 | **White (Contractor)** | Prog. `$1/$2/$3` | `Block 1 Any` | `Block 1 Any` | `Block 1 Any` | `+$1` | `Glitch` | `Glitch` |
 | **Red (Marketing)** | `$4–$5` (Variant) | `+1 Market Share / +$1` | `+$2` | `+$2` | `+$2` | **Secret face** | `Red ★` |
-| **Blue (Firewall)** | `$4–$6` (Variant) | `+1 🔬` | `+1 🔬` | `+$1` | `+1 🔬 / +$1` | **Secret face** | `Blue ★` |
+| **Blue (Firewall)** | `$4–$6` (Variant) | `+1 Corporate Secret` | `+1 Corporate Secret` | `+$1` | `+1 🔬 / +$1` | **Secret face** | `Blue ★` |
 | **Green (Antivirus)** | `$4–$5` (Variant) | `+2 🔬` | `+1 🔬` | `+2 🔬` | `+1 🔬 / +$1` | **Secret face** | `Green ★` |
 | **Yellow (Commercial)**| `$5–$6` (Variant) | `+2 Market Share` | `+1 Market Share / +1 🔬` | `+$1 & +1 Market Share` | `+$2 / +1 🔬` | `+$2 / +1 🔬` | `Yellow ★` |
 | **Purple (Specialist)** | Starter / Public Relations L3 | `Block 1 Any` | `Block 1 Any` | `+$2` | `+$1 & +1 🔬` | **Secret face** | `Purple ★ (Signature Protocol)` |
