@@ -418,6 +418,7 @@ class GameConfig:
     secret_yield_blue_cap: int = 3  # [TUNE]
     secret_yield_green_base: int = 3  # [TUNE] minus the owner's Glitched Shield Slots, min 0
     secret_yield_purple: int = 1  # [TUNE]
+    secret_yield_green_glitch_penalty: bool = True  # If False (v0.38e), Green Secret yield is flat secret_yield_green_base unconditionally.
     glitched_shield_slots_enabled: bool = False
     slot_graduation_clear: int = 1  # [TUNE] slots cleared once per Phase 5 if >= 1 die graduates
     company_starting_die_enabled: bool = False
@@ -636,6 +637,36 @@ class GameConfig:
         return cls.v038c(**overrides)
 
     @classmethod
+    def v038e(cls, **overrides) -> "GameConfig":
+        """v0.38 candidate 5 (Phase 52: Secret Face Simplification & Processing Triggers).
+        Inherits all v0.38d rules (C2 setup, 1 starting glitched slot, Shogun Baffle physics,
+        Green triage clean), and applies the simplified 4-color Secret architecture:
+        - Red: flat +2 + Market Leader Bonus trigger
+        - Blue: flat +2 (+1 if Defense Grid >= L3, cap 3; block bonus eliminated)
+        - Green: flat +2 + clean 1 Glitched Shield Slot (glitch yield penalty eliminated)
+        - Purple: flat +1 (no trigger)
+        """
+        for k, v in (
+            ("secret_yield_blue_base", 2),
+            ("secret_yield_blue_block_bonus", 0),
+            ("secret_yield_blue_grid_l3_bonus", 1),
+            ("secret_yield_blue_cap", 3),
+            ("secret_yield_green_base", 2),
+            ("secret_yield_green_glitch_penalty", False),
+            ("green_bank_cleans_slot", True),
+            ("green_triage_clean_mode", "COUNT_THEN_CLEAN"),
+        ):
+            overrides.setdefault(k, v)
+        return cls.v038d(**overrides)
+
+    @classmethod
+    def v038e_roster(cls, **overrides) -> "GameConfig":
+        """``v038e()`` + the ``v037_roster()`` bot switches (lever A push on, default params)."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v038e(**overrides)
+
+    @classmethod
     def v038_roster(cls, **overrides) -> "GameConfig":
         """``v038()`` + the ``v037_roster()`` bot switches (lever A push on, default params)."""
         overrides.setdefault("bot_pr_push", True)
@@ -710,6 +741,8 @@ class GameConfig:
                 raise ValueError(f"{name} must be an int >= 0, got {val!r}")
         if self.secret_yield_blue_cap < self.secret_yield_blue_base:
             raise ValueError("secret_yield_blue_cap must be >= secret_yield_blue_base")
+        if not isinstance(self.secret_yield_green_glitch_penalty, bool):
+            raise ValueError(f"secret_yield_green_glitch_penalty must be a bool, got {self.secret_yield_green_glitch_penalty!r}")
         if self.company_starting_die_enabled:
             missing = [c for c in ("MERIDIAN", "OMNIDYNE", "AEGIS", "DTO", "HELIX", "PROMETHEUS")
                        if self.company_starting_colors.get(c) not in ("RED", "BLUE", "GREEN")]

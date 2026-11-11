@@ -252,7 +252,7 @@ Each surviving player simultaneously resolves all three colors against their com
 
 1. **Blocking:**
    * Every shield is a `Block 1 Any` shield. You choose how your available shields are split across the Red, Blue and Green cubes. **Every available `Any` shield must block while any unblocked cube remains**: you choose only the split, and you cannot hold a shield back.
-   * Dice assigned to shields absorb attacks cleanly and remain deployed in **In Production**. Remember how many Blue cubes you blocked this round (it raises Blue Secret face yields in Phase 5; cubes ignored by *Baffle Echo* were not blocked).
+   * Dice assigned to shields absorb attacks cleanly and remain deployed in **In Production**.
 2. **Unblocked Damage:**
    * **Red (Market Manipulation):** Lower your **Market Share** by **`1`** per unblocked Red cube (Market Share cannot drop below `0`; any excess has no further effect). Red cubes never cost Money or Corporate Secrets.
    * **Blue (Spyware / Data Exfiltration):** Lose **`1` Corporate Secret** per unblocked Blue cube.
@@ -278,15 +278,15 @@ All surviving players simultaneously update their terminal pipeline in this orde
 1. **Magnetic Splice:** *(Institutional Override Timing: Contracting **Omnidyne Systems** may trigger Magnetic Splice here to move 1 die of your choice from your Processing Box directly to Ready for Release for free; it banks its Secret now).*
 2. **Production Return:** Move **all surviving dice** from **In Production** (Income and Shields) to your **Scanned Box**.
 3. **Scanned Graduation (Hardware Throughput Limit):** Move up to **`release_bandwidth` dice of your choice** (`4` baseline, upgradable to `5` and `6`) from the **Scanned Box** to your **Ready for Release Zone**. You may graduate fewer. Any remaining dice stay in the Scanned Box.
-4. **Conveyor Triage (Hardware Throughput Limit):** Move up to **`triage_bandwidth` dice** (`2` baseline, upgradable to `3` and `4`) from the **Processing Box** into the **Scanned Box**, **oldest first**: dice leave in the order they entered the Processing Box (any color; dice that entered together leave in roll order). You do not choose. Each die banks its Secret as it moves (see *Secret Face Yields*). When a **Green** die leaves the Processing Box and banks its Secret, it cleans `1` of your **Glitched Shield Slots** (after calculating its Secret yield). *(Dice triaged now graduate no earlier than next round's Phase 5.)* At **Triage Track Level 4**, gain **`+1 🔬`** for each die you move beyond the 2nd (up to `+2 🔬` at Bandwidth `4`).
+4. **Conveyor Triage (Hardware Throughput Limit):** Move up to **`triage_bandwidth` dice** (`2` baseline, upgradable to `3` and `4`) from the **Processing Box** into the **Scanned Box**, **oldest first**: dice leave in the order they entered the Processing Box (any color; dice that entered together leave in roll order). You do not choose. Each die banks its Secret as it moves (see *Secret Face Yields*). When a **Green** die leaves the Processing Box and banks its Secret, it cleans `1` of your **Glitched Shield Slots**. *(Dice triaged now graduate no earlier than next round's Phase 5.)* At **Triage Track Level 4**, gain **`+1 🔬`** for each die you move beyond the 2nd (up to `+2 🔬` at Bandwidth `4`).
    * **Hardware Throughput Limits:** Throughput is strictly governed by your Triage and Release hardware bandwidths; excess dice remain in the Processing Box (keeping their Secret for a later round), and excess scanned dice remain in the Scanned Box.
 5. **Market Leader Bonus (end of Phase 5):** If at least `1` Secret face on a **Red** die was banked this round (by any player, in Phase 3 or Phase 5), award the **Market Leader Bonus** once (see below). Several Red Secret faces in one round still give one award.
 
 #### Secret Face Yields `[TUNE]`
 A die showing a **Secret face** banks its Secret when it leaves the **Processing Box** (Conveyor Triage, *Magnetic Splice*, *Jumper Diagnostics*, *B3 Air-Gapped Backup*): its owner gains **Corporate Secrets** by the die's color, using the game state at that moment:
 * **Red:** `+2`.
-* **Blue:** `+1`, plus `1` if you blocked at least `1` Blue cube this round, plus `1` if your Defense Grid Track is at Level 3 or higher (maximum `+3`). A Blue die leaving in Phase 3 gets no block bonus (Phase 4 has not happened yet).
-* **Green:** `+3` minus your **Glitched Shield Slots** (minimum `0`), calculated before the die cleans 1 slot; then clean `1` of your **Glitched Shield Slots**.
+* **Blue:** `+2`, plus `1` if your Defense Grid Track is at Level 3 or higher (maximum `+3`).
+* **Green:** `+2`; then clean `1` of your **Glitched Shield Slots**.
 * **Purple:** `+1`.
 
 A die returned to the supply from the Processing Box, or still in the Processing Box when the game ends, banks nothing.

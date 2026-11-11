@@ -28,8 +28,18 @@ function secretNote(color) {
   const y = (state && state.secret_yields) || {};
   if (!state || !state.is_secret_faces || color === "yellow") return null;
   if (color === "red") return `Secret face: +${y.red} Corporate Secrets when it leaves the Processing Box`;
-  if (color === "blue") return `Secret face: +${y.blue_base} (+${y.blue_block} if you blocked a Blue cube, +${y.blue_grid} at Defense Grid Level 3+; max ${y.blue_cap})`;
-  if (color === "green") return `Secret face: ${y.green_base} minus your Glitched Shield Slots`;
+  if (color === "blue") {
+    if (y.blue_block && y.blue_block > 0) {
+      return `Secret face: +${y.blue_base} (+${y.blue_block} if you blocked a Blue cube, +${y.blue_grid} at Defense Grid Level 3+; max ${y.blue_cap})`;
+    }
+    return `Secret face: +${y.blue_base} Corporate Secrets (+${y.blue_grid} at Defense Grid Level 3+; max ${y.blue_cap})`;
+  }
+  if (color === "green") {
+    if (y.green_glitch_penalty) {
+      return `Secret face: ${y.green_base} minus your Glitched Shield Slots`;
+    }
+    return `Secret face: +${y.green_base} Corporate Secrets (cleans 1 Glitched Shield Slot)`;
+  }
   return `Secret face: +${y.purple} Corporate Secret`;
 }
 

@@ -602,7 +602,7 @@ export function renderPlayerMats() {
                     <span class="shield-symbol" style="color: #38bdf8;">🛡️</span>
                     <span style="color: #38bdf8;">DEFENSE GRID</span>
                     <span class="shield-count">(${redShieldDice.length + blueShieldDice.length + greenShieldDice.length + anyShieldDice.length}/${effCap} CAP)</span>
-                    ${slotsGlitched > 0 ? `<span class="shield-count" style="color: #f43f5e;" title="Glitched Shield Slots cannot hold a shield and lower Green Secret face yields">⚠️ ${slotsGlitched} GLITCHED SHIELD SLOT${slotsGlitched > 1 ? 'S' : ''}</span>` : ''}
+                    ${slotsGlitched > 0 ? `<span class="shield-count" style="color: #f43f5e;" title="Glitched Shield Slots cannot hold a shield (clean in Phase 1 or Phase 5)">⚠️ ${slotsGlitched} GLITCHED SHIELD SLOT${slotsGlitched > 1 ? 'S' : ''}</span>` : ''}
                   </div>
                   <div style="font-size: 0.65rem; color: var(--text-dim);">
                     Generic (Any) shields only

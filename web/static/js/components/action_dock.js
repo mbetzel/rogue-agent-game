@@ -768,7 +768,7 @@ export function renderActionDock() {
               </div>
               <span class="confirm-malware-sub">
                 ${newSlots > 0 ? `<strong>${newSlots}</strong> of your shield slots will become Glitched Shield Slots (no die moves; ${greenInfo.glitched_shield_slots || 0} already glitched of ${greenInfo.defense_capacity || 0} capacity).` : 'All of your shield slots are already glitched: the excess has no effect.'}
-                A Glitched Shield Slot cannot hold a shield and lowers your Green Secret face yield by 1. Clean slots in Phase 1 or Phase 5.
+                A Glitched Shield Slot cannot hold a shield. Clean slots in Phase 1 or Phase 5.
               </span>
             </div>
           </div>

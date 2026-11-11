@@ -242,16 +242,21 @@ def marginal_block_value(color: CubeColor, rem: Dict[CubeColor, int], player: "P
     if r <= 0:
         return base
     if color == CubeColor.BLUE:
-        first_block = r >= int((attack or {}).get(CubeColor.BLUE, r))  # no Blue blocked yet this round
-        if player.blocked_blue_this_round == 0 and _pending(player, DieColor.BLUE) and first_block:
-            base += SECRET_VALUE * cfg.secret_yield_blue_block_bonus * min(_pending(player, DieColor.BLUE),
-                                                                        player.triage_bandwidth)
+        # If blue_block_bonus is 0 (v0.38e), no heuristic bonus is added;
+        # Blue cubes are blocked solely to prevent immediate secret theft.
+        if cfg.secret_yield_blue_block_bonus > 0:
+            first_block = r >= int((attack or {}).get(CubeColor.BLUE, r))  # no Blue blocked yet this round
+            if player.blocked_blue_this_round == 0 and _pending(player, DieColor.BLUE) and first_block:
+                base += SECRET_VALUE * cfg.secret_yield_blue_block_bonus * min(_pending(player, DieColor.BLUE),
+                                                                            player.triage_bandwidth)
         return base
     if color == CubeColor.GREEN:
         if player.glitched_shield_slots >= player.defense_capacity:
             return 0.0  # excess Green has no effect
         v = SHIELD_VALUE
-        if player.glitched_shield_slots < cfg.secret_yield_green_base:
+        # If green_glitch_penalty is False (v0.38e), glitched slots do NOT reduce
+        # Secret yield; Green is blocked solely to defend Shield Capacity.
+        if getattr(cfg, "secret_yield_green_glitch_penalty", True) and player.glitched_shield_slots < cfg.secret_yield_green_base:
             v += SECRET_VALUE * min(_pending(player, DieColor.GREEN) + _owned(player, DieColor.GREEN) * 0.2,
                                     player.triage_bandwidth)
         return v

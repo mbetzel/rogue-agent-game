@@ -128,6 +128,10 @@ class GameController:
         if research_track_model is not None:
             return GameConfig(research_track_model=research_track_model, **common)
         version = str(rules_version or WEB_DEFAULT_RULES_VERSION).lower().lstrip("v")
+        if version in ("038e", "0.38e"):
+            return GameConfig.v038e(**common)
+        if version in ("038d", "0.38d"):
+            return GameConfig.v038d(**common)
         if version in ("0.38.0", "0.38", "038c"):
             return GameConfig.v038c(**common)
         if version in ("0.37.0", "0.37"):

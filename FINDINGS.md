@@ -417,3 +417,36 @@ Sources: `docs/findings/early_game_pressure_modeling.md`, `docs/findings/c2_gree
     All color win rates remain within healthy competitive bounds without any single dominant color.
   - **Early Round Pressure ("Tutorialization"):** In Round 1, players face an average of 1.4 incoming attack cubes with only 1 active clean Shield Slot. Players must make meaningful trade-offs from Turn 1: whether to dedicate their starter die to blocking, take damage, or accept a glitched slot penalty.
 - **Official Balance Verdict: OFFICIALLY APPROVED (`v0.38d`).** Package `v0.38d` meets all design pillars, tension targets, and balance criteria.
+
+## 46. Phase 52 Secret Simplification & Processing Triggers: APPROVED (`v0.38e`)
+
+Sources: `docs/specs/v380e_secret_simplification_spec.md`, `sim_results/v380e_secret_simplification/validation_report.md` (3,600 games across 2P/3P/4P, seeds 42..1241, mixed roster with `MixedPolicyBot`).
+
+- **Context & Design Problem:**
+  Under `v0.38d`, Secret face banking suffered from cognitive overhead and balance asymmetry:
+  1. *Blue Tracking & Low EV:* Banking Blue required mid-round memory tracking in Phase 4 Step 1 (*"Remember how many Blue cubes you blocked this round"*), broke timing equivalence for Phase 3 instant-banking (*B3 Air-Gapped Backup*, *Jumper Diagnostics*), and depressed Blue Secret EV to 1.458 Secrets/bank (zero Blue cubes blocked in 61.9% of rounds), dragging 4P Blue Company win rate down to 20.3%.
+  2. *Green Calculation Friction:* Green Secret yield ($Y = \max(0, 3 - g)$ before cleaning $g \leftarrow \max(0, g-1)$) created order-of-operation confusion, runaway early-game payouts (3 Secrets), and feel-bad late-game zeroes (4.4% of banks).
+- **Implemented Package (`v0.38e`):**
+  1. *Universal Baselines:* Red, Blue, and Green dice bank an unconditional baseline yield of **`+2` Corporate Secrets**; Purple Specialist banks flat **`+1` Corporate Secret**.
+  2. *Four Dedicated Domain Triggers (Fired Upon Leaving Processing Box):*
+     - **Red (Market Domain):** Sets `state.red_secret_banked_this_round = True`, firing the **Market Leader Bonus** (1st `+3`, 2nd `+1` Corporate Secrets) once at the end of Phase 5.
+     - **Blue (Hardware Defense Domain):** Evaluates Defense Grid Track; awards **`+1` Corporate Secret if Defense Grid $\ge$ Level 3** (max `+3`). Zero cube tracking or attack dependencies.
+     - **Green (System Integrity Domain):** Unconditionally cleans **`1` Glitched Shield Slot** ($g \leftarrow \max(0, g - 1)$). Zero yield penalty.
+     - **Purple (Proprietary Specialist Domain):** Pure baseline (`+1` Corporate Secret, no domain trigger).
+  3. *Rules Simplification:* Cleanly excised the Phase 4 Step 1 Blue tracking reminder and Phase 3 instant-banking timing exceptions from `RULES.md`.
+- **Monte Carlo Telemetry Metrics (3,600 Games):**
+  - **Game Pacing:** Mean rounds **8.84** (2P), **9.00** (3P), **9.04** (4P) — aggregate **8.96** rounds, perfectly centered in the 8.5–9.5 target window. 0.0% timeouts.
+  - **Healthy End Trigger Triad:**
+    - **Singularity:** **37.25%** (2P), **44.67%** (3P), **45.92%** (4P) — aggregate **42.61%** (target 30%–50%).
+    - **Patient Zero:** **17.92%** (2P), **28.67%** (3P), **28.42%** (4P) — aggregate **25.00%** (target 15%–35%).
+    - **Market Collapse:** **43.25%** (2P), **26.08%** (3P), **25.42%** (4P) — aggregate **31.58%** (target 15%–45%).
+    - **Total Wipeout:** **1.58%** (2P), **0.58%** (3P), **0.25%** (4P) — aggregate **0.81%** (guardrail $\le 3.0\%$).
+- **Telemetry Invariant Confirmations (40,473 Banking Events):**
+  - **Red Invariant (`INV-V38E-05`):** 100.0% yielded exactly 2 Secrets (13,336 / 13,336).
+  - **Green Invariant (`INV-V38E-04`):** 100.0% yielded exactly 2 Secrets (12,463 / 12,463).
+  - **Purple Invariant (`INV-V38E-06`):** 100.0% yielded exactly 1 Secret (16,607 / 16,607).
+  - **Blue Invariant (`INV-V38E-01/02`):** 100.0% yielded $\in \{2, 3\}$ (8,046 / 8,046: 92.18% at 2, 7.82% at 3).
+  - **Blue L3+ Grid Trigger:** 7.82% aggregate trigger rate (2P 6.35%, 3P 8.24%, 4P 8.28%), providing a meaningful hardware reward without distortion.
+  - **Green Decontamination Efficiency:** 0.914–1.020 slots cleaned per seat (~0.95 slots/seat aggregate; 82.3%–85.8% clean efficiency when glitched slots were present).
+  - **EV & Competitive Parity:** Blue Secret EV increased from 1.458 to 2.077 (+0.619), restoring Blue Company win rates (2P 45.0%, 3P 31.2%, 4P 22.5%) and dominant path win rates (2P 43.8%, 3P 37.1%, 4P 26.7%) to healthy parity.
+- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.38e`).** Cognitive friction and memory tracking are eliminated while preserving tight pacing, healthy existential triad distributions, and strong multi-path strategic depth.
