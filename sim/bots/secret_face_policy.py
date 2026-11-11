@@ -281,7 +281,7 @@ def color_score(bot: Any, player: "PlayerState", state: "GameState", color: DieC
     cfg = state.config
     die = create_colored_die(color=color, die_id=-1, variant_card=state.variant_cards.get(color),
                              face_profile=cfg.die_face_profile)
-    if color == DieColor.YELLOW and cfg.die_face_profile in ("V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3"):
+    if color == DieColor.YELLOW and cfg.die_face_profile in ("V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D"):
         v = yellow_ms_score(player, state, die)
     else:
         v = mean_reroll_value(player, state, die, len(player.glitched_dice))

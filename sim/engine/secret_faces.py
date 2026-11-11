@@ -95,11 +95,25 @@ def bank(cfg: "GameConfig", p: "PlayerState", die: "Die", state: Any = None) -> 
     """Banks the Secret of a die leaving the Processing Box (INV-SF-01: once per visit). Returns Secrets gained.
     Call *after* removing the die from ``glitched_dice``; a die without ``secret_pending`` yields 0.
 
-    RSP-1 (spec §14.5.3 step 1): a Red bank sets ``state.red_secret_banked_this_round`` (the Red Secret payout
-    fires later, at the end of Phase 5; ``bank`` never awards payout Secrets, INV-RSP-01)."""
+    Under v0.38d (Variant B: COUNT_THEN_CLEAN), Green calculates yield on current glitched slots, awards Secrets,
+    and then cleans 1 Glitched Shield Slot (INV-V38D-05)."""
     if not getattr(die, "secret_pending", False):
         return 0
-    y = secret_yield(cfg, p, die.color)
+
+    clean_mode = getattr(cfg, "green_triage_clean_mode", "NONE")
+    if clean_mode == "NONE" and getattr(cfg, "green_bank_cleans_slot", False):
+        clean_mode = "COUNT_THEN_CLEAN"
+
+    # Variant A support (for sensitivity/comparison testing)
+    if clean_mode == "CLEAN_THEN_COUNT" and die.color == DieColor.GREEN:
+        clean_slots(p, 1, "green_triage")
+        y = secret_yield(cfg, p, die.color)
+    else:
+        # Variant B (Standard approved rule) and NONE
+        y = secret_yield(cfg, p, die.color)
+        if clean_mode == "COUNT_THEN_CLEAN" and die.color == DieColor.GREEN:
+            clean_slots(p, 1, "green_triage")
+
     if die.color == DieColor.RED:
         p.red_secrets_banked += 1
         if die.processing_entry_round and state is not None:
@@ -163,12 +177,16 @@ def glitch_slots(p: "PlayerState", n: int, source: str) -> int:
 
 def clean_slots(p: "PlayerState", n: int, how: str) -> int:
     """Cleans up to ``n`` glitched slots. ``how``: ``"die"`` (placement), ``"face"`` (Green F1 / G1),
-    ``"graduation"`` (Phase 5 step 3b)."""
+    ``"graduation"`` (Phase 5 step 3b), ``"green_triage"`` (Phase 5 step 1 Green banking)."""
     done = min(max(0, int(n)), int(p.glitched_shield_slots))
     if done:
         p.glitched_shield_slots -= done
-        attr = {"die": "slots_cleaned_by_die", "face": "slots_cleaned_by_face",
-                "graduation": "slots_cleared_by_graduation"}[how]
+        attr = {
+            "die": "slots_cleaned_by_die",
+            "face": "slots_cleaned_by_face",
+            "graduation": "slots_cleared_by_graduation",
+            "green_triage": "slots_cleaned_by_green_triage",
+        }[how]
         setattr(p, attr, getattr(p, attr) + done)
     return done
 

@@ -1371,7 +1371,7 @@ def create_colored_die(
             }
             die_cost = default_costs.get(color, 4)
 
-    if face_profile in ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3"):
+    if face_profile in ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D"):
         return _create_colored_die_v038(color, die_id, variant_card, star_face, var_code, die_cost, face_profile)
 
     if color == DieColor.RED:
@@ -1459,6 +1459,12 @@ def _choice(a: Face, b: Face) -> Face:
     return Face(name=f"{a.name} / {b.name}", is_choice=True, choices=(a, b))
 
 
+V038D_V1_STAGING_PAYLOAD: Dict[str, Dict[CubeColor, int]] = {
+    "SCRIPT_KIDDIE": {CubeColor.RED: 2, CubeColor.BLUE: 1, CubeColor.GREEN: 1},
+    "DATA_SCRAPER": {CubeColor.RED: 1, CubeColor.BLUE: 2, CubeColor.GREEN: 1},
+}
+
+
 def _create_colored_die_v038(color: DieColor, die_id: int, variant_card: Optional[VariantCard], star_face: Face,
                              var_code: Optional[str], die_cost: int, profile: str = "V038_DRAFT") -> Die:
     """spec v380 §4.2 ``V038_DRAFT`` tables [TUNE]."""
@@ -1470,15 +1476,17 @@ def _create_colored_die_v038(color: DieColor, die_id: int, variant_card: Optiona
         faces = [Face(name="+1 🔬", patches=1), Face(name="+1 🔬", patches=1), Face(name="+$1", money=1),
                  _choice(Face("+1 🔬", patches=1), Face("+$1", money=1)), SECRET_FACE, star_face]
     elif color == DieColor.GREEN:
-        faces = [_choice(Face(CLEAN_SLOT_NAME, clean_slots=1), Face("+$1", money=1)),
+        f1 = (Face(name="+2 🔬", patches=2) if profile == "V038D"
+              else _choice(Face(CLEAN_SLOT_NAME, clean_slots=1), Face("+$1", money=1)))
+        faces = [f1,
                  Face(name="+1 🔬", patches=1), Face(name="+2 🔬", patches=2),
                  _choice(Face("+1 🔬", patches=1), Face("+$1", money=1)), SECRET_FACE, star_face]
-    elif color == DieColor.YELLOW and profile in ("V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3"):
+    elif color == DieColor.YELLOW and profile in ("V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D"):
         y = lambda: _choice(Face("+$2", money=2), Face("+1 🔬", patches=1))  # noqa: E731
         f1 = (Face(name="+$1 & +1 Market Share", money=1, market_share=1) if profile == "V038_YELLOW_MS_ALT"
               else Face(name="+2 Market Share", market_share=2))
-        # RSP-1 (spec §14.5.1): _F3 swaps F3 "+$3" for "+$1 & +1 Market Share"
-        f3 = (Face(name="+$1 & +1 Market Share", money=1, market_share=1) if profile == "V038_YELLOW_MS_F3"
+        # RSP-1 (spec §14.5.1): _F3 / V038D swaps F3 "+$3" for "+$1 & +1 Market Share"
+        f3 = (Face(name="+$1 & +1 Market Share", money=1, market_share=1) if profile in ("V038_YELLOW_MS_F3", "V038D")
               else Face(name="+$3", money=3))
         faces = [f1, _choice(Face("+1 Market Share", market_share=1), Face("+1 🔬", patches=1)),
                  f3, y(), y(), star_face]

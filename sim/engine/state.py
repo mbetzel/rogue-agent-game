@@ -263,6 +263,7 @@ class PlayerState:
         self.slots_cleaned_by_die = 0
         self.slots_cleaned_by_face = 0
         self.slots_cleared_by_graduation = 0
+        self.slots_cleaned_by_green_triage = 0  # Added for v0.38d Green banking triage
         self.max_glitched_slots = 0
         self.zero_capacity_rounds = 0
         self.market_share_gained_face = 0  # Red F1 / R1 (outside the Public Relations limit)

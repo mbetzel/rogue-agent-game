@@ -88,6 +88,14 @@ def _rsp1_on(cfg: Any) -> bool:
     return bool(getattr(cfg, "is_red_secret_payout", False)) or getattr(cfg, "red_secret_owner_yield", None) is not None
 
 
+def _v038d_on(cfg: Any) -> bool:
+    return (
+        bool(getattr(cfg, "green_bank_cleans_slot", False))
+        or getattr(cfg, "green_triage_clean_mode", "NONE") != "NONE"
+        or getattr(cfg, "starting_glitched_shield_slots", 0) > 0
+    )
+
+
 def _rsp1_row(p: Any, end_award: int) -> Dict[str, Any]:
     """RSP-1 per-player telemetry (spec §14.5.5); only emitted when an RSP-1 lever is on (v038b rows unchanged)."""
     return {
@@ -114,7 +122,7 @@ def _v038_row(cfg: Any, p: Any, bonus: int, end_award: int = 0) -> Dict[str, Any
     if end_award:
         by_source["red_secret_payout_end"] = by_source.get("red_secret_payout_end", 0) + end_award
     row = _rsp1_row(p, end_award) if _rsp1_on(cfg) else {}
-    return {
+    out = {
         **row,
         "secrets_by_source": by_source,
         "secret_faces_rolled": dict(p.secret_faces_rolled),
@@ -135,6 +143,9 @@ def _v038_row(cfg: Any, p: Any, bonus: int, end_award: int = 0) -> Dict[str, Any
         "colored_dice_owned_by_round": [dict(r) for r in p.colored_dice_owned_by_round],
         "processing_box_count": len(p.glitched_dice),
     }
+    if _v038d_on(cfg):
+        out["slots_cleaned_by_green_triage"] = p.slots_cleaned_by_green_triage
+    return out
 
 
 def evaluate_end_game(engine: GameEngine) -> EndGameResult:

@@ -384,3 +384,36 @@ Sources: `docs/specs/g2_universal_sandbox_spec.md`, `docs/findings/g2_universal_
 - **Pacing & End Triggers:** Mean rounds 8.24–8.39 across all pods; 0.0% timeouts. End triggers under G2 Standard: 2P Singularity 42.7% (below ≤48% guardrail), PZ 18.5%, MC 35.5%, TW 3.3%; 3P Sing 45.8%, PZ 33.0%, MC 21.0%, TW 0.2%; 4P Sing 49.5%, PZ 33.5%, MC 17.0%, TW 0.0%. Pacing and existential tension are identical within noise to G3 and Random modes.
 - **Anti-Degeneracy Proof:** Maximum active glitches observed across 14,400 games was 3 ($<2\%$ of rounds). Stalling to farm research was non-existent because unblocked Blue cubes threaten Patient Zero elimination, unblocked Red cubes threaten Market Collapse, and each glitched slot directly penalizes banked Green Secrets ($3 - g$ Secrets, where 1 Secret = 1 VP = ~3 🔬).
 - **Official Balance Verdict: OFFICIALLY APPROVED (`v0.38c`).** No further tuning required; G2 redesign locked.
+
+## 45. Phase 51 Package `v0.38d` Balance Assessment: Early-Game Tension & Green-Clean Variant B: APPROVED
+
+Sources: `docs/findings/early_game_pressure_modeling.md`, `docs/findings/c2_green_clean_analysis.md`, `docs/specs/v380d_c2_green_clean_spec.md`, `sim_results/shogun_tower_comparison/comparison_report.md` (3,600 games), `sim_results/v380d_c2_green_clean/validation_report.md` (3,600 games across 2P/3P/4P, Standard and Aggressive bot profiles, seeds 42..641).
+
+- **Context & Design Problem:** Physical testing with the *Shogun* Cube Tower revealed that the legacy simulation (`LEDGE_AVALANCHE`) over-estimated early round damage by +33% and ignored baffle retention. Once calibrated (`SHOGUN_BAFFLE`), the opening rounds under `v0.38c` became too calm: with 2 clean Shield Slots and starting dice allocations, players trivially blocked all incoming attack cubes through `v1.0` and into `v2.0`, removing early-game decision tension and failing to tutorialize defensive triage.
+- **Implemented Package (`v0.38d` — Candidate C2 + Green-Clean Package, Variant B):**
+  1. **Shogun Baffle Tower Physics:** Validated two-state physical retention model ($p_{\text{exit}} \approx 0.70$ empty, retention scaling with stuck cubes $S$, avalanche regime at $S \ge 3$ or $F+S \ge 7$).
+  2. **Candidate C2 Early-Game Tuning:**
+     - Setup priming: 4 cubes (`1R, 1B, 1G, 1K`).
+     - `v1.0` Staging Cup Payload: 4 attack cubes (`2R, 1B, 1G` on *Script Kiddie*; `1R, 2B, 1G` on *Data Scraper*).
+     - Starting Glitched Shield Slot: Every player begins with **1 Glitched Shield Slot** on their Company Terminal Mat (1 clean, 1 glitched out of baseline Defense Capacity 2).
+  3. **Removal of Passive CI/CD Auto-Clean:** Graduation from Scanned Box to Ready for Release in Phase 5 Step 3 no longer cleans a glitched slot (`slot_graduation_clear = 0`). Slot cleaning is strictly active.
+  4. **Green Die Specialization:** Green Face 1 converted from `Clean 1 Glitched Shield Slot / +$1` to `+2 🔬` (`V038D`), establishing Green as the premier research engine.
+  5. **Variant B Green Banking Slot Clean:** When a Green die leaves the Processing Box and banks its Secret, it yields $Y = \max(0, 3 - g)$ Corporate Secrets (calculated on pre-clean glitched slots $g$), then cleans 1 Glitched Shield Slot. Variant B prevents the runaway Green company dominance observed under Variant A (49.6% win rate).
+- **Monte Carlo Validation Metrics (3,600 Games):**
+  - **Game Pacing:** Mean rounds **8.73–8.94** across 2P/3P/4P (target 8.5–9.5). Zero timeouts (0.0%).
+  - **End Trigger Distribution:**
+    - **Singularity:** **36.4%–42.4%** (target 35%–48%).
+    - **Patient Zero:** **19.3%–30.6%** (target 20%–35%).
+    - **Market Collapse:** **26.3%–43.0%** (target 18%–35%).
+    - **Total Wipeout:** **0.8%–1.3%**.
+  - **Slot Cleaning Mechanism Breakdown:**
+    - Graduation auto-cleans: **0.00** across all player counts (passive clean successfully eradicated).
+    - Active die cleans (Phase 1 Step 5 assignment): **5.23–5.33** slots cleaned per player per game.
+    - Green Secret triage cleans: **0.69–0.79** slots cleaned per player per game.
+  - **Company & Color Win Rate Parity:**
+    - 2P: Red 53.6%, Blue 46.8%, Green 49.6%.
+    - 3P: Red 30.6%, Blue 30.6%, Green 38.9%.
+    - 4P: Red 24.3%, Blue 22.4%, Green 28.2%.
+    All color win rates remain within healthy competitive bounds without any single dominant color.
+  - **Early Round Pressure ("Tutorialization"):** In Round 1, players face an average of 1.4 incoming attack cubes with only 1 active clean Shield Slot. Players must make meaningful trade-offs from Turn 1: whether to dedicate their starter die to blocking, take damage, or accept a glitched slot penalty.
+- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.38d`).** Package `v0.38d` meets all design pillars, tension targets, and balance criteria.

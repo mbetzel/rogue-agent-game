@@ -12,14 +12,14 @@ Split out of `RULES.md`; this file is canonical for Section 6.
 | **White (Contractor)** | Prog. `$1/$2/$3` | `Block 1 Any` | `Block 1 Any` | `Block 1 Any` | `+$1` | `Glitch` | `Glitch` |
 | **Red (Marketing)** | `$4–$5` (Variant) | `+1 Market Share / +$1` | `+$2` | `+$2` | `+$2` | **Secret face** | `Red ★` |
 | **Blue (Firewall)** | `$4–$6` (Variant) | `+1 🔬` | `+1 🔬` | `+$1` | `+1 🔬 / +$1` | **Secret face** | `Blue ★` |
-| **Green (Antivirus)** | `$4–$5` (Variant) | `Clean 1 Glitched Shield Slot / +$1` | `+1 🔬` | `+2 🔬` | `+1 🔬 / +$1` | **Secret face** | `Green ★` |
+| **Green (Antivirus)** | `$4–$5` (Variant) | `+2 🔬` | `+1 🔬` | `+2 🔬` | `+1 🔬 / +$1` | **Secret face** | `Green ★` |
 | **Yellow (Commercial)**| `$5–$6` (Variant) | `+2 Market Share` | `+1 Market Share / +1 🔬` | `+$1 & +1 Market Share` | `+$2 / +1 🔬` | `+$2 / +1 🔬` | `Yellow ★` |
 | **Purple (Specialist)** | Starter / Public Relations L3 | `Block 1 Any` | `Block 1 Any` | `+$2` | `+$1 & +1 🔬` | **Secret face** | `Purple ★ (Signature Protocol)` |
 
 * **Choice Faces (`/`):** Faces with a slash (`/`) indicate a Choice Face. During Phase 1 Step 5, the player declares which of the two options the die fulfills for this round (e.g. `+1 Market Share / +$1`).
 * **Shields:** Only Gray, White and Purple dice have shield faces, and every shield is `Block 1 Any`. Red, Blue, Green and Yellow dice have no shield faces.
 * **Market Share Faces:** Red and Yellow Market Share outputs resolve in Phase 3: Income; they cannot raise Market Share above your maximum and do not count toward your Public Relations limit.
-* **Secret Faces:** Face 5 on Red, Blue, Green and Purple dice. A die showing it after rerolls moves to the **Processing Box** with no other output and banks its Secret when it leaves (yields: Red `+2`; Blue `+1` / `+2` / `+3`; Green `3` minus your Glitched Shield Slots; Purple `+1`; see Phase 5 *Secret Face Yields*). It may be rerolled like any face. Yellow dice have no Secret face.
+* **Secret Faces:** Face 5 on Red, Blue, Green and Purple dice. A die showing it after rerolls moves to the **Processing Box** with no other output and banks its Secret when it leaves (yields: Red `+2`; Blue `+1` / `+2` / `+3`; Green `3` minus your Glitched Shield Slots, then cleans `1` Glitched Shield Slot; Purple `+1`; see Phase 5 *Secret Face Yields*). It may be rerolled like any face. Yellow dice have no Secret face.
 * **Glitch Faces (`Glitch`):** Only on White Contractor dice (Faces 5 & 6). A Contractor showing `Glitch` cannot be rerolled (except with Helix's Brute-Force Bypass) and is discarded to the general supply at the end of Phase 1 rerolls. Glitch faces produce 0 shields and 0 resource outputs.
 
 ### B. Sample Module Variant Cards (`★` Effects)
@@ -52,8 +52,8 @@ Each Version Card defines its Corruption Track (`4` spaces on `v1.0`, `5` spaces
 
 | Version | Card Name | Initial Setup Cup | Space 1 | Space 2 | Space 3 | Space 4 | Space 5 | Space 6 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **`v1.0`** (4) | *Script Kiddie* | `1R, 1B, 1G` | Add `1R` | All lose `$2` + Add `1K` | Lose `1 🔬` | **Upgrade:** Lose `1 🔬` | — | — |
-| **`v1.0`** (4) | *Data Scraper* | `1R, 2B` (`+$1` start) | Lose `1 🔬` | Lose `$1` + Add `1K` | Add `1G` | **Upgrade:** Glitch `1` die | — | — |
+| **`v1.0`** (4) | *Script Kiddie* | `2R, 1B, 1G` | Add `1R` | All lose `$2` + Add `1K` | Lose `1 🔬` | **Upgrade:** Lose `1 🔬` | — | — |
+| **`v1.0`** (4) | *Data Scraper* | `1R, 2B, 1G` (`+$1` start) | Lose `1 🔬` | Lose `$1` + Add `1K` | Add `1G` | **Upgrade:** Glitch `1` die | — | — |
 | **`v2.0`** (5) | *RaaS* | — | All lose `$2` | Add `1R, 1G` + Add `1K` | All lose `$2` & Add `1R` | Lose `$3` & `1 🔬` + Add `1K` | **Upgrade:** Add `1R` | — |
 | **`v2.0`** (5) | *Polymorphic Worm* | — | Lose `2 🔬` | Add `2G` + Add `1K` | All glitch `1` die & Add `1G` | Glitch `1` die + Add `1K` | **Upgrade:** Add `1R` | — |
 | **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 1B, 1G` | Lose `$3` & `1 🔬` + Add `1K` | Add `1R, 1B` | All glitch `1` die & Add `1B, 1K` | Return `1` Colored Die | **Singularity** |
@@ -63,8 +63,8 @@ Each Version Card defines its Corruption Track (`4` spaces on `v1.0`, `5` spaces
 
 | Version | Card Name | Initial Setup Cup | Space 1 | Space 2 | Space 3 | Space 4 | Space 5 | Space 6 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **`v1.0`** (4) | *Script Kiddie* | `1R, 1B, 1G` | Add `1R` | All lose `$3` + Add `1K` | Glitch `1` die | **Upgrade:** Lose `1 🔬` | — | — |
-| **`v1.0`** (4) | *Data Scraper* | `1R, 2B` (`+$1` start) | Lose `2 🔬` | Lose `$2` + Add `1K` | Add `1G` | **Upgrade:** Glitch `2` dice | — | — |
+| **`v1.0`** (4) | *Script Kiddie* | `2R, 1B, 1G` | Add `1R` | All lose `$3` + Add `1K` | Glitch `1` die | **Upgrade:** Lose `1 🔬` | — | — |
+| **`v1.0`** (4) | *Data Scraper* | `1R, 2B, 1G` (`+$1` start) | Lose `2 🔬` | Lose `$2` + Add `1K` | Add `1G` | **Upgrade:** Glitch `2` dice | — | — |
 | **`v2.0`** (5) | *RaaS* | — | All lose `$2` | Add `1R, 1G` + Add `1K` | All lose `$2` & Add `1R` | Lose `$3` & `1 🔬` + Add `1K` | **Upgrade:** Add `1R` | — |
 | **`v2.0`** (5) | *Polymorphic Worm* | — | Lose `2 🔬` | Add `2G` + Add `1K` | All glitch `1` die & Add `1G` | Glitch `2` dice + Add `1K` | **Upgrade:** Add `1R` | — |
 | **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 1B, 1G` | Lose `$3` & `1 🔬` + Add `1K` | Add `1R, 1B` | All glitch `1` die & Add `1B, 1K` | Return `1` Colored Die & glitch `1` die | **Singularity** |

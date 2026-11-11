@@ -22,7 +22,7 @@ V038_PR_REGAIN_COST = 3  # [TUNE] OQ-9 follow-up: 3 research per +1 Market Share
 _FACE_PROFILES = ("V037", "V038_DRAFT")
 # die_face_profile only: V038_DRAFT with the candidate-2 Yellow table (spec §14.3); _ALT = F1 "+$1 & +1 Market Share"
 # _F3 = V038_YELLOW_MS with Yellow F3 "+$1 & +1 Market Share" (spec §14.5.1, RSP-1)
-V038_DIE_FACE_PROFILES = ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3")
+V038_DIE_FACE_PROFILES = ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D")
 _DIE_FACE_PROFILES = ("V037",) + V038_DIE_FACE_PROFILES
 V038B_STARTING_SECRETS = {2: 3, 3: 4, 4: 4}  # [TUNE] §14.3
 V038B_RED_TIERS = ((11, 3), (7, 2), (3, 1), (0, 0))  # [TUNE] §14.3
@@ -32,6 +32,7 @@ V038C_MARKET_SHARE_START = {2: 13, 3: 16, 4: 17}  # [TUNE] §14.5.2 / FINDINGS �
 V038C_RED_SECRET_PAYOUT = {2: (3, 1), 3: (3, 1, 0), 4: (3, 1, 0, 0)}  # [TUNE] §14.5.2
 _TRIAGE_ORDER_RULES = ("BOT", "OLDEST_FIRST")
 _TRIAGE_L1_MODES = ("WHITE_CONTRACTORS", "GRAY_DIE")
+_GREEN_TRIAGE_CLEAN_MODES = ("NONE", "COUNT_THEN_CLEAN", "CLEAN_THEN_COUNT")
 
 
 class CubeColor(str, Enum):
@@ -438,6 +439,11 @@ class GameConfig:
     # --- Green G2 Universal Sandbox [TUNE] (Phase 50) ---
     g2_base_research: int = 2   # Base Phase 3 research output on G2 Universal Sandbox face
     g2_glitch_bonus: int = 1    # Phase 3 research bonus per active Glitched Shield Slot
+    # v0.38d: C2 setup & Green-Clean package levers
+    starting_glitched_shield_slots: int = 0  # v038d sets to 1 (INV-V38D-02)
+    green_triage_clean_mode: str = "NONE"   # "NONE" | "COUNT_THEN_CLEAN" | "CLEAN_THEN_COUNT"
+    green_bank_cleans_slot: bool = False
+    v1_staging_payload_override: Optional[Dict[str, Dict[CubeColor, int]]] = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.bot_pr_push_params, PrPushParams):
@@ -612,6 +618,24 @@ class GameConfig:
         return cls.v038c(**overrides)
 
     @classmethod
+    def v038d(cls, **overrides) -> "GameConfig":
+        """v0.38 candidate 4 (C2 + Green-Clean Package, Variant B): ``v038c()`` + Candidate C2 setup (4 priming cubes,
+        4 starting attack cubes in staging cup, 1 starting Glitched Shield Slot), elimination of passive graduation
+        auto-clean (slot_graduation_clear = 0), Green Face 1 = +2 🔬 (die_face_profile = 'V038D'), and Green banking
+        triage cleans 1 Glitched Shield Slot (COUNT_THEN_CLEAN). Preserves Shogun Baffle tower physics."""
+        from sim.entities import V038D_V1_STAGING_PAYLOAD
+        for k, v in (
+            ("starting_glitched_shield_slots", 1),
+            ("slot_graduation_clear", 0),
+            ("green_triage_clean_mode", "COUNT_THEN_CLEAN"),
+            ("green_bank_cleans_slot", True),
+            ("die_face_profile", "V038D"),
+            ("v1_staging_payload_override", dict(V038D_V1_STAGING_PAYLOAD)),
+        ):
+            overrides.setdefault(k, v)
+        return cls.v038c(**overrides)
+
+    @classmethod
     def v038_roster(cls, **overrides) -> "GameConfig":
         """``v038()`` + the ``v037_roster()`` bot switches (lever A push on, default params)."""
         overrides.setdefault("bot_pr_push", True)
@@ -694,6 +718,20 @@ class GameConfig:
             if self.starting_gray_dice < 1:
                 raise ValueError("company_starting_die_enabled requires starting_gray_dice >= 1")
         self._validate_rsp1()
+        self._validate_v038d()
+
+    def _validate_v038d(self) -> None:
+        """spec v0.38d §3.1.2 validation."""
+        if self.green_bank_cleans_slot and self.green_triage_clean_mode == "NONE":
+            self.green_triage_clean_mode = "COUNT_THEN_CLEAN"
+        elif self.green_triage_clean_mode in ("COUNT_THEN_CLEAN", "CLEAN_THEN_COUNT"):
+            self.green_bank_cleans_slot = True
+        if self.green_triage_clean_mode not in _GREEN_TRIAGE_CLEAN_MODES:
+            raise ValueError(
+                f"green_triage_clean_mode must be one of {_GREEN_TRIAGE_CLEAN_MODES}, got {self.green_triage_clean_mode!r}"
+            )
+        if self.starting_glitched_shield_slots < 0:
+            raise ValueError("starting_glitched_shield_slots must be >= 0")
 
     def _validate_rsp1(self) -> None:
         """spec §14.5.1 validation."""

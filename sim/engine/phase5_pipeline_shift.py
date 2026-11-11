@@ -224,7 +224,7 @@ def conveyor_triage(player: PlayerState) -> List[Die]:
 def graduation_slot_clear(engine: GameEngine, player: PlayerState, graduated: int) -> int:
     """v0.38 step 3b: once per Phase 5, if >= 1 die graduated, clear ``slot_graduation_clear`` slot(s)."""
     player.slot_clear_used_this_phase5 = False
-    if graduated <= 0 or player.glitched_shield_slots <= 0:
+    if graduated <= 0 or player.glitched_shield_slots <= 0 or engine.config.slot_graduation_clear <= 0:
         return 0
     player.slot_clear_used_this_phase5 = True
     return secret_faces.clean_slots(player, engine.config.slot_graduation_clear, "graduation")

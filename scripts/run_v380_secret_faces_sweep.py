@@ -119,7 +119,7 @@ def check_overrides_effective(config_name: str, roster: str, players: int, overr
                         "(ineffective override; pass --allow-noop to run anyway)")
 
 
-CONFIGS = ("v038", "v038_roster", "v038b", "v038c", "v037", "v037_roster")
+CONFIGS = ("v038", "v038_roster", "v038b", "v038c", "v038d", "v037", "v037_roster")
 ROSTERS = ("mixed1", "archetypes")
 
 
@@ -189,6 +189,7 @@ def play(task) -> Dict[str, Any]:
             "stranded_secrets": r.get("stranded_secrets", 0), "stranded_dice": r.get("stranded_dice", 0),
             "slots_glitched_by_source": dict(r.get("slots_glitched_by_source", {})),
             "slots_cleaned": {"die": r.get("slots_cleaned_by_die", 0), "face": r.get("slots_cleaned_by_face", 0),
+                              "green_triage": r.get("slots_cleaned_by_green_triage", 0),
                               "graduation": r.get("slots_cleared_by_graduation", 0)},
             "max_glitched_slots": r.get("max_glitched_slots", 0),
             "zero_capacity_rounds": r.get("zero_capacity_rounds", 0),

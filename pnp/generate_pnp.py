@@ -269,8 +269,8 @@ DICE_SPECS: List[DieSpec] = [
         title="GREEN",
         subtitle="Antivirus",
         cost_str="$4-$5 (by Variant)",
-        faces=("Clean 1 Glitched Shield Slot / +$1", "+1 {RESEARCH}", "+2 {RESEARCH}", "+1 {RESEARCH} / +$1", "{SECRET} Secret", "{GREEN} {STAR}"),
-        notes="Research engine & slot repair. Face 5 Secret face (3 minus Glitched Shield Slots), Face 6 Green {STAR}.",
+        faces=("+2 {RESEARCH}", "+1 {RESEARCH}", "+2 {RESEARCH}", "+1 {RESEARCH} / +$1", "{SECRET} Secret", "{GREEN} {STAR}"),
+        notes="Premier Research engine. Face 5 Secret face (3 minus Glitched Shield Slots, then cleans 1 slot), Face 6 Green {STAR}.",
     ),
     DieSpec(
         color_key="yellow",
@@ -350,21 +350,21 @@ VARIANT_CARDS: List[VariantCardSpec] = [
     ),
     VariantCardSpec(
         'G1', 'green', 'GREEN // ANTIVIRUS', '$5',
-        '{PIP1} Clean/$1 | {PIP2} +1{RESEARCH} | {PIP3} +2{RESEARCH}', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
+        '{PIP1} +2{RESEARCH} | {PIP2} +1{RESEARCH} | {PIP3} +2{RESEARCH}', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
         'Self-Healing Kernel', 'P1 CLEAN + P3 INCOME',
         '**Clean 1 Glitched Shield Slot** (Phase 1 Step 5) **AND** gain **+1 {RESEARCH}** in Phase 3: Income.',
         'Kernel: cleans a slot & yields Research.',
     ),
     VariantCardSpec(
         'G2', 'green', 'GREEN // ANTIVIRUS', '$4',
-        '{PIP1} Clean/$1 | {PIP2} +1{RESEARCH} | {PIP3} +2{RESEARCH}', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
+        '{PIP1} +2{RESEARCH} | {PIP2} +1{RESEARCH} | {PIP3} +2{RESEARCH}', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
         'Universal Sandbox', 'P3 INCOME',
         'Gain **+2 {RESEARCH}**, plus **+1 {RESEARCH}** for each of your **Glitched Shield Slots** in Phase 3: Income.',
         'Sandbox: generates research from quarantined glitches.',
     ),
     VariantCardSpec(
         'G3', 'green', 'GREEN // ANTIVIRUS', '$4',
-        '{PIP1} Clean/$1 | {PIP2} +1{RESEARCH} | {PIP3} +2{RESEARCH}', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
+        '{PIP1} +2{RESEARCH} | {PIP2} +1{RESEARCH} | {PIP3} +2{RESEARCH}', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
         'Live Reboot', 'P3 INCOME OUTPUT',
         'Gain **+2 {RESEARCH}** and **+$1** in Phase 3: Income.',
         'Live Reboot: High-yield immediate income.',
@@ -469,7 +469,7 @@ VERSION_TILES: List[VersionTileSpec] = [
         version="v1.0",
         name="Script Kiddie",
         profile="INITIAL",
-        banner_text="**Setup Payload:** Add 1 {RED} 1 {BLUE} 1 {GREEN} to Staging Cup.\nSpace 4 upgrades to v2.0.",
+        banner_text="**Setup Payload:** Add 2 {RED} 1 {BLUE} 1 {GREEN} to Staging Cup.\nSpace 4 upgrades to v2.0.",
         spaces=(
             VersionTrackSpaceSpec(1, "+1 {RED}"),
             VersionTrackSpaceSpec(2, "All Lose $2\n+1 {BLACK}"),
@@ -481,7 +481,7 @@ VERSION_TILES: List[VersionTileSpec] = [
         version="v1.0",
         name="Data Scraper",
         profile="INITIAL",
-        banner_text="**Setup Payload:** Add 1 {RED} 2 {BLUE} to Staging Cup.\nAll players start with +$1.",
+        banner_text="**Setup Payload:** Add 1 {RED} 2 {BLUE} 1 {GREEN} to Staging Cup.\nAll players start with +$1.",
         spaces=(
             VersionTrackSpaceSpec(1, "Lose 1 {RESEARCH}"),
             VersionTrackSpaceSpec(2, "Lose $1\n+1 {BLACK}"),
@@ -968,7 +968,7 @@ def render_player_board(
     page.rect(px + 6.0, dg_y, pw - 12.0, 104.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.85)
     page.rect(px + 6.0, dg_y, pw - 12.0, 14.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.6)
     page.rich_line(px + 10.0, dg_y + 10.0, "**DEFENSE GRID**  (SHIELD SLOTS — BLOCK 1 ANY)", size=6.8, color=PALETTE["ink"])
-    page.text(px + pw - 14.0, dg_y + 10.0, "RESOLVES IN PHASE 4: ATTACK", font="mono_bold", size=5.2, color=PALETTE["muted"], align="right")
+    page.text(px + pw - 14.0, dg_y + 10.0, "START WITH 1 GLITCHED SLOT  |  RESOLVES IN P4", font="mono_bold", size=5.2, color=PALETTE["muted"], align="right")
 
     # Four spacious Shield Slots; each carries a spot for a Glitched Shield Slot marker
     d_box_x = px + 9.0
@@ -976,7 +976,7 @@ def render_player_board(
     slot_gap = 6.0
     slot_w = (d_box_w - 3 * slot_gap) / 4.0
     slot_y, slot_h = dg_y + 20.0, 78.0
-    slot_tags = ("ACTIVE (START)", "ACTIVE (START)", "UNLOCKS AT L2", "UNLOCKS AT L4")
+    slot_tags = ("ACTIVE (START)", "START GLITCHED", "UNLOCKS AT L2", "UNLOCKS AT L4")
     for sl in range(4):
         sx = d_box_x + sl * (slot_w + slot_gap)
         page.rounded_rect(sx, slot_y, slot_w, slot_h, r=3.0, stroke=PALETTE["border"], fill=PALETTE["white"] if sl < 2 else PALETTE["paper_tint"], line_width=0.85, dash=(3.0, 2.0))
@@ -1061,7 +1061,7 @@ def render_player_board(
         gl_x + 6.0, gl_y + 56.0, gl_w - 12.0,
         "**Bank on Exit:** {RED} **+2** | {PURPLE} **+1**\n"
         "{BLUE} **+1** (+1 blk Blue, +1 Def L3+)\n"
-        "{GREEN} **3** minus Glitched Slots",
+        "{GREEN} **3** minus Glitched (then cleans 1)",
         size=4.8, leading=6.4, color=PALETTE["ink_soft"],
     )
 
@@ -1502,7 +1502,7 @@ def render_market_board(page: PDFPage) -> None:
         "- **2P / 3P / 4P:** **$6** | **3 / 4 / 4** Secrets | **13 / 16 / 17** Market Share (= max) | **0** {RESEARCH}\n"
         "- **Market:** **4 / 6 / 8** dice per color | identical company start (all tracks L0); DTO Slush Fund **once per game**\n"
         "- **Corruption Tracks:** v1.0 **4** / v2.0 **5** / v3.0 **6** spaces (all player counts)\n"
-        "- **Each player:** 2 Gray + 1 starting colored die (Company color, from that Market stack) + 1 Purple in Ready for Release; 1 Purple in Personal Reserve; Market Share Marker on your start value.",
+        "- **Each player:** 2 Gray + 1 starting colored die (Company color) + 1 Purple in Ready; 1 Purple in Reserve; **1 Glitched Shield Slot** on mat; Market Share Marker on start value.",
         size=6.2, leading=8.7, color=PALETTE["ink"],
     )
 
@@ -1528,7 +1528,7 @@ def render_market_board(page: PDFPage) -> None:
 SECRET_YIELD_SHORT = {
     "red": "Bank +2",
     "blue": "Bank +1 to +3",
-    "green": "Bank 3 - Glitched Slots",
+    "green": "Bank 3 - Glitched, clean 1",
     "purple": "Bank +1",
 }
 
@@ -1648,7 +1648,7 @@ def render_master_dice_reference(page: PDFPage) -> None:
     yield_rows = [
         ("red", "RED", "**+2** Secrets."),
         ("blue", "BLUE", "**+1**; **+1** if you blocked 1+ Blue cube this round; **+1** at Defense Grid L3+ (max **+3**)."),
-        ("green", "GREEN", "**+3** minus your Glitched Shield Slots (min 0)."),
+        ("green", "GREEN", "Banks Secret (**3 minus Glitched Shield Slots**, min 0), then **cleans 1 Glitched Shield Slot**."),
         ("purple", "PURPLE", "**+1** Secret."),
     ]
     yr_h = 17.0
@@ -1658,7 +1658,7 @@ def render_master_dice_reference(page: PDFPage) -> None:
         page.rect(40.0, yy, yw, yr_h, stroke=PALETTE["rule"], fill=PALETTE["white"] if yi % 2 == 0 else PALETTE["paper_tint"], line_width=0.5)
         page.rect(40.0, yy, 4.0, yr_h, stroke=None, fill=fgy)
         page.text(49.0, yy + 11.0, yn, font="bold", size=6.2, color=fgy)
-        _fit_paragraph(page, 86.0, yy + (7.6 if yk == "blue" else 11.0), yw - 92.0, yt, yy + yr_h + 6.0, size=5.6, leading=6.2, min_size=4.6, color=PALETTE["ink"])
+        _fit_paragraph(page, 86.0, yy + (7.6 if yk in ("blue", "green") else 11.0), yw - 92.0, yt, yy + yr_h + 6.0, size=5.4 if yk in ("blue", "green") else 5.6, leading=6.0, min_size=4.5, color=PALETTE["ink"])
     page.text(46.0, by + bh - 6.4, "Dice still in the Processing Box at game end, or returned to supply, bank nothing.", font="italic", size=4.6, color=PALETTE["muted"])
 
     box_w = (712.0 - yw - 20.0) / 2.0
@@ -1667,7 +1667,7 @@ def render_master_dice_reference(page: PDFPage) -> None:
             "CHOICE FACES, SHIELDS & GLITCH",
             (
                 "- **Slash ( / ):** Choose **1** option in Phase 1 Step 5 *(e.g. Red Face 1: +1 Market Share OR +$1)*. **Ampersand ( & ):** gain **both**.\n"
-                "- **Shields:** only Gray, White and Purple show shields, all **Block 1 Any**. A **Glitched Shield Slot** cannot hold one; the Green `Clean 1 Glitched Shield Slot` face repairs a slot.\n"
+                "- **Shields:** only Gray, White and Purple show shields, all **Block 1 Any**. A **Glitched Shield Slot** cannot hold one; clean via Green Secret exit, G1, or 1 Any shield die.\n"
                 "- **Glitch** (White only) cannot be rerolled and is discarded. Secret faces may be rerolled."
             ),
         ),
@@ -1708,7 +1708,7 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
         ("white", "WHITE", "$1-$3", ("1 Any", "1 Any", "1 Any", "+$1", "Glitch", "Glitch")),
         ("red", "RED", "$4-$5", ("+1 Share\n/ +$1", "+$2", "+$2", "+$2", "{SECRET} Secret", "{RED} {STAR}")),
         ("blue", "BLUE", "$4-$6", ("+1{RESEARCH}", "+1{RESEARCH}", "+$1", "+1{RESEARCH}\n/ +$1", "{SECRET} Secret", "{BLUE} {STAR}")),
-        ("green", "GREEN", "$4-$5", ("Clean Slot\n/ +$1", "+1{RESEARCH}", "+2{RESEARCH}", "+1{RESEARCH}\n/ +$1", "{SECRET} Secret", "{GREEN} {STAR}")),
+        ("green", "GREEN", "$4-$5", ("+2{RESEARCH}", "+1{RESEARCH}", "+2{RESEARCH}", "+1{RESEARCH}\n/ +$1", "{SECRET} Secret", "{GREEN} {STAR}")),
         ("yellow", "YELLOW", "$5-$6", ("+2 Share", "+1 Share\n/ +1{RESEARCH}", "+$1 &\n+1 Share", "+$2 /\n+1{RESEARCH}", "+$2 /\n+1{RESEARCH}", "{YELLOW} {STAR}")),
         ("purple", "PURPLE", "Not sold", ("1 Any", "1 Any", "+$2", "$1 & 1{RESEARCH}", "{SECRET} Secret", "{PURPLE}{STAR} Protocol")),
     ]
@@ -1769,7 +1769,7 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
                 x + 6.0, fy + 23.0, cw - 12.0,
                 "- {RED} **Red Secret:** **+2** Corporate Secrets *(also triggers **Market Leader Bonus** at end of Phase 5)*\n"
                 "- {BLUE} **Blue Secret:** **+1** Secret (**+1** if you blocked a Blue cube this round; **+1** at Defense L3+; max **3**)\n"
-                "- {GREEN} **Green Secret:** **3 minus** your current Glitched Shield Slots (min **0**)   |   {PURPLE} **Purple Secret:** **+1** Secret\n"
+                "- {GREEN} **Green Secret:** **3 minus** Glitched Shield Slots (min **0**), then cleans 1 slot   |   {PURPLE} **Purple Secret:** **+1** Secret\n"
                 "- **Choice ( / ):** Commit in P1 Step 5   |   **Dual ( & ):** Gain both   |   **Glitch (White):** Cannot reroll; discard",
                 size=5.6, leading=8.0, color=PALETTE["ink"],
             )
@@ -1792,7 +1792,7 @@ def render_four_player_round_reference_cards(page: PDFPage) -> None:
     phases = [
         (
             "P1: ROLL & DEPLOY (Simultaneous)",
-            "**1. Pulse:** +1 {BLACK} -> Staging Cup (do pending Version Switch first). **2. Temp Staffing:** Hire {WHITE} Contractors ($1/$2/$3, max 3). **3-4. Roll & Rerolls:** Roll Ready + Contractors; up to 2 free rerolls (White Glitch cannot reroll; Secret faces can). **5. Assign:** Secret faces -> Processing Box; clean Glitched Shield Slots (Clean face or 1 Any shield die); shields -> Defense Grid; rest -> Income. Discard White Glitch.",
+            "**1. Pulse:** +1 {BLACK} -> Staging Cup (do pending Version Switch first). **2. Temp Staffing:** Hire {WHITE} Contractors ($1/$2/$3, max 3). **3-4. Roll & Rerolls:** Roll Ready + Contractors; up to 2 free rerolls (White Glitch cannot reroll; Secret faces can). **5. Assign:** Secret faces -> Processing Box; clean Glitched Shield Slots (G1 or 1 Any shield die); shields -> Defense Grid; rest -> Income. Discard White Glitch.",
         ),
         (
             "P2: COMPILER DROP & CORRUPTION",
@@ -1808,7 +1808,7 @@ def render_four_player_round_reference_cards(page: PDFPage) -> None:
         ),
         (
             "P5: CI/CD PIPELINE SHIFT (Simultaneous)",
-            "**1.** Magnetic Splice (Omnidyne). **2.** In Production -> **Scanned Box**. **3.** Scanned -> **Ready** (<= Release Bandwidth 4/5/6; if 1+ graduated, clean 1 Glitched Shield Slot). **4.** Conveyor Triage: **Processing -> Scanned** (<= Triage Bandwidth 2/3/4, oldest first; each banks its Secret). **5.** If a **Red Secret** banked this round: **Market Leader Bonus**.",
+            "**1.** Magnetic Splice (Omnidyne). **2.** In Production -> **Scanned Box**. **3.** Scanned -> **Ready** (<= Release Bandwidth 4/5/6). **4.** Conveyor Triage: **Processing -> Scanned** (<= Triage Bandwidth 2/3/4, oldest first; each banks its Secret). **5.** If a **Red Secret** banked this round: **Market Leader Bonus**.",
         ),
         (
             "P6: OPERATIONS (Clockwise from First Player)",
@@ -2119,7 +2119,7 @@ def render_pnp_tokens_page(page: PDFPage) -> None:
             page.text(bx + 26.0, by + 23.0, "1 Pt  |  Client Data", font="regular", size=5.8, color=PALETTE["muted"])
 
     # Section 2b (y = 268..330): 16x Glitched Shield Slot markers (4 per player; 8 cols x 2 rows)
-    page.text(42.0, 270.0, "GLITCHED SHIELD SLOT MARKERS (x16 — 4 PER PLAYER; PLACE ON A SHIELD SLOT OF THE DEFENSE GRID)", font="mono_bold", size=6.8, color=PALETTE["red"])
+    page.text(42.0, 270.0, "GLITCHED SHIELD SLOT MARKERS (x16 — 4 PER PLAYER; EACH PLAYER STARTS WITH 1 MARKER ON MAT)", font="mono_bold", size=6.8, color=PALETTE["red"])
     gy0 = 275.0
     gh = 26.0
     for r in range(2):

@@ -34,6 +34,16 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/g2_universal_sandbox_spec.md`.
   - [x] *Implementation (`senior-engineer`) + Code Review Gate (`staff-engineer`):* `sim/`, `web/`, and unit tests (`tests/test_g2_universal_sandbox.py`, 941/941 tests passing; `staff-engineer` APPROVED).
   - [x] *Validation sweep (`product-owner`) + Balance sign-off (`game-designer`) + PnP update (`graphic-designer`):* `sim_results/g2_universal_sandbox/validation_report.md` (14,400 games, 0 errors); `FINDINGS.md` §44 (`APPROVED`); `pnp/generate_pnp.py` & PDFs regenerated; `GLOSSARY.md` synced.
+- [x] **Phase 51: Package `v0.38d` (Candidate C2 Setup + Green-Clean Package, Variant B)**
+  - [x] *Cube Tower Physics Calibration (`game-designer`):* Physical *Shogun* Cube Tower drop tests (10 test drops) revealed legacy `LEDGE_AVALANCHE` over-damaged Round 1 by +33% and ignored baffle retention. Validated two-state physical retention model (`SHOGUN_BAFFLE`: $p_{\text{exit}} \approx 0.70$, retention scaling with stuck cubes $S$, avalanche regime at $S \ge 3$ or $F+S \ge 7$). Calibrated and pushed (`f7d9742`).
+  - [x] *Pre-SDLC Game Designer Modeling & Tension Tuning:* `docs/findings/early_game_pressure_modeling.md` and `docs/findings/c2_green_clean_analysis.md`. Addressed "calm opening" problem where 2 clean shield slots easily blocked all `v1.0` attack cubes. Candidate C2 (4 priming cubes, 4 starting attack cubes, 1 starting Glitched Shield Slot) + Green-Clean Variant B modeled.
+  - [x] *User sign-off (2026-11-11):* Candidate C2 + Remove CI/CD auto-clean on graduation + Green Face 1 converted to `+2 🔬` + Green Secret triage cleans 1 Glitched Shield Slot (Variant B: count then clean).
+  - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/v380d_c2_green_clean_spec.md`.
+  - [x] *Implementation (`senior-engineer`):* `sim/config.py`, `sim/entities.py`, `sim/engine/secret_faces.py`, `sim/engine/phase5_pipeline_shift.py`, `sim/engine/core.py`, `sim/engine/state.py`, `sim/engine/end_game.py`, `sim/bots/secret_face_policy.py`, `tests/test_v380d_c2_green_clean.py` (INV-V38D-01..08).
+  - [x] *Code Review Gate (`staff-engineer`):* APPROVED with follow-up telemetry key added to sweep scripts. Full suite 958 passed, 0 failed, 2 skipped.
+  - [x] *Validation Sweep (`product-owner`):* `sim_results/v380d_c2_green_clean/validation_report.md` (3,600 games across 2P/3P/4P, Standard and Aggressive bots, seeds 42..641, 0 errors).
+  - [x] *Balance Sign-off (`game-designer`):* `FINDINGS.md` §45. Game length 8.73–8.94 rounds, 36–42% Singularity, 19–31% Patient Zero, 26–43% Market Collapse. Passive graduation clean eradicated (0.00); Green company win rate stabilized at 38.9% (3P). APPROVED.
+  - [ ] *PnP Asset Update (`graphic-designer`):* `pnp/generate_pnp.py` updated and PDFs regenerated.
 - [x] **Completed phases (Phases 1–46, 48)** are archived in [docs/archive/PLAN_completed_phases.md](docs/archive/PLAN_completed_phases.md), along with the legacy v0.3-era Sections 3–5 (code architecture, experiment matrix, SDLC checklist).
 
 ---

@@ -207,6 +207,12 @@ class GameEngine:
             if config.secret_face_enabled:
                 player.secrets_by_source["starting"] = player.secrets
                 player.company_color = company_color.value if company_color is not None else None
+            if config.glitched_shield_slots_enabled:
+                start_g = int(getattr(config, "starting_glitched_shield_slots", 0))
+                player.glitched_shield_slots = start_g
+                player.max_glitched_slots = start_g
+                if start_g > 0:
+                    player.slots_glitched_by_source["setup"] = start_g
             players.append(player)
 
         # Initialize Market: 2 * num_players dice per colored die (INV-PURPLE-02: Purple excluded from Central Market)
@@ -227,7 +233,13 @@ class GameEngine:
             CubeColor.GREEN: 0,
             CubeColor.BLACK: 0,
         }
-        for color, count in self.version_deck[0].get_staging_payload(self.config.num_players).items():
+        v1_code = self.version_deck[0].directive_code
+        payload_override = getattr(self.config, "v1_staging_payload_override", None)
+        if payload_override and (v1_code in payload_override or self.version_deck[0].name.upper().replace(" ", "_") in payload_override):
+            staging_payload = payload_override.get(v1_code) or payload_override[self.version_deck[0].name.upper().replace(" ", "_")]
+        else:
+            staging_payload = self.version_deck[0].get_staging_payload(self.config.num_players)
+        for color, count in staging_payload.items():
             staging_cup[color] = count
 
         # Setup First Player randomly per RULES.md Section 3 Step 4
