@@ -119,7 +119,7 @@ def check_overrides_effective(config_name: str, roster: str, players: int, overr
                         "(ineffective override; pass --allow-noop to run anyway)")
 
 
-CONFIGS = ("v038", "v038_roster", "v038b", "v038c", "v038d", "v037", "v037_roster")
+CONFIGS = ("v038", "v038_roster", "v038b", "v038c", "v038d", "v038e", "v038e_roster", "v038f", "v038f_roster", "v037", "v037_roster")
 ROSTERS = ("mixed1", "archetypes")
 
 
@@ -186,6 +186,7 @@ def play(task) -> Dict[str, Any]:
             "secrets_by_source": dict(r.get("secrets_by_source", {})),
             "secret_faces_rolled": dict(r.get("secret_faces_rolled", {})),
             "secret_faces_banked": dict(r.get("secret_faces_banked", {})),
+            "secret_yield_hist": {k: dict(v) for k, v in r.get("secret_yield_hist", {}).items()},
             "stranded_secrets": r.get("stranded_secrets", 0), "stranded_dice": r.get("stranded_dice", 0),
             "slots_glitched_by_source": dict(r.get("slots_glitched_by_source", {})),
             "slots_cleaned": {"die": r.get("slots_cleaned_by_die", 0), "face": r.get("slots_cleaned_by_face", 0),
@@ -296,6 +297,13 @@ def summarise(records: List[Dict[str, Any]], config_name: str, roster: str, play
         "red_mean_wait_rounds": round(sum(x["red_wait_rounds"] for x in seats_all) / wait_n, 3) if wait_n else None,
         "red_pending_at_end_per_game": round(sum(g["red_pending_at_end"] for g in records) / games, 3) if games else None,
     }
+    yield_hist = defaultdict(Counter)
+    for x in seats_all:
+        for c, h in x.get("secret_yield_hist", {}).items():
+            for y_val, count in h.items():
+                yield_hist[c][str(y_val)] += int(count)
+    yield_hist_totals = {c: dict(sorted(cnt.items())) for c, cnt in sorted(yield_hist.items())}
+
     return {
         "rsp1": rsp1,
         "config": config_name, "roster": roster, "overrides": {str(k): v for k, v in overrides.items()},
@@ -308,6 +316,7 @@ def summarise(records: List[Dict[str, Any]], config_name: str, roster: str, play
         "secrets_by_source_per_seat": src,
         "secret_faces_rolled_per_seat": per_seat("secret_faces_rolled"),
         "secret_faces_banked_per_seat": per_seat("secret_faces_banked"),
+        "secret_yield_hist_totals": yield_hist_totals,
         "stranded_share": round(stranded / (stranded + banked), 4) if stranded + banked else 0.0,
         "stranded_dice_per_seat": round(sum(x["stranded_dice"] for x in seats_all) / nseat, 3),
         "slots_glitched_per_seat": per_seat("slots_glitched_by_source"),

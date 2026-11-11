@@ -619,7 +619,9 @@ class GameStateSerializer:
                 "red": state.config.red_secret_owner_yield if state.config.red_secret_owner_yield is not None else None,
                 "blue_base": state.config.secret_yield_blue_base, "blue_block": state.config.secret_yield_blue_block_bonus,
                 "blue_grid": state.config.secret_yield_blue_grid_l3_bonus, "blue_cap": state.config.secret_yield_blue_cap,
-                "green_base": state.config.secret_yield_green_base, "purple": state.config.secret_yield_purple,
+                "green_base": state.config.secret_yield_green_base,
+                "green_glitch_penalty": getattr(state.config, "secret_yield_green_glitch_penalty", True),
+                "purple": state.config.secret_yield_purple,
             },
             "market_leader_bonus_schedule": list(state.config.market_leader_bonus_schedule(len(state.players))
                                                  if hasattr(state.config, "market_leader_bonus_schedule") else []),

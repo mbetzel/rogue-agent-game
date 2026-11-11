@@ -44,14 +44,30 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Validation Sweep (`product-owner`):* `sim_results/v380d_c2_green_clean/validation_report.md` (3,600 games across 2P/3P/4P, Standard and Aggressive bots, seeds 42..641, 0 errors).
   - [x] *Balance Sign-off (`game-designer`):* `FINDINGS.md` §45. Game length 8.73–8.94 rounds, 36–42% Singularity, 19–31% Patient Zero, 26–43% Market Collapse. Passive graduation clean eradicated (0.00); Green company win rate stabilized at 38.9% (3P). APPROVED.
   - [x] *PnP Asset Update (`graphic-designer`):* `pnp/generate_pnp.py` updated and PDFs regenerated.
-- [x] **Phase 52: Market Share Track & Headroom Architecture (Package `v0.38e`)**
+- [x] **Phase 52: Secret Simplification & Domain Processing Triggers (`v0.38e`)**
+  - [x] *Pre-SDLC Game Designer Modeling:* Universal baseline (+2 Secrets for Red/Blue/Green; +1 for Purple) and 4 domain triggers (Red: Market Leader Bonus; Blue: Defense Grid >= L3; Green: clean 1 Glitched Shield Slot; Purple: no trigger). Evaluated Option A (Grid >= L3) vs Option B (Grid >= L2). Blue EV restored from 1.46 to 2.08 (+0.62); Green stabilized from 1.82 to 2.00; Phase 4 Blue block memory burden and Phase 3 timing exception eradicated.
+  - [x] *User sign-off (2026-11-11):* User approved `secret_simplification_investigation.md` and Option A (Defense Grid >= L3).
+  - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/v380e_secret_simplification_spec.md` with invariants INV-V38E-01..08.
+  - [x] *Implementation (`senior-engineer`):* `sim/config.py` (`v038e()` and `v038e_roster()`), `sim/engine/secret_faces.py`, `sim/bots/secret_face_policy.py`, `RULES.md`, and new test suite `tests/test_v380e_secret_simplification.py` (969 tests OK).
+  - [x] *Code Review Gate (`staff-engineer`):* APPROVED (spec fidelity, invariants INV-V38E-01..08, backwards parity for v0.37/v0.38d).
+  - [x] *Validation Sweep (`product-owner`):* `sim_results/v380e_secret_simplification/validation_report.md` (3,600 games across 2P/3P/4P, seeds 42..1241, 0 errors). Pacing 8.84–9.04 rounds; Singularity 37–46%, Patient Zero 18–29%, Market Collapse 25–43%, Total Wipeout <= 1.6%. Invariant checks: 100% Red=2, Green=2, Purple=1, Blue in {2, 3}.
+  - [x] *Balance Sign-off (`game-designer`):* `FINDINGS.md` §46. APPROVED (`v0.38e`).
+  - [x] *Asset & Web Synchronization (`graphic-designer` & Main Agent):* `GLOSSARY.md`, `RULES_APPENDIX.md`, `pnp/generate_pnp.py` (PDFs regenerated), and `web/` components updated.
+- [x] **Phase 53: Blue Module Die Rebalance (`v0.38f`)**
+  - [x] *Pre-SDLC Game Designer Modeling:* Converted Blue Faces 1 & 2 from `+1 🔬` to unconditional `+1 Corporate Secret` directly awarded in Phase 3. Eliminates research overlap with Green, creates a distinct "Firewall / Data Vault" thematic profile (50% secret density), eliminates early-game Blue Company survival lag, and models a +0.133 $/roll EV lift.
+  - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/v380f_blue_dice_rebalance_spec.md` with invariants INV-V38F-01..08.
+  - [x] *Implementation (`senior-engineer`):* `sim/config.py` (`v038f()`, `v038f_roster()`), `sim/entities.py`, `sim/engine/phase3_income.py`, `sim/bots/*`, `RULES.md`, `RULES_APPENDIX.md`, `tests/test_v380f_blue_dice_rebalance.py`.
+  - [x] *Code Review Gate (`staff-engineer`):* APPROVED (full test suite passing, backwards parity preserved).
+  - [x] *Validation Sweep (`product-owner`):* `sim_results/v380f_blue_dice_rebalance/validation_report.md` (3,600 games across 2P/3P/4P, seeds 42..1241, 0 errors). Game length 8.93 / 9.44 / 9.26 rounds; Singularity 46.8%, Market Collapse 33.6%, Patient Zero 19.2%, Total Wipeout 0.42%. Blue Company win rates: 49.1% (2P), 33.4% (3P), 25.3% (4P). Market purchases per seat up +75% to +99%.
+  - [x] *Balance Sign-off (`game-designer`):* `FINDINGS.md` §47. Theoretical parity achieved; healthy triad stability; APPROVED (`v0.38f`).
+- [x] **Phase 54: Market Share Track & Headroom Architecture (`v0.38g` / Headroom)**
   - [x] *Pre-SDLC Game Designer Modeling:* `docs/findings/market_share_early_pressure_analysis.md` (5,200 games + 50k tower drops across 2P/3P/4P). Evaluated headroom, -2 Red damage, and company starting asymmetry. -2 Red rejected (spikes Market Collapse to 68% in R3–5); asymmetry rejected (2:1 win rate skew). Candidate A4 (Unified Max 20, starts 13 at 2P / 16 at 3P/4P) recommended.
   - [x] *User Sign-Off (2026-11-11):* Option A (Unified Max 20) with starts at 13 (2P) and 16 (3P & 4P unified) approved. Rejection of -2 Red damage and company asymmetry confirmed.
   - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/market_share_headroom_spec.md`.
-  - [x] *Implementation (`senior-engineer`):* `sim/config.py` (`v038e`, `DEFAULT_MARKET_SHARE_MAX=20`, `V038E_MARKET_SHARE_START`), `sim/engine/state.py` (decoupled `init_market_share` + `market_share_peak`), `sim/engine/core.py`, `sim/bots/secret_face_policy.py`, `sim/bots/market_share_policy.py`, `tests/test_market_share_headroom.py` (10/10 passed).
+  - [x] *Implementation (`senior-engineer`):* `sim/config.py` (`DEFAULT_MARKET_SHARE_MAX=20`, `V038E_MARKET_SHARE_START`), `sim/engine/state.py` (decoupled `init_market_share` + `market_share_peak`), `sim/engine/core.py`, `sim/bots/secret_face_policy.py`, `sim/bots/market_share_policy.py`, `tests/test_market_share_headroom.py` (10/10 passed).
   - [x] *Code Review Gate (`staff-engineer`):* APPROVED (full regression clean, backward compatibility verified).
   - [x] *Validation Sweep (`product-owner`):* `sim_results/market_share_headroom/validation_report.md` (3,600 games across 2P/3P/4P, seeds 42..1241). R1 Red F1 choice selection jumped from 0.0% to 100.0%; R1 ceiling congestion dropped from 54–73% to 0.0%; pacing 8.72–9.12 rounds; 0 timeouts.
-  - [x] *Balance Sign-Off (`game-designer`):* `FINDINGS.md` §46. Zero Blank Faces restored; pacing and tri-modal end triggers healthy. APPROVED.
+  - [x] *Balance Sign-Off (`game-designer`):* `FINDINGS.md` §48. Zero Blank Faces restored; pacing and tri-modal end triggers healthy. APPROVED.
   - [x] *PnP Asset Update (`graphic-designer`):* `pnp/generate_pnp.py` updated to 3x7 (21-cell) Central Market Share Track and PDFs regenerated.
 - [x] **Completed phases (Phases 1–46, 48)** are archived in [docs/archive/PLAN_completed_phases.md](docs/archive/PLAN_completed_phases.md), along with the legacy v0.3-era Sections 3–5 (code architecture, experiment matrix, SDLC checklist).
 

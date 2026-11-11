@@ -268,7 +268,7 @@ export function renderCompiler() {
           <div class="cube-threat-row green-row">
             <span class="threat-pill green">▲ GREEN // MALWARE</span>
             <div class="threat-row-text">
-              <strong>Blocks: Generic (Any) Shield.</strong> Each unblocked Green turns 1 shield slot into a <strong>Glitched Shield Slot</strong> (no die moves; max = Defense Grid Capacity). <em>Each Glitched Shield Slot lowers your Green Secret face yield by 1.</em>
+              <strong>Blocks: Generic (Any) Shield.</strong> Each unblocked Green turns 1 shield slot into a <strong>Glitched Shield Slot</strong> (no die moves; max = Defense Grid Capacity). <em>A Glitched Shield Slot cannot hold a shield die.</em>
             </div>
           </div>
         </div>

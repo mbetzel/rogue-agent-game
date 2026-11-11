@@ -261,8 +261,8 @@ DICE_SPECS: List[DieSpec] = [
         title="BLUE",
         subtitle="Firewall",
         cost_str="$4-$6 (by Variant)",
-        faces=("+1 {RESEARCH}", "+1 {RESEARCH}", "+$1", "+1 {RESEARCH} / +$1", "{SECRET} Secret", "{BLUE} {STAR}"),
-        notes="Research & Secrets. Face 5 Secret face (+1 to +3), Face 6 Blue {STAR}.",
+        faces=("+1 Corporate Secret", "+1 Corporate Secret", "+$1", "+1 {RESEARCH} / +$1", "{SECRET} Secret", "{BLUE} {STAR}"),
+        notes="Direct Secrets & Defense synergy. Face 5 Secret face (+2, or +3 at Defense Grid L3+), Face 6 Blue {STAR}.",
     ),
     DieSpec(
         color_key="green",
@@ -270,7 +270,7 @@ DICE_SPECS: List[DieSpec] = [
         subtitle="Antivirus",
         cost_str="$4-$5 (by Variant)",
         faces=("+2 {RESEARCH}", "+1 {RESEARCH}", "+2 {RESEARCH}", "+1 {RESEARCH} / +$1", "{SECRET} Secret", "{GREEN} {STAR}"),
-        notes="Premier Research engine. Face 5 Secret face (3 minus Glitched Shield Slots, then cleans 1 slot), Face 6 Green {STAR}.",
+        notes="Premier Research engine. Face 5 Secret face (+2, then cleans 1 Glitched Shield Slot), Face 6 Green {STAR}.",
     ),
     DieSpec(
         color_key="yellow",
@@ -329,21 +329,21 @@ VARIANT_CARDS: List[VariantCardSpec] = [
     ),
     VariantCardSpec(
         'B1', 'blue', 'BLUE // FIREWALL', '$5',
-        '{PIP1}{PIP2} +1{RESEARCH} | {PIP3} +$1', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
+        '{PIP1}{PIP2} +1 Secret | {PIP3} +$1', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
         'Honeypot Telemetry', 'P3 INCOME + P4 BONUS',
         'Gain **+1 {RESEARCH}** in Phase 3; if **1+ {BLUE} Blue** cubes exit and you take **0 Blue** damage in Phase 4, gain **+$2** *(die must still be In Production)*.',
         'Honeypot: +1 research; +$2 if 0 Blue damage.',
     ),
     VariantCardSpec(
         'B2', 'blue', 'BLUE // FIREWALL', '$6',
-        '{PIP1}{PIP2} +1{RESEARCH} | {PIP3} +$1', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
+        '{PIP1}{PIP2} +1 Secret | {PIP3} +$1', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
         'Deep R&D Vault', 'P6 OPS',
         'Pay **$4** in Phase 6 to gain **+1 Corporate Secret**.',
         'R&D Vault: pay $4 in P6 for a Secret.',
     ),
     VariantCardSpec(
         'B3', 'blue', 'BLUE // FIREWALL', '$4',
-        '{PIP1}{PIP2} +1{RESEARCH} | {PIP3} +$1', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
+        '{PIP1}{PIP2} +1 Secret | {PIP3} +$1', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
         'Air-Gapped Backup', 'P3 INCOME',
         'In Phase 3, move **1 die from your Processing Box to your Scanned Box**, banking its Secret.',
         'Air-Gapped: Processing -> Scanned, banks Secret.',
@@ -1058,11 +1058,12 @@ def render_player_board(
         page.rounded_rect(sdx, sdy, 28.0, 28.0, r=2.5, stroke=PALETTE["purple_light"], fill=PALETTE["paper_tint"], line_width=0.6, dash=(2.5, 1.5))
 
     page.rich_paragraph(
-        gl_x + 6.0, gl_y + 56.0, gl_w - 12.0,
-        "**Bank on Exit:** {RED} **+2** | {PURPLE} **+1**\n"
-        "{BLUE} **+1** (+1 blk Blue, +1 Def L3+)\n"
-        "{GREEN} **3** minus Glitched (then cleans 1)",
-        size=4.8, leading=6.4, color=PALETTE["ink_soft"],
+        gl_x + 6.0, gl_y + 54.0, gl_w - 12.0,
+        "**Bank on Exit:**\n"
+        "{PURPLE} **+1**  |  {RED} **+2** *(MLB)*\n"
+        "{BLUE} **+2** *(+1 if Def Grid L3+)*\n"
+        "{GREEN} **+2** *(cleans 1 Glitched Slot)*",
+        size=4.6, leading=6.2, color=PALETTE["ink_soft"],
     )
 
     page.text(gl_x + gl_w / 2.0, gl_y + gl_h - 14.0, "< TRIAGES TO SCANNED <", font="mono_bold", size=5.4, color=PALETTE["purple"], align="center")
@@ -1532,9 +1533,9 @@ def render_market_board(page: PDFPage) -> None:
 # =============================================================================
 
 SECRET_YIELD_SHORT = {
-    "red": "Bank +2",
-    "blue": "Bank +1 to +3",
-    "green": "Bank 3 - Glitched, clean 1",
+    "red": "Bank +2 (MLB)",
+    "blue": "Bank +2 (+3 @ L3)",
+    "green": "Bank +2, clean 1",
     "purple": "Bank +1",
 }
 
@@ -1652,9 +1653,9 @@ def render_master_dice_reference(page: PDFPage) -> None:
     page.rect(40.0, by, yw, 16.0, stroke=PALETTE["blue"], fill=PALETTE["blue_light"], line_width=0.7)
     page.rich_line(47.0, by + 11.4, "{SECRET} **SECRET FACE YIELDS** (Face 5, banked when it leaves the Processing Box)", size=5.6, color=PALETTE["blue"])
     yield_rows = [
-        ("red", "RED", "**+2** Secrets."),
-        ("blue", "BLUE", "**+1**; **+1** if you blocked 1+ Blue cube this round; **+1** at Defense Grid L3+ (max **+3**)."),
-        ("green", "GREEN", "Banks Secret (**3 minus Glitched Shield Slots**, min 0), then **cleans 1 Glitched Shield Slot**."),
+        ("red", "RED", "**+2** Secrets *(triggers **Market Leader Bonus**)*."),
+        ("blue", "BLUE", "**+2** Secrets (**+1** at Defense Grid L3+, max **+3**)."),
+        ("green", "GREEN", "**+2** Secrets, then **cleans 1 Glitched Shield Slot**."),
         ("purple", "PURPLE", "**+1** Secret."),
     ]
     yr_h = 17.0
@@ -1713,7 +1714,7 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
         ("gray", "GRAY", "Starter", ("1 Any", "1 Any", "$1 & 1{RESEARCH}", "$1 / 1{RESEARCH}", "$1 / 1{RESEARCH}", "+1{RESEARCH}")),
         ("white", "WHITE", "$1-$3", ("1 Any", "1 Any", "1 Any", "+$1", "Glitch", "Glitch")),
         ("red", "RED", "$4-$5", ("+1 Share\n/ +$1", "+$2", "+$2", "+$2", "{SECRET} Secret", "{RED} {STAR}")),
-        ("blue", "BLUE", "$4-$6", ("+1{RESEARCH}", "+1{RESEARCH}", "+$1", "+1{RESEARCH}\n/ +$1", "{SECRET} Secret", "{BLUE} {STAR}")),
+        ("blue", "BLUE", "$4-$6", ("+1 Secret", "+1 Secret", "+$1", "+1{RESEARCH}\n/ +$1", "{SECRET} Secret", "{BLUE} {STAR}")),
         ("green", "GREEN", "$4-$5", ("+2{RESEARCH}", "+1{RESEARCH}", "+2{RESEARCH}", "+1{RESEARCH}\n/ +$1", "{SECRET} Secret", "{GREEN} {STAR}")),
         ("yellow", "YELLOW", "$5-$6", ("+2 Share", "+1 Share\n/ +1{RESEARCH}", "+$1 &\n+1 Share", "+$2 /\n+1{RESEARCH}", "+$2 /\n+1{RESEARCH}", "{YELLOW} {STAR}")),
         ("purple", "PURPLE", "Not sold", ("1 Any", "1 Any", "+$2", "$1 & 1{RESEARCH}", "{SECRET} Secret", "{PURPLE}{STAR} Protocol")),
@@ -1774,8 +1775,8 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
             page.rich_paragraph(
                 x + 6.0, fy + 23.0, cw - 12.0,
                 "- {RED} **Red Secret:** **+2** Corporate Secrets *(also triggers **Market Leader Bonus** at end of Phase 5)*\n"
-                "- {BLUE} **Blue Secret:** **+1** Secret (**+1** if you blocked a Blue cube this round; **+1** at Defense L3+; max **3**)\n"
-                "- {GREEN} **Green Secret:** **3 minus** Glitched Shield Slots (min **0**), then cleans 1 slot   |   {PURPLE} **Purple Secret:** **+1** Secret\n"
+                "- {BLUE} **Blue Secret:** **+2** Secrets (**+1** at Defense L3+; max **3**)\n"
+                "- {GREEN} **Green Secret:** **+2** Secrets, then cleans 1 slot   |   {PURPLE} **Purple Secret:** **+1** Secret\n"
                 "- **Choice ( / ):** Commit in P1 Step 5   |   **Dual ( & ):** Gain both   |   **Glitch (White):** Cannot reroll; discard",
                 size=5.6, leading=8.0, color=PALETTE["ink"],
             )

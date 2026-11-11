@@ -1,0 +1,878 @@
+[
+  {
+    "avg_rounds": 8.844,
+    "breach_rate": 0.195,
+    "config": "v038e_roster",
+    "cube_exits_avg": {
+      "blue": 11.302,
+      "green": 14.54,
+      "red": 16.876
+    },
+    "endings": {
+      "market_collapse": 0.4325,
+      "patient_zero": 0.1792,
+      "singularity": 0.3725,
+      "total_wipeout": 0.0158
+    },
+    "final_market_share_hist": {
+      "0": 406,
+      "1": 400,
+      "10": 117,
+      "11": 132,
+      "12": 188,
+      "13": 133,
+      "2": 191,
+      "3": 145,
+      "4": 141,
+      "5": 128,
+      "6": 99,
+      "7": 102,
+      "8": 112,
+      "9": 106
+    },
+    "games": 1200,
+    "market_share_min_avg": 4.606,
+    "max_glitched_slots_avg": 2.145,
+    "outliers": {
+      "highest_winner_secrets": [
+        417,
+        865,
+        137,
+        212,
+        791
+      ],
+      "longest": [
+        1067,
+        815,
+        488,
+        1229,
+        1225
+      ],
+      "round_limit": [],
+      "shortest": [
+        87,
+        1146,
+        53,
+        62,
+        66
+      ],
+      "total_wipeout": [
+        148,
+        160,
+        176,
+        216,
+        324,
+        328,
+        347,
+        353,
+        366,
+        448,
+        530,
+        539,
+        621,
+        684,
+        723,
+        724,
+        863,
+        924,
+        961
+      ]
+    },
+    "overrides": {},
+    "path_rule": "majority colour >= 60% of owned Red/Blue/Green/Yellow dice at game end, else mixed",
+    "players": 2,
+    "purchases_per_seat_by_archetype": {
+      "AccelerationistBot": {
+        "blue": 0.082,
+        "green": 0.883,
+        "red": 1.152,
+        "yellow": 0.987
+      },
+      "AdaptiveBalancedBot": {
+        "blue": 0.141,
+        "green": 0.237,
+        "red": 1.378,
+        "yellow": 0.651
+      },
+      "MixedPolicyBot": {
+        "blue": 0.221,
+        "green": 0.278,
+        "red": 1.222,
+        "yellow": 0.805
+      },
+      "RecklessSaboteurBot": {
+        "blue": 0.164,
+        "green": 0.008,
+        "red": 0.857,
+        "yellow": 0.377
+      },
+      "SecOpsTurtleBot": {
+        "blue": 0.098,
+        "green": 0.061,
+        "red": 0.154,
+        "yellow": 0.106
+      },
+      "VentureGreedBot": {
+        "blue": 0.45,
+        "green": 0.975,
+        "red": 1.731,
+        "yellow": 1.857
+      }
+    },
+    "roster": "mixed1",
+    "rounds_hist": {
+      "1": 2,
+      "10": 232,
+      "11": 311,
+      "12": 90,
+      "13": 3,
+      "2": 40,
+      "3": 46,
+      "4": 38,
+      "5": 39,
+      "6": 40,
+      "7": 78,
+      "8": 129,
+      "9": 152
+    },
+    "rsp1": {
+      "end_payout_rate": 0.9842,
+      "multi_red_bank_round_share": 0.0481,
+      "payout_leader_is_winner_rate": 0.8242,
+      "payout_secrets_per_seat": 8.803,
+      "payout_vs_face_secret_share": 0.5062,
+      "payouts_per_game": 2.79,
+      "red_mean_wait_rounds": 0.03,
+      "red_pending_at_end_per_game": 0.157,
+      "red_secrets_banked_per_seat": 1.616
+    },
+    "seats_by_archetype": {
+      "AccelerationistBot": 231,
+      "AdaptiveBalancedBot": 241,
+      "MixedPolicyBot": 1200,
+      "RecklessSaboteurBot": 244,
+      "SecOpsTurtleBot": 246,
+      "VentureGreedBot": 238
+    },
+    "seats_by_company_color": {
+      "blue": 797,
+      "green": 810,
+      "red": 793
+    },
+    "seats_by_path": {
+      "blue": 176,
+      "green": 267,
+      "mixed": 1222,
+      "red": 541,
+      "yellow": 194
+    },
+    "secret_faces_banked_per_seat": {
+      "blue": 0.775,
+      "green": 1.111,
+      "purple": 1.536,
+      "red": 1.616
+    },
+    "secret_faces_rolled_per_seat": {
+      "blue": 0.86,
+      "green": 1.207,
+      "purple": 1.581,
+      "red": 1.795
+    },
+    "secret_yield_hist_totals": {
+      "blue": {
+        "2": 1741,
+        "3": 118
+      },
+      "green": {
+        "2": 2666
+      },
+      "purple": {
+        "1": 3687
+      },
+      "red": {
+        "2": 3878
+      }
+    },
+    "secrets_by_source_per_seat": {
+      "b2": 0.046,
+      "blue_damage": -6.287,
+      "breakthrough": 0.294,
+      "burn_notice": 0.021,
+      "corruption": -0.498,
+      "red_secret_payout": 6.758,
+      "red_secret_payout_end": 2.045,
+      "secret_face_blue": 1.598,
+      "secret_face_green": 2.222,
+      "secret_face_purple": 1.536,
+      "secret_face_red": 3.232,
+      "starting": 3.0,
+      "y1": 0.171,
+      "y3": 0.209
+    },
+    "slots_cleaned_per_seat": {
+      "die": 5.292,
+      "face": 0.149,
+      "graduation": 0.0,
+      "green_triage": 0.914
+    },
+    "slots_glitched_per_seat": {
+      "corruption": 1.623,
+      "green_cube": 5.408,
+      "setup": 1.0
+    },
+    "stranded_dice_per_seat": 0.171,
+    "stranded_share": 0.0357,
+    "total_wipeout_rate": 0.0158,
+    "win_rate_by_archetype": {
+      "AccelerationistBot": 0.4545,
+      "AdaptiveBalancedBot": 0.6805,
+      "MixedPolicyBot": 0.5025,
+      "RecklessSaboteurBot": 0.3197,
+      "SecOpsTurtleBot": 0.561,
+      "VentureGreedBot": 0.4706
+    },
+    "win_rate_by_company_color": {
+      "blue": 0.4504,
+      "green": 0.563,
+      "red": 0.4855
+    },
+    "win_rate_by_path": {
+      "blue": 0.4375,
+      "green": 0.633,
+      "mixed": 0.4722,
+      "red": 0.5434,
+      "yellow": 0.4278
+    },
+    "winner_archetype_counts": {
+      "AccelerationistBot": 105,
+      "AdaptiveBalancedBot": 164,
+      "MixedPolicyBot": 603,
+      "RecklessSaboteurBot": 78,
+      "SecOpsTurtleBot": 138,
+      "VentureGreedBot": 112
+    },
+    "winner_secrets_avg": 17.418,
+    "winner_secrets_hist": {
+      "-1": 7,
+      "-2": 3,
+      "0": 9,
+      "10": 42,
+      "11": 47,
+      "12": 52,
+      "13": 48,
+      "14": 51,
+      "15": 55,
+      "16": 57,
+      "17": 42,
+      "18": 46,
+      "19": 50,
+      "20": 44,
+      "21": 39,
+      "22": 58,
+      "23": 39,
+      "24": 51,
+      "25": 41,
+      "26": 27,
+      "27": 22,
+      "28": 28,
+      "29": 29,
+      "30": 19,
+      "31": 13,
+      "32": 8,
+      "33": 12,
+      "34": 9,
+      "35": 5,
+      "36": 9,
+      "37": 3,
+      "38": 7,
+      "39": 3,
+      "4": 21,
+      "40": 5,
+      "43": 1,
+      "48": 1,
+      "5": 30,
+      "51": 1,
+      "6": 43,
+      "7": 35,
+      "8": 50,
+      "9": 38
+    },
+    "zero_capacity_rounds_per_seat": 0.93
+  },
+  {
+    "avg_rounds": 9.0,
+    "breach_rate": 0.2992,
+    "config": "v038e_roster",
+    "cube_exits_avg": {
+      "blue": 11.738,
+      "green": 14.887,
+      "red": 17.698
+    },
+    "endings": {
+      "market_collapse": 0.2608,
+      "patient_zero": 0.2867,
+      "singularity": 0.4467,
+      "total_wipeout": 0.0058
+    },
+    "final_market_share_hist": {
+      "0": 244,
+      "1": 325,
+      "10": 168,
+      "11": 186,
+      "12": 203,
+      "13": 220,
+      "14": 238,
+      "15": 336,
+      "16": 360,
+      "2": 170,
+      "3": 184,
+      "4": 163,
+      "5": 160,
+      "6": 141,
+      "7": 177,
+      "8": 166,
+      "9": 159
+    },
+    "games": 1200,
+    "market_share_min_avg": 8.01,
+    "max_glitched_slots_avg": 2.197,
+    "outliers": {
+      "highest_winner_secrets": [
+        761,
+        353,
+        705,
+        268,
+        780
+      ],
+      "longest": [
+        844,
+        1228,
+        1222,
+        1216,
+        1210
+      ],
+      "round_limit": [],
+      "shortest": [
+        52,
+        72,
+        89,
+        101,
+        138
+      ],
+      "total_wipeout": [
+        80,
+        232,
+        324,
+        377,
+        499,
+        992,
+        1114
+      ]
+    },
+    "overrides": {},
+    "path_rule": "majority colour >= 60% of owned Red/Blue/Green/Yellow dice at game end, else mixed",
+    "players": 3,
+    "purchases_per_seat_by_archetype": {
+      "AccelerationistBot": {
+        "blue": 0.067,
+        "green": 1.101,
+        "red": 0.769,
+        "yellow": 1.45
+      },
+      "AdaptiveBalancedBot": {
+        "blue": 0.123,
+        "green": 0.175,
+        "red": 1.062,
+        "yellow": 1.091
+      },
+      "MixedPolicyBot": {
+        "blue": 0.191,
+        "green": 0.226,
+        "red": 1.048,
+        "yellow": 1.154
+      },
+      "RecklessSaboteurBot": {
+        "blue": 0.058,
+        "green": 0.028,
+        "red": 0.88,
+        "yellow": 0.655
+      },
+      "SecOpsTurtleBot": {
+        "blue": 0.126,
+        "green": 0.038,
+        "red": 0.063,
+        "yellow": 0.148
+      },
+      "VentureGreedBot": {
+        "blue": 0.417,
+        "green": 0.893,
+        "red": 1.647,
+        "yellow": 2.346
+      }
+    },
+    "roster": "mixed1",
+    "rounds_hist": {
+      "10": 245,
+      "11": 357,
+      "12": 129,
+      "13": 1,
+      "2": 27,
+      "3": 65,
+      "4": 73,
+      "5": 34,
+      "6": 42,
+      "7": 33,
+      "8": 78,
+      "9": 116
+    },
+    "rsp1": {
+      "end_payout_rate": 0.9942,
+      "multi_red_bank_round_share": 0.0513,
+      "payout_leader_is_winner_rate": 0.7393,
+      "payout_secrets_per_seat": 7.503,
+      "payout_vs_face_secret_share": 0.4976,
+      "payouts_per_game": 2.919,
+      "red_mean_wait_rounds": 0.023,
+      "red_pending_at_end_per_game": 0.198,
+      "red_secrets_banked_per_seat": 1.144
+    },
+    "seats_by_archetype": {
+      "AccelerationistBot": 476,
+      "AdaptiveBalancedBot": 464,
+      "MixedPolicyBot": 1200,
+      "RecklessSaboteurBot": 498,
+      "SecOpsTurtleBot": 506,
+      "VentureGreedBot": 456
+    },
+    "seats_by_company_color": {
+      "blue": 1186,
+      "green": 1245,
+      "red": 1169
+    },
+    "seats_by_path": {
+      "blue": 259,
+      "green": 401,
+      "mixed": 1769,
+      "red": 504,
+      "yellow": 667
+    },
+    "secret_faces_banked_per_seat": {
+      "blue": 0.712,
+      "green": 1.136,
+      "purple": 1.534,
+      "red": 1.144
+    },
+    "secret_faces_rolled_per_seat": {
+      "blue": 0.8,
+      "green": 1.263,
+      "purple": 1.595,
+      "red": 1.298
+    },
+    "secret_yield_hist_totals": {
+      "blue": {
+        "2": 2351,
+        "3": 211
+      },
+      "green": {
+        "2": 4090
+      },
+      "purple": {
+        "1": 5523
+      },
+      "red": {
+        "2": 4119
+      }
+    },
+    "secrets_by_source_per_seat": {
+      "b2": 0.046,
+      "blue_damage": -7.237,
+      "breakthrough": 0.348,
+      "burn_notice": 0.027,
+      "corruption": -0.521,
+      "red_secret_payout": 5.907,
+      "red_secret_payout_end": 1.596,
+      "secret_face_blue": 1.482,
+      "secret_face_green": 2.272,
+      "secret_face_purple": 1.534,
+      "secret_face_red": 2.288,
+      "starting": 4.0,
+      "y1": 0.212,
+      "y3": 0.346
+    },
+    "slots_cleaned_per_seat": {
+      "die": 5.53,
+      "face": 0.168,
+      "graduation": 0.0,
+      "green_triage": 0.949
+    },
+    "slots_glitched_per_seat": {
+      "corruption": 1.63,
+      "green_cube": 5.65,
+      "setup": 1.0
+    },
+    "stranded_dice_per_seat": 0.171,
+    "stranded_share": 0.0398,
+    "total_wipeout_rate": 0.0058,
+    "win_rate_by_archetype": {
+      "AccelerationistBot": 0.3298,
+      "AdaptiveBalancedBot": 0.5431,
+      "MixedPolicyBot": 0.31,
+      "RecklessSaboteurBot": 0.1386,
+      "SecOpsTurtleBot": 0.4565,
+      "VentureGreedBot": 0.261
+    },
+    "win_rate_by_company_color": {
+      "blue": 0.312,
+      "green": 0.408,
+      "red": 0.2754
+    },
+    "win_rate_by_path": {
+      "blue": 0.3707,
+      "green": 0.4564,
+      "mixed": 0.3307,
+      "red": 0.3155,
+      "yellow": 0.2654
+    },
+    "winner_archetype_counts": {
+      "AccelerationistBot": 157,
+      "AdaptiveBalancedBot": 252,
+      "MixedPolicyBot": 372,
+      "RecklessSaboteurBot": 69,
+      "SecOpsTurtleBot": 231,
+      "VentureGreedBot": 119
+    },
+    "winner_secrets_avg": 17.039,
+    "winner_secrets_hist": {
+      "-1": 1,
+      "0": 6,
+      "10": 59,
+      "11": 46,
+      "12": 53,
+      "13": 50,
+      "14": 43,
+      "15": 51,
+      "16": 69,
+      "17": 51,
+      "18": 49,
+      "19": 49,
+      "20": 51,
+      "21": 47,
+      "22": 49,
+      "23": 38,
+      "24": 36,
+      "25": 36,
+      "26": 45,
+      "27": 29,
+      "28": 24,
+      "29": 13,
+      "30": 8,
+      "31": 12,
+      "32": 12,
+      "33": 7,
+      "34": 6,
+      "35": 7,
+      "36": 5,
+      "37": 3,
+      "38": 1,
+      "39": 3,
+      "4": 16,
+      "40": 3,
+      "41": 1,
+      "42": 2,
+      "43": 2,
+      "48": 1,
+      "5": 17,
+      "6": 35,
+      "7": 45,
+      "8": 56,
+      "9": 63
+    },
+    "zero_capacity_rounds_per_seat": 0.973
+  },
+  {
+    "avg_rounds": 9.037,
+    "breach_rate": 0.2925,
+    "config": "v038e_roster",
+    "cube_exits_avg": {
+      "blue": 11.421,
+      "green": 15.013,
+      "red": 18.104
+    },
+    "endings": {
+      "market_collapse": 0.2542,
+      "patient_zero": 0.2842,
+      "singularity": 0.4592,
+      "total_wipeout": 0.0025
+    },
+    "final_market_share_hist": {
+      "0": 262,
+      "1": 349,
+      "10": 192,
+      "11": 209,
+      "12": 221,
+      "13": 245,
+      "14": 293,
+      "15": 344,
+      "16": 406,
+      "17": 575,
+      "2": 183,
+      "3": 208,
+      "4": 214,
+      "5": 243,
+      "6": 221,
+      "7": 217,
+      "8": 218,
+      "9": 200
+    },
+    "games": 1200,
+    "market_share_min_avg": 8.918,
+    "max_glitched_slots_avg": 2.204,
+    "outliers": {
+      "highest_winner_secrets": [
+        932,
+        705,
+        1022,
+        355,
+        767
+      ],
+      "longest": [
+        1200,
+        601,
+        486,
+        408,
+        345
+      ],
+      "round_limit": [],
+      "shortest": [
+        72,
+        80,
+        89,
+        90,
+        106
+      ],
+      "total_wipeout": [
+        53,
+        394,
+        776
+      ]
+    },
+    "overrides": {},
+    "path_rule": "majority colour >= 60% of owned Red/Blue/Green/Yellow dice at game end, else mixed",
+    "players": 4,
+    "purchases_per_seat_by_archetype": {
+      "AccelerationistBot": {
+        "blue": 0.048,
+        "green": 1.353,
+        "red": 0.669,
+        "yellow": 1.266
+      },
+      "AdaptiveBalancedBot": {
+        "blue": 0.151,
+        "green": 0.226,
+        "red": 0.953,
+        "yellow": 1.054
+      },
+      "MixedPolicyBot": {
+        "blue": 0.215,
+        "green": 0.282,
+        "red": 1.101,
+        "yellow": 1.186
+      },
+      "RecklessSaboteurBot": {
+        "blue": 0.046,
+        "green": 0.015,
+        "red": 0.908,
+        "yellow": 0.581
+      },
+      "SecOpsTurtleBot": {
+        "blue": 0.175,
+        "green": 0.05,
+        "red": 0.083,
+        "yellow": 0.118
+      },
+      "VentureGreedBot": {
+        "blue": 0.419,
+        "green": 0.85,
+        "red": 1.708,
+        "yellow": 2.709
+      }
+    },
+    "roster": "mixed1",
+    "rounds_hist": {
+      "10": 264,
+      "11": 362,
+      "12": 114,
+      "13": 6,
+      "2": 30,
+      "3": 75,
+      "4": 63,
+      "5": 30,
+      "6": 25,
+      "7": 40,
+      "8": 60,
+      "9": 131
+    },
+    "rsp1": {
+      "end_payout_rate": 0.9975,
+      "multi_red_bank_round_share": 0.0834,
+      "payout_leader_is_winner_rate": 0.6987,
+      "payout_secrets_per_seat": 7.761,
+      "payout_vs_face_secret_share": 0.5014,
+      "payouts_per_game": 3.576,
+      "red_mean_wait_rounds": 0.024,
+      "red_pending_at_end_per_game": 0.226,
+      "red_secrets_banked_per_seat": 1.112
+    },
+    "seats_by_archetype": {
+      "AccelerationistBot": 711,
+      "AdaptiveBalancedBot": 716,
+      "MixedPolicyBot": 1200,
+      "RecklessSaboteurBot": 720,
+      "SecOpsTurtleBot": 727,
+      "VentureGreedBot": 726
+    },
+    "seats_by_company_color": {
+      "blue": 1579,
+      "green": 1634,
+      "red": 1587
+    },
+    "seats_by_path": {
+      "blue": 384,
+      "green": 603,
+      "mixed": 2195,
+      "red": 718,
+      "yellow": 900
+    },
+    "secret_faces_banked_per_seat": {
+      "blue": 0.755,
+      "green": 1.189,
+      "purple": 1.541,
+      "red": 1.112
+    },
+    "secret_faces_rolled_per_seat": {
+      "blue": 0.849,
+      "green": 1.329,
+      "purple": 1.605,
+      "red": 1.24
+    },
+    "secret_yield_hist_totals": {
+      "blue": {
+        "2": 3325,
+        "3": 300
+      },
+      "green": {
+        "2": 5707
+      },
+      "purple": {
+        "1": 7397
+      },
+      "red": {
+        "2": 5339
+      }
+    },
+    "secrets_by_source_per_seat": {
+      "b2": 0.042,
+      "blue_damage": -7.202,
+      "breakthrough": 0.346,
+      "burn_notice": 0.028,
+      "corruption": -0.534,
+      "red_secret_payout": 6.387,
+      "red_secret_payout_end": 1.374,
+      "secret_face_blue": 1.573,
+      "secret_face_green": 2.378,
+      "secret_face_purple": 1.541,
+      "secret_face_red": 2.225,
+      "starting": 4.0,
+      "y1": 0.198,
+      "y3": 0.398
+    },
+    "slots_cleaned_per_seat": {
+      "die": 5.55,
+      "face": 0.176,
+      "graduation": 0.0,
+      "green_triage": 1.02
+    },
+    "slots_glitched_per_seat": {
+      "corruption": 1.619,
+      "green_cube": 5.773,
+      "setup": 1.0
+    },
+    "stranded_dice_per_seat": 0.156,
+    "stranded_share": 0.0356,
+    "total_wipeout_rate": 0.0025,
+    "win_rate_by_archetype": {
+      "AccelerationistBot": 0.2152,
+      "AdaptiveBalancedBot": 0.405,
+      "MixedPolicyBot": 0.2433,
+      "RecklessSaboteurBot": 0.0799,
+      "SecOpsTurtleBot": 0.3611,
+      "VentureGreedBot": 0.1997
+    },
+    "win_rate_by_company_color": {
+      "blue": 0.2245,
+      "green": 0.3124,
+      "red": 0.2111
+    },
+    "win_rate_by_path": {
+      "blue": 0.2669,
+      "green": 0.3756,
+      "mixed": 0.2474,
+      "red": 0.2033,
+      "yellow": 0.2022
+    },
+    "winner_archetype_counts": {
+      "AccelerationistBot": 153,
+      "AdaptiveBalancedBot": 290,
+      "MixedPolicyBot": 292,
+      "RecklessSaboteurBot": 58,
+      "SecOpsTurtleBot": 263,
+      "VentureGreedBot": 145
+    },
+    "winner_secrets_avg": 18.684,
+    "winner_secrets_hist": {
+      "-1": 1,
+      "-2": 1,
+      "0": 1,
+      "10": 48,
+      "11": 54,
+      "12": 56,
+      "13": 42,
+      "14": 35,
+      "15": 49,
+      "16": 49,
+      "17": 54,
+      "18": 56,
+      "19": 67,
+      "20": 48,
+      "21": 60,
+      "22": 53,
+      "23": 51,
+      "24": 49,
+      "25": 54,
+      "26": 44,
+      "27": 28,
+      "28": 23,
+      "29": 22,
+      "30": 23,
+      "31": 21,
+      "32": 15,
+      "33": 13,
+      "34": 12,
+      "35": 4,
+      "36": 2,
+      "37": 8,
+      "38": 4,
+      "39": 1,
+      "4": 3,
+      "40": 2,
+      "41": 2,
+      "42": 1,
+      "5": 9,
+      "6": 19,
+      "7": 32,
+      "8": 46,
+      "9": 39
+    },
+    "zero_capacity_rounds_per_seat": 1.011
+  }
+]

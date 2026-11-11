@@ -51,13 +51,15 @@ def secret_yield(cfg: "GameConfig", p: "PlayerState", color: Any) -> int:
         return 0
     if color == DieColor.BLUE:
         y = int(cfg.secret_yield_blue_base)
-        if int(getattr(p, "blocked_blue_this_round", 0)) > 0:
+        if cfg.secret_yield_blue_block_bonus > 0 and int(getattr(p, "blocked_blue_this_round", 0)) > 0:
             y += int(cfg.secret_yield_blue_block_bonus)
         if int(p.defense_level) >= 3:
             y += int(cfg.secret_yield_blue_grid_l3_bonus)
         return min(int(cfg.secret_yield_blue_cap), y)
     if color == DieColor.GREEN:
-        return max(0, int(cfg.secret_yield_green_base) - int(getattr(p, "glitched_shield_slots", 0)))
+        if getattr(cfg, "secret_yield_green_glitch_penalty", True):
+            return max(0, int(cfg.secret_yield_green_base) - int(getattr(p, "glitched_shield_slots", 0)))
+        return int(cfg.secret_yield_green_base)
     if color == DieColor.PURPLE:
         return int(cfg.secret_yield_purple)
     return 0

@@ -418,7 +418,71 @@ Sources: `docs/findings/early_game_pressure_modeling.md`, `docs/findings/c2_gree
   - **Early Round Pressure ("Tutorialization"):** In Round 1, players face an average of 1.4 incoming attack cubes with only 1 active clean Shield Slot. Players must make meaningful trade-offs from Turn 1: whether to dedicate their starter die to blocking, take damage, or accept a glitched slot penalty.
 - **Official Balance Verdict: OFFICIALLY APPROVED (`v0.38d`).** Package `v0.38d` meets all design pillars, tension targets, and balance criteria.
 
-## 46. Phase 52 Post-Telemetry Balance Assessment: Unified Market Share Track & Headroom Architecture (`v0.38e`): APPROVED
+## 46. Phase 52 Secret Simplification & Processing Triggers: APPROVED (`v0.38e`)
+
+Sources: `docs/specs/v380e_secret_simplification_spec.md`, `sim_results/v380e_secret_simplification/validation_report.md` (3,600 games across 2P/3P/4P, seeds 42..1241, mixed roster with `MixedPolicyBot`).
+
+- **Context & Design Problem:**
+  Under `v0.38d`, Secret face banking suffered from cognitive overhead and balance asymmetry:
+  1. *Blue Tracking & Low EV:* Banking Blue required mid-round memory tracking in Phase 4 Step 1 (*"Remember how many Blue cubes you blocked this round"*), broke timing equivalence for Phase 3 instant-banking (*B3 Air-Gapped Backup*, *Jumper Diagnostics*), and depressed Blue Secret EV to 1.458 Secrets/bank (zero Blue cubes blocked in 61.9% of rounds), dragging 4P Blue Company win rate down to 20.3%.
+  2. *Green Calculation Friction:* Green Secret yield ($Y = \max(0, 3 - g)$ before cleaning $g \leftarrow \max(0, g-1)$) created order-of-operation confusion, runaway early-game payouts (3 Secrets), and feel-bad late-game zeroes (4.4% of banks).
+- **Implemented Package (`v0.38e`):**
+  1. *Universal Baselines:* Red, Blue, and Green dice bank an unconditional baseline yield of **`+2` Corporate Secrets**; Purple Specialist banks flat **`+1` Corporate Secret**.
+  2. *Four Dedicated Domain Triggers (Fired Upon Leaving Processing Box):*
+     - **Red (Market Domain):** Sets `state.red_secret_banked_this_round = True`, firing the **Market Leader Bonus** (1st `+3`, 2nd `+1` Corporate Secrets) once at the end of Phase 5.
+     - **Blue (Hardware Defense Domain):** Evaluates Defense Grid Track; awards **`+1` Corporate Secret if Defense Grid $\ge$ Level 3** (max `+3`). Zero cube tracking or attack dependencies.
+     - **Green (System Integrity Domain):** Unconditionally cleans **`1` Glitched Shield Slot** ($g \leftarrow \max(0, g - 1)$). Zero yield penalty.
+     - **Purple (Proprietary Specialist Domain):** Pure baseline (`+1` Corporate Secret, no domain trigger).
+  3. *Rules Simplification:* Cleanly excised the Phase 4 Step 1 Blue tracking reminder and Phase 3 instant-banking timing exceptions from `RULES.md`.
+- **Monte Carlo Telemetry Metrics (3,600 Games):**
+  - **Game Pacing:** Mean rounds **8.84** (2P), **9.00** (3P), **9.04** (4P) — aggregate **8.96** rounds, perfectly centered in the 8.5–9.5 target window. 0.0% timeouts.
+  - **Healthy End Trigger Triad:**
+    - **Singularity:** **37.25%** (2P), **44.67%** (3P), **45.92%** (4P) — aggregate **42.61%** (target 30%–50%).
+    - **Patient Zero:** **17.92%** (2P), **28.67%** (3P), **28.42%** (4P) — aggregate **25.00%** (target 15%–35%).
+    - **Market Collapse:** **43.25%** (2P), **26.08%** (3P), **25.42%** (4P) — aggregate **31.58%** (target 15%–45%).
+    - **Total Wipeout:** **1.58%** (2P), **0.58%** (3P), **0.25%** (4P) — aggregate **0.81%** (guardrail $\le 3.0\%$).
+- **Telemetry Invariant Confirmations (40,473 Banking Events):**
+  - **Red Invariant (`INV-V38E-05`):** 100.0% yielded exactly 2 Secrets (13,336 / 13,336).
+  - **Green Invariant (`INV-V38E-04`):** 100.0% yielded exactly 2 Secrets (12,463 / 12,463).
+  - **Purple Invariant (`INV-V38E-06`):** 100.0% yielded exactly 1 Secret (16,607 / 16,607).
+  - **Blue Invariant (`INV-V38E-01/02`):** 100.0% yielded $\in \{2, 3\}$ (8,046 / 8,046: 92.18% at 2, 7.82% at 3).
+  - **Blue L3+ Grid Trigger:** 7.82% aggregate trigger rate (2P 6.35%, 3P 8.24%, 4P 8.28%), providing a meaningful hardware reward without distortion.
+  - **Green Decontamination Efficiency:** 0.914–1.020 slots cleaned per seat (~0.95 slots/seat aggregate; 82.3%–85.8% clean efficiency when glitched slots were present).
+  - **EV & Competitive Parity:** Blue Secret EV increased from 1.458 to 2.077 (+0.619), restoring Blue Company win rates (2P 45.0%, 3P 31.2%, 4P 22.5%) and dominant path win rates (2P 43.8%, 3P 37.1%, 4P 26.7%) to healthy parity.
+- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.38e`).** Cognitive friction and memory tracking are eliminated while preserving tight pacing, healthy existential triad distributions, and strong multi-path strategic depth.
+
+## 47. Phase 53 Blue Module Die Rebalance: APPROVED (`v0.38f`)
+
+Sources: `docs/specs/v380f_blue_dice_rebalance_spec.md`, `sim_results/v380f_blue_dice_rebalance/validation_report.md` (3,600 games across 2P/3P/4P, seeds 42..1241, config `v038f_roster` with `MixedPolicyBot`).
+
+- **Context & Design Problem:**
+  Across prior iterations (`v0.38` through `v0.38e`), Blue module dice suffered from identity confusion and suppressed adoption:
+  1. *Redundant Research Overlap with Green:* Blue featured research on Faces 1, 2, and 4 (`+1 🔬`), functioning as an inferior duplicate of Green rather than embodying the "Firewall / Data Vault" archetype.
+  2. *Asymmetric Secret Banking Latency:* Red provided immediate Phase 3 cash/Market Share and banked high-yield Secrets in Phase 5. Blue Secret generation relied entirely on Face 5 navigating the Processing Box conveyor latency, penalizing Blue starter companies (DTO, Aegis) in early-round survival and tempo.
+  3. *Market Neglect & Win Rate Gap:* In `v0.38e`, Blue purchases lingered at only ~0.18–0.20 per seat, and 4P Blue Company win rate sat at 22.45% (below fair 25.0%).
+- **Implemented Package (`v0.38f`):**
+  1. *Direct Corporate Secrets on Faces 1 & 2:* Converted Blue Faces 1 & 2 from `+1 🔬` to unconditional **`+1 Corporate Secret`** directly awarded in Phase 3 Income (`"blue_face"`), bypassing the Processing Box.
+  2. *50% Secret Density Profile:* Blue dice now feature 3 of 6 faces generating Corporate Secrets (Faces 1 & 2 direct income, Face 5 banked deferred yield), establishing Blue as the premier VP and defensive buffer module.
+  3. *Topology Preservation:* Face 3 (`+$1`), Face 4 (`+1 🔬 / +$1`), Face 5 (`Secret face` yielding 2 Secrets, +1 if Defense Grid $\ge$ L3), and Face 6 (`Blue ★` Variant) remained intact.
+- **Monte Carlo Telemetry Evaluation (3,600 Games):**
+  - **Pacing & Tension:** Mean game length lands squarely in the 8.5–9.5 round target window: **8.93** (2P), **9.44** (3P), **9.26** (4P) — aggregate **9.21** rounds.
+  - **End-Game Triad Stability:**
+    - **Singularity:** **38.17%** (2P), **52.08%** (3P), **50.25%** (4P) — aggregate **46.83%** (target 30%–55%).
+    - **Market Collapse:** **44.92%** (2P), **28.83%** (3P), **27.00%** (4P) — aggregate **33.58%** (target 15%–45%).
+    - **Patient Zero:** **15.67%** (2P), **19.08%** (3P), **22.75%** (4P) — aggregate **19.17%** (target 15%–35%).
+    - **Total Wipeout:** **1.25%** (2P), **0.00%** (3P), **0.00%** (4P) — aggregate **0.42%** (guardrail $\le 2.0\%$).
+  - **Company Color Win Rate Parity:**
+    - **2P:** Blue (DTO/Aegis) **49.06%** vs Green 54.69%, Red 46.15% (fair share 50.0%, within $\pm 5.0\%$).
+    - **3P:** Blue **33.39%** vs Green 38.55%, Red 27.72% (fair share 33.3%, dead-center).
+    - **4P:** Blue **25.33%** vs Green 28.52%, Red 21.05% (fair share 25.0%, exact theoretical parity, up from 22.45%).
+  - **Market Vitality & Strategic Viability:**
+    - Market purchases per seat surged: 2P **0.356** (+74.5%), 3P **0.333** (+99.4%), 4P **0.350** (+94.4%).
+    - Blue Dominant Path ($\ge 60\%$ dice) win rate reached **30.46%** in 4P (up from 26.69%), confirming robust strategic viability.
+    - Direct Blue Face secrets delivered **+0.771 Secrets/seat** aggregate, providing a stable survival buffer that moderately softened Patient Zero spikes without inflating game length.
+  - **Invariant Adherence:** 100% compliance across all 46,103 banking events (9,371 Blue banked dice yielded strictly $\in \{2, 3\}$, with 6.23% triggering the L3+ Grid bonus).
+- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.38f`).** Blue module dice have achieved complete thematic distinction, healthy market liquidity, and exact theoretical win rate parity across all player counts without destabilizing the end-game triad.
+
+## 48. Phase 54 Post-Telemetry Balance Assessment: Unified Market Share Track & Headroom Architecture (`v0.38g` / Headroom): APPROVED
 
 Sources: `docs/specs/market_share_headroom_spec.md`, `sim_results/market_share_headroom/validation_report.md` (3,600 games across 2P/3P/4P, seeds 42..1241).
 
@@ -449,4 +513,4 @@ Sources: `docs/specs/market_share_headroom_spec.md`, `sim_results/market_share_h
   5. **Invariants & Mechanical Robustness:**
      - Invariants `INV-MS-HEADROOM-01` through `08` fully validated.
      - Floor at 0 and ceiling at 20 respected with zero overflow exceptions across all matches. Outlier seeds confirmed clean resolution on early wipeouts (seeds 87/1146 via PZ) and long engine games (seeds 254/400/650 via Singularity at Round 13).
-- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.38e`).** The headroom architecture resolves all dead face and PR track lockout defects without perturbing game length or threat curves. The candidate is approved for baseline lock and Phase B documentation / PnP asset sync.
+- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.38g` / Headroom).** The headroom architecture resolves all dead face and PR track lockout defects without perturbing game length or threat curves. The candidate is approved for baseline lock and Phase B documentation / PnP asset sync.

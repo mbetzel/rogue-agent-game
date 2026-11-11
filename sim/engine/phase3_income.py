@@ -134,7 +134,10 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
         base_research = row["research"] - row.get("protocol_research", 0)
         player.gain_research(base_research, row.get("research_source", "income"))
         player.gain_research(row.get("protocol_research", 0), "signature_protocol")
-        player.gain_secrets(row["secrets"], "y3")
+        eff = die.effective_face or die.current_face
+        if row["secrets"] > 0:
+            source = "blue_face" if die.color == DieColor.BLUE else ("y3" if (eff and eff.star_code == "Y3") or row.get("star_note") == "0-Day Broker" else "face")
+            player.gain_secrets(row["secrets"], source)
         record.money += row["money"]
         record.research += row["research"]
         record.secrets += row["secrets"]
@@ -143,8 +146,7 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
             # v0.38 Red F1 / R1: Phase 3 income, clamped at the maximum, outside the Public Relations limit
             player.change_market_share(+row["market_share"], "face")
 
-        eff = die.effective_face or die.current_face
-        if eff.is_star:
+        if eff and eff.is_star:
             if eff.star_code == "Y3":
                 # Proprietary Training: move die to glitched_dice after collecting secret
                 # (v0.38 Variant profile: to the Scanned Box)

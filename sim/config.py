@@ -22,7 +22,7 @@ V038_PR_REGAIN_COST = 3  # [TUNE] OQ-9 follow-up: 3 research per +1 Market Share
 _FACE_PROFILES = ("V037", "V038_DRAFT")
 # die_face_profile only: V038_DRAFT with the candidate-2 Yellow table (spec §14.3); _ALT = F1 "+$1 & +1 Market Share"
 # _F3 = V038_YELLOW_MS with Yellow F3 "+$1 & +1 Market Share" (spec §14.5.1, RSP-1)
-V038_DIE_FACE_PROFILES = ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D")
+V038_DIE_FACE_PROFILES = ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D", "V038F")
 _DIE_FACE_PROFILES = ("V037",) + V038_DIE_FACE_PROFILES
 V038B_STARTING_SECRETS = {2: 3, 3: 4, 4: 4}  # [TUNE] §14.3
 V038B_RED_TIERS = ((11, 3), (7, 2), (3, 1), (0, 0))  # [TUNE] §14.3
@@ -423,6 +423,7 @@ class GameConfig:
     secret_yield_blue_cap: int = 3  # [TUNE]
     secret_yield_green_base: int = 3  # [TUNE] minus the owner's Glitched Shield Slots, min 0
     secret_yield_purple: int = 1  # [TUNE]
+    secret_yield_green_glitch_penalty: bool = True  # If False (v0.38e), Green Secret yield is flat secret_yield_green_base unconditionally.
     glitched_shield_slots_enabled: bool = False
     slot_graduation_clear: int = 1  # [TUNE] slots cleared once per Phase 5 if >= 1 die graduates
     company_starting_die_enabled: bool = False
@@ -644,9 +645,57 @@ class GameConfig:
 
     @classmethod
     def v038e(cls, **overrides) -> "GameConfig":
-        """v0.38 candidate 5 (Headroom Architecture): v038d + Market Share start 13 (2P) / 16 (3P/4P)
-        with unified track maximum 20."""
+        """v0.38 candidate 5 (Phase 52: Secret Face Simplification & Processing Triggers).
+        Inherits all v0.38d rules (C2 setup, 1 starting glitched slot, Shogun Baffle physics,
+        Green triage clean, Headroom Architecture max 20), and applies the simplified 4-color Secret architecture:
+        - Red: flat +2 + Market Leader Bonus trigger
+        - Blue: flat +2 (+1 if Defense Grid >= L3, cap 3; block bonus eliminated)
+        - Green: flat +2 + clean 1 Glitched Shield Slot (glitch yield penalty eliminated)
+        - Purple: flat +1 (no trigger)
+        """
+        for k, v in (
+            ("secret_yield_blue_base", 2),
+            ("secret_yield_blue_block_bonus", 0),
+            ("secret_yield_blue_grid_l3_bonus", 1),
+            ("secret_yield_blue_cap", 3),
+            ("secret_yield_green_base", 2),
+            ("secret_yield_green_glitch_penalty", False),
+            ("green_bank_cleans_slot", True),
+            ("green_triage_clean_mode", "COUNT_THEN_CLEAN"),
+        ):
+            overrides.setdefault(k, v)
         return cls.v038d(**overrides)
+
+    @classmethod
+    def v038e_roster(cls, **overrides) -> "GameConfig":
+        """``v038e()`` + the ``v037_roster()`` bot switches (lever A push on, default params)."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v038e(**overrides)
+
+    @classmethod
+    def v038f(cls, **overrides) -> "GameConfig":
+        """v0.38 candidate 6 (Blue Module Die Rebalance: Direct Corporate Secrets on Faces 1 & 2).
+        Inherits all v0.38e rules (C2 setup, 1 starting glitched slot, Shogun Baffle physics,
+        Green triage clean, Red owner yield +2 + Market Leader Bonus trigger, Blue Defense Grid L3 trigger,
+        Headroom Architecture max 20),
+        and introduces die_face_profile="V038F":
+        - Blue Face 1: +1 Corporate Secret
+        - Blue Face 2: +1 Corporate Secret
+        - Blue Face 3: +$1
+        - Blue Face 4: +1 🔬 / +$1
+        - Blue Face 5: Secret face (+2 baseline, +1 if Defense Grid >= L3)
+        - Blue Face 6: Blue ★ (Variant Card)
+        """
+        overrides.setdefault("die_face_profile", "V038F")
+        return cls.v038e(**overrides)
+
+    @classmethod
+    def v038f_roster(cls, **overrides) -> "GameConfig":
+        """``v038f()`` + the ``v037_roster()`` bot switches (lever A push on, default params)."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v038f(**overrides)
 
     @classmethod
     def v038_roster(cls, **overrides) -> "GameConfig":
@@ -723,6 +772,8 @@ class GameConfig:
                 raise ValueError(f"{name} must be an int >= 0, got {val!r}")
         if self.secret_yield_blue_cap < self.secret_yield_blue_base:
             raise ValueError("secret_yield_blue_cap must be >= secret_yield_blue_base")
+        if not isinstance(self.secret_yield_green_glitch_penalty, bool):
+            raise ValueError(f"secret_yield_green_glitch_penalty must be a bool, got {self.secret_yield_green_glitch_penalty!r}")
         if self.company_starting_die_enabled:
             missing = [c for c in ("MERIDIAN", "OMNIDYNE", "AEGIS", "DTO", "HELIX", "PROMETHEUS")
                        if self.company_starting_colors.get(c) not in ("RED", "BLUE", "GREEN")]
