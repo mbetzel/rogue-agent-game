@@ -61,6 +61,7 @@ class ShieldColor(str, Enum):
 class TowerMode(str, Enum):
     LEDGE_AVALANCHE = "ledge_avalanche"
     FLAT_BINOMIAL = "flat_binomial"
+    SHOGUN_BAFFLE = "shogun_baffle"
 
 
 class EndGameReason(str, Enum):
@@ -276,6 +277,15 @@ class GameConfig:
     tower_ledge_capacity: float = 5.0
     tower_base_exit_prob: float = 0.60
     tower_avalanche_scale: float = 0.05  # Extra exit probability per cube above capacity
+    # Shogun Cube Tower Two-State Baffle Physics (Calibrated Model B)
+    tower_empty_exit_prob: float = 0.70  # Empty tower falling pass-through (S = 0)
+    tower_obstruction_alpha: float = 0.15  # Reduction in falling pass-through per stuck cube (sub-avalanche)
+    tower_min_fall_prob: float = 0.35  # Floor on sub-avalanche falling pass-through
+    tower_trapping_dislodge_prob: float = 0.21  # Dislodge probability for resting cubes when F > 0 (sub-avalanche)
+    tower_avalanche_fall_prob: float = 0.60  # Falling pass-through during avalanche
+    tower_avalanche_dislodge_prob: float = 0.70  # Resting cube dislodgement probability during avalanche
+    tower_avalanche_stuck_threshold: int = 3  # S >= 3 triggers avalanche cascade when F > 0
+    tower_avalanche_mass_threshold: int = 7  # F + S >= 7 triggers avalanche cascade when F > 0
 
     # Compiler Priming & Buffer Overflow (v0.9.1 Baseline)
     enable_compiler_priming: bool = True
@@ -496,6 +506,7 @@ class GameConfig:
             self.slush_fund_once_per_game = v035
         if self.level2_perks_enabled is None:
             self.level2_perks_enabled = not v035
+        self._validate_tower_config()
         self._validate_v038()
         if self.starting_secrets_by_player_count is None:
             # NOTE: resolved once at construction. Re-assigning round_sequence later does NOT
@@ -582,7 +593,8 @@ class GameConfig:
         """v0.38 candidate 3, RSP-1 (spec §14.5, FINDINGS §43.4): ``v038b()`` + Red Secret owner yield +2 (User, 2026-11-09, §43.5), the Red
         Secret payout (at most once per round at the end of Phase 5; 1st +3 / 2nd +1) plus one end payout, Market
         Leader Bonus and v2.0 comparison removed, Market Share 13 / 16 / 17 (start = max), Yellow F3
-        ``+$1 & +1 Market Share``, oldest-first Conveyor Triage. Starting Secrets 3 / 4 / 4."""
+        ``+$1 & +1 Market Share``, oldest-first Conveyor Triage, Shogun Baffle tower physics. Starting Secrets 3 / 4 / 4."""
+        overrides.setdefault("tower_mode", TowerMode.SHOGUN_BAFFLE)
         for k, v in (("red_secret_owner_yield", 2),
                      ("red_secret_payout_by_player_count", dict(V038C_RED_SECRET_PAYOUT)),
                      ("red_secret_payout_at_end", True), ("red_secret_payout_skip_on_collapse", False),
@@ -594,11 +606,39 @@ class GameConfig:
         return cls.v038b(**overrides)
 
     @classmethod
+    def v038c_legacy_tower(cls, **overrides) -> "GameConfig":
+        """v0.38c rules running on the legacy LEDGE_AVALANCHE tower for comparative sensitivity sweeps."""
+        overrides.setdefault("tower_mode", TowerMode.LEDGE_AVALANCHE)
+        return cls.v038c(**overrides)
+
+    @classmethod
     def v038_roster(cls, **overrides) -> "GameConfig":
         """``v038()`` + the ``v037_roster()`` bot switches (lever A push on, default params)."""
         overrides.setdefault("bot_pr_push", True)
         overrides.setdefault("bot_pr_push_params", PrPushParams())
         return cls.v038(**overrides)
+
+    def _validate_tower_config(self) -> None:
+        """Validates Cube Tower physics parameters (spec §2.4)."""
+        self.tower_mode = TowerMode(self.tower_mode)
+        prob_fields = (
+            "tower_empty_exit_prob",
+            "tower_obstruction_alpha",
+            "tower_min_fall_prob",
+            "tower_trapping_dislodge_prob",
+            "tower_avalanche_fall_prob",
+            "tower_avalanche_dislodge_prob",
+            "tower_flat_exit_prob",
+            "tower_base_exit_prob",
+        )
+        for name in prob_fields:
+            val = getattr(self, name)
+            if isinstance(val, bool) or not isinstance(val, (int, float)) or not (0.0 <= float(val) <= 1.0):
+                raise ValueError(f"{name} must be a probability in [0.0, 1.0], got {val!r}")
+        for name in ("tower_avalanche_stuck_threshold", "tower_avalanche_mass_threshold"):
+            val = getattr(self, name)
+            if isinstance(val, bool) or not isinstance(val, int) or val < 1:
+                raise ValueError(f"{name} must be an integer >= 1, got {val!r}")
 
     def _validate_v038(self) -> None:
         """spec §2.2. Called from __post_init__ after red_mode / any_shield_policy resolve."""
