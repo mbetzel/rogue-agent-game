@@ -64,7 +64,9 @@ def _ordered_research(player: Any, state: Any, pr_first: bool, focus: Sequence[s
     if pr_first:
         while lv["PATENT"] < pr_cap and buy("PATENT"):
             pass
-        if getattr(cfg, "is_share_regain", False) and getattr(player, "market_share", None) is not None:
+        if getattr(cfg, "share_regain_currency", "RESEARCH") == "MONEY":
+            regain = 0
+        elif getattr(cfg, "is_share_regain", False) and getattr(player, "market_share", None) is not None:
             lvl = max(0, min(4, lv["PATENT"]))
             cost, cap = int(cfg.share_regain_cost_by_level[lvl]), int(cfg.share_regain_cap_by_level[lvl])
             room = max(0, min(cap, int(player.market_share_max) - int(player.market_share)))

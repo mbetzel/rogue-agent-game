@@ -215,6 +215,10 @@ class ReferenceSearchEngine(GameEngine):
         self._take_snapshot(4, commitments, cr)
         return super()._run_phase_4_attack_resolution(commitments, cr)
 
+    def _run_phase_operations(self) -> None:
+        self._take_snapshot(5 if self.config.operations_before_pipeline_shift else 6)
+        super()._run_phase_operations()
+
     def _run_phase_6_operations(self) -> None:
         self._take_snapshot(6)
         super()._run_phase_6_operations()
@@ -323,7 +327,8 @@ class ReferenceSearchBot(BaseBot):
     def _snapshot_ok(self, hook: str) -> bool:
         eng = self.engine
         snap = getattr(eng, "_snap", None) if eng is not None else None
-        return (snap is not None and snap.phase == SEARCHED_PHASE[hook] == self._phase
+        expected = (5 if (eng is not None and getattr(eng.config, "operations_before_pipeline_shift", False) and hook == "take_operations_actions") else SEARCHED_PHASE[hook])
+        return (snap is not None and snap.phase == expected == self._phase
                 and snap.round_no == eng.state.current_round)
 
     def generate_candidates(self, hook: str, kwargs: Dict[str, Any]) -> List[Tuple[str, Any, Any]]:
@@ -362,7 +367,7 @@ class ReferenceSearchBot(BaseBot):
     def _search(self, hook: str, cands: List[Tuple[str, Any, Any]]) -> int:
         eng = self.engine
         call_index = len(self.phase_log)
-        phase = SEARCHED_PHASE[hook]
+        phase = (5 if (eng is not None and getattr(eng.config, "operations_before_pipeline_shift", False) and hook == "take_operations_actions") else SEARCHED_PHASE[hook])
         seeds = [rollout_seed(self.match_seed, self.bot_id, eng.state.current_round, phase, call_index, k)
                  for k in range(self.n_rollouts)]  # INV-REF-CRN-01: shared by every candidate
         decision_no = self.stats["search_entries"]

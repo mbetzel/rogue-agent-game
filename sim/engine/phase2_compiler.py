@@ -172,6 +172,29 @@ def return_player_colored_dice_step2a(
                 returned += 1
 
 
+def clamp_green_cubes_to_add(state: Any, cfg: Any, requested_green: int) -> int:
+    """Clamps requested Green cubes against global_green_cube_cap (spec §3.9)."""
+    if getattr(cfg, "global_green_cube_cap", 0) <= 0:
+        return requested_green
+    if hasattr(state, "total_green_cubes_in_circulation"):
+        current_green = state.total_green_cubes_in_circulation()
+    else:
+        staged = state.staging_cup.get(CubeColor.GREEN, 0) if isinstance(state.staging_cup, dict) else state.staging_cup.count(CubeColor.GREEN)
+        exit_tray = getattr(state, "exit_tray", getattr(state, "last_exited_cubes", {}))
+        exited = exit_tray.get(CubeColor.GREEN, 0) if isinstance(exit_tray, dict) else exit_tray.count(CubeColor.GREEN)
+        if hasattr(state.tower, "stuck_cubes") and isinstance(state.tower.stuck_cubes, dict):
+            stuck = state.tower.stuck_cubes.get(CubeColor.GREEN, 0)
+        elif hasattr(state.tower, "count"):
+            stuck = state.tower.count(CubeColor.GREEN)
+        elif hasattr(state.tower, "get_stuck_copy"):
+            stuck = state.tower.get_stuck_copy().get(CubeColor.GREEN, 0)
+        else:
+            stuck = 0
+        current_green = staged + exited + stuck
+    headroom = max(0, cfg.global_green_cube_cap - current_green)
+    return min(requested_green, headroom)
+
+
 def resolve_corruption_space(
     engine: GameEngine,
     space: CorruptionSpace,
@@ -182,6 +205,14 @@ def resolve_corruption_space(
     # 1. Add Cubes
     if space.add_cubes:
         for color, count in space.add_cubes.items():
+            if color == CubeColor.GREEN and getattr(engine.config, "global_green_cube_cap", 0) > 0:
+                actual_count = clamp_green_cubes_to_add(engine.state, engine.config, count)
+                clamped_diff = count - actual_count
+                if clamped_diff > 0 and hasattr(engine, "telemetry_history") and engine.telemetry_history:
+                    engine.telemetry_history[-1].green_cubes_clamped_per_round += clamped_diff
+                count = actual_count
+            if count <= 0:
+                continue
             if engine.config.corruption_cubes_resolve_immediately:
                 if color == CubeColor.BLACK:
                     engine.state.staging_cup[color] = engine.state.staging_cup.get(color, 0) + count

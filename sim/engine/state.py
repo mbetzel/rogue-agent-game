@@ -131,6 +131,11 @@ class PlayerState:
     purple_star_available: bool = False
     purple_star_count: int = 0
 
+    # --- v0.40.0 fields ---
+    money_spent_regain: int = 0
+    scanned_dice_purchased_this_turn: int = 0
+    triage_milestones_claimed: List[str] = field(default_factory=list)
+
     is_patient_zero: bool = False
     elimination_round: Optional[int] = None
     elimination_reason: Optional[str] = None
@@ -358,9 +363,15 @@ class PlayerState:
             self.patent_level = getattr(setup_company, "starting_patent_level", 0) if patent_level is None else patent_level
             self.upgrade_discount = getattr(setup_company, "upgrade_discount", 0) if upgrade_discount is None else upgrade_discount
         else:
-            self.defense_capacity = 2 if defense_capacity is None else defense_capacity
-            self.triage_bandwidth = 2 if triage_bandwidth is None else triage_bandwidth
-            self.release_bandwidth = 4 if release_bandwidth is None else release_bandwidth
+            if config is not None and getattr(config, "is_v035_tracks", False):
+                def_cap = config.track_capacity_by_level.get("DEFENSE", (2,))[0]
+                tri_bw = config.track_capacity_by_level.get("TRIAGE", (2,))[0]
+                rel_bw = config.track_capacity_by_level.get("RELEASE", (4,))[0]
+            else:
+                def_cap, tri_bw, rel_bw = 2, 2, 4
+            self.defense_capacity = def_cap if defense_capacity is None else defense_capacity
+            self.triage_bandwidth = tri_bw if triage_bandwidth is None else triage_bandwidth
+            self.release_bandwidth = rel_bw if release_bandwidth is None else release_bandwidth
             init_triage = triage_level if triage_level is not None else (pipeline_level if pipeline_level is not None else 0)
             init_release = release_level if release_level is not None else (pipeline_level if pipeline_level is not None else 0)
             self.triage_level = init_triage
@@ -368,6 +379,10 @@ class PlayerState:
             self.defense_level = 0 if defense_level is None else defense_level
             self.patent_level = 0 if patent_level is None else patent_level
             self.upgrade_discount = 0 if upgrade_discount is None else upgrade_discount
+
+        self.money_spent_regain = 0
+        self.scanned_dice_purchased_this_turn = 0
+        self.triage_milestones_claimed = []
 
         self._has_emergency_hotfix = has_emergency_hotfix or (self.triage_level >= 2)
         self._has_passive_firewall = has_passive_firewall or (self.defense_level >= 2)
@@ -982,6 +997,7 @@ class RoundTelemetry:
     version_comparisons: List[Dict[str, Any]] = field(default_factory=list)
     purchases_by_player: Dict[int, Dict[str, int]] = field(default_factory=dict)
     end_triggers_this_round: List[str] = field(default_factory=list)
+    green_cubes_clamped_per_round: int = 0
 
 
 @dataclass
@@ -1225,6 +1241,23 @@ class GameState:
         if self.config.corruption_track_flat_capacity is not None:
             return self.config.corruption_track_flat_capacity
         return self.active_version.track_capacity
+
+    @property
+    def exit_tray(self) -> Dict[CubeColor, int]:
+        return self.last_exited_cubes
+
+    def total_green_cubes_in_circulation(self) -> int:
+        staged = self.staging_cup.get(CubeColor.GREEN, 0) if isinstance(self.staging_cup, dict) else self.staging_cup.count(CubeColor.GREEN)
+        exited = self.last_exited_cubes.get(CubeColor.GREEN, 0) if isinstance(self.last_exited_cubes, dict) else self.last_exited_cubes.count(CubeColor.GREEN)
+        if hasattr(self.tower, "stuck_cubes") and isinstance(self.tower.stuck_cubes, dict):
+            stuck = self.tower.stuck_cubes.get(CubeColor.GREEN, 0)
+        elif hasattr(self.tower, "count"):
+            stuck = self.tower.count(CubeColor.GREEN)
+        elif hasattr(self.tower, "get_stuck_copy"):
+            stuck = self.tower.get_stuck_copy().get(CubeColor.GREEN, 0)
+        else:
+            stuck = 0
+        return staged + exited + stuck
 
     def get_market_die_cost(self, color: DieColor) -> int:
         """Returns the dynamic cost of a Central Market die based on the active variant card."""

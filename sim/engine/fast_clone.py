@@ -151,8 +151,10 @@ def from_snapshot(snap: Snapshot) -> Tuple[Any, Any, Any]:
 
 
 def resume_round(engine: Any, phase: int, commitments: Any = None, cr: Any = None) -> None:
-    """Plays the rest of the current round from the start of ``phase`` (1, 4 or 6), mirroring
+    """Plays the rest of the current round from the start of ``phase`` (1, 4, 5, or 6), mirroring
     ``GameEngine._run_round_six_phase`` without telemetry snapshots."""
+    from sim.engine.phase6_operations import pass_first_player_marker
+
     s = engine.state
     if phase == 1:
         commitments = engine._execute_phase_1()
@@ -165,11 +167,33 @@ def resume_round(engine: Any, phase: int, commitments: Any = None, cr: Any = Non
         engine._run_phase_4_attack_resolution(commitments, cr)
         if s.game_over:
             return
-        engine._run_phase_5_pipeline_shift()
-        phase = 6
-    if phase != 6:
-        raise ValueError(f"resume_round: unsupported phase {phase}")
-    engine._run_phase_6_operations()
+        if engine.config.operations_before_pipeline_shift:
+            engine._run_phase_operations()
+            engine._run_phase_pipeline_shift()
+            pass_first_player_marker(engine)
+            phase = None
+        else:
+            engine._run_phase_5_pipeline_shift()
+            phase = 6
+    if phase is not None:
+        if engine.config.operations_before_pipeline_shift:
+            if phase == 5:
+                engine._run_phase_operations()
+                engine._run_phase_pipeline_shift()
+                pass_first_player_marker(engine)
+            elif phase == 6:
+                engine._run_phase_pipeline_shift()
+                pass_first_player_marker(engine)
+            else:
+                raise ValueError(f"resume_round: unsupported phase {phase}")
+        else:
+            if phase == 5:
+                engine._run_phase_5_pipeline_shift()
+                phase = 6
+            if phase == 6:
+                engine._run_phase_6_operations()
+            else:
+                raise ValueError(f"resume_round: unsupported phase {phase}")
     if s.is_final_round:
         s.game_over = True
     else:

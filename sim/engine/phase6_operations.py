@@ -74,6 +74,8 @@ def execute_player_operations_turn(
     )
 
     active_ver = engine.state.active_version.version_str
+    player.scanned_dice_purchased_this_turn = 0
+    player.regain_this_turn = 0
     v035 = bool(getattr(engine.config, "is_v035_tracks", False))
     purple_ok = bool(getattr(engine.config, "purple_purchasable", True))
 
@@ -160,7 +162,10 @@ def execute_player_operations_turn(
                 variant_card=engine.state.variant_cards.get(free_color),
             )
             engine.state.next_die_id += 1
-            player.ready_for_release_dice.append(new_die)
+            dest_zone = player.scanned_dice if engine.config.purchased_dice_to_scanned else player.ready_for_release_dice
+            dest_zone.append(new_die)
+            if engine.config.purchased_dice_to_scanned:
+                player.scanned_dice_purchased_this_turn += 1
             player.record_purchase(free_color)
             player.mark_ability_used(active_ver)
             prometheus_discount_applied = True
@@ -277,7 +282,10 @@ def execute_player_operations_turn(
                     variant_card=engine.state.variant_cards.get(color),
                 )
                 engine.state.next_die_id += 1
-                player.ready_for_release_dice.append(new_die)
+                dest_zone = player.scanned_dice if engine.config.purchased_dice_to_scanned else player.ready_for_release_dice
+                dest_zone.append(new_die)
+                if engine.config.purchased_dice_to_scanned:
+                    player.scanned_dice_purchased_this_turn += 1
                 player.record_purchase(color)
 
     # Unused Ad Campaign actions are lost at the end of the Operations Turn
@@ -317,23 +325,33 @@ def _reject_patent_filings(player: PlayerState, filings: int) -> None:
 def execute_share_regain(engine: GameEngine, player: PlayerState, wanted: int) -> int:
     """Public Relations Track Phase 6 step: regain Market Share (INV-MS-REGAIN-01).
 
-    Each +1 costs the research rate of the current level; at most ``cap[level]`` per Operations Turn; never
-    above the maximum. Cap and cost are re-read per step at the post-upgrade level (E15).
+    Each +1 costs the research rate (or cash when currency == 'MONEY') of the current level; at most
+    ``cap[level]`` per Operations Turn; never above the maximum. Cap and cost are re-read per step at
+    the post-upgrade level (E15).
     """
     cfg = engine.config
-    player.regain_this_turn = 0
+    if getattr(player, "regain_this_turn", None) is None:
+        player.regain_this_turn = 0
     done = 0
     if not cfg.is_share_regain or player.market_share is None:
         return 0
+    use_money = (cfg.share_regain_currency == "MONEY")
     while done < int(wanted or 0):
         lvl = player.patent_level
         cap = cfg.share_regain_cap_by_level[lvl]
         cost = cfg.share_regain_cost_by_level[lvl]
-        if player.regain_this_turn >= cap or player.market_share >= player.market_share_max \
-                or player.research_tokens < cost:
+        if player.regain_this_turn >= cap or player.market_share >= player.market_share_max:
             break
-        player.research_tokens -= cost
-        player.research_spent_regain += cost
+        if use_money:
+            if player.money < cost:
+                break
+            player.money -= cost
+            player.money_spent_regain += cost
+        else:
+            if player.research_tokens < cost:
+                break
+            player.research_tokens -= cost
+            player.research_spent_regain += cost
         player.change_market_share(+1, "regain")
         player.regain_this_turn += 1
         done += 1
@@ -429,4 +447,5 @@ def execute_operations(engine: GameEngine) -> None:
             continue
         plan = resolve_operations_plan(player.bot, player, engine.state, engine.rng)
         execute_player_operations_turn(engine, player, plan)
-    pass_first_player_marker(engine)
+    if not engine.config.operations_before_pipeline_shift:
+        pass_first_player_marker(engine)
