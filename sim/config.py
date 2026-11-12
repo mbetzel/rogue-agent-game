@@ -259,7 +259,7 @@ class GameConfig:
     dirty_income_black_cubes: int = 1  # Deprecated
     patch_cash_cost: int = 2  # [TUNE: $1–$3]
     patch_token_cost: int = 1
-    max_market_purchases_per_turn: int = 2  # [TUNE: 2]
+    max_market_purchases_per_turn: int = 2  # [TUNE: 2 in legacy; 1 in v0.40.0]
     max_rounds: int = 30  # Safety cap for simulation termination
 
     # Temp Staffing & Yahtzee Rerolls (v0.6 / v0.7)
@@ -780,6 +780,7 @@ class GameConfig:
         for k, v in (
             ("operations_before_pipeline_shift", True),
             ("purchased_dice_to_scanned", True),
+            ("max_market_purchases_per_turn", 1),
             ("share_regain_currency", "MONEY"),
             ("share_regain_cost_by_level", dict(V040_SHARE_REGAIN_COST_MONEY)),
             ("share_regain_cap_by_level", dict(V040_SHARE_REGAIN_CAP)),
@@ -987,6 +988,7 @@ class GameConfig:
     def legacy_v035(cls, **overrides) -> "GameConfig":
         """v0.35.0 baseline (today's defaults). Exists now so the parity test survives a later default flip."""
         overrides.setdefault("red_mode", RedMode.RANSOM)
+        overrides.setdefault("max_market_purchases_per_turn", 2)
         # Starting Secrets resolve in __post_init__ under RANSOM: 8/8/8 (six-phase), 8/8/12 (v0.33 round).
         return cls(**overrides)
 
@@ -994,6 +996,7 @@ class GameConfig:
     def legacy_v033(cls, **overrides) -> "GameConfig":
         """v0.33.0 baseline: three-phase round + 4P = 12 Secrets."""
         overrides.setdefault("red_mode", RedMode.RANSOM)
+        overrides.setdefault("max_market_purchases_per_turn", 2)
         overrides.setdefault("legacy_archetype_override_bridge", True)
         overrides.setdefault("research_track_model", ResearchTrackModel.V034_THREE_LEVEL)
         return cls(round_sequence=RoundSequence.V033_THREE_PHASE, **overrides)
@@ -1002,6 +1005,7 @@ class GameConfig:
     def legacy_v034(cls, **overrides) -> "GameConfig":
         """v0.34.0 baseline: six-phase round with the v0.34 three-level research tracks."""
         overrides.setdefault("red_mode", RedMode.RANSOM)
+        overrides.setdefault("max_market_purchases_per_turn", 2)
         overrides.setdefault("research_track_model", ResearchTrackModel.V034_THREE_LEVEL)
         return cls(**overrides)
 

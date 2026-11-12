@@ -126,7 +126,7 @@ class GameController:
         common = dict(num_players=num_players, enable_corporate_asymmetry=enable_corporate_asymmetry,
                       round_sequence=RoundSequence.SIX_PHASE)  # the web is SIX_PHASE only (OQ-7)
         if research_track_model is not None:
-            return GameConfig(research_track_model=research_track_model, **common)
+            return GameConfig(research_track_model=research_track_model, max_market_purchases_per_turn=2, **common)
         version = str(rules_version or WEB_DEFAULT_RULES_VERSION).lower().lstrip("v")
         if version in ("040", "0.40.0", "0.40", "0391", "0.39.1", "039", "0.39.0"):
             return GameConfig.v040(**common)
