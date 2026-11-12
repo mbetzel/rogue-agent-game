@@ -44,12 +44,15 @@ def _ordered_research(player: Any, state: Any, pr_first: bool, focus: Sequence[s
 
     cfg = state.config
     costs = cfg.track_step_costs
+    max_ups = getattr(cfg, "max_hardware_upgrades_per_turn", 2)
     res = int(player.research_tokens)
     lv = {t: int(getattr(player, LEVEL_ATTR[t])) for t in LEVEL_ATTR}
     upgrades: List[str] = []
 
     def buy(t: str) -> bool:
         nonlocal res
+        if len(upgrades) >= max_ups:
+            return False
         if lv[t] >= 4 or res < int(costs[lv[t]]):
             return False
         res -= int(costs[lv[t]])

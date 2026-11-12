@@ -1,0 +1,639 @@
+{
+  "candidate": {
+    "2": {
+      "pod": "2P",
+      "players": 2,
+      "games": 1200,
+      "rounds": {
+        "mean": 8.97,
+        "min": 1,
+        "max": 13,
+        "timeouts": 0,
+        "timeout_pct": 0.0
+      },
+      "endings": {
+        "singularity_pct": 38.75,
+        "patient_zero_pct": 15.33,
+        "market_collapse_pct": 45.0,
+        "total_wipeout_pct": 0.92
+      },
+      "track_progression": {
+        "mean_upgrades_per_seat": 3.98,
+        "mean_levels": {
+          "DEFENSE": 0.85,
+          "TRIAGE": 1.37,
+          "RELEASE": 1.31,
+          "PATENT": 0.45
+        },
+        "l3_breakthrough_pct_by_track": {
+          "DEFENSE": 10.42,
+          "TRIAGE": 26.62,
+          "RELEASE": 25.54,
+          "PATENT": 0.0
+        },
+        "any_l3_breakthrough_pct": 62.58,
+        "l4_capstone_pct_by_track": {
+          "DEFENSE": 6.21,
+          "TRIAGE": 19.12,
+          "RELEASE": 19.92,
+          "PATENT": 0.0
+        },
+        "any_l4_capstone_pct": 45.25,
+        "maxed_2plus_tracks_pct": 0.0
+      },
+      "excess_turn_limit": {
+        "total_excess_blocked": 0,
+        "excess_per_game": 0.0,
+        "excess_per_seat": 0.0,
+        "games_with_excess_pct": 0.0,
+        "players_with_excess_pct": 0.0,
+        "rounds_with_excess_pct": 0.0
+      },
+      "pr_defense_telemetry": {
+        "mean_regains_per_seat": 1.95,
+        "mean_pr_research_per_seat": 5.85,
+        "mean_red_incoming_per_seat": 15.77,
+        "mean_red_blocked_per_seat": 2.84,
+        "mean_red_unblocked_per_seat": 12.94,
+        "mean_share_lost_per_seat": 12.61,
+        "red_block_rate_pct": 17.98
+      },
+      "win_rates_by_color": {
+        "blue": 48.68,
+        "green": 51.23,
+        "red": 50.06
+      },
+      "seats_by_color": {
+        "red": 793,
+        "green": 810,
+        "blue": 797
+      },
+      "win_rates_by_company": {
+        "Aegis Defense Relay": 52.96,
+        "Department of Telecommunications Oversight": 44.61,
+        "Helix Biomedical Consortium": 45.95,
+        "Meridian Financial Trust": 49.47,
+        "Omnidyne Systems": 56.92,
+        "The Prometheus Foundation": 50.6
+      },
+      "seats_by_company": {
+        "The Prometheus Foundation": 415,
+        "Helix Biomedical Consortium": 420,
+        "Department of Telecommunications Oversight": 408,
+        "Aegis Defense Relay": 389,
+        "Meridian Financial Trust": 378,
+        "Omnidyne Systems": 390
+      },
+      "win_rates_by_archetype": {
+        "AccelerationistBot": 52.38,
+        "AdaptiveBalancedBot": 70.95,
+        "MixedPolicyBot": 47.58,
+        "RecklessSaboteurBot": 33.2,
+        "SecOpsTurtleBot": 53.66,
+        "VentureGreedBot": 52.1
+      },
+      "seats_by_archetype": {
+        "MixedPolicyBot": 1200,
+        "RecklessSaboteurBot": 244,
+        "VentureGreedBot": 238,
+        "AdaptiveBalancedBot": 241,
+        "SecOpsTurtleBot": 246,
+        "AccelerationistBot": 231
+      }
+    },
+    "3": {
+      "pod": "3P",
+      "players": 3,
+      "games": 1200,
+      "rounds": {
+        "mean": 9.39,
+        "min": 2,
+        "max": 13,
+        "timeouts": 0,
+        "timeout_pct": 0.0
+      },
+      "endings": {
+        "singularity_pct": 52.0,
+        "patient_zero_pct": 21.92,
+        "market_collapse_pct": 25.92,
+        "total_wipeout_pct": 0.17
+      },
+      "track_progression": {
+        "mean_upgrades_per_seat": 4.66,
+        "mean_levels": {
+          "DEFENSE": 1.06,
+          "TRIAGE": 1.51,
+          "RELEASE": 1.51,
+          "PATENT": 0.58
+        },
+        "l3_breakthrough_pct_by_track": {
+          "DEFENSE": 13.39,
+          "TRIAGE": 28.47,
+          "RELEASE": 29.06,
+          "PATENT": 0.0
+        },
+        "any_l3_breakthrough_pct": 70.92,
+        "l4_capstone_pct_by_track": {
+          "DEFENSE": 8.47,
+          "TRIAGE": 21.64,
+          "RELEASE": 24.58,
+          "PATENT": 0.0
+        },
+        "any_l4_capstone_pct": 54.69,
+        "maxed_2plus_tracks_pct": 0.0
+      },
+      "excess_turn_limit": {
+        "total_excess_blocked": 0,
+        "excess_per_game": 0.0,
+        "excess_per_seat": 0.0,
+        "games_with_excess_pct": 0.0,
+        "players_with_excess_pct": 0.0,
+        "rounds_with_excess_pct": 0.0
+      },
+      "pr_defense_telemetry": {
+        "mean_regains_per_seat": 2.36,
+        "mean_pr_research_per_seat": 7.07,
+        "mean_red_incoming_per_seat": 16.53,
+        "mean_red_blocked_per_seat": 3.52,
+        "mean_red_unblocked_per_seat": 13.02,
+        "mean_share_lost_per_seat": 12.82,
+        "red_block_rate_pct": 21.27
+      },
+      "win_rates_by_color": {
+        "blue": 33.64,
+        "green": 34.54,
+        "red": 31.74
+      },
+      "seats_by_color": {
+        "red": 1169,
+        "green": 1245,
+        "blue": 1186
+      },
+      "win_rates_by_company": {
+        "Aegis Defense Relay": 36.78,
+        "Department of Telecommunications Oversight": 30.54,
+        "Helix Biomedical Consortium": 29.73,
+        "Meridian Financial Trust": 32.41,
+        "Omnidyne Systems": 39.6,
+        "The Prometheus Foundation": 31.07
+      },
+      "seats_by_company": {
+        "The Prometheus Foundation": 589,
+        "Helix Biomedical Consortium": 639,
+        "Meridian Financial Trust": 580,
+        "Department of Telecommunications Oversight": 596,
+        "Aegis Defense Relay": 590,
+        "Omnidyne Systems": 606
+      },
+      "win_rates_by_archetype": {
+        "AccelerationistBot": 32.56,
+        "AdaptiveBalancedBot": 56.47,
+        "MixedPolicyBot": 33.17,
+        "RecklessSaboteurBot": 13.86,
+        "SecOpsTurtleBot": 31.62,
+        "VentureGreedBot": 34.21
+      },
+      "seats_by_archetype": {
+        "MixedPolicyBot": 1200,
+        "SecOpsTurtleBot": 506,
+        "AccelerationistBot": 476,
+        "RecklessSaboteurBot": 498,
+        "VentureGreedBot": 456,
+        "AdaptiveBalancedBot": 464
+      }
+    },
+    "4": {
+      "pod": "4P",
+      "players": 4,
+      "games": 1200,
+      "rounds": {
+        "mean": 9.04,
+        "min": 2,
+        "max": 13,
+        "timeouts": 0,
+        "timeout_pct": 0.0
+      },
+      "endings": {
+        "singularity_pct": 44.33,
+        "patient_zero_pct": 26.25,
+        "market_collapse_pct": 29.42,
+        "total_wipeout_pct": 0.0
+      },
+      "track_progression": {
+        "mean_upgrades_per_seat": 4.25,
+        "mean_levels": {
+          "DEFENSE": 0.95,
+          "TRIAGE": 1.38,
+          "RELEASE": 1.39,
+          "PATENT": 0.53
+        },
+        "l3_breakthrough_pct_by_track": {
+          "DEFENSE": 11.23,
+          "TRIAGE": 26.0,
+          "RELEASE": 27.1,
+          "PATENT": 0.0
+        },
+        "any_l3_breakthrough_pct": 64.33,
+        "l4_capstone_pct_by_track": {
+          "DEFENSE": 6.71,
+          "TRIAGE": 19.19,
+          "RELEASE": 22.88,
+          "PATENT": 0.0
+        },
+        "any_l4_capstone_pct": 48.77,
+        "maxed_2plus_tracks_pct": 0.0
+      },
+      "excess_turn_limit": {
+        "total_excess_blocked": 0,
+        "excess_per_game": 0.0,
+        "excess_per_seat": 0.0,
+        "games_with_excess_pct": 0.0,
+        "players_with_excess_pct": 0.0,
+        "rounds_with_excess_pct": 0.0
+      },
+      "pr_defense_telemetry": {
+        "mean_regains_per_seat": 2.46,
+        "mean_pr_research_per_seat": 7.37,
+        "mean_red_incoming_per_seat": 16.03,
+        "mean_red_blocked_per_seat": 3.51,
+        "mean_red_unblocked_per_seat": 12.52,
+        "mean_share_lost_per_seat": 12.36,
+        "red_block_rate_pct": 21.91
+      },
+      "win_rates_by_color": {
+        "blue": 22.89,
+        "green": 24.69,
+        "red": 27.41
+      },
+      "seats_by_color": {
+        "red": 1587,
+        "green": 1634,
+        "blue": 1579
+      },
+      "win_rates_by_company": {
+        "Aegis Defense Relay": 27.49,
+        "Department of Telecommunications Oversight": 18.15,
+        "Helix Biomedical Consortium": 22.54,
+        "Meridian Financial Trust": 26.71,
+        "Omnidyne Systems": 26.88,
+        "The Prometheus Foundation": 28.13
+      },
+      "seats_by_company": {
+        "Meridian Financial Trust": 805,
+        "The Prometheus Foundation": 782,
+        "Helix Biomedical Consortium": 823,
+        "Department of Telecommunications Oversight": 777,
+        "Aegis Defense Relay": 802,
+        "Omnidyne Systems": 811
+      },
+      "win_rates_by_archetype": {
+        "AccelerationistBot": 19.55,
+        "AdaptiveBalancedBot": 46.51,
+        "MixedPolicyBot": 25.25,
+        "RecklessSaboteurBot": 7.43,
+        "SecOpsTurtleBot": 26.89,
+        "VentureGreedBot": 24.24
+      },
+      "seats_by_archetype": {
+        "AdaptiveBalancedBot": 716,
+        "RecklessSaboteurBot": 720,
+        "MixedPolicyBot": 1200,
+        "AccelerationistBot": 711,
+        "SecOpsTurtleBot": 727,
+        "VentureGreedBot": 726
+      }
+    }
+  },
+  "baseline": {
+    "2": {
+      "pod": "2P",
+      "players": 2,
+      "games": 1200,
+      "rounds": {
+        "mean": 8.93,
+        "min": 1,
+        "max": 13,
+        "timeouts": 0,
+        "timeout_pct": 0.0
+      },
+      "endings": {
+        "singularity_pct": 38.08,
+        "patient_zero_pct": 15.58,
+        "market_collapse_pct": 45.42,
+        "total_wipeout_pct": 0.92
+      },
+      "track_progression": {
+        "mean_upgrades_per_seat": 3.06,
+        "mean_levels": {
+          "DEFENSE": 0.59,
+          "TRIAGE": 1.09,
+          "RELEASE": 1.04,
+          "PATENT": 0.34
+        },
+        "l3_breakthrough_pct_by_track": {
+          "DEFENSE": 7.71,
+          "TRIAGE": 21.58,
+          "RELEASE": 21.04,
+          "PATENT": 0.0
+        },
+        "any_l3_breakthrough_pct": 50.33,
+        "l4_capstone_pct_by_track": {
+          "DEFENSE": 3.04,
+          "TRIAGE": 9.38,
+          "RELEASE": 11.79,
+          "PATENT": 0.0
+        },
+        "any_l4_capstone_pct": 24.21,
+        "maxed_2plus_tracks_pct": 0.0
+      },
+      "excess_turn_limit": {
+        "total_excess_blocked": 0,
+        "excess_per_game": 0.0,
+        "excess_per_seat": 0.0,
+        "games_with_excess_pct": 0.0,
+        "players_with_excess_pct": 0.0,
+        "rounds_with_excess_pct": 0.0
+      },
+      "pr_defense_telemetry": {
+        "mean_regains_per_seat": 1.83,
+        "mean_pr_research_per_seat": 5.48,
+        "mean_red_incoming_per_seat": 15.57,
+        "mean_red_blocked_per_seat": 2.75,
+        "mean_red_unblocked_per_seat": 12.83,
+        "mean_share_lost_per_seat": 12.49,
+        "red_block_rate_pct": 17.63
+      },
+      "win_rates_by_color": {
+        "blue": 48.56,
+        "green": 50.12,
+        "red": 51.32
+      },
+      "seats_by_color": {
+        "red": 793,
+        "green": 810,
+        "blue": 797
+      },
+      "win_rates_by_company": {
+        "Aegis Defense Relay": 52.7,
+        "Department of Telecommunications Oversight": 44.61,
+        "Helix Biomedical Consortium": 45.24,
+        "Meridian Financial Trust": 52.91,
+        "Omnidyne Systems": 55.38,
+        "The Prometheus Foundation": 49.88
+      },
+      "seats_by_company": {
+        "The Prometheus Foundation": 415,
+        "Helix Biomedical Consortium": 420,
+        "Department of Telecommunications Oversight": 408,
+        "Aegis Defense Relay": 389,
+        "Meridian Financial Trust": 378,
+        "Omnidyne Systems": 390
+      },
+      "win_rates_by_archetype": {
+        "AccelerationistBot": 47.19,
+        "AdaptiveBalancedBot": 70.12,
+        "MixedPolicyBot": 49.0,
+        "RecklessSaboteurBot": 37.3,
+        "SecOpsTurtleBot": 52.03,
+        "VentureGreedBot": 48.32
+      },
+      "seats_by_archetype": {
+        "MixedPolicyBot": 1200,
+        "RecklessSaboteurBot": 244,
+        "VentureGreedBot": 238,
+        "AdaptiveBalancedBot": 241,
+        "SecOpsTurtleBot": 246,
+        "AccelerationistBot": 231
+      }
+    },
+    "3": {
+      "pod": "3P",
+      "players": 3,
+      "games": 1200,
+      "rounds": {
+        "mean": 9.29,
+        "min": 2,
+        "max": 14,
+        "timeouts": 0,
+        "timeout_pct": 0.0
+      },
+      "endings": {
+        "singularity_pct": 48.0,
+        "patient_zero_pct": 22.83,
+        "market_collapse_pct": 28.92,
+        "total_wipeout_pct": 0.25
+      },
+      "track_progression": {
+        "mean_upgrades_per_seat": 3.53,
+        "mean_levels": {
+          "DEFENSE": 0.73,
+          "TRIAGE": 1.19,
+          "RELEASE": 1.2,
+          "PATENT": 0.41
+        },
+        "l3_breakthrough_pct_by_track": {
+          "DEFENSE": 9.56,
+          "TRIAGE": 23.61,
+          "RELEASE": 25.56,
+          "PATENT": 0.0
+        },
+        "any_l3_breakthrough_pct": 58.72,
+        "l4_capstone_pct_by_track": {
+          "DEFENSE": 3.78,
+          "TRIAGE": 11.86,
+          "RELEASE": 15.44,
+          "PATENT": 0.0
+        },
+        "any_l4_capstone_pct": 31.08,
+        "maxed_2plus_tracks_pct": 0.0
+      },
+      "excess_turn_limit": {
+        "total_excess_blocked": 0,
+        "excess_per_game": 0.0,
+        "excess_per_seat": 0.0,
+        "games_with_excess_pct": 0.0,
+        "players_with_excess_pct": 0.0,
+        "rounds_with_excess_pct": 0.0
+      },
+      "pr_defense_telemetry": {
+        "mean_regains_per_seat": 2.19,
+        "mean_pr_research_per_seat": 6.57,
+        "mean_red_incoming_per_seat": 16.36,
+        "mean_red_blocked_per_seat": 3.38,
+        "mean_red_unblocked_per_seat": 12.98,
+        "mean_share_lost_per_seat": 12.77,
+        "red_block_rate_pct": 20.67
+      },
+      "win_rates_by_color": {
+        "blue": 33.68,
+        "green": 34.1,
+        "red": 32.16
+      },
+      "seats_by_color": {
+        "red": 1169,
+        "green": 1245,
+        "blue": 1186
+      },
+      "win_rates_by_company": {
+        "Aegis Defense Relay": 37.63,
+        "Department of Telecommunications Oversight": 29.78,
+        "Helix Biomedical Consortium": 29.11,
+        "Meridian Financial Trust": 32.33,
+        "Omnidyne Systems": 39.36,
+        "The Prometheus Foundation": 32.0
+      },
+      "seats_by_company": {
+        "The Prometheus Foundation": 589,
+        "Helix Biomedical Consortium": 639,
+        "Meridian Financial Trust": 580,
+        "Department of Telecommunications Oversight": 596,
+        "Aegis Defense Relay": 590,
+        "Omnidyne Systems": 606
+      },
+      "win_rates_by_archetype": {
+        "AccelerationistBot": 27.52,
+        "AdaptiveBalancedBot": 60.24,
+        "MixedPolicyBot": 33.92,
+        "RecklessSaboteurBot": 15.46,
+        "SecOpsTurtleBot": 29.64,
+        "VentureGreedBot": 34.1
+      },
+      "seats_by_archetype": {
+        "MixedPolicyBot": 1200,
+        "SecOpsTurtleBot": 506,
+        "AccelerationistBot": 476,
+        "RecklessSaboteurBot": 498,
+        "VentureGreedBot": 456,
+        "AdaptiveBalancedBot": 464
+      }
+    },
+    "4": {
+      "pod": "4P",
+      "players": 4,
+      "games": 1200,
+      "rounds": {
+        "mean": 9.03,
+        "min": 2,
+        "max": 13,
+        "timeouts": 0,
+        "timeout_pct": 0.0
+      },
+      "endings": {
+        "singularity_pct": 42.42,
+        "patient_zero_pct": 26.83,
+        "market_collapse_pct": 30.75,
+        "total_wipeout_pct": 0.0
+      },
+      "track_progression": {
+        "mean_upgrades_per_seat": 3.33,
+        "mean_levels": {
+          "DEFENSE": 0.67,
+          "TRIAGE": 1.11,
+          "RELEASE": 1.14,
+          "PATENT": 0.41
+        },
+        "l3_breakthrough_pct_by_track": {
+          "DEFENSE": 7.96,
+          "TRIAGE": 21.46,
+          "RELEASE": 23.77,
+          "PATENT": 0.0
+        },
+        "any_l3_breakthrough_pct": 53.19,
+        "l4_capstone_pct_by_track": {
+          "DEFENSE": 3.12,
+          "TRIAGE": 10.92,
+          "RELEASE": 15.9,
+          "PATENT": 0.0
+        },
+        "any_l4_capstone_pct": 29.94,
+        "maxed_2plus_tracks_pct": 0.0
+      },
+      "excess_turn_limit": {
+        "total_excess_blocked": 0,
+        "excess_per_game": 0.0,
+        "excess_per_seat": 0.0,
+        "games_with_excess_pct": 0.0,
+        "players_with_excess_pct": 0.0,
+        "rounds_with_excess_pct": 0.0
+      },
+      "pr_defense_telemetry": {
+        "mean_regains_per_seat": 2.29,
+        "mean_pr_research_per_seat": 6.88,
+        "mean_red_incoming_per_seat": 16.12,
+        "mean_red_blocked_per_seat": 3.41,
+        "mean_red_unblocked_per_seat": 12.72,
+        "mean_share_lost_per_seat": 12.57,
+        "red_block_rate_pct": 21.12
+      },
+      "win_rates_by_color": {
+        "blue": 21.56,
+        "green": 26.9,
+        "red": 26.47
+      },
+      "seats_by_color": {
+        "red": 1587,
+        "green": 1634,
+        "blue": 1579
+      },
+      "win_rates_by_company": {
+        "Aegis Defense Relay": 23.75,
+        "Department of Telecommunications Oversight": 19.31,
+        "Helix Biomedical Consortium": 22.66,
+        "Meridian Financial Trust": 26.34,
+        "Omnidyne Systems": 31.2,
+        "The Prometheus Foundation": 26.6
+      },
+      "seats_by_company": {
+        "Meridian Financial Trust": 805,
+        "The Prometheus Foundation": 782,
+        "Helix Biomedical Consortium": 823,
+        "Department of Telecommunications Oversight": 777,
+        "Aegis Defense Relay": 802,
+        "Omnidyne Systems": 811
+      },
+      "win_rates_by_archetype": {
+        "AccelerationistBot": 15.19,
+        "AdaptiveBalancedBot": 53.07,
+        "MixedPolicyBot": 24.58,
+        "RecklessSaboteurBot": 7.99,
+        "SecOpsTurtleBot": 24.0,
+        "VentureGreedBot": 25.48
+      },
+      "seats_by_archetype": {
+        "AdaptiveBalancedBot": 716,
+        "RecklessSaboteurBot": 720,
+        "MixedPolicyBot": 1200,
+        "AccelerationistBot": 711,
+        "SecOpsTurtleBot": 727,
+        "VentureGreedBot": 726
+      }
+    }
+  },
+  "config": {
+    "games_per_pod": 1200,
+    "seed_start": 42,
+    "player_counts": [
+      2,
+      3,
+      4
+    ],
+    "candidate_overrides": {
+      "track_step_costs": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "max_hardware_upgrades_per_turn": 2
+    },
+    "baseline_overrides": {
+      "track_step_costs": [
+        1,
+        2,
+        2,
+        3
+      ],
+      "max_hardware_upgrades_per_turn": 999
+    }
+  }
+}

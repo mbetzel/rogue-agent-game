@@ -298,6 +298,9 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     patent_cost = player.get_patent_cost() if hasattr(player, "get_patent_cost") else 4
     research_avail = getattr(player, "research_tokens", player.patches)
 
+    max_upgrades = getattr(controller.state.config, "max_hardware_upgrades_per_turn", 2)
+    can_upgrade_limit = meta.get("upgrades_this_turn", 0) < max_upgrades
+
     can_upgrade_track = {
         "triage": bool(
             controller.phase == 6
@@ -306,6 +309,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             and not is_eliminated
             and getattr(player, "triage_level", 0) < max_track_level
             and pending_bt is None
+            and can_upgrade_limit
             and triage_cost is not None
             and research_avail >= triage_cost
         ),
@@ -316,6 +320,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             and not is_eliminated
             and getattr(player, "release_level", 0) < max_track_level
             and pending_bt is None
+            and can_upgrade_limit
             and release_cost is not None
             and research_avail >= release_cost
         ),
@@ -326,6 +331,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             and not is_eliminated
             and getattr(player, "pipeline_level", 0) < max_track_level
             and pending_bt is None
+            and can_upgrade_limit
             and pipeline_cost is not None
             and research_avail >= pipeline_cost
         ),
@@ -336,6 +342,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             and not is_eliminated
             and getattr(player, "defense_level", 0) < max_track_level
             and pending_bt is None
+            and can_upgrade_limit
             and defense_cost is not None
             and research_avail >= defense_cost
         ),
@@ -346,6 +353,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
             and not is_eliminated
             and getattr(player, "patent_level", 0) < max_track_level
             and pending_bt is None
+            and can_upgrade_limit
             and patent_track_cost is not None
             and research_avail >= patent_track_cost
         ),

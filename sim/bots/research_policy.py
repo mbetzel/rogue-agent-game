@@ -62,9 +62,12 @@ def plan_research3(policy: ResearchPolicy, player: PlayerState, state: GameState
     order = list(policy.focus_order)
     upgrades: List[str] = []
     sim_lv = dict(lv)
+    max_ups = getattr(config, "max_hardware_upgrades_per_turn", 2)
     if not is_late_game(policy, state):
         focus = order[0]
         for t in _want_list(policy, lv):
+            if len(upgrades) >= max_ups:
+                break
             if sim_lv[t] >= 4:
                 continue
             c = int(costs[sim_lv[t]])
@@ -114,11 +117,14 @@ def _plan_research_share_regain(policy: ResearchPolicy, player: PlayerState, sta
 
     # 2. Want-list with the remaining research
     upgrades: List[str] = []
+    max_ups = getattr(config, "max_hardware_upgrades_per_turn", 2)
     late = is_late_game(policy, state) or (aware and msp.any_survivor_critical(state, pol))
     leftovers_ok = late
     if not late:
         focus = list(policy.focus_order)[0]
         for t in _want_list(policy, lv):
+            if len(upgrades) >= max_ups:
+                break
             if sim_lv[t] >= 4:
                 continue
             c = int(costs[sim_lv[t]])

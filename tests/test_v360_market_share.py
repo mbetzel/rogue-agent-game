@@ -211,8 +211,18 @@ class TestParity(unittest.TestCase):
         # GameConfig(red_mode=RANSOM) resolves identically and gets a 50-seed subset.
         for n in capture.PLAYER_COUNTS:
             self.assertEqual(GameConfig(num_players=n, red_mode=RedMode.RANSOM), GameConfig.legacy_v035(num_players=n))
-        ransom = lambda **kw: GameConfig(red_mode=RedMode.RANSOM, **kw)  # noqa: E731
-        for factory, seeds in ((GameConfig.legacy_v035, capture.SEEDS), (ransom, capture.SEEDS[:50])):
+        v035_factory = lambda **kw: GameConfig.legacy_v035(
+            track_step_costs=(1, 2, 2, 3),
+            max_hardware_upgrades_per_turn=999,
+            **kw
+        )
+        ransom = lambda **kw: GameConfig(
+            red_mode=RedMode.RANSOM,
+            track_step_costs=(1, 2, 2, 3),
+            max_hardware_upgrades_per_turn=999,
+            **kw
+        )  # noqa: E731
+        for factory, seeds in ((v035_factory, capture.SEEDS), (ransom, capture.SEEDS[:50])):
             for scenario in capture.SCENARIOS:
                 for n in capture.PLAYER_COUNTS:
                     with open(capture.fixture_path(scenario, n), encoding="utf-8") as fh:
@@ -606,7 +616,7 @@ class TestRegainAndVariants(MSHarness):
         self.assertEqual((p.market_share, p.research_tokens), (11, 4))
         e = self.make_ms()
         p = e.state.players[0]
-        p.market_share, p.research_tokens = 10, 7
+        p.market_share, p.research_tokens = 10, 6
         self.ops(e, p, track_upgrades=["PUBLIC_RELATIONS", "PATENT"], share_regain=3)
         self.assertEqual((p.patent_level, p.market_share, p.research_tokens, p.money), (2, 12, 0, 3))
 
@@ -639,8 +649,10 @@ class TestRegainAndVariants(MSHarness):
 
         e = self.make_ms()
         p = e.state.players[0]
-        p.research_tokens = 5
-        self.ops(e, p, track_upgrades=["PATENT", "PATENT", "PATENT"])
+        p.research_tokens = 2
+        self.ops(e, p, track_upgrades=["PATENT", "PATENT"])
+        p.research_tokens = 2
+        self.ops(e, p, track_upgrades=["PATENT"])
         self.assertEqual((p.patent_level, p.money, p.personal_purple_reserve), (3, 3, 0))
         self.assertEqual(sum(1 for d in p.total_dice if d.color == DieColor.PURPLE), 1)
         self.assertEqual(rt.track_display_name(e.config, "PATENT"), "Public Relations Track")

@@ -69,12 +69,14 @@ def advance_operations_turns(controller: GameController) -> None:
         controller.active_player_index = next_pid
         if meta["is_human"]:
             meta["purchases_this_turn"] = 0
+            meta["upgrades_this_turn"] = 0
             meta["dirty_income_taken_this_turn"] = False
             player.regain_this_turn = 0  # v0.36.0 Public Relations Track: per-Operations-Turn cap
             return
 
         controller.operations_turn_queue.pop(0)
         meta["purchases_this_turn"] = 0
+        meta["upgrades_this_turn"] = 0
         execute_bot_operations(controller, player, meta)
 
     # All players have finished Phase 6 -> complete round cleanup
@@ -900,6 +902,10 @@ def upgrade_hardware_track(
     if player.is_patient_zero:
         raise ValueError("Eliminated players cannot upgrade hardware tracks")
 
+    max_upgrades = getattr(controller.state.config, "max_hardware_upgrades_per_turn", 2)
+    if meta.get("upgrades_this_turn", 0) >= max_upgrades:
+        raise ValueError(f"Hardware upgrade limit reached ({max_upgrades} upgrades per Operations Turn)")
+
     t = str(track_type).upper().strip()
     cost = player.get_track_upgrade_cost(t)
     if cost is None:
@@ -911,6 +917,8 @@ def upgrade_hardware_track(
     success = player.upgrade_track(t, round_number=controller.state.current_round) if controller.state.config.is_v035_tracks else player.upgrade_track(t)
     if not success:
         raise ValueError(f"Failed to upgrade track {track_type}")
+
+    meta["upgrades_this_turn"] = meta.get("upgrades_this_turn", 0) + 1
 
     new_level = getattr(player, f"{t.lower()}_level", 1)
     controller.event_log.append(

@@ -59,7 +59,12 @@ class TestLA01Parity(unittest.TestCase):
     def test_la01_switch_off_explicit(self):
         from tests.fixtures.v036_parity import capture
 
-        off = lambda **kw: GameConfig.legacy_v036(bot_pr_push=False, **kw)  # noqa: E731
+        off = lambda **kw: GameConfig.legacy_v036(
+            bot_pr_push=False,
+            track_step_costs=(1, 2, 2, 3),
+            max_hardware_upgrades_per_turn=999,
+            **kw
+        )  # noqa: E731
         for scenario in capture.SCENARIOS:
             for n in capture.PLAYER_COUNTS:
                 with open(capture.fixture_path(scenario, n), encoding="utf-8") as fh:
@@ -74,22 +79,35 @@ class TestLA02PushFixtures(unittest.TestCase):
         from tests.fixtures.v036_parity.capture import PLAYER_COUNTS, SCENARIOS, SEEDS, run_scenario
         from tests.fixtures.v037_push import capture
 
+        v037_factory = lambda **kw: capture.config_factory(
+            track_step_costs=(1, 2, 2, 3),
+            max_hardware_upgrades_per_turn=999,
+            **kw
+        )
         for scenario in SCENARIOS:
             for n in PLAYER_COUNTS:
                 with open(capture.fixture_path(scenario, n), encoding="utf-8") as fh:
                     golden = json.load(fh)
                 for seed in SEEDS:
-                    got = json.loads(json.dumps(run_scenario(capture.config_factory, scenario, n, seed), sort_keys=True))
+                    got = json.loads(json.dumps(run_scenario(v037_factory, scenario, n, seed), sort_keys=True))
                     self.assertEqual(got, golden[str(seed)], f"{scenario} {n}P {seed}")
 
     def test_la02_ref1_fixture(self):
+        from unittest import mock
         from tests.fixtures.v037_push import capture
 
         with open(os.path.join(capture.FIXTURE_DIR, "ref1_3p.json"), encoding="utf-8") as fh:
             golden = json.load(fh)
-        for seed in capture.REF_SEEDS[:3]:
-            got = json.loads(json.dumps(capture.run_ref1(seed), sort_keys=True))
-            self.assertEqual(got, golden[str(seed)], f"ref1 {seed}")
+        orig_factory = capture.config_factory
+        v037_factory = lambda **kw: orig_factory(
+            track_step_costs=(1, 2, 2, 3),
+            max_hardware_upgrades_per_turn=999,
+            **kw
+        )
+        with mock.patch("tests.fixtures.v037_push.capture.config_factory", v037_factory):
+            for seed in capture.REF_SEEDS[:3]:
+                got = json.loads(json.dumps(capture.run_ref1(seed), sort_keys=True))
+                self.assertEqual(got, golden[str(seed)], f"ref1 {seed}")
 
     def test_la02_switch_changes_play(self):
         from tests.fixtures.v036_parity.capture import run_scenario
@@ -104,12 +122,15 @@ def _old_ordered_research(player, state, pr_first, focus):
 
     cfg = state.config
     costs = cfg.track_step_costs
+    max_ups = getattr(cfg, "max_hardware_upgrades_per_turn", 2)
     res = int(player.research_tokens)
     lv = {t: int(getattr(player, LEVEL_ATTR[t])) for t in LEVEL_ATTR}
     upgrades = []
 
     def buy(t):
         nonlocal res
+        if len(upgrades) >= max_ups:
+            return False
         if lv[t] >= 4 or res < int(costs[lv[t]]):
             return False
         res -= int(costs[lv[t]])

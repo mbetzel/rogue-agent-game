@@ -25,7 +25,11 @@ from sim.bots.reference_search import (
 from tests.fixtures.v035_parity.capture import _bot_classes
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-V036 = GameConfig.v036
+V036 = lambda **kw: GameConfig.v036(
+    track_step_costs=(1, 2, 2, 3),
+    max_hardware_upgrades_per_turn=999,
+    **kw
+)
 
 
 def _build(scenario, n, seed, engine_cls=GameEngine):
@@ -602,7 +606,12 @@ class TestCleanup(unittest.TestCase):
         from tests.fixtures.v035_parity import capture as c35
         from tests.fixtures.v033_parity import capture as c33
 
-        for cap, factory, scen in ((c35, GameConfig.legacy_v035, c35.SCENARIOS),):
+        v035_factory = lambda **kw: GameConfig.legacy_v035(
+            track_step_costs=(1, 2, 2, 3),
+            max_hardware_upgrades_per_turn=999,
+            **kw
+        )
+        for cap, factory, scen in ((c35, v035_factory, c35.SCENARIOS),):
             for scenario in scen:
                 for n in cap.PLAYER_COUNTS:
                     with open(cap.fixture_path(scenario, n), encoding="utf-8") as fh:
