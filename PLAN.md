@@ -60,6 +60,15 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Code Review Gate (`staff-engineer`):* APPROVED (full test suite passing, backwards parity preserved).
   - [x] *Validation Sweep (`product-owner`):* `sim_results/v380f_blue_dice_rebalance/validation_report.md` (3,600 games across 2P/3P/4P, seeds 42..1241, 0 errors). Game length 8.93 / 9.44 / 9.26 rounds; Singularity 46.8%, Market Collapse 33.6%, Patient Zero 19.2%, Total Wipeout 0.42%. Blue Company win rates: 49.1% (2P), 33.4% (3P), 25.3% (4P). Market purchases per seat up +75% to +99%.
   - [x] *Balance Sign-off (`game-designer`):* `FINDINGS.md` §47. Theoretical parity achieved; healthy triad stability; APPROVED (`v0.38f`).
+- [x] **Phase 54: Market Share Track & Headroom Architecture (`v0.38g` / Headroom)**
+  - [x] *Pre-SDLC Game Designer Modeling:* `docs/findings/market_share_early_pressure_analysis.md` (5,200 games + 50k tower drops across 2P/3P/4P). Evaluated headroom, -2 Red damage, and company starting asymmetry. -2 Red rejected (spikes Market Collapse to 68% in R3–5); asymmetry rejected (2:1 win rate skew). Candidate A4 (Unified Max 20, starts 13 at 2P / 16 at 3P/4P) recommended.
+  - [x] *User Sign-Off (2026-11-11):* Option A (Unified Max 20) with starts at 13 (2P) and 16 (3P & 4P unified) approved. Rejection of -2 Red damage and company asymmetry confirmed.
+  - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/market_share_headroom_spec.md`.
+  - [x] *Implementation (`senior-engineer`):* `sim/config.py` (`DEFAULT_MARKET_SHARE_MAX=20`, `V038E_MARKET_SHARE_START`), `sim/engine/state.py` (decoupled `init_market_share` + `market_share_peak`), `sim/engine/core.py`, `sim/bots/secret_face_policy.py`, `sim/bots/market_share_policy.py`, `tests/test_market_share_headroom.py` (10/10 passed).
+  - [x] *Code Review Gate (`staff-engineer`):* APPROVED (full regression clean, backward compatibility verified).
+  - [x] *Validation Sweep (`product-owner`):* `sim_results/market_share_headroom/validation_report.md` (3,600 games across 2P/3P/4P, seeds 42..1241). R1 Red F1 choice selection jumped from 0.0% to 100.0%; R1 ceiling congestion dropped from 54–73% to 0.0%; pacing 8.72–9.12 rounds; 0 timeouts.
+  - [x] *Balance Sign-Off (`game-designer`):* `FINDINGS.md` §48. Zero Blank Faces restored; pacing and tri-modal end triggers healthy. APPROVED.
+  - [x] *PnP Asset Update (`graphic-designer`):* `pnp/generate_pnp.py` updated to 3x7 (21-cell) Central Market Share Track and PDFs regenerated.
 - [x] **Completed phases (Phases 1–46, 48)** are archived in [docs/archive/PLAN_completed_phases.md](docs/archive/PLAN_completed_phases.md), along with the legacy v0.3-era Sections 3–5 (code architecture, experiment matrix, SDLC checklist).
 
 ---

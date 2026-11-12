@@ -376,29 +376,32 @@ def urgent_regain(player: "PlayerState", state: "GameState", pol: MarketSharePol
     v0.36.0 urgency (``_urgent_regain_v036``), raised in v2.0+ / the Final Round to the smallest regain that
     improves the expected Market Leader Bonus when the bonus is active (v0.37.0 spec §5.3)."""
     k0 = _urgent_regain_v036(player, state, pol, cap)
-    if payout_active(player, state, pol) and player.market_share is not None:
-        # RSP-1 (spec §14.5.6): largest regain whose payout value covers its research cost
-        room = min(cap, player.market_share_max - player.market_share)
-        cost = int(state.config.share_regain_cost_by_level.get(player.patent_level, 2))
+    if player.market_share is None:
+        return 0
+    room = min(cap, player.market_share_max - player.market_share)
+    if room <= 0:
+        return 0
+
+    # RSP-1 Red Secret payout urgency
+    if payout_active(player, state, pol):
+        cost = int(state.config.share_regain_cost_by_level.get(player.patent_level, 3))
         best = k0
         for k in range(1, room + 1):
             gain = pol.blue_value * payout_share_delta(player, state, player.market_share, player.market_share + k, None, pol)
             if gain >= k * cost:
                 best = max(best, k)
         return best
-    if (not leader_bonus_active(player, state, pol) or player.market_share is None
-            or (state.current_version_index < 1 and not state.is_final_round)):
-        return k0
-    room = min(cap, player.market_share_max - player.market_share)
-    rivals = [int(p.market_share or 0) for p in state.players
-              if p.player_id != player.player_id and not p.is_patient_zero]
-    if not rivals:
-        return k0
-    sched = state.config.market_leader_bonus_schedule(len(state.players))
-    base = expected_market_leader_bonus(player.market_share, rivals, sched)
-    for k in range(1, room + 1):
-        if expected_market_leader_bonus(player.market_share + k, rivals, sched) > base:
-            return max(k0, k)
+
+    # Market Leader Bonus urgency
+    if leader_bonus_active(player, state, pol) and (state.current_version_index >= 1 or state.is_final_round):
+        rivals = [int(p.market_share or 0) for p in state.players
+                  if p.player_id != player.player_id and not p.is_patient_zero]
+        if rivals:
+            sched = state.config.market_leader_bonus_schedule(len(state.players))
+            base = expected_market_leader_bonus(player.market_share, rivals, sched)
+            for k in range(1, room + 1):
+                if expected_market_leader_bonus(player.market_share + k, rivals, sched) > base:
+                    return max(k0, k)
     return k0
 
 

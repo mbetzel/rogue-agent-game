@@ -1,0 +1,978 @@
+{
+  "candidate": {
+    "2P": {
+      "pod": "2P",
+      "players": 2,
+      "games": 1200,
+      "rounds": {
+        "mean": 8.72,
+        "min": 1,
+        "max": 13,
+        "timeouts": 0,
+        "timeout_pct": 0.0
+      },
+      "endings": {
+        "singularity_pct": 35.67,
+        "patient_zero_pct": 20.33,
+        "market_collapse_pct": 42.0,
+        "total_wipeout_pct": 2.0
+      },
+      "market_share_dynamics": {
+        "mean_peak_ms": 13.89,
+        "mean_final_ms": 5.57,
+        "ceiling_reached_pct": 1.58,
+        "headroom_utilized_pct": 42.46,
+        "r1_players_at_max_pct": 0.0,
+        "r2_players_at_max_pct": 0.0
+      },
+      "red_f1_agency": {
+        "r1_red_f1_rolled": 155,
+        "r1_share_chosen": 155,
+        "r1_money_chosen": 0,
+        "share_selection_pct": 100.0
+      },
+      "win_rates_by_color": {
+        "blue": 43.41,
+        "green": 50.25,
+        "red": 56.37
+      },
+      "seats_by_color": {
+        "red": 793,
+        "green": 810,
+        "blue": 797
+      },
+      "win_rates_by_company": {
+        "Aegis Defense Relay": 47.56,
+        "Department of Telecommunications Oversight": 39.46,
+        "Helix Biomedical Consortium": 45.95,
+        "Meridian Financial Trust": 59.52,
+        "Omnidyne Systems": 54.87,
+        "The Prometheus Foundation": 53.49
+      },
+      "seats_by_company": {
+        "The Prometheus Foundation": 415,
+        "Helix Biomedical Consortium": 420,
+        "Department of Telecommunications Oversight": 408,
+        "Aegis Defense Relay": 389,
+        "Meridian Financial Trust": 378,
+        "Omnidyne Systems": 390
+      },
+      "win_rates_by_archetype": {
+        "AccelerationistBot": 47.62,
+        "AdaptiveBalancedBot": 58.51,
+        "MixedPolicyBot": 49.67,
+        "RecklessSaboteurBot": 35.66,
+        "SecOpsTurtleBot": 56.5,
+        "VentureGreedBot": 53.36
+      },
+      "seats_by_archetype": {
+        "MixedPolicyBot": 1200,
+        "RecklessSaboteurBot": 244,
+        "VentureGreedBot": 238,
+        "AdaptiveBalancedBot": 241,
+        "SecOpsTurtleBot": 246,
+        "AccelerationistBot": 231
+      },
+      "outliers": {
+        "shortest": [
+          {
+            "seed": 87,
+            "rounds": 1,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 1146,
+            "rounds": 1,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 53,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 62,
+            "rounds": 2,
+            "end_reason": "total_wipeout"
+          },
+          {
+            "seed": 66,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          }
+        ],
+        "longest": [
+          {
+            "seed": 400,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 650,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 815,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 953,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 984,
+            "rounds": 13,
+            "end_reason": "singularity"
+          }
+        ],
+        "total_wipeouts": [
+          {
+            "seed": 48,
+            "rounds": 3,
+            "overflows": 0
+          },
+          {
+            "seed": 62,
+            "rounds": 2,
+            "overflows": 0
+          },
+          {
+            "seed": 148,
+            "rounds": 2,
+            "overflows": 0
+          },
+          {
+            "seed": 176,
+            "rounds": 2,
+            "overflows": 0
+          },
+          {
+            "seed": 216,
+            "rounds": 2,
+            "overflows": 0
+          },
+          {
+            "seed": 279,
+            "rounds": 10,
+            "overflows": 0
+          },
+          {
+            "seed": 328,
+            "rounds": 3,
+            "overflows": 0
+          },
+          {
+            "seed": 347,
+            "rounds": 4,
+            "overflows": 0
+          },
+          {
+            "seed": 366,
+            "rounds": 3,
+            "overflows": 0
+          },
+          {
+            "seed": 414,
+            "rounds": 4,
+            "overflows": 0
+          }
+        ],
+        "timeouts": []
+      }
+    },
+    "3P": {
+      "pod": "3P",
+      "players": 3,
+      "games": 1200,
+      "rounds": {
+        "mean": 9.12,
+        "min": 2,
+        "max": 13,
+        "timeouts": 0,
+        "timeout_pct": 0.0
+      },
+      "endings": {
+        "singularity_pct": 45.25,
+        "patient_zero_pct": 27.17,
+        "market_collapse_pct": 27.08,
+        "total_wipeout_pct": 0.5
+      },
+      "market_share_dynamics": {
+        "mean_peak_ms": 17.2,
+        "mean_final_ms": 8.74,
+        "ceiling_reached_pct": 13.03,
+        "headroom_utilized_pct": 54.25,
+        "r1_players_at_max_pct": 0.0,
+        "r2_players_at_max_pct": 0.06
+      },
+      "red_f1_agency": {
+        "r1_red_f1_rolled": 214,
+        "r1_share_chosen": 214,
+        "r1_money_chosen": 0,
+        "share_selection_pct": 100.0
+      },
+      "win_rates_by_color": {
+        "blue": 27.07,
+        "green": 33.73,
+        "red": 39.26
+      },
+      "seats_by_color": {
+        "red": 1169,
+        "green": 1245,
+        "blue": 1186
+      },
+      "win_rates_by_company": {
+        "Aegis Defense Relay": 28.14,
+        "Department of Telecommunications Oversight": 26.01,
+        "Helix Biomedical Consortium": 27.07,
+        "Meridian Financial Trust": 40.34,
+        "Omnidyne Systems": 40.76,
+        "The Prometheus Foundation": 38.2
+      },
+      "seats_by_company": {
+        "The Prometheus Foundation": 589,
+        "Helix Biomedical Consortium": 639,
+        "Meridian Financial Trust": 580,
+        "Department of Telecommunications Oversight": 596,
+        "Aegis Defense Relay": 590,
+        "Omnidyne Systems": 606
+      },
+      "win_rates_by_archetype": {
+        "AccelerationistBot": 28.15,
+        "AdaptiveBalancedBot": 51.29,
+        "MixedPolicyBot": 34.67,
+        "RecklessSaboteurBot": 15.86,
+        "SecOpsTurtleBot": 32.61,
+        "VentureGreedBot": 36.84
+      },
+      "seats_by_archetype": {
+        "MixedPolicyBot": 1200,
+        "SecOpsTurtleBot": 506,
+        "AccelerationistBot": 476,
+        "RecklessSaboteurBot": 498,
+        "VentureGreedBot": 456,
+        "AdaptiveBalancedBot": 464
+      },
+      "outliers": {
+        "shortest": [
+          {
+            "seed": 52,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 72,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 89,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 101,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 138,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          }
+        ],
+        "longest": [
+          {
+            "seed": 1235,
+            "rounds": 12,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 1237,
+            "rounds": 12,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 217,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 368,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 586,
+            "rounds": 13,
+            "end_reason": "singularity"
+          }
+        ],
+        "total_wipeouts": [
+          {
+            "seed": 232,
+            "rounds": 3,
+            "overflows": 0
+          },
+          {
+            "seed": 364,
+            "rounds": 3,
+            "overflows": 0
+          },
+          {
+            "seed": 537,
+            "rounds": 5,
+            "overflows": 0
+          },
+          {
+            "seed": 720,
+            "rounds": 3,
+            "overflows": 0
+          },
+          {
+            "seed": 829,
+            "rounds": 2,
+            "overflows": 0
+          },
+          {
+            "seed": 1040,
+            "rounds": 4,
+            "overflows": 0
+          }
+        ],
+        "timeouts": []
+      }
+    },
+    "4P": {
+      "pod": "4P",
+      "players": 4,
+      "games": 1200,
+      "rounds": {
+        "mean": 8.9,
+        "min": 2,
+        "max": 13,
+        "timeouts": 0,
+        "timeout_pct": 0.0
+      },
+      "endings": {
+        "singularity_pct": 39.33,
+        "patient_zero_pct": 29.33,
+        "market_collapse_pct": 31.33,
+        "total_wipeout_pct": 0.0
+      },
+      "market_share_dynamics": {
+        "mean_peak_ms": 17.25,
+        "mean_final_ms": 9.01,
+        "ceiling_reached_pct": 14.37,
+        "headroom_utilized_pct": 56.19,
+        "r1_players_at_max_pct": 0.0,
+        "r2_players_at_max_pct": 0.1
+      },
+      "red_f1_agency": {
+        "r1_red_f1_rolled": 267,
+        "r1_share_chosen": 267,
+        "r1_money_chosen": 0,
+        "share_selection_pct": 100.0
+      },
+      "win_rates_by_color": {
+        "blue": 18.05,
+        "green": 23.99,
+        "red": 32.96
+      },
+      "seats_by_color": {
+        "red": 1587,
+        "green": 1634,
+        "blue": 1579
+      },
+      "win_rates_by_company": {
+        "Aegis Defense Relay": 21.57,
+        "Department of Telecommunications Oversight": 14.41,
+        "Helix Biomedical Consortium": 20.41,
+        "Meridian Financial Trust": 34.41,
+        "Omnidyne Systems": 27.62,
+        "The Prometheus Foundation": 31.46
+      },
+      "seats_by_company": {
+        "Meridian Financial Trust": 805,
+        "The Prometheus Foundation": 782,
+        "Helix Biomedical Consortium": 823,
+        "Department of Telecommunications Oversight": 777,
+        "Aegis Defense Relay": 802,
+        "Omnidyne Systems": 811
+      },
+      "win_rates_by_archetype": {
+        "AccelerationistBot": 18.14,
+        "AdaptiveBalancedBot": 40.78,
+        "MixedPolicyBot": 23.83,
+        "RecklessSaboteurBot": 11.25,
+        "SecOpsTurtleBot": 26.41,
+        "VentureGreedBot": 30.3
+      },
+      "seats_by_archetype": {
+        "AdaptiveBalancedBot": 716,
+        "RecklessSaboteurBot": 720,
+        "MixedPolicyBot": 1200,
+        "AccelerationistBot": 711,
+        "SecOpsTurtleBot": 727,
+        "VentureGreedBot": 726
+      },
+      "outliers": {
+        "shortest": [
+          {
+            "seed": 72,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 80,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 89,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 106,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 115,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          }
+        ],
+        "longest": [
+          {
+            "seed": 254,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 320,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 870,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 904,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 1066,
+            "rounds": 13,
+            "end_reason": "singularity"
+          }
+        ],
+        "total_wipeouts": [],
+        "timeouts": []
+      }
+    }
+  },
+  "baseline": {
+    "2P": {
+      "pod": "2P",
+      "players": 2,
+      "games": 1200,
+      "rounds": {
+        "mean": 8.73,
+        "min": 1,
+        "max": 13,
+        "timeouts": 0,
+        "timeout_pct": 0.0
+      },
+      "endings": {
+        "singularity_pct": 36.08,
+        "patient_zero_pct": 18.67,
+        "market_collapse_pct": 42.83,
+        "total_wipeout_pct": 2.42
+      },
+      "market_share_dynamics": {
+        "mean_peak_ms": 13.0,
+        "mean_final_ms": 5.03,
+        "ceiling_reached_pct": 100.0,
+        "headroom_utilized_pct": 0.0,
+        "r1_players_at_max_pct": 53.79,
+        "r2_players_at_max_pct": 39.86
+      },
+      "red_f1_agency": {
+        "r1_red_f1_rolled": 155,
+        "r1_share_chosen": 0,
+        "r1_money_chosen": 155,
+        "share_selection_pct": 0.0
+      },
+      "win_rates_by_color": {
+        "blue": 43.29,
+        "green": 52.35,
+        "red": 54.35
+      },
+      "seats_by_color": {
+        "red": 793,
+        "green": 810,
+        "blue": 797
+      },
+      "win_rates_by_company": {
+        "Aegis Defense Relay": 48.33,
+        "Department of Telecommunications Oversight": 38.48,
+        "Helix Biomedical Consortium": 49.29,
+        "Meridian Financial Trust": 58.73,
+        "Omnidyne Systems": 55.64,
+        "The Prometheus Foundation": 50.36
+      },
+      "seats_by_company": {
+        "The Prometheus Foundation": 415,
+        "Helix Biomedical Consortium": 420,
+        "Department of Telecommunications Oversight": 408,
+        "Aegis Defense Relay": 389,
+        "Meridian Financial Trust": 378,
+        "Omnidyne Systems": 390
+      },
+      "win_rates_by_archetype": {
+        "AccelerationistBot": 45.89,
+        "AdaptiveBalancedBot": 61.41,
+        "MixedPolicyBot": 49.25,
+        "RecklessSaboteurBot": 35.25,
+        "SecOpsTurtleBot": 60.57,
+        "VentureGreedBot": 50.42
+      },
+      "seats_by_archetype": {
+        "MixedPolicyBot": 1200,
+        "RecklessSaboteurBot": 244,
+        "VentureGreedBot": 238,
+        "AdaptiveBalancedBot": 241,
+        "SecOpsTurtleBot": 246,
+        "AccelerationistBot": 231
+      },
+      "outliers": {
+        "shortest": [
+          {
+            "seed": 87,
+            "rounds": 1,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 1146,
+            "rounds": 1,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 53,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 62,
+            "rounds": 2,
+            "end_reason": "total_wipeout"
+          },
+          {
+            "seed": 66,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          }
+        ],
+        "longest": [
+          {
+            "seed": 333,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 608,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 813,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 815,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 1149,
+            "rounds": 13,
+            "end_reason": "singularity"
+          }
+        ],
+        "total_wipeouts": [
+          {
+            "seed": 48,
+            "rounds": 3,
+            "overflows": 0
+          },
+          {
+            "seed": 62,
+            "rounds": 2,
+            "overflows": 0
+          },
+          {
+            "seed": 148,
+            "rounds": 2,
+            "overflows": 0
+          },
+          {
+            "seed": 176,
+            "rounds": 2,
+            "overflows": 0
+          },
+          {
+            "seed": 216,
+            "rounds": 2,
+            "overflows": 0
+          },
+          {
+            "seed": 324,
+            "rounds": 4,
+            "overflows": 0
+          },
+          {
+            "seed": 328,
+            "rounds": 3,
+            "overflows": 0
+          },
+          {
+            "seed": 347,
+            "rounds": 4,
+            "overflows": 0
+          },
+          {
+            "seed": 353,
+            "rounds": 4,
+            "overflows": 0
+          },
+          {
+            "seed": 366,
+            "rounds": 3,
+            "overflows": 0
+          }
+        ],
+        "timeouts": []
+      }
+    },
+    "3P": {
+      "pod": "3P",
+      "players": 3,
+      "games": 1200,
+      "rounds": {
+        "mean": 8.89,
+        "min": 2,
+        "max": 13,
+        "timeouts": 0,
+        "timeout_pct": 0.0
+      },
+      "endings": {
+        "singularity_pct": 42.0,
+        "patient_zero_pct": 31.42,
+        "market_collapse_pct": 25.92,
+        "total_wipeout_pct": 0.67
+      },
+      "market_share_dynamics": {
+        "mean_peak_ms": 16.0,
+        "mean_final_ms": 8.43,
+        "ceiling_reached_pct": 100.0,
+        "headroom_utilized_pct": 0.0,
+        "r1_players_at_max_pct": 68.22,
+        "r2_players_at_max_pct": 54.69
+      },
+      "red_f1_agency": {
+        "r1_red_f1_rolled": 214,
+        "r1_share_chosen": 0,
+        "r1_money_chosen": 214,
+        "share_selection_pct": 0.0
+      },
+      "win_rates_by_color": {
+        "blue": 31.37,
+        "green": 37.27,
+        "red": 31.14
+      },
+      "seats_by_color": {
+        "red": 1169,
+        "green": 1245,
+        "blue": 1186
+      },
+      "win_rates_by_company": {
+        "Aegis Defense Relay": 34.07,
+        "Department of Telecommunications Oversight": 28.69,
+        "Helix Biomedical Consortium": 33.65,
+        "Meridian Financial Trust": 32.76,
+        "Omnidyne Systems": 41.09,
+        "The Prometheus Foundation": 29.54
+      },
+      "seats_by_company": {
+        "The Prometheus Foundation": 589,
+        "Helix Biomedical Consortium": 639,
+        "Meridian Financial Trust": 580,
+        "Department of Telecommunications Oversight": 596,
+        "Aegis Defense Relay": 590,
+        "Omnidyne Systems": 606
+      },
+      "win_rates_by_archetype": {
+        "AccelerationistBot": 29.83,
+        "AdaptiveBalancedBot": 51.08,
+        "MixedPolicyBot": 31.92,
+        "RecklessSaboteurBot": 16.27,
+        "SecOpsTurtleBot": 45.06,
+        "VentureGreedBot": 28.29
+      },
+      "seats_by_archetype": {
+        "MixedPolicyBot": 1200,
+        "SecOpsTurtleBot": 506,
+        "AccelerationistBot": 476,
+        "RecklessSaboteurBot": 498,
+        "VentureGreedBot": 456,
+        "AdaptiveBalancedBot": 464
+      },
+      "outliers": {
+        "shortest": [
+          {
+            "seed": 52,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 72,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 89,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 101,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 138,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          }
+        ],
+        "longest": [
+          {
+            "seed": 1235,
+            "rounds": 12,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 135,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 299,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 304,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 345,
+            "rounds": 13,
+            "end_reason": "singularity"
+          }
+        ],
+        "total_wipeouts": [
+          {
+            "seed": 232,
+            "rounds": 3,
+            "overflows": 0
+          },
+          {
+            "seed": 324,
+            "rounds": 4,
+            "overflows": 0
+          },
+          {
+            "seed": 720,
+            "rounds": 3,
+            "overflows": 0
+          },
+          {
+            "seed": 829,
+            "rounds": 2,
+            "overflows": 0
+          },
+          {
+            "seed": 992,
+            "rounds": 3,
+            "overflows": 0
+          },
+          {
+            "seed": 1031,
+            "rounds": 8,
+            "overflows": 0
+          },
+          {
+            "seed": 1114,
+            "rounds": 3,
+            "overflows": 0
+          },
+          {
+            "seed": 1233,
+            "rounds": 10,
+            "overflows": 1
+          }
+        ],
+        "timeouts": []
+      }
+    },
+    "4P": {
+      "pod": "4P",
+      "players": 4,
+      "games": 1200,
+      "rounds": {
+        "mean": 8.94,
+        "min": 2,
+        "max": 13,
+        "timeouts": 0,
+        "timeout_pct": 0.0
+      },
+      "endings": {
+        "singularity_pct": 42.25,
+        "patient_zero_pct": 31.42,
+        "market_collapse_pct": 26.25,
+        "total_wipeout_pct": 0.08
+      },
+      "market_share_dynamics": {
+        "mean_peak_ms": 17.0,
+        "mean_final_ms": 9.37,
+        "ceiling_reached_pct": 100.0,
+        "headroom_utilized_pct": 0.0,
+        "r1_players_at_max_pct": 73.33,
+        "r2_players_at_max_pct": 58.98
+      },
+      "red_f1_agency": {
+        "r1_red_f1_rolled": 265,
+        "r1_share_chosen": 0,
+        "r1_money_chosen": 265,
+        "share_selection_pct": 0.0
+      },
+      "win_rates_by_color": {
+        "blue": 20.27,
+        "green": 29.1,
+        "red": 25.49
+      },
+      "seats_by_color": {
+        "red": 1587,
+        "green": 1634,
+        "blue": 1579
+      },
+      "win_rates_by_company": {
+        "Aegis Defense Relay": 23.82,
+        "Department of Telecommunications Oversight": 16.6,
+        "Helix Biomedical Consortium": 25.7,
+        "Meridian Financial Trust": 26.65,
+        "Omnidyne Systems": 32.55,
+        "The Prometheus Foundation": 24.3
+      },
+      "seats_by_company": {
+        "Meridian Financial Trust": 805,
+        "The Prometheus Foundation": 782,
+        "Helix Biomedical Consortium": 823,
+        "Department of Telecommunications Oversight": 777,
+        "Aegis Defense Relay": 802,
+        "Omnidyne Systems": 811
+      },
+      "win_rates_by_archetype": {
+        "AccelerationistBot": 18.85,
+        "AdaptiveBalancedBot": 32.54,
+        "MixedPolicyBot": 25.29,
+        "RecklessSaboteurBot": 10.28,
+        "SecOpsTurtleBot": 41.47,
+        "VentureGreedBot": 21.21
+      },
+      "seats_by_archetype": {
+        "AdaptiveBalancedBot": 716,
+        "RecklessSaboteurBot": 720,
+        "MixedPolicyBot": 1200,
+        "AccelerationistBot": 711,
+        "SecOpsTurtleBot": 727,
+        "VentureGreedBot": 726
+      },
+      "outliers": {
+        "shortest": [
+          {
+            "seed": 72,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 80,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 89,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 106,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          },
+          {
+            "seed": 115,
+            "rounds": 2,
+            "end_reason": "patient_zero"
+          }
+        ],
+        "longest": [
+          {
+            "seed": 370,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 645,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 871,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 1051,
+            "rounds": 13,
+            "end_reason": "singularity"
+          },
+          {
+            "seed": 1133,
+            "rounds": 13,
+            "end_reason": "singularity"
+          }
+        ],
+        "total_wipeouts": [
+          {
+            "seed": 203,
+            "rounds": 6,
+            "overflows": 0
+          }
+        ],
+        "timeouts": []
+      }
+    }
+  }
+}

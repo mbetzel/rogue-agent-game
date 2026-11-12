@@ -48,7 +48,7 @@ COMPANIES: List[CompanyCardSpec] = [
         ),
         flavor='"When liquidity is limitless, headcount is merely an accounting variable."',
         hardware_summary="DEF CAP 2  |  TRIAGE 2  |  RELEASE 4  |  TRACKS L0  |  START DIE: {RED} RED",
-        starting_bonus="$6  |  SECRETS 3/4/4  |  MARKET SHARE 13/16/17 (2P/3P/4P)  |  0 {RESEARCH}",
+        starting_bonus="$6  |  SECRETS 3/4/4  |  MARKET SHARE 13 (2P) / 16 (3-4P) [MAX 20]  |  0 {RESEARCH}",
     ),
     CompanyCardSpec(
         code="OMNIDYNE",
@@ -62,7 +62,7 @@ COMPANIES: List[CompanyCardSpec] = [
         ),
         flavor='"Proprietary hardware backplanes allow instantaneous hot-swapping under live load."',
         hardware_summary="DEF CAP 2  |  TRIAGE 2  |  RELEASE 4  |  TRACKS L0  |  START DIE: {GREEN} GREEN",
-        starting_bonus="$6  |  SECRETS 3/4/4  |  MARKET SHARE 13/16/17 (2P/3P/4P)  |  0 {RESEARCH}",
+        starting_bonus="$6  |  SECRETS 3/4/4  |  MARKET SHARE 13 (2P) / 16 (3-4P) [MAX 20]  |  0 {RESEARCH}",
     ),
     CompanyCardSpec(
         code="AEGIS",
@@ -76,7 +76,7 @@ COMPANIES: List[CompanyCardSpec] = [
         ),
         flavor='"Multi-layered kinetic dampeners disperse inbound network blast energy."',
         hardware_summary="DEF CAP 2  |  TRIAGE 2  |  RELEASE 4  |  TRACKS L0  |  START DIE: {BLUE} BLUE",
-        starting_bonus="$6  |  SECRETS 3/4/4  |  MARKET SHARE 13/16/17 (2P/3P/4P)  |  0 {RESEARCH}",
+        starting_bonus="$6  |  SECRETS 3/4/4  |  MARKET SHARE 13 (2P) / 16 (3-4P) [MAX 20]  |  0 {RESEARCH}",
     ),
     CompanyCardSpec(
         code="DTO",
@@ -90,7 +90,7 @@ COMPANIES: List[CompanyCardSpec] = [
         ),
         flavor='"Classified black budget allocations absorb compliance failures without public oversight."',
         hardware_summary="DEF CAP 2  |  TRIAGE 2  |  RELEASE 4  |  TRACKS L0  |  START DIE: {BLUE} BLUE",
-        starting_bonus="$6  |  SECRETS 3/4/4  |  MARKET SHARE 13/16/17 (2P/3P/4P)  |  0 {RESEARCH}",
+        starting_bonus="$6  |  SECRETS 3/4/4  |  MARKET SHARE 13 (2P) / 16 (3-4P) [MAX 20]  |  0 {RESEARCH}",
     ),
     CompanyCardSpec(
         code="HELIX",
@@ -105,7 +105,7 @@ COMPANIES: List[CompanyCardSpec] = [
         ),
         flavor='"Massively parallel quantum sequencing breaks deterministic encryption gates."',
         hardware_summary="DEF CAP 2  |  TRIAGE 2  |  RELEASE 4  |  TRACKS L0  |  START DIE: {GREEN} GREEN",
-        starting_bonus="$6  |  SECRETS 3/4/4  |  MARKET SHARE 13/16/17 (2P/3P/4P)  |  0 {RESEARCH}",
+        starting_bonus="$6  |  SECRETS 3/4/4  |  MARKET SHARE 13 (2P) / 16 (3-4P) [MAX 20]  |  0 {RESEARCH}",
     ),
     CompanyCardSpec(
         code="PROMETHEUS",
@@ -120,7 +120,7 @@ COMPANIES: List[CompanyCardSpec] = [
         ),
         flavor='"Open-source cryptographic protocols circumvent proprietary enterprise licensing fees."',
         hardware_summary="DEF CAP 2  |  TRIAGE 2  |  RELEASE 4  |  TRACKS L0  |  START DIE: {RED} RED",
-        starting_bonus="$6  |  SECRETS 3/4/4  |  MARKET SHARE 13/16/17 (2P/3P/4P)  |  0 {RESEARCH}",
+        starting_bonus="$6  |  SECRETS 3/4/4  |  MARKET SHARE 13 (2P) / 16 (3-4P) [MAX 20]  |  0 {RESEARCH}",
     ),
 ]
 
@@ -788,10 +788,10 @@ PUBLIC_RELATIONS_LEVELS = [
     ("Regain up to 3/rnd", ""),
 ]
 
-# Market Share track (RULES.md v0.38.0): start = max = 13 (2P) / 16 (3P) / 17 (4P); 0 = Market Collapse;
+# Market Share track (RULES.md v0.38e): start = 13 (2P) / 16 (3-4P); max = 20; 0 = Market Collapse;
 # Market Leader Bonus by Market Share place (1st +3 Secrets; 2nd +1).
-MARKET_SHARE_MAX = 17
-MARKET_SHARE_START = {13: "2P START/MAX", 16: "3P START/MAX", 17: "4P START/MAX"}
+MARKET_SHARE_MAX = 20
+MARKET_SHARE_START = {13: "2P START", 16: "3-4P START"}
 
 
 
@@ -1460,17 +1460,17 @@ def render_agent_board(page: PDFPage) -> None:
 
     # Subheader / Start & Max instruction strip
     page.rect(g_x + 6.0, col_top + 26.0, g_w - 12.0, 22.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.6)
-    page.rich_line(g_x + g_w / 2.0, col_top + 35.0, "**START = MAX:**  **13** (2P)  |  **16** (3P)  |  **17** (4P)", size=6.5, color=PALETTE["ink"], align="center")
+    page.rich_line(g_x + g_w / 2.0, col_top + 35.0, "**START:** **13** (2P)  |  **16** (3–4P)   •   **TRACK MAX:** **20**", size=6.3, color=PALETTE["ink"], align="center")
     page.rich_line(g_x + g_w / 2.0, col_top + 44.0, "Place all players' Market Share Markers here. **-1** per unblocked {RED}.", size=5.5, color=PALETTE["ink_soft"], align="center")
 
-    # 18-space Track Grid (17 down to 0) in 3 columns x 6 rows — large cells for multiple player markers!
+    # 21-space Track Grid (20 down to 0) in 3 columns x 7 rows — large cells for multiple player markers!
     grid_top = col_top + 53.0
     grid_h = 376.0
     pad_x = 8.0
     gap_c = 5.0
-    gap_r = 4.5
+    gap_r = 4.0
     cw = (g_w - 2 * pad_x - 2 * gap_c) / 3.0  # ~70.6 pt wide
-    ch = (grid_h - 5 * gap_r) / 6.0           # ~58.9 pt tall
+    ch = (grid_h - 6 * gap_r) / 7.0           # ~50.3 pt tall
 
     for idx_val, val in enumerate(range(MARKET_SHARE_MAX, -1, -1)):
         r_i = idx_val // 3
@@ -1480,21 +1480,27 @@ def render_agent_board(page: PDFPage) -> None:
         tag = MARKET_SHARE_START.get(val)
         if val == 0:
             page.rounded_rect(cx, cy, cw, ch, r=3.0, stroke=PALETTE["red"], fill=PALETTE["red"], line_width=1.0)
-            page.text(cx + cw / 2.0, cy + 16.0, "0", font="bold", size=13.0, color=PALETTE["white"], align="center")
-            page.text(cx + cw / 2.0, cy + 28.0, "MARKET", font="mono_bold", size=6.0, color=PALETTE["white"], align="center")
-            page.text(cx + cw / 2.0, cy + 36.0, "COLLAPSE", font="mono_bold", size=6.0, color=PALETTE["white"], align="center")
-            page.text(cx + cw / 2.0, cy + 48.0, "Final Round", font="italic", size=5.5, color=PALETTE["white"], align="center")
+            page.text(cx + cw / 2.0, cy + 14.0, "0", font="bold", size=12.0, color=PALETTE["white"], align="center")
+            page.text(cx + cw / 2.0, cy + 24.5, "MARKET", font="mono_bold", size=5.5, color=PALETTE["white"], align="center")
+            page.text(cx + cw / 2.0, cy + 32.5, "COLLAPSE", font="mono_bold", size=5.5, color=PALETTE["white"], align="center")
+            page.text(cx + cw / 2.0, cy + 42.5, "Final Round", font="italic", size=5.0, color=PALETTE["white"], align="center")
         elif tag:
             page.rounded_rect(cx, cy, cw, ch, r=3.0, stroke=PALETTE["red"], fill=PALETTE["red_light"], line_width=1.0)
-            page.rect(cx, cy, cw, 12.0, stroke=PALETTE["red"], fill=PALETTE["red"], line_width=0.6)
-            page.text(cx + cw / 2.0, cy + 8.6, tag, font="mono_bold", size=5.4, color=PALETTE["white"], align="center")
-            page.text(cx + cw / 2.0, cy + 33.0, str(val), font="bold", size=14.0, color=PALETTE["ink"], align="center")
-            page.text(cx + cw / 2.0, cy + 49.0, "START / MAX", font="mono", size=4.8, color=PALETTE["red"], align="center")
+            page.rect(cx, cy, cw, 11.5, stroke=PALETTE["red"], fill=PALETTE["red"], line_width=0.6)
+            page.text(cx + cw / 2.0, cy + 8.2, tag, font="mono_bold", size=5.4, color=PALETTE["white"], align="center")
+            page.text(cx + cw / 2.0, cy + 28.0, str(val), font="bold", size=13.0, color=PALETTE["ink"], align="center")
+            page.circle(cx + cw / 2.0, cy + 38.5, 6.5, stroke=PALETTE["red"], fill=None, line_width=0.4, dash=(2.0, 2.0))
+        elif val == MARKET_SHARE_MAX:
+            page.rounded_rect(cx, cy, cw, ch, r=3.0, stroke=PALETTE["red"], fill=PALETTE["paper_tint"], line_width=0.8)
+            page.rect(cx, cy, cw, 11.5, stroke=PALETTE["red"], fill=PALETTE["red_light"], line_width=0.6)
+            page.text(cx + cw / 2.0, cy + 8.2, "TRACK MAX", font="mono_bold", size=5.4, color=PALETTE["red"], align="center")
+            page.text(cx + cw / 2.0, cy + 28.0, str(val), font="bold", size=13.0, color=PALETTE["ink"], align="center")
+            page.circle(cx + cw / 2.0, cy + 38.5, 6.5, stroke=PALETTE["guide"], fill=None, line_width=0.4, dash=(2.0, 2.0))
         else:
             page.rounded_rect(cx, cy, cw, ch, r=3.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.6)
-            page.text(cx + 8.0, cy + 14.0, str(val), font="bold", size=11.0, color=PALETTE["ink_soft"])
+            page.text(cx + 7.0, cy + 13.0, str(val), font="bold", size=10.0, color=PALETTE["ink_soft"])
             # Subtle marker placement ring
-            page.circle(cx + cw / 2.0 + 6.0, cy + ch / 2.0 + 4.0, 12.0, stroke=PALETTE["guide"], fill=None, line_width=0.4, dash=(2.0, 2.0))
+            page.circle(cx + cw / 2.0 + 6.0, cy + ch / 2.0 + 3.0, 10.0, stroke=PALETTE["guide"], fill=None, line_width=0.4, dash=(2.0, 2.0))
 
     # Market Leader Bonus & Collapse Callout Box at bottom of Right Column
     mb_y = grid_top + grid_h + 6.0
@@ -1644,7 +1650,7 @@ def render_market_board(page: PDFPage) -> None:
     page.text(48.0, fy + 11.8, "SETUP QUICK-REFERENCE & COMPILER PRIMING", font="bold", size=7.8, color=PALETTE["ink"])
     page.rich_paragraph(
         48.0, fy + 26.5, fw - 16.0,
-        "- **2P / 3P / 4P:** **$6** | **3 / 4 / 4** Secrets | **13 / 16 / 17** Market Share (= max) | **0** {RESEARCH}\n"
+        "- **2P / 3P / 4P:** **$6** | **3 / 4 / 4** Secrets | **13 (2P) / 16 (3-4P) [Max 20]** Market Share | **0** {RESEARCH}\n"
         "- **Market:** **4 / 6 / 8** dice per color | identical company start (all tracks L0); DTO Slush Fund **once per game**\n"
         "- **Corruption Tracks:** v1.0 **4** / v2.0 **5** / v3.0 **6** spaces (all player counts)\n"
         "- **Each player:** 2 Gray + 1 starting colored die (Company color) + 1 Purple in Ready; 1 Purple in Reserve; **1 Glitched Shield Slot** on mat; Market Share Marker on start value.",

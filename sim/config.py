@@ -30,6 +30,9 @@ V038B_MARKET_SHARE_START = {2: 14, 3: 14, 4: 14}  # [TUNE] §14.4 (start = max)
 V038B_MARKET_LEADER_BONUS = {2: (4, 0), 3: (4, 2, 0), 4: (4, 2, 0, 0)}  # [TUNE] §14.4
 V038C_MARKET_SHARE_START = {2: 13, 3: 16, 4: 17}  # [TUNE] §14.5.2 / FINDINGS §43.5 (start = max)
 V038C_RED_SECRET_PAYOUT = {2: (3, 1), 3: (3, 1, 0), 4: (3, 1, 0, 0)}  # [TUNE] §14.5.2
+# --- Tunable Defaults for Headroom Architecture (spec: market_share_headroom_spec.md) ---
+V038E_MARKET_SHARE_START: Dict[int, int] = {2: 13, 3: 16, 4: 16}  # Unified 3P and 4P at 16
+DEFAULT_MARKET_SHARE_MAX: int = 20
 _TRIAGE_ORDER_RULES = ("BOT", "OLDEST_FIRST")
 _TRIAGE_L1_MODES = ("WHITE_CONTRACTORS", "GRAY_DIE")
 _GREEN_TRIAGE_CLEAN_MODES = ("NONE", "COUNT_THEN_CLEAN", "CLEAN_THEN_COUNT")
@@ -372,6 +375,8 @@ class GameConfig:
         # [TUNE] start = max; not read under RANSOM. Balance iteration 1 (User 2026-11-06): 19/20/20 -> 17/18/18
         default_factory=lambda: {2: 17, 3: 18, 4: 18}
     )
+    # NEW FIELD: Unified maximum Market Share across player counts (decoupled from start)
+    market_share_max: Optional[int] = None
     # Sub-flags: None resolves once in __post_init__ from red_mode (re-assigning red_mode later does NOT re-resolve).
     market_collapse_enabled: Optional[bool] = None
     # [TUNE] Version -> payout. Under MARKET_SHARE resolves to {"v2.0": 4}: the v1.0 -> v2.0 comparison was dropped
@@ -632,6 +637,8 @@ class GameConfig:
             ("green_bank_cleans_slot", True),
             ("die_face_profile", "V038D"),
             ("v1_staging_payload_override", dict(V038D_V1_STAGING_PAYLOAD)),
+            ("market_share_start_by_player_count", dict(V038E_MARKET_SHARE_START)),
+            ("market_share_max", DEFAULT_MARKET_SHARE_MAX),
         ):
             overrides.setdefault(k, v)
         return cls.v038c(**overrides)
@@ -640,7 +647,7 @@ class GameConfig:
     def v038e(cls, **overrides) -> "GameConfig":
         """v0.38 candidate 5 (Phase 52: Secret Face Simplification & Processing Triggers).
         Inherits all v0.38d rules (C2 setup, 1 starting glitched slot, Shogun Baffle physics,
-        Green triage clean), and applies the simplified 4-color Secret architecture:
+        Green triage clean, Headroom Architecture max 20), and applies the simplified 4-color Secret architecture:
         - Red: flat +2 + Market Leader Bonus trigger
         - Blue: flat +2 (+1 if Defense Grid >= L3, cap 3; block bonus eliminated)
         - Green: flat +2 + clean 1 Glitched Shield Slot (glitch yield penalty eliminated)
@@ -670,7 +677,8 @@ class GameConfig:
     def v038f(cls, **overrides) -> "GameConfig":
         """v0.38 candidate 6 (Blue Module Die Rebalance: Direct Corporate Secrets on Faces 1 & 2).
         Inherits all v0.38e rules (C2 setup, 1 starting glitched slot, Shogun Baffle physics,
-        Green triage clean, Red owner yield +2 + Market Leader Bonus trigger, Blue Defense Grid L3 trigger),
+        Green triage clean, Red owner yield +2 + Market Leader Bonus trigger, Blue Defense Grid L3 trigger,
+        Headroom Architecture max 20),
         and introduces die_face_profile="V038F":
         - Blue Face 1: +1 Corporate Secret
         - Blue Face 2: +1 Corporate Secret
@@ -860,10 +868,16 @@ class GameConfig:
     def is_share_regain(self) -> bool:
         return self.patents_mode == PatentsMode.SHARE_REGAIN
 
+    def get_market_share_max(self, num_players: Optional[int] = None) -> int:
+        """Returns the maximum Market Share ceiling (unified 20 across all player counts)."""
+        if self.market_share_max is not None:
+            return self.market_share_max
+        return self.market_share_start(num_players)
+
     def market_share_start(self, num_players: Optional[int] = None) -> int:
-        """Starting (= maximum) Market Share for the player count (or self.num_players)."""
+        """Starting Market Share for the player count (or self.num_players)."""
         n = num_players if num_players is not None else self.num_players
-        return self.market_share_start_by_player_count.get(n, self.market_share_start_by_player_count.get(4, 18))
+        return self.market_share_start_by_player_count.get(n, self.market_share_start_by_player_count.get(4, 16))
 
     def _validate_market_leader_bonus(self, ms: bool) -> None:
         norm = self._normalize_place_schedule(self.market_leader_bonus_by_player_count, "market_leader_bonus")
