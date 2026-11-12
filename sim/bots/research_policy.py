@@ -105,6 +105,23 @@ def _plan_research_share_regain(policy: ResearchPolicy, player: PlayerState, sta
     sim_lv = dict(lv)
     share, smax = int(player.market_share), int(player.market_share_max)
 
+    if getattr(config, "share_regain_currency", "RESEARCH") == "MONEY":
+        upgrades: List[str] = []
+        max_ups = getattr(config, "max_hardware_upgrades_per_turn", 2)
+        for t in _want_list(policy, lv):
+            if len(upgrades) >= max_ups:
+                break
+            if sim_lv[t] >= 4:
+                continue
+            c = int(costs[sim_lv[t]])
+            if res >= c:
+                upgrades.append(t)
+                res -= c
+                sim_lv[t] += 1
+            else:
+                break
+        return upgrades, 0, 0
+
     def rate(level: int) -> Tuple[int, int]:
         lvl = max(0, min(4, level))
         return int(config.share_regain_cost_by_level[lvl]), int(config.share_regain_cap_by_level[lvl])

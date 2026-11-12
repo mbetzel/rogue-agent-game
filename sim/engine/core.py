@@ -191,9 +191,15 @@ class GameEngine:
                 ability_v1_status=AbilityStatus.AVAILABLE,
                 ability_v2_status=AbilityStatus.LOCKED,
                 ability_v3_status=AbilityStatus.LOCKED,
-                defense_capacity=comp.starting_defense_capacity if (comp and use_asym) else 2,
-                triage_bandwidth=comp.starting_triage_bandwidth if (comp and use_asym) else 2,
-                release_bandwidth=comp.starting_release_bandwidth if (comp and use_asym) else 4,
+                defense_capacity=comp.starting_defense_capacity if (comp and use_asym) else (
+                    config.track_capacity_by_level.get("DEFENSE", (2,))[0] if getattr(config, "is_v035_tracks", False) else 2
+                ),
+                triage_bandwidth=comp.starting_triage_bandwidth if (comp and use_asym) else (
+                    config.track_capacity_by_level.get("TRIAGE", (2,))[0] if getattr(config, "is_v035_tracks", False) else 2
+                ),
+                release_bandwidth=comp.starting_release_bandwidth if (comp and use_asym) else (
+                    config.track_capacity_by_level.get("RELEASE", (4,))[0] if getattr(config, "is_v035_tracks", False) else 4
+                ),
                 triage_level=comp.starting_triage_level if (comp and use_asym) else 0,
                 release_level=comp.starting_release_level if (comp and use_asym) else 0,
                 pipeline_level=comp.starting_triage_level if (comp and use_asym) else 0,
@@ -242,7 +248,10 @@ class GameEngine:
         else:
             staging_payload = self.version_deck[0].get_staging_payload(self.config.num_players)
         for color, count in staging_payload.items():
-            staging_cup[color] = count
+            if color == CubeColor.GREEN and getattr(self.config, "global_green_cube_cap", 0) > 0:
+                staging_cup[color] = min(count, self.config.global_green_cube_cap)
+            else:
+                staging_cup[color] = count
 
         # Setup First Player randomly per RULES.md Section 3 Step 4
         first_player_index = self.rng.randrange(config.num_players)
@@ -327,6 +336,12 @@ class GameEngine:
 
     def _run_phase_6_operations(self) -> None:
         phase6_operations.execute_operations(self)
+
+    def _run_phase_operations(self) -> None:
+        phase6_operations.execute_operations(self)
+
+    def _run_phase_pipeline_shift(self):
+        return phase5_pipeline_shift.execute_pipeline_shift(self)
 
     def _snapshot_players(self) -> List[Dict]:
         return [
@@ -489,17 +504,31 @@ class GameEngine:
         if s.game_over:
             return self._finalize_telemetry(tel, end_phase=4)
 
-        # Phase 5: CI/CD Pipeline Shift
-        shifts = self._run_phase_5_pipeline_shift()
-        tel.scanned_held_by_player = {pid: r.held_in_scanned for pid, r in shifts.items()}
-        tel.graduated_by_player = {pid: len(r.graduated_ids) for pid, r in shifts.items()}
-        tel.phases_executed.append(5)
-        tel.phase_snapshots[5] = self._snapshot_players()
+        if self.config.operations_before_pipeline_shift:
+            # Phase 5: Operations (Clockwise turns from First Player)
+            self._run_phase_operations()
+            tel.phases_executed.append(5)
+            tel.phase_snapshots[5] = self._snapshot_players()
 
-        # Phase 6: Operations (clockwise; passes the First Player Marker)
-        self._run_phase_6_operations()
-        tel.phases_executed.append(6)
-        tel.phase_snapshots[6] = self._snapshot_players()
+            # Phase 6: CI/CD Pipeline Shift (Simultaneous)
+            shifts = self._run_phase_pipeline_shift()
+            tel.scanned_held_by_player = {pid: r.held_in_scanned for pid, r in shifts.items()}
+            tel.graduated_by_player = {pid: len(r.graduated_ids) for pid, r in shifts.items()}
+            tel.phases_executed.append(6)
+            tel.phase_snapshots[6] = self._snapshot_players()
+            phase6_operations.pass_first_player_marker(self)
+        else:
+            # Legacy Sequence (v0.34 - v0.39): Phase 5 Shift -> Phase 6 Operations
+            shifts = self._run_phase_pipeline_shift()
+            tel.scanned_held_by_player = {pid: r.held_in_scanned for pid, r in shifts.items()}
+            tel.graduated_by_player = {pid: len(r.graduated_ids) for pid, r in shifts.items()}
+            tel.phases_executed.append(5)
+            tel.phase_snapshots[5] = self._snapshot_players()
+
+            # Phase 6: Operations (clockwise; passes the First Player Marker)
+            self._run_phase_6_operations()
+            tel.phases_executed.append(6)
+            tel.phase_snapshots[6] = self._snapshot_players()
 
         if s.is_final_round:
             s.game_over = True

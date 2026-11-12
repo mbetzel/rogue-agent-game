@@ -1,0 +1,1035 @@
+{
+  "candidate": {
+    "2": {
+      "games": 1200,
+      "rounds": {
+        "mean": 9.010833333333334,
+        "min": 1,
+        "max": 13,
+        "distribution": {
+          "<=7": 251,
+          "8": 123,
+          "9": 181,
+          "10": 254,
+          "11": 301,
+          "12": 84,
+          "13+": 6
+        }
+      },
+      "endings": {
+        "singularity_pct": 37.416666666666664,
+        "patient_zero_pct": 14.000000000000002,
+        "market_collapse_pct": 48.0,
+        "total_wipeout_pct": 0.5833333333333334,
+        "round_limit_pct": 0.0
+      },
+      "cicd_pipeline": {
+        "mean_market_purchased_per_game": 4.7875,
+        "mean_market_purchased_per_seat": 2.39375,
+        "total_market_purchased": 5745,
+        "mean_graduated_per_game": 75.75833333333334,
+        "mean_graduated_per_seat": 37.87916666666667,
+        "mean_graduated_per_player_round": 4.2037362434107095,
+        "mean_zones": {
+          "ready": 4.587375683344433,
+          "in_production": 0.08519145322270322,
+          "scanned": 2.1571714234839234,
+          "processing": 0.13592487836237838,
+          "contractors": 0.0,
+          "total_held": 6.965663438413438
+        }
+      },
+      "triage_backpressure": {
+        "backpressure_round_pct": 12.017941366873208,
+        "players_backpressure_pct": 53.625,
+        "mean_processing_held": 0.13592487836237838,
+        "l2_milestone_pct": 43.25,
+        "l2_mean_round": 3.653179190751445,
+        "l4_capstone_triage_pct": 23.875,
+        "l4_capstone_defense_pct": 10.625,
+        "l4_capstone_release_pct": 31.458333333333332,
+        "l4_capstone_patent_pct": 0.0,
+        "any_l4_capstone_pct": 65.95833333333333,
+        "maxed_2plus_tracks_pct": 0.0
+      },
+      "dual_economy": {
+        "mean_money_spent_regain_per_seat": 3.6175,
+        "mean_regains_per_seat": 1.2058333333333333,
+        "players_buying_regain_pct": 61.416666666666664,
+        "ending_cash": {
+          "mean": 2.0716666666666668,
+          "median": 2,
+          "min": 0,
+          "max": 27
+        },
+        "mean_track_research": 9.250833333333333,
+        "research_by_track": {
+          "DEFENSE": 2.01875,
+          "TRIAGE": 3.0283333333333333,
+          "RELEASE": 3.2808333333333333,
+          "PATENT": 0.9229166666666667
+        }
+      },
+      "threat_green_cap": {
+        "total_clamped": 405,
+        "games_with_clamping": 324,
+        "clamping_game_pct": 27.0,
+        "max_clamped_in_game": 2,
+        "mean_peak_green": 3.8841666666666668,
+        "max_peak_green": 5
+      },
+      "win_rates_by_company": {
+        "PROMETHEUS": 55.18072289156627,
+        "HELIX": 43.80952380952381,
+        "DTO": 45.34313725490196,
+        "AEGIS": 56.29820051413882,
+        "MERIDIAN": 49.47089947089947,
+        "OMNIDYNE": 50.256410256410255
+      },
+      "win_rates_by_color": {
+        "red": 52.459016393442624,
+        "green": 46.913580246913575,
+        "blue": 50.690087829360095
+      },
+      "win_rates_by_archetype": {
+        "MixedPolicyBot": 51.083333333333336,
+        "RecklessSaboteurBot": 36.47540983606557,
+        "VentureGreedBot": 33.61344537815126,
+        "AdaptiveBalancedBot": 78.00829875518673,
+        "SecOpsTurtleBot": 52.84552845528455,
+        "AccelerationistBot": 43.290043290043286
+      },
+      "outliers": {
+        "early_wipeouts": [
+          {
+            "seed": 48,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 51,
+            "rounds": 5,
+            "end_reason": "market_collapse",
+            "wipeout": false
+          },
+          {
+            "seed": 53,
+            "rounds": 3,
+            "end_reason": "total_wipeout",
+            "wipeout": true
+          },
+          {
+            "seed": 61,
+            "rounds": 5,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 62,
+            "rounds": 2,
+            "end_reason": "total_wipeout",
+            "wipeout": true
+          },
+          {
+            "seed": 72,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 80,
+            "rounds": 3,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 87,
+            "rounds": 1,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 148,
+            "rounds": 3,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 151,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          }
+        ],
+        "round_stalls": [],
+        "clamping_outliers": [],
+        "total_early_wipeouts": 125,
+        "total_round_stalls": 0,
+        "total_clamping_outliers": 0
+      }
+    },
+    "3": {
+      "games": 1200,
+      "rounds": {
+        "mean": 9.310833333333333,
+        "min": 2,
+        "max": 14,
+        "distribution": {
+          "<=7": 211,
+          "8": 83,
+          "9": 156,
+          "10": 292,
+          "11": 323,
+          "12": 127,
+          "13+": 8
+        }
+      },
+      "endings": {
+        "singularity_pct": 45.5,
+        "patient_zero_pct": 22.0,
+        "market_collapse_pct": 32.5,
+        "total_wipeout_pct": 0.0,
+        "round_limit_pct": 0.0
+      },
+      "cicd_pipeline": {
+        "mean_market_purchased_per_game": 7.5275,
+        "mean_market_purchased_per_seat": 2.5091666666666668,
+        "total_market_purchased": 9033,
+        "mean_graduated_per_game": 117.97916666666667,
+        "mean_graduated_per_seat": 39.326388888888886,
+        "mean_graduated_per_player_round": 4.223723858110326,
+        "mean_zones": {
+          "ready": 4.655255636338969,
+          "in_production": 0.07151776695526696,
+          "scanned": 2.2321103819020487,
+          "processing": 0.10676680572513905,
+          "contractors": 0.0,
+          "total_held": 7.065650590921424
+        }
+      },
+      "triage_backpressure": {
+        "backpressure_round_pct": 9.511023598556042,
+        "players_backpressure_pct": 49.55555555555556,
+        "mean_processing_held": 0.10676680572513905,
+        "l2_milestone_pct": 43.0,
+        "l2_mean_round": 3.558139534883721,
+        "l4_capstone_triage_pct": 25.27777777777778,
+        "l4_capstone_defense_pct": 11.11111111111111,
+        "l4_capstone_release_pct": 33.44444444444444,
+        "l4_capstone_patent_pct": 0.0,
+        "any_l4_capstone_pct": 69.83333333333334,
+        "maxed_2plus_tracks_pct": 0.0
+      },
+      "dual_economy": {
+        "mean_money_spent_regain_per_seat": 2.941666666666667,
+        "mean_regains_per_seat": 0.9805555555555555,
+        "players_buying_regain_pct": 53.80555555555555,
+        "ending_cash": {
+          "mean": 2.129166666666667,
+          "median": 2,
+          "min": 0,
+          "max": 20
+        },
+        "mean_track_research": 9.700555555555555,
+        "research_by_track": {
+          "DEFENSE": 2.1733333333333333,
+          "TRIAGE": 3.087222222222222,
+          "RELEASE": 3.452777777777778,
+          "PATENT": 0.9872222222222222
+        }
+      },
+      "threat_green_cap": {
+        "total_clamped": 404,
+        "games_with_clamping": 330,
+        "clamping_game_pct": 27.500000000000004,
+        "max_clamped_in_game": 2,
+        "mean_peak_green": 3.9383333333333335,
+        "max_peak_green": 5
+      },
+      "win_rates_by_company": {
+        "PROMETHEUS": 36.84210526315789,
+        "HELIX": 26.134585289514867,
+        "MERIDIAN": 32.241379310344826,
+        "DTO": 32.38255033557047,
+        "AEGIS": 38.13559322033898,
+        "OMNIDYNE": 34.81848184818482
+      },
+      "win_rates_by_color": {
+        "red": 34.55945252352438,
+        "green": 30.361445783132528,
+        "blue": 35.24451939291737
+      },
+      "win_rates_by_archetype": {
+        "MixedPolicyBot": 33.666666666666664,
+        "SecOpsTurtleBot": 42.094861660079054,
+        "AccelerationistBot": 25.630252100840334,
+        "RecklessSaboteurBot": 13.654618473895583,
+        "VentureGreedBot": 19.736842105263158,
+        "AdaptiveBalancedBot": 65.30172413793103
+      },
+      "outliers": {
+        "early_wipeouts": [
+          {
+            "seed": 52,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 54,
+            "rounds": 3,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 57,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 61,
+            "rounds": 5,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 66,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 69,
+            "rounds": 4,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 72,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 78,
+            "rounds": 4,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 80,
+            "rounds": 5,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 87,
+            "rounds": 3,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          }
+        ],
+        "round_stalls": [
+          {
+            "seed": 476,
+            "rounds": 14,
+            "end_reason": "singularity"
+          }
+        ],
+        "clamping_outliers": [],
+        "total_early_wipeouts": 133,
+        "total_round_stalls": 1,
+        "total_clamping_outliers": 0
+      }
+    },
+    "4": {
+      "games": 1200,
+      "rounds": {
+        "mean": 9.039166666666667,
+        "min": 2,
+        "max": 13,
+        "distribution": {
+          "<=7": 235,
+          "8": 110,
+          "9": 176,
+          "10": 278,
+          "11": 304,
+          "12": 94,
+          "13+": 3
+        }
+      },
+      "endings": {
+        "singularity_pct": 37.75,
+        "patient_zero_pct": 27.083333333333332,
+        "market_collapse_pct": 35.083333333333336,
+        "total_wipeout_pct": 0.08333333333333334,
+        "round_limit_pct": 0.0
+      },
+      "cicd_pipeline": {
+        "mean_market_purchased_per_game": 10.15,
+        "mean_market_purchased_per_seat": 2.5375,
+        "total_market_purchased": 12180,
+        "mean_graduated_per_game": 154.97166666666666,
+        "mean_graduated_per_seat": 38.742916666666666,
+        "mean_graduated_per_player_round": 4.2861159767677695,
+        "mean_zones": {
+          "ready": 4.70280537980538,
+          "in_production": 0.06781133507696008,
+          "scanned": 2.226911295880046,
+          "processing": 0.08775709591334592,
+          "contractors": 0.0,
+          "total_held": 7.085285106675731
+        }
+      },
+      "triage_backpressure": {
+        "backpressure_round_pct": 7.942288190283027,
+        "players_backpressure_pct": 43.625,
+        "mean_processing_held": 0.08775709591334592,
+        "l2_milestone_pct": 42.229166666666664,
+        "l2_mean_round": 3.405032067094228,
+        "l4_capstone_triage_pct": 26.458333333333332,
+        "l4_capstone_defense_pct": 9.791666666666666,
+        "l4_capstone_release_pct": 34.375,
+        "l4_capstone_patent_pct": 0.0,
+        "any_l4_capstone_pct": 70.625,
+        "maxed_2plus_tracks_pct": 0.0
+      },
+      "dual_economy": {
+        "mean_money_spent_regain_per_seat": 2.91125,
+        "mean_regains_per_seat": 0.9704166666666667,
+        "players_buying_regain_pct": 53.22916666666667,
+        "ending_cash": {
+          "mean": 2.25875,
+          "median": 2,
+          "min": 0,
+          "max": 30
+        },
+        "mean_track_research": 9.764791666666667,
+        "research_by_track": {
+          "DEFENSE": 2.1660416666666666,
+          "TRIAGE": 3.1008333333333336,
+          "RELEASE": 3.4914583333333336,
+          "PATENT": 1.0064583333333332
+        }
+      },
+      "threat_green_cap": {
+        "total_clamped": 373,
+        "games_with_clamping": 302,
+        "clamping_game_pct": 25.166666666666664,
+        "max_clamped_in_game": 2,
+        "mean_peak_green": 3.8341666666666665,
+        "max_peak_green": 5
+      },
+      "win_rates_by_company": {
+        "MERIDIAN": 28.074534161490682,
+        "PROMETHEUS": 28.13299232736573,
+        "HELIX": 19.441069258809236,
+        "DTO": 19.81981981981982,
+        "AEGIS": 27.057356608478806,
+        "OMNIDYNE": 27.49691738594328
+      },
+      "win_rates_by_color": {
+        "red": 28.10333963453056,
+        "green": 23.439412484700124,
+        "blue": 23.495883470550982
+      },
+      "win_rates_by_archetype": {
+        "AdaptiveBalancedBot": 61.731843575419,
+        "RecklessSaboteurBot": 6.805555555555555,
+        "MixedPolicyBot": 24.333333333333336,
+        "AccelerationistBot": 15.752461322081576,
+        "SecOpsTurtleBot": 28.060522696011002,
+        "VentureGreedBot": 13.911845730027547
+      },
+      "outliers": {
+        "early_wipeouts": [
+          {
+            "seed": 63,
+            "rounds": 5,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 64,
+            "rounds": 5,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 68,
+            "rounds": 5,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 71,
+            "rounds": 4,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 72,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 80,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 91,
+            "rounds": 3,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 115,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 120,
+            "rounds": 4,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 127,
+            "rounds": 4,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          }
+        ],
+        "round_stalls": [],
+        "clamping_outliers": [],
+        "total_early_wipeouts": 150,
+        "total_round_stalls": 0,
+        "total_clamping_outliers": 0
+      }
+    }
+  },
+  "baseline": {
+    "2": {
+      "games": 1200,
+      "rounds": {
+        "mean": 8.969166666666666,
+        "min": 1,
+        "max": 13,
+        "distribution": {
+          "<=7": 259,
+          "8": 109,
+          "9": 188,
+          "10": 227,
+          "11": 315,
+          "12": 98,
+          "13+": 4
+        }
+      },
+      "endings": {
+        "singularity_pct": 38.75,
+        "patient_zero_pct": 15.333333333333332,
+        "market_collapse_pct": 45.0,
+        "total_wipeout_pct": 0.9166666666666666,
+        "round_limit_pct": 0.0
+      },
+      "cicd_pipeline": {
+        "mean_market_purchased_per_game": 5.225833333333333,
+        "mean_market_purchased_per_seat": 2.6129166666666666,
+        "total_market_purchased": 6271,
+        "mean_graduated_per_game": 71.6675,
+        "mean_graduated_per_seat": 35.83375,
+        "mean_graduated_per_player_round": 3.995215088729908,
+        "mean_zones": {
+          "ready": 4.562318312474563,
+          "in_production": 0.09160230278980279,
+          "scanned": 1.979546191077441,
+          "processing": 0.03727175833425833,
+          "contractors": 0.0,
+          "total_held": 6.670738564676064
+        }
+      },
+      "triage_backpressure": {
+        "backpressure_round_pct": 2.6851249651584133,
+        "players_backpressure_pct": 21.416666666666668,
+        "mean_processing_held": 0.03727175833425833,
+        "l2_milestone_pct": 36.75,
+        "l2_mean_round": 3.5850340136054424,
+        "l4_capstone_triage_pct": 19.125,
+        "l4_capstone_defense_pct": 6.208333333333333,
+        "l4_capstone_release_pct": 19.916666666666664,
+        "l4_capstone_patent_pct": 0.0,
+        "any_l4_capstone_pct": 45.25,
+        "maxed_2plus_tracks_pct": 0.0
+      },
+      "dual_economy": {
+        "mean_money_spent_regain_per_seat": 0.0,
+        "mean_regains_per_seat": 1.94875,
+        "players_buying_regain_pct": 75.91666666666667,
+        "ending_cash": {
+          "mean": 3.135,
+          "median": 2,
+          "min": 0,
+          "max": 40
+        },
+        "mean_track_research": 5.0625,
+        "research_by_track": {
+          "DEFENSE": 1.01875,
+          "TRIAGE": 1.8275,
+          "RELEASE": 1.76875,
+          "PATENT": 0.4475
+        }
+      },
+      "threat_green_cap": {
+        "total_clamped": 0,
+        "games_with_clamping": 0,
+        "clamping_game_pct": 0.0,
+        "max_clamped_in_game": 0,
+        "mean_peak_green": 4.123333333333333,
+        "max_peak_green": 7
+      },
+      "win_rates_by_company": {
+        "PROMETHEUS": 50.602409638554214,
+        "HELIX": 45.95238095238095,
+        "DTO": 44.6078431372549,
+        "AEGIS": 52.95629820051414,
+        "MERIDIAN": 49.47089947089947,
+        "OMNIDYNE": 56.92307692307692
+      },
+      "win_rates_by_color": {
+        "red": 50.06305170239597,
+        "green": 51.23456790123457,
+        "blue": 48.68255959849435
+      },
+      "win_rates_by_archetype": {
+        "MixedPolicyBot": 47.583333333333336,
+        "RecklessSaboteurBot": 33.19672131147541,
+        "VentureGreedBot": 52.10084033613446,
+        "AdaptiveBalancedBot": 70.95435684647303,
+        "SecOpsTurtleBot": 53.65853658536586,
+        "AccelerationistBot": 52.38095238095239
+      },
+      "outliers": {
+        "early_wipeouts": [
+          {
+            "seed": 53,
+            "rounds": 3,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 54,
+            "rounds": 4,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 55,
+            "rounds": 5,
+            "end_reason": "market_collapse",
+            "wipeout": false
+          },
+          {
+            "seed": 62,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 66,
+            "rounds": 3,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 68,
+            "rounds": 5,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 72,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 80,
+            "rounds": 3,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 81,
+            "rounds": 5,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 85,
+            "rounds": 5,
+            "end_reason": "market_collapse",
+            "wipeout": false
+          }
+        ],
+        "round_stalls": [],
+        "clamping_outliers": [],
+        "total_early_wipeouts": 147,
+        "total_round_stalls": 0,
+        "total_clamping_outliers": 0
+      }
+    },
+    "3": {
+      "games": 1200,
+      "rounds": {
+        "mean": 9.394166666666667,
+        "min": 2,
+        "max": 13,
+        "distribution": {
+          "<=7": 202,
+          "8": 68,
+          "9": 134,
+          "10": 252,
+          "11": 386,
+          "12": 148,
+          "13+": 10
+        }
+      },
+      "endings": {
+        "singularity_pct": 52.0,
+        "patient_zero_pct": 21.916666666666668,
+        "market_collapse_pct": 25.916666666666664,
+        "total_wipeout_pct": 0.16666666666666669,
+        "round_limit_pct": 0.0
+      },
+      "cicd_pipeline": {
+        "mean_market_purchased_per_game": 8.348333333333333,
+        "mean_market_purchased_per_seat": 2.7827777777777776,
+        "total_market_purchased": 10018,
+        "mean_graduated_per_game": 113.64833333333333,
+        "mean_graduated_per_seat": 37.882777777777775,
+        "mean_graduated_per_player_round": 4.032585233152961,
+        "mean_zones": {
+          "ready": 4.694234761380595,
+          "in_production": 0.07504133597883597,
+          "scanned": 2.1160459640667977,
+          "processing": 0.029716788612621947,
+          "contractors": 0.0,
+          "total_held": 6.91503885003885
+        }
+      },
+      "triage_backpressure": {
+        "backpressure_round_pct": 2.235429787989,
+        "players_backpressure_pct": 18.777777777777775,
+        "mean_processing_held": 0.029716788612621947,
+        "l2_milestone_pct": 37.69444444444445,
+        "l2_mean_round": 3.2652910832719235,
+        "l4_capstone_triage_pct": 21.63888888888889,
+        "l4_capstone_defense_pct": 8.472222222222223,
+        "l4_capstone_release_pct": 24.583333333333332,
+        "l4_capstone_patent_pct": 0.0,
+        "any_l4_capstone_pct": 54.69444444444444,
+        "maxed_2plus_tracks_pct": 0.0
+      },
+      "dual_economy": {
+        "mean_money_spent_regain_per_seat": 0.0,
+        "mean_regains_per_seat": 2.3577777777777778,
+        "players_buying_regain_pct": 79.86111111111111,
+        "ending_cash": {
+          "mean": 2.9805555555555556,
+          "median": 2,
+          "min": 0,
+          "max": 52
+        },
+        "mean_track_research": 5.912222222222222,
+        "research_by_track": {
+          "DEFENSE": 1.2780555555555555,
+          "TRIAGE": 2.006388888888889,
+          "RELEASE": 2.0455555555555556,
+          "PATENT": 0.5822222222222222
+        }
+      },
+      "threat_green_cap": {
+        "total_clamped": 0,
+        "games_with_clamping": 0,
+        "clamping_game_pct": 0.0,
+        "max_clamped_in_game": 0,
+        "mean_peak_green": 4.225833333333333,
+        "max_peak_green": 8
+      },
+      "win_rates_by_company": {
+        "PROMETHEUS": 31.069609507640067,
+        "HELIX": 29.7339593114241,
+        "MERIDIAN": 32.41379310344827,
+        "DTO": 30.536912751677853,
+        "AEGIS": 36.77966101694915,
+        "OMNIDYNE": 39.603960396039604
+      },
+      "win_rates_by_color": {
+        "red": 31.736526946107784,
+        "green": 34.53815261044177,
+        "blue": 33.642495784148394
+      },
+      "win_rates_by_archetype": {
+        "MixedPolicyBot": 33.166666666666664,
+        "SecOpsTurtleBot": 31.620553359683797,
+        "AccelerationistBot": 32.563025210084035,
+        "RecklessSaboteurBot": 13.855421686746988,
+        "VentureGreedBot": 34.21052631578947,
+        "AdaptiveBalancedBot": 56.46551724137932
+      },
+      "outliers": {
+        "early_wipeouts": [
+          {
+            "seed": 52,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 57,
+            "rounds": 3,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 66,
+            "rounds": 3,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 71,
+            "rounds": 5,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 72,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 78,
+            "rounds": 4,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 89,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 101,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 105,
+            "rounds": 4,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 107,
+            "rounds": 4,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          }
+        ],
+        "round_stalls": [],
+        "clamping_outliers": [],
+        "total_early_wipeouts": 153,
+        "total_round_stalls": 0,
+        "total_clamping_outliers": 0
+      }
+    },
+    "4": {
+      "games": 1200,
+      "rounds": {
+        "mean": 9.041666666666666,
+        "min": 2,
+        "max": 13,
+        "distribution": {
+          "<=7": 262,
+          "8": 73,
+          "9": 131,
+          "10": 271,
+          "11": 355,
+          "12": 106,
+          "13+": 2
+        }
+      },
+      "endings": {
+        "singularity_pct": 44.333333333333336,
+        "patient_zero_pct": 26.25,
+        "market_collapse_pct": 29.416666666666668,
+        "total_wipeout_pct": 0.0,
+        "round_limit_pct": 0.0
+      },
+      "cicd_pipeline": {
+        "mean_market_purchased_per_game": 11.0625,
+        "mean_market_purchased_per_seat": 2.765625,
+        "total_market_purchased": 13275,
+        "mean_graduated_per_game": 146.20833333333334,
+        "mean_graduated_per_seat": 36.552083333333336,
+        "mean_graduated_per_player_round": 4.042626728110599,
+        "mean_zones": {
+          "ready": 4.671527283480408,
+          "in_production": 0.06675108976671476,
+          "scanned": 2.0484971619815373,
+          "processing": 0.02401871565934066,
+          "contractors": 0.0,
+          "total_held": 6.810794250888001
+        }
+      },
+      "triage_backpressure": {
+        "backpressure_round_pct": 1.8571428571428572,
+        "players_backpressure_pct": 15.187500000000002,
+        "mean_processing_held": 0.02401871565934066,
+        "l2_milestone_pct": 34.625,
+        "l2_mean_round": 3.3345367027677497,
+        "l4_capstone_triage_pct": 19.1875,
+        "l4_capstone_defense_pct": 6.708333333333333,
+        "l4_capstone_release_pct": 22.875,
+        "l4_capstone_patent_pct": 0.0,
+        "any_l4_capstone_pct": 48.770833333333336,
+        "maxed_2plus_tracks_pct": 0.0
+      },
+      "dual_economy": {
+        "mean_money_spent_regain_per_seat": 0.0,
+        "mean_regains_per_seat": 2.45625,
+        "players_buying_regain_pct": 80.625,
+        "ending_cash": {
+          "mean": 3.0283333333333333,
+          "median": 2,
+          "min": 0,
+          "max": 50
+        },
+        "mean_track_research": 5.381666666666667,
+        "research_by_track": {
+          "DEFENSE": 1.1260416666666666,
+          "TRIAGE": 1.83,
+          "RELEASE": 1.8914583333333332,
+          "PATENT": 0.5341666666666667
+        }
+      },
+      "threat_green_cap": {
+        "total_clamped": 0,
+        "games_with_clamping": 0,
+        "clamping_game_pct": 0.0,
+        "max_clamped_in_game": 0,
+        "mean_peak_green": 4.09,
+        "max_peak_green": 7
+      },
+      "win_rates_by_company": {
+        "MERIDIAN": 26.70807453416149,
+        "PROMETHEUS": 28.13299232736573,
+        "HELIX": 22.539489671931957,
+        "DTO": 18.146718146718147,
+        "AEGIS": 27.49376558603491,
+        "OMNIDYNE": 26.880394574599258
+      },
+      "win_rates_by_color": {
+        "red": 27.410207939508506,
+        "green": 24.694002447980417,
+        "blue": 22.894236858771375
+      },
+      "win_rates_by_archetype": {
+        "AdaptiveBalancedBot": 46.50837988826816,
+        "RecklessSaboteurBot": 7.430555555555555,
+        "MixedPolicyBot": 25.25,
+        "AccelerationistBot": 19.549929676511955,
+        "SecOpsTurtleBot": 26.891334250343878,
+        "VentureGreedBot": 24.242424242424242
+      },
+      "outliers": {
+        "early_wipeouts": [
+          {
+            "seed": 52,
+            "rounds": 3,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 63,
+            "rounds": 3,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 68,
+            "rounds": 3,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 72,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 80,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 85,
+            "rounds": 5,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 86,
+            "rounds": 3,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 89,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 91,
+            "rounds": 2,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          },
+          {
+            "seed": 107,
+            "rounds": 4,
+            "end_reason": "patient_zero",
+            "wipeout": false
+          }
+        ],
+        "round_stalls": [],
+        "clamping_outliers": [],
+        "total_early_wipeouts": 185,
+        "total_round_stalls": 0,
+        "total_clamping_outliers": 0
+      }
+    }
+  },
+  "config": {
+    "games_per_pod": 1200,
+    "seed_start": 42,
+    "player_counts": [
+      2,
+      3,
+      4
+    ]
+  }
+}

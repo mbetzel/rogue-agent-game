@@ -154,6 +154,10 @@ def apply_level(config: GameConfig, player: PlayerState, track: str, new_level: 
     if cap is not None:
         setattr(player, CAPACITY_ATTR[t], cap)
     player.level_reached_round.setdefault(t, {}).setdefault(new_level, round_number)
+    if t == "TRIAGE" and new_level == 2 and getattr(config, "triage_l2_milestone_secrets", 0) > 0:
+        if "triage_l2" not in player.triage_milestones_claimed:
+            player.gain_secrets(config.triage_l2_milestone_secrets, "triage_l2_milestone")
+            player.triage_milestones_claimed.append("triage_l2")
 
 
 def patent_rate(config: GameConfig, player: PlayerState) -> tuple:

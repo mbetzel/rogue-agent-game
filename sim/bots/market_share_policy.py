@@ -437,6 +437,10 @@ def _planned_spend(plan: Any, player: "PlayerState", state: "GameState") -> int:
         spend += cfg.b2_secret_cost
     if getattr(plan, "use_y1_secret", False) and player.y1_available:
         spend += 6
+    if getattr(cfg, "share_regain_currency", "RESEARCH") == "MONEY" and getattr(plan, "share_regain", 0) > 0:
+        lvl = player.patent_level
+        cost = cfg.share_regain_cost_by_level[lvl]
+        spend += int(plan.share_regain) * cost
     return spend
 
 
@@ -484,4 +488,30 @@ def apply_market_share_policy(bot: Any, plan: Any, player: "PlayerState", state:
             use += 1
             money -= cfg.r2_share_cost
     plan.use_r2_share = use
+
+    # Cash PR Regain (v0.40.0 dual economy): spend $3 Cash per +1 Market Share up to PR cap
+    if getattr(cfg, "share_regain_currency", "RESEARCH") == "MONEY" and player.market_share < player.market_share_max:
+        lvl = player.patent_level
+        cap = cfg.share_regain_cap_by_level[lvl]
+        cost = cfg.share_regain_cost_by_level[lvl]
+        max_regain = max(0, min(cap, player.market_share_max - player.market_share))
+        regain = 0
+        money = player.money - _planned_spend(plan, player, state) - (use * cfg.r2_share_cost)
+        if player.market_share <= 4 and money >= cost and max_regain > 0:
+            surv_steps = min(max_regain, (5 - player.market_share), money // cost)
+            regain += surv_steps
+            money -= surv_steps * cost
+        if regain < max_regain and money >= cost:
+            push = (
+                prp.window(bot, player, state, hook="regain") == prp.PUSH
+                or getattr(state, "red_secret_banked_this_round", False)
+                or any(d.color == DieColor.RED and getattr(d.effective_face or d.current_face, "is_secret", False) for d in player.glitched_dice)
+                or money >= cost * 2
+            )
+            if push:
+                add_steps = min(max_regain - regain, money // cost)
+                regain += add_steps
+                money -= add_steps * cost
+        plan.share_regain = regain
+
     return plan

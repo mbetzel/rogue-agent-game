@@ -605,11 +605,149 @@ def get_random_variant_cards(rng: random.Random) -> Dict[DieColor, VariantCard]:
 
 
 def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
-    """Returns all 6 sample Version cards with per-version Corruption Tracks per RULES.md Section 6C.
+    """Returns Version cards with per-version Corruption Tracks per RULES.md Section 6C.
 
-    Supported profiles: "STANDARD" (Profile 1) and "AGGRESSIVE" (Profile 2).
+    Supported profiles: "STANDARD" (Profile 1), "AGGRESSIVE" (Profile 2), and "V040_ASYMMETRIC" (v0.40.0).
     """
-    is_aggressive = profile.upper() == "AGGRESSIVE"
+    p = profile.upper()
+    if p == "V040_ASYMMETRIC":
+        return [
+            # --- Branch Alpha: Economic Extortion (Red-Heavy) ---
+            VersionCard(
+                version_str="v1.0",
+                name="Script Kiddie (Alpha)",
+                staging_payload={CubeColor.RED: 2, CubeColor.BLUE: 1},
+                directive_description="None.",
+                directive_code="SCRIPT_KIDDIE",
+                corruption_track=(
+                    CorruptionSpace(index=1, label="Add 1R", add_cubes={CubeColor.RED: 1}),
+                    CorruptionSpace(index=2, label="All lose $2 + Add 1K", lose_money=2, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=3, label="All lose $2", lose_money=2),
+                    CorruptionSpace(index=4, label="Upgrade: Add 1R", add_cubes={CubeColor.RED: 1}, is_upgrade=True),
+                ),
+            ),
+            VersionCard(
+                version_str="v1.0",
+                name="Data Scraper (Beta)",
+                staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 2},
+                directive_description="None.",
+                directive_code="DATA_SCRAPER",
+                corruption_track=(
+                    CorruptionSpace(index=1, label="Lose 2 🔬", lose_patches=2),
+                    CorruptionSpace(index=2, label="Add 1B + Add 1K", add_cubes={CubeColor.BLUE: 1, CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=3, label="Lose 1 🔬", lose_patches=1),
+                    CorruptionSpace(index=4, label="Upgrade: Add 1B", add_cubes={CubeColor.BLUE: 1}, is_upgrade=True),
+                ),
+            ),
+            VersionCard(
+                version_str="v1.0",
+                name="Logic Daemon (Gamma)",
+                staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1},
+                directive_description="None.",
+                directive_code="LOGIC_DAEMON",
+                corruption_track=(
+                    CorruptionSpace(index=1, label="Add 1G", add_cubes={CubeColor.GREEN: 1}),
+                    CorruptionSpace(index=2, label="Glitch 1 die + Add 1K", demote_dice=1, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=3, label="Add 1G", add_cubes={CubeColor.GREEN: 1}),
+                    CorruptionSpace(index=4, label="Upgrade: Glitch 1 die", demote_dice=1, is_upgrade=True),
+                ),
+            ),
+            # --- Branch Alpha v2.0 ---
+            VersionCard(
+                version_str="v2.0",
+                name="Ransomware-as-a-Service (Alpha)",
+                staging_payload={},
+                directive_description="None.",
+                directive_code="RAAS",
+                corruption_track=(
+                    CorruptionSpace(index=1, label="Add 2R", add_cubes={CubeColor.RED: 2}),
+                    CorruptionSpace(index=2, label="All lose $3 + Add 1K", lose_money=3, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=3, label="Add 1R & All lose $2", add_cubes={CubeColor.RED: 1}, lose_money=2),
+                    CorruptionSpace(index=4, label="All lose $3 + Add 1K", lose_money=3, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=5, label="Upgrade: Add 2R", add_cubes={CubeColor.RED: 2}, is_upgrade=True),
+                ),
+            ),
+            # --- Branch Beta v2.0 ---
+            VersionCard(
+                version_str="v2.0",
+                name="Spyware Mesh (Beta)",
+                staging_payload={},
+                directive_description="None.",
+                directive_code="SPYWARE_MESH",
+                corruption_track=(
+                    CorruptionSpace(index=1, label="Add 2B", add_cubes={CubeColor.BLUE: 2}),
+                    CorruptionSpace(index=2, label="Lose 2 🔬 + Add 1K", lose_patches=2, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=3, label="Add 1B & Lose 1 🔬", add_cubes={CubeColor.BLUE: 1}, lose_patches=1),
+                    CorruptionSpace(index=4, label="Lose 1 Secret + Add 1K", lose_secrets=1, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=5, label="Upgrade: Add 2B", add_cubes={CubeColor.BLUE: 2}, is_upgrade=True),
+                ),
+            ),
+            # --- Branch Gamma v2.0 ---
+            VersionCard(
+                version_str="v2.0",
+                name="Polymorphic Worm (Gamma)",
+                staging_payload={},
+                directive_description="None.",
+                directive_code="POLYMORPHIC_WORM",
+                corruption_track=(
+                    CorruptionSpace(index=1, label="Add 2G", add_cubes={CubeColor.GREEN: 2}),
+                    CorruptionSpace(index=2, label="Glitch 1 die + Add 1K", demote_dice=1, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=3, label="All glitch 1 die & Add 1G", demote_dice=1, add_cubes={CubeColor.GREEN: 1}),
+                    CorruptionSpace(index=4, label="Glitch 1 die + Add 1K", demote_dice=1, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=5, label="Upgrade: Add 1G", add_cubes={CubeColor.GREEN: 1}, is_upgrade=True),
+                ),
+            ),
+            # --- Branch Alpha v3.0 ---
+            VersionCard(
+                version_str="v3.0",
+                name="Zero-Day Override (Alpha)",
+                staging_payload={},
+                directive_description="None.",
+                directive_code="ZERO_DAY_OVERRIDE",
+                corruption_track=(
+                    CorruptionSpace(index=1, label="Add 2R, 1B", add_cubes={CubeColor.RED: 2, CubeColor.BLUE: 1}),
+                    CorruptionSpace(index=2, label="All lose $3 + Add 1K", lose_money=3, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=3, label="Add 2R", add_cubes={CubeColor.RED: 2}),
+                    CorruptionSpace(index=4, label="All lose $3 + Add 1K", lose_money=3, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=5, label="Add 1R & Return 1 Colored Die", add_cubes={CubeColor.RED: 1}, return_colored_dice=1),
+                    CorruptionSpace(index=6, label="Singularity", is_singularity=True),
+                ),
+            ),
+            # --- Branch Beta v3.0 ---
+            VersionCard(
+                version_str="v3.0",
+                name="Corrupted Kernel (Beta)",
+                staging_payload={},
+                directive_description="None.",
+                directive_code="CORRUPTED_KERNEL",
+                corruption_track=(
+                    CorruptionSpace(index=1, label="Add 2B, 1R", add_cubes={CubeColor.BLUE: 2, CubeColor.RED: 1}),
+                    CorruptionSpace(index=2, label="Lose 1 Secret + Add 1K", lose_secrets=1, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=3, label="Add 2B", add_cubes={CubeColor.BLUE: 2}),
+                    CorruptionSpace(index=4, label="Lose 2 🔬 + Add 1K", lose_patches=2, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=5, label="Return 1 Colored Die", return_colored_dice=1),
+                    CorruptionSpace(index=6, label="Singularity: Lose 1 Secret", lose_secrets=1, is_singularity=True),
+                ),
+            ),
+            # --- Branch Gamma v3.0 ---
+            VersionCard(
+                version_str="v3.0",
+                name="Subversion Engine (Gamma)",
+                staging_payload={},
+                directive_description="None.",
+                directive_code="SUBVERSION_ENGINE",
+                corruption_track=(
+                    CorruptionSpace(index=1, label="Add 1R, 1B, 1G", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1}),
+                    CorruptionSpace(index=2, label="Lose $2 & 1 🔬 + Add 1K", lose_money=2, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=3, label="Add 1G, 1R", add_cubes={CubeColor.GREEN: 1, CubeColor.RED: 1}),
+                    CorruptionSpace(index=4, label="All glitch 1 die + Add 1K", demote_dice=1, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=5, label="Return 1 Colored Die", return_colored_dice=1),
+                    CorruptionSpace(index=6, label="Singularity", is_singularity=True),
+                ),
+            ),
+        ]
+
+    is_aggressive = p == "AGGRESSIVE"
 
     if is_aggressive:
         # Profile 2: Aggressive Escalation Tracks (Same Pacing Clock, Heightened Economic Friction)
@@ -872,7 +1010,10 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
 def get_default_version_deck(profile: str = "STANDARD") -> List[VersionCard]:
     """Returns the default baseline version cards: Script Kiddie (v1.0), RaaS (v2.0), Zero-Day Override (v3.0)."""
     cards = get_all_version_cards(profile=profile)
-    return [cards[0], cards[2], cards[4]]
+    v1_pool = [v for v in cards if v.version_str == "v1.0"]
+    v2_pool = [v for v in cards if v.version_str == "v2.0"]
+    v3_pool = [v for v in cards if v.version_str == "v3.0"]
+    return [v1_pool[0], v2_pool[0], v3_pool[0]]
 
 
 def get_roadmap_deck(path_id: int, profile: str = "STANDARD") -> List[VersionCard]:

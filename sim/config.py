@@ -19,6 +19,12 @@ V038_COMPANY_STARTING_COLORS = {  # [TUNE] OQ-4 (User 2026-11-07)
 V038_STARTING_SECRETS = {2: 5, 3: 5, 4: 5}  # [TUNE] OQ-1 (User 2026-11-07)
 V038_MARKET_SHARE_START = {2: 12, 3: 12, 4: 12}
 V038_PR_REGAIN_COST = 3  # [TUNE] OQ-9 follow-up: 3 research per +1 Market Share (v0.37: 2)
+
+# --- v0.40.0 candidate constants (FINDINGS §50, spec v400) ---
+V040_TRIAGE_CAPACITY = (1, 1, 1, 1, 2)         # Levels 0..4 Triage Bandwidth
+V040_TRACK_STEP_COSTS = (1, 2, 2, 3)          # (1, 2, 2, 3) 🔬 (8 🔬 total per track)
+V040_SHARE_REGAIN_CAP = {0: 1, 1: 1, 2: 2, 3: 2, 4: 3}
+V040_SHARE_REGAIN_COST_MONEY = {0: 3, 1: 3, 2: 3, 3: 3, 4: 3}
 _FACE_PROFILES = ("V037", "V038_DRAFT")
 # die_face_profile only: V038_DRAFT with the candidate-2 Yellow table (spec §14.3); _ALT = F1 "+$1 & +1 Market Share"
 # _F3 = V038_YELLOW_MS with Yellow F3 "+$1 & +1 Market Share" (spec §14.5.1, RSP-1)
@@ -452,6 +458,15 @@ class GameConfig:
     green_bank_cleans_slot: bool = False
     v1_staging_payload_override: Optional[Dict[str, Dict[CubeColor, int]]] = None
 
+    # --- v0.40.0 Gameplay Balance & Architecture Extensions (INV-V400-*) ---
+    operations_before_pipeline_shift: bool = False  # If True, Phase 5 = Operations, Phase 6 = Pipeline Shift
+    purchased_dice_to_scanned: bool = False         # If True, market colored dice enter Scanned Box instead of Ready
+    share_regain_currency: str = "RESEARCH"        # "RESEARCH" (legacy v0.36-v0.39) | "MONEY" (v0.40.0)
+    share_regain_cost_money: int = 3               # [TUNE: $3] Cash per +1 Market Share when currency == "MONEY"
+    global_green_cube_cap: int = 0                 # [TUNE: 0 = uncapped (legacy); 5 in v0.40.0]
+    triage_l2_milestone_secrets: int = 0           # [TUNE: 0 = disabled (legacy); 1 in v0.40.0]
+    version_card_profile: str = "STANDARD"         # "STANDARD" | "AGGRESSIVE" | "V040_ASYMMETRIC"
+
     def __post_init__(self) -> None:
         if not (isinstance(self.track_step_costs, tuple) and len(self.track_step_costs) == 4 and all(isinstance(c, int) and c >= 0 for c in self.track_step_costs)):
             raise ValueError("track_step_costs must be a 4-tuple of non-negative integers")
@@ -525,6 +540,7 @@ class GameConfig:
             self.level2_perks_enabled = not v035
         self._validate_tower_config()
         self._validate_v038()
+        self._validate_v040()
         if self.starting_secrets_by_player_count is None:
             # NOTE: resolved once at construction. Re-assigning round_sequence later does NOT
             # re-resolve this dict; use GameConfig.legacy_v033() or pass round_sequence to __init__.
@@ -709,6 +725,47 @@ class GameConfig:
         overrides.setdefault("bot_pr_push_params", PrPushParams())
         return cls.v038(**overrides)
 
+    @classmethod
+    def v040(cls, **overrides) -> "GameConfig":
+        """v0.40.0 candidate baseline (FINDINGS §50, spec v400):
+        - CI/CD execution sequence swap: Phase 5 Operations -> Phase 6 CI/CD Pipeline Shift.
+        - Market purchased dice enter Scanned Box (gated by Release Bandwidth).
+        - Triage Track progression: Bandwidth (1, 1, 1, 1, 2), L2 +1 Secret milestone.
+        - Dual economy: Market Share PR regain costs $3 Cash per +1 (PR caps: 1/1/2/2/3).
+        - Hardware track step costs: (1, 2, 2, 3) 🔬 (8 🔬 total), max 2 upgrades/turn.
+        - Global Green Cube Cap: max 5 Green cubes in circulation.
+        - Asymmetric SETEC Version profiles (Alpha: Red, Beta: Blue, Gamma: Green).
+        - Inherits all v0.38f / Headroom rules (Shogun Baffle, MS 13/16/20, Blue V038F direct secrets).
+        """
+        for k, v in (
+            ("operations_before_pipeline_shift", True),
+            ("purchased_dice_to_scanned", True),
+            ("share_regain_currency", "MONEY"),
+            ("share_regain_cost_by_level", dict(V040_SHARE_REGAIN_COST_MONEY)),
+            ("share_regain_cap_by_level", dict(V040_SHARE_REGAIN_CAP)),
+            ("track_step_costs", V040_TRACK_STEP_COSTS),
+            ("max_hardware_upgrades_per_turn", 2),
+            ("global_green_cube_cap", 5),
+            ("triage_l2_milestone_secrets", 1),
+            ("version_card_profile", "V040_ASYMMETRIC"),
+        ):
+            overrides.setdefault(k, v)
+
+        # Configure track capacity override for TRIAGE
+        capacities = dict(cls().track_capacity_by_level)
+        capacities["TRIAGE"] = V040_TRIAGE_CAPACITY
+        overrides.setdefault("track_capacity_by_level", capacities)
+
+        # Inherit from v038f baseline
+        return cls.v038f(**overrides)
+
+    @classmethod
+    def v040_roster(cls, **overrides) -> "GameConfig":
+        """v0.40.0 + bot autonomous PR push and cash allocation policies enabled."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v040(**overrides)
+
     def _validate_tower_config(self) -> None:
         """Validates Cube Tower physics parameters (spec §2.4)."""
         self.tower_mode = TowerMode(self.tower_mode)
@@ -822,6 +879,30 @@ class GameConfig:
             raise ValueError(f"triage_order_rule must be one of {_TRIAGE_ORDER_RULES}, got {self.triage_order_rule!r}")
         if self.triage_order_rule == "OLDEST_FIRST" and not self.secret_face_enabled:
             raise ValueError("triage_order_rule='OLDEST_FIRST' requires secret_face_enabled")
+
+    def _validate_v040(self) -> None:
+        """Validates v0.40.0 configuration extensions (spec §2.3)."""
+        if self.operations_before_pipeline_shift:
+            if self.round_sequence != RoundSequence.SIX_PHASE:
+                raise ValueError("operations_before_pipeline_shift requires round_sequence=SIX_PHASE")
+            if not self.purchased_dice_to_scanned:
+                raise ValueError("operations_before_pipeline_shift requires purchased_dice_to_scanned=True")
+        if self.share_regain_currency not in ("RESEARCH", "MONEY"):
+            raise ValueError(f"share_regain_currency must be 'RESEARCH' or 'MONEY', got {self.share_regain_currency!r}")
+        if self.share_regain_currency == "MONEY":
+            if not self.is_market_share:
+                raise ValueError("share_regain_currency='MONEY' requires red_mode=MARKET_SHARE")
+            for lvl, cost in self.share_regain_cost_by_level.items():
+                if not isinstance(cost, int) or cost <= 0:
+                    raise ValueError(f"share_regain_cost_by_level[{lvl}] must be an integer > 0, got {cost!r}")
+        if self.global_green_cube_cap < 0:
+            raise ValueError("global_green_cube_cap must be >= 0")
+        if self.operations_before_pipeline_shift and self.global_green_cube_cap < 1:
+            raise ValueError("global_green_cube_cap must be >= 1")
+        if not (isinstance(self.track_step_costs, tuple) and len(self.track_step_costs) == 4 and all(isinstance(c, int) and c > 0 for c in self.track_step_costs)):
+            raise ValueError("track_step_costs must be a 4-tuple of strictly positive integers")
+        if self.version_card_profile not in ("STANDARD", "AGGRESSIVE", "V040_ASYMMETRIC"):
+            raise ValueError(f"version_card_profile must be 'STANDARD', 'AGGRESSIVE', or 'V040_ASYMMETRIC', got {self.version_card_profile!r}")
 
     def red_secret_payout_schedule(self, num_players: Optional[int] = None) -> Tuple[int, ...]:
         """Red Secret payout by place (index 0 = 1st), padded with 0 / truncated to the player count; () when off."""
