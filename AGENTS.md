@@ -16,6 +16,14 @@ Follow this workflow across sessions:
    - Hand each subagent a short brief (goal, files, cited sections) instead of letting it re-derive context, and ask for a compact handoff back (≤ 300 words).
 5. **Keep Documentation Synchronized:**
    - Update `RULES.md` whenever game mechanics or `[TUNE]` baselines change.
+   - **Version Number Bumping Protocol:** Whenever the game version is bumped (e.g., `v0.40.0` → `v0.41.0`), ensure the version string is synchronized across all relevant files:
+     - `RULES.md` (Title header)
+     - `RULES_APPENDIX.md` (Section 6 Title header)
+     - `GLOSSARY.md` (Section 7 Title header)
+     - `RULES_QUICKREF.md` (Title header)
+     - `pnp/README.md` (Pack title & component summary)
+     - `pnp/generate_pnp.py` (Docstring & version strings / header badges)
+     - `PLAN.md` (Active baseline milestones & rules draft checkboxes)
    - Update `PLAN.md` (status checkboxes & upcoming experiments) before and after implementation milestones.
    - Record Monte Carlo experiment outputs, balance takeaways, and rule iteration rationale in `FINDINGS.md`. When it grows past ~8 sections, move the oldest into `docs/archive/` and keep the numbering. Move completed `PLAN.md` phases into `docs/archive/PLAN_completed_phases.md`.
 
