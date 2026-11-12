@@ -65,7 +65,7 @@ class TestWebV036(unittest.TestCase):
     def test_default_is_v036(self):
         gc = GameController()
         st = gc.new_game(num_players=3, seed=5)
-        self.assertEqual(gc.state.config, GameConfig(num_players=3, enable_corporate_asymmetry=True))
+        self.assertEqual(gc.state.config, GameConfig.v037(num_players=3, enable_corporate_asymmetry=True))
         self.assertTrue(st["is_market_share"] and st["is_share_regain"])
         self.assertEqual(st["patent_track_name"], "Public Relations Track")
         self.assertEqual(st["version_share_payout"], {"v2.0": 4})

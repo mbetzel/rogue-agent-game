@@ -53,6 +53,30 @@ class AbilityStatus(str, Enum):
     FORFEITED = "FORFEITED"
 
 
+class TargetCriterion(str, Enum):
+    """Target selection criteria for Phase 2 Corruption Track spaces."""
+    ALL = "ALL"                             # Table-wide hit (legacy baseline)
+    MOST_MONEY = "MOST_MONEY"               # Player(s) with highest cash ($)
+    MOST_RESEARCH = "MOST_RESEARCH"         # Player(s) with highest Research Tokens (🔬)
+    MOST_MARKET_SHARE = "MOST_MARKET_SHARE" # Player(s) with highest Market Share (MS)
+    FEWEST_GLITCHED = "FEWEST_GLITCHED"     # Player(s) with lowest glitched shield slots
+    MOST_COLORED_DICE = "MOST_COLORED_DICE" # Player(s) with most colored dice
+    MOST_SECRETS = "MOST_SECRETS"           # Player(s) with highest Corporate Secrets
+
+
+class TargetScope(str, Enum):
+    """Scope of target selection for Phase 2 Corruption Track spaces."""
+    ALL = "ALL"
+    TARGETED = "TARGETED"
+
+
+class TransferType(str, Enum):
+    """Robin Hood transfer types for Phase 2 Corruption Track spaces."""
+    NONE = "NONE"
+    LEAST_MS_TAKES_CASH = "LEAST_MS_TAKES_CASH"                     # Least MS takes cash from Most MS
+    LEAST_RESEARCH_TAKES_RESEARCH = "LEAST_RESEARCH_TAKES_RESEARCH" # Least 🔬 takes 🔬 from Most 🔬
+
+
 @dataclass(frozen=True)
 class ArchetypeCard:
     """Represents a consultancy archetype card with once-per-version ability."""
@@ -221,9 +245,24 @@ class CorruptionSpace:
     demote_dice: int = 0
     return_colored_dice: int = 0
     lose_secrets: int = 0
+    lose_market_share: int = 0                      # v0.41.0: Direct Market Share loss
     next_phase_lock: Optional[str] = None
     is_upgrade: bool = False
     is_singularity: bool = False
+
+    # Player-Specific Targeting:
+    target_criterion: Optional[TargetCriterion] = None
+    target_money_criterion: Optional[TargetCriterion] = None
+    target_patches_criterion: Optional[TargetCriterion] = None
+    target_demote_criterion: Optional[TargetCriterion] = None
+    target_return_colored_criterion: Optional[TargetCriterion] = None
+    target_secrets_criterion: Optional[TargetCriterion] = None
+    target_market_share_criterion: Optional[TargetCriterion] = None
+    target_scope: Optional[TargetScope] = None
+
+    # Robin Hood Transfers:
+    transfer_type: TransferType = TransferType.NONE
+    transfer_amount: int = 0
 
 
 @dataclass(frozen=True)
@@ -604,12 +643,203 @@ def get_random_variant_cards(rng: random.Random) -> Dict[DieColor, VariantCard]:
     return chosen
 
 
-def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
+def _get_legacy_version_cards(is_aggressive: bool = False) -> List[VersionCard]:
+    """Returns legacy pre-v0.41.0 Version cards with uniform table-wide hazards (INV-TARGET-08)."""
+    if is_aggressive:
+        return [
+            VersionCard(
+                version_str="v1.0",
+                name="Script Kiddie",
+                staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1},
+                directive_description="None.",
+                directive_code="SCRIPT_KIDDIE",
+                corruption_track=(
+                    CorruptionSpace(index=1, label="Add 1R", add_cubes={CubeColor.RED: 1}),
+                    CorruptionSpace(index=2, label="All lose $3 + Add 1K", lose_money=3, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=3, label="Glitch 1 die", demote_dice=1),
+                    CorruptionSpace(index=4, label="Upgrade: Lose 1 🔬", lose_patches=1, is_upgrade=True),
+                ),
+            ),
+            VersionCard(
+                version_str="v1.0",
+                name="Data Scraper",
+                staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 2},
+                directive_description="Players start with +$1 extra Money.",
+                directive_code="DATA_SCRAPER",
+                starting_cash_bonus=1,
+                corruption_track=(
+                    CorruptionSpace(index=1, label="Lose 2 🔬", lose_patches=2),
+                    CorruptionSpace(index=2, label="Lose $2 + Add 1K", lose_money=2, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=3, label="Add 1G", add_cubes={CubeColor.GREEN: 1}),
+                    CorruptionSpace(index=4, label="Upgrade: Glitch 2 dice", demote_dice=2, is_upgrade=True),
+                ),
+            ),
+            VersionCard(
+                version_str="v2.0",
+                name="Ransomware-as-a-Service",
+                staging_payload={},
+                directive_description="None.",
+                directive_code="RAAS",
+                staging_payload_2p={},
+                corruption_track=(
+                    CorruptionSpace(index=1, label="All lose $2", lose_money=2),
+                    CorruptionSpace(index=2, label="Add 1R, 1G + Add 1K", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1, CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=3, label="All lose $2 & Add 1R", lose_money=2, add_cubes={CubeColor.RED: 1}),
+                    CorruptionSpace(index=4, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=5, label="Upgrade: Add 1R", add_cubes={CubeColor.RED: 1}, is_upgrade=True),
+                ),
+            ),
+            VersionCard(
+                version_str="v2.0",
+                name="Polymorphic Worm",
+                staging_payload={},
+                directive_description="None.",
+                directive_code="POLYMORPHIC_WORM",
+                staging_payload_2p={},
+                corruption_track=(
+                    CorruptionSpace(index=1, label="Lose 2 🔬", lose_patches=2),
+                    CorruptionSpace(index=2, label="Add 2G + Add 1K", add_cubes={CubeColor.GREEN: 2, CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=3, label="All glitch 1 die & Add 1G", demote_dice=1, add_cubes={CubeColor.GREEN: 1}),
+                    CorruptionSpace(index=4, label="Glitch 2 dice + Add 1K", demote_dice=2, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=5, label="Upgrade: Add 1R", add_cubes={CubeColor.RED: 1}, is_upgrade=True),
+                ),
+            ),
+            VersionCard(
+                version_str="v3.0",
+                name="Zero-Day Override",
+                staging_payload={},
+                directive_description="None.",
+                directive_code="ZERO_DAY_OVERRIDE",
+                staging_payload_2p={},
+                corruption_track=(
+                    CorruptionSpace(index=1, label="Add 1R, 1B, 1G", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1}),
+                    CorruptionSpace(index=2, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=3, label="Add 1R, 1B", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}),
+                    CorruptionSpace(index=4, label="All glitch 1 die & Add 1B, 1K", demote_dice=1, add_cubes={CubeColor.BLUE: 1, CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=5, label="Return 1 Colored Die & glitch 1 die", return_colored_dice=1, demote_dice=1),
+                    CorruptionSpace(index=6, label="Singularity", is_singularity=True),
+                ),
+            ),
+            VersionCard(
+                version_str="v3.0",
+                name="Corrupted Kernel",
+                staging_payload={},
+                directive_description="None.",
+                directive_code="CORRUPTED_KERNEL",
+                staging_payload_2p={},
+                corruption_track=(
+                    CorruptionSpace(index=1, label="Glitch 2 dice + Add 1R, 1B", demote_dice=2, add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}),
+                    CorruptionSpace(index=2, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=3, label="Add 1R, 1G", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1}),
+                    CorruptionSpace(index=4, label="Lose 2 Secrets + Add 1K", lose_secrets=2, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=5, label="Return 1 Colored Die & glitch 1 die", return_colored_dice=1, demote_dice=1),
+                    CorruptionSpace(index=6, label="Singularity: Lose 1 Secret", lose_secrets=1, is_singularity=True),
+                ),
+            ),
+        ]
+    return [
+        VersionCard(
+            version_str="v1.0",
+            name="Script Kiddie",
+            staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1},
+            directive_description="None.",
+            directive_code="SCRIPT_KIDDIE",
+            corruption_track=(
+                CorruptionSpace(index=1, label="Add 1R", add_cubes={CubeColor.RED: 1}),
+                CorruptionSpace(index=2, label="All lose $2 + Add 1K", lose_money=2, add_cubes={CubeColor.BLACK: 1}),
+                CorruptionSpace(index=3, label="Lose 1 🔬", lose_patches=1),
+                CorruptionSpace(index=4, label="Upgrade: Lose 1 🔬", lose_patches=1, is_upgrade=True),
+            ),
+        ),
+        VersionCard(
+            version_str="v1.0",
+            name="Data Scraper",
+            staging_payload={CubeColor.RED: 1, CubeColor.BLUE: 2},
+            directive_description="Players start with +$1 extra Money.",
+            directive_code="DATA_SCRAPER",
+            starting_cash_bonus=1,
+            corruption_track=(
+                CorruptionSpace(index=1, label="Lose 1 🔬", lose_patches=1),
+                CorruptionSpace(index=2, label="Lose $1 + Add 1K", lose_money=1, add_cubes={CubeColor.BLACK: 1}),
+                CorruptionSpace(index=3, label="Add 1G", add_cubes={CubeColor.GREEN: 1}),
+                CorruptionSpace(index=4, label="Upgrade: Glitch 1 die", demote_dice=1, is_upgrade=True),
+            ),
+        ),
+        VersionCard(
+            version_str="v2.0",
+            name="Ransomware-as-a-Service",
+            staging_payload={},
+            directive_description="None.",
+            directive_code="RAAS",
+            staging_payload_2p={},
+            corruption_track=(
+                CorruptionSpace(index=1, label="All lose $2", lose_money=2),
+                CorruptionSpace(index=2, label="Add 1R, 1G + Add 1K", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1, CubeColor.BLACK: 1}),
+                CorruptionSpace(index=3, label="All lose $2 & Add 1R", lose_money=2, add_cubes={CubeColor.RED: 1}),
+                CorruptionSpace(index=4, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+                CorruptionSpace(index=5, label="Upgrade: Add 1R", add_cubes={CubeColor.RED: 1}, is_upgrade=True),
+            ),
+        ),
+        VersionCard(
+            version_str="v2.0",
+            name="Polymorphic Worm",
+            staging_payload={},
+            directive_description="None.",
+            directive_code="POLYMORPHIC_WORM",
+            staging_payload_2p={},
+            corruption_track=(
+                CorruptionSpace(index=1, label="Lose 2 🔬", lose_patches=2),
+                CorruptionSpace(index=2, label="Add 2G + Add 1K", add_cubes={CubeColor.GREEN: 2, CubeColor.BLACK: 1}),
+                CorruptionSpace(index=3, label="All glitch 1 die & Add 1G", demote_dice=1, add_cubes={CubeColor.GREEN: 1}),
+                CorruptionSpace(index=4, label="Glitch 1 die + Add 1K", demote_dice=1, add_cubes={CubeColor.BLACK: 1}),
+                CorruptionSpace(index=5, label="Upgrade: Add 1R", add_cubes={CubeColor.RED: 1}, is_upgrade=True),
+            ),
+        ),
+        VersionCard(
+            version_str="v3.0",
+            name="Zero-Day Override",
+            staging_payload={},
+            directive_description="None.",
+            directive_code="ZERO_DAY_OVERRIDE",
+            staging_payload_2p={},
+            corruption_track=(
+                CorruptionSpace(index=1, label="Add 1R, 1B, 1G", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1}),
+                CorruptionSpace(index=2, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+                CorruptionSpace(index=3, label="Add 1R, 1B", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}),
+                CorruptionSpace(index=4, label="All glitch 1 die & Add 1B, 1K", demote_dice=1, add_cubes={CubeColor.BLUE: 1, CubeColor.BLACK: 1}),
+                CorruptionSpace(index=5, label="Return 1 Colored Die", return_colored_dice=1),
+                CorruptionSpace(index=6, label="Singularity", is_singularity=True),
+            ),
+        ),
+        VersionCard(
+            version_str="v3.0",
+            name="Corrupted Kernel",
+            staging_payload={},
+            directive_description="None.",
+            directive_code="CORRUPTED_KERNEL",
+            staging_payload_2p={},
+            corruption_track=(
+                CorruptionSpace(index=1, label="Glitch 1 die + Add 1R, 1B", demote_dice=1, add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}),
+                CorruptionSpace(index=2, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+                CorruptionSpace(index=3, label="Add 1R, 1G", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1}),
+                CorruptionSpace(index=4, label="Lose 1 Secret + Add 1K", lose_secrets=1, add_cubes={CubeColor.BLACK: 1}),
+                CorruptionSpace(index=5, label="Return 1 Colored Die", return_colored_dice=1),
+                CorruptionSpace(index=6, label="Singularity: Lose 1 Secret", lose_secrets=1, is_singularity=True),
+            ),
+        ),
+    ]
+
+
+def get_all_version_cards(profile: str = "STANDARD", player_specific: bool = True) -> List[VersionCard]:
     """Returns Version cards with per-version Corruption Tracks per RULES.md Section 6C.
 
     Supported profiles: "STANDARD" (Profile 1), "AGGRESSIVE" (Profile 2), and "V040_ASYMMETRIC" (v0.40.0).
+    When player_specific is False (or profile begins with "LEGACY"), returns legacy table-wide hazard cards (INV-TARGET-08).
     """
     p = profile.upper()
+    if not player_specific or p.startswith("LEGACY"):
+        is_aggressive = ("AGGRESSIVE" in p)
+        return _get_legacy_version_cards(is_aggressive=is_aggressive)
     if p == "V040_ASYMMETRIC":
         return [
             # --- Branch Alpha: Economic Extortion (Red-Heavy) ---
@@ -761,13 +991,14 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                 directive_code="SCRIPT_KIDDIE",
                 corruption_track=(
                     CorruptionSpace(index=1, label="Add 1R", add_cubes={CubeColor.RED: 1}),
-                    CorruptionSpace(index=2, label="All lose $3 + Add 1K", lose_money=3, add_cubes={CubeColor.BLACK: 1}),
-                    CorruptionSpace(index=3, label="Glitch 1 die", demote_dice=1),
+                    CorruptionSpace(index=2, label="Most $ loses $3 + Add 1K", lose_money=3, add_cubes={CubeColor.BLACK: 1}, target_criterion=TargetCriterion.MOST_MONEY),
+                    CorruptionSpace(index=3, label="Fewest Glitched glitches 1 slot", demote_dice=1, target_criterion=TargetCriterion.FEWEST_GLITCHED),
                     CorruptionSpace(
                         index=4,
-                        label="Upgrade: Lose 1 🔬",
-                        lose_patches=1,
+                        label="Upgrade: Most 🔬 loses 2 🔬",
+                        lose_patches=2,
                         is_upgrade=True,
+                        target_criterion=TargetCriterion.MOST_RESEARCH,
                     ),
                 ),
             ),
@@ -780,14 +1011,15 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                 directive_code="DATA_SCRAPER",
                 starting_cash_bonus=1,
                 corruption_track=(
-                    CorruptionSpace(index=1, label="Lose 2 🔬", lose_patches=2),
-                    CorruptionSpace(index=2, label="Lose $2 + Add 1K", lose_money=2, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=1, label="Most 🔬 loses 2 🔬", lose_patches=2, target_criterion=TargetCriterion.MOST_RESEARCH),
+                    CorruptionSpace(index=2, label="Most $ loses $3 + Add 1K", lose_money=3, add_cubes={CubeColor.BLACK: 1}, target_criterion=TargetCriterion.MOST_MONEY),
                     CorruptionSpace(index=3, label="Add 1G", add_cubes={CubeColor.GREEN: 1}),
                     CorruptionSpace(
                         index=4,
-                        label="Upgrade: Glitch 2 dice",
+                        label="Upgrade: Fewest Glitched glitches 2 slots",
                         demote_dice=2,
                         is_upgrade=True,
+                        target_criterion=TargetCriterion.FEWEST_GLITCHED,
                     ),
                 ),
             ),
@@ -800,10 +1032,10 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                 directive_code="RAAS",
                 staging_payload_2p={},
                 corruption_track=(
-                    CorruptionSpace(index=1, label="All lose $2", lose_money=2),
+                    CorruptionSpace(index=1, label="Transfer: Least MS takes $2 from Most MS", transfer_type=TransferType.LEAST_MS_TAKES_CASH, transfer_amount=2),
                     CorruptionSpace(index=2, label="Add 1R, 1B + Add 1K", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.BLACK: 1}),
-                    CorruptionSpace(index=3, label="All lose $2 & Add 1R", lose_money=2, add_cubes={CubeColor.RED: 1}),
-                    CorruptionSpace(index=4, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=3, label="Most $ loses $3 & Add 1R", lose_money=3, add_cubes={CubeColor.RED: 1}, target_criterion=TargetCriterion.MOST_MONEY),
+                    CorruptionSpace(index=4, label="Most MS loses $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}, target_criterion=TargetCriterion.MOST_MARKET_SHARE),
                     CorruptionSpace(
                         index=5,
                         label="Upgrade: Add 1R",
@@ -821,10 +1053,10 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                 directive_code="POLYMORPHIC_WORM",
                 staging_payload_2p={},
                 corruption_track=(
-                    CorruptionSpace(index=1, label="Lose 2 🔬", lose_patches=2),
+                    CorruptionSpace(index=1, label="Transfer: Least 🔬 takes 2 🔬 from Most 🔬", transfer_type=TransferType.LEAST_RESEARCH_TAKES_RESEARCH, transfer_amount=2),
                     CorruptionSpace(index=2, label="Add 1B, 1G + Add 1K", add_cubes={CubeColor.BLUE: 1, CubeColor.GREEN: 1, CubeColor.BLACK: 1}),
-                    CorruptionSpace(index=3, label="All glitch 1 die & Add 1G", demote_dice=1, add_cubes={CubeColor.GREEN: 1}),
-                    CorruptionSpace(index=4, label="Glitch 2 dice + Add 1K", demote_dice=2, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=3, label="Fewest Glitched glitches 1 slot & Add 1G", demote_dice=1, add_cubes={CubeColor.GREEN: 1}, target_criterion=TargetCriterion.FEWEST_GLITCHED),
+                    CorruptionSpace(index=4, label="Fewest Glitched glitches 2 slots + Add 1K", demote_dice=2, add_cubes={CubeColor.BLACK: 1}, target_criterion=TargetCriterion.FEWEST_GLITCHED),
                     CorruptionSpace(
                         index=5,
                         label="Upgrade: Add 1R",
@@ -843,10 +1075,10 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                 staging_payload_2p={},
                 corruption_track=(
                     CorruptionSpace(index=1, label="Add 1R, 1B, 1G", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1}),
-                    CorruptionSpace(index=2, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=2, label="Most $ loses $4; Most 🔬 loses 2 🔬 + Add 1K", lose_money=4, lose_patches=2, add_cubes={CubeColor.BLACK: 1}, target_money_criterion=TargetCriterion.MOST_MONEY, target_patches_criterion=TargetCriterion.MOST_RESEARCH),
                     CorruptionSpace(index=3, label="Add 1R, 1B", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}),
-                    CorruptionSpace(index=4, label="All glitch 1 die & Add 1B, 1K", demote_dice=1, add_cubes={CubeColor.BLUE: 1, CubeColor.BLACK: 1}),
-                    CorruptionSpace(index=5, label="Return 1 Colored Die & glitch 1 die", return_colored_dice=1, demote_dice=1),
+                    CorruptionSpace(index=4, label="Fewest Glitched glitches 1 slot & Add 1B, 1K", demote_dice=1, add_cubes={CubeColor.BLUE: 1, CubeColor.BLACK: 1}, target_criterion=TargetCriterion.FEWEST_GLITCHED),
+                    CorruptionSpace(index=5, label="Most Colored Dice returns 1 die & glitches 1 slot", return_colored_dice=1, demote_dice=1, target_return_colored_criterion=TargetCriterion.MOST_COLORED_DICE, target_demote_criterion=TargetCriterion.MOST_COLORED_DICE, target_criterion=TargetCriterion.MOST_COLORED_DICE),
                     CorruptionSpace(
                         index=6,
                         label="Singularity",
@@ -863,16 +1095,17 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                 directive_code="CORRUPTED_KERNEL",
                 staging_payload_2p={},
                 corruption_track=(
-                    CorruptionSpace(index=1, label="Glitch 2 dice + Add 1R, 1B", demote_dice=2, add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}),
-                    CorruptionSpace(index=2, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=1, label="Fewest Glitched glitches 2 slots + Add 1R, 1B", demote_dice=2, add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}, target_criterion=TargetCriterion.FEWEST_GLITCHED),
+                    CorruptionSpace(index=2, label="Most MS loses $4 & 2 🔬 + Add 1K", lose_money=4, lose_patches=2, add_cubes={CubeColor.BLACK: 1}, target_criterion=TargetCriterion.MOST_MARKET_SHARE),
                     CorruptionSpace(index=3, label="Add 1R, 1G", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1}),
-                    CorruptionSpace(index=4, label="Lose 2 Secrets + Add 1K", lose_secrets=2, add_cubes={CubeColor.BLACK: 1}),
-                    CorruptionSpace(index=5, label="Return 1 Colored Die & glitch 1 die", return_colored_dice=1, demote_dice=1),
+                    CorruptionSpace(index=4, label="Most Secrets loses 2 Secrets + Add 1K", lose_secrets=2, add_cubes={CubeColor.BLACK: 1}, target_criterion=TargetCriterion.MOST_SECRETS),
+                    CorruptionSpace(index=5, label="Most Colored Dice returns 1 die & glitches 1 slot", return_colored_dice=1, demote_dice=1, target_return_colored_criterion=TargetCriterion.MOST_COLORED_DICE, target_demote_criterion=TargetCriterion.MOST_COLORED_DICE, target_criterion=TargetCriterion.MOST_COLORED_DICE),
                     CorruptionSpace(
                         index=6,
-                        label="Singularity: Lose 1 Secret",
+                        label="Singularity: Most Secrets loses 1 Secret",
                         lose_secrets=1,
                         is_singularity=True,
+                        target_criterion=TargetCriterion.MOST_SECRETS,
                     ),
                 ),
             ),
@@ -889,13 +1122,14 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
             directive_code="SCRIPT_KIDDIE",
             corruption_track=(
                 CorruptionSpace(index=1, label="Add 1R", add_cubes={CubeColor.RED: 1}),
-                CorruptionSpace(index=2, label="All lose $2 + Add 1K", lose_money=2, add_cubes={CubeColor.BLACK: 1}),
-                CorruptionSpace(index=3, label="Lose 1 🔬", lose_patches=1),
+                CorruptionSpace(index=2, label="Player with most $ loses $2 + Add 1K", lose_money=2, add_cubes={CubeColor.BLACK: 1}, target_criterion=TargetCriterion.MOST_MONEY),
+                CorruptionSpace(index=3, label="Player with most 🔬 loses 1 🔬", lose_patches=1, target_criterion=TargetCriterion.MOST_RESEARCH),
                 CorruptionSpace(
                     index=4,
-                    label="Upgrade: Lose 1 🔬",
-                    lose_patches=1,
+                    label="Upgrade: Player with most MS loses 1 MS",
+                    lose_market_share=1,
                     is_upgrade=True,
+                    target_criterion=TargetCriterion.MOST_MARKET_SHARE,
                 ),
             ),
         ),
@@ -908,14 +1142,15 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
             directive_code="DATA_SCRAPER",
             starting_cash_bonus=1,
             corruption_track=(
-                CorruptionSpace(index=1, label="Lose 1 🔬", lose_patches=1),
-                CorruptionSpace(index=2, label="Lose $1 + Add 1K", lose_money=1, add_cubes={CubeColor.BLACK: 1}),
+                CorruptionSpace(index=1, label="Player with most 🔬 loses 1 🔬", lose_patches=1, target_criterion=TargetCriterion.MOST_RESEARCH),
+                CorruptionSpace(index=2, label="Player with most $ loses $2 + Add 1K", lose_money=2, add_cubes={CubeColor.BLACK: 1}, target_criterion=TargetCriterion.MOST_MONEY),
                 CorruptionSpace(index=3, label="Add 1G", add_cubes={CubeColor.GREEN: 1}),
                 CorruptionSpace(
                     index=4,
-                    label="Upgrade: Glitch 1 die",
+                    label="Upgrade: Player with fewest Glitched slots glitches 1 slot",
                     demote_dice=1,
                     is_upgrade=True,
+                    target_criterion=TargetCriterion.FEWEST_GLITCHED,
                 ),
             ),
         ),
@@ -928,10 +1163,10 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
             directive_code="RAAS",
             staging_payload_2p={},
             corruption_track=(
-                CorruptionSpace(index=1, label="All lose $2", lose_money=2),
+                CorruptionSpace(index=1, label="Transfer: Least MS takes $1 from Most MS", transfer_type=TransferType.LEAST_MS_TAKES_CASH, transfer_amount=1),
                 CorruptionSpace(index=2, label="Add 1R, 1B + Add 1K", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.BLACK: 1}),
-                CorruptionSpace(index=3, label="All lose $2 & Add 1R", lose_money=2, add_cubes={CubeColor.RED: 1}),
-                CorruptionSpace(index=4, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+                CorruptionSpace(index=3, label="Player with most $ loses $2 & Add 1R", lose_money=2, add_cubes={CubeColor.RED: 1}, target_criterion=TargetCriterion.MOST_MONEY),
+                CorruptionSpace(index=4, label="Player with most MS loses $3 and 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}, target_criterion=TargetCriterion.MOST_MARKET_SHARE),
                 CorruptionSpace(
                     index=5,
                     label="Upgrade: Add 1R",
@@ -949,10 +1184,10 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
             directive_code="POLYMORPHIC_WORM",
             staging_payload_2p={},
             corruption_track=(
-                CorruptionSpace(index=1, label="Lose 2 🔬", lose_patches=2),
+                CorruptionSpace(index=1, label="Transfer: Least 🔬 takes 1 🔬 from Most 🔬", transfer_type=TransferType.LEAST_RESEARCH_TAKES_RESEARCH, transfer_amount=1),
                 CorruptionSpace(index=2, label="Add 1B, 1G + Add 1K", add_cubes={CubeColor.BLUE: 1, CubeColor.GREEN: 1, CubeColor.BLACK: 1}),
-                CorruptionSpace(index=3, label="All glitch 1 die & Add 1G", demote_dice=1, add_cubes={CubeColor.GREEN: 1}),
-                CorruptionSpace(index=4, label="Glitch 1 die + Add 1K", demote_dice=1, add_cubes={CubeColor.BLACK: 1}),
+                CorruptionSpace(index=3, label="Player with fewest Glitched slots glitches 1 slot & Add 1G", demote_dice=1, add_cubes={CubeColor.GREEN: 1}, target_criterion=TargetCriterion.FEWEST_GLITCHED),
+                CorruptionSpace(index=4, label="Player with most Secrets loses $3 + Add 1K", lose_money=3, add_cubes={CubeColor.BLACK: 1}, target_criterion=TargetCriterion.MOST_SECRETS),
                 CorruptionSpace(
                     index=5,
                     label="Upgrade: Add 1R",
@@ -971,10 +1206,10 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
             staging_payload_2p={},
             corruption_track=(
                 CorruptionSpace(index=1, label="Add 1R, 1B, 1G", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.GREEN: 1}),
-                CorruptionSpace(index=2, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+                CorruptionSpace(index=2, label="Most $ loses $3; Most 🔬 loses 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}, target_money_criterion=TargetCriterion.MOST_MONEY, target_patches_criterion=TargetCriterion.MOST_RESEARCH),
                 CorruptionSpace(index=3, label="Add 1R, 1B", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}),
-                CorruptionSpace(index=4, label="All glitch 1 die & Add 1B, 1K", demote_dice=1, add_cubes={CubeColor.BLUE: 1, CubeColor.BLACK: 1}),
-                CorruptionSpace(index=5, label="Return 1 Colored Die", return_colored_dice=1),
+                CorruptionSpace(index=4, label="Player with fewest Glitched slots glitches 1 slot & Add 1B, 1K", demote_dice=1, add_cubes={CubeColor.BLUE: 1, CubeColor.BLACK: 1}, target_criterion=TargetCriterion.FEWEST_GLITCHED),
+                CorruptionSpace(index=5, label="Player with most Colored Dice returns 1 Colored Die", return_colored_dice=1, target_criterion=TargetCriterion.MOST_COLORED_DICE),
                 CorruptionSpace(
                     index=6,
                     label="Singularity",
@@ -991,32 +1226,36 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
             directive_code="CORRUPTED_KERNEL",
             staging_payload_2p={},
             corruption_track=(
-                CorruptionSpace(index=1, label="Glitch 1 die + Add 1R, 1B", demote_dice=1, add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}),
-                CorruptionSpace(index=2, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
+                CorruptionSpace(index=1, label="Player with fewest Glitched slots glitches 1 slot + Add 1R, 1B", demote_dice=1, add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1}, target_criterion=TargetCriterion.FEWEST_GLITCHED),
+                CorruptionSpace(index=2, label="Player with most MS loses $3 and 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}, target_criterion=TargetCriterion.MOST_MARKET_SHARE),
                 CorruptionSpace(index=3, label="Add 1R, 1G", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1}),
-                CorruptionSpace(index=4, label="Lose 1 Secret + Add 1K", lose_secrets=1, add_cubes={CubeColor.BLACK: 1}),
-                CorruptionSpace(index=5, label="Return 1 Colored Die", return_colored_dice=1),
+                CorruptionSpace(index=4, label="Player with most Secrets loses 1 Secret + Add 1K", lose_secrets=1, add_cubes={CubeColor.BLACK: 1}, target_criterion=TargetCriterion.MOST_SECRETS),
+                CorruptionSpace(index=5, label="Player with most Colored Dice returns 1 Colored Die", return_colored_dice=1, target_criterion=TargetCriterion.MOST_COLORED_DICE),
                 CorruptionSpace(
                     index=6,
-                    label="Singularity: Lose 1 Secret",
+                    label="Singularity: Most Secrets loses 1 Secret",
                     lose_secrets=1,
                     is_singularity=True,
+                    target_criterion=TargetCriterion.MOST_SECRETS,
                 ),
             ),
         ),
     ]
 
 
-def get_default_version_deck(profile: str = "STANDARD") -> List[VersionCard]:
+get_version_cards = get_all_version_cards
+
+
+def get_default_version_deck(profile: str = "STANDARD", player_specific: bool = True) -> List[VersionCard]:
     """Returns the default baseline version cards: Script Kiddie (v1.0), RaaS (v2.0), Zero-Day Override (v3.0)."""
-    cards = get_all_version_cards(profile=profile)
+    cards = get_all_version_cards(profile=profile, player_specific=player_specific)
     v1_pool = [v for v in cards if v.version_str == "v1.0"]
     v2_pool = [v for v in cards if v.version_str == "v2.0"]
     v3_pool = [v for v in cards if v.version_str == "v3.0"]
     return [v1_pool[0], v2_pool[0], v3_pool[0]]
 
 
-def get_roadmap_deck(path_id: int, profile: str = "STANDARD") -> List[VersionCard]:
+def get_roadmap_deck(path_id: int, profile: str = "STANDARD", player_specific: bool = True) -> List[VersionCard]:
     """Returns a deterministic 3-card roadmap deck for a designated path ID (1-4).
 
     Path 1 (Kinetic): Script Kiddie (v1.0), RaaS (v2.0), Corrupted Kernel (v3.0)
@@ -1024,7 +1263,7 @@ def get_roadmap_deck(path_id: int, profile: str = "STANDARD") -> List[VersionCar
     Path 3 (Mixed A): Script Kiddie (v1.0), RaaS (v2.0), Zero-Day Override (v3.0)
     Path 4 (Mixed B): Script Kiddie (v1.0), Polymorphic Worm (v2.0), Corrupted Kernel (v3.0)
     """
-    cards = {c.directive_code: c for c in get_all_version_cards(profile=profile)}
+    cards = {c.directive_code: c for c in get_all_version_cards(profile=profile, player_specific=player_specific)}
     if path_id == 1:
         return [cards["SCRIPT_KIDDIE"], cards["RAAS"], cards["CORRUPTED_KERNEL"]]
     elif path_id == 2:
@@ -1037,9 +1276,9 @@ def get_roadmap_deck(path_id: int, profile: str = "STANDARD") -> List[VersionCar
         raise ValueError(f"Unknown roadmap path_id: {path_id}. Must be 1, 2, 3, or 4.")
 
 
-def get_random_version_deck(rng: random.Random, profile: str = "STANDARD") -> List[VersionCard]:
+def get_random_version_deck(rng: random.Random, profile: str = "STANDARD", player_specific: bool = True) -> List[VersionCard]:
     """Randomly selects 1 v1.0 card, 1 v2.0 card, and 1 v3.0 card for the Rogue Agent roadmap."""
-    all_versions = get_all_version_cards(profile=profile)
+    all_versions = get_all_version_cards(profile=profile, player_specific=player_specific)
     v1_pool = [v for v in all_versions if v.version_str == "v1.0"]
     v2_pool = [v for v in all_versions if v.version_str == "v2.0"]
     v3_pool = [v for v in all_versions if v.version_str == "v3.0"]

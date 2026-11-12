@@ -428,6 +428,8 @@ class PlayerState:
             self.market_share_gained_r2 += actual
         elif source == "face":
             self.market_share_gained_face += actual
+        elif source == "corruption":
+            self.market_share_lost_red += -actual
         else:
             raise ValueError(f"unknown Market Share source {source!r}")
         if self.market_share_min is None or after < self.market_share_min:
@@ -461,6 +463,14 @@ class PlayerState:
         self.purchases_by_color[key] = self.purchases_by_color.get(key, 0) + 1
 
     # --- Backward Compatibility Properties & Hardware Methods ---
+    @property
+    def research(self) -> int:
+        return self.research_tokens
+
+    @research.setter
+    def research(self, value: int) -> None:
+        self.research_tokens = value
+
     @property
     def patches(self) -> int:
         """Backward compatibility bridge forwarding patches to research_tokens."""

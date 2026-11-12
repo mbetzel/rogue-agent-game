@@ -66,7 +66,7 @@ class TestConfig(unittest.TestCase):
     def test_mlb01_presets(self):
         # Phase B: GameConfig() is the v0.37.0 ruleset; legacy_v036() (alias v036()) is the v0.36.0 baseline.
         for n in (2, 3, 4):
-            self.assertEqual(GameConfig(num_players=n), GameConfig.v037(num_players=n))
+            self.assertEqual(GameConfig(num_players=n, player_specific_corruption=False), GameConfig.v037(num_players=n))
             self.assertEqual(GameConfig.v036(num_players=n), GameConfig.legacy_v036(num_players=n))
             self.assertNotEqual(GameConfig(num_players=n), GameConfig.legacy_v036(num_players=n))
             for c in (GameConfig.legacy_v036(num_players=n), GameConfig.v036(num_players=n),

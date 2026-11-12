@@ -87,7 +87,29 @@ class GameEngine:
         self.config = config
         self.variant_cards = resolve_variant_cards(variant_cards or get_default_variant_cards(), config.red_variant_set)
         self.variant_cards = apply_variant_profile(self.variant_cards, config.variant_profile)  # v0.38 (§5)
-        self.version_deck = version_deck or get_default_version_deck(profile=config.corruption_track_profile)
+        self.version_deck = version_deck or get_default_version_deck(
+            profile=config.corruption_track_profile,
+            player_specific=getattr(config, "player_specific_corruption", True),
+        )
+        if not getattr(config, "player_specific_corruption", True) and self.version_deck:
+            from sim.entities import get_all_version_cards, TransferType
+            legacy_by_code = {
+                c.directive_code: c for c in get_all_version_cards(
+                    profile=config.corruption_track_profile, player_specific=False
+                )
+            }
+            converted = []
+            for c in self.version_deck:
+                has_targeting = any(
+                    getattr(sp, "target_criterion", None) is not None
+                    or getattr(sp, "transfer_type", TransferType.NONE) != TransferType.NONE
+                    for sp in c.corruption_track
+                )
+                if has_targeting and c.directive_code in legacy_by_code:
+                    converted.append(legacy_by_code[c.directive_code])
+                else:
+                    converted.append(c)
+            self.version_deck = converted
 
         # Modular Setup Resolution (INV-SETUP-01..04)
         if use_introductory_presets and config.num_players in INTRODUCTORY_PRESETS:
