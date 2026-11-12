@@ -435,7 +435,7 @@ VERSION_TILES: List[VersionTileSpec] = [
         banner_text="**Financial Extortion:** Space 3 drains cash & adds Red cube.\nSpace 5 upgrades to v3.0.",
         spaces=(
             VersionTrackSpaceSpec(1, "All Lose $2"),
-            VersionTrackSpaceSpec(2, "+1 {RED} +1 {GREEN}\n+1 {BLACK}"),
+            VersionTrackSpaceSpec(2, "+1 {RED} +1 {BLUE}\n+1 {BLACK}"),
             VersionTrackSpaceSpec(3, "All Lose $2\n& Add 1 {RED}"),
             VersionTrackSpaceSpec(4, "Lose $3 & 1 {RESEARCH}\n+1 {BLACK}"),
             VersionTrackSpaceSpec(5, "UPGRADE v3.0\n+1 {RED}", is_milestone=True),
@@ -448,7 +448,7 @@ VERSION_TILES: List[VersionTileSpec] = [
         banner_text="**Memory Infiltration:** Space 3 glitches 1 die & adds Green cube.\nSpace 5 upgrades to v3.0.",
         spaces=(
             VersionTrackSpaceSpec(1, "Lose 2 {RESEARCH}"),
-            VersionTrackSpaceSpec(2, "+2 {GREEN}\n+1 {BLACK}"),
+            VersionTrackSpaceSpec(2, "+1 {BLUE} +1 {GREEN}\n+1 {BLACK}"),
             VersionTrackSpaceSpec(3, "All glitch 1 die\n& Add 1 {GREEN}"),
             VersionTrackSpaceSpec(4, "Glitch 1 Die\n+1 {BLACK}"),
             VersionTrackSpaceSpec(5, "UPGRADE v3.0\n+1 {RED}", is_milestone=True),
