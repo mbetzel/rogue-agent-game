@@ -51,59 +51,54 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
 
     *(As on the other tracks, a Breakthrough level keeps the value of the level below it: the Public Relations limit is `1` at Levels 0–1, `2` at Levels 2–3 and `3` at Level 4, always at `3 🔬` per `+1` Market Share. See Phase 6.)*
 
-  * **Personal Reserve** (1 holding slot for your 2nd Purple Proprietary Specialist die, released only by the Public Relations Level 3 Breakthrough)
-  * **Institutional Override Track (`v1.0`, `v2.0`, `v3.0`)**: 3 tracking slots for once-per-version Client Company powers (DTO *Slush Fund* is once per game)
+  * **Personal Reserve** (1 outline space on Public Relations Track Level 3 for your 2nd Purple Proprietary Specialist die, unlocked upon reaching Level 3)
+  * **Institutional Override Track (`v1.0`, `v2.0`, `v3.0`)**: 3 tracking slots on each Client Company Card (which sits alongside your mat) for once-per-version Client Company powers (DTO *Slush Fund* is once per game)
 * **CI/CD Company Terminal Mat Physical Wireframe:**
+*(Client Company Cards and White Hat Dossier Cards are dealt at setup and sit alongside the mat).*
 ```
 +--------------------------------------------------------------------------------------------------------------------+
 |  [LEFT COLUMN: CORPORATE HQ]         |  [MAIN COLUMN: CI/CD PIPELINE & DEFENSE GRID]                               |
 |                                      |                                                                             |
 |  +--------------------------------+  |  +-----------------------------------------------------------------------+  |
-|  | CLIENT COMPANY CARD            |  |  | 1. READY FOR RELEASE (Active Staging / Rolling Pool)                  |  |
-|  | - Omnidyne / Aegis / Meridian  |  |  |                                                                       |  |
-|  |   Helix / DTO / Prometheus     |  |  |  [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]                                      |  |
-|  | - Version Overrides:           |  |  +-----------------------------------------------------------------------+  |
-|  |   [v1.0]   [v2.0]   [v3.0]     |  |                                     ^                                       |
-|  +--------------------------------+  |                                     |  [VERTICAL RELEASE UPGRADE BRIDGE]    |
-|                                      |                                     |  L0: 4 | L1 (1 🔬): ★ Gray die         |
-|  +--------------------------------+  |                                     |  L2 (1 🔬): 5 | L3 (2 🔬): ★ Secret    |
-|  | WHITE HAT OPERATIVE DOSSIER    |  |                                     |  L4 (2 🔬): 6 + 1 free reroll         |
-|  | - Operator / Phreaker / Spook  |  |                                     |                                       |
-|  |   Acoustic / Prodigy / Cipher  |  |  +-----------------------------------------------------------------------+  |
-|  | - Face 6 Signature Protocol    |  |  | 2. IN PRODUCTION (Deployed Dice)                                      |  |
-|  | - Personal Reserve (Purple):   |  |  |  +-----------------------------+  +---------------------------------+  |  |
-|  |   [Die 2: Public Rel. L3]      |  |  |  | INCOME (Cash / Research / ★) |  | DEFENSE GRID (Shield Slots)     |  |  |
-|  +--------------------------------+  |  |  |                             |  | [Shield] [Shield] [Shield] [ ]   |  |  |
-|                                      |  |  |                             |  +---------------------------------+  |  |
-|  +--------------------------------+  |  |  |                             |  | [EMBEDDED SHIELD UPGRADE]       |  |  |
-|  | CORPORATE SECRETS TRACK (VP)   |  |  |  |                             |  | L0: Cap 2 | L1 (1🔬): ★ Gray     |  |  |
-|  | [12][11][10][9][8][7][6][5]    |  |  |  |                             |  | L2: Cap 3 | L3: ★ Secret       |  |  |
-|  | [ 4][ 3][ 2][ 1][ 0: BREACH! ] |  |  |  |                             |  | L4: Cap 4 + $1/block           |  |  |
-|  +--------------------------------+  |  |  +-----------------------------+  +---------------------------------+  |  |
-|                                      |  +-----------------------------------------------------------------------+  |
-|  +--------------------------------+  |                                                                             |
-|  | RESEARCH TOKENS (🔬 UNCAPPED)   |  |  +-----------------------------------------------------------------------+  |
-|  | (Storage Bank)                 |  |  | 3. UNDER DEVELOPMENT (Offline Pipeline)                               |  |
-|  +--------------------------------+  |  |  +-------------------+  [EMBEDDED TRIAGE]     +--------------------+  |  |
-|                                      |  |  | PROCESSING BOX    |  L0: 2 | L1: ★ Gray    | SCANNED BOX        |  |  |
-|  +--------------------------------+  |  |  | (Secret faces)    |  L2: 3 | L3: ★ $3 swap| (Validated)        |  |  |
-|  | LIQUID CASH ($)                |  |  |  |                   |  L4: 4 + 🔬/die >2     |                    |  |  |
-|  | (Storage Bank)                 |  |  |  |                   |                        |                    |  |  |
-|  +--------------------------------+  |  |  |                   |  ----------> --------->|                    |  |  |
-|                                      |  |  +-------------------+                        +--------------------+  |  |
+|  | CORPORATE SECRETS (VP HOLDER)  |  |  | 1. READY FOR RELEASE (Active Staging / Rolling Pool)                  |  |
+|  | - Start: 3 (2P) / 4 (3-4P)      |  |  |                                                                       |  |
+|  | - 1 Secret = 1 VP (Uncapped)   |  |  |  [GRAY] [GRAY] [COMP] [PURP] [ ] [ ] [ ] [ ] [ ] [ ]                   |  |
+|  | - <= 0 = Total Data Breach     |  |  +-----------------------------------------------------------------------+  |
+|  +--------------------------------+  |                                     ^                                       |
+|                                      |                                     |  [VERTICAL RELEASE TRACK]             |
+|  +--------------------------------+  |                                     |  L0: 4 dice                           |
+|  | LIQUID CASH ($ HOLDER)         |  |                                     |  L1 (1 🔬): ★ Gray die [DIE OUTLINE]   |
+|  | - Start: $6 (Uncapped)         |  |                                     |  L2 (1 🔬): 5 dice                     |
+|  | - Contractors ($3) / Market    |  |                                     |  L3 (2 🔬): ★ 1 Secret                 |
+|  +--------------------------------+  |                                     |  L4 (2 🔬): 6 dice + 1 free reroll    |
+|                                      |                                     |                                       |
 |  +--------------------------------+  |  +-----------------------------------------------------------------------+  |
-|  | PUBLIC RELATIONS TRACK         |  |                                                                             |
-|  | L0: +1 Share/rnd | L1: ★ $3    |  |                                                                             |
-|  | L2: +2 Share | L3: ★ Purple    |  |                                                                             |
-|  | L4: +3 Share | 3🔬 per +1       |  |                                                                             |
-|  +--------------------------------+  |                                                                             |
-|                                      |                                                                             |
-|  +--------------------------------+  |                                                                             |
-|  | MARKET SHARE (MAX = START)     |  |                                                                             |
-|  | [17][16][15][14][13][12]       |  |                                                                             |
-|  | [11][10][ 9][ 8][ 7][ 6][ 5]   |  |                                                                             |
-|  | [ 4][ 3][ 2][ 1][0: COLLAPSE]  |  |                                                                             |
-|  +--------------------------------+  +-----------------------------------------------------------------------------+
+|  | RESEARCH TOKENS (🔬 HOLDER)     |  |  | 2. IN PRODUCTION (Deployed Dice)                                      |  |
+|  | - Start: 0 🔬 (Uncapped)        |  |  |  +-----------------------------+  +---------------------------------+  |  |
+|  | - Upgrades (1/1/2/2 🔬; <= 2/turn) & PR |  | INCOME (Cash / Research / ★) |  | DEFENSE GRID (Shield Slots)     |  |  |
+|  +--------------------------------+  |  |  |                             |  | [Slot 1] [Slot 2] [Slot 3] [Slot 4]  |  |
+|                                      |  |  |                             |  +---------------------------------+  |  |
+|  +--------------------------------+  |  |  |                             |  | DEFENSE GRID TRACK               |  |  |
+|  | PUBLIC RELATIONS TRACK (EXPAND)|  |  |                             |  | L0: Cap 2                        |  |  |
+|  | 3 🔬 = +1 Market Share (P6)    |  |  |  |                             |  | L1 (1 🔬): ★ Gray [DIE OUTLINE]  |  |  |
+|  | - L0: Regain up to 1/rnd       |  |  |  |                             |  | L2 (1 🔬): Cap 3                 |  |  |
+|  | - L1: ★ +$3 Liquid Cash        |  |  |  |                             |  | L3 (2 🔬): ★ 1 Secret            |  |  |
+|  | - L2: Regain up to 2/rnd       |  |  |  +-----------------------------+  | L4 (2 🔬): Cap 4 + $1/block         |  |  |
+|  | - L3: ★ 2nd Purple Specialist  |  |  +-----------------------------------------------------------------------+  |
+|  |   Die Reserve [DIE OUTLINE]    |  |                                                                             |
+|  | - L4: Regain up to 3/rnd       |  |  +-----------------------------------------------------------------------+  |
+|  +--------------------------------+  |  | 3. UNDER DEVELOPMENT (CI/CD Pipeline)                                 |  |
+|                                      |  |  +-------------------+  +------------------------------------------+  |  |
+|                                      |  |  | SCANNED BOX       |  | TRIAGE TRACK (Conveyor Bandwidth)        |  |  |
+|                                      |  |  | (Unbounded Tray)  |  | L0: 2 | L1 (1🔬): ★ Gray [DIE OUTLINE]   |  |  |
+|                                      |  |  |                   |  | L2 (1🔬): 3 | L3 (2🔬): ★ $3 swap        |  |  |
+|                                      |  |  | ^ Graduates to    |  | L4 (2🔬): 4 + 🔬/die >2                  |  |  |
+|                                      |  |  |   Ready for       |  | PROCESSING BOX (Elongated FIFO Queue)    |  |  |
+|                                      |  |  |   Release (P5)    |  | <-- [OLDEST] <== FIFO FLOW <== [NEWEST]  |  |  |
+|                                      |  |  |                   |  | Bank on Exit: Purple +1, Red/Blue/Grn +2 |  |  |
+|                                      |  |  +-------------------+  +------------------------------------------+  |  |
+|                                      |  +-----------------------------------------------------------------------+  |
++--------------------------------------+-----------------------------------------------------------------------------+
 ```
 * **6 Client Company Cards** (Enterprise clients contracting the White Hat Operative; each grants an Institutional Override and names the color of your starting colored die — Red, Blue or Green, see Section 6D. Every company starts with the same hardware and resources):
   * **Meridian Financial Trust** (*Banking Infrastructure / Redundant Crew*)
