@@ -128,6 +128,10 @@ class GameController:
         if research_track_model is not None:
             return GameConfig(research_track_model=research_track_model, **common)
         version = str(rules_version or WEB_DEFAULT_RULES_VERSION).lower().lstrip("v")
+        if version in ("040", "0.40.0", "0.40", "0391", "0.39.1", "039", "0.39.0"):
+            return GameConfig.v040(**common)
+        if version in ("038f", "0.38f"):
+            return GameConfig.v038f(**common)
         if version in ("038e", "0.38e"):
             return GameConfig.v038e(**common)
         if version in ("038d", "0.38d"):
@@ -545,6 +549,11 @@ class GameController:
         return phase3_income_actions.confirm_income(
             self, player_id, spook_burn_die_id=spook_burn_die_id, phreaker_die_id=phreaker_die_id
         )
+
+    def capital_injection(self, player_id: int) -> Dict[str, Any]:
+        """Phase 3: Meridian Financial Trust Capital Injection (+3 $)."""
+        return phase3_income_actions.capital_injection(self, player_id)
+
 
     def confirm_attacks(
         self,

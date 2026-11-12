@@ -47,6 +47,7 @@ HOOK_DTYPES: Dict[str, str] = {
     "choose_prodigy_face_override": "phase1_roll",
     "choose_prodigy_purple_star_override": "phase1_roll",
     "choose_meridian_override": "phase1_roll",
+    "choose_meridian_capital_injection": "phase3_income",
     "choose_operator_ability": "phase1_roll",
     "choose_omnidyne_override": "phase1_roll",
     "choose_phreaker_ability": "phase1_roll",

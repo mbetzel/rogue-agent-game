@@ -34,6 +34,7 @@ import {
 } from "../state.js";
 import {
   doResolveBreakthrough,
+  doCapitalInjection,
   doHireContractors,
   doRoll,
   doReroll,
@@ -71,7 +72,7 @@ export function renderActionDock() {
 
   if (state.phase === 1) {
     if (caps.can_hire_contractors || caps.can_roll) {
-      if (caps.can_hire_contractors) {
+      if (caps.can_hire_contractors && (state.contractor_max_hire > 0 || state.contractor_supply > 0)) {
         const hireWrap = document.createElement("div");
         hireWrap.style.display = "inline-flex";
         hireWrap.style.alignItems = "center";
@@ -1401,6 +1402,15 @@ function renderIncomePanel(controls, human, caps) {
         ? (human.scanned_dice || []).map((d) => `<option value="${d.die_id}">Jumper Diagnostics: roll Scanned Box ${d.color.toUpperCase()} #${d.die_id}</option>`).join("")
         : `<option value="">Jumper Diagnostics: empty Under Development (+$1)</option>`);
     bar.appendChild(diagSelect);
+  }
+  if (caps.can_capital_injection) {
+    const ciBtn = document.createElement("button");
+    ciBtn.className = "action-btn";
+    ciBtn.style.borderColor = "#38bdf8";
+    ciBtn.style.color = "#38bdf8";
+    ciBtn.innerText = "★ Capital Injection (+$3 Cash)";
+    ciBtn.onclick = () => doCapitalInjection();
+    bar.appendChild(ciBtn);
   }
   const btn = document.createElement("button");
   btn.className = "action-btn btn-confirm-income";

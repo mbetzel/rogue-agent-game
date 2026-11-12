@@ -186,3 +186,33 @@ def record_phreaker_diagnostics(controller: GameController, player_id: int, die_
     meta["pending_phreaker_die_id"] = die_id
     controller.event_log.append(f"{meta['name']} selected a Jumper Diagnostics target (resolves on Phase 3 confirm).")
     return controller.get_full_state()
+
+
+def capital_injection(controller: GameController, player_id: int) -> Dict[str, Any]:
+    """Activates Meridian Financial Trust's Capital Injection once per Rogue Agent version during Phase 3."""
+    from web.controller.capabilities import has_company_override, legacy_bridge_enabled
+    from sim.entities import CompanyCode
+
+    if controller.phase != int(RoundPhase.INCOME):
+        raise ValueError(f"Capital Injection resolves in Phase 3: Income (current phase {controller.phase})")
+    player = controller.state.players[player_id]
+    meta = controller.player_meta[player_id]
+    if player.is_patient_zero:
+        raise ValueError("Eliminated players cannot perform operations")
+    is_meridian = has_company_override(player, CompanyCode.MERIDIAN, legacy_bridge_enabled(controller))
+    if not is_meridian:
+        raise ValueError("Player does not have Meridian Financial Trust Capital Injection override")
+    meridian_mode = getattr(controller.state.config, "meridian_override_mode", "REDUNDANT_CREW")
+    if meridian_mode != "CAPITAL_INJECTION":
+        raise ValueError("Capital Injection is not active under current ruleset")
+
+    active_ver = controller.state.active_version.version_str if controller.state.active_version else None
+    if not player.is_ability_available(active_ver):
+        raise ValueError("Capital Injection override has already been used for this SETEC version")
+
+    cash_gain = getattr(controller.state.config, "meridian_capital_injection_cash", 3)
+    player.money += cash_gain
+    player.mark_ability_used(active_ver)
+    controller.event_log.append(f"{meta['name']} activated Meridian Financial Trust Capital Injection (+${cash_gain} cash).")
+    return controller.get_full_state()
+

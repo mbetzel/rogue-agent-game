@@ -12,7 +12,15 @@ import random
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from sim.config import DieColor
-from sim.entities import ArchetypeCode, Face, WhiteHatCode, has_signature_protocol, legacy_bridge_enabled
+from sim.entities import (
+    ArchetypeCode,
+    CompanyCode,
+    Face,
+    WhiteHatCode,
+    has_company_override,
+    has_signature_protocol,
+    legacy_bridge_enabled,
+)
 from sim.engine.state import IncomeRecord
 from sim.engine import secret_faces
 
@@ -78,6 +86,12 @@ def _die_income_row(state: GameState, player: PlayerState, die: Die) -> Optional
             elif _is_operative(player, WhiteHatCode.SPOOK, legacy_bridge_enabled(state)):
                 money += 2
                 star_note = "Burn Notice (+$2)"
+            elif _is_operative(player, WhiteHatCode.OPERATOR, legacy_bridge_enabled(state)):
+                if getattr(state.config, "operator_protocol_mode", "CONTINGENT_STAFFING") == "LOGISTICS_BOUNTY":
+                    gain_research = getattr(state.config, "operator_logistics_bounty_research", 1)
+                    research += gain_research
+                    protocol_research = gain_research
+                    star_note = f"Logistics Bounty (+{gain_research} 🔬)"
         elif code == "R1":
             card = (getattr(state, "variant_cards", None) or {}).get(DieColor.RED)
             star_note = f"{card.name} (+$2)" if card is not None and card.code == "R1" else _STAR_NOTES.get(code)
@@ -140,6 +154,7 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
             player.gain_secrets(row["secrets"], source)
         record.money += row["money"]
         record.research += row["research"]
+        record.protocol_research += row.get("protocol_research", 0)
         record.secrets += row["secrets"]
         record.details.append(row)
         if row.get("market_share") and engine.config.is_market_share:
@@ -230,6 +245,7 @@ def preview_player_income(state: GameState, player: PlayerState) -> IncomeRecord
             continue
         record.money += row["money"]
         record.research += row["research"]
+        record.protocol_research += row.get("protocol_research", 0)
         record.secrets += row["secrets"]
         record.details.append(row)
     record.purple_star_triggers = len(purple_star_dice_in_production(player))
@@ -406,6 +422,37 @@ def resolve_income_signature_protocols(
     return triggers
 
 
+def resolve_meridian_capital_injection(
+    engine: GameEngine,
+    player: PlayerState,
+    record: Optional[IncomeRecord] = None,
+) -> bool:
+    """Phase 3 Institutional Override: Meridian Capital Injection (+3 cash once per version)."""
+    active_ver = engine.state.active_version.version_str if (engine.state and engine.state.active_version) else None
+    is_meridian = (
+        has_company_override(player, CompanyCode.MERIDIAN, legacy_bridge_enabled(engine))
+        and player.is_ability_available(active_ver)
+        and getattr(engine.config, "meridian_override_mode", "REDUNDANT_CREW") == "CAPITAL_INJECTION"
+    )
+    if not is_meridian:
+        return False
+
+    use_injection = player.bot.choose_meridian_capital_injection(
+        player_state=player,
+        game_state=engine.state,
+        rng=engine.rng,
+    )
+    if use_injection:
+        cash = getattr(engine.config, "meridian_capital_injection_cash", 3)
+        player.gain_money(cash, "capital_injection")
+        player.mark_ability_used(active_ver)
+        if record is not None:
+            record.capital_injection_used = True
+            record.capital_injection_cash = cash
+        return True
+    return False
+
+
 def execute_player_income(
     engine: GameEngine,
     player: PlayerState,
@@ -427,6 +474,7 @@ def execute_player_income(
         trigger_count=triggers,
         record=record,
     )
+    resolve_meridian_capital_injection(engine, player, record=record)
     record.money = player.money - money0
     record.research = player.research_tokens - research0
     record.secrets = player.secrets - secrets0
