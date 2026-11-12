@@ -304,14 +304,24 @@ class TestParity(unittest.TestCase):
     def test_mlb17_v036_parity(self):
         from tests.fixtures.v036_parity import capture
 
+        v036_factory = lambda **kw: GameConfig.legacy_v036(
+            track_step_costs=(1, 2, 2, 3),
+            max_hardware_upgrades_per_turn=999,
+            **kw
+        )
         # Phase B: legacy_v036() is the v0.36.0 baseline (full seeds); the v036() alias gets a 50-seed subset.
-        self._replay(GameConfig.legacy_v036, capture.SCENARIOS, capture.PLAYER_COUNTS, capture.SEEDS)
-        self._replay(GameConfig.v036, capture.SCENARIOS, capture.PLAYER_COUNTS, capture.SEEDS[:50])
+        self._replay(v036_factory, capture.SCENARIOS, capture.PLAYER_COUNTS, capture.SEEDS)
+        self._replay(v036_factory, capture.SCENARIOS, capture.PLAYER_COUNTS, capture.SEEDS[:50])
 
     def test_mlb18_off_switch_parity(self):
         from tests.fixtures.v036_parity import capture
 
-        zero = lambda **kw: GameConfig.v036(market_leader_bonus_by_player_count={3: (0, 0, 0)}, **kw)  # noqa: E731
+        zero = lambda **kw: GameConfig.v036(
+            market_leader_bonus_by_player_count={3: (0, 0, 0)},
+            track_step_costs=(1, 2, 2, 3),
+            max_hardware_upgrades_per_turn=999,
+            **kw
+        )  # noqa: E731
         self._replay(zero, capture.SCENARIOS, (3,), capture.SEEDS[:20])
 
 

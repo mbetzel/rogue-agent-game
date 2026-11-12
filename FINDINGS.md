@@ -514,3 +514,46 @@ Sources: `docs/specs/market_share_headroom_spec.md`, `sim_results/market_share_h
      - Invariants `INV-MS-HEADROOM-01` through `08` fully validated.
      - Floor at 0 and ceiling at 20 respected with zero overflow exceptions across all matches. Outlier seeds confirmed clean resolution on early wipeouts (seeds 87/1146 via PZ) and long engine games (seeds 254/400/650 via Singularity at Round 13).
 - **Official Balance Verdict: OFFICIALLY APPROVED (`v0.38g` / Headroom).** The headroom architecture resolves all dead face and PR track lockout defects without perturbing game length or threat curves. The candidate is approved for baseline lock and Phase B documentation / PnP asset sync.
+
+## 49. Phase 55 Post-Telemetry Balance Assessment: Research Upgrade Limit & Track Step Costs (`v0.39.0` Candidate): APPROVED
+
+Sources: `docs/specs/spec_research_upgrade_limit.md`, `sim_results/v390_research_upgrade_limit/validation_report.md`, `sim_results/v390_research_upgrade_limit/sweep_report.json` (3,600 games across 2P/3P/4P, seeds 42..1241).
+
+- **Context & Design Problem in Baseline:**
+  Under the pre-v0.39.0 research architecture (`(1, 2, 2, 3) 🔬` step costs and unbounded per-turn hardware upgrades):
+  1. Early hardware progression suffered from steep initial friction (2 🔬 required for L2), delaying early specialization and pipeline capacity expansion.
+  2. Late-game research hoarding enabled explosive single-turn bursts (players jumping 3–4 levels on tracks simultaneously), creating severe snowballing and de-synchronizing engine development from the round counter.
+  3. The absence of a per-turn upgrade cap allowed degenerate multi-track hyper-engineering.
+- **Architectural Solution (`v0.39.0` Package):**
+  1. **Smoothed Hardware Track Step Costs:** Re-calibrated to `(1, 1, 2, 2) 🔬` across all four tracks (Defense Grid, Conveyor Triage, CI/CD Pipeline, Public Relations Track). Total track cost reduced from 8 🔬 to 6 🔬; L1 and L2 are accessible at 1 🔬 each.
+  2. **Operations Turn Hardware Upgrade Limit (`max = 2`):** A strict per-turn hardware upgrade limit (`max_hardware_upgrades_per_turn = 2`) enforced in Phase 6: Operations (Item 1). Players may execute at most 2 total hardware track upgrades per turn across all tracks combined.
+  3. **Independence of Market Share Regain:** PR Market Share regain in Item 2 remains completely independent of the hardware upgrade limit. Breakthrough bonuses (e.g. +$2 from Triage L2) immediately fund subsequent operations actions within the same turn.
+  4. **Telemetry & Controller Guardrails:** Engine, web controller, and bot policies reject excess upgrade requests, logging them to `excess_hardware_upgrades_requested` and `RoundTelemetry.excess_hardware_upgrades_by_player`.
+- **Validation Against Core Design Pillars & Balance Criteria (3,600 Games):**
+  1. **Macro Pacing Preserved:**
+     - Mean rounds played: **8.97** (2P), **9.39** (3P), and **9.04** (4P) — all solidly inside the canonical 8.5–9.5 round target window (baseline was 8.93, 9.29, 9.03).
+     - Timeouts / Limit Hits: **0 (0.0%)** across all pods.
+  2. **Tri-Modal End-Game Stability:**
+     - **Singularity:** 38.8% (2P), 52.0% (3P), 44.3% (4P) — aggregate 45.0% (target 30%–55%).
+     - **Market Collapse:** 45.0% (2P), 25.9% (3P), 29.4% (4P) — aggregate 33.4% (target 15%–45%).
+     - **Patient Zero:** 15.3% (2P), 21.9% (3P), 26.2% (4P) — aggregate 21.1% (target 15%–35%).
+     - **Total Wipeout:** 0.92% (2P), 0.17% (3P), 0.00% (4P) — aggregate 0.36% (guardrail $\le 2.0\%$).
+  3. **Track Progression & Smoothing:**
+     - Mean hardware upgrades per seat increased from 3.06–3.53 to **3.98** (2P), **4.66** (3P), and **4.25** (4P) (+0.92 to +1.13 upgrades/seat), confirming enhanced hardware liquidity from 1 🔬 step costs.
+     - L3 Breakthrough achievement surged: **62.6%** (2P, +12.2%), **70.9%** (3P, +12.2%), and **64.3%** (4P, +11.1%), ensuring players reliably access mid-game track powers.
+     - L4 Capstone achievement increased to **45.2%** (2P), **54.7%** (3P), and **48.8%** (4P) (+18.8% to +23.6%), rewarding focused endgame specialization.
+     - **Anti-Snowball Guardrail:** Players maxing 2+ tracks held strictly to **0.00%** across all pods (target $< 10.0\%$). Hyper-engineering runaway is completely suppressed.
+  4. **Turn Limit Enforcement & Telemetry:**
+     - In simulated bot matches, research policies naturally throttled want-lists at `max = 2` (TEST-RUL-08); engine telemetry confirms 0 overflow violations under compliant policies while unit tests TEST-RUL-02 and TEST-RUL-06 verify exact truncation and telemetry logging when 3+ upgrades are submitted.
+     - Burst multi-level jumps in a single turn are eradicated, pacing upgrades across rounds.
+  5. **Public Relations Track Defense & Telemetry:**
+     - Market Share regains averaged **1.95** (2P), **2.36** (3P), and **2.46** (4P) points per seat, powered by **5.85 🔬–7.37 🔬** invested in PR.
+     - Red cube block rate held steady at **18.0%** (2P), **21.3%** (3P), and **21.9%** (4P), providing active economic self-defense against unblocked Red cube pressure (mean share lost 12.36–12.82 points).
+  6. **Company Equity & Archetype Viability:**
+     - Starting Color Win Rates (3P): Red **31.7%** / Blue **33.6%** / Green **34.5%** (fair share 33.3%, all within $\pm 1.7\%$).
+     - Starting Color Win Rates (4P): Red **27.4%** / Blue **22.9%** / Green **24.7%** (fair share 25.0%, all within $\pm 2.5\%$).
+     - Starting Color Win Rates (2P): Red **50.1%** / Blue **48.7%** / Green **51.2%** (fair share 50.0%, dead-center).
+     - Client Company win rates remain balanced: Omnidyne (26.9%–56.9%), Aegis (27.5%–53.0%), Prometheus (28.1%–50.6%), Meridian (26.7%–49.5%), Helix (22.5%–46.0%), DTO (18.1%–44.6%).
+     - Competitive archetype diversity maintained: AdaptiveBalanced (46.5%–71.0%), SecOpsTurtle (26.9%–53.7%), VentureGreed (24.2%–52.1%), Accelerationist (19.6%–52.4%), MixedPolicy (25.2%–47.6%).
+- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.39.0`).** The Research Upgrade Limit (`max = 2`) and Track Step Costs `(1, 1, 2, 2) 🔬` successfully smooth early track progression, cap runaway hyper-engineering, and maintain rock-solid macro pacing and tri-modal endgame tension. Recommended for canonical lock in `RULES.md` and release as `v0.39.0`.
+

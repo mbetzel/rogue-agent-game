@@ -211,6 +211,7 @@ class GameController:
                 "has_committed": False,
                 "commitments": {},
                 "purchases_this_turn": 0,
+                "upgrades_this_turn": 0,
                 "dirty_income_taken_this_turn": False,
                 "spent_from_kept": 0,
                 "locked_reroll_indices": [],
@@ -384,6 +385,7 @@ class GameController:
             meta["has_committed"] = False
             meta["commitments"] = {}
             meta["purchases_this_turn"] = 0
+            meta["upgrades_this_turn"] = 0
             meta["dirty_income_taken_this_turn"] = False
             meta["spent_from_kept"] = 0
             meta["locked_reroll_indices"] = []
@@ -583,6 +585,8 @@ class GameController:
 
     def upgrade_track(self, player_id: int, track_type: str) -> Dict[str, Any]:
         return phase6_operations_actions.upgrade_hardware_track(self, player_id, track_type)
+
+    upgrade_hardware_track = upgrade_track
 
     def file_patent(self, player_id: int) -> Dict[str, Any]:
         return phase6_operations_actions.file_cryptographic_patent(self, player_id)

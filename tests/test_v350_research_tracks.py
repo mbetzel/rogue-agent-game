@@ -83,7 +83,7 @@ class TestTrackCostsAndLevels(V035Harness):
         e = self.make()
         p = e.state.players[0]
         for t in rt.TRACKS:
-            p.research_tokens = 8
+            p.research_tokens = 6
             costs = []
             while True:
                 c = p.get_track_upgrade_cost(t)
@@ -91,7 +91,7 @@ class TestTrackCostsAndLevels(V035Harness):
                     break
                 costs.append(c)
                 self.assertTrue(p.upgrade_track(t))
-            self.assertEqual(costs, [1, 2, 2, 3], t)
+            self.assertEqual(costs, [1, 1, 2, 2], t)
             self.assertEqual(p.research_tokens, 0)
             self.assertIsNone(p.get_track_upgrade_cost(t))
             self.assertFalse(p.upgrade_track(t))
@@ -104,7 +104,7 @@ class TestTrackCostsAndLevels(V035Harness):
         self.assertEqual(p2.get_track_upgrade_cost("DEFENSE"), 1)
         p2.research_tokens = 1
         p2.upgrade_track("DEFENSE")
-        self.assertEqual(p2.get_track_upgrade_cost("DEFENSE"), 2)
+        self.assertEqual(p2.get_track_upgrade_cost("DEFENSE"), 1)
 
     def test_r02_capacity_per_level(self):
         e = self.make()
@@ -122,7 +122,7 @@ class TestTrackCostsAndLevels(V035Harness):
         plan = Phase3ActionPlan(track_upgrades=["TRIAGE", "TRIAGE"])
         e = self.make(bots=[PlanBot(0, plan), PlanBot(1)])
         p0, p1 = e.state.players
-        p0.research_tokens = 3  # L0->L1 (1) + L1->L2 (2)
+        p0.research_tokens = 2  # L0->L1 (1) + L1->L2 (1)
         p0.glitched_dice.extend(self.gray() for _ in range(4))
         c = [self.deploy(e, p0, [self.gray(Face("+$1", money=1))]), self.deploy(e, p1, [])]
         self.force(e, c, {CubeColor.RED: 1})
@@ -147,8 +147,9 @@ class TestBreakthroughs(V035Harness):
 
     def test_r05_defense_l0_to_l3_in_order(self):
         e = self.make()
+        e.config.max_hardware_upgrades_per_turn = 4
         p = e.state.players[0]
-        p.research_tokens, p.secrets = 5, 8
+        p.research_tokens, p.secrets = 4, 8
         self.ops(e, p, Phase3ActionPlan(track_upgrades=["DEFENSE"] * 3))
         self.assertEqual(p.defense_level, 3)
         self.assertEqual(p.defense_capacity, 3)
@@ -188,9 +189,10 @@ class TestBreakthroughs(V035Harness):
     def test_r06b_unaffordable_step_stops_the_plan(self):
         e = self.make()
         p = e.state.players[0]
-        p.research_tokens = 2
-        self.ops(e, p, Phase3ActionPlan(track_upgrades=["DEFENSE", "DEFENSE", "RELEASE"]))
-        self.assertEqual((p.defense_level, p.release_level, p.research_tokens), (1, 0, 1))
+        p.defense_level = 2
+        p.research_tokens = 1
+        self.ops(e, p, Phase3ActionPlan(track_upgrades=["DEFENSE", "RELEASE"]))
+        self.assertEqual((p.defense_level, p.release_level, p.research_tokens), (2, 0, 1))
 
     def test_r07_no_double_breakthrough(self):
         e = self.make()
@@ -536,7 +538,7 @@ class TestLevel4Effects(V035Harness):
         # Filing after a same-turn Patents upgrade uses the new rate
         e = self.make()
         p = e.state.players[0]
-        p.patent_level, p.research_tokens, p.secrets = 1, 5, 5
+        p.patent_level, p.research_tokens, p.secrets = 1, 4, 5
         self.ops(e, p, Phase3ActionPlan(track_upgrades=["PATENT"], patent_filings=5))
         self.assertEqual((p.patent_level, p.secrets, p.research_tokens), (2, 7, 0))
 
@@ -672,16 +674,18 @@ class TestResearchPolicy(unittest.TestCase):
         return plan_research(ResearchPolicy(focus_order=order), p, s, GameConfig.legacy_v035())
 
     def test_r29_policy(self):
-        # Focus first up to L4 (1+2+2+3 = 8)
-        self.assertEqual(self.plan(self._P(8)), (["TRIAGE"] * 4, 0))
-        # Save when short: 2 research buys L1 (1) then can't afford L2 (2) -> stop
-        self.assertEqual(self.plan(self._P(2)), (["TRIAGE"], 0))
-        # Focus done -> L1 on each other track, then L2 of 2nd track
-        self.assertEqual(self.plan(self._P(5, TRIAGE=4)), (["DEFENSE", "RELEASE", "PATENT", "DEFENSE"], 0))
-        # Everything bought + research >= 4 -> file Patents with the rest at the post-upgrade rate
+        # Focus first up to L4: capped at 2 upgrades per turn (costs 1 + 1 = 2)
+        self.assertEqual(self.plan(self._P(8)), (["TRIAGE", "TRIAGE"], 0))
+        # 2 research buys L1 (1) and L2 (1) -> 2 upgrades cap reached
+        self.assertEqual(self.plan(self._P(2)), (["TRIAGE", "TRIAGE"], 0))
+        # 1 research buys L1 (1), saves toward L2 -> stop
+        self.assertEqual(self.plan(self._P(1)), (["TRIAGE"], 0))
+        # Focus done -> L1 on each other track, capped at 2 upgrades per turn
+        self.assertEqual(self.plan(self._P(5, TRIAGE=4)), (["DEFENSE", "RELEASE"], 0))
+        # Upgrades capped at 2 -> file Patents with the rest at the post-upgrade rate
         up, filings = self.plan(self._P(9, TRIAGE=4))
-        self.assertEqual(up, ["DEFENSE", "RELEASE", "PATENT", "DEFENSE"])
-        self.assertEqual(filings, (9 - 5) // 2)
+        self.assertEqual(up, ["DEFENSE", "RELEASE"])
+        self.assertEqual(filings, (9 - 2) // 2)
         # Late game (any survivor <= 3 Secrets): no upgrades, file everything
         other = self._P(0)
         other.secrets = 3

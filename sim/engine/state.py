@@ -116,6 +116,7 @@ class PlayerState:
     defense_level: int = 0
     patent_level: int = 0
     upgrade_discount: int = 0
+    excess_hardware_upgrades_requested: int = 0
 
     # --- CI/CD Pipeline Zones (v0.22.0 Canonical) ---
     ready_for_release_dice: List[Die] = field(default_factory=list)
@@ -225,6 +226,7 @@ class PlayerState:
         }
         self.slush_fund_used_game = False
         self.triage_l3_upgrade_color: Optional[str] = None
+        self.excess_hardware_upgrades_requested = 0
         # v0.36.0 Market Share (None under RedMode.RANSOM; initialised by GameEngine under MARKET_SHARE)
         self.market_share: Optional[int] = None
         self.market_share_max: Optional[int] = None
@@ -955,6 +957,7 @@ class RoundTelemetry:
     track_upgrades_by_player: Dict[int, List[Tuple[str, int]]] = field(default_factory=dict)
     breakthroughs_by_player: Dict[int, List[Dict[str, Any]]] = field(default_factory=dict)
     rejected_purple_purchases_by_player: Dict[int, int] = field(default_factory=dict)
+    excess_hardware_upgrades_by_player: Dict[int, int] = field(default_factory=dict)
     # --- v0.36.0 Market Share telemetry (empty / None under RANSOM except red_by_player, purchases_by_player) ---
     market_share_after_p4: Dict[int, Optional[int]] = field(default_factory=dict)
     market_share_end_of_round: Dict[int, Optional[int]] = field(default_factory=dict)

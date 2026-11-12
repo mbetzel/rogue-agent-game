@@ -69,6 +69,13 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Validation Sweep (`product-owner`):* `sim_results/market_share_headroom/validation_report.md` (3,600 games across 2P/3P/4P, seeds 42..1241). R1 Red F1 choice selection jumped from 0.0% to 100.0%; R1 ceiling congestion dropped from 54–73% to 0.0%; pacing 8.72–9.12 rounds; 0 timeouts.
   - [x] *Balance Sign-Off (`game-designer`):* `FINDINGS.md` §48. Zero Blank Faces restored; pacing and tri-modal end triggers healthy. APPROVED.
   - [x] *PnP Asset Update (`graphic-designer`):* `pnp/generate_pnp.py` updated to 3x7 (21-cell) Central Market Share Track and PDFs regenerated.
+- [x] **Phase 55: Research Upgrade Limit & Track Step Costs (`v0.39.0`)**
+  - [x] *Pre-SDLC Game Designer Modeling:* Evaluated step cost re-calibration from `(1, 2, 2, 3)` to `(1, 1, 2, 2) 🔬` (6 🔬 total) and Operations Turn hardware upgrade limit (`max = 2`). Addressed early track friction, late research hoarding, and multi-track snowballing.
+  - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/spec_research_upgrade_limit.md` with invariants INV-RUL-01..08.
+  - [x] *Implementation (`senior-engineer`):* `sim/config.py` (`track_step_costs`, `max_hardware_upgrades_per_turn`), `sim/engine/phase6_operations.py`, `sim/bots/research_policy.py`, `sim/bots/pr_push_policy.py`, `sim/engine/state.py`, `core.py`, `end_game.py`, `web/controller/*`, `tests/test_research_upgrade_limit.py` (TEST-RUL-01..08 passed).
+  - [x] *Code Review Gate (`staff-engineer`):* APPROVED (full regression clean, backwards parity preserved).
+  - [x] *Validation Sweep (`product-owner`):* `sim_results/v390_research_upgrade_limit/validation_report.md` (3,600 games across 2P/3P/4P, seeds 42..1241, 0 errors). Mean rounds 8.97 (2P), 9.39 (3P), 9.04 (4P); Singularity 38.8%–52.0%, Patient Zero 15.3%–26.2%, Market Collapse 25.9%–45.0%, Total Wipeout ≤ 0.92%. Upgrades per seat 3.98–4.66; L3 reached 62.6%–70.9%; L4 reached 45.2%–54.7%; 2+ maxed tracks held to 0.00%.
+  - [x] *Balance Sign-Off (`game-designer` / `product-owner`):* `FINDINGS.md` §49. Pacing, tri-modal distribution, anti-snowballing, and company equity fully validated. APPROVED (`v0.39.0`).
 - [x] **Completed phases (Phases 1–46, 48)** are archived in [docs/archive/PLAN_completed_phases.md](docs/archive/PLAN_completed_phases.md), along with the legacy v0.3-era Sections 3–5 (code architecture, experiment matrix, SDLC checklist).
 
 ---

@@ -40,7 +40,7 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
     * **Scanned Box** (modules completing verification before release)
     * **Hardware Throughput Limits** (Triage Bandwidth: Processing $\to$ Scanned; Release Bandwidth: Scanned $\to$ Ready)
   * **Central Market Share Track** (on the Central SETEC Agent Board, numbered `0` to `20` `[TUNE: v0.38e]`). Starting value is `13` at 2 players and `16` at 3 and 4 players (allowing `+7` or `+4` spaces of headroom to grow up to the track maximum of `20`). Lowered by unblocked **Red Cubes** and *Customer Poaching*; raised by Red and Yellow Market Share faces, *Brand Protection* and *Ad Campaign*, and regained with research through the **Public Relations Track**. A surviving player at `0` triggers a **Market Collapse** (see Phase 4). Market Share places earn the **Market Leader Bonus** (see Phase 5 and Section 5).
-  * **Terminal Hardware & R&D Upgrade Tracks (4 Independent Tracks, Levels 0 $\to$ 4):** Each step costs **`1 / 2 / 2 / 3 🔬`** to reach Level 1 / 2 / 3 / 4 `[TUNE]` (`8 🔬` per track). Levels 1 and 3 of every track carry a **Breakthrough**, resolved immediately when that level is reached (see Phase 6).
+  * **Terminal Hardware & R&D Upgrade Tracks (4 Independent Tracks, Levels 0 $\to$ 4):** Each step costs **`1 / 1 / 2 / 2 🔬`** to reach Level 1 / 2 / 3 / 4 `[TUNE]` (`6 🔬` per track). Levels 1 and 3 of every track carry a **Breakthrough**, resolved immediately when that level is reached (see Phase 6).
 
     | Track | Level 0 | Level 1 (Breakthrough) | Level 2 | Level 3 (Breakthrough) | Level 4 |
     | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -66,8 +66,8 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
 |  |   [v1.0]   [v2.0]   [v3.0]     |  |                                     ^                                       |
 |  +--------------------------------+  |                                     |  [VERTICAL RELEASE UPGRADE BRIDGE]    |
 |                                      |                                     |  L0: 4 | L1 (1 🔬): ★ Gray die         |
-|  +--------------------------------+  |                                     |  L2 (2 🔬): 5 | L3 (2 🔬): ★ Secret    |
-|  | WHITE HAT OPERATIVE DOSSIER    |  |                                     |  L4 (3 🔬): 6 + 1 free reroll         |
+|  +--------------------------------+  |                                     |  L2 (1 🔬): 5 | L3 (2 🔬): ★ Secret    |
+|  | WHITE HAT OPERATIVE DOSSIER    |  |                                     |  L4 (2 🔬): 6 + 1 free reroll         |
 |  | - Operator / Phreaker / Spook  |  |                                     |                                       |
 |  |   Acoustic / Prodigy / Cipher  |  |  +-----------------------------------------------------------------------+  |
 |  | - Face 6 Signature Protocol    |  |  | 2. IN PRODUCTION (Deployed Dice)                                      |  |
@@ -299,15 +299,15 @@ Place every player who is not **Patient Zero** by their **Market Share** at that
 ### Phase 6: Operations (Operations Turns, Clockwise)
 
 Surviving White Hat Operatives take clockwise **Operations Turns** starting with the **First Player**. On your turn, perform any of the following operations in any order:
-1. **Terminal Hardware Track Upgrades:**
-   * Spend Research Tokens (`🔬`) to raise any of your 4 tracks one level at a time: **`1 🔬`** to reach Level 1, **`2 🔬`** for Level 2, **`2 🔬`** for Level 3, **`3 🔬`** for Level 4 `[TUNE]` (no discounts; unlimited upgrades per turn as long as tokens are available). See the track table in Section 2.
-   * **Breakthroughs (Levels 1 and 3):** When a track reaches Level 1 or Level 3, its **Breakthrough** resolves **immediately**, before your next operation. If you raise several levels in one turn, resolve them one level at a time, in the order you buy them (e.g. `$3` from the Public Relations Level 1 Breakthrough can pay for a Triage Level 3 Breakthrough bought afterwards). Each Breakthrough happens only once, the first time you reach that level.
+1. **Terminal Hardware Track Upgrades (Limit `2` upgrades per turn `[TUNE]`):**
+   * Spend Research Tokens (`🔬`) to raise any of your 4 tracks one level at a time: **`1 🔬`** to reach Level 1, **`1 🔬`** for Level 2, **`2 🔬`** for Level 3, **`2 🔬`** for Level 4 `[TUNE]` (no discounts; limit 2 hardware upgrades per turn `[TUNE]`, across all tracks combined). See the track table in Section 2.
+   * **Breakthroughs (Levels 1 and 3):** When a track reaches Level 1 or Level 3, its **Breakthrough** resolves **immediately**, before your next operation. If you execute 2 upgrades in one turn, resolve them one level at a time, in the order you buy them (e.g. `$3` from the Public Relations Level 1 Breakthrough can pay for a Triage Level 3 Breakthrough bought afterwards, or fund dice purchases in the same turn). Each Breakthrough happens only once, the first time you reach that level.
      * New dice from a Breakthrough (Gray Legacy, Central Market colored or Purple) go to your **Ready for Release Zone** and do not use Release Bandwidth.
      * **Triage Level 3 Breakthrough (optional):** Pay **`$3`** `[TUNE]` to return `1` Gray Legacy die you own (from your Ready for Release Zone, Scanned Box or Processing Box) to the box and take `1` die of any Central Market color with stock left (it uses that color's active Variant Card). The new die goes to your Ready for Release Zone. The `$3` is flat (not the Variant Card price), is not a purchase (it does not count toward your 2-dice limit), and cannot be discounted by *Algorithmic Arbitrage*. If you can't pay, own no Gray Legacy die, or every Central Market stack is empty, or you decline, the Breakthrough is lost (it cannot be claimed later).
      * **Public Relations Level 3 Breakthrough:** Move the Purple die from your Personal Reserve to your Ready for Release Zone.
    * Defense Capacity applies from next round's Phase 1; Triage and Release Bandwidth apply from next round's Phase 5; Level 4 effects apply from the next phase in which they are used.
 2. **Regain Market Share (Public Relations Track):**
-   * Spend **`3 🔬`** `[TUNE]` for each **`+1` Market Share**, up to your current Public Relations limit this turn: **`1`** at Levels 0–1, **`2`** at Levels 2–3, **`3`** at Level 4 `[TUNE]`. A level bought earlier in the same turn applies to later regains.
+   * Spend **`3 🔬`** `[TUNE]` for each **`+1` Market Share**, up to your current Public Relations limit this turn: **`1`** at Levels 0–1, **`2`** at Levels 2–3, **`3`** at Level 4 `[TUNE]`. A level bought earlier in the same turn applies to later regains. Market Share regain is an operational resource conversion, not a hardware track upgrade, and does not count toward or consume your limit of 2 hardware upgrades per turn.
    * Market Share can never exceed the track maximum (`20`); you cannot spend research while at the track maximum.
    * You may regain Market Share during the Final Round (final Market Share sets your game-end **Market Leader Bonus** place and is the first tiebreaker), but doing so does not cancel a Final Round already triggered.
 3. **Paid `★` Actions:** Resolve *B2 Deep R&D Vault* (pay `$4` → `+1` Corporate Secret) or *Y1 Algorithmic Trading* Secret purchases rolled this round, and *R2 Ad Campaign* (pay `$2` → `+1` Market Share, once per *Ad Campaign* die that was In Production in Phase 3). *Ad Campaign* does not count toward your Public Relations limit, cannot raise Market Share above the track maximum of `20` (you do not pay while at maximum), and any unused *Ad Campaign* is lost at the end of your Operations Turn.

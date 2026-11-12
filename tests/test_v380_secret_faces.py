@@ -110,7 +110,15 @@ class TestSF01Parity(unittest.TestCase):
     def test_sf01_v037_parity_fixtures(self):
         from tests.fixtures.v037_parity import capture as c
 
-        factories = {"v037": [GameConfig, GameConfig.v037], "v037_roster": [GameConfig.v037_roster]}
+        factories = {
+            "v037": [
+                lambda **kw: GameConfig(track_step_costs=(1, 2, 2, 3), max_hardware_upgrades_per_turn=999, **kw),
+                lambda **kw: GameConfig.v037(track_step_costs=(1, 2, 2, 3), max_hardware_upgrades_per_turn=999, **kw),
+            ],
+            "v037_roster": [
+                lambda **kw: GameConfig.v037_roster(track_step_costs=(1, 2, 2, 3), max_hardware_upgrades_per_turn=999, **kw),
+            ],
+        }
         for name, facs in factories.items():
             for sc in c.SCENARIOS:
                 for n in c.PLAYER_COUNTS:
@@ -957,12 +965,17 @@ class TestRSP1(unittest.TestCase):
         from tests.fixtures.v038b_parity import capture as c
 
         for name in c.CONFIGS:
+            fac = lambda n_name=name: lambda **kw: c.config_factory(n_name)(
+                track_step_costs=(1, 2, 2, 3),
+                max_hardware_upgrades_per_turn=999,
+                **kw
+            )
             for sc in c.SCENARIOS:
                 for n in c.PLAYER_COUNTS:
                     with open(c.fixture_path(name, sc, n), encoding="utf-8") as fh:
                         golden = json.load(fh)
                     for seed in c.SEEDS:
-                        got = json.loads(json.dumps(c.run_scenario(c.config_factory(name), sc, n, seed),
+                        got = json.loads(json.dumps(c.run_scenario(fac(), sc, n, seed),
                                                     sort_keys=True))
                         self.assertEqual(got, golden[str(seed)], f"{name} {sc} {n}P {seed}")
 

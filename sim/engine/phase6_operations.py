@@ -363,23 +363,41 @@ def _log_rejected_purple(player: PlayerState) -> None:
 
 
 def execute_track_upgrades(engine: GameEngine, player: PlayerState, plan: Any) -> list:
-    """v0.35.0 Step 1: pay each planned step in plan order; its Breakthrough resolves before the next step
-    is paid. A step that can't be paid stops the sequence (later steps are skipped, not reordered)."""
+    """Phase 6 Item 1: Pay and raise tracks step by step up to max_hardware_upgrades_per_turn.
+    Each Breakthrough resolves immediately before the next step is paid (INV-RT-BT-IMMEDIATE-01).
+    Excess requested upgrades beyond the per-turn limit are rejected and recorded in telemetry.
+    """
     from sim.engine import research_tracks
 
     choices = getattr(plan, "breakthrough_choices", None) or {}
     done = []
-    for track in list(getattr(plan, "track_upgrades", []) or []):
+    max_upgrades = getattr(engine.config, "max_hardware_upgrades_per_turn", 2)
+    requested = list(getattr(plan, "track_upgrades", []) or [])
+
+    for track in requested:
+        # Check per-turn upgrade cap
+        if len(done) >= max_upgrades:
+            break
+
         t = research_tracks.normalize_track(track)
         if t not in research_tracks.LEVEL_ATTR:
             continue
+
         if not player.upgrade_track(t, round_number=engine.state.current_round):
             break
+
         lvl = research_tracks.level_of(player, t)
         done.append((t, lvl))
+
         if lvl in research_tracks.BREAKTHROUGH_LEVELS:
             choice = research_tracks.ask_breakthrough_choice(engine, player, t, lvl, choices)
             research_tracks.resolve_breakthrough(engine, player, t, lvl, choice)
+
+    # Telemetry & error handling: record excess requested upgrades
+    if len(requested) > max_upgrades:
+        excess = len(requested) - max_upgrades
+        player.excess_hardware_upgrades_requested = getattr(player, "excess_hardware_upgrades_requested", 0) + excess
+
     player.track_upgrades_this_round = getattr(player, "track_upgrades_this_round", []) + done
     return done
 

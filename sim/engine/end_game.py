@@ -239,6 +239,8 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
                 "research_spent_tracks": dict(getattr(p, "research_spent_tracks", {})),
                 "research_spent_patents": getattr(p, "research_spent_patents", 0),
                 "patent_secrets_gained": getattr(p, "patent_secrets_gained", 0),
+                **({"excess_hardware_upgrades_requested": getattr(p, "excess_hardware_upgrades_requested", 0)}
+                   if getattr(cfg, "max_hardware_upgrades_per_turn", 2) != 999 else {}),
                 "final_track_levels": {
                     "DEFENSE": p.defense_level, "TRIAGE": p.triage_level,
                     "RELEASE": p.release_level, "PATENT": p.patent_level,

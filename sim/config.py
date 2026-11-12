@@ -338,7 +338,8 @@ class GameConfig:
 
     # --- v0.35.0 Research Tracks (INV-RT-*) ---
     research_track_model: ResearchTrackModel = ResearchTrackModel.V035_FIVE_LEVEL
-    track_step_costs: Tuple[int, int, int, int] = (1, 2, 2, 3)  # [TUNE] cost to reach L1..L4
+    track_step_costs: Tuple[int, int, int, int] = (1, 1, 2, 2)  # [TUNE] cost to reach L1..L4 (total 6 🔬 per track)
+    max_hardware_upgrades_per_turn: int = 2  # [TUNE: 2] max hardware track upgrades per Operations Turn
     track_capacity_by_level: Dict[str, Tuple[int, ...]] = field(
         default_factory=lambda: {
             "DEFENSE": (2, 2, 3, 3, 4),
@@ -452,6 +453,10 @@ class GameConfig:
     v1_staging_payload_override: Optional[Dict[str, Dict[CubeColor, int]]] = None
 
     def __post_init__(self) -> None:
+        if not (isinstance(self.track_step_costs, tuple) and len(self.track_step_costs) == 4 and all(isinstance(c, int) and c >= 0 for c in self.track_step_costs)):
+            raise ValueError("track_step_costs must be a 4-tuple of non-negative integers")
+        if not (isinstance(self.max_hardware_upgrades_per_turn, int) and self.max_hardware_upgrades_per_turn > 0):
+            raise ValueError("max_hardware_upgrades_per_turn must be an integer > 0")
         if not isinstance(self.bot_pr_push_params, PrPushParams):
             raise ValueError("bot_pr_push_params must be a PrPushParams")
         self.bot_pr_push_params.validate()

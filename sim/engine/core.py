@@ -367,7 +367,12 @@ class GameEngine:
 
     def _begin_research_telemetry(self) -> None:
         self._research_round_start = {
-            p.player_id: (p.research_earned_total, len(p.breakthroughs), getattr(p, "rejected_purple_purchases", 0))
+            p.player_id: (
+                p.research_earned_total,
+                len(p.breakthroughs),
+                getattr(p, "rejected_purple_purchases", 0),
+                getattr(p, "excess_hardware_upgrades_requested", 0),
+            )
             for p in self.state.players
         }
         for p in self.state.players:
@@ -426,11 +431,12 @@ class GameEngine:
             return
         self._record_market_share_telemetry(tel)
         for p in self.state.players:
-            earned0, bt0, rej0 = start.get(p.player_id, (0, 0, 0))
+            earned0, bt0, rej0, excess0 = start.get(p.player_id, (0, 0, 0, 0))
             tel.research_gained_by_player[p.player_id] = p.research_earned_total - earned0
             tel.track_upgrades_by_player[p.player_id] = list(getattr(p, "track_upgrades_this_round", []))
             tel.breakthroughs_by_player[p.player_id] = [b.as_dict() for b in p.breakthroughs[bt0:]]
             tel.rejected_purple_purchases_by_player[p.player_id] = getattr(p, "rejected_purple_purchases", 0) - rej0
+            tel.excess_hardware_upgrades_by_player[p.player_id] = getattr(p, "excess_hardware_upgrades_requested", 0) - excess0
 
     def _finalize_telemetry(self, tel: RoundTelemetry, end_phase: Optional[int]) -> RoundTelemetry:
         self._record_research_telemetry(tel)
