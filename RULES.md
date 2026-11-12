@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.40.0)
+# Too Many Secrets — Rules Draft (v0.41.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
