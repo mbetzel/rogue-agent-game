@@ -3,7 +3,7 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
-- [x] **Rules Draft `v0.40.0`** captured in [RULES.md](./RULES.md)
+- [x] **Rules Draft `v0.41.0`** captured in [RULES.md](./RULES.md)
 - [x] **Multi-Agent SDLC Pipeline** defined in Section 2 below
 - [ ] **Phase 44 (exploration): Red Rebalance — $2 Ransom, Block 2 Red, Red Choice Face**
   - [x] *Pre-SDLC Game Designer Modeling:* proposal = $2 per unblocked Red cube; Red 1-pip face `Block 2 Red`; one Red `+$2` face becomes `+$1 / +1 🔬`; Blue, Green and ★ variants unchanged. Sim levers `red_ransom_per_cube` and `red_die_profile` (defaults = v0.35). Sweep `scripts/run_v360_red_rebalance_sweep.py` (1,500 games per pod). Results: `FINDINGS.md` §31.
@@ -104,6 +104,14 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Milestone 3 Code Review Gate (`staff-engineer`):* APPROVED (full regression clean, invariant verification, zero volume drift).
   - [x] *Milestone 4 Product Owner & Game Designer Validation:* 10,000-game Monte Carlo validation sweep across 2P/3P/4P pods (`sim_results/option_b_v2_cube_shift/telemetry_report.md`); `FINDINGS.md` §53. Pacing centered (8.16–8.74 rounds), artificial Green clamping suppressed by 85% (-260 cubes on Canonical Roads 1–4), Blue exfiltration restored, archetype equity confirmed. APPROVED (`v0.40.1 Candidate`).
   - [x] *Milestone 5 Asset & Documentation Sync (`graphic-designer`):* Updated `RULES_APPENDIX.md` Section 6C (Standard & Aggressive profile tables), `pnp/generate_pnp.py` (VERSION_TILES for RaaS & Polymorphic Worm), and regenerated all 10 PnP PDFs cleanly.
+- [x] **Phase 59: Player-Specific SETEC Corruption Attacks & Robin Hood Transfers (`v0.41.0 Baseline`)**
+  - [x] *Pre-SDLC Game Designer Modeling & Cost Impact Analysis:* Evaluated player-specific targeting criteria (Most vs Least across assets) and proved Round 1 100% tie uniformity preserves table opening friction. Comprehensive economic cost impact analysis across all 30 spaces mapped shadow prices ($1 cash, $2 🔬, $2.50 MS, $3 glitched slot/secret, $5 colored die) in `docs/findings/player_specific_corruption_analysis.md` and `docs/findings/corruption_spaces_cost_impact_analysis.md`. User aligned on receiver choice for tied transfer targets, flat $1/1 🔬 transfer scaling, and pure targeted/shared-ties model.
+  - [x] *Milestone 1 Technical Architecture Spec (`principal-engineer`):* `docs/specs/player_specific_corruption_spec.md` with invariants `INV-TARGET-01` through `INV-TARGET-08` (deterministic targeting, inclusive ties, zero-sum transfers, tie fizzles, receiver agency, Option B cube volume & cap preservation, zero-floor safeguards, backward compatibility).
+  - [x] *Milestone 2 Implementation (`senior-engineer`):* `sim/config.py` (`player_specific_corruption=True` on v040+), `sim/entities.py` (`TargetCriterion`, `TargetScope`, `TransferType`, updated Version Cards), `sim/engine/phase2_compiler.py` (`get_targeted_players`, `resolve_corruption_transfer`), `sim/bots/base.py` (`choose_corruption_transfer_donor`), and `tests/test_player_specific_corruption.py` (TC-P2-TGT-01..13 passed). Full regression suite (1030 tests) passed cleanly.
+  - [x] *Milestone 3 Code Review Gate (`staff-engineer`):* APPROVED (full invariant verification, backward parity confirmed, zero information leaks).
+  - [x] *Milestone 4 Product Owner Sweep:* 6,000-game comparative Monte Carlo sweep across 2P/3P/4P pods (`sim_results/player_specific_corruption/validation_report.md`). Pacing centered at 8.44–8.82 rounds; tri-modal end-game split healthy (Singularity 28–33%, Patient Zero 22–42%, Market Collapse 29–44%, Total Wipeout <= 0.87% macro average); Robin Hood transfers successfully redistributed liquidity without macro inflation.
+  - [x] *Milestone 5 Balance Assessment (`game-designer`):* `FINDINGS.md` §54. APPROVED as `v0.41.0 Baseline`.
+  - [x] *Milestone 6 Documentation & Asset Sync (`graphic-designer` & Main Agent):* `RULES.md` Phase 2, `RULES_APPENDIX.md` §6C, `pnp/generate_pnp.py` updated and all 10 PDFs regenerated.
 - [x] **Completed phases (Phases 1–46, 48)** are archived in [docs/archive/PLAN_completed_phases.md](docs/archive/PLAN_completed_phases.md), along with the legacy v0.3-era Sections 3–5 (code architecture, experiment matrix, SDLC checklist).
 
 ---

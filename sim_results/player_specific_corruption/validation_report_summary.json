@@ -1,0 +1,601 @@
+{
+  "baseline": {
+    "4": {
+      "n_games": 1000,
+      "mean_rounds": 8.72,
+      "std_rounds": 2.76,
+      "min_rounds": 2,
+      "max_rounds": 13,
+      "median_rounds": 10,
+      "singularity_pct": 34.7,
+      "patient_zero_pct": 31.8,
+      "market_collapse_pct": 33.5,
+      "total_wipeout_pct": 0.0,
+      "round_limit_pct": 0.0,
+      "survivor_secrets_mean": 11.12,
+      "survivor_secrets_std": 6.09,
+      "survivor_ms_mean": 8.51,
+      "survivor_ms_std": 5.93,
+      "survivor_money_mean": 2.83,
+      "survivor_money_std": 3.05,
+      "survivor_research_mean": 4.39,
+      "survivor_research_std": 5.9,
+      "archetypes": {
+        "AdaptiveBalancedBot": {
+          "games": 667,
+          "wins": 224,
+          "win_rate": 33.58,
+          "pz_rate": 3.0
+        },
+        "SecOpsTurtleBot": {
+          "games": 667,
+          "wins": 295,
+          "win_rate": 44.23,
+          "pz_rate": 1.8
+        },
+        "VentureGreedBot": {
+          "games": 667,
+          "wins": 108,
+          "win_rate": 16.19,
+          "pz_rate": 16.49
+        },
+        "AccelerationistBot": {
+          "games": 667,
+          "wins": 129,
+          "win_rate": 19.34,
+          "pz_rate": 10.94
+        },
+        "RecklessSaboteurBot": {
+          "games": 666,
+          "wins": 69,
+          "win_rate": 10.36,
+          "pz_rate": 14.86
+        },
+        "MixedPolicyBot": {
+          "games": 666,
+          "wins": 175,
+          "win_rate": 26.28,
+          "pz_rate": 10.36
+        }
+      },
+      "spread": 33.87,
+      "transfers": {
+        "raas_attempts": 0,
+        "raas_fizzles": 0,
+        "raas_fizzle_rate": 0.0,
+        "raas_executed": 0,
+        "raas_tied_donors": 0,
+        "raas_tied_donor_rate": 0.0,
+        "raas_cash_moved": 0,
+        "raas_zero_floor": 0,
+        "worm_attempts": 0,
+        "worm_fizzles": 0,
+        "worm_fizzle_rate": 0.0,
+        "worm_executed": 0,
+        "worm_tied_donors": 0,
+        "worm_tied_donor_rate": 0.0,
+        "worm_res_moved": 0,
+        "worm_zero_floor": 0
+      },
+      "outliers": {
+        "short_seeds": [
+          48,
+          53,
+          66,
+          68,
+          71,
+          78,
+          82,
+          86,
+          89,
+          93
+        ],
+        "long_seeds": [],
+        "wipeout_seeds": []
+      }
+    },
+    "3": {
+      "n_games": 1000,
+      "mean_rounds": 8.93,
+      "std_rounds": 2.6,
+      "min_rounds": 2,
+      "max_rounds": 13,
+      "median_rounds": 10,
+      "singularity_pct": 39.7,
+      "patient_zero_pct": 29.3,
+      "market_collapse_pct": 30.7,
+      "total_wipeout_pct": 0.3,
+      "round_limit_pct": 0.0,
+      "survivor_secrets_mean": 12.06,
+      "survivor_secrets_std": 6.46,
+      "survivor_ms_mean": 7.73,
+      "survivor_ms_std": 5.8,
+      "survivor_money_mean": 2.75,
+      "survivor_money_std": 3.1,
+      "survivor_research_mean": 4.39,
+      "survivor_research_std": 6.1,
+      "archetypes": {
+        "AdaptiveBalancedBot": {
+          "games": 500,
+          "wins": 184,
+          "win_rate": 36.8,
+          "pz_rate": 2.8
+        },
+        "SecOpsTurtleBot": {
+          "games": 500,
+          "wins": 258,
+          "win_rate": 51.6,
+          "pz_rate": 2.6
+        },
+        "VentureGreedBot": {
+          "games": 500,
+          "wins": 57,
+          "win_rate": 11.4,
+          "pz_rate": 20.4
+        },
+        "AccelerationistBot": {
+          "games": 500,
+          "wins": 176,
+          "win_rate": 35.2,
+          "pz_rate": 13.2
+        },
+        "RecklessSaboteurBot": {
+          "games": 500,
+          "wins": 89,
+          "win_rate": 17.8,
+          "pz_rate": 16.4
+        },
+        "MixedPolicyBot": {
+          "games": 500,
+          "wins": 235,
+          "win_rate": 47.0,
+          "pz_rate": 11.0
+        }
+      },
+      "spread": 40.2,
+      "transfers": {
+        "raas_attempts": 0,
+        "raas_fizzles": 0,
+        "raas_fizzle_rate": 0.0,
+        "raas_executed": 0,
+        "raas_tied_donors": 0,
+        "raas_tied_donor_rate": 0.0,
+        "raas_cash_moved": 0,
+        "raas_zero_floor": 0,
+        "worm_attempts": 0,
+        "worm_fizzles": 0,
+        "worm_fizzle_rate": 0.0,
+        "worm_executed": 0,
+        "worm_tied_donors": 0,
+        "worm_tied_donor_rate": 0.0,
+        "worm_res_moved": 0,
+        "worm_zero_floor": 0
+      },
+      "outliers": {
+        "short_seeds": [
+          44,
+          45,
+          48,
+          72,
+          85,
+          93,
+          95,
+          100,
+          105,
+          106
+        ],
+        "long_seeds": [],
+        "wipeout_seeds": [
+          85,
+          176,
+          417
+        ]
+      }
+    },
+    "2": {
+      "n_games": 1000,
+      "mean_rounds": 8.69,
+      "std_rounds": 2.75,
+      "min_rounds": 1,
+      "max_rounds": 13,
+      "median_rounds": 9,
+      "singularity_pct": 35.1,
+      "patient_zero_pct": 17.7,
+      "market_collapse_pct": 45.8,
+      "total_wipeout_pct": 1.4,
+      "round_limit_pct": 0.0,
+      "survivor_secrets_mean": 13.57,
+      "survivor_secrets_std": 6.77,
+      "survivor_ms_mean": 4.9,
+      "survivor_ms_std": 4.86,
+      "survivor_money_mean": 2.61,
+      "survivor_money_std": 3.17,
+      "survivor_research_mean": 3.7,
+      "survivor_research_std": 5.6,
+      "archetypes": {
+        "AdaptiveBalancedBot": {
+          "games": 334,
+          "wins": 130,
+          "win_rate": 38.92,
+          "pz_rate": 2.99
+        },
+        "SecOpsTurtleBot": {
+          "games": 334,
+          "wins": 204,
+          "win_rate": 61.08,
+          "pz_rate": 2.4
+        },
+        "VentureGreedBot": {
+          "games": 333,
+          "wins": 145,
+          "win_rate": 43.54,
+          "pz_rate": 15.02
+        },
+        "AccelerationistBot": {
+          "games": 333,
+          "wins": 188,
+          "win_rate": 56.46,
+          "pz_rate": 13.81
+        },
+        "RecklessSaboteurBot": {
+          "games": 333,
+          "wins": 119,
+          "win_rate": 35.74,
+          "pz_rate": 15.62
+        },
+        "MixedPolicyBot": {
+          "games": 333,
+          "wins": 214,
+          "win_rate": 64.26,
+          "pz_rate": 11.71
+        }
+      },
+      "spread": 28.52,
+      "transfers": {
+        "raas_attempts": 0,
+        "raas_fizzles": 0,
+        "raas_fizzle_rate": 0.0,
+        "raas_executed": 0,
+        "raas_tied_donors": 0,
+        "raas_tied_donor_rate": 0.0,
+        "raas_cash_moved": 0,
+        "raas_zero_floor": 0,
+        "worm_attempts": 0,
+        "worm_fizzles": 0,
+        "worm_fizzle_rate": 0.0,
+        "worm_executed": 0,
+        "worm_tied_donors": 0,
+        "worm_tied_donor_rate": 0.0,
+        "worm_res_moved": 0,
+        "worm_zero_floor": 0
+      },
+      "outliers": {
+        "short_seeds": [
+          44,
+          46,
+          56,
+          68,
+          71,
+          72,
+          80,
+          82,
+          85,
+          106
+        ],
+        "long_seeds": [],
+        "wipeout_seeds": [
+          80,
+          181,
+          344,
+          347,
+          406,
+          440,
+          461,
+          490,
+          634,
+          638
+        ]
+      }
+    }
+  },
+  "candidate": {
+    "4": {
+      "n_games": 1000,
+      "mean_rounds": 8.44,
+      "std_rounds": 2.73,
+      "min_rounds": 2,
+      "max_rounds": 13,
+      "median_rounds": 9,
+      "singularity_pct": 28.0,
+      "patient_zero_pct": 42.0,
+      "market_collapse_pct": 30.0,
+      "total_wipeout_pct": 0.0,
+      "round_limit_pct": 0.0,
+      "survivor_secrets_mean": 10.46,
+      "survivor_secrets_std": 5.9,
+      "survivor_ms_mean": 8.82,
+      "survivor_ms_std": 6.12,
+      "survivor_money_mean": 3.27,
+      "survivor_money_std": 3.44,
+      "survivor_research_mean": 4.58,
+      "survivor_research_std": 6.22,
+      "archetypes": {
+        "AdaptiveBalancedBot": {
+          "games": 667,
+          "wins": 225,
+          "win_rate": 33.73,
+          "pz_rate": 4.05
+        },
+        "SecOpsTurtleBot": {
+          "games": 667,
+          "wins": 301,
+          "win_rate": 45.13,
+          "pz_rate": 2.55
+        },
+        "VentureGreedBot": {
+          "games": 667,
+          "wins": 96,
+          "win_rate": 14.39,
+          "pz_rate": 21.14
+        },
+        "AccelerationistBot": {
+          "games": 667,
+          "wins": 126,
+          "win_rate": 18.89,
+          "pz_rate": 12.59
+        },
+        "RecklessSaboteurBot": {
+          "games": 666,
+          "wins": 71,
+          "win_rate": 10.66,
+          "pz_rate": 20.42
+        },
+        "MixedPolicyBot": {
+          "games": 666,
+          "wins": 181,
+          "win_rate": 27.18,
+          "pz_rate": 12.31
+        }
+      },
+      "spread": 34.47,
+      "transfers": {
+        "raas_attempts": 565,
+        "raas_fizzles": 33,
+        "raas_fizzle_rate": 5.84,
+        "raas_executed": 532,
+        "raas_tied_donors": 240,
+        "raas_tied_donor_rate": 45.11,
+        "raas_cash_moved": 472,
+        "raas_zero_floor": 60,
+        "worm_attempts": 871,
+        "worm_fizzles": 58,
+        "worm_fizzle_rate": 6.66,
+        "worm_executed": 813,
+        "worm_tied_donors": 277,
+        "worm_tied_donor_rate": 34.07,
+        "worm_res_moved": 563,
+        "worm_zero_floor": 250
+      },
+      "outliers": {
+        "short_seeds": [
+          48,
+          53,
+          68,
+          71,
+          78,
+          82,
+          86,
+          93,
+          95,
+          104
+        ],
+        "long_seeds": [],
+        "wipeout_seeds": []
+      }
+    },
+    "3": {
+      "n_games": 1000,
+      "mean_rounds": 8.82,
+      "std_rounds": 2.57,
+      "min_rounds": 2,
+      "max_rounds": 13,
+      "median_rounds": 10,
+      "singularity_pct": 33.1,
+      "patient_zero_pct": 37.7,
+      "market_collapse_pct": 28.8,
+      "total_wipeout_pct": 0.4,
+      "round_limit_pct": 0.0,
+      "survivor_secrets_mean": 11.37,
+      "survivor_secrets_std": 6.17,
+      "survivor_ms_mean": 8.06,
+      "survivor_ms_std": 6.01,
+      "survivor_money_mean": 3.14,
+      "survivor_money_std": 3.4,
+      "survivor_research_mean": 4.62,
+      "survivor_research_std": 6.25,
+      "archetypes": {
+        "AdaptiveBalancedBot": {
+          "games": 500,
+          "wins": 184,
+          "win_rate": 36.8,
+          "pz_rate": 3.2
+        },
+        "SecOpsTurtleBot": {
+          "games": 500,
+          "wins": 263,
+          "win_rate": 52.6,
+          "pz_rate": 2.4
+        },
+        "VentureGreedBot": {
+          "games": 500,
+          "wins": 53,
+          "win_rate": 10.6,
+          "pz_rate": 27.6
+        },
+        "AccelerationistBot": {
+          "games": 500,
+          "wins": 183,
+          "win_rate": 36.6,
+          "pz_rate": 14.4
+        },
+        "RecklessSaboteurBot": {
+          "games": 500,
+          "wins": 98,
+          "win_rate": 19.6,
+          "pz_rate": 22.4
+        },
+        "MixedPolicyBot": {
+          "games": 500,
+          "wins": 219,
+          "win_rate": 43.8,
+          "pz_rate": 13.8
+        }
+      },
+      "spread": 42.0,
+      "transfers": {
+        "raas_attempts": 529,
+        "raas_fizzles": 87,
+        "raas_fizzle_rate": 16.45,
+        "raas_executed": 442,
+        "raas_tied_donors": 127,
+        "raas_tied_donor_rate": 28.73,
+        "raas_cash_moved": 391,
+        "raas_zero_floor": 51,
+        "worm_attempts": 649,
+        "worm_fizzles": 108,
+        "worm_fizzle_rate": 16.64,
+        "worm_executed": 541,
+        "worm_tied_donors": 114,
+        "worm_tied_donor_rate": 21.07,
+        "worm_res_moved": 439,
+        "worm_zero_floor": 102
+      },
+      "outliers": {
+        "short_seeds": [
+          44,
+          45,
+          48,
+          72,
+          85,
+          93,
+          100,
+          105,
+          106,
+          107
+        ],
+        "long_seeds": [],
+        "wipeout_seeds": [
+          176,
+          417,
+          495,
+          1036
+        ]
+      }
+    },
+    "2": {
+      "n_games": 1000,
+      "mean_rounds": 8.6,
+      "std_rounds": 2.71,
+      "min_rounds": 1,
+      "max_rounds": 13,
+      "median_rounds": 9,
+      "singularity_pct": 32.3,
+      "patient_zero_pct": 21.6,
+      "market_collapse_pct": 43.9,
+      "total_wipeout_pct": 2.2,
+      "round_limit_pct": 0.0,
+      "survivor_secrets_mean": 12.46,
+      "survivor_secrets_std": 6.43,
+      "survivor_ms_mean": 4.82,
+      "survivor_ms_std": 4.81,
+      "survivor_money_mean": 2.75,
+      "survivor_money_std": 3.33,
+      "survivor_research_mean": 3.88,
+      "survivor_research_std": 5.59,
+      "archetypes": {
+        "AdaptiveBalancedBot": {
+          "games": 334,
+          "wins": 132,
+          "win_rate": 39.52,
+          "pz_rate": 5.39
+        },
+        "SecOpsTurtleBot": {
+          "games": 334,
+          "wins": 202,
+          "win_rate": 60.48,
+          "pz_rate": 2.69
+        },
+        "VentureGreedBot": {
+          "games": 333,
+          "wins": 141,
+          "win_rate": 42.34,
+          "pz_rate": 18.62
+        },
+        "AccelerationistBot": {
+          "games": 333,
+          "wins": 192,
+          "win_rate": 57.66,
+          "pz_rate": 16.82
+        },
+        "RecklessSaboteurBot": {
+          "games": 333,
+          "wins": 126,
+          "win_rate": 37.84,
+          "pz_rate": 19.82
+        },
+        "MixedPolicyBot": {
+          "games": 333,
+          "wins": 207,
+          "win_rate": 62.16,
+          "pz_rate": 14.71
+        }
+      },
+      "spread": 24.32,
+      "transfers": {
+        "raas_attempts": 424,
+        "raas_fizzles": 172,
+        "raas_fizzle_rate": 40.57,
+        "raas_executed": 252,
+        "raas_tied_donors": 0,
+        "raas_tied_donor_rate": 0.0,
+        "raas_cash_moved": 219,
+        "raas_zero_floor": 33,
+        "worm_attempts": 474,
+        "worm_fizzles": 209,
+        "worm_fizzle_rate": 44.09,
+        "worm_executed": 265,
+        "worm_tied_donors": 0,
+        "worm_tied_donor_rate": 0.0,
+        "worm_res_moved": 265,
+        "worm_zero_floor": 0
+      },
+      "outliers": {
+        "short_seeds": [
+          44,
+          46,
+          53,
+          56,
+          68,
+          71,
+          72,
+          80,
+          82,
+          85
+        ],
+        "long_seeds": [],
+        "wipeout_seeds": [
+          80,
+          88,
+          106,
+          181,
+          247,
+          344,
+          406,
+          413,
+          422,
+          440
+        ]
+      }
+    }
+  }
+}

@@ -128,7 +128,7 @@ class GameController:
         if research_track_model is not None:
             return GameConfig(research_track_model=research_track_model, max_market_purchases_per_turn=2, **common)
         version = str(rules_version or WEB_DEFAULT_RULES_VERSION).lower().lstrip("v")
-        if version in ("040", "0.40.0", "0.40", "0391", "0.39.1", "039", "0.39.0"):
+        if version in ("041", "0.41.0", "0.41", "040", "0.40.0", "0.40", "0391", "0.39.1", "039", "0.39.0"):
             return GameConfig.v040(**common)
         if version in ("038f", "0.38f"):
             return GameConfig.v038f(**common)
@@ -139,7 +139,7 @@ class GameController:
         if version in ("0.38.0", "0.38", "038c"):
             return GameConfig.v038c(**common)
         if version in ("0.37.0", "0.37"):
-            return GameConfig(research_track_model=ResearchTrackModel.V035_FIVE_LEVEL, **common)
+            return GameConfig.v037(research_track_model=ResearchTrackModel.V035_FIVE_LEVEL, **common)
         raise ValueError(f"Unknown rules_version {rules_version!r}; expected 'v0.38.0' or 'v0.37.0'")
 
     def new_game(

@@ -43,31 +43,31 @@ Split out of `RULES.md`; this file is canonical for Section 6.
 
 ### C. Sample SETEC Version Cards & Per-Version Corruption Tracks `[TUNE]`
 
-Each Version Card defines its Corruption Track (`4` spaces on `v1.0`, `5` spaces on `v2.0`, `6` spaces on `v3.0`, consistent across all player counts). The Corruption Track is the **sole source of new SETEC cubes** entering the economy after setup. Two intensity profiles (**Standard** and **Aggressive**) are defined below for simulation benchmarking:
+Each Version Card defines its Corruption Track (`4` spaces on `v1.0`, `5` spaces on `v2.0`, `6` spaces on `v3.0`, consistent across all player counts). The Corruption Track is the **sole source of new SETEC cubes** entering the economy after setup. In `v0.41.0`, non-cube hazards feature **deterministic player-specific targeting** (targeting the player with the most of an asset, or executing zero-sum Robin Hood transfers; tied leaders all suffer the loss, and tied transfer targets let the receiver choose). Two intensity profiles (**Standard** and **Aggressive**) are defined below for simulation benchmarking:
 
-*(`Glitch X die / dice` spaces turn `X` of each affected player's shield slots into **Glitched Shield Slots**; no dice move. See Phase 2.)*
+*(Direct hazards: tied leaders all suffer the penalty simultaneously. Transfer spaces: least takes from most; receiver chooses if tied for most; if all tied across table, transfer fizzles).*
 
 #### Profile 1: Standard Escalation Tracks (`4 / 5 / 6` Spaces)
 
 | Version | Card Name | Initial Setup Cup | Space 1 | Space 2 | Space 3 | Space 4 | Space 5 | Space 6 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **`v1.0`** (4) | *Script Kiddie* | `2R, 1B, 1G` | Add `1R` | All lose `$2` + Add `1K` | Lose `1 🔬` | **Upgrade:** Lose `1 🔬` | — | — |
-| **`v1.0`** (4) | *Data Scraper* | `1R, 2B, 1G` (`+$1` start) | Lose `1 🔬` | Lose `$1` + Add `1K` | Add `1G` | **Upgrade:** Glitch `1` die | — | — |
-| **`v2.0`** (5) | *RaaS* | — | All lose `$2` | Add `1R, 1B` + Add `1K` | All lose `$2` & Add `1R` | Lose `$3` & `1 🔬` + Add `1K` | **Upgrade:** Add `1R` | — |
-| **`v2.0`** (5) | *Polymorphic Worm* | — | Lose `2 🔬` | Add `1B, 1G` + Add `1K` | All glitch `1` die & Add `1G` | Glitch `1` die + Add `1K` | **Upgrade:** Add `1R` | — |
-| **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 1B, 1G` | Lose `$3` & `1 🔬` + Add `1K` | Add `1R, 1B` | All glitch `1` die & Add `1B, 1K` | Return `1` Colored Die | **Singularity** |
-| **`v3.0`** (6) | *Corrupted Kernel* | — | Glitch `1` die + Add `1R, 1B` | Lose `$3` & `1 🔬` + Add `1K` | Add `1R, 1G` | Lose `1 Secret` + Add `1K` | Return `1` Colored Die | **Singularity:** Lose `1 Secret` |
+| **`v1.0`** (4) | *Script Kiddie* | `2R, 1B, 1G` | Add `1R` | Most `$` loses `$2` + Add `1K` | Most `🔬` loses `1 🔬` | **Upgrade:** Most MS loses `1` MS | — | — |
+| **`v1.0`** (4) | *Data Scraper* | `1R, 2B, 1G` (`+$1` start) | Most `🔬` loses `1 🔬` | Most `$` loses `$2` + Add `1K` | Add `1G` | **Upgrade:** Fewest Glitched glitches `1` slot | — | — |
+| **`v2.0`** (5) | *RaaS* | — | Transfer: Least MS takes `$1` from Most MS | Add `1R, 1B` + Add `1K` | Most `$` loses `$2` & Add `1R` | Most MS loses `$3` & `1 🔬` + Add `1K` | **Upgrade:** Add `1R` | — |
+| **`v2.0`** (5) | *Polymorphic Worm* | — | Transfer: Least `🔬` takes `1 🔬` from Most `🔬` | Add `1B, 1G` + Add `1K` | Fewest Glitched glitches `1` slot & Add `1G` | Most Secrets loses `$3` + Add `1K` | **Upgrade:** Add `1R` | — |
+| **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 1B, 1G` | Most `$` loses `$3`; Most `🔬` loses `1 🔬` + Add `1K` | Add `1R, 1B` | Fewest Glitched glitches `1` slot & Add `1B, 1K` | Most Colored Dice returns `1` die | **Singularity** |
+| **`v3.0`** (6) | *Corrupted Kernel* | — | Fewest Glitched glitches `1` slot + Add `1R, 1B` | Most MS loses `$3` & `1 🔬` + Add `1K` | Add `1R, 1G` | Most Secrets loses `1 Secret` + Add `1K` | Most Colored Dice returns `1` die | **Singularity:** Most Secrets loses `1 Secret` |
 
 #### Profile 2: Aggressive Escalation Tracks (`4 / 5 / 6` Spaces — Heightened Economic Friction)
 
 | Version | Card Name | Initial Setup Cup | Space 1 | Space 2 | Space 3 | Space 4 | Space 5 | Space 6 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **`v1.0`** (4) | *Script Kiddie* | `2R, 1B, 1G` | Add `1R` | All lose `$3` + Add `1K` | Glitch `1` die | **Upgrade:** Lose `1 🔬` | — | — |
-| **`v1.0`** (4) | *Data Scraper* | `1R, 2B, 1G` (`+$1` start) | Lose `2 🔬` | Lose `$2` + Add `1K` | Add `1G` | **Upgrade:** Glitch `2` dice | — | — |
-| **`v2.0`** (5) | *RaaS* | — | All lose `$2` | Add `1R, 1B` + Add `1K` | All lose `$2` & Add `1R` | Lose `$3` & `1 🔬` + Add `1K` | **Upgrade:** Add `1R` | — |
-| **`v2.0`** (5) | *Polymorphic Worm* | — | Lose `2 🔬` | Add `1B, 1G` + Add `1K` | All glitch `1` die & Add `1G` | Glitch `2` dice + Add `1K` | **Upgrade:** Add `1R` | — |
-| **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 1B, 1G` | Lose `$3` & `1 🔬` + Add `1K` | Add `1R, 1B` | All glitch `1` die & Add `1B, 1K` | Return `1` Colored Die & glitch `1` die | **Singularity** |
-| **`v3.0`** (6) | *Corrupted Kernel* | — | Glitch `2` dice + Add `1R, 1B` | Lose `$3` & `1 🔬` + Add `1K` | Add `1R, 1G` | Lose `2 Secrets` + Add `1K` | Return `1` Colored Die & glitch `1` die | **Singularity:** Lose `1 Secret` |
+| **`v1.0`** (4) | *Script Kiddie* | `2R, 1B, 1G` | Add `1R` | Most `$` loses `$3` + Add `1K` | Fewest Glitched glitches `1` slot | **Upgrade:** Most `🔬` loses `2 🔬` | — | — |
+| **`v1.0`** (4) | *Data Scraper* | `1R, 2B, 1G` (`+$1` start) | Most `🔬` loses `2 🔬` | Most `$` loses `$3` + Add `1K` | Add `1G` | **Upgrade:** Fewest Glitched glitches `2` slots | — | — |
+| **`v2.0`** (5) | *RaaS* | — | Transfer: Least MS takes `$2` from Most MS | Add `1R, 1B` + Add `1K` | Most `$` loses `$3` & Add `1R` | Most MS loses `$3` & `1 🔬` + Add `1K` | **Upgrade:** Add `1R` | — |
+| **`v2.0`** (5) | *Polymorphic Worm* | — | Transfer: Least `🔬` takes `2 🔬` from Most `🔬` | Add `1B, 1G` + Add `1K` | Fewest Glitched glitches `1` slot & Add `1G` | Fewest Glitched glitches `2` slots + Add `1K` | **Upgrade:** Add `1R` | — |
+| **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 1B, 1G` | Most `$` loses `$4`; Most `🔬` loses `2 🔬` + Add `1K` | Add `1R, 1B` | Fewest Glitched glitches `1` slot & Add `1B, 1K` | Most Colored Dice returns `1` die & glitches `1` slot | **Singularity** |
+| **`v3.0`** (6) | *Corrupted Kernel* | — | Fewest Glitched glitches `2` slots + Add `1R, 1B` | Most MS loses `$4` & `2 🔬` + Add `1K` | Add `1R, 1G` | Most Secrets loses `2 Secrets` + Add `1K` | Most Colored Dice returns `1` die & glitches `1` slot | **Singularity:** Most Secrets loses `1 Secret` |
 
 ---
 

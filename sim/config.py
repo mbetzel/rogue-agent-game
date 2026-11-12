@@ -234,6 +234,7 @@ class GameConfig:
     # Corruption track (v0.15.0 Per-Version Escalating Tracks)
     corruption_track_profile: str = "STANDARD"  # "STANDARD" (Profile 1) or "AGGRESSIVE" (Profile 2)
     corruption_cubes_resolve_immediately: bool = False  # Mode A (False): Staging Cup; Mode B (True): immediate tray attack for R/B/G
+    player_specific_corruption: bool = True  # v0.41.0 (Phase 59): Targeted adversarial corruption hazards
     corruption_track_lengths: Dict[str, int] = field(
         default_factory=lambda: {"v1.0": 4, "v2.0": 5, "v3.0": 6}
     )
@@ -574,6 +575,7 @@ class GameConfig:
         Final tune (User, plan §11 / FINDINGS §34): starting Secrets 7/7/8 (2P/3P/4P), replacing 8/10/11.
         """
         overrides.setdefault("red_mode", RedMode.MARKET_SHARE)
+        overrides.setdefault("player_specific_corruption", False)
         overrides.setdefault("starting_secrets_by_player_count", {2: 7, 3: 7, 4: 8})  # [TUNE]
         overrides.setdefault("market_share_start_by_player_count", {2: 17, 3: 18, 4: 18})
         overrides.setdefault("version_share_payout", {"v2.0": 4})
@@ -605,6 +607,7 @@ class GameConfig:
         12-point Market Share without Market Collapse, Company starting die, Triage L1 Gray die, 5/5/5 Secrets,
         Public Relations regain 3 research per +1 Market Share. On top of ``v037()``."""
         for k, v in (
+            ("player_specific_corruption", False),
             ("secret_face_enabled", True), ("die_face_profile", "V038_DRAFT"), ("variant_profile", "V038_DRAFT"),
             ("power_profile", "V038_DRAFT"), ("glitched_shield_slots_enabled", True),
             ("company_starting_die_enabled", True), ("company_starting_colors", dict(V038_COMPANY_STARTING_COLORS)),
@@ -778,6 +781,7 @@ class GameConfig:
         - Asymmetric SETEC Version profiles (Alpha: Red, Beta: Blue, Gamma: Green)
         """
         for k, v in (
+            ("player_specific_corruption", True),
             ("operations_before_pipeline_shift", True),
             ("purchased_dice_to_scanned", True),
             ("max_market_purchases_per_turn", 1),
@@ -988,6 +992,7 @@ class GameConfig:
     def legacy_v035(cls, **overrides) -> "GameConfig":
         """v0.35.0 baseline (today's defaults). Exists now so the parity test survives a later default flip."""
         overrides.setdefault("red_mode", RedMode.RANSOM)
+        overrides.setdefault("player_specific_corruption", False)
         overrides.setdefault("max_market_purchases_per_turn", 2)
         # Starting Secrets resolve in __post_init__ under RANSOM: 8/8/8 (six-phase), 8/8/12 (v0.33 round).
         return cls(**overrides)
@@ -996,6 +1001,7 @@ class GameConfig:
     def legacy_v033(cls, **overrides) -> "GameConfig":
         """v0.33.0 baseline: three-phase round + 4P = 12 Secrets."""
         overrides.setdefault("red_mode", RedMode.RANSOM)
+        overrides.setdefault("player_specific_corruption", False)
         overrides.setdefault("max_market_purchases_per_turn", 2)
         overrides.setdefault("legacy_archetype_override_bridge", True)
         overrides.setdefault("research_track_model", ResearchTrackModel.V034_THREE_LEVEL)
@@ -1005,6 +1011,7 @@ class GameConfig:
     def legacy_v034(cls, **overrides) -> "GameConfig":
         """v0.34.0 baseline: six-phase round with the v0.34 three-level research tracks."""
         overrides.setdefault("red_mode", RedMode.RANSOM)
+        overrides.setdefault("player_specific_corruption", False)
         overrides.setdefault("max_market_purchases_per_turn", 2)
         overrides.setdefault("research_track_model", ResearchTrackModel.V034_THREE_LEVEL)
         return cls(**overrides)

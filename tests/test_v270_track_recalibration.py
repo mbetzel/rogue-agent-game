@@ -22,7 +22,7 @@ class TestV270CorruptionTrackRecalibration(unittest.TestCase):
 
     def test_standard_raas_space_1(self) -> None:
         """INV-TRACK-CALIB-01: v2.0 RaaS Space 1 deals $2 cash loss (recalibrated from $1)."""
-        standard_cards = {c.directive_code: c for c in get_all_version_cards("STANDARD")}
+        standard_cards = {c.directive_code: c for c in get_all_version_cards("STANDARD", player_specific=False)}
         raas = standard_cards["RAAS"]
         sp1 = raas.corruption_track[0]
         self.assertEqual(sp1.index, 1)
@@ -33,7 +33,7 @@ class TestV270CorruptionTrackRecalibration(unittest.TestCase):
 
     def test_standard_raas_space_4(self) -> None:
         """INV-TRACK-CALIB-01: v2.0 RaaS Space 4 deals $3 & 1 research + 1K (recalibrated from $2)."""
-        standard_cards = {c.directive_code: c for c in get_all_version_cards("STANDARD")}
+        standard_cards = {c.directive_code: c for c in get_all_version_cards("STANDARD", player_specific=False)}
         raas = standard_cards["RAAS"]
         sp4 = raas.corruption_track[3]
         self.assertEqual(sp4.index, 4)
@@ -44,7 +44,7 @@ class TestV270CorruptionTrackRecalibration(unittest.TestCase):
 
     def test_standard_zeroday_space_2(self) -> None:
         """INV-TRACK-CALIB-01: v3.0 Zero-Day Space 2 deals $3 & 1 research + 1K (recalibrated from $2)."""
-        standard_cards = {c.directive_code: c for c in get_all_version_cards("STANDARD")}
+        standard_cards = {c.directive_code: c for c in get_all_version_cards("STANDARD", player_specific=False)}
         zd = standard_cards["ZERO_DAY_OVERRIDE"]
         sp2 = zd.corruption_track[1]
         self.assertEqual(sp2.index, 2)
@@ -55,7 +55,7 @@ class TestV270CorruptionTrackRecalibration(unittest.TestCase):
 
     def test_standard_kernel_space_2(self) -> None:
         """INV-TRACK-CALIB-01: v3.0 Corrupted Kernel Space 2 deals $3 & 1 research + 1K (recalibrated from $2)."""
-        standard_cards = {c.directive_code: c for c in get_all_version_cards("STANDARD")}
+        standard_cards = {c.directive_code: c for c in get_all_version_cards("STANDARD", player_specific=False)}
         ck = standard_cards["CORRUPTED_KERNEL"]
         sp2 = ck.corruption_track[1]
         self.assertEqual(sp2.index, 2)
@@ -66,7 +66,7 @@ class TestV270CorruptionTrackRecalibration(unittest.TestCase):
 
     def test_aggressive_profile_parity(self) -> None:
         """INV-TRACK-AGGR-01: Aggressive profile maintains parity with calibrated thresholds."""
-        aggr_cards = {c.directive_code: c for c in get_all_version_cards("AGGRESSIVE")}
+        aggr_cards = {c.directive_code: c for c in get_all_version_cards("AGGRESSIVE", player_specific=False)}
         raas = aggr_cards["RAAS"]
         self.assertEqual(raas.corruption_track[0].lose_money, 2)
         self.assertEqual(raas.corruption_track[3].lose_money, 3)
@@ -98,7 +98,7 @@ class TestV270CorruptionTrackRecalibration(unittest.TestCase):
         bots = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         engine = GameEngine(cfg, bots=bots, seed=42)
 
-        standard_cards = {c.directive_code: c for c in get_all_version_cards("STANDARD")}
+        standard_cards = {c.directive_code: c for c in get_all_version_cards("STANDARD", player_specific=False)}
         raas = standard_cards["RAAS"]
         sp1 = raas.corruption_track[0]
 
@@ -120,7 +120,7 @@ class TestV270CorruptionTrackRecalibration(unittest.TestCase):
         bots = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         engine = GameEngine(cfg, bots=bots, seed=42)
 
-        standard_cards = {c.directive_code: c for c in get_all_version_cards("STANDARD")}
+        standard_cards = {c.directive_code: c for c in get_all_version_cards("STANDARD", player_specific=False)}
         zd = standard_cards["ZERO_DAY_OVERRIDE"]
         sp2 = zd.corruption_track[1]
 
@@ -149,7 +149,7 @@ class TestV270CorruptionTrackRecalibration(unittest.TestCase):
         bots = [AdaptiveBalancedBot(0), AdaptiveBalancedBot(1)]
         engine = GameEngine(cfg, bots=bots, seed=42)
 
-        standard_cards = {c.directive_code: c for c in get_all_version_cards("STANDARD")}
+        standard_cards = {c.directive_code: c for c in get_all_version_cards("STANDARD", player_specific=False)}
         zd = standard_cards["ZERO_DAY_OVERRIDE"]
         sp2 = zd.corruption_track[1]
 

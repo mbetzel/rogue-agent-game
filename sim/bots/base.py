@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple
 
 from sim.config import CubeColor, DieColor, ShieldColor
-from sim.entities import ArchetypeCode, Face
+from sim.entities import ArchetypeCode, Face, TransferType
 
 if TYPE_CHECKING:
     from sim.engine import GameState, PlayerState
@@ -349,6 +349,24 @@ class BaseBot:
                     best_score = score
                     best_choice = (idx, f)
         return best_choice
+
+    def choose_corruption_transfer_donor(
+        self,
+        player: PlayerState,
+        state: GameState,
+        tied_pids: List[int],
+        transfer_type: TransferType,
+    ) -> int:
+        """Selects which tied leader to take resources from during Phase 2.
+
+        Default Strategic Heuristic:
+        1. Primary: Target the rival holding the highest Corporate Secrets (closest to winning / survival buffer).
+        2. Secondary: If tied in Secrets, choose closest clockwise neighbor: (pid - player_id) % num_players.
+        """
+        by_id = {p.player_id: p for p in state.players}
+        n = len(state.players)
+        order = {pid: (pid - player.player_id) % n for pid in tied_pids}
+        return min(tied_pids, key=lambda pid: (-by_id[pid].secrets, order[pid]))
 
     # =========================================================================
     # White Hat Signature Protocols (Purple Face 6)

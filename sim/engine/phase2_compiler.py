@@ -8,16 +8,16 @@ Attack Cubes (Red / Blue / Green) are NOT resolved here; see ``phase4_attack_res
 from __future__ import annotations
 
 import inspect
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from sim.config import CubeColor, DieColor, EndGameReason, ShieldColor
-from sim.entities import CorruptionSpace, Die
+from sim.entities import CorruptionSpace, Die, TargetCriterion, TransferType
 from sim.engine.state import CompileResult
 from sim.engine import market_share
 
 if TYPE_CHECKING:
     from sim.engine.core import GameEngine
-    from sim.engine.state import Commitments, PlayerState
+    from sim.engine.state import Commitments, GameState, PlayerState
 
 
 def _accepts_kwarg(func, name: str) -> bool:
@@ -195,6 +195,147 @@ def clamp_green_cubes_to_add(state: Any, cfg: Any, requested_green: int) -> int:
     return min(requested_green, headroom)
 
 
+def default_transfer_donor(
+    receiver: PlayerState,
+    state: GameState,
+    donor_pids: List[int],
+) -> int:
+    """Canonical default deterministic fallback for transfer donor selection (INV-TARGET-05)."""
+    by_id = {p.player_id: p for p in state.players}
+    n = len(state.players)
+    order = {pid: (pid - receiver.player_id) % n for pid in donor_pids}
+    return min(donor_pids, key=lambda pid: (-by_id[pid].secrets, order[pid]))
+
+
+def get_targeted_players(
+    engine: GameEngine,
+    criterion: Optional[TargetCriterion],
+) -> List[PlayerState]:
+    """Identifies players targeted by a corruption space criterion.
+
+    Adheres strictly to INV-TARGET-02 (all tied players affected).
+    Excludes eliminated Patient Zero players.
+    """
+    if criterion is None or criterion == TargetCriterion.ALL:
+        return [p for p in engine.state.players if not p.is_patient_zero]
+
+    active_players = [p for p in engine.state.players if not p.is_patient_zero]
+    if not active_players:
+        return []
+
+    if criterion == TargetCriterion.MOST_MONEY:
+        max_val = max(p.money for p in active_players)
+        return [p for p in active_players if p.money == max_val]
+
+    elif criterion == TargetCriterion.MOST_RESEARCH:
+        max_val = max(p.research for p in active_players)
+        return [p for p in active_players if p.research == max_val]
+
+    elif criterion == TargetCriterion.MOST_MARKET_SHARE:
+        max_val = max(p.market_share or 0 for p in active_players)
+        return [p for p in active_players if (p.market_share or 0) == max_val]
+
+    elif criterion == TargetCriterion.FEWEST_GLITCHED:
+        min_val = min(p.glitched_shield_slots for p in active_players)
+        return [p for p in active_players if p.glitched_shield_slots == min_val]
+
+    elif criterion == TargetCriterion.MOST_COLORED_DICE:
+        get_cd = lambda p: p.colored_dice() if callable(getattr(p, "colored_dice", None)) else p.colored_dice
+        max_val = max(len(get_cd(p)) for p in active_players)
+        return [p for p in active_players if len(get_cd(p)) == max_val]
+
+    elif criterion == TargetCriterion.MOST_SECRETS:
+        max_val = max(p.secrets for p in active_players)
+        return [p for p in active_players if p.secrets == max_val]
+
+    return active_players
+
+
+def resolve_corruption_transfer(engine: GameEngine, space: CorruptionSpace) -> List[Dict[str, Any]]:
+    """Resolves Robin Hood transfer spaces per INV-TARGET-03, 04, 05.
+
+    Transfer Types:
+    - LEAST_MS_TAKES_CASH: Player with least MS takes $X from player with most MS.
+    - LEAST_RESEARCH_TAKES_RESEARCH: Player with least 🔬 takes X 🔬 from player with most 🔬.
+    """
+    s = engine.state
+    active_players = [p for p in s.players if not p.is_patient_zero]
+    if len(active_players) < 2:
+        return []
+
+    # 1. Identify metrics
+    if space.transfer_type == TransferType.LEAST_MS_TAKES_CASH:
+        get_metric = lambda p: p.market_share or 0
+        get_res = lambda p: p.money
+        deduct_res = lambda p, amt: setattr(p, "money", max(0, p.money - amt))
+        credit_res = lambda p, amt: setattr(p, "money", p.money + amt)
+        res_name = "cash"
+    elif space.transfer_type == TransferType.LEAST_RESEARCH_TAKES_RESEARCH:
+        get_metric = lambda p: p.research
+        get_res = lambda p: p.research
+        deduct_res = lambda p, amt: p.lose_research(amt, "corruption_transfer")
+        credit_res = lambda p, amt: p.gain_research(amt, "corruption_transfer")
+        res_name = "research"
+    else:
+        return []
+
+    max_val = max(get_metric(p) for p in active_players)
+    min_val = min(get_metric(p) for p in active_players)
+
+    # INV-TARGET-04: Table-wide tie fizzles
+    if max_val == min_val:
+        return [{"status": "fizzle", "reason": "all_players_tied"}]
+
+    donors = [p for p in active_players if get_metric(p) == max_val]
+    receivers = [p for p in active_players if get_metric(p) == min_val]
+
+    # Order receivers clockwise from First Player for stable execution
+    first_idx = getattr(s, "first_player_index", 0)
+    receivers_ordered = sorted(
+        receivers,
+        key=lambda p: (s.players.index(p) - first_idx) % len(s.players),
+    )
+
+    events = []
+    by_id = {p.player_id: p for p in s.players}
+    requested_amount = space.transfer_amount
+
+    for receiver in receivers_ordered:
+        # Determine donor among tied leaders (INV-TARGET-05)
+        donor_pids = [d.player_id for d in donors]
+        if len(donor_pids) == 1:
+            chosen_pid = donor_pids[0]
+        else:
+            hook = getattr(receiver.bot, "choose_corruption_transfer_donor", None) if hasattr(receiver, "bot") else None
+            chosen_pid = hook(receiver, s, list(donor_pids), space.transfer_type) if callable(hook) else None
+            if chosen_pid not in donor_pids:
+                chosen_pid = default_transfer_donor(receiver, s, donor_pids)
+
+        donor = by_id[chosen_pid]
+
+        # INV-TARGET-07: Zero-floor check on donor
+        available = max(0, get_res(donor))
+        actual_moved = min(available, requested_amount)
+
+        if actual_moved > 0:
+            deduct_res(donor, actual_moved)
+            credit_res(receiver, actual_moved)
+
+        ev = {
+            "round": s.current_round,
+            "space_index": space.index,
+            "transfer_type": space.transfer_type.value,
+            "receiver_pid": receiver.player_id,
+            "donor_pid": donor.player_id,
+            "requested": requested_amount,
+            "actual_moved": actual_moved,
+            "resource": res_name,
+        }
+        events.append(ev)
+
+    return events
+
+
 def resolve_corruption_space(
     engine: GameEngine,
     space: CorruptionSpace,
@@ -202,7 +343,7 @@ def resolve_corruption_space(
     exited_cubes: Dict[CubeColor, int],
     expected_income_by_pid: Optional[Dict[int, int]] = None,
 ) -> None:
-    # 1. Add Cubes
+    # 1. Add Cubes (conserved 100%)
     if space.add_cubes:
         for color, count in space.add_cubes.items():
             if color == CubeColor.GREEN and getattr(engine.config, "global_green_cube_cap", 0) > 0:
@@ -221,15 +362,14 @@ def resolve_corruption_space(
             else:
                 engine.state.staging_cup[color] = engine.state.staging_cup.get(color, 0) + count
 
-    # 2. Lose Money
-    if space.lose_money > 0:
-        for player in engine.state.players:
-            player.money = max(0, player.money - space.lose_money)
-
-    # 3. Lose Patches
-    if space.lose_patches > 0:
-        for player in engine.state.players:
-            player.lose_research(space.lose_patches, "corruption")
+    # Helper for commitments lookup by player ID
+    commitments_by_pid = {}
+    if player_commitments:
+        pc_items = player_commitments.values() if isinstance(player_commitments, dict) else player_commitments
+        for item in pc_items:
+            if isinstance(item, (list, tuple)) and len(item) == 3:
+                p, rolled, comm = item
+                commitments_by_pid[p.player_id] = (rolled, comm)
 
     threat_strengths = {
         CubeColor.RED: exited_cubes.get(CubeColor.RED, 0),
@@ -237,30 +377,121 @@ def resolve_corruption_space(
         CubeColor.GREEN: exited_cubes.get(CubeColor.GREEN, 0),
     }
 
-    # 4. Demote Dice (v0.38 Glitched Shield Slots: glitch X shield slots instead; no die moves)
-    if space.demote_dice > 0 and getattr(engine.config, "glitched_shield_slots_enabled", False):
-        from sim.engine import secret_faces
+    # Backward compatibility check
+    if not getattr(engine.config, "player_specific_corruption", True):
+        # 2. Lose Money
+        if space.lose_money > 0:
+            for player in engine.state.players:
+                player.money = max(0, player.money - space.lose_money)
 
-        for player, _rolled, _commitments in player_commitments:
-            secret_faces.glitch_slots(player, space.demote_dice, "corruption")
-    elif space.demote_dice > 0:
-        for player, rolled_dice, commitments in player_commitments:
-            demote_player_dice_step2a(
-                player, rolled_dice, commitments, space.demote_dice, threat_strengths, engine=engine
-            )
+        # 3. Lose Patches
+        if space.lose_patches > 0:
+            for player in engine.state.players:
+                player.lose_research(space.lose_patches, "corruption")
 
-    # 5. Return Colored Dice
+        # 3b. Lose Market Share
+        if getattr(space, "lose_market_share", 0) > 0:
+            for player in engine.state.players:
+                player.change_market_share(-space.lose_market_share, "corruption")
+
+        # 4. Demote Dice (v0.38 Glitched Shield Slots)
+        if space.demote_dice > 0 and getattr(engine.config, "glitched_shield_slots_enabled", False):
+            from sim.engine import secret_faces
+            for player in engine.state.players:
+                secret_faces.glitch_slots(player, space.demote_dice, "corruption")
+        elif space.demote_dice > 0:
+            for player in engine.state.players:
+                rolled, comm = commitments_by_pid.get(player.player_id, (list(player.ready_dice) if hasattr(player, "ready_dice") else [], {}))
+                demote_player_dice_step2a(
+                    player, rolled, comm, space.demote_dice, threat_strengths, engine=engine
+                )
+
+        # 5. Return Colored Dice
+        if space.return_colored_dice > 0:
+            for player in engine.state.players:
+                exp_income = (expected_income_by_pid or {}).get(player.player_id, 0)
+                rolled, comm = commitments_by_pid.get(player.player_id, (list(player.ready_dice) if hasattr(player, "ready_dice") else [], {}))
+                return_player_colored_dice_step2a(
+                    engine, player, rolled, comm, space.return_colored_dice, threat_strengths,
+                    expected_income=exp_income,
+                )
+
+        # 6. Lose Secrets
+        if space.lose_secrets > 0:
+            for player in engine.state.players:
+                player.gain_secrets(-space.lose_secrets, "corruption")
+                if player.secrets <= 0:
+                    player.is_patient_zero = True
+                    if player.elimination_round is None:
+                        player.elimination_round = engine.state.current_round
+                    if player.elimination_reason is None:
+                        player.elimination_reason = "Total Breach (<= 0 Secrets)"
+                    player.breach_depth = max(0, -player.secrets)
+
+        # 7. Next Phase Lock
+        if getattr(space, "next_phase_lock", None):
+            engine.state.pending_next_phase_locks.add(space.next_phase_lock)
+        return
+
+    # --- Targeted Player-Specific Resolution (v0.41.0 / Phase 59) ---
+    # 2. Robin Hood Transfers (INV-TARGET-03, 04, 05)
+    if space.transfer_type != TransferType.NONE and space.transfer_amount > 0:
+        resolve_corruption_transfer(engine, space)
+
+    # 3. Direct Hazards with Targeted Resolution
+    # Money Loss
+    if space.lose_money > 0:
+        crit = space.target_money_criterion or space.target_criterion
+        targets = get_targeted_players(engine, crit)
+        for player in targets:
+            player.money = max(0, player.money - space.lose_money)
+
+    # Research Loss
+    if space.lose_patches > 0:
+        crit = space.target_patches_criterion or space.target_criterion
+        targets = get_targeted_players(engine, crit)
+        for player in targets:
+            player.lose_research(space.lose_patches, "corruption")
+
+    # Market Share Loss
+    if getattr(space, "lose_market_share", 0) > 0:
+        crit = space.target_market_share_criterion or space.target_criterion
+        targets = get_targeted_players(engine, crit)
+        for player in targets:
+            player.change_market_share(-space.lose_market_share, "corruption")
+
+    # Demote Dice (Glitched Shield Slots)
+    if space.demote_dice > 0:
+        crit = space.target_demote_criterion or space.target_criterion
+        targets = get_targeted_players(engine, crit)
+        if getattr(engine.config, "glitched_shield_slots_enabled", False):
+            from sim.engine import secret_faces
+            for player in targets:
+                secret_faces.glitch_slots(player, space.demote_dice, "corruption")
+        else:
+            for player in targets:
+                rolled, comm = commitments_by_pid.get(player.player_id, (list(player.ready_dice) if hasattr(player, "ready_dice") else [], {}))
+                demote_player_dice_step2a(
+                    player, rolled, comm, space.demote_dice, threat_strengths, engine=engine
+                )
+
+    # Return Colored Module Dice
     if space.return_colored_dice > 0:
-        for player, rolled_dice, commitments in player_commitments:
+        crit = space.target_return_colored_criterion or space.target_criterion
+        targets = get_targeted_players(engine, crit)
+        for player in targets:
             exp_income = (expected_income_by_pid or {}).get(player.player_id, 0)
+            rolled, comm = commitments_by_pid.get(player.player_id, (list(player.ready_dice) if hasattr(player, "ready_dice") else [], {}))
             return_player_colored_dice_step2a(
-                engine, player, rolled_dice, commitments, space.return_colored_dice, threat_strengths,
+                engine, player, rolled, comm, space.return_colored_dice, threat_strengths,
                 expected_income=exp_income,
             )
 
-    # 6. Lose Secrets
+    # Corporate Secrets Loss
     if space.lose_secrets > 0:
-        for player in engine.state.players:
+        crit = space.target_secrets_criterion or space.target_criterion
+        targets = get_targeted_players(engine, crit)
+        for player in targets:
             player.gain_secrets(-space.lose_secrets, "corruption")
             if player.secrets <= 0:
                 player.is_patient_zero = True
@@ -270,7 +501,7 @@ def resolve_corruption_space(
                     player.elimination_reason = "Total Breach (<= 0 Secrets)"
                 player.breach_depth = max(0, -player.secrets)
 
-    # 7. Next Phase Lock (Excised in v0.29.0)
+    # Next Phase Lock
     if getattr(space, "next_phase_lock", None):
         engine.state.pending_next_phase_locks.add(space.next_phase_lock)
 
