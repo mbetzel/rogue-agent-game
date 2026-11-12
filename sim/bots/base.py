@@ -201,6 +201,17 @@ class BaseBot:
         """Returns True if the bot activates Meridian's Redundant Crew override."""
         return False
 
+    def choose_meridian_capital_injection(
+        self,
+        player_state: PlayerState,
+        game_state: Optional[Any] = None,
+        rng: Optional[random.Random] = None,
+    ) -> bool:
+        """Returns True if Meridian activates Capital Injection in Phase 3.
+        Liquid cash is non-expiring and maximizes Phase 6 Operations purchasing power.
+        """
+        return True
+
     def choose_operator_buy_third_die(
         self,
         player_state: PlayerState,

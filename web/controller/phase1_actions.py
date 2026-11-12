@@ -48,6 +48,8 @@ def hire_contractors(
     buy_third_die: bool = False,
 ) -> Dict[str, Any]:
     """Hires 1-3 temporary White Contractor dice during Phase 1 before rolling."""
+    if not getattr(controller.state.config, "white_contractor_dice_enabled", True) or controller.state.config.contractor_max_hire <= 0:
+        raise ValueError("Contractor hiring is disabled in v0.40.0")
     if controller.phase != 1:
         raise ValueError(f"Cannot hire contractors in phase {controller.phase} ({controller.phase_name})")
     if player_id not in controller.player_meta:

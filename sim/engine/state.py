@@ -284,6 +284,10 @@ class PlayerState:
         self.red_payout_secrets = 0
         self.red_processing_wait_rounds = 0  # stall diagnostic: sum of rounds a banked Red die sat pending
         self.red_processing_wait_count = 0
+        # v0.39.1 / v0.40.0 telemetry (Phase 56)
+        self.capital_injection_uses = 0
+        self.logistics_bounty_triggers = 0
+        self.money_by_source: Dict[str, int] = {}
         self.player_id = player_id
         self.bot = bot
         self.money = money
@@ -422,6 +426,15 @@ class PlayerState:
         self.secrets += amount
         if amount:
             self.secrets_by_source[source] = self.secrets_by_source.get(source, 0) + amount
+
+    def gain_money(self, amount: int, source: str = "other") -> None:
+        """Cash gain with a ledger entry (telemetry only; behaviour = ``money += amount``)."""
+        if amount <= 0:
+            return
+        self.money += amount
+        self.money_by_source[source] = self.money_by_source.get(source, 0) + amount
+        if source == "capital_injection":
+            self.capital_injection_uses += 1
 
     @property
     def processing_box(self) -> List[Die]:
@@ -831,8 +844,9 @@ class PlayerState:
         return [d for d in self.total_dice if d.color != DieColor.GRAY and d.color != DieColor.WHITE]
 
     @staticmethod
-    def _normalize_version_key(v: str) -> int:
-        s = str(v).strip().lower()
+    def _normalize_version_key(v: Any) -> int:
+        raw = getattr(v, "version_str", v)
+        s = str(raw).strip().lower()
         if "1" in s:
             return 1
         elif "2" in s:
@@ -1039,6 +1053,9 @@ class IncomeRecord:
     burned_die_ids: List[int] = field(default_factory=list)
     diagnostics_face: Optional[str] = None
     purple_star_triggers: int = 0
+    protocol_research: int = 0
+    capital_injection_used: bool = False
+    capital_injection_cash: int = 0
 
     def as_dict(self) -> Dict[str, Any]:
         return {
@@ -1050,6 +1067,8 @@ class IncomeRecord:
             "burned_die_ids": list(self.burned_die_ids),
             "diagnostics_face": self.diagnostics_face,
             "purple_star_triggers": self.purple_star_triggers,
+            "capital_injection_used": self.capital_injection_used,
+            "capital_injection_cash": self.capital_injection_cash,
         }
 
 

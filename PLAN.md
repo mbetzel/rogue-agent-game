@@ -76,6 +76,12 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Code Review Gate (`staff-engineer`):* APPROVED (full regression clean, backwards parity preserved).
   - [x] *Validation Sweep (`product-owner`):* `sim_results/v390_research_upgrade_limit/validation_report.md` (3,600 games across 2P/3P/4P, seeds 42..1241, 0 errors). Mean rounds 8.97 (2P), 9.39 (3P), 9.04 (4P); Singularity 38.8%–52.0%, Patient Zero 15.3%–26.2%, Market Collapse 25.9%–45.0%, Total Wipeout ≤ 0.92%. Upgrades per seat 3.98–4.66; L3 reached 62.6%–70.9%; L4 reached 45.2%–54.7%; 2+ maxed tracks held to 0.00%.
   - [x] *Balance Sign-Off (`game-designer` / `product-owner`):* `FINDINGS.md` §49. Pacing, tri-modal distribution, anti-snowballing, and company equity fully validated. APPROVED (`v0.39.0`).
+- [x] **Phase 56: Remove White Contractor Dice & Glitch Faces (`v0.39.1` / `v0.40.0`)**
+  - [x] *Pre-SDLC Game Designer Modeling:* Evaluated Option A (Complete Removal) vs Option B (Bonus-Only) across 5,400 Monte Carlo games. Option A eliminates 12 physical dice and 8 rules/exceptions with zero negative impact on pacing (8.81–9.25 rounds) and improved 2P Singularity balance.
+  - [x] *User Sign-Off (2026-11-11):* Approved Option A (Complete Removal), Meridian Financial Trust renamed to *Capital Injection* (`+$3` cash in Phase 3: Income), and The Operator renamed to *Logistics Bounty* (`+1 🔬` Research in Phase 3: Income when `Purple ★` is rolled). `RULES.md`, `RULES_APPENDIX.md`, and `GLOSSARY.md` updated.
+  - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/remove_contractor_dice_spec.md` with invariants INV-RCD-01..08.
+  - [x] *Implementation (`senior-engineer`) + Code Review Gate (`staff-engineer`):* `sim/` preset & Phase 1/3/4 updates, bot updates, `web/` UI cleanup, and unit tests (`TEST-RCD-01..09` passed, 1002/1002 full suite passed). Staff Engineer review APPROVED.
+  - [x] *Validation Sweep (`product-owner`) + Balance Sign-Off (`game-designer`) + PnP Update (`graphic-designer`):* 3,600-game sweep (`sim_results/v040/validation_sweep.json`), `FINDINGS.md` §50 (APPROVED for canonical v0.40.0 baseline), `pnp/generate_pnp.py` & PDF regeneration complete.
 - [x] **Completed phases (Phases 1–46, 48)** are archived in [docs/archive/PLAN_completed_phases.md](docs/archive/PLAN_completed_phases.md), along with the legacy v0.3-era Sections 3–5 (code architecture, experiment matrix, SDLC checklist).
 
 ---

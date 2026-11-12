@@ -129,7 +129,9 @@ def check_operator_contingent_staffing(
     """Operator Face 6 Protocol (Contingent Staffing):
     Immediately roll 1 free White Contractor die into rolled pool.
     """
-    if engine.state.contractor_supply <= 0:
+    if getattr(engine.config, "operator_protocol_mode", "CONTINGENT_STAFFING") != "CONTINGENT_STAFFING":
+        return None
+    if not getattr(engine.config, "white_contractor_dice_enabled", True) or engine.state.contractor_supply <= 0:
         return None
     has_purple_star = any(
         d.current_face and d.current_face.is_star and d.current_face.star_code == "PURPLE_STAR"
@@ -229,8 +231,9 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
     stuck_copy = engine.state.tower.get_stuck_copy()
 
     # 2. Temp Staffing (Contractor Hiring)
+    contractors_active = engine.config.contractor_max_hire > 0 and getattr(engine.config, "white_contractor_dice_enabled", True)
     active_ver = engine.state.active_version.version_str
-    for player in engine.state.players:
+    for player in (engine.state.players if contractors_active else []):
         if player.is_patient_zero or (player_ids is not None and player.player_id not in player_ids):
             continue
 

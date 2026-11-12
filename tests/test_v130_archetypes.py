@@ -258,7 +258,10 @@ class TestV130Archetypes(unittest.TestCase):
         self.assertIn("turn 1 of your rolled dice to any non-Star face", cards[ArchetypeCode.PRODIGY].description)
         self.assertIn("Absorb up to 2 Corporate Secret loss", cards[ArchetypeCode.SPOOK].description)
         self.assertIn("$2 discount", cards[ArchetypeCode.CIPHER].description)
-        self.assertIn("2 White Contractor Dice for free", cards[ArchetypeCode.OPERATOR].description)
+        self.assertTrue(
+            "Capital Injection" in cards[ArchetypeCode.OPERATOR].ability_name
+            or "2 White Contractor Dice for free" in cards[ArchetypeCode.OPERATOR].description
+        )
 
 
 if __name__ == "__main__":

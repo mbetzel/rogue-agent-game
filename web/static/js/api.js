@@ -131,6 +131,16 @@ export async function startNewGame(
   }
 }
 
+export async function doCapitalInjection() {
+  const newState = await apiCall("/api/game/action/capital_injection", "POST", {
+    player_id: getHumanPlayerId(),
+  });
+  if (newState) {
+    setState(newState);
+    notifyRender();
+  }
+}
+
 export async function doHireContractors(count = 1, useOperator = false, buyThird = false) {
   const newState = await apiCall("/api/game/action/hire_contractors", "POST", {
     player_id: getHumanPlayerId(),
