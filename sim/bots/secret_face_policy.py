@@ -73,7 +73,7 @@ def share_value(player: "PlayerState", state: Optional["GameState"], n: int, sha
     """Money-equivalent of +n Market Share (clamped at the maximum): base, Red yield tier crossings for owned /
     pending Red dice, Market Collapse risk (when enabled) and the expected Market Leader Bonus."""
     share = int(player.market_share or 0) if share is None else int(share)
-    gain = max(0, min(int(n), int(player.market_share_max or 0) - share))
+    gain = max(0, min(int(n), int(player.market_share_max or 20) - share))
     if gain <= 0:
         return 0.0
     v = SHARE_VALUE * gain
@@ -93,7 +93,9 @@ def share_value(player: "PlayerState", state: Optional["GameState"], n: int, sha
     from sim.bots import market_share_policy as msp
 
     pol = msp.DEFAULT_POLICY
-    if msp.leader_bonus_active(player, state, pol):
+    if msp.payout_active(player, state, pol):
+        v += SECRET_VALUE * msp.payout_share_delta(player, state, share, share + gain, None, pol)  # RSP-1 (spec §14.5.6)
+    elif msp.leader_bonus_active(player, state, pol):
         from sim.engine.market_share import expected_market_leader_bonus
 
         sched = cfg.market_leader_bonus_schedule(len(state.players))
@@ -101,8 +103,6 @@ def share_value(player: "PlayerState", state: Optional["GameState"], n: int, sha
                   if q.player_id != player.player_id and not q.is_patient_zero]
         d = expected_market_leader_bonus(share + gain, rivals, sched) - expected_market_leader_bonus(share, rivals, sched)
         v += msp.leader_bonus_time_weight(state, pol) * SECRET_VALUE * d
-    if msp.payout_active(player, state, pol):
-        v += SECRET_VALUE * msp.payout_share_delta(player, state, share, share + gain, None, pol)  # RSP-1 (spec §14.5.6)
     return v
 
 
