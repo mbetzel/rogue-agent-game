@@ -315,3 +315,54 @@ Sources: `scripts/v400_dice_purchase_limit_investigation.py` (3,600 games across
   Limiting software module dice purchases to **1 die per turn** (`max_market_purchases_per_turn = 1`) harmonizes dice purchasing with Release Track progression (+1 die purchase matches the +1 capacity of Release Track Level 2), eliminates the deceptive beginner queue trap, prevents anti-thematic market denial, and leaves game pacing and Company equity completely intact.
   - `RULES.md` updated in Phase 5 Step 4 to: `Purchase Software Module Dice (Limit 1 die per turn [TUNE]):`.
   - `sim/config.py` default updated to `max_market_purchases_per_turn = 1` with explicit legacy preservation for v0.33/v0.34/v0.35.
+
+
+## 53. Phase 58 Balance Refinement: SETEC Corruption Track Cube Distribution Recalibration (Option B) (`v0.40.1`): APPROVED
+
+Sources: `sim_results/option_b_v2_cube_shift/telemetry_report.md` (10,000-game dataset across 4P/3P/2P pods and Canonical Roadmaps 1–4, Seeds 42..1041 & 2000..2499); Architecture Specification `docs/specs/spec_option_b_v2_cube_shift.md`.
+
+- **Investigation Context & Threat Asymmetry Rationale:**
+  In `v0.40.0` (Phase 57), compiler cube distribution exhibited an unintended structural tension:
+  1. *Green Cube Defense Blackout:* Canonical Roadmaps featuring *Data Scraper (`v1.0`)*, *Polymorphic Worm (`v2.0`)*, and *Zero-Day Override (`v3.0`)* introduced 6 cumulative Green cubes into the staging cup. Because a player's Defense Grid maxes out at 4 shield slots (Level 4), a late-game compile could exit 6 Green cubes, guaranteeing at least 2 unblocked Glitched Shield Slots even for a player with a fully fortified grid. To prevent this, the engine enforced `global_green_cube_cap = 5` via artificial runtime clamping (occurring in 22.6% of 4P games and clamping 275 cubes).
+  2. *Blue Threat Deficit:* Simultaneously, cumulative Blue cubes across canonical decks ranged only between [2, 5], lagging behind defensive shielding and leaving Corporate Secrets attrition milder than intended.
+  3. *Option B Recalibration:* Shifting exactly 1 cube from Green to Blue on Space 2 of both `v2.0` Version Cards (*RaaS*: `1R, 1G + 1K` $\to$ `1R, 1B + 1K`; *Polymorphic Worm*: `2G + 1K` $\to$ `1B, 1G + 1K`) realigns compiler threat naturally:
+     - Cumulative Green cubes contract to `[2, 5]`, matching Defense Grid capacity and eliminating artificial clamping.
+     - Cumulative Blue cubes elevate to `[3, 6]`, heightening acute secrets exfiltration while remaining below Red's `[4, 8]` ceiling.
+     - Total Attack Cubes (15 for Zero-Day, 13 for Kernel) and the pacing clock (15 track spaces + 1 pulse = 6 Black cubes) remain 100% conserved.
+
+- **Empirical Telemetry Evaluation (10,000 Games Across Pods & Canonical Roads):**
+
+  | Metric | Baseline (`v0.40.0`) | Option B (`v0.40.1`) | Delta | Design Assessment |
+  | :--- | :---: | :---: | :---: | :--- |
+  | **Macro Pacing (4P)** | 8.50 ± 2.81 | 8.16 ± 2.72 | -0.34 | Perfectly centered in 8–11 round target window |
+  | **Macro Pacing (3P)** | 9.03 ± 2.71 | 8.74 ± 2.65 | -0.29 | Stable multi-player pacing curve |
+  | **Macro Pacing (2P)** | 8.65 ± 2.75 | 8.50 ± 2.73 | -0.15 | Consistent two-player head-to-head duration |
+  | **End-Game: Singularity (4P)** | 30.7% | 21.3% | -9.4% | Primary clock remains fully active |
+  | **End-Game: Patient Zero (4P)** | 35.9% | 51.3% | +15.4% | Sharpened acute threat pressure |
+  | **End-Game: Market Collapse (4P)** | 33.4% | 27.4% | -6.0% | Robust secondary economic corridor |
+  | **Total Wipeouts (4P Pods)** | 0.0% | 0.0% | 0.0% | Zero runaway wipeout failures |
+  | **Peak Green Cubes (Max)** | 5 | 5 | 0 | Physical volume strictly $\le 5$ across all pods |
+  | **Green Clamping Games % (4P)** | 22.6% (275 cubes) | 4.1% (41 cubes) | -18.5% | Artificial clamping suppressed (-85% cubes) |
+  | **Canonical Roads 1–4 Clamping** | 260 cubes clamped | 0 cubes clamped | -260 | Zero artificial clamping on Canonical Roads 1–4 |
+  | **Peak Blue Cubes (Mean, 4P)** | 2.92 (Max 6) | 3.56 (Max 7) | +0.63 | Healthy exfiltration threat presence |
+  | **Survivor Mean Secrets (4P)** | 10.59 | 9.41 | -1.17 | Controlled tension without premature elimination |
+  | **Early Knockout (< R7, 4P)** | 21.8% | 24.5% | +2.7% | Negligible change; no sudden-death spikes |
+
+- **Core Design Pillar Evaluations:**
+  1. *The Cube Tower Compiler:*
+     - Peak Green cubes in circulation are strictly capped at 5 across all 10,000 games. On Canonical Roadmaps 1–4, clamped cubes dropped from 260 to 0 (0% clamping). The remaining residual clamping (~4% in random decks) is isolated to worst-case Deck 7 simulation timing where transient baffle holds and exited cubes coincide before physical drop.
+     - Blue threat scaling successfully restores tension to Corporate Secrets without inducing catastrophic collapse: mean survivor secrets decreased from 10.59 to 9.41 in 4P (11.35 to 10.02 in 3P, 13.14 to 11.49 in 2P).
+  2. *Deterministic Foresight & Invariant Verification:*
+     - `INV-RANGE-RECALIB-01` ($G \in [2, 5], B \in [3, 6], R \in [4, 8], K = 6$) is 100% satisfied across all 8 canonical roadmap decks.
+     - `INV-CUBE-VOLUME-01` is strictly preserved: exactly 15 Attack / 21 Total cubes for Zero-Day Override roadmaps and 13 Attack / 19 Total cubes for Corrupted Kernel roadmaps ($\Delta = 0$).
+     - `INV-PACING-CLOCK-01` and `INV-PROFILE-PARITY-01` are mathematically verified across Standard and Aggressive profiles.
+  3. *End-Game Triad & Player Agency:*
+     - The end-game distribution shifts meaningfully toward acute threat: Patient Zero rises to 51.3% in 4P (42.0% in 3P, 25.6% in 2P), establishing a tangible survival countdown. Singularity (21.3% in 4P, 33.7% in 3P, 29.7% in 2P) and Market Collapse (27.4% in 4P, 24.1% in 3P, 42.8% in 2P) remain vital alternative strategic paths.
+     - Total Wipeout remains virtually zero under standard conditions (0.0% in 4P pods; 0.70% across 3,000 extreme edge-case stress runs vs 0.57% baseline).
+  4. *Bot Archetype Equity:*
+     - Archetype meta shows balanced strategic viability: `AdaptiveBalancedBot` (55.7% win rate, 3.9% PZ), `SecOpsTurtleBot` (46.5% win rate, 3.0% PZ), `MixedPolicyBot` (21.3% win rate, 14.6% PZ), `AccelerationistBot` (13.1% win rate, 18.6% PZ), `VentureGreedBot` (8.8% win rate, 22.8% PZ), `RecklessSaboteurBot` (6.9% win rate, 29.0% PZ).
+     - SecOps defensive investments gain clear utility against increased Blue threat, while greedy strategies face calibrated downside risks rather than unpreventable wipeouts.
+
+- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.40.1 Candidate`).**
+  Option B resolves the long-standing Green cube defense blackout and artificial clamping flaws cleanly, enhances Corporate Secrets attrition, preserves pacing invariance and volume conservation, and maintains archetype equity. Approved for promotion through Milestone 5 (Product Owner Acceptance Gate) and Milestone 6 (Asset & Documentation Finalization).
+

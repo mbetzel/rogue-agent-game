@@ -100,7 +100,7 @@ class TestV400GameplayBalance(unittest.TestCase):
         while Breakthrough dice enter ready_for_release_dice (INV-V400-02).
         """
         cfg = GameConfig.v040(num_players=2)
-        engine = GameEngine(cfg)
+        engine = GameEngine(cfg, seed=0)
         p0 = engine.state.players[0]
         p0.money = 20
         d1 = create_gray_die(101)
@@ -128,7 +128,7 @@ class TestV400GameplayBalance(unittest.TestCase):
         when both returned dice and purchased dice occupy Scanned (INV-V400-03).
         """
         cfg = GameConfig.v040(num_players=2)
-        engine = GameEngine(cfg)
+        engine = GameEngine(cfg, seed=0)
         p0 = engine.state.players[0]
         p0.release_bandwidth = 4
         p0.ready_for_release_dice = []
@@ -149,7 +149,7 @@ class TestV400GameplayBalance(unittest.TestCase):
         and advancing to L2 grants +1 Corporate Secret milestone (INV-V400-04).
         """
         cfg = GameConfig.v040(num_players=2)
-        engine = GameEngine(cfg)
+        engine = GameEngine(cfg, seed=0)
         p0 = engine.state.players[0]
         p0.secrets = 4
         p0.research_tokens = 20
@@ -188,7 +188,7 @@ class TestV400GameplayBalance(unittest.TestCase):
         and a banked Red Secret triggers the Market Leader Bonus evaluating post-Phase 5 Market Share (INV-V400-05).
         """
         cfg = GameConfig.v040(num_players=2)
-        engine = GameEngine(cfg)
+        engine = GameEngine(cfg, seed=0)
         p0 = engine.state.players[0]
         p1 = engine.state.players[1]
 
@@ -231,7 +231,7 @@ class TestV400GameplayBalance(unittest.TestCase):
         and enforces PR Track level caps (INV-V400-06).
         """
         cfg = GameConfig.v040(num_players=2)
-        engine = GameEngine(cfg)
+        engine = GameEngine(cfg, seed=0)
         p0 = engine.state.players[0]
         p0.patent_level = 0  # cap = 1
         p0.market_share = 10

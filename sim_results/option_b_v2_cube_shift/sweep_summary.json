@@ -1,0 +1,1609 @@
+{
+  "pods": {
+    "4": {
+      "option_b": {
+        "n_games": 1000,
+        "rounds": {
+          "mean": 8.156,
+          "std": 2.7193857870958764,
+          "min": 2,
+          "max": 12,
+          "bins": {
+            "<=7": 318,
+            "8": 114,
+            "9": 175,
+            "10": 188,
+            "11": 168,
+            "12": 37,
+            "13+": 0
+          }
+        },
+        "endings": {
+          "singularity_pct": 21.3,
+          "patient_zero_pct": 51.300000000000004,
+          "market_collapse_pct": 27.400000000000002,
+          "total_wipeout_pct": 0.0,
+          "raw_counts": {
+            "market_collapse": 274,
+            "patient_zero": 513,
+            "singularity": 213
+          },
+          "wipeout_count": 0
+        },
+        "threat": {
+          "clamped_total": 41,
+          "clamped_games": 41,
+          "clamped_games_pct": 4.1000000000000005,
+          "peak_green_max": 5,
+          "peak_green_mean": 2.936,
+          "peak_green_dist": {
+            "1": 160,
+            "2": 272,
+            "3": 205,
+            "4": 198,
+            "5": 165
+          },
+          "peak_blue_max": 7,
+          "peak_blue_mean": 3.556,
+          "peak_red_max": 9,
+          "peak_red_mean": 4.643,
+          "mean_blue_exited": 11.992,
+          "mean_green_exited": 10.361
+        },
+        "blue_pressure": {
+          "pz_games": 523,
+          "pz_games_pct": 52.300000000000004,
+          "total_pz_eliminations": 609,
+          "mean_elim_round": 6.632887189292543,
+          "early_elim_games": 245,
+          "early_elim_pct": 24.5,
+          "mean_survivor_secrets": 9.412833333333333
+        },
+        "bots": {
+          "AdaptiveBalancedBot": {
+            "seats": 596,
+            "win_rate": 55.70469798657718,
+            "mean_secrets": 12.325503355704697,
+            "pz_rate": 3.859060402684564
+          },
+          "RecklessSaboteurBot": {
+            "seats": 606,
+            "win_rate": 6.9306930693069315,
+            "mean_secrets": 4.927392739273928,
+            "pz_rate": 29.042904290429046
+          },
+          "MixedPolicyBot": {
+            "seats": 1000,
+            "win_rate": 21.3,
+            "mean_secrets": 8.015,
+            "pz_rate": 14.6
+          },
+          "AccelerationistBot": {
+            "seats": 597,
+            "win_rate": 13.06532663316583,
+            "mean_secrets": 6.341708542713568,
+            "pz_rate": 18.592964824120603
+          },
+          "SecOpsTurtleBot": {
+            "seats": 609,
+            "win_rate": 46.4696223316913,
+            "mean_secrets": 12.036124794745485,
+            "pz_rate": 2.955665024630542
+          },
+          "VentureGreedBot": {
+            "seats": 592,
+            "win_rate": 8.783783783783784,
+            "mean_secrets": 5.756756756756757,
+            "pz_rate": 22.804054054054053
+          }
+        },
+        "n_deck_7": 129
+      },
+      "baseline": {
+        "n_games": 1000,
+        "rounds": {
+          "mean": 8.5,
+          "std": 2.8145908977899294,
+          "min": 2,
+          "max": 13,
+          "bins": {
+            "<=7": 271,
+            "8": 85,
+            "9": 162,
+            "10": 197,
+            "11": 232,
+            "12": 48,
+            "13+": 5
+          }
+        },
+        "endings": {
+          "singularity_pct": 30.7,
+          "patient_zero_pct": 35.9,
+          "market_collapse_pct": 33.4,
+          "total_wipeout_pct": 0.0,
+          "raw_counts": {
+            "market_collapse": 334,
+            "patient_zero": 359,
+            "singularity": 307
+          },
+          "wipeout_count": 0
+        },
+        "threat": {
+          "clamped_total": 275,
+          "clamped_games": 226,
+          "clamped_games_pct": 22.6,
+          "peak_green_max": 5,
+          "peak_green_mean": 3.626,
+          "peak_green_dist": {
+            "2": 176,
+            "3": 167,
+            "4": 192,
+            "5": 385,
+            "1": 80
+          },
+          "peak_blue_max": 6,
+          "peak_blue_mean": 2.922,
+          "peak_red_max": 9,
+          "peak_red_mean": 4.886,
+          "mean_blue_exited": 10.69,
+          "mean_green_exited": 13.113
+        },
+        "blue_pressure": {
+          "pz_games": 363,
+          "pz_games_pct": 36.3,
+          "total_pz_eliminations": 414,
+          "mean_elim_round": 5.8429752066115705,
+          "early_elim_games": 218,
+          "early_elim_pct": 21.8,
+          "mean_survivor_secrets": 10.586583333333333
+        },
+        "bots": {
+          "AdaptiveBalancedBot": {
+            "seats": 596,
+            "win_rate": 54.69798657718121,
+            "mean_secrets": 14.001677852348994,
+            "pz_rate": 3.1879194630872485
+          },
+          "RecklessSaboteurBot": {
+            "seats": 606,
+            "win_rate": 7.590759075907591,
+            "mean_secrets": 6.4537953795379535,
+            "pz_rate": 21.45214521452145
+          },
+          "MixedPolicyBot": {
+            "seats": 1000,
+            "win_rate": 20.7,
+            "mean_secrets": 9.611,
+            "pz_rate": 9.700000000000001
+          },
+          "AccelerationistBot": {
+            "seats": 597,
+            "win_rate": 13.5678391959799,
+            "mean_secrets": 7.8542713567839195,
+            "pz_rate": 13.06532663316583
+          },
+          "SecOpsTurtleBot": {
+            "seats": 609,
+            "win_rate": 46.79802955665024,
+            "mean_secrets": 13.80952380952381,
+            "pz_rate": 1.477832512315271
+          },
+          "VentureGreedBot": {
+            "seats": 592,
+            "win_rate": 9.29054054054054,
+            "mean_secrets": 7.33445945945946,
+            "pz_rate": 13.682432432432432
+          }
+        },
+        "n_deck_7": 129
+      }
+    },
+    "3": {
+      "option_b": {
+        "n_games": 1000,
+        "rounds": {
+          "mean": 8.745,
+          "std": 2.6523593289767526,
+          "min": 2,
+          "max": 13,
+          "bins": {
+            "<=7": 250,
+            "8": 88,
+            "9": 135,
+            "10": 229,
+            "11": 235,
+            "12": 57,
+            "13+": 6
+          }
+        },
+        "endings": {
+          "singularity_pct": 33.7,
+          "patient_zero_pct": 42.0,
+          "market_collapse_pct": 24.099999999999998,
+          "total_wipeout_pct": 0.2,
+          "raw_counts": {
+            "patient_zero": 420,
+            "singularity": 337,
+            "market_collapse": 241,
+            "total_wipeout": 2
+          },
+          "wipeout_count": 2
+        },
+        "threat": {
+          "clamped_total": 47,
+          "clamped_games": 47,
+          "clamped_games_pct": 4.7,
+          "peak_green_max": 5,
+          "peak_green_mean": 3.156,
+          "peak_green_dist": {
+            "2": 252,
+            "5": 222,
+            "3": 208,
+            "4": 200,
+            "1": 118
+          },
+          "peak_blue_max": 7,
+          "peak_blue_mean": 3.84,
+          "peak_red_max": 9,
+          "peak_red_mean": 4.908,
+          "mean_blue_exited": 13.667,
+          "mean_green_exited": 11.905
+        },
+        "blue_pressure": {
+          "pz_games": 434,
+          "pz_games_pct": 43.4,
+          "total_pz_eliminations": 480,
+          "mean_elim_round": 6.877880184331797,
+          "early_elim_games": 193,
+          "early_elim_pct": 19.3,
+          "mean_survivor_secrets": 10.01503006012024
+        },
+        "bots": {
+          "MixedPolicyBot": {
+            "seats": 1000,
+            "win_rate": 33.800000000000004,
+            "mean_secrets": 8.55,
+            "pz_rate": 17.8
+          },
+          "SecOpsTurtleBot": {
+            "seats": 428,
+            "win_rate": 53.97196261682243,
+            "mean_secrets": 12.341121495327103,
+            "pz_rate": 2.102803738317757
+          },
+          "AccelerationistBot": {
+            "seats": 400,
+            "win_rate": 22.75,
+            "mean_secrets": 7.09,
+            "pz_rate": 17.25
+          },
+          "RecklessSaboteurBot": {
+            "seats": 409,
+            "win_rate": 16.625916870415647,
+            "mean_secrets": 5.728606356968215,
+            "pz_rate": 28.606356968215156
+          },
+          "VentureGreedBot": {
+            "seats": 379,
+            "win_rate": 16.094986807387862,
+            "mean_secrets": 6.211081794195251,
+            "pz_rate": 24.80211081794195
+          },
+          "AdaptiveBalancedBot": {
+            "seats": 384,
+            "win_rate": 54.947916666666664,
+            "mean_secrets": 12.580729166666666,
+            "pz_rate": 3.3854166666666665
+          }
+        },
+        "n_deck_7": 146
+      },
+      "baseline": {
+        "n_games": 1000,
+        "rounds": {
+          "mean": 9.032,
+          "std": 2.706344453372538,
+          "min": 2,
+          "max": 13,
+          "bins": {
+            "<=7": 216,
+            "8": 74,
+            "9": 111,
+            "10": 224,
+            "11": 276,
+            "12": 93,
+            "13+": 6
+          }
+        },
+        "endings": {
+          "singularity_pct": 43.5,
+          "patient_zero_pct": 27.900000000000002,
+          "market_collapse_pct": 28.599999999999998,
+          "total_wipeout_pct": 0.0,
+          "raw_counts": {
+            "market_collapse": 286,
+            "singularity": 435,
+            "patient_zero": 279
+          },
+          "wipeout_count": 0
+        },
+        "threat": {
+          "clamped_total": 308,
+          "clamped_games": 260,
+          "clamped_games_pct": 26.0,
+          "peak_green_max": 5,
+          "peak_green_mean": 3.815,
+          "peak_green_dist": {
+            "3": 188,
+            "5": 446,
+            "4": 173,
+            "2": 136,
+            "1": 57
+          },
+          "peak_blue_max": 6,
+          "peak_blue_mean": 3.136,
+          "peak_red_max": 9,
+          "peak_red_mean": 5.078,
+          "mean_blue_exited": 11.984,
+          "mean_green_exited": 14.634
+        },
+        "blue_pressure": {
+          "pz_games": 287,
+          "pz_games_pct": 28.7,
+          "total_pz_eliminations": 315,
+          "mean_elim_round": 5.902439024390244,
+          "early_elim_games": 177,
+          "early_elim_pct": 17.7,
+          "mean_survivor_secrets": 11.3515
+        },
+        "bots": {
+          "MixedPolicyBot": {
+            "seats": 1000,
+            "win_rate": 32.9,
+            "mean_secrets": 10.427,
+            "pz_rate": 11.3
+          },
+          "SecOpsTurtleBot": {
+            "seats": 428,
+            "win_rate": 54.90654205607477,
+            "mean_secrets": 14.261682242990654,
+            "pz_rate": 0.7009345794392523
+          },
+          "AccelerationistBot": {
+            "seats": 400,
+            "win_rate": 23.5,
+            "mean_secrets": 8.795,
+            "pz_rate": 11.75
+          },
+          "RecklessSaboteurBot": {
+            "seats": 409,
+            "win_rate": 15.892420537897312,
+            "mean_secrets": 7.43520782396088,
+            "pz_rate": 19.315403422982886
+          },
+          "VentureGreedBot": {
+            "seats": 379,
+            "win_rate": 17.150395778364118,
+            "mean_secrets": 7.928759894459103,
+            "pz_rate": 17.150395778364118
+          },
+          "AdaptiveBalancedBot": {
+            "seats": 384,
+            "win_rate": 55.208333333333336,
+            "mean_secrets": 14.53125,
+            "pz_rate": 2.083333333333333
+          }
+        },
+        "n_deck_7": 146
+      }
+    },
+    "2": {
+      "option_b": {
+        "n_games": 1000,
+        "rounds": {
+          "mean": 8.501,
+          "std": 2.726799302191937,
+          "min": 1,
+          "max": 13,
+          "bins": {
+            "<=7": 276,
+            "8": 115,
+            "9": 152,
+            "10": 184,
+            "11": 209,
+            "12": 62,
+            "13+": 2
+          }
+        },
+        "endings": {
+          "singularity_pct": 29.7,
+          "patient_zero_pct": 25.6,
+          "market_collapse_pct": 42.8,
+          "total_wipeout_pct": 1.9,
+          "raw_counts": {
+            "market_collapse": 428,
+            "patient_zero": 256,
+            "singularity": 297,
+            "total_wipeout": 19
+          },
+          "wipeout_count": 19
+        },
+        "threat": {
+          "clamped_total": 60,
+          "clamped_games": 60,
+          "clamped_games_pct": 6.0,
+          "peak_green_max": 5,
+          "peak_green_mean": 3.093,
+          "peak_green_dist": {
+            "2": 214,
+            "3": 222,
+            "4": 185,
+            "5": 220,
+            "1": 159
+          },
+          "peak_blue_max": 7,
+          "peak_blue_mean": 3.655,
+          "peak_red_max": 9,
+          "peak_red_mean": 4.793,
+          "mean_blue_exited": 12.892,
+          "mean_green_exited": 11.465
+        },
+        "blue_pressure": {
+          "pz_games": 278,
+          "pz_games_pct": 27.800000000000004,
+          "total_pz_eliminations": 297,
+          "mean_elim_round": 5.4496402877697845,
+          "early_elim_games": 186,
+          "early_elim_pct": 18.6,
+          "mean_survivor_secrets": 11.494393476044852
+        },
+        "bots": {
+          "MixedPolicyBot": {
+            "seats": 1000,
+            "win_rate": 50.6,
+            "mean_secrets": 10.44,
+            "pz_rate": 15.5
+          },
+          "RecklessSaboteurBot": {
+            "seats": 209,
+            "win_rate": 31.57894736842105,
+            "mean_secrets": 6.636363636363637,
+            "pz_rate": 26.794258373205743
+          },
+          "VentureGreedBot": {
+            "seats": 203,
+            "win_rate": 38.42364532019704,
+            "mean_secrets": 7.4926108374384235,
+            "pz_rate": 22.660098522167488
+          },
+          "AdaptiveBalancedBot": {
+            "seats": 199,
+            "win_rate": 69.84924623115577,
+            "mean_secrets": 15.492462311557789,
+            "pz_rate": 4.0201005025125625
+          },
+          "SecOpsTurtleBot": {
+            "seats": 199,
+            "win_rate": 65.82914572864321,
+            "mean_secrets": 13.537688442211055,
+            "pz_rate": 3.015075376884422
+          },
+          "AccelerationistBot": {
+            "seats": 190,
+            "win_rate": 42.10526315789473,
+            "mean_secrets": 8.5,
+            "pz_rate": 13.684210526315791
+          }
+        },
+        "n_deck_7": 130
+      },
+      "baseline": {
+        "n_games": 1000,
+        "rounds": {
+          "mean": 8.651,
+          "std": 2.7493195081251938,
+          "min": 1,
+          "max": 13,
+          "bins": {
+            "<=7": 250,
+            "8": 115,
+            "9": 139,
+            "10": 199,
+            "11": 216,
+            "12": 79,
+            "13+": 2
+          }
+        },
+        "endings": {
+          "singularity_pct": 33.300000000000004,
+          "patient_zero_pct": 20.200000000000003,
+          "market_collapse_pct": 44.800000000000004,
+          "total_wipeout_pct": 1.7000000000000002,
+          "raw_counts": {
+            "market_collapse": 448,
+            "patient_zero": 202,
+            "singularity": 333,
+            "total_wipeout": 17
+          },
+          "wipeout_count": 17
+        },
+        "threat": {
+          "clamped_total": 314,
+          "clamped_games": 250,
+          "clamped_games_pct": 25.0,
+          "peak_green_max": 5,
+          "peak_green_mean": 3.73,
+          "peak_green_dist": {
+            "3": 162,
+            "4": 202,
+            "5": 414,
+            "1": 78,
+            "2": 144
+          },
+          "peak_blue_max": 6,
+          "peak_blue_mean": 2.888,
+          "peak_red_max": 9,
+          "peak_red_mean": 4.893,
+          "mean_blue_exited": 10.979,
+          "mean_green_exited": 13.685
+        },
+        "blue_pressure": {
+          "pz_games": 221,
+          "pz_games_pct": 22.1,
+          "total_pz_eliminations": 238,
+          "mean_elim_round": 4.778280542986425,
+          "early_elim_games": 171,
+          "early_elim_pct": 17.1,
+          "mean_survivor_secrets": 13.14496439471007
+        },
+        "bots": {
+          "MixedPolicyBot": {
+            "seats": 1000,
+            "win_rate": 49.5,
+            "mean_secrets": 12.299,
+            "pz_rate": 12.6
+          },
+          "RecklessSaboteurBot": {
+            "seats": 209,
+            "win_rate": 33.97129186602871,
+            "mean_secrets": 8.655502392344498,
+            "pz_rate": 18.660287081339714
+          },
+          "VentureGreedBot": {
+            "seats": 203,
+            "win_rate": 38.42364532019704,
+            "mean_secrets": 9.123152709359607,
+            "pz_rate": 19.21182266009852
+          },
+          "AdaptiveBalancedBot": {
+            "seats": 199,
+            "win_rate": 71.35678391959799,
+            "mean_secrets": 17.603015075376884,
+            "pz_rate": 4.0201005025125625
+          },
+          "SecOpsTurtleBot": {
+            "seats": 199,
+            "win_rate": 65.32663316582915,
+            "mean_secrets": 15.577889447236181,
+            "pz_rate": 2.0100502512562812
+          },
+          "AccelerationistBot": {
+            "seats": 190,
+            "win_rate": 44.21052631578947,
+            "mean_secrets": 10.394736842105264,
+            "pz_rate": 11.578947368421053
+          }
+        },
+        "n_deck_7": 130
+      }
+    }
+  },
+  "canonical_paths": {
+    "Path 1 (RaaS + Kernel)": {
+      "option_b": {
+        "n_games": 500,
+        "rounds": {
+          "mean": 8.438,
+          "std": 1.7204871845801728,
+          "min": 2,
+          "max": 12,
+          "bins": {
+            "<=7": 107,
+            "8": 117,
+            "9": 148,
+            "10": 91,
+            "11": 34,
+            "12": 3,
+            "13+": 0
+          }
+        },
+        "endings": {
+          "singularity_pct": 6.6000000000000005,
+          "patient_zero_pct": 20.599999999999998,
+          "market_collapse_pct": 72.8,
+          "total_wipeout_pct": 0.0,
+          "raw_counts": {
+            "market_collapse": 364,
+            "singularity": 33,
+            "patient_zero": 103
+          },
+          "wipeout_count": 0
+        },
+        "threat": {
+          "clamped_total": 0,
+          "clamped_games": 0,
+          "clamped_games_pct": 0.0,
+          "peak_green_max": 3,
+          "peak_green_mean": 1.52,
+          "peak_green_dist": {
+            "2": 200,
+            "1": 270,
+            "3": 30
+          },
+          "peak_blue_max": 4,
+          "peak_blue_mean": 2.846,
+          "peak_red_max": 9,
+          "peak_red_mean": 6.648,
+          "mean_blue_exited": 9.448,
+          "mean_green_exited": 7.06
+        },
+        "blue_pressure": {
+          "pz_games": 104,
+          "pz_games_pct": 20.8,
+          "total_pz_eliminations": 112,
+          "mean_elim_round": 6.865384615384615,
+          "early_elim_games": 42,
+          "early_elim_pct": 8.4,
+          "mean_survivor_secrets": 11.400833333333335
+        },
+        "bots": {
+          "MixedPolicyBot": {
+            "seats": 500,
+            "win_rate": 21.6,
+            "mean_secrets": 10.532,
+            "pz_rate": 5.4
+          },
+          "SecOpsTurtleBot": {
+            "seats": 301,
+            "win_rate": 47.176079734219265,
+            "mean_secrets": 14.6578073089701,
+            "pz_rate": 0.6644518272425249
+          },
+          "AdaptiveBalancedBot": {
+            "seats": 303,
+            "win_rate": 59.73597359735974,
+            "mean_secrets": 16.11881188118812,
+            "pz_rate": 0.0
+          },
+          "AccelerationistBot": {
+            "seats": 307,
+            "win_rate": 9.77198697068404,
+            "mean_secrets": 8.80130293159609,
+            "pz_rate": 5.863192182410423
+          },
+          "RecklessSaboteurBot": {
+            "seats": 309,
+            "win_rate": 4.854368932038835,
+            "mean_secrets": 7.495145631067961,
+            "pz_rate": 11.326860841423949
+          },
+          "VentureGreedBot": {
+            "seats": 280,
+            "win_rate": 8.571428571428571,
+            "mean_secrets": 8.021428571428572,
+            "pz_rate": 10.714285714285714
+          }
+        },
+        "n_deck_7": 0
+      },
+      "baseline": {
+        "n_games": 500,
+        "rounds": {
+          "mean": 8.56,
+          "std": 1.7390942751316247,
+          "min": 2,
+          "max": 12,
+          "bins": {
+            "<=7": 98,
+            "8": 109,
+            "9": 147,
+            "10": 97,
+            "11": 47,
+            "12": 2,
+            "13+": 0
+          }
+        },
+        "endings": {
+          "singularity_pct": 8.4,
+          "patient_zero_pct": 13.4,
+          "market_collapse_pct": 78.2,
+          "total_wipeout_pct": 0.0,
+          "raw_counts": {
+            "market_collapse": 391,
+            "singularity": 42,
+            "patient_zero": 67
+          },
+          "wipeout_count": 0
+        },
+        "threat": {
+          "clamped_total": 0,
+          "clamped_games": 0,
+          "clamped_games_pct": 0.0,
+          "peak_green_max": 4,
+          "peak_green_mean": 2.504,
+          "peak_green_dist": {
+            "3": 197,
+            "1": 17,
+            "2": 250,
+            "4": 36
+          },
+          "peak_blue_max": 3,
+          "peak_blue_mean": 1.924,
+          "peak_red_max": 9,
+          "peak_red_mean": 6.758,
+          "mean_blue_exited": 7.59,
+          "mean_green_exited": 9.284
+        },
+        "blue_pressure": {
+          "pz_games": 69,
+          "pz_games_pct": 13.8,
+          "total_pz_eliminations": 73,
+          "mean_elim_round": 6.115942028985507,
+          "early_elim_games": 38,
+          "early_elim_pct": 7.6,
+          "mean_survivor_secrets": 12.7255
+        },
+        "bots": {
+          "MixedPolicyBot": {
+            "seats": 500,
+            "win_rate": 21.0,
+            "mean_secrets": 11.962,
+            "pz_rate": 3.5999999999999996
+          },
+          "SecOpsTurtleBot": {
+            "seats": 301,
+            "win_rate": 47.50830564784053,
+            "mean_secrets": 16.169435215946844,
+            "pz_rate": 0.6644518272425249
+          },
+          "AdaptiveBalancedBot": {
+            "seats": 303,
+            "win_rate": 60.396039603960396,
+            "mean_secrets": 17.66996699669967,
+            "pz_rate": 0.33003300330033003
+          },
+          "AccelerationistBot": {
+            "seats": 307,
+            "win_rate": 10.097719869706841,
+            "mean_secrets": 10.270358306188925,
+            "pz_rate": 4.5602605863192185
+          },
+          "RecklessSaboteurBot": {
+            "seats": 309,
+            "win_rate": 4.854368932038835,
+            "mean_secrets": 9.161812297734627,
+            "pz_rate": 7.443365695792881
+          },
+          "VentureGreedBot": {
+            "seats": 280,
+            "win_rate": 8.214285714285714,
+            "mean_secrets": 9.614285714285714,
+            "pz_rate": 5.357142857142857
+          }
+        },
+        "n_deck_7": 0
+      }
+    },
+    "Path 2 (Worm + Zero-Day)": {
+      "option_b": {
+        "n_games": 500,
+        "rounds": {
+          "mean": 9.258,
+          "std": 1.98981273224865,
+          "min": 2,
+          "max": 12,
+          "bins": {
+            "<=7": 71,
+            "8": 59,
+            "9": 94,
+            "10": 127,
+            "11": 127,
+            "12": 22,
+            "13+": 0
+          }
+        },
+        "endings": {
+          "singularity_pct": 31.2,
+          "patient_zero_pct": 23.400000000000002,
+          "market_collapse_pct": 45.4,
+          "total_wipeout_pct": 0.0,
+          "raw_counts": {
+            "singularity": 156,
+            "patient_zero": 117,
+            "market_collapse": 227
+          },
+          "wipeout_count": 0
+        },
+        "threat": {
+          "clamped_total": 0,
+          "clamped_games": 0,
+          "clamped_games_pct": 0.0,
+          "peak_green_max": 5,
+          "peak_green_mean": 3.912,
+          "peak_green_dist": {
+            "5": 116,
+            "4": 284,
+            "1": 17,
+            "3": 57,
+            "2": 26
+          },
+          "peak_blue_max": 6,
+          "peak_blue_mean": 3.848,
+          "peak_red_max": 7,
+          "peak_red_mean": 5.392,
+          "mean_blue_exited": 11.8,
+          "mean_green_exited": 13.186
+        },
+        "blue_pressure": {
+          "pz_games": 117,
+          "pz_games_pct": 23.400000000000002,
+          "total_pz_eliminations": 130,
+          "mean_elim_round": 7.102564102564102,
+          "early_elim_games": 48,
+          "early_elim_pct": 9.6,
+          "mean_survivor_secrets": 11.872833333333334
+        },
+        "bots": {
+          "MixedPolicyBot": {
+            "seats": 500,
+            "win_rate": 23.599999999999998,
+            "mean_secrets": 10.914,
+            "pz_rate": 6.4
+          },
+          "SecOpsTurtleBot": {
+            "seats": 301,
+            "win_rate": 45.51495016611295,
+            "mean_secrets": 15.199335548172758,
+            "pz_rate": 0.9966777408637874
+          },
+          "AdaptiveBalancedBot": {
+            "seats": 303,
+            "win_rate": 57.42574257425742,
+            "mean_secrets": 16.095709570957094,
+            "pz_rate": 0.0
+          },
+          "AccelerationistBot": {
+            "seats": 307,
+            "win_rate": 12.37785016286645,
+            "mean_secrets": 9.547231270358306,
+            "pz_rate": 8.469055374592834
+          },
+          "RecklessSaboteurBot": {
+            "seats": 309,
+            "win_rate": 4.854368932038835,
+            "mean_secrets": 8.016181229773462,
+            "pz_rate": 12.62135922330097
+          },
+          "VentureGreedBot": {
+            "seats": 280,
+            "win_rate": 6.428571428571428,
+            "mean_secrets": 8.103571428571428,
+            "pz_rate": 10.714285714285714
+          }
+        },
+        "n_deck_7": 0
+      },
+      "baseline": {
+        "n_games": 500,
+        "rounds": {
+          "mean": 9.438,
+          "std": 1.9415703414456977,
+          "min": 2,
+          "max": 12,
+          "bins": {
+            "<=7": 57,
+            "8": 48,
+            "9": 96,
+            "10": 138,
+            "11": 133,
+            "12": 28,
+            "13+": 0
+          }
+        },
+        "endings": {
+          "singularity_pct": 33.6,
+          "patient_zero_pct": 13.8,
+          "market_collapse_pct": 52.6,
+          "total_wipeout_pct": 0.0,
+          "raw_counts": {
+            "singularity": 168,
+            "patient_zero": 69,
+            "market_collapse": 263
+          },
+          "wipeout_count": 0
+        },
+        "threat": {
+          "clamped_total": 142,
+          "clamped_games": 142,
+          "clamped_games_pct": 28.4,
+          "peak_green_max": 5,
+          "peak_green_mean": 4.678,
+          "peak_green_dist": {
+            "5": 420,
+            "1": 17,
+            "4": 43,
+            "3": 10,
+            "2": 10
+          },
+          "peak_blue_max": 5,
+          "peak_blue_mean": 3.044,
+          "peak_red_max": 7,
+          "peak_red_mean": 5.528,
+          "mean_blue_exited": 9.564,
+          "mean_green_exited": 15.902
+        },
+        "blue_pressure": {
+          "pz_games": 69,
+          "pz_games_pct": 13.8,
+          "total_pz_eliminations": 73,
+          "mean_elim_round": 6.333333333333333,
+          "early_elim_games": 39,
+          "early_elim_pct": 7.8,
+          "mean_survivor_secrets": 13.7745
+        },
+        "bots": {
+          "MixedPolicyBot": {
+            "seats": 500,
+            "win_rate": 23.1,
+            "mean_secrets": 12.93,
+            "pz_rate": 3.8
+          },
+          "SecOpsTurtleBot": {
+            "seats": 301,
+            "win_rate": 45.84717607973422,
+            "mean_secrets": 17.25249169435216,
+            "pz_rate": 0.9966777408637874
+          },
+          "AdaptiveBalancedBot": {
+            "seats": 303,
+            "win_rate": 57.59075907590759,
+            "mean_secrets": 18.376237623762375,
+            "pz_rate": 0.0
+          },
+          "AccelerationistBot": {
+            "seats": 307,
+            "win_rate": 12.703583061889251,
+            "mean_secrets": 11.73615635179153,
+            "pz_rate": 3.908794788273615
+          },
+          "RecklessSaboteurBot": {
+            "seats": 309,
+            "win_rate": 5.177993527508091,
+            "mean_secrets": 10.258899676375405,
+            "pz_rate": 8.090614886731391
+          },
+          "VentureGreedBot": {
+            "seats": 280,
+            "win_rate": 6.071428571428571,
+            "mean_secrets": 10.4,
+            "pz_rate": 5.0
+          }
+        },
+        "n_deck_7": 0
+      }
+    },
+    "Path 3 (RaaS + Zero-Day)": {
+      "option_b": {
+        "n_games": 500,
+        "rounds": {
+          "mean": 8.46,
+          "std": 1.7327448772451295,
+          "min": 2,
+          "max": 12,
+          "bins": {
+            "<=7": 107,
+            "8": 113,
+            "9": 148,
+            "10": 92,
+            "11": 37,
+            "12": 3,
+            "13+": 0
+          }
+        },
+        "endings": {
+          "singularity_pct": 9.2,
+          "patient_zero_pct": 19.0,
+          "market_collapse_pct": 71.8,
+          "total_wipeout_pct": 0.0,
+          "raw_counts": {
+            "market_collapse": 359,
+            "patient_zero": 95,
+            "singularity": 46
+          },
+          "wipeout_count": 0
+        },
+        "threat": {
+          "clamped_total": 0,
+          "clamped_games": 0,
+          "clamped_games_pct": 0.0,
+          "peak_green_max": 3,
+          "peak_green_mean": 1.884,
+          "peak_green_dist": {
+            "3": 80,
+            "2": 282,
+            "1": 138
+          },
+          "peak_blue_max": 6,
+          "peak_blue_mean": 3.166,
+          "peak_red_max": 9,
+          "peak_red_mean": 6.662,
+          "mean_blue_exited": 9.696,
+          "mean_green_exited": 7.516
+        },
+        "blue_pressure": {
+          "pz_games": 95,
+          "pz_games_pct": 19.0,
+          "total_pz_eliminations": 103,
+          "mean_elim_round": 6.557894736842106,
+          "early_elim_games": 42,
+          "early_elim_pct": 8.4,
+          "mean_survivor_secrets": 11.686666666666666
+        },
+        "bots": {
+          "MixedPolicyBot": {
+            "seats": 500,
+            "win_rate": 21.2,
+            "mean_secrets": 10.862,
+            "pz_rate": 5.0
+          },
+          "SecOpsTurtleBot": {
+            "seats": 301,
+            "win_rate": 46.84385382059801,
+            "mean_secrets": 14.990033222591363,
+            "pz_rate": 0.6644518272425249
+          },
+          "AdaptiveBalancedBot": {
+            "seats": 303,
+            "win_rate": 60.066006600660074,
+            "mean_secrets": 16.504950495049506,
+            "pz_rate": 0.33003300330033003
+          },
+          "AccelerationistBot": {
+            "seats": 307,
+            "win_rate": 9.77198697068404,
+            "mean_secrets": 9.1628664495114,
+            "pz_rate": 5.537459283387622
+          },
+          "RecklessSaboteurBot": {
+            "seats": 309,
+            "win_rate": 5.501618122977346,
+            "mean_secrets": 7.864077669902913,
+            "pz_rate": 10.032362459546926
+          },
+          "VentureGreedBot": {
+            "seats": 280,
+            "win_rate": 8.571428571428571,
+            "mean_secrets": 8.25,
+            "pz_rate": 9.642857142857144
+          }
+        },
+        "n_deck_7": 0
+      },
+      "baseline": {
+        "n_games": 500,
+        "rounds": {
+          "mean": 8.56,
+          "std": 1.742547831737133,
+          "min": 2,
+          "max": 12,
+          "bins": {
+            "<=7": 98,
+            "8": 109,
+            "9": 149,
+            "10": 94,
+            "11": 47,
+            "12": 3,
+            "13+": 0
+          }
+        },
+        "endings": {
+          "singularity_pct": 10.0,
+          "patient_zero_pct": 13.4,
+          "market_collapse_pct": 76.6,
+          "total_wipeout_pct": 0.0,
+          "raw_counts": {
+            "market_collapse": 383,
+            "patient_zero": 67,
+            "singularity": 50
+          },
+          "wipeout_count": 0
+        },
+        "threat": {
+          "clamped_total": 0,
+          "clamped_games": 0,
+          "clamped_games_pct": 0.0,
+          "peak_green_max": 4,
+          "peak_green_mean": 2.854,
+          "peak_green_dist": {
+            "4": 89,
+            "3": 266,
+            "1": 17,
+            "2": 128
+          },
+          "peak_blue_max": 5,
+          "peak_blue_mean": 2.276,
+          "peak_red_max": 9,
+          "peak_red_mean": 6.756,
+          "mean_blue_exited": 7.882,
+          "mean_green_exited": 9.7
+        },
+        "blue_pressure": {
+          "pz_games": 67,
+          "pz_games_pct": 13.4,
+          "total_pz_eliminations": 71,
+          "mean_elim_round": 6.014925373134329,
+          "early_elim_games": 38,
+          "early_elim_pct": 7.6,
+          "mean_survivor_secrets": 13.034
+        },
+        "bots": {
+          "MixedPolicyBot": {
+            "seats": 500,
+            "win_rate": 21.0,
+            "mean_secrets": 12.29,
+            "pz_rate": 3.4000000000000004
+          },
+          "SecOpsTurtleBot": {
+            "seats": 301,
+            "win_rate": 46.51162790697674,
+            "mean_secrets": 16.45847176079734,
+            "pz_rate": 0.6644518272425249
+          },
+          "AdaptiveBalancedBot": {
+            "seats": 303,
+            "win_rate": 61.05610561056105,
+            "mean_secrets": 17.914191419141915,
+            "pz_rate": 0.0
+          },
+          "AccelerationistBot": {
+            "seats": 307,
+            "win_rate": 10.097719869706841,
+            "mean_secrets": 10.625407166123779,
+            "pz_rate": 4.5602605863192185
+          },
+          "RecklessSaboteurBot": {
+            "seats": 309,
+            "win_rate": 4.854368932038835,
+            "mean_secrets": 9.482200647249192,
+            "pz_rate": 7.119741100323624
+          },
+          "VentureGreedBot": {
+            "seats": 280,
+            "win_rate": 8.571428571428571,
+            "mean_secrets": 9.917857142857143,
+            "pz_rate": 5.714285714285714
+          }
+        },
+        "n_deck_7": 0
+      }
+    },
+    "Path 4 (Worm + Kernel)": {
+      "option_b": {
+        "n_games": 500,
+        "rounds": {
+          "mean": 9.25,
+          "std": 1.991842079518223,
+          "min": 2,
+          "max": 12,
+          "bins": {
+            "<=7": 71,
+            "8": 61,
+            "9": 92,
+            "10": 132,
+            "11": 119,
+            "12": 25,
+            "13+": 0
+          }
+        },
+        "endings": {
+          "singularity_pct": 31.6,
+          "patient_zero_pct": 25.2,
+          "market_collapse_pct": 43.2,
+          "total_wipeout_pct": 0.0,
+          "raw_counts": {
+            "singularity": 158,
+            "patient_zero": 126,
+            "market_collapse": 216
+          },
+          "wipeout_count": 0
+        },
+        "threat": {
+          "clamped_total": 0,
+          "clamped_games": 0,
+          "clamped_games_pct": 0.0,
+          "peak_green_max": 5,
+          "peak_green_mean": 3.648,
+          "peak_green_dist": {
+            "5": 73,
+            "4": 238,
+            "1": 17,
+            "3": 146,
+            "2": 26
+          },
+          "peak_blue_max": 4,
+          "peak_blue_mean": 3.03,
+          "peak_red_max": 7,
+          "peak_red_mean": 5.388,
+          "mean_blue_exited": 11.082,
+          "mean_green_exited": 12.496
+        },
+        "blue_pressure": {
+          "pz_games": 131,
+          "pz_games_pct": 26.200000000000003,
+          "total_pz_eliminations": 150,
+          "mean_elim_round": 7.374045801526718,
+          "early_elim_games": 48,
+          "early_elim_pct": 9.6,
+          "mean_survivor_secrets": 11.395666666666665
+        },
+        "bots": {
+          "MixedPolicyBot": {
+            "seats": 500,
+            "win_rate": 23.200000000000003,
+            "mean_secrets": 10.32,
+            "pz_rate": 7.8
+          },
+          "SecOpsTurtleBot": {
+            "seats": 301,
+            "win_rate": 48.17275747508305,
+            "mean_secrets": 14.621262458471762,
+            "pz_rate": 1.3289036544850499
+          },
+          "AdaptiveBalancedBot": {
+            "seats": 303,
+            "win_rate": 55.44554455445545,
+            "mean_secrets": 15.485148514851485,
+            "pz_rate": 0.33003300330033003
+          },
+          "AccelerationistBot": {
+            "seats": 307,
+            "win_rate": 10.749185667752444,
+            "mean_secrets": 8.95114006514658,
+            "pz_rate": 8.143322475570033
+          },
+          "RecklessSaboteurBot": {
+            "seats": 309,
+            "win_rate": 5.177993527508091,
+            "mean_secrets": 7.4045307443365695,
+            "pz_rate": 14.239482200647249
+          },
+          "VentureGreedBot": {
+            "seats": 280,
+            "win_rate": 7.857142857142857,
+            "mean_secrets": 7.646428571428571,
+            "pz_rate": 13.214285714285715
+          }
+        },
+        "n_deck_7": 0
+      },
+      "baseline": {
+        "n_games": 500,
+        "rounds": {
+          "mean": 9.45,
+          "std": 1.9491275474921557,
+          "min": 2,
+          "max": 12,
+          "bins": {
+            "<=7": 57,
+            "8": 49,
+            "9": 91,
+            "10": 142,
+            "11": 130,
+            "12": 31,
+            "13+": 0
+          }
+        },
+        "endings": {
+          "singularity_pct": 37.4,
+          "patient_zero_pct": 13.8,
+          "market_collapse_pct": 48.8,
+          "total_wipeout_pct": 0.0,
+          "raw_counts": {
+            "singularity": 187,
+            "patient_zero": 69,
+            "market_collapse": 244
+          },
+          "wipeout_count": 0
+        },
+        "threat": {
+          "clamped_total": 118,
+          "clamped_games": 118,
+          "clamped_games_pct": 23.599999999999998,
+          "peak_green_max": 5,
+          "peak_green_mean": 4.502,
+          "peak_green_dist": {
+            "5": 332,
+            "1": 17,
+            "4": 131,
+            "3": 10,
+            "2": 10
+          },
+          "peak_blue_max": 3,
+          "peak_blue_mean": 2.13,
+          "peak_red_max": 7,
+          "peak_red_mean": 5.522,
+          "mean_blue_exited": 8.824,
+          "mean_green_exited": 15.474
+        },
+        "blue_pressure": {
+          "pz_games": 74,
+          "pz_games_pct": 14.799999999999999,
+          "total_pz_eliminations": 79,
+          "mean_elim_round": 6.554054054054054,
+          "early_elim_games": 39,
+          "early_elim_pct": 7.8,
+          "mean_survivor_secrets": 13.069833333333333
+        },
+        "bots": {
+          "MixedPolicyBot": {
+            "seats": 500,
+            "win_rate": 22.900000000000002,
+            "mean_secrets": 12.214,
+            "pz_rate": 4.0
+          },
+          "SecOpsTurtleBot": {
+            "seats": 301,
+            "win_rate": 48.17275747508305,
+            "mean_secrets": 16.488372093023255,
+            "pz_rate": 0.9966777408637874
+          },
+          "AdaptiveBalancedBot": {
+            "seats": 303,
+            "win_rate": 55.28052805280528,
+            "mean_secrets": 17.63036303630363,
+            "pz_rate": 0.0
+          },
+          "AccelerationistBot": {
+            "seats": 307,
+            "win_rate": 11.726384364820847,
+            "mean_secrets": 11.019543973941367,
+            "pz_rate": 4.234527687296417
+          },
+          "RecklessSaboteurBot": {
+            "seats": 309,
+            "win_rate": 6.148867313915858,
+            "mean_secrets": 9.491909385113269,
+            "pz_rate": 9.385113268608414
+          },
+          "VentureGreedBot": {
+            "seats": 280,
+            "win_rate": 6.428571428571428,
+            "mean_secrets": 9.696428571428571,
+            "pz_rate": 5.0
+          }
+        },
+        "n_deck_7": 0
+      }
+    }
+  },
+  "deck_7": {
+    "option_b": {
+      "n_games": 405,
+      "rounds": {
+        "mean": 8.264197530864198,
+        "std": 3.260448119673582,
+        "min": 1,
+        "max": 13,
+        "bins": {
+          "<=7": 148,
+          "8": 18,
+          "9": 21,
+          "10": 74,
+          "11": 99,
+          "12": 43,
+          "13+": 2
+        }
+      },
+      "endings": {
+        "singularity_pct": 40.0,
+        "patient_zero_pct": 57.03703703703704,
+        "market_collapse_pct": 1.9753086419753085,
+        "total_wipeout_pct": 0.9876543209876543,
+        "raw_counts": {
+          "patient_zero": 231,
+          "singularity": 162,
+          "total_wipeout": 4,
+          "market_collapse": 8
+        },
+        "wipeout_count": 4
+      },
+      "threat": {
+        "clamped_total": 76,
+        "clamped_games": 76,
+        "clamped_games_pct": 18.765432098765434,
+        "peak_green_max": 5,
+        "peak_green_mean": 3.9925925925925925,
+        "peak_green_dist": {
+          "1": 45,
+          "5": 252,
+          "2": 45,
+          "3": 30,
+          "4": 33
+        },
+        "peak_blue_max": 7,
+        "peak_blue_mean": 4.617283950617284,
+        "peak_red_max": 5,
+        "peak_red_mean": 3.0469135802469136,
+        "mean_blue_exited": 15.688888888888888,
+        "mean_green_exited": 14.488888888888889
+      },
+      "blue_pressure": {
+        "pz_games": 235,
+        "pz_games_pct": 58.0246913580247,
+        "total_pz_eliminations": 272,
+        "mean_elim_round": 6.276595744680851,
+        "early_elim_games": 125,
+        "early_elim_pct": 30.864197530864196,
+        "mean_survivor_secrets": 8.896924355777223
+      },
+      "bots": {
+        "MixedPolicyBot": {
+          "seats": 405,
+          "win_rate": 34.074074074074076,
+          "mean_secrets": 6.9679012345679014,
+          "pz_rate": 23.209876543209877
+        },
+        "SecOpsTurtleBot": {
+          "seats": 171,
+          "win_rate": 47.368421052631575,
+          "mean_secrets": 10.187134502923977,
+          "pz_rate": 7.017543859649122
+        },
+        "AdaptiveBalancedBot": {
+          "seats": 175,
+          "win_rate": 53.714285714285715,
+          "mean_secrets": 10.82857142857143,
+          "pz_rate": 6.2857142857142865
+        },
+        "AccelerationistBot": {
+          "seats": 137,
+          "win_rate": 23.357664233576642,
+          "mean_secrets": 4.744525547445256,
+          "pz_rate": 29.1970802919708
+        },
+        "VentureGreedBot": {
+          "seats": 161,
+          "win_rate": 19.875776397515526,
+          "mean_secrets": 4.739130434782608,
+          "pz_rate": 32.298136645962735
+        },
+        "RecklessSaboteurBot": {
+          "seats": 165,
+          "win_rate": 16.969696969696972,
+          "mean_secrets": 4.254545454545455,
+          "pz_rate": 38.18181818181819
+        }
+      },
+      "n_deck_7": 405
+    },
+    "baseline": {
+      "n_games": 405,
+      "rounds": {
+        "mean": 8.671604938271605,
+        "std": 3.370417114647418,
+        "min": 1,
+        "max": 13,
+        "bins": {
+          "<=7": 127,
+          "8": 10,
+          "9": 20,
+          "10": 51,
+          "11": 133,
+          "12": 62,
+          "13+": 2
+        }
+      },
+      "endings": {
+        "singularity_pct": 55.80246913580247,
+        "patient_zero_pct": 41.48148148148148,
+        "market_collapse_pct": 1.9753086419753085,
+        "total_wipeout_pct": 0.7407407407407408,
+        "raw_counts": {
+          "patient_zero": 168,
+          "singularity": 226,
+          "market_collapse": 8,
+          "total_wipeout": 3
+        },
+        "wipeout_count": 3
+      },
+      "threat": {
+        "clamped_total": 371,
+        "clamped_games": 285,
+        "clamped_games_pct": 70.37037037037037,
+        "peak_green_max": 5,
+        "peak_green_mean": 4.120987654320988,
+        "peak_green_dist": {
+          "1": 45,
+          "5": 292,
+          "2": 45,
+          "4": 5,
+          "3": 18
+        },
+        "peak_blue_max": 6,
+        "peak_blue_mean": 4.185185185185185,
+        "peak_red_max": 5,
+        "peak_red_mean": 3.2814814814814817,
+        "mean_blue_exited": 14.530864197530864,
+        "mean_green_exited": 16.720987654320986
+      },
+      "blue_pressure": {
+        "pz_games": 171,
+        "pz_games_pct": 42.22222222222222,
+        "total_pz_eliminations": 191,
+        "mean_elim_round": 5.368421052631579,
+        "early_elim_games": 116,
+        "early_elim_pct": 28.641975308641975,
+        "mean_survivor_secrets": 10.368366500829186
+      },
+      "bots": {
+        "MixedPolicyBot": {
+          "seats": 405,
+          "win_rate": 36.54320987654321,
+          "mean_secrets": 9.012345679012345,
+          "pz_rate": 16.543209876543212
+        },
+        "SecOpsTurtleBot": {
+          "seats": 171,
+          "win_rate": 41.52046783625731,
+          "mean_secrets": 12.321637426900585,
+          "pz_rate": 4.093567251461988
+        },
+        "AdaptiveBalancedBot": {
+          "seats": 175,
+          "win_rate": 53.714285714285715,
+          "mean_secrets": 13.022857142857143,
+          "pz_rate": 3.428571428571429
+        },
+        "AccelerationistBot": {
+          "seats": 137,
+          "win_rate": 22.62773722627737,
+          "mean_secrets": 6.532846715328467,
+          "pz_rate": 20.437956204379564
+        },
+        "VentureGreedBot": {
+          "seats": 161,
+          "win_rate": 20.496894409937887,
+          "mean_secrets": 6.391304347826087,
+          "pz_rate": 24.22360248447205
+        },
+        "RecklessSaboteurBot": {
+          "seats": 165,
+          "win_rate": 16.969696969696972,
+          "mean_secrets": 6.157575757575757,
+          "pz_rate": 26.666666666666668
+        }
+      },
+      "n_deck_7": 405
+    }
+  },
+  "outliers": {
+    "total_wipeouts": 21,
+    "base_total_wipeouts": 17,
+    "wipeout_seeds": [
+      181,
+      244,
+      80,
+      104,
+      120,
+      123,
+      176,
+      216,
+      218,
+      284
+    ],
+    "fast_games_opt": 844,
+    "fast_games_base": 737,
+    "late_games_opt": 8,
+    "late_games_base": 13
+  }
+}

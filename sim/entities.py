@@ -801,7 +801,7 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                 staging_payload_2p={},
                 corruption_track=(
                     CorruptionSpace(index=1, label="All lose $2", lose_money=2),
-                    CorruptionSpace(index=2, label="Add 1R, 1G + Add 1K", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1, CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=2, label="Add 1R, 1B + Add 1K", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.BLACK: 1}),
                     CorruptionSpace(index=3, label="All lose $2 & Add 1R", lose_money=2, add_cubes={CubeColor.RED: 1}),
                     CorruptionSpace(index=4, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
                     CorruptionSpace(
@@ -822,7 +822,7 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
                 staging_payload_2p={},
                 corruption_track=(
                     CorruptionSpace(index=1, label="Lose 2 🔬", lose_patches=2),
-                    CorruptionSpace(index=2, label="Add 2G + Add 1K", add_cubes={CubeColor.GREEN: 2, CubeColor.BLACK: 1}),
+                    CorruptionSpace(index=2, label="Add 1B, 1G + Add 1K", add_cubes={CubeColor.BLUE: 1, CubeColor.GREEN: 1, CubeColor.BLACK: 1}),
                     CorruptionSpace(index=3, label="All glitch 1 die & Add 1G", demote_dice=1, add_cubes={CubeColor.GREEN: 1}),
                     CorruptionSpace(index=4, label="Glitch 2 dice + Add 1K", demote_dice=2, add_cubes={CubeColor.BLACK: 1}),
                     CorruptionSpace(
@@ -929,7 +929,7 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
             staging_payload_2p={},
             corruption_track=(
                 CorruptionSpace(index=1, label="All lose $2", lose_money=2),
-                CorruptionSpace(index=2, label="Add 1R, 1G + Add 1K", add_cubes={CubeColor.RED: 1, CubeColor.GREEN: 1, CubeColor.BLACK: 1}),
+                CorruptionSpace(index=2, label="Add 1R, 1B + Add 1K", add_cubes={CubeColor.RED: 1, CubeColor.BLUE: 1, CubeColor.BLACK: 1}),
                 CorruptionSpace(index=3, label="All lose $2 & Add 1R", lose_money=2, add_cubes={CubeColor.RED: 1}),
                 CorruptionSpace(index=4, label="Lose $3 & 1 🔬 + Add 1K", lose_money=3, lose_patches=1, add_cubes={CubeColor.BLACK: 1}),
                 CorruptionSpace(
@@ -950,7 +950,7 @@ def get_all_version_cards(profile: str = "STANDARD") -> List[VersionCard]:
             staging_payload_2p={},
             corruption_track=(
                 CorruptionSpace(index=1, label="Lose 2 🔬", lose_patches=2),
-                CorruptionSpace(index=2, label="Add 2G + Add 1K", add_cubes={CubeColor.GREEN: 2, CubeColor.BLACK: 1}),
+                CorruptionSpace(index=2, label="Add 1B, 1G + Add 1K", add_cubes={CubeColor.BLUE: 1, CubeColor.GREEN: 1, CubeColor.BLACK: 1}),
                 CorruptionSpace(index=3, label="All glitch 1 die & Add 1G", demote_dice=1, add_cubes={CubeColor.GREEN: 1}),
                 CorruptionSpace(index=4, label="Glitch 1 die + Add 1K", demote_dice=1, add_cubes={CubeColor.BLACK: 1}),
                 CorruptionSpace(
