@@ -992,7 +992,7 @@ def render_player_board(
         icon_type="money",
         line1="Start: **$6**",
         line2="Phase 3: Gain Income from software modules",
-        line3="Phase 5: Buy dice ($4–$6) -> Scanned | Regain MS ($3)",
+        line3="Phase 5: Buy 1 die ($4–$6) -> Scanned | Regain MS ($3)",
         line4="Operational Tiebreaker #2 at game end",
     )
 
@@ -1919,7 +1919,7 @@ def render_four_player_round_reference_cards(page: PDFPage) -> None:
         ),
         (
             "P5: OPERATIONS (Clockwise from First Player)",
-            "Upgrade Tracks (<= 2 upgrades/turn [1/2/2/3 {RESEARCH}]; L1 & L3 Breakthroughs resolve at once) | Regain Market Share ($3 Cash each, up to PR limit 1/1/2/2/3; separate) | Paid {STAR} incl. Ad Campaign | Buy <= 2 dice -> Scanned Box.",
+            "Upgrade Tracks (<= 2 upgrades/turn [1/2/2/3 {RESEARCH}]; L1 & L3 Breakthroughs resolve at once) | Regain Market Share ($3 Cash each, up to PR limit 1/1/2/2/3; separate) | Paid {STAR} incl. Ad Campaign | Buy <= 1 die -> Scanned Box.",
         ),
         (
             "P6: CI/CD PIPELINE SHIFT (Simultaneous)",
