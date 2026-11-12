@@ -116,11 +116,11 @@ class TestV400GameplayBalance(unittest.TestCase):
         plan = Phase3ActionPlan(market_purchases=[DieColor.RED, DieColor.BLUE])
         execute_player_operations_turn(engine, p0, plan)
 
-        # Purchased dice must be in scanned_dice, not ready_for_release
-        self.assertEqual(len(p0.scanned_dice), 2)
-        self.assertEqual(p0.scanned_dice_purchased_this_turn, 2)
+        # Purchased dice must be in scanned_dice, not ready_for_release (capped at max_market_purchases_per_turn = 1)
+        self.assertEqual(len(p0.scanned_dice), 1)
+        self.assertEqual(p0.scanned_dice_purchased_this_turn, 1)
         self.assertEqual(p0.ready_for_release_dice, [d1, d2])
-        self.assertEqual({d.color for d in p0.scanned_dice}, {DieColor.RED, DieColor.BLUE})
+        self.assertEqual({d.color for d in p0.scanned_dice}, {DieColor.RED})
 
     def test_v400_03_scanned_graduation_under_release_bandwidth_gate(self):
         """TEST-V400-03: Verify Scanned Graduation strictly respects Release Bandwidth

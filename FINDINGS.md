@@ -288,3 +288,30 @@ Sources: `docs/findings/v400_playtest_feedback_modeling.md`, `docs/specs/v400_ga
 - **Official Balance Verdict: OFFICIALLY APPROVED (`v0.40.0 Baseline`).**
   The Phase 56 balance suite successfully resolves the economic divergence, restores tactical pipeline tension via Triage backpressure and Scanned staging, eliminates defensive blackout risks via the Global Green Cube Cap, and provides immediate hardware upgrade gratification through Phase 5/6 re-sequencing. Macro pacing, tri-modal end-game distribution, and starter equity remain exemplary. Formally approved as the design and balance baseline for `v0.40.0`.
 
+
+## 52. Phase 58: Software Module Dice Purchase Limit Recalibration (1 Die per Round) (`v0.40.0 Tuning`): APPROVED
+
+Sources: `scripts/v400_dice_purchase_limit_investigation.py` (3,600 games across 2P/3P/4P, seeds 42..641, active `v0.40.0` baseline).
+
+- **Investigation Background & Throughput Context:**
+  With the Phase 56 CI/CD sequence reorder (Phase 5 Operations $\to$ Phase 6 Pipeline Shift) and the routing of purchased Central Market colored dice (`$4–$6`) into the Scanned Box, the previous per-turn purchase limit of 2 dice (`max_market_purchases_per_turn = 2`) created an unintended "dead capital trap":
+  1. *Immediate Queue Overflow:* A player purchasing 2 dice in Phase 5 places both into the Scanned Box. In Phase 6 Step 2, their 4 starter dice return from In Production, resulting in $4 + 2 = 6$ dice in Scanned.
+  2. *Hardware Bandwidth Bottleneck:* Baseline Release Bandwidth is 4. Even with an immediate Phase 5 Release Track Level 2 upgrade (Bandwidth 5), exactly 1 die remains stuck in the Scanned Box; without an upgrade, 2 dice are trapped. Releasing both purchased dice required reaching the Release Level 4 Capstone (Bandwidth 6, costing 8 🔬 total).
+  3. *Deadweight Investment:* Players spending $8–$12 on a double purchase found themselves with offline dice stuck in the Scanned Box across multiple rounds.
+  4. *Market Denials:* Allowing 2 dice purchases allowed a single cash-rich player to consume 33%–50% of an entire color market stack (capped at `2 × Players`) in one turn.
+
+- **Empirical Sweep Telemetry (3,600 Games Across 2P/3P/4P):**
+  Comparative Monte Carlo simulations testing `max_market_purchases_per_turn = 2` vs `max_market_purchases_per_turn = 1`:
+  1. *Turn-Level Frequency:* 2-dice purchases occurred in only **3.36%** (3P), **3.43%** (2P), and **4.06%** (4P) of all player-turns (~10%–12% of purchase opportunities).
+  2. *Market Volume Shift:* Purchases per seat shifted minimally from **3.24 to 3.08** (3P), **3.06 to 2.94** (2P), and **3.26 to 3.09** (4P) — a minor ~4%–5% trim. Players spread their acquisitions across consecutive rounds rather than double-buying in one round.
+  3. *Scanned Queue Decongestion:* Ending stranded dice in the Scanned Box decreased from 4.28 to 4.13 (3P), 3.95 to 3.83 (2P), and 4.26 to 4.09 (4P).
+  4. *Macro Pacing & Pacing Invariance:*
+     - Average rounds: 2P **8.59 $\to$ 8.67**, 3P **8.88 $\to$ 8.99**, 4P **8.46 $\to$ 8.54** (shifts strictly $\le 0.11$ rounds).
+     - 3P End-Game Triad: Singularity **39.8% $\to$ 43.8%**, Market Collapse **29.8% $\to$ 27.3%**, Patient Zero **30.2% $\to$ 28.8%**, Total Wipeout **0.2% $\to$ 0.0%**.
+     - 3P Company Win Rates: Blue **37.7% $\to$ 36.6%**, Green **28.8% $\to$ 28.7%**, Red **33.7% $\to$ 34.9%** (fair share 33.3%).
+     - Economics: Final Cash ($3.01 $\to$ $3.15), Final Secrets (10.62 $\to$ 10.43), Final Market Share (9.05 $\to$ 9.08).
+
+- **Balance Verdict & Rule Update: OFFICIALLY APPROVED.**
+  Limiting software module dice purchases to **1 die per turn** (`max_market_purchases_per_turn = 1`) harmonizes dice purchasing with Release Track progression (+1 die purchase matches the +1 capacity of Release Track Level 2), eliminates the deceptive beginner queue trap, prevents anti-thematic market denial, and leaves game pacing and Company equity completely intact.
+  - `RULES.md` updated in Phase 5 Step 4 to: `Purchase Software Module Dice (Limit 1 die per turn [TUNE]):`.
+  - `sim/config.py` default updated to `max_market_purchases_per_turn = 1` with explicit legacy preservation for v0.33/v0.34/v0.35.
