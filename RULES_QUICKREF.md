@@ -1,4 +1,4 @@
-# Too Many Secrets — Quick Reference Rules
+# Too Many Secrets — Quick Reference Rules (v0.41.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Format:** Simultaneous / Turn-Based Hybrid
 
