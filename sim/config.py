@@ -36,6 +36,8 @@ DEFAULT_MARKET_SHARE_MAX: int = 20
 _TRIAGE_ORDER_RULES = ("BOT", "OLDEST_FIRST")
 _TRIAGE_L1_MODES = ("WHITE_CONTRACTORS", "GRAY_DIE")
 _GREEN_TRIAGE_CLEAN_MODES = ("NONE", "COUNT_THEN_CLEAN", "CLEAN_THEN_COUNT")
+_MERIDIAN_OVERRIDE_MODES = ("REDUNDANT_CREW", "CAPITAL_INJECTION")
+_OPERATOR_PROTOCOL_MODES = ("CONTINGENT_STAFFING", "LOGISTICS_BOUNTY")
 
 
 class CubeColor(str, Enum):
@@ -451,6 +453,13 @@ class GameConfig:
     green_triage_clean_mode: str = "NONE"   # "NONE" | "COUNT_THEN_CLEAN" | "CLEAN_THEN_COUNT"
     green_bank_cleans_slot: bool = False
     v1_staging_payload_override: Optional[Dict[str, Dict[CubeColor, int]]] = None
+    # --- v0.39.1 / v0.40.0 White Contractor Removal & Meridian/Operator Rework (INV-RCD-*). ---
+    # Defaults reproduce v0.38f bit-identically.
+    white_contractor_dice_enabled: bool = True
+    meridian_override_mode: str = "REDUNDANT_CREW"          # "REDUNDANT_CREW" | "CAPITAL_INJECTION"
+    meridian_capital_injection_cash: int = 3                # [TUNE] +3 $ in Phase 3
+    operator_protocol_mode: str = "CONTINGENT_STAFFING"     # "CONTINGENT_STAFFING" | "LOGISTICS_BOUNTY"
+    operator_logistics_bounty_research: int = 1             # [TUNE] +1 🔬 per Purple ★ in Phase 3
 
     def __post_init__(self) -> None:
         if not (isinstance(self.track_step_costs, tuple) and len(self.track_step_costs) == 4 and all(isinstance(c, int) and c >= 0 for c in self.track_step_costs)):
@@ -703,6 +712,39 @@ class GameConfig:
         return cls.v038f(**overrides)
 
     @classmethod
+    def v040(cls, **overrides) -> "GameConfig":
+        """v0.40.0 (Phase 56: Remove White Contractor Dice & Glitch Faces).
+        Inherits all v0.38f rules and removes White Contractor dice:
+        - white_contractor_dice_enabled = False (contractor_max_hire = 0, contractor_supply_total = 0)
+        - meridian_override_mode = 'CAPITAL_INJECTION' (+3 $ in Phase 3 once per Rogue Agent Version)
+        - operator_protocol_mode = 'LOGISTICS_BOUNTY' (+1 🔬 per Purple ★ face still In Production in Phase 3)
+        """
+        for k, v in (
+            ("white_contractor_dice_enabled", False),
+            ("contractor_max_hire", 0),
+            ("contractor_supply_total", 0),
+            ("meridian_override_mode", "CAPITAL_INJECTION"),
+            ("meridian_capital_injection_cash", 3),
+            ("operator_protocol_mode", "LOGISTICS_BOUNTY"),
+            ("operator_logistics_bounty_research", 1),
+        ):
+            overrides.setdefault(k, v)
+        return cls.v038f(**overrides)
+
+    @classmethod
+    def v040_roster(cls, **overrides) -> "GameConfig":
+        """``v040()`` + the ``v037_roster()`` bot switches (lever A push on, default params)."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v040(**overrides)
+
+    # Aliases for v0.39.1 / v0.39 transition naming
+    v0391 = v040
+    v0391_roster = v040_roster
+    v039 = v040
+    v039_roster = v040_roster
+
+    @classmethod
     def v038_roster(cls, **overrides) -> "GameConfig":
         """``v038()`` + the ``v037_roster()`` bot switches (lever A push on, default params)."""
         overrides.setdefault("bot_pr_push", True)
@@ -788,6 +830,29 @@ class GameConfig:
                 raise ValueError("company_starting_die_enabled requires starting_gray_dice >= 1")
         self._validate_rsp1()
         self._validate_v038d()
+        self._validate_rcd()
+
+    def _validate_rcd(self) -> None:
+        """spec remove_contractor_dice_spec §3.1 validation."""
+        if not isinstance(self.white_contractor_dice_enabled, bool):
+            raise ValueError(
+                f"white_contractor_dice_enabled must be a bool, got {self.white_contractor_dice_enabled!r}"
+            )
+        if not self.white_contractor_dice_enabled:
+            self.contractor_max_hire = 0
+            self.contractor_supply_total = 0
+        if self.meridian_override_mode not in _MERIDIAN_OVERRIDE_MODES:
+            raise ValueError(
+                f"meridian_override_mode must be one of {_MERIDIAN_OVERRIDE_MODES}, got {self.meridian_override_mode!r}"
+            )
+        if self.operator_protocol_mode not in _OPERATOR_PROTOCOL_MODES:
+            raise ValueError(
+                f"operator_protocol_mode must be one of {_OPERATOR_PROTOCOL_MODES}, got {self.operator_protocol_mode!r}"
+            )
+        for name in ("meridian_capital_injection_cash", "operator_logistics_bounty_research"):
+            val = getattr(self, name)
+            if isinstance(val, bool) or not isinstance(val, int) or val < 0:
+                raise ValueError(f"{name} must be an int >= 0, got {val!r}")
 
     def _validate_v038d(self) -> None:
         """spec v0.38d §3.1.2 validation."""
@@ -977,10 +1042,20 @@ class GameConfig:
                 total_cost += self.contractor_cost_progression[-1]
         return total_cost
 
+    @property
+    def white_contractors_enabled(self) -> bool:
+        return self.white_contractor_dice_enabled
+
+    @white_contractors_enabled.setter
+    def white_contractors_enabled(self, val: bool) -> None:
+        self.white_contractor_dice_enabled = bool(val)
+
     def get_max_affordable_contractors(
         self, money: int, already_hired: int = 0, supply: Optional[int] = None
     ) -> int:
         """Calculates the maximum number of contractors that can be afforded given money, already_hired, and supply."""
+        if not self.white_contractor_dice_enabled:
+            return 0
         max_possible = self.contractor_max_hire - already_hired
         if supply is not None:
             max_possible = min(max_possible, supply)

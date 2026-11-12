@@ -40,13 +40,12 @@ COMPANIES: List[CompanyCardSpec] = [
         code="MERIDIAN",
         name="Meridian Financial Trust",
         sector="Banking Infrastructure",
-        override_name="Redundant Crew",
-        override_timing="P1: STAFFING",
+        override_name="Capital Injection",
+        override_timing="P3: INCOME",
         override_desc=(
-            "Hire up to **2 White Contractor Dice for free** this round, "
-            "bypassing progressive contractor costs."
+            "Gain **+$3 Cash** cleanly in Phase 3: Income (once per SETEC Version)."
         ),
-        flavor='"When liquidity is limitless, headcount is merely an accounting variable."',
+        flavor='"When liquidity is limitless, capital allocation is an offensive discipline."',
         hardware_summary="DEF CAP 2  |  TRIAGE 2  |  RELEASE 4  |  TRACKS L0  |  START DIE: {RED} RED",
         starting_bonus="$6  |  SECRETS 3/4/4  |  MARKET SHARE 13 (2P) / 16 (3-4P) [MAX 20]  |  0 {RESEARCH}",
     ),
@@ -99,9 +98,8 @@ COMPANIES: List[CompanyCardSpec] = [
         override_name="Brute-Force Bypass",
         override_timing="P1: STEP 4 REROLLS",
         override_desc=(
-            "Gain **1 extra free reroll** this phase and include **any number of Glitch dice** in "
-            "your free rerolls. In addition, turn **1 rolled die** to any legal non-Star face "
-            "of its color (the Secret face is allowed)."
+            "Gain **1 extra free reroll** this phase. In addition, turn **1 rolled die** "
+            "to any legal non-Star face of its color (the Secret face is allowed)."
         ),
         flavor='"Massively parallel quantum sequencing breaks deterministic encryption gates."',
         hardware_summary="DEF CAP 2  |  TRIAGE 2  |  RELEASE 4  |  TRACKS L0  |  START DIE: {GREEN} GREEN",
@@ -142,13 +140,12 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         code="OPERATOR",
         name="The Operator",
         role="Tactical Staffing & Logistics Lead",
-        flavor='"Redundant contractor pipelines ready on zero notice."',
+        flavor='"Optimized resource pipelines yield sustained intelligence."',
         purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {RESEARCH}", "{SECRET} Secret", "{PURPLE} {STAR}"),
-        protocol_name="Contingent Staffing",
-        protocol_timing="P1: STEP 4 ROLLING",
+        protocol_name="Logistics Bounty",
+        protocol_timing="P3: INCOME",
         protocol_desc=(
-            "When Face 6 ({PURPLE} {STAR}) is rolled, immediately roll **1 free White Contractor Die** "
-            "from supply directly into your active pool (eligible for remaining rerolls this phase)."
+            "Gain **+1 {RESEARCH}** in Phase 3: Income per **{PURPLE} {STAR}** still In Production."
         ),
     ),
     WhiteHatDossierSpec(
@@ -238,15 +235,7 @@ DICE_SPECS: List[DieSpec] = [
         subtitle="Legacy Code",
         cost_str="Starter (2 each)",
         faces=("Block 1 Any", "Block 1 Any", "+$1 & +1 {RESEARCH}", "+$1 / +1 {RESEARCH}", "+$1 / +1 {RESEARCH}", "+1 {RESEARCH}"),
-        notes="Start: 2 Gray + 1 starting colored die + 1 Purple in Ready for Release; more Gray via Level 1 Breakthroughs. Faces 4-5 are Choices (/): declare in Phase 1 Step 5.",
-    ),
-    DieSpec(
-        color_key="white",
-        title="WHITE",
-        subtitle="Contractor",
-        cost_str="$1 / $2 / $3",
-        faces=("Block 1 Any", "Block 1 Any", "Block 1 Any", "+$1", "Glitch", "Glitch"),
-        notes="Temp hire (max 3/rd). +$1 face pays in Phase 3: Income. Returns to supply after Phase 4. Glitch cannot be rerolled; discarded.",
+        notes="Start: 2 Gray + 1 starting colored die + 1 Purple in Ready for Release; more Gray via Level 1 Breakthroughs. Faces 4-5 are Choices (/): declare in Phase 1 Step 4.",
     ),
     DieSpec(
         color_key="red",
@@ -1002,7 +991,7 @@ def render_player_board(
         tag="UNCAPPED RESERVE",
         icon_type="money",
         line1="Start: **$6**",
-        line2="Phase 1: Hire White Contractors ($3 each, max 3)",
+        line2="Phase 3: Gain Income from software modules",
         line3="Phase 6: Purchase Central Market dice ($4–$6)",
         line4="Operational Tiebreaker #2 at game end",
     )
@@ -1534,72 +1523,51 @@ def render_market_board(page: PDFPage) -> None:
     page.text(742.0, 47.5, "4 MARKET STACKS (R/B/G/Y)  |  PURPLE IN PERSONAL RESERVES", font="mono", size=7.0, color=PALETTE["rule"], align="right")
 
     # -------------------------------------------------------------------------
-    # TOP ROW: Staging Cup | Phase 2 Exit Sorting Tray | White Contractor Pool
+    # TOP ROW: Staging Cup Zone & Compiler Exit Sorting Tray (2 Wide Symmetric Panels)
     # -------------------------------------------------------------------------
     ty, th = 64.0, 126.0
+    top_w = (712.0 - 14.0) / 2.0  # 349.0 pt each (matches bottom row symmetry!)
 
-    # 1. Staging Cup Zone (x = 40, w = 212)
-    page.rect(40.0, ty, 212.0, th, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
-    page.rect(40.0, ty, 212.0, 19.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
-    page.text(146.0, ty + 13.2, "STAGING CUP (RELAY QUEUE)", font="bold", size=8.6, color=PALETTE["ink"], align="center")
-    page.circle(94.0, ty + 73.0, 38.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=1.1, dash=(4, 2))
-    page.circle(94.0, ty + 73.0, 28.0, stroke=PALETTE["rule"], fill=PALETTE["white"], line_width=0.6)
-    page.text(94.0, ty + 71.0, "STAGING", font="mono_bold", size=7.2, color=PALETTE["muted"], align="center")
-    page.text(94.0, ty + 80.5, "CUP", font="mono_bold", size=7.2, color=PALETTE["muted"], align="center")
+    # 1. Staging Cup Zone (x = 40, w = 349)
+    page.rect(40.0, ty, top_w, th, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
+    page.rect(40.0, ty, top_w, 19.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
+    page.text(40.0 + top_w / 2.0, ty + 13.2, "STAGING CUP (RELAY QUEUE)", font="bold", size=8.6, color=PALETTE["ink"], align="center")
+    page.circle(104.0, ty + 73.0, 38.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=1.1, dash=(4, 2))
+    page.circle(104.0, ty + 73.0, 28.0, stroke=PALETTE["rule"], fill=PALETTE["white"], line_width=0.6)
+    page.text(104.0, ty + 71.0, "STAGING", font="mono_bold", size=7.2, color=PALETTE["muted"], align="center")
+    page.text(104.0, ty + 80.5, "CUP", font="mono_bold", size=7.2, color=PALETTE["muted"], align="center")
     page.rich_paragraph(
-        140.0, ty + 34.0, 106.0,
+        158.0, ty + 32.0, 180.0,
         "**Queued for Next Drop:**\n"
-        "- **P1 Pulse:** Injected {BLACK}\n"
-        "- **P4 End:** Recycled {RED}{BLUE}{GREEN}\n"
-        "- **Corruption:** Track Cubes",
-        size=6.7, leading=9.8, color=PALETTE["ink_soft"],
+        "- **P1 Pulse:** Injected {BLACK} Cube\n"
+        "- **P4 End:** Recycled {RED}{BLUE}{GREEN} Cubes\n"
+        "- **Corruption:** Advance Track Cubes",
+        size=7.2, leading=10.5, color=PALETTE["ink_soft"],
     )
-    page.text(146.0, ty + 118.0, "Setup Priming: Drop 1 R/B/G/Black into tower; stuck cubes prime R1.", font="italic", size=5.6, color=PALETTE["muted"], align="center")
+    page.text(40.0 + top_w / 2.0, ty + 118.0, "Setup Priming: Drop 1 R/B/G/Black into tower; stuck cubes prime R1.", font="italic", size=6.0, color=PALETTE["muted"], align="center")
 
-    # 2. Phase 2 Exit Sorting Tray (x = 264, w = 212)
-    ex_x = 264.0
-    page.rect(ex_x, ty, 212.0, th, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
-    page.rect(ex_x, ty, 212.0, 19.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
-    page.text(ex_x + 106.0, ty + 13.2, "COMPILER EXIT TRAY (SORTING)", font="bold", size=8.6, color=PALETTE["ink"], align="center")
-    tray_cols = [("black", "P2: BLACK"), ("red", "P4: RED"), ("blue", "P4: BLUE"), ("green", "P4: GREEN")]
-    tw_sub = 45.0
-    tgap = 5.5
-    tx0 = ex_x + (212.0 - (4 * tw_sub + 3 * tgap)) / 2.0
-    for i, (ck, clbl) in enumerate(tray_cols):
+    # 2. Phase 2 Exit Sorting Tray (x = 403, w = 349)
+    ex_x = 40.0 + top_w + 14.0
+    page.rect(ex_x, ty, top_w, th, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
+    page.rect(ex_x, ty, top_w, 19.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
+    page.text(ex_x + top_w / 2.0, ty + 13.2, "COMPILER EXIT TRAY (SORTING & RESOLUTION)", font="bold", size=8.6, color=PALETTE["ink"], align="center")
+    tray_cols = [
+        ("black", "P2: CORRUPT", "Track Space"),
+        ("red", "P4: RED", "-1 Market Share"),
+        ("blue", "P4: BLUE", "-1 Secret"),
+        ("green", "P4: GREEN", "Glitch Slot"),
+    ]
+    tw_sub = 74.0
+    tgap = 8.0
+    tx0 = ex_x + (top_w - (4 * tw_sub + 3 * tgap)) / 2.0
+    for i, (ck, clbl, csub) in enumerate(tray_cols):
         bx = tx0 + i * (tw_sub + tgap)
         fg, bg = _color_pair(ck)
-        page.rounded_rect(bx, ty + 27.0, tw_sub, 76.0, r=3.0, stroke=fg, fill=bg if ck != "black" else PALETTE["paper_tint"], line_width=0.8)
-        page.draw_color_badge(bx + tw_sub / 2.0, ty + 52.0, 13.0, ck)
-        page.text(bx + tw_sub / 2.0, ty + 94.0, clbl, font="mono_bold", size=5.8, color=PALETTE["ink"], align="center")
-    page.text(ex_x + 106.0, ty + 117.5, "Black resolves in Phase 2; Red/Blue/Green wait here for Phase 4.", font="italic", size=6.3, color=PALETTE["muted"], align="center")
-
-    # 3. White Contractor Pool (x = 488, w = 264)
-    wx, ww = 488.0, 264.0
-    page.rect(wx, ty, ww, th, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
-    page.rect(wx, ty, ww, 19.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
-    page.rich_line(wx + ww / 2.0, ty + 13.2, "{WHITE} **WHITE CONTRACTOR POOL (12 DICE)**", size=8.5, color=PALETTE["ink"], align="center")
-
-    # Progressive Hiring Cost Boxes
-    tiers_hire = [("1st HIRE", "$1"), ("2nd HIRE", "$2"), ("3rd HIRE", "$3")]
-    hw = 76.0
-    hgap = 9.0
-    hx0 = wx + (ww - (3 * hw + 2 * hgap)) / 2.0
-    for i, (hlbl, hcost) in enumerate(tiers_hire):
-        hx = hx0 + i * (hw + hgap)
-        page.rounded_rect(hx, ty + 26.0, hw, 34.0, r=3.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.8)
-        page.text(hx + hw / 2.0, ty + 38.0, hlbl, font="mono", size=6.5, color=PALETTE["muted"], align="center")
-        page.text(hx + hw / 2.0, ty + 53.0, hcost, font="bold", size=11.0, color=PALETTE["ink"], align="center")
-
-    page.rich_line(
-        wx + ww / 2.0, ty + 84.0,
-        "Hire in **Phase 1 Step 2** (max 3/round = $6).",
-        size=7.2, color=PALETTE["ink"], align="center",
-    )
-    page.rich_line(
-        wx + ww / 2.0, ty + 100.0,
-        "{WHITE} **+$1** face pays in Phase 3. All return to supply after **Phase 4**.",
-        size=6.4, color=PALETTE["ink_soft"], align="center",
-    )
+        page.rounded_rect(bx, ty + 26.0, tw_sub, 76.0, r=3.0, stroke=fg, fill=bg if ck != "black" else PALETTE["paper_tint"], line_width=0.8)
+        page.draw_color_badge(bx + tw_sub / 2.0, ty + 46.0, 13.0, ck)
+        page.text(bx + tw_sub / 2.0, ty + 72.0, clbl, font="mono_bold", size=6.5, color=PALETTE["ink"], align="center")
+        page.text(bx + tw_sub / 2.0, ty + 86.0, csub, font="regular", size=5.8, color=PALETTE["ink_soft"], align="center")
+    page.text(ex_x + top_w / 2.0, ty + 117.5, "Black resolves in Phase 2; Red/Blue/Green attack in Phase 4 unless blocked.", font="italic", size=6.3, color=PALETTE["muted"], align="center")
 
     # -------------------------------------------------------------------------
     # MIDDLE ROW: 4 Software Module Market Slots (x = 40..752, y = 200..498)
@@ -1715,8 +1683,8 @@ def render_master_dice_reference(page: PDFPage) -> None:
         page.draw_pip_die(fx + 18.0, ty + 14.0, 16.0, p_i + 1)
         page.text(fx + 31.0, ty + 18.0, f"FACE {p_i + 1}", font="mono_bold", size=7.8, color=PALETTE["ink"])
 
-    # 7 Die Rows
-    row_h = 52.0
+    # 6 Die Rows
+    row_h = 56.0
     for r_idx, dspec in enumerate(DICE_SPECS):
         ry = ty + hh + r_idx * row_h
         fg, bg = _color_pair(dspec.color_key)
@@ -1726,10 +1694,8 @@ def render_master_dice_reference(page: PDFPage) -> None:
         # Left color tab + Die Name
         page.rect(tx, ry, 5.0, row_h, stroke=None, fill=fg)
         page.draw_color_badge(tx + 17.0, ry + 18.0, 11.0, dspec.color_key)
-        page.text(tx + 28.0, ry + 21.5, dspec.title, font="bold", size=9.2, color=fg if dspec.color_key != "white" else PALETTE["ink"])
+        page.text(tx + 28.0, ry + 21.5, dspec.title, font="bold", size=9.2, color=fg)
         page.text(tx + 12.0, ry + 34.5, dspec.subtitle, font="regular", size=7.4, color=PALETTE["ink_soft"])
-        if dspec.color_key == "white":
-            page.text(tx + 12.0, ry + 46.5, "TEMP / 1 ROUND", font="mono_bold", size=6.0, color=PALETTE["muted"])
 
         # Cost cell
         mx = tx + col_die
@@ -1747,7 +1713,6 @@ def render_master_dice_reference(page: PDFPage) -> None:
             fx = mx + col_meta + f_idx * col_face
             page.line(fx, ry, fx, ry + row_h, stroke=PALETTE["rule"], width=0.7)
             is_star = "{STAR}" in f_mk
-            is_glitch = f_mk == "Glitch"
             is_secret = "{SECRET}" in f_mk
             is_choice = "/" in f_mk
 
@@ -1764,10 +1729,6 @@ def render_master_dice_reference(page: PDFPage) -> None:
                 page.rich_line(fx + col_face / 2.0, ry + 22.0, f"**{f_mk}**", size=8.0, color=PALETTE["blue"], align="center")
                 page.text(fx + col_face / 2.0, ry + 31.5, "-> Processing Box", font="mono_bold", size=5.4, color=PALETTE["ink"], align="center")
                 page.text(fx + col_face / 2.0, ry + 39.0, SECRET_YIELD_SHORT[dspec.color_key], font="italic", size=5.4, color=PALETTE["ink_soft"], align="center")
-            elif is_glitch:
-                page.rounded_rect(fx + 5.0, ry + 7.0, col_face - 10.0, row_h - 14.0, r=3.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.7, dash=(2, 1.5))
-                page.rich_line(fx + col_face / 2.0, ry + 24.5, f"**{f_mk}**", size=7.6, color=PALETTE["ink"], align="center")
-                page.text(fx + col_face / 2.0, ry + 36.5, "0 Output / No Reroll", font="mono", size=5.4, color=PALETTE["muted"], align="center")
             elif is_choice:
                 page.rounded_rect(fx + 4.0, ry + 5.0, col_face - 8.0, row_h - 10.0, r=3.0, stroke=PALETTE["muted"], fill=PALETTE["white"], line_width=0.6)
                 parts_c = [p.strip() for p in f_mk.split("/")]
@@ -1789,9 +1750,9 @@ def render_master_dice_reference(page: PDFPage) -> None:
                 plain_size = min(8.4, 8.4 * (col_face - 12.0) / max(1.0, measure_text(f_mk, font="bold", size=8.4)))
                 page.rich_line(fx + col_face / 2.0, ry + 29.5, f"**{f_mk}**", size=max(plain_size, 5.8), color=PALETTE["ink"], align="center")
 
-    # Bottom strip (y = 462..578, h = 116 pt): Secret Face Yields table + two rules callouts
-    by = 462.0
-    bh = 116.0
+    # Bottom strip (y = 442..578, h = 136 pt): Secret Face Yields table + two rules callouts
+    by = 442.0
+    bh = 136.0
     yw = 232.0
     page.rect(40.0, by, yw, bh, stroke=PALETTE["blue"], fill=PALETTE["white"], line_width=0.9)
     page.rect(40.0, by, yw, 16.0, stroke=PALETTE["blue"], fill=PALETTE["blue_light"], line_width=0.7)
@@ -1815,11 +1776,11 @@ def render_master_dice_reference(page: PDFPage) -> None:
     box_w = (712.0 - yw - 20.0) / 2.0
     callouts = [
         (
-            "CHOICE FACES, SHIELDS & GLITCH",
+            "CHOICE FACES, SHIELDS & GLITCHED SLOTS",
             (
-                "- **Slash ( / ):** Choose **1** option in Phase 1 Step 5 *(e.g. Red Face 1: +1 Market Share OR +$1)*. **Ampersand ( & ):** gain **both**.\n"
-                "- **Shields:** only Gray, White and Purple show shields, all **Block 1 Any**. A **Glitched Shield Slot** cannot hold one; clean via Green Secret exit, G1, or 1 Any shield die.\n"
-                "- **Glitch** (White only) cannot be rerolled and is discarded. Secret faces may be rerolled."
+                "- **Slash ( / ):** Choose **1** option in Phase 1 Step 4 *(e.g. Red Face 1: +1 Market Share OR +$1)*. **Ampersand ( & ):** gain **both**.\n"
+                "- **Shields:** only Gray and Purple show shields, all **Block 1 Any**. A **Glitched Shield Slot** cannot hold one; clean via Green Secret exit, G1, or 1 Any shield die.\n"
+                "- **Secret Faces:** Secret faces (Face 5) may be rerolled or kept normally during rerolls."
             ),
         ),
         (
@@ -1856,7 +1817,6 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
 
     compact_rows = [
         ("gray", "GRAY", "Starter", ("1 Any", "1 Any", "$1 & 1{RESEARCH}", "$1 / 1{RESEARCH}", "$1 / 1{RESEARCH}", "+1{RESEARCH}")),
-        ("white", "WHITE", "$1-$3", ("1 Any", "1 Any", "1 Any", "+$1", "Glitch", "Glitch")),
         ("red", "RED", "$4-$5", ("+1 Share\n/ +$1", "+$2", "+$2", "+$2", "{SECRET} Secret", "{RED} {STAR}")),
         ("blue", "BLUE", "$4-$6", ("+1 Secret", "+1 Secret", "+$1", "+1{RESEARCH}\n/ +$1", "{SECRET} Secret", "{BLUE} {STAR}")),
         ("green", "GREEN", "$4-$5", ("+2{RESEARCH}", "+1{RESEARCH}", "+2{RESEARCH}", "+1{RESEARCH}\n/ +$1", "{SECRET} Secret", "{GREEN} {STAR}")),
@@ -1888,13 +1848,13 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
                 page.line(fx, ty, fx, ty + 19.0, stroke=PALETTE["rule"], width=0.5)
                 page.draw_pip_die(fx + c_f / 2.0, ty + 9.5, 11.5, p_i + 1)
 
-            rh = 20.0
+            rh = 22.0
             for idx, (ck, dname, dmeta, dfaces) in enumerate(compact_rows):
                 ry = ty + 19.0 + idx * rh
                 fg, _ = _color_pair(ck)
                 page.rect(x, ry, cw, rh, stroke=PALETTE["rule"], fill=PALETTE["white"] if idx % 2 == 0 else PALETTE["paper_tint"], line_width=0.5)
                 page.draw_color_badge(x + 9.0, ry + rh / 2.0, 7.5, ck)
-                page.text(x + 16.0, ry + rh / 2.0 + 2.4, dname, font="bold", size=6.6, color=fg if ck != "white" else PALETTE["ink"])
+                page.text(x + 16.0, ry + rh / 2.0 + 2.4, dname, font="bold", size=6.6, color=fg)
                 page.line(x + c_name, ry, x + c_name, ry + rh, stroke=PALETTE["rule"], width=0.5)
                 page.text(x + c_name + c_cost / 2.0, ry + rh / 2.0 + 2.2, dmeta, font="mono", size=6.0, color=PALETTE["ink_soft"], align="center")
 
@@ -1911,7 +1871,7 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
                             page.rich_line(fx + c_f / 2.0, ry + 7.5 + li_ * 6.8, f"**{ltxt}**", size=5.0, color=f_col, align="center")
 
             # Clean Secret Face Yields & Icon Legend Footer
-            fy = ty + 19.0 + 7 * rh
+            fy = ty + 19.0 + len(compact_rows) * rh
             fh = y + ch - fy
             page.rect(x, fy, cw, fh, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.7)
             page.rect(x, fy, cw, 14.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.6)
@@ -1921,7 +1881,7 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
                 "- {RED} **Red Secret:** **+2** Corporate Secrets *(also triggers **Market Leader Bonus** at end of Phase 5)*\n"
                 "- {BLUE} **Blue Secret:** **+2** Secrets (**+1** at Defense L3+; max **3**)\n"
                 "- {GREEN} **Green Secret:** **+2** Secrets, then cleans 1 slot   |   {PURPLE} **Purple Secret:** **+1** Secret\n"
-                "- **Choice ( / ):** Commit in P1 Step 5   |   **Dual ( & ):** Gain both   |   **Glitch (White):** Cannot reroll; discard",
+                "- **Choice ( / ):** Commit in P1 Step 4   |   **Dual ( & ):** Gain both   |   **Secret Faces:** Rerollable in P1 Step 3",
                 size=5.6, leading=8.0, color=PALETTE["ink"],
             )
 
@@ -1943,7 +1903,7 @@ def render_four_player_round_reference_cards(page: PDFPage) -> None:
     phases = [
         (
             "P1: ROLL & DEPLOY (Simultaneous)",
-            "**1. Pulse:** +1 {BLACK} -> Staging Cup (do pending Version Switch first). **2. Temp Staffing:** Hire {WHITE} Contractors ($1/$2/$3, max 3). **3-4. Roll & Rerolls:** Roll Ready + Contractors; up to 2 free rerolls (White Glitch cannot reroll; Secret faces can). **5. Assign:** Secret faces -> Processing Box; clean Glitched Shield Slots (G1 or 1 Any shield die); shields -> Defense Grid; rest -> Income. Discard White Glitch.",
+            "**1. Pulse:** +1 {BLACK} -> Staging Cup (do pending Version Switch first). **2-3. Roll & Rerolls:** Roll Ready dice; up to 2 free rerolls (Secret faces can reroll). **4. Assign:** Secret faces -> Processing Box; clean Glitched Shield Slots (G1 or 1 Any shield die); shields -> Defense Grid; rest -> Income.",
         ),
         (
             "P2: COMPILER DROP & CORRUPTION",
@@ -1951,11 +1911,11 @@ def render_four_player_round_reference_cards(page: PDFPage) -> None:
         ),
         (
             "P3: INCOME (Simultaneous)",
-            "Collect $, {RESEARCH}, Market Share & {STAR} from every die still **In Production** (incl. {WHITE}). Purple {STAR} Signature Protocols fire once per die. Then **Customer Poaching** (clockwise from First Player): take 1 Market Share from top rival.",
+            "Collect $, {RESEARCH}, Market Share & {STAR} from every die still **In Production**. Purple {STAR} Signature Protocols fire once per die. Then **Customer Poaching** (clockwise from First Player): take 1 Market Share from top rival.",
         ),
         (
             "P4: ATTACK RESOLUTION (Simultaneous)",
-            "Split all **Any** shields across cubes (all must block). Unblocked: {RED} **-1 Market Share** | {BLUE} **-1 Secret** | {GREEN} 1 shield slot -> **Glitched Shield Slot**. Recycle {RED}{BLUE}{GREEN} -> Staging Cup; {WHITE} -> supply. **End Check:** Total Wipeout, Patient Zero (<=0 Secrets), **Market Collapse** (0 Market Share = Final Round).",
+            "Split all **Any** shields across cubes (all must block). Unblocked: {RED} **-1 Market Share** | {BLUE} **-1 Secret** | {GREEN} 1 shield slot -> **Glitched Shield Slot**. Recycle {RED}{BLUE}{GREEN} -> Staging Cup. **End Check:** Total Wipeout, Patient Zero (<=0 Secrets), **Market Collapse** (0 Market Share = Final Round).",
         ),
         (
             "P5: CI/CD PIPELINE SHIFT (Simultaneous)",

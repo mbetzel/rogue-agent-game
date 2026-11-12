@@ -54,35 +54,54 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
 
     v038 = bool(getattr(controller.state.config, "secret_face_enabled", False))
     can_roll = (controller.phase == 1 and not meta["has_rolled"] and not is_eliminated)
-    already_hired = meta.get("hired_contractors", 0)
+    white_enabled = bool(getattr(controller.state.config, "white_contractor_dice_enabled", True))
     max_contractors = controller.state.config.contractor_max_hire
-    if already_hired < max_contractors:
-        next_contractor_cost = controller.state.config.get_contractor_cost_for_hire(1, already_hired=already_hired)
-    else:
-        next_contractor_cost = None
-
-    can_hire_contractors = (
-        controller.phase == 1
-        and not meta["has_rolled"]
-        and not is_eliminated
-        and already_hired < max_contractors
-        and controller.state.contractor_supply > 0
-        and next_contractor_cost is not None
-        and player.money >= next_contractor_cost
-    )
     active_ver = controller.state.active_version.version_str if (controller.state and controller.state.active_version) else None
     ability_avail = player.is_ability_available(active_ver) if active_ver else player.is_ability_available()
 
-    # Company Institutional Overrides & Operative Protocol Capabilities
-    is_operator = has_company_override(player, CompanyCode.MERIDIAN, legacy_bridge_enabled(controller))
-    can_operator = bool(
-        controller.phase == 1
-        and not meta["has_rolled"]
+    if not white_enabled or max_contractors <= 0:
+        already_hired = meta.get("hired_contractors", 0)
+        next_contractor_cost = None
+        can_hire_contractors = False
+        can_operator = False
+    else:
+        already_hired = meta.get("hired_contractors", 0)
+        if already_hired < max_contractors:
+            next_contractor_cost = controller.state.config.get_contractor_cost_for_hire(1, already_hired=already_hired)
+        else:
+            next_contractor_cost = None
+
+        can_hire_contractors = (
+            controller.phase == 1
+            and not meta["has_rolled"]
+            and not is_eliminated
+            and already_hired < max_contractors
+            and controller.state.contractor_supply > 0
+            and next_contractor_cost is not None
+            and player.money >= next_contractor_cost
+        )
+
+        # Company Institutional Overrides & Operative Protocol Capabilities
+        is_operator = has_company_override(player, CompanyCode.MERIDIAN, legacy_bridge_enabled(controller))
+        can_operator = bool(
+            controller.phase == 1
+            and not meta["has_rolled"]
+            and not is_eliminated
+            and is_operator
+            and ability_avail
+            and already_hired < max_contractors
+            and controller.state.contractor_supply > 0
+        )
+
+    # Phase 3 Meridian Capital Injection
+    is_meridian = has_company_override(player, CompanyCode.MERIDIAN, legacy_bridge_enabled(controller))
+    meridian_mode = getattr(controller.state.config, "meridian_override_mode", "REDUNDANT_CREW")
+    can_capital_injection = bool(
+        controller.phase == 3
         and not is_eliminated
-        and is_operator
+        and is_meridian
+        and meridian_mode == "CAPITAL_INJECTION"
         and ability_avail
-        and already_hired < max_contractors
-        and controller.state.contractor_supply > 0
     )
 
     is_prodigy = has_company_override(player, CompanyCode.HELIX, legacy_bridge_enabled(controller))
@@ -412,6 +431,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         "can_roll": can_roll,
         "can_hire_contractors": can_hire_contractors,
         "next_contractor_cost": next_contractor_cost,
+        "can_capital_injection": can_capital_injection,
         "can_reroll": can_reroll,
         "can_hotfix": can_hotfix,
         "can_commit": can_commit,

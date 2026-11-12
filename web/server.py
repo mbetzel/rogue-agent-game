@@ -193,6 +193,13 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
 
+                elif clean_path == "/api/game/action/capital_injection":
+                    # Phase 3: Meridian Capital Injection
+                    pid = get_target_pid(default_to_human=True)
+                    state = self.controller.capital_injection(pid)
+                    payload, code = success_response({"state": state})
+                    self._send_json_response(payload, code)
+
                 elif clean_path == "/api/game/action/confirm_income":
                     # Phase 3: Income
                     pid = get_target_pid(default_to_human=True)

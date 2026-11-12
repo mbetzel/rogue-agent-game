@@ -7,6 +7,7 @@ import {
   setRenderAppCallback,
   refreshState,
   startNewGame,
+  doCapitalInjection,
   doHireContractors,
   doReroll,
   doDebugUnlock,
@@ -80,6 +81,7 @@ window.closeModal = closeModal;
 window.renderApp = renderApp;
 window.refreshState = refreshState;
 window.startNewGame = startNewGame;
+window.doCapitalInjection = doCapitalInjection;
 window.doHireContractors = doHireContractors;
 window.doReroll = doReroll;
 window.doDebugUnlock = doDebugUnlock;

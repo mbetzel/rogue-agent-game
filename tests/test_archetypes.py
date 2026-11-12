@@ -100,7 +100,7 @@ class TestArchetypeRegistry(unittest.TestCase):
         # Exact names and ability names verification per Section 6D
         operator = get_archetype_by_code(ArchetypeCode.OPERATOR)
         self.assertEqual(operator.name, "The Operator")
-        self.assertEqual(operator.ability_name, "Redundant Crew")
+        self.assertEqual(operator.ability_name, "Capital Injection")
 
         prodigy = get_archetype_by_code(ArchetypeCode.PRODIGY)
         self.assertEqual(prodigy.name, "The Prodigy")
@@ -820,8 +820,8 @@ class TestWebSerializerAndController(unittest.TestCase):
         self.assertIsNotNone(serialized["archetype"])
         self.assertEqual(serialized["archetype"]["code"], "OPERATOR")
         self.assertEqual(serialized["archetype"]["name"], "The Operator")
-        self.assertEqual(serialized["archetype"]["ability_name"], "Redundant Crew")
-        self.assertEqual(serialized["archetype"]["timing_window"], "Phase 1: Staffing Step")
+        self.assertEqual(serialized["archetype"]["ability_name"], "Capital Injection")
+        self.assertEqual(serialized["archetype"]["timing_window"], "Phase 3: Income")
 
         self.assertEqual(serialized["ability_v1_status"], "AVAILABLE")
         self.assertEqual(serialized["ability_v2_status"], "LOCKED")
@@ -844,7 +844,7 @@ class TestWebSerializerAndController(unittest.TestCase):
         # Check event log records archetype assignments
         log_text = " ".join(controller.event_log)
         self.assertIn("The Operator", log_text)
-        self.assertIn("Redundant Crew", log_text)
+        self.assertIn("Capital Injection", log_text)
 
         # Execute human Operator hiring
         controller.hire_contractors(0, count=2, use_operator_ability=True)

@@ -9,18 +9,17 @@ Split out of `RULES.md`; this file is canonical for Section 6.
 | Die Type | Cost | Face 1 | Face 2 | Face 3 | Face 4 | Face 5 | Face 6 |
 | :--- | :---: | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Gray (Legacy)** | Starter (2) / Breakthrough | `Block 1 Any` | `Block 1 Any` | `+$1 & +1 🔬` | `+$1 / +1 🔬` | `+$1 / +1 🔬` | `+1 🔬` `[TUNE]` |
-| **White (Contractor)** | Prog. `$1/$2/$3` | `Block 1 Any` | `Block 1 Any` | `Block 1 Any` | `+$1` | `Glitch` | `Glitch` |
 | **Red (Marketing)** | `$4–$5` (Variant) | `+1 Market Share / +$1` | `+$2` | `+$2` | `+$2` | **Secret face** | `Red ★` |
 | **Blue (Firewall)** | `$4–$6` (Variant) | `+1 Corporate Secret` | `+1 Corporate Secret` | `+$1` | `+1 🔬 / +$1` | **Secret face** | `Blue ★` |
 | **Green (Antivirus)** | `$4–$5` (Variant) | `+2 🔬` | `+1 🔬` | `+2 🔬` | `+1 🔬 / +$1` | **Secret face** | `Green ★` |
 | **Yellow (Commercial)**| `$5–$6` (Variant) | `+2 Market Share` | `+1 Market Share / +1 🔬` | `+$1 & +1 Market Share` | `+$2 / +1 🔬` | `+$2 / +1 🔬` | `Yellow ★` |
 | **Purple (Specialist)** | Starter / Public Relations L3 | `Block 1 Any` | `Block 1 Any` | `+$2` | `+$1 & +1 🔬` | **Secret face** | `Purple ★ (Signature Protocol)` |
 
-* **Choice Faces (`/`):** Faces with a slash (`/`) indicate a Choice Face. During Phase 1 Step 5, the player declares which of the two options the die fulfills for this round (e.g. `+1 Market Share / +$1`).
-* **Shields:** Only Gray, White and Purple dice have shield faces, and every shield is `Block 1 Any`. Red, Blue, Green and Yellow dice have no shield faces.
+* **Choice Faces (`/`):** Faces with a slash (`/`) indicate a Choice Face. During Phase 1 Step 4, the player declares which of the two options the die fulfills for this round (e.g. `+1 Market Share / +$1`).
+* **Shields:** Only Gray and Purple dice have shield faces, and every shield is `Block 1 Any`. Red, Blue, Green and Yellow dice have no shield faces.
 * **Market Share Faces:** Red and Yellow Market Share outputs resolve in Phase 3: Income; they cannot raise Market Share above your maximum and do not count toward your Public Relations limit.
 * **Secret Faces:** Face 5 on Red, Blue, Green and Purple dice. A die showing it after rerolls moves to the **Processing Box** with no other output and banks its Secret when it leaves (yields: Red `+2` and triggers the Market Leader Bonus; Blue `+2`, or `+3` if Defense Grid $\ge$ Level 3; Green `+2`, then cleans `1` Glitched Shield Slot; Purple `+1`; see Phase 5 *Secret Face Yields*). It may be rerolled like any face. Yellow dice have no Secret face.
-* **Glitch Faces (`Glitch`):** Only on White Contractor dice (Faces 5 & 6). A Contractor showing `Glitch` cannot be rerolled (except with Helix's Brute-Force Bypass) and is discarded to the general supply at the end of Phase 1 rerolls. Glitch faces produce 0 shields and 0 resource outputs.
+* **Zero Blank or Glitch Faces:** Every face on every Software Module Die produces a positive shield, resource, Secret, or Star (`★`) output (`0` blank faces and `0` Glitch faces).
 
 ### B. Sample Module Variant Cards (`★` Effects)
 *(Timing: `[In Production — Income]` outputs are collected in **Phase 3: Income**; damage-conditional bonuses resolve in **Phase 4: Attack Resolution**; paid `[Phase 6 — Operations]` options resolve during your Operations Turn.)*
@@ -34,7 +33,7 @@ Split out of `RULES.md`; this file is canonical for Section 6.
   * *B2 — Deep R&D Vault (`$6`):* `[Phase 6 — Operations]` pay `$4` during Phase 6 to gain `+1 Corporate Secret` `[TUNE]`.
   * *B3 — Air-Gapped Backup (`$4`):* `[In Production — Income]` move `1` die from your **Processing Box** to your **Scanned Box** in Phase 3, banking its Secret `[TUNE]`.
 * **Green `★` Variants:**
-  * *G1 — Self-Healing Kernel (`$5`):* `Clean 1 Glitched Shield Slot` (in Phase 1 Step 5) + `[In Production — Income]` gain `+1 🔬`.
+  * *G1 — Self-Healing Kernel (`$5`):* `Clean 1 Glitched Shield Slot` (in Phase 1 Step 4) + `[In Production — Income]` gain `+1 🔬`.
   * *G2 — Universal Sandbox (`$4`):* `[In Production — Income]` Gain `+2 🔬`, plus `+1 🔬` for each of your **Glitched Shield Slots** `[TUNE]`.
   * *G3 — Live Reboot (`$4`):* `[In Production — Income]` Gain `+2 🔬` + `+$1`.
 * **Yellow `★` Variants:**
@@ -81,11 +80,11 @@ Each player contracts with 1 enterprise Client Company for the duration of the m
 
 | Company Code | Company Name | Sector | Institutional Override | Timing Window | Description | Flavor Quote |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **MERIDIAN** | **Meridian Financial Trust** | Banking Infrastructure | *Redundant Crew* | Phase 1: Step 2 Staffing | Hire up to **2 White Contractor Dice for free** this round, bypassing progressive contractor costs. | *"When liquidity is limitless, headcount is merely an accounting variable."* |
+| **MERIDIAN** | **Meridian Financial Trust** | Banking Infrastructure | *Capital Injection* | Phase 3: Income | Gain an immediate **`+$3` cash payout** from the bank `[TUNE]`. | *"When liquidity is limitless, capital allocation is merely an accounting variable."* |
 | **OMNIDYNE** | **Omnidyne Systems** | Tech Giant | *Magnetic Splice* | Phase 5: Step 1 (Magnetic Splice) | Move **1 die** from your **Processing Box** directly to your **Ready for Release Zone** for **free** (bypassing Scanned); it banks its Secret now. | *"Proprietary hardware backplanes allow instantaneous hot-swapping under live load."* |
 | **AEGIS** | **Aegis Defense Relay** | Security Firm | *Baffle Echo* | Phase 4: Attack Resolution | When resolving compiler damage, ignore **1 Attack Cube** (`Red`, `Blue`, or `Green`) of your choice for yourself this round. *(All exited cubes remain in the exit tray and recycle into the Staging Cup as normal).* | *"Multi-layered kinetic dampeners disperse inbound network blast energy."* |
 | **DTO** | **Department of Telecommunications Oversight** | Federal Agency | *Slush Fund* | Phase 4: Attack Resolution (**once per game**) | The DTO accesses emergency black budget reserves: **Absorb up to 2 Corporate Secret loss** from unblocked Blue Spyware for free. *(Any additional Secret loss applies as normal).* | *"Classified black budget allocations absorb compliance failures without public oversight."* |
-| **HELIX** | **Helix Biomedical Consortium** | Medical Research | *Brute-Force Bypass* | Phase 1: Step 4 Rerolls | Gain **1 extra free reroll** this phase, and you may include **any number of Glitch dice** in your free rerolls. In addition, turn **1 of your rolled dice to any legal non-Star face of its color** (the Secret face is allowed). | *"Massively parallel quantum sequencing breaks deterministic encryption gates."* |
+| **HELIX** | **Helix Biomedical Consortium** | Medical Research | *Brute-Force Bypass* | Phase 1: Step 3 Rerolls | Gain **1 extra free reroll** this phase. In addition, turn **1 of your rolled dice to any legal non-Star face of its color** (the Secret face is allowed). | *"Massively parallel quantum sequencing breaks deterministic encryption gates."* |
 | **PROMETHEUS** | **The Prometheus Foundation** | Non-Profit | *Algorithmic Arbitrage* | Phase 6: Operations Turn | Purchase **1 Colored Die** from the Central Market at a **`$2 discount`** (minimum cost `$0`), **OR** gain an immediate **`+$2` cash payout** from the bank. | *"Open-source cryptographic protocols circumvent proprietary enterprise licensing fees."* |
 
 #### 2. The 6 White Hat Dossiers (`WhiteHat`) — Face 6 Signature Protocols
@@ -93,11 +92,11 @@ Each player is a specialist **White Hat Operative**. Your White Hat Dossier defi
 
 | White Hat Code | Operative Name | Role | Signature Protocol | Timing Window | Description | Flavor Quote |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **OPERATOR** | **The Operator** | Tactical Staffing & Logistics Lead | *Contingent Staffing* | Phase 1: Step 4 Rolling | When Face 6 (`Purple ★`) is rolled, immediately roll **1 free White Contractor Die** from the supply directly into your active pool (eligible for all remaining rerolls this phase). | *"Redundant contractor pipelines ready on zero notice."* |
+| **OPERATOR** | **The Operator** | Tactical Staffing & Logistics Lead | *Logistics Bounty* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain **`+1 🔬` Research Token** `[TUNE]`. | *"Dedicated telemetry pipelines harvest live operational diagnostics on zero notice."* |
 | **PHREAKER** | **The Phreaker** | Hardware Intrusion Specialist | *Jumper Diagnostics* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, move **1 die** from your **Processing Box** to your **Scanned Box**, banking its Secret now. If your Processing Box is empty, roll **1 Scanned Box die** and collect its `$` / `🔬` output (die remains in place); if Under Development is empty, collect **`+$1 cash`**. | *"Raw voltage pulses extract signal from dormant silicon."* |
 | **ACOUSTIC** | **The Acoustic** | Side-Channel Cryptanalyst | *Resonance Sensor* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain **`+$1 cash`** per distinct cube color present in the Tower Exit Tray this round (`Red`, `Blue`, `Green`, `Black`; up to **`+$4`** max). | *"Harmonic resonance frequencies decode physical chassis vibrations."* |
 | **SPOOK** | **The Spook** | Covert Intelligence Specialist | *Burn Notice* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain an immediate **`+$2` cash payout**; in addition, you may optionally **permanently return 1 owned colored module die to the market** to gain **`+1 Corporate Secret`**. | *"Scorched-earth protocols ensure zero forensic recovery."* |
-| **PRODIGY** | **The Prodigy** | Autonomous Exploit Hacker | *Arbitrary Code Execution* | Phase 1: Step 4 Rolling | When Face 6 (`Purple ★`) is rolled, turn **1 other rolled die** in your active pool to **any legal non-Star face of that die's color** other than the Secret face. | *"Payload injection executes before memory boundaries establish."* |
+| **PRODIGY** | **The Prodigy** | Autonomous Exploit Hacker | *Arbitrary Code Execution* | Phase 1: Step 3 Rerolls | When Face 6 (`Purple ★`) is rolled, turn **1 other rolled die** in your active pool to **any legal non-Star face of that die's color** other than the Secret face. | *"Payload injection executes before memory boundaries establish."* |
 | **CIPHER** | **The Cipher** | Distributed Ledger Architect | *Algorithmic Parity* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain an additional **`+$2` cash income** AND **`+1 🔬` Research Token**. | *"Parity calculations balance zero-knowledge proofs flawlessly."* |
 
 #### 3. Canonical Pairings & 36-Combination Synergy Setup

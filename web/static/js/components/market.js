@@ -70,37 +70,40 @@ export function renderMarket() {
   `;
 
   // 2. White Contractor Supply Strip (Top of Market)
-  const contractorPoolEl = document.createElement("div");
-  contractorPoolEl.className = "contractor-pool-panel";
-  contractorPoolEl.innerHTML = `
-    <div class="contractor-hdr-row">
-      <div class="contractor-title">
-        <span class="contractor-symbol">◌</span>
-        <span>WHITE CONTRACTOR SUPPLY (12 DICE TOTAL — ${state.contractor_supply || 0} IN POOL)</span>
+  const showContractors = (state.contractor_max_hire > 0 || state.contractor_supply > 0) && state.white_contractor_dice_enabled !== false;
+  if (showContractors) {
+    const contractorPoolEl = document.createElement("div");
+    contractorPoolEl.className = "contractor-pool-panel";
+    contractorPoolEl.innerHTML = `
+      <div class="contractor-hdr-row">
+        <div class="contractor-title">
+          <span class="contractor-symbol">◌</span>
+          <span>WHITE CONTRACTOR SUPPLY (12 DICE TOTAL — ${state.contractor_supply || 0} IN POOL)</span>
+        </div>
+        <div class="contractor-rules-note">
+          Phase 1 Staffing | Max 3/Round | Pays income in Phase 3 | Returns to supply after Phase 4 | Never enters the Processing Box
+        </div>
       </div>
-      <div class="contractor-rules-note">
-        Phase 1 Staffing | Max 3/Round | Pays income in Phase 3 | Returns to supply after Phase 4 | Never enters the Processing Box
+      <div class="contractor-cost-tiers">
+        <div class="contractor-tier-box">
+          <span class="tier-lbl">1ST HIRE</span>
+          <span class="tier-cost">$1</span>
+        </div>
+        <div class="contractor-tier-box">
+          <span class="tier-lbl">2ND HIRE</span>
+          <span class="tier-cost">$2</span>
+        </div>
+        <div class="contractor-tier-box">
+          <span class="tier-lbl">3RD HIRE</span>
+          <span class="tier-cost">$3</span>
+        </div>
+        <div class="contractor-faces-summary">
+          <strong>Faces:</strong> ⚀⚁⚂ Block 1 Any &nbsp;|&nbsp; ⚃ +$1 &nbsp;|&nbsp; ⚄⚅ ⚠️ Glitch (0 output, discarded to supply; the only Glitch faces)
+        </div>
       </div>
-    </div>
-    <div class="contractor-cost-tiers">
-      <div class="contractor-tier-box">
-        <span class="tier-lbl">1ST HIRE</span>
-        <span class="tier-cost">$1</span>
-      </div>
-      <div class="contractor-tier-box">
-        <span class="tier-lbl">2ND HIRE</span>
-        <span class="tier-cost">$2</span>
-      </div>
-      <div class="contractor-tier-box">
-        <span class="tier-lbl">3RD HIRE</span>
-        <span class="tier-cost">$3</span>
-      </div>
-      <div class="contractor-faces-summary">
-        <strong>Faces:</strong> ⚀⚁⚂ Block 1 Any &nbsp;|&nbsp; ⚃ +$1 &nbsp;|&nbsp; ⚄⚅ ⚠️ Glitch (0 output, discarded to supply; the only Glitch faces)
-      </div>
-    </div>
-  `;
-  boardEl.appendChild(contractorPoolEl);
+    `;
+    boardEl.appendChild(contractorPoolEl);
+  }
 
   // 3. 5 Horizontal / Grid Market Slots
   const slotsGrid = document.createElement("div");

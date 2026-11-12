@@ -119,7 +119,11 @@ def check_overrides_effective(config_name: str, roster: str, players: int, overr
                         "(ineffective override; pass --allow-noop to run anyway)")
 
 
-CONFIGS = ("v038", "v038_roster", "v038b", "v038c", "v038d", "v038e", "v038e_roster", "v038f", "v038f_roster", "v037", "v037_roster")
+CONFIGS = (
+    "v040", "v040_roster", "v0391",
+    "v038", "v038_roster", "v038b", "v038c", "v038d", "v038e", "v038e_roster", "v038f", "v038f_roster",
+    "v037", "v037_roster",
+)
 ROSTERS = ("mixed1", "archetypes")
 
 

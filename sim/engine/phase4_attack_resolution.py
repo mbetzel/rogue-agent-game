@@ -564,6 +564,8 @@ def expire_contractors(engine: GameEngine, skip_pids: AbstractSet[int] = frozens
     Every White die (by identity) in contractor_dice or any zone returns to supply exactly once,
     so ``contractor_supply`` is conserved (INV-SEQ-CONTRACTOR-EXPIRY-01).
     """
+    if not getattr(engine.config, "white_contractor_dice_enabled", True) or engine.config.contractor_supply_total <= 0:
+        return
     for player in engine.state.players:
         if player.player_id in skip_pids:
             continue
