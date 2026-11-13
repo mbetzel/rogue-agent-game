@@ -31,6 +31,7 @@ class CompanyCardSpec:
     override_timing: str
     override_desc: str
     flavor: str
+    starting_die: str = ""
     hardware_summary: str = ""
     starting_bonus: str = ""
 
@@ -46,8 +47,7 @@ COMPANIES: List[CompanyCardSpec] = [
             "Gain **+$3 Cash** cleanly in Phase 3: Income (once per SETEC Version)."
         ),
         flavor='"When liquidity is limitless, capital allocation is an offensive discipline."',
-        hardware_summary="DEF CAP 2  |  TRIAGE 1  |  RELEASE 4  |  TRACKS L0  |  START DIE: {RED} RED",
-        starting_bonus="$6  |  SECRETS 3/4/4  |  MARKET SHARE 13 (2P) / 16 (3-4P) [MAX 20]  |  0 {RESEARCH}",
+        starting_die="RED",
     ),
     CompanyCardSpec(
         code="OMNIDYNE",
@@ -60,8 +60,7 @@ COMPANIES: List[CompanyCardSpec] = [
             "**Ready for Release Zone** for **free** (bypassing Scanned); it banks its Secret now."
         ),
         flavor='"Proprietary hardware backplanes allow instantaneous hot-swapping under live load."',
-        hardware_summary="DEF CAP 2  |  TRIAGE 1  |  RELEASE 4  |  TRACKS L0  |  START DIE: {GREEN} GREEN",
-        starting_bonus="$6  |  SECRETS 3/4/4  |  MARKET SHARE 13 (2P) / 16 (3-4P) [MAX 20]  |  0 {RESEARCH}",
+        starting_die="GREEN",
     ),
     CompanyCardSpec(
         code="AEGIS",
@@ -74,8 +73,7 @@ COMPANIES: List[CompanyCardSpec] = [
             "of your choice for yourself this round. Exited cubes remain in tray and recycle as normal."
         ),
         flavor='"Multi-layered kinetic dampeners disperse inbound network blast energy."',
-        hardware_summary="DEF CAP 2  |  TRIAGE 1  |  RELEASE 4  |  TRACKS L0  |  START DIE: {BLUE} BLUE",
-        starting_bonus="$6  |  SECRETS 3/4/4  |  MARKET SHARE 13 (2P) / 16 (3-4P) [MAX 20]  |  0 {RESEARCH}",
+        starting_die="BLUE",
     ),
     CompanyCardSpec(
         code="DTO",
@@ -88,8 +86,7 @@ COMPANIES: List[CompanyCardSpec] = [
             "from unblocked **Blue Spyware** for free. **Once per game** (optional when it applies)."
         ),
         flavor='"Classified black budget allocations absorb compliance failures without public oversight."',
-        hardware_summary="DEF CAP 2  |  TRIAGE 1  |  RELEASE 4  |  TRACKS L0  |  START DIE: {BLUE} BLUE",
-        starting_bonus="$6  |  SECRETS 3/4/4  |  MARKET SHARE 13 (2P) / 16 (3-4P) [MAX 20]  |  0 {RESEARCH}",
+        starting_die="BLUE",
     ),
     CompanyCardSpec(
         code="HELIX",
@@ -102,8 +99,7 @@ COMPANIES: List[CompanyCardSpec] = [
             "to any legal non-Star face of its color (the Secret face is allowed)."
         ),
         flavor='"Massively parallel quantum sequencing breaks deterministic encryption gates."',
-        hardware_summary="DEF CAP 2  |  TRIAGE 1  |  RELEASE 4  |  TRACKS L0  |  START DIE: {GREEN} GREEN",
-        starting_bonus="$6  |  SECRETS 3/4/4  |  MARKET SHARE 13 (2P) / 16 (3-4P) [MAX 20]  |  0 {RESEARCH}",
+        starting_die="GREEN",
     ),
     CompanyCardSpec(
         code="PROMETHEUS",
@@ -117,8 +113,7 @@ COMPANIES: List[CompanyCardSpec] = [
             "from the bank."
         ),
         flavor='"Open-source cryptographic protocols circumvent proprietary enterprise licensing fees."',
-        hardware_summary="DEF CAP 2  |  TRIAGE 1  |  RELEASE 4  |  TRACKS L0  |  START DIE: {RED} RED",
-        starting_bonus="$6  |  SECRETS 3/4/4  |  MARKET SHARE 13 (2P) / 16 (3-4P) [MAX 20]  |  0 {RESEARCH}",
+        starting_die="RED",
     ),
 ]
 
@@ -580,15 +575,16 @@ def _draw_company_card(page: PDFPage, x: float, y: float, w: float, h: float, co
     page.rect(x + 4.0, fy, w - 8.0, fh, stroke=PALETTE["guide"], fill=PALETTE["paper_tint"], line_width=0.5)
     _fit_paragraph(page, x + 7.0, fy + 6.0, w - 14.0, f"*{comp.flavor}*", fy + fh - 2.0, size=5.0, leading=6.0, min_size=4.5, color=PALETTE["ink_soft"], align="center")
 
-    # Hardware & bonus strip
-    hw_y, hw_h = y + 45.0, 16.0
-    page.rect(x + 4.0, hw_y, w - 8.0, hw_h, stroke=PALETTE["ink"], fill=PALETTE["purple_light"], line_width=0.5)
-    page.rich_line(x + w / 2.0, hw_y + 6.8, f"**{comp.hardware_summary}**", size=4.9, color=PALETTE["ink"], align="center")
-    page.rich_line(x + w / 2.0, hw_y + 13.4, f"**{comp.starting_bonus}**", size=4.6, color=PALETTE["purple"], align="center")
+    # Starting Colored Die strip
+    hw_y, hw_h = y + 45.0, 14.0
+    die_col = comp.starting_die.lower()
+    fg_col, bg_col = _color_pair(die_col)
+    page.rect(x + 4.0, hw_y, w - 8.0, hw_h, stroke=fg_col, fill=bg_col, line_width=0.7)
+    page.rich_line(x + w / 2.0, hw_y + 9.5, f"**STARTING COLORED DIE: {{{comp.starting_die}}} {comp.starting_die}**", size=5.8, color=fg_col, align="center")
 
     # Institutional Override box
-    o_y = y + 63.0
-    o_h = h - 66.0
+    o_y = y + 62.0
+    o_h = h - 65.0
     page.rect(x + 4.0, o_y, w - 8.0, o_h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.7)
     page.rect(x + 4.0, o_y, w - 8.0, 12.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.5)
     tw = measure_text(comp.override_timing, font="mono_bold", size=4.7) + 4.0
@@ -1418,7 +1414,7 @@ def render_agent_board(page: PDFPage) -> None:
     ]
 
     cy_box = col_top + 78.0
-    card_gap = 8.0
+    card_gap = 12.0
     for ckey, ctitle, ctag, cbody, bh_card in cube_cards:
         fg, bg = _color_pair(ckey)
         page.rounded_rect(m_x + 7.0, cy_box, m_w - 14.0, bh_card, r=3.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.8)
@@ -1427,17 +1423,6 @@ def render_agent_board(page: PDFPage) -> None:
         page.rich_line(m_x + m_w - 11.0, cy_box + 12.0, ctag, size=5.8, base_font="mono_bold", color=PALETTE["ink_soft"], align="right")
         page.rich_paragraph(m_x + 11.0, cy_box + 28.0, m_w - 22.0, cbody, size=6.6, leading=9.0, color=PALETTE["ink"])
         cy_box += bh_card + card_gap
-
-    # Bottom Shield Blocking Rule Box inside Middle Column
-    sh_y = cy_box + 2.0
-    sh_h = col_bot - sh_y - 8.0
-    page.rounded_rect(m_x + 7.0, sh_y, m_w - 14.0, sh_h, r=3.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.8)
-    page.rich_line(m_x + m_w / 2.0, sh_y + 13.0, "**ANY-SHIELD BLOCKING RULE (PHASE 4)**", size=6.8, color=PALETTE["ink"], align="center")
-    page.rich_paragraph(
-        m_x + 11.0, sh_y + 24.5, m_w - 22.0,
-        "Every shield is **Block 1 Any**. In Phase 4, split your active shields across {RED}, {BLUE}, and {GREEN} cubes; every shield must block while any unblocked cube remains.",
-        size=6.3, leading=8.5, color=PALETTE["ink_soft"],
-    )
 
     # -------------------------------------------------------------------------
     # COLUMN 3 (Right): Shared Central Market Share Track (x = 514, w = 238)
@@ -2112,8 +2097,10 @@ def _draw_version_tile(page: PDFPage, x: float, y: float, w: float, h: float, ti
         page.rect(sx + (sw - 14.0) / 2.0, y_track + 13.0, 14.0, 14.0, stroke=PALETTE["muted"], fill=PALETTE["paper_tint"], line_width=0.5, dash=(2, 2))
         page.rich_line(sx + sw / 2.0, y_track + 22.5, "{BLACK}", size=5.5, color=PALETTE["muted"], align="center")
 
-        # Space effect text below
-        page.rich_paragraph(sx + 1.0, y_track + 33.0, sw - 2.0, sp.label, size=4.9, leading=6.5, color=PALETTE["ink"], align="center")
+        # Space effect text below (scaled to avoid overflow in narrow spaces, e.g. v3.0 Singularity)
+        sp_size = 3.8 if sp.is_singularity else 4.9
+        sp_leading = 5.2 if sp.is_singularity else 6.5
+        page.rich_paragraph(sx + 1.0, y_track + 33.0, sw - 2.0, sp.label, size=sp_size, leading=sp_leading, color=PALETTE["ink"], align="center")
 
 
 def render_version_tiles_page(page: PDFPage) -> None:
