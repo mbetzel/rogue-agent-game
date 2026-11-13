@@ -1005,4 +1005,50 @@ class BaseBot:
                 return (idx, target)
         return None
 
+    def choose_target_lock_color(
+        self,
+        player: PlayerState,
+        tied_colors: List[CubeColor],
+        game_state: GameState,
+        attack: Dict[CubeColor, int],
+    ) -> CubeColor:
+        """Selects which tied dominant attack color hits this player under Target Lock (INV-TL-01, INV-TL-06)."""
+        return default_target_lock_color_heuristic(player, tied_colors, game_state, attack)
+
+
+def default_target_lock_color_heuristic(
+    player: PlayerState,
+    tied_colors: List[CubeColor],
+    state: GameState,
+    attack: Dict[CubeColor, int],
+) -> CubeColor:
+    """Selects which tied dominant attack color hits this player under Target Lock (INV-TL-01, INV-TL-06).
+
+    Default Strategic Heuristic:
+    Minimizes marginal operational damage based on corporate survivability margins.
+    """
+    if not tied_colors:
+        return CubeColor.RED
+
+    priority_order = {CubeColor.GREEN: 0, CubeColor.RED: 1, CubeColor.BLUE: 2}
+    available_shields = max(0, player.defense_capacity - player.glitched_shield_slots)
+    total_incoming = sum(attack.get(c, 0) for c in (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN))
+
+    # 1. Defense Capacity Buffer Evaluation:
+    if available_shields >= total_incoming + 1:
+        return min(tied_colors, key=lambda c: priority_order.get(c, 99))
+
+    # 2. Unblocked Marginal Damage Cost Ranking:
+    def _damage_cost(c: CubeColor) -> float:
+        if c == CubeColor.BLUE:
+            return 100.0 if player.secrets <= 2 else 5.0
+        elif c == CubeColor.RED:
+            ms = player.market_share if player.market_share is not None else 10
+            return 25.0 if ms <= 2 else 2.5
+        elif c == CubeColor.GREEN:
+            return 0.0 if player.glitched_shield_slots >= player.defense_capacity else 1.8
+        return 10.0
+
+    return min(tied_colors, key=lambda c: (_damage_cost(c), priority_order.get(c, 99)))
+
 

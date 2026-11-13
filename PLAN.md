@@ -3,7 +3,7 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
-- [x] **Rules Draft `v0.41.0`** captured in [RULES.md](./RULES.md)
+- [x] **Rules Draft `v0.42.0`** captured in [RULES.md](./RULES.md)
 - [x] **Multi-Agent SDLC Pipeline** defined in Section 2 below
 - [ ] **Phase 44 (exploration): Red Rebalance — $2 Ransom, Block 2 Red, Red Choice Face**
   - [x] *Pre-SDLC Game Designer Modeling:* proposal = $2 per unblocked Red cube; Red 1-pip face `Block 2 Red`; one Red `+$2` face becomes `+$1 / +1 🔬`; Blue, Green and ★ variants unchanged. Sim levers `red_ransom_per_cube` and `red_die_profile` (defaults = v0.35). Sweep `scripts/run_v360_red_rebalance_sweep.py` (1,500 games per pod). Results: `FINDINGS.md` §31.
@@ -112,6 +112,14 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Milestone 4 Product Owner Sweep:* 6,000-game comparative Monte Carlo sweep across 2P/3P/4P pods (`sim_results/player_specific_corruption/validation_report.md`). Pacing centered at 8.44–8.82 rounds; tri-modal end-game split healthy (Singularity 28–33%, Patient Zero 22–42%, Market Collapse 29–44%, Total Wipeout <= 0.87% macro average); Robin Hood transfers successfully redistributed liquidity without macro inflation.
   - [x] *Milestone 5 Balance Assessment (`game-designer`):* `FINDINGS.md` §54. APPROVED as `v0.41.0 Baseline`.
   - [x] *Milestone 6 Documentation & Asset Sync (`graphic-designer` & Main Agent):* `RULES.md` Phase 2, `RULES_APPENDIX.md` §6C, `pnp/generate_pnp.py` updated and all 10 PDFs regenerated.
+- [x] **Phase 60: Operative Signature Cubes & Target Lock Protocol (`v0.42.0 Baseline`)**
+  - [x] *Pre-SDLC Game Designer Modeling & Analysis:* Modeled Cube Tower personality mechanics and evaluated unblockable damage vs. blockable Target Lock (+1 dominant Attack Cube, defending player breaks ties, Scenario B attention cycle). Empirical first-secret timing across 500 games established mean 2.11 rounds, validating setup state starting idle on player mats. User signed off on Option 1 (defending player choice) and Scenario B.
+  - [x] *Milestone 1 Technical Architecture Spec (`principal-engineer`):* `docs/specs/target_lock_signature_cubes_spec.md` with invariants `INV-TL-01` through `INV-TL-08` (tie resolution hook, empty tray fizzle, volume conservation, blockable Any shields, baffle hold tracking, bot heuristics, config flags, threat volume conservation).
+  - [x] *Milestone 2 Implementation (`senior-engineer`):* `sim/config.py` (`target_lock_enabled` default False, `v042` preset), `sim/tower.py` (signature cube mass & two-state baffle physics), `sim/engine/state.py` (`PlayerState`, `GameState`, `RoundTelemetry`), `sim/engine/phase2_compiler.py` (compiler drop & lock activation), `sim/engine/phase4_attack_resolution.py` (bonus attack resolution, shield blocking, Defense L4 cash), `sim/engine/phase5_pipeline_shift.py` (idempotent triage queueing), `sim/bots/base.py` (`choose_target_lock_color` hook & heuristic), and `tests/test_target_lock.py` (12 unit tests passing).
+  - [x] *Milestone 3 Code Review Gate (`staff-engineer`):* APPROVED (full invariant audit, zero regression, golden parity verified).
+  - [x] *Milestone 4 Product Owner Sweep:* 7,200-game comparative Monte Carlo sweep across 2P/3P/4P pods (`sim_results/target_lock_validation/validation_report.md`). Pacing centered at 8.06 rounds; Total Wipeout 0.81% (<= 1.0% target); baffle retention ~40% matching physical Shogun test calibration; Target Lock trigger rate 2.25–2.59/seat-game; top-engine win rates compressed 2%–4% in favor of trailing archetypes.
+  - [x] *Milestone 5 Balance Assessment (`game-designer`):* `FINDINGS.md` §55. APPROVED as `v0.42.0 Baseline`.
+  - [x] *Milestone 6 Documentation & Asset Sync (`graphic-designer` & Main Agent):* `RULES.md`, `RULES_QUICKREF.md`, `GLOSSARY.md`, `RULES_APPENDIX.md`, `PLAN.md`, `pnp/README.md`, and `pnp/generate_pnp.py` synchronized to `v0.42.0`.
 - [x] **Completed phases (Phases 1–46, 48)** are archived in [docs/archive/PLAN_completed_phases.md](docs/archive/PLAN_completed_phases.md), along with the legacy v0.3-era Sections 3–5 (code architecture, experiment matrix, SDLC checklist).
 
 ---

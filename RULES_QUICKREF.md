@@ -1,4 +1,4 @@
-# Too Many Secrets — Quick Reference Rules (v0.41.0)
+# Too Many Secrets — Quick Reference Rules (v0.42.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Format:** Simultaneous / Turn-Based Hybrid
 
@@ -22,8 +22,9 @@ You are a **White Hat Operative** contracted to defend a **Client Company** agai
    * Place starting cubes listed on the `v1.0` card into the **Staging Cup** (typically `2 Red, 1 Blue, 1 Green, 0 Black`).
 2. **Central Software Market:**
    * For each color (**Red, Blue, Green, Yellow**), reveal **1 random Variant Card** and place a stack of **`2 × Players`** dice of that color on it. *(Purple dice are not in the central market).*
-3. **Player Terminal Mats:**
+3. **Player Terminal Mats & Cubes:**
    * Each player takes 1 **Company Terminal Mat** with all 4 Hardware Tracks at **Level 0**.
+   * Take **`7` cubes in your player color**: `4` on Hardware Tracks (Level 0), `1` on Client Company Override (Available), `1` on Central Market Share Track, and `1` **Operative Signature Cube** on your Company Terminal Mat (idle).
    * Place **1 Glitched Shield Slot Marker** on your Defense Grid (leaving 1 clean and 1 glitched slot available at baseline Defense Capacity 2).
    * Place **1 Purple Specialist Die** on your mat's **Personal Reserve** slot.
 4. **Deal Dossiers & Starting Pools:**
@@ -90,6 +91,7 @@ Each round consists of **6 Phases**:
 
 1. **Drop:** Empty the entire **Staging Cup** into the **Cube Tower**. Group exited cubes by color in the tray.
    * Exited **Red, Blue, and Green Attack Cubes** stay in the tray until Phase 4.
+   * **Operative Signature Cubes:** Exited Signature Cubes trigger **Target Lock** for that player and return immediately to their mat. Stuck Signature Cubes stay inside the tower.
 2. **Buffer Overflow:** If **0 cubes exit**, no attacks occur and no corruption advances. Income is still collected in Phase 3. Add **1 Red, 1 Blue, and 1 Green Cube** to the Staging Cup for next round.
 3. **Resolve Black Cubes:** Advance exited Black Cubes one-by-one onto the active Version's **Corruption Track**, immediately resolving each space's effect:
    * **Add Cubes:** Add printed cubes to the **Staging Cup** (primes next round).
@@ -117,6 +119,7 @@ Collect all resources produced by dice still deployed **In Production** (Income 
 ### Phase 4: Attack Resolution (Simultaneous)
 
 Calculate total attack cubes in the tray: **Red**, **Blue**, and **Green**. Each player simultaneously allocates their available `Block 1 Any` shields:
+* **Target Lock (+1 Cube):** If you triggered a Target Lock in Phase 2, face **`+1 Attack Cube`** of the most common exited color in the tray (defending player breaks ties; fizzles if no attack cubes exited). This extra cube is fully blockable by shields and is not recycled.
 * **Mandatory Blocking:** Every active shield must block an attack cube if any unblocked cubes remain. You choose how to distribute shields among colors.
 * **Unblocked Cube Penalties:**
   * **Red (Market Manipulation):** Lose **`1` Market Share** per unblocked Red cube (minimum 0).
@@ -161,6 +164,7 @@ Starting with the First Player, each player takes their Operations Turn:
      * **Green:** `+2 Secrets` and clean `1` Glitched Shield Slot
      * **Purple:** `+1 Secret`
    * *Triage Level 4:* Gain `+1 🔬` for each die moved beyond the 2nd.
+   * **Queue Signature Cube:** When banking at least 1 Secret, if your **Operative Signature Cube** is on your mat, move it to the **Staging Cup** for next round's compile.
 4. **Market Leader Bonus Check:** If any player banked a **Red Secret** this round (Phase 3 or 6), award the **Market Leader Bonus** by current Market Share:
    * **1st Place:** `+3 Secrets`
    * **2nd Place:** `+1 Secret`

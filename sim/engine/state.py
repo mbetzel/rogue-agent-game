@@ -6,7 +6,7 @@ import random
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
-from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor
+from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor, SignatureCubeLocation
 from sim.entities import (
     AbilityStatus,
     ArchetypeCard,
@@ -135,6 +135,16 @@ class PlayerState:
     money_spent_regain: int = 0
     scanned_dice_purchased_this_turn: int = 0
     triage_milestones_claimed: List[str] = field(default_factory=list)
+
+    # --- Operative Signature Cube & Target Lock Protocol (Phase 60) ---
+    signature_cube_location: SignatureCubeLocation = SignatureCubeLocation.IDLE_ON_MAT
+    target_locked: bool = False
+    target_lock_baffle_rounds: int = 0
+    target_locks_triggered: int = 0
+    extra_attacks_absorbed: int = 0
+    extra_attacks_unblocked: int = 0
+    baffle_hold_rounds_total: int = 0
+    baffle_hold_visits: int = 0
 
     is_patient_zero: bool = False
     elimination_round: Optional[int] = None
@@ -394,6 +404,16 @@ class PlayerState:
         self.personal_purple_reserve = personal_purple_reserve
         self.purple_star_available = purple_star_available
         self.purple_star_count = purple_star_count
+
+        # --- Operative Signature Cube & Target Lock Protocol (Phase 60) ---
+        self.signature_cube_location = kwargs.get("signature_cube_location", SignatureCubeLocation.IDLE_ON_MAT)
+        self.target_locked = kwargs.get("target_locked", False)
+        self.target_lock_baffle_rounds = kwargs.get("target_lock_baffle_rounds", 0)
+        self.target_locks_triggered = kwargs.get("target_locks_triggered", 0)
+        self.extra_attacks_absorbed = kwargs.get("extra_attacks_absorbed", 0)
+        self.extra_attacks_unblocked = kwargs.get("extra_attacks_unblocked", 0)
+        self.baffle_hold_rounds_total = kwargs.get("baffle_hold_rounds_total", 0)
+        self.baffle_hold_visits = kwargs.get("baffle_hold_visits", 0)
 
     # --- v0.36.0 Market Share (INV-MS-LEDGER-01) ---
     def init_market_share(self, start: int, max_share: Optional[int] = None) -> None:
@@ -1008,6 +1028,12 @@ class RoundTelemetry:
     purchases_by_player: Dict[int, Dict[str, int]] = field(default_factory=dict)
     end_triggers_this_round: List[str] = field(default_factory=list)
     green_cubes_clamped_per_round: int = 0
+    # --- Operative Signature Cube & Target Lock Protocol (Phase 60) ---
+    target_locks_by_player: Dict[int, bool] = field(default_factory=dict)
+    target_lock_extra_colors: Dict[int, Optional[str]] = field(default_factory=dict)
+    target_lock_absorbed_by_player: Dict[int, int] = field(default_factory=dict)
+    target_lock_unblocked_by_player: Dict[int, int] = field(default_factory=dict)
+    signature_cube_locations: Dict[int, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -1065,6 +1091,8 @@ class CompileResult:
     black_dropped: int = 0
     breached_pids: Set[int] = field(default_factory=set)  # players who became Patient Zero during Phase 2
     version_comparisons: List[VersionComparisonRecord] = field(default_factory=list)  # v0.36.0
+    exited_signature_pids: Set[int] = field(default_factory=set)
+    stuck_signature_pids: Set[int] = field(default_factory=set)
 
 
 @dataclass
@@ -1179,6 +1207,8 @@ class GameState:
             CubeColor.BLACK: 0,
         }
     )
+    # Signature cube player IDs currently queued in the staging cup (Phase 60)
+    staging_signature_cubes: Set[int] = field(default_factory=set)
     tower: CubeTower = field(init=False)
     priming_exited_cubes: Dict[CubeColor, int] = field(
         default_factory=lambda: {

@@ -53,6 +53,13 @@ class CubeColor(str, Enum):
     BLACK = "black"
 
 
+class SignatureCubeLocation(str, Enum):
+    """Physical location of an Operative Signature Cube in the Attention Cycle."""
+    IDLE_ON_MAT = "idle_on_mat"       # Resting in cradle on Company Terminal Mat
+    STAGING_CUP = "staging_cup"       # Queued in central Staging Cup for Phase 2 compiler drop
+    IN_TOWER = "in_tower"             # Trapped on internal baffles inside the Cube Tower
+
+
 class DieColor(str, Enum):
     GRAY = "gray"
     WHITE = "white"
@@ -477,6 +484,10 @@ class GameConfig:
     triage_l2_milestone_secrets: int = 0           # [TUNE: 0 = disabled (legacy); 1 in v0.40.0]
     version_card_profile: str = "STANDARD"         # "STANDARD" | "AGGRESSIVE" | "V040_ASYMMETRIC"
 
+    # --- Operative Signature Cube & Target Lock Protocol (Phase 60) ---
+    target_lock_enabled: bool = False
+    target_lock_bonus_attack: int = 1
+
     def __post_init__(self) -> None:
         if not (isinstance(self.track_step_costs, tuple) and len(self.track_step_costs) == 4 and all(isinstance(c, int) and c >= 0 for c in self.track_step_costs)):
             raise ValueError("track_step_costs must be a 4-tuple of non-negative integers")
@@ -810,6 +821,17 @@ class GameConfig:
         overrides.setdefault("bot_pr_push", True)
         overrides.setdefault("bot_pr_push_params", PrPushParams())
         return cls.v040(**overrides)
+
+    @classmethod
+    def v041(cls, **overrides) -> "GameConfig":
+        """v0.41.0 canonical baseline."""
+        return cls.v040_roster(**overrides)
+
+    @classmethod
+    def v042(cls, **overrides) -> "GameConfig":
+        """Candidate preset enabling Operative Signature Cubes and Target Lock Protocol."""
+        overrides.setdefault("target_lock_enabled", True)
+        return cls.v041(**overrides)
 
     def _validate_tower_config(self) -> None:
         """Validates Cube Tower physics parameters (spec §2.4)."""

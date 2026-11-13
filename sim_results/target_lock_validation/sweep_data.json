@@ -1,0 +1,723 @@
+{
+  "candidate": {
+    "4P": {
+      "games": 1200,
+      "players": 4,
+      "mean_rounds": 7.883,
+      "std_rounds": 2.729,
+      "min_rounds": 2,
+      "max_rounds": 13,
+      "round_distribution": {
+        "2": 60,
+        "3": 60,
+        "4": 68,
+        "5": 71,
+        "6": 68,
+        "7": 106,
+        "8": 179,
+        "9": 187,
+        "10": 193,
+        "11": 162,
+        "12": 43,
+        "13": 3
+      },
+      "singularity_pct": 19.17,
+      "patient_zero_pct": 46.92,
+      "market_collapse_pct": 33.83,
+      "total_wipeout_pct": 0.08,
+      "round_limit_pct": 0.0,
+      "wipeouts_count": 1,
+      "early_wipeout_seeds": [
+        438
+      ],
+      "long_stall_seeds": [
+        286,
+        292,
+        321
+      ],
+      "archetypes": {
+        "AccelerationistBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 141.0,
+          "win_rate": 14.6875,
+          "pz_rate": 16.666666666666664,
+          "avg_secrets": 7.527083333333334,
+          "avg_market_share": 9.035416666666666,
+          "tl_triggered_per_game": 1.80625,
+          "tl_absorption_eff": 0.23781212841854932
+        },
+        "AdaptiveBalancedBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 487.0,
+          "win_rate": 50.72916666666667,
+          "pz_rate": 3.0208333333333335,
+          "avg_secrets": 11.994791666666666,
+          "avg_market_share": 10.265625,
+          "tl_triggered_per_game": 2.8385416666666665,
+          "tl_absorption_eff": 0.8
+        },
+        "RecklessSaboteurBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 64.0,
+          "win_rate": 6.666666666666667,
+          "pz_rate": 25.416666666666664,
+          "avg_secrets": 5.639583333333333,
+          "avg_market_share": 9.165625,
+          "tl_triggered_per_game": 1.86875,
+          "tl_absorption_eff": 0.057836899942163095
+        },
+        "SecOpsTurtleBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 419.0,
+          "win_rate": 43.645833333333336,
+          "pz_rate": 2.083333333333333,
+          "avg_secrets": 12.0125,
+          "avg_market_share": 9.113541666666666,
+          "tl_triggered_per_game": 2.879166666666667,
+          "tl_absorption_eff": 1.954887218045113
+        },
+        "VentureGreedBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 89.0,
+          "win_rate": 9.270833333333334,
+          "pz_rate": 20.729166666666668,
+          "avg_secrets": 6.479166666666667,
+          "avg_market_share": 9.397916666666667,
+          "tl_triggered_per_game": 1.8541666666666667,
+          "tl_absorption_eff": 0.6373117033603708
+        }
+      },
+      "target_lock": {
+        "total_initial_drops": 11698,
+        "total_trapped_drops": 4709,
+        "baffle_retention_rate": 40.25,
+        "mean_baffle_hold_rounds": 0.49,
+        "tl_triggered_total": 10797,
+        "tl_triggered_per_player_game": 2.249,
+        "tl_triggered_per_round": 1.141,
+        "tl_absorbed_total": 89,
+        "tl_unblocked_total": 10333,
+        "absorption_efficiency": 0.85,
+        "color_breakdown": {
+          "red": 5078,
+          "blue": 1551,
+          "green": 3925
+        },
+        "fizzles_total": 243,
+        "final_locations": {
+          "idle_on_mat": 2691,
+          "in_tower": 901,
+          "staging_cup": 1208
+        }
+      }
+    },
+    "3P": {
+      "games": 1200,
+      "players": 3,
+      "mean_rounds": 8.337,
+      "std_rounds": 2.623,
+      "min_rounds": 2,
+      "max_rounds": 13,
+      "round_distribution": {
+        "2": 32,
+        "3": 52,
+        "4": 62,
+        "5": 62,
+        "6": 61,
+        "7": 105,
+        "8": 156,
+        "9": 167,
+        "10": 225,
+        "11": 215,
+        "12": 60,
+        "13": 3
+      },
+      "singularity_pct": 27.5,
+      "patient_zero_pct": 38.92,
+      "market_collapse_pct": 33.25,
+      "total_wipeout_pct": 0.33,
+      "round_limit_pct": 0.0,
+      "wipeouts_count": 4,
+      "early_wipeout_seeds": [
+        216,
+        1049,
+        1229
+      ],
+      "long_stall_seeds": [
+        368,
+        601,
+        898
+      ],
+      "archetypes": {
+        "AccelerationistBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 204.0,
+          "win_rate": 28.333333333333332,
+          "pz_rate": 15.694444444444445,
+          "avg_secrets": 7.873611111111111,
+          "avg_market_share": 9.13888888888889,
+          "tl_triggered_per_game": 2.0166666666666666,
+          "tl_absorption_eff": 0.29133284777858703
+        },
+        "AdaptiveBalancedBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 412.0,
+          "win_rate": 57.22222222222222,
+          "pz_rate": 4.444444444444445,
+          "avg_secrets": 12.927777777777777,
+          "avg_market_share": 9.1125,
+          "tl_triggered_per_game": 3.2180555555555554,
+          "tl_absorption_eff": 0.5454545454545455
+        },
+        "RecklessSaboteurBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 106.0,
+          "win_rate": 14.722222222222223,
+          "pz_rate": 28.055555555555557,
+          "avg_secrets": 5.906944444444444,
+          "avg_market_share": 8.804166666666667,
+          "tl_triggered_per_game": 2.202777777777778,
+          "tl_absorption_eff": 0.26229508196721313
+        },
+        "SecOpsTurtleBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 357.0,
+          "win_rate": 49.583333333333336,
+          "pz_rate": 1.9444444444444444,
+          "avg_secrets": 12.615277777777777,
+          "avg_market_share": 8.316666666666666,
+          "tl_triggered_per_game": 3.1902777777777778,
+          "tl_absorption_eff": 2.451202905129369
+        },
+        "VentureGreedBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 121.0,
+          "win_rate": 16.805555555555557,
+          "pz_rate": 23.88888888888889,
+          "avg_secrets": 6.625,
+          "avg_market_share": 9.044444444444444,
+          "tl_triggered_per_game": 2.0388888888888888,
+          "tl_absorption_eff": 0.4240282685512367
+        }
+      },
+      "target_lock": {
+        "total_initial_drops": 9775,
+        "total_trapped_drops": 3857,
+        "baffle_retention_rate": 39.46,
+        "mean_baffle_hold_rounds": 0.49,
+        "tl_triggered_total": 9120,
+        "tl_triggered_per_player_game": 2.533,
+        "tl_triggered_per_round": 0.912,
+        "tl_absorbed_total": 80,
+        "tl_unblocked_total": 8636,
+        "absorption_efficiency": 0.92,
+        "color_breakdown": {
+          "red": 4038,
+          "blue": 1541,
+          "green": 3261
+        },
+        "fizzles_total": 280,
+        "final_locations": {
+          "idle_on_mat": 2119,
+          "staging_cup": 826,
+          "in_tower": 655
+        }
+      }
+    },
+    "2P": {
+      "games": 1200,
+      "players": 2,
+      "mean_rounds": 7.96,
+      "std_rounds": 2.813,
+      "min_rounds": 1,
+      "max_rounds": 14,
+      "round_distribution": {
+        "1": 9,
+        "2": 66,
+        "3": 57,
+        "4": 53,
+        "5": 51,
+        "6": 73,
+        "7": 126,
+        "8": 162,
+        "9": 174,
+        "10": 188,
+        "11": 185,
+        "12": 53,
+        "13": 2,
+        "14": 1
+      },
+      "singularity_pct": 24.83,
+      "patient_zero_pct": 24.92,
+      "market_collapse_pct": 48.25,
+      "total_wipeout_pct": 2.0,
+      "round_limit_pct": 0.0,
+      "wipeouts_count": 24,
+      "early_wipeout_seeds": [
+        104,
+        176,
+        199,
+        216,
+        282,
+        393,
+        401,
+        431,
+        499,
+        579,
+        694,
+        838,
+        842,
+        867,
+        951,
+        1004,
+        1111,
+        1183,
+        1201
+      ],
+      "long_stall_seeds": [
+        45,
+        310,
+        617
+      ],
+      "archetypes": {
+        "AccelerationistBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 275.0,
+          "win_rate": 57.291666666666664,
+          "pz_rate": 18.125,
+          "avg_secrets": 8.064583333333333,
+          "avg_market_share": 6.3875,
+          "tl_triggered_per_game": 1.9625,
+          "tl_absorption_eff": 0.8830022075055187
+        },
+        "AdaptiveBalancedBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 346.0,
+          "win_rate": 72.08333333333333,
+          "pz_rate": 3.958333333333333,
+          "avg_secrets": 14.997916666666667,
+          "avg_market_share": 4.9,
+          "tl_triggered_per_game": 3.341666666666667,
+          "tl_absorption_eff": 0.6476683937823834
+        },
+        "RecklessSaboteurBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 140.0,
+          "win_rate": 29.166666666666668,
+          "pz_rate": 19.583333333333332,
+          "avg_secrets": 8.083333333333334,
+          "avg_market_share": 5.991666666666666,
+          "tl_triggered_per_game": 2.214583333333333,
+          "tl_absorption_eff": 0.4868549172346641
+        },
+        "SecOpsTurtleBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 278.0,
+          "win_rate": 57.91666666666667,
+          "pz_rate": 5.208333333333334,
+          "avg_secrets": 13.1875,
+          "avg_market_share": 4.670833333333333,
+          "tl_triggered_per_game": 3.4291666666666667,
+          "tl_absorption_eff": 1.837769328263625
+        },
+        "VentureGreedBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 161.0,
+          "win_rate": 33.541666666666664,
+          "pz_rate": 25.416666666666664,
+          "avg_secrets": 7.795833333333333,
+          "avg_market_share": 6.23125,
+          "tl_triggered_per_game": 1.9833333333333334,
+          "tl_absorption_eff": 0.1092896174863388
+        }
+      },
+      "target_lock": {
+        "total_initial_drops": 6695,
+        "total_trapped_drops": 2687,
+        "baffle_retention_rate": 40.13,
+        "mean_baffle_hold_rounds": 0.496,
+        "tl_triggered_total": 6207,
+        "tl_triggered_per_player_game": 2.586,
+        "tl_triggered_per_round": 0.65,
+        "tl_absorbed_total": 53,
+        "tl_unblocked_total": 5917,
+        "absorption_efficiency": 0.89,
+        "color_breakdown": {
+          "red": 2712,
+          "blue": 1019,
+          "green": 2319
+        },
+        "fizzles_total": 157,
+        "final_locations": {
+          "in_tower": 488,
+          "idle_on_mat": 1298,
+          "staging_cup": 614
+        }
+      }
+    }
+  },
+  "baseline": {
+    "4P": {
+      "games": 1200,
+      "players": 4,
+      "mean_rounds": 8.232,
+      "std_rounds": 2.767,
+      "min_rounds": 2,
+      "max_rounds": 13,
+      "round_distribution": {
+        "2": 53,
+        "3": 54,
+        "4": 64,
+        "5": 65,
+        "6": 61,
+        "7": 93,
+        "8": 128,
+        "9": 168,
+        "10": 239,
+        "11": 217,
+        "12": 54,
+        "13": 4
+      },
+      "singularity_pct": 26.42,
+      "patient_zero_pct": 45.75,
+      "market_collapse_pct": 27.83,
+      "total_wipeout_pct": 0.0,
+      "round_limit_pct": 0.0,
+      "wipeouts_count": 0,
+      "early_wipeout_seeds": [],
+      "long_stall_seeds": [
+        321,
+        356,
+        560,
+        1010
+      ],
+      "archetypes": {
+        "AccelerationistBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 121.0,
+          "win_rate": 12.604166666666666,
+          "pz_rate": 15.416666666666668,
+          "avg_secrets": 7.647916666666666,
+          "avg_market_share": 9.327083333333333,
+          "tl_triggered_per_game": 0.0,
+          "tl_absorption_eff": 0.0
+        },
+        "AdaptiveBalancedBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 505.0,
+          "win_rate": 52.604166666666664,
+          "pz_rate": 2.604166666666667,
+          "avg_secrets": 12.748958333333333,
+          "avg_market_share": 11.077083333333333,
+          "tl_triggered_per_game": 0.0,
+          "tl_absorption_eff": 0.0
+        },
+        "RecklessSaboteurBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 57.0,
+          "win_rate": 5.9375,
+          "pz_rate": 23.854166666666668,
+          "avg_secrets": 5.876041666666667,
+          "avg_market_share": 9.510416666666666,
+          "tl_triggered_per_game": 0.0,
+          "tl_absorption_eff": 0.0
+        },
+        "SecOpsTurtleBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 450.0,
+          "win_rate": 46.875,
+          "pz_rate": 1.25,
+          "avg_secrets": 12.940625,
+          "avg_market_share": 9.775,
+          "tl_triggered_per_game": 0.0,
+          "tl_absorption_eff": 0.0
+        },
+        "VentureGreedBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 67.0,
+          "win_rate": 6.979166666666667,
+          "pz_rate": 21.354166666666664,
+          "avg_secrets": 6.309375,
+          "avg_market_share": 9.666666666666666,
+          "tl_triggered_per_game": 0.0,
+          "tl_absorption_eff": 0.0
+        }
+      },
+      "target_lock": {
+        "total_initial_drops": 0,
+        "total_trapped_drops": 0,
+        "baffle_retention_rate": 0.0,
+        "mean_baffle_hold_rounds": 0.0,
+        "tl_triggered_total": 0,
+        "tl_triggered_per_player_game": 0.0,
+        "tl_triggered_per_round": 0.0,
+        "tl_absorbed_total": 0,
+        "tl_unblocked_total": 0,
+        "absorption_efficiency": 0.0,
+        "color_breakdown": {},
+        "fizzles_total": 0,
+        "final_locations": {
+          "idle_on_mat": 4800
+        }
+      }
+    },
+    "3P": {
+      "games": 1200,
+      "players": 3,
+      "mean_rounds": 8.912,
+      "std_rounds": 2.52,
+      "min_rounds": 2,
+      "max_rounds": 13,
+      "round_distribution": {
+        "2": 25,
+        "3": 43,
+        "4": 45,
+        "5": 45,
+        "6": 38,
+        "7": 77,
+        "8": 105,
+        "9": 185,
+        "10": 270,
+        "11": 271,
+        "12": 91,
+        "13": 5
+      },
+      "singularity_pct": 35.08,
+      "patient_zero_pct": 36.08,
+      "market_collapse_pct": 28.33,
+      "total_wipeout_pct": 0.5,
+      "round_limit_pct": 0.0,
+      "wipeouts_count": 6,
+      "early_wipeout_seeds": [
+        216
+      ],
+      "long_stall_seeds": [
+        243,
+        299,
+        1143,
+        1190,
+        1198
+      ],
+      "archetypes": {
+        "AccelerationistBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 203.0,
+          "win_rate": 28.194444444444443,
+          "pz_rate": 14.305555555555555,
+          "avg_secrets": 8.202777777777778,
+          "avg_market_share": 9.127777777777778,
+          "tl_triggered_per_game": 0.0,
+          "tl_absorption_eff": 0.0
+        },
+        "AdaptiveBalancedBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 442.0,
+          "win_rate": 61.38888888888889,
+          "pz_rate": 2.2222222222222223,
+          "avg_secrets": 14.05,
+          "avg_market_share": 9.590277777777779,
+          "tl_triggered_per_game": 0.0,
+          "tl_absorption_eff": 0.0
+        },
+        "RecklessSaboteurBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 95.0,
+          "win_rate": 13.194444444444445,
+          "pz_rate": 25.13888888888889,
+          "avg_secrets": 6.138888888888889,
+          "avg_market_share": 8.8125,
+          "tl_triggered_per_game": 0.0,
+          "tl_absorption_eff": 0.0
+        },
+        "SecOpsTurtleBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 357.0,
+          "win_rate": 49.583333333333336,
+          "pz_rate": 2.083333333333333,
+          "avg_secrets": 13.57638888888889,
+          "avg_market_share": 8.595833333333333,
+          "tl_triggered_per_game": 0.0,
+          "tl_absorption_eff": 0.0
+        },
+        "VentureGreedBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 103.0,
+          "win_rate": 14.305555555555555,
+          "pz_rate": 24.305555555555554,
+          "avg_secrets": 6.631944444444445,
+          "avg_market_share": 9.036111111111111,
+          "tl_triggered_per_game": 0.0,
+          "tl_absorption_eff": 0.0
+        }
+      },
+      "target_lock": {
+        "total_initial_drops": 0,
+        "total_trapped_drops": 0,
+        "baffle_retention_rate": 0.0,
+        "mean_baffle_hold_rounds": 0.0,
+        "tl_triggered_total": 0,
+        "tl_triggered_per_player_game": 0.0,
+        "tl_triggered_per_round": 0.0,
+        "tl_absorbed_total": 0,
+        "tl_unblocked_total": 0,
+        "absorption_efficiency": 0.0,
+        "color_breakdown": {},
+        "fizzles_total": 0,
+        "final_locations": {
+          "idle_on_mat": 3600
+        }
+      }
+    },
+    "2P": {
+      "games": 1200,
+      "players": 2,
+      "mean_rounds": 8.57,
+      "std_rounds": 2.807,
+      "min_rounds": 1,
+      "max_rounds": 13,
+      "round_distribution": {
+        "1": 9,
+        "2": 59,
+        "3": 53,
+        "4": 29,
+        "5": 33,
+        "6": 53,
+        "7": 77,
+        "8": 137,
+        "9": 183,
+        "10": 219,
+        "11": 254,
+        "12": 89,
+        "13": 5
+      },
+      "singularity_pct": 33.58,
+      "patient_zero_pct": 24.0,
+      "market_collapse_pct": 41.0,
+      "total_wipeout_pct": 1.42,
+      "round_limit_pct": 0.0,
+      "wipeouts_count": 17,
+      "early_wipeout_seeds": [
+        104,
+        118,
+        176,
+        216,
+        393,
+        431,
+        499,
+        579,
+        634,
+        694,
+        809,
+        915,
+        1111,
+        1225
+      ],
+      "long_stall_seeds": [
+        192,
+        433,
+        434,
+        497,
+        747
+      ],
+      "archetypes": {
+        "AccelerationistBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 270.0,
+          "win_rate": 56.25,
+          "pz_rate": 17.083333333333332,
+          "avg_secrets": 8.735416666666667,
+          "avg_market_share": 6.40625,
+          "tl_triggered_per_game": 0.0,
+          "tl_absorption_eff": 0.0
+        },
+        "AdaptiveBalancedBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 341.0,
+          "win_rate": 71.04166666666667,
+          "pz_rate": 3.5416666666666665,
+          "avg_secrets": 15.6625,
+          "avg_market_share": 5.166666666666667,
+          "tl_triggered_per_game": 0.0,
+          "tl_absorption_eff": 0.0
+        },
+        "RecklessSaboteurBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 142.0,
+          "win_rate": 29.583333333333332,
+          "pz_rate": 20.208333333333332,
+          "avg_secrets": 7.9375,
+          "avg_market_share": 6.364583333333333,
+          "tl_triggered_per_game": 0.0,
+          "tl_absorption_eff": 0.0
+        },
+        "SecOpsTurtleBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 300.0,
+          "win_rate": 62.5,
+          "pz_rate": 3.125,
+          "avg_secrets": 14.433333333333334,
+          "avg_market_share": 4.7125,
+          "tl_triggered_per_game": 0.0,
+          "tl_absorption_eff": 0.0
+        },
+        "VentureGreedBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 147.0,
+          "win_rate": 30.625000000000004,
+          "pz_rate": 23.125,
+          "avg_secrets": 8.2,
+          "avg_market_share": 6.520833333333333,
+          "tl_triggered_per_game": 0.0,
+          "tl_absorption_eff": 0.0
+        }
+      },
+      "target_lock": {
+        "total_initial_drops": 0,
+        "total_trapped_drops": 0,
+        "baffle_retention_rate": 0.0,
+        "mean_baffle_hold_rounds": 0.0,
+        "tl_triggered_total": 0,
+        "tl_triggered_per_player_game": 0.0,
+        "tl_triggered_per_round": 0.0,
+        "tl_absorbed_total": 0,
+        "tl_unblocked_total": 0,
+        "absorption_efficiency": 0.0,
+        "color_breakdown": {},
+        "fizzles_total": 0,
+        "final_locations": {
+          "idle_on_mat": 2400
+        }
+      }
+    }
+  }
+}
