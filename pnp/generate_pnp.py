@@ -1174,7 +1174,7 @@ def render_player_board(
     _draw_track_cells(page, _cells_row(tt_x + 3.0, tt_y + 15.0, tt_w - 6.0, tt_h - 17.0, gap=2.5), TRIAGE_LEVELS, PALETTE["purple"])
 
     # --- 4C: Processing Box (Bottom Right: x = 394..752, w = 358, y = 520..576, h = 56) ---
-    # Elongated FIFO Queue (no misleading dice outlines)
+    # Elongated FIFO Queue with dedicated Operative Signature Cube cradle
     gl_x, gl_w = rx + 126.0, rw - 130.0
     gl_y, gl_h = uy + 76.0, 56.0
     page.rect(gl_x, gl_y, gl_w, gl_h, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.9)
@@ -1182,14 +1182,26 @@ def render_player_board(
     page.rich_line(gl_x + 6.0, gl_y + 9.5, "{SECRET} **PROCESSING BOX  (FIRST IN, FIRST OUT PIPELINE)**", size=6.2, color=PALETTE["purple"])
     page.text(gl_x + gl_w - 6.0, gl_y + 9.5, "P1 STEP 5: SECRET FACES ENTER", font="mono_bold", size=4.6, color=PALETTE["purple"], align="right")
 
-    # Long FIFO conveyor lane
+    # Layout: Dedicated Signature Cube cradle (right) + FIFO Conveyor Lane (left)
+    cube_spot_w = 48.0
+    lane_w = gl_w - cube_spot_w - 12.0
     lane_y = gl_y + 15.5
     lane_h = 23.0
-    page.rounded_rect(gl_x + 4.0, lane_y, gl_w - 8.0, lane_h, r=2.5, stroke=PALETTE["purple_light"], fill=PALETTE["paper_tint"], line_width=0.6)
-    page.rich_line(gl_x + 8.0, lane_y + 7.5, "<-- **[EXIT: OLDEST / 1ST]**", size=5.0, color=PALETTE["purple"])
-    page.rich_line(gl_x + gl_w / 2.0, lane_y + 7.5, "<=====  **FIFO CONVEYOR FLOW (TRIAGES NEXT TO SCANNED)**  <=====", size=4.8, color=PALETTE["purple"], align="center")
-    page.rich_line(gl_x + gl_w - 8.0, lane_y + 7.5, "**[ENTRY: NEWEST]** <---", size=5.0, color=PALETTE["purple"], align="right")
-    page.text(gl_x + gl_w / 2.0, lane_y + 17.5, "Dice line up in entry order; in Phase 6 Conveyor Triage, up to Triage Bandwidth oldest dice move first", font="italic", size=4.5, color=PALETTE["muted"], align="center")
+
+    # FIFO conveyor lane
+    page.rounded_rect(gl_x + 4.0, lane_y, lane_w, lane_h, r=2.5, stroke=PALETTE["purple_light"], fill=PALETTE["paper_tint"], line_width=0.6)
+    page.rich_line(gl_x + 8.0, lane_y + 7.5, "<-- **[EXIT: OLDEST]**", size=5.0, color=PALETTE["purple"])
+    page.rich_line(gl_x + 4.0 + lane_w / 2.0, lane_y + 7.5, "<===  **FIFO CONVEYOR FLOW (TRIAGES TO SCANNED)**  <===", size=4.6, color=PALETTE["purple"], align="center")
+    page.rich_line(gl_x + 4.0 + lane_w - 6.0, lane_y + 7.5, "**[ENTRY]** <---", size=5.0, color=PALETTE["purple"], align="right")
+    page.text(gl_x + 4.0 + lane_w / 2.0, lane_y + 17.5, "Dice line up in entry order; in Phase 6, up to Triage Bandwidth oldest dice move first", font="italic", size=4.3, color=PALETTE["muted"], align="center")
+
+    # Dedicated Operative Signature Cube cradle
+    cube_x = gl_x + 4.0 + lane_w + 4.0
+    page.rounded_rect(cube_x, lane_y, cube_spot_w, lane_h, r=2.5, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.8, dash=(2.5, 1.5))
+    page.rect(cube_x + cube_spot_w / 2.0 - 5.0, lane_y + 2.5, 10.0, 10.0, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.6)
+    page.text(cube_x + cube_spot_w / 2.0, lane_y + 9.5, "CUBE", font="mono_bold", size=4.2, color=PALETTE["purple"], align="center")
+    page.text(cube_x + cube_spot_w / 2.0, lane_y + 17.5, "SIGNATURE CUBE", font="mono_bold", size=4.4, color=PALETTE["purple"], align="center")
+    page.text(cube_x + cube_spot_w / 2.0, lane_y + 21.5, "(TOWER RELAY)", font="italic", size=3.8, color=PALETTE["muted"], align="center")
 
     # Bank on Exit Yield Key banner below lane
     page.rich_line(
