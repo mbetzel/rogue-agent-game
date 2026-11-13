@@ -468,7 +468,15 @@ def resolve_player_defense_and_wear(
 
     # Flat Secret Leak: 1 Secret if any shortfall exists, else 0
     ransom_secret_loss = 1 if unpaid_ransom > 0 else 0
-    potential_secret_loss = ransom_secret_loss + unblocked_blue
+
+    # Phase 60: Version-gated Blue exfiltration damage multiplier (INV-P60-01)
+    blue_damage_multiplier = (
+        getattr(engine.config, "v3_blue_secret_damage", 2)
+        if active_ver == "v3.0"
+        else 1
+    )
+    blue_secret_loss = unblocked_blue * blue_damage_multiplier
+    potential_secret_loss = ransom_secret_loss + blue_secret_loss
 
     # DTO Slush Fund Interaction
     cfg = engine.config
@@ -542,6 +550,9 @@ def resolve_player_defense_and_wear(
         "market_share_lost": ms_lost,
         "malware_fizzled": bool(unblocked_green > 0 and len(player.in_production_dice) == 0 and len(player.contractor_dice) == 0),
         "target_lock_extra_color": target_lock_extra_color.value if target_lock_extra_color else None,
+        "blue_damage_multiplier": blue_damage_multiplier,
+        "blue_secret_loss": blue_secret_loss,
+        "potential_secret_loss": potential_secret_loss,
     }
     _record_generic_shield_telemetry(player, player.last_defense_breakdown)
 

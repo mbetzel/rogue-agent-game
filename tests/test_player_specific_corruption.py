@@ -352,7 +352,7 @@ class TestPlayerSpecificCorruption(unittest.TestCase):
         Assert all 6 Version cards in Profile 1 and Profile 2 conserve Attack cubes, Black cubes,
         and cap enforcement exactly bit-for-bit per Option B.
         """
-        for profile in ("STANDARD", "AGGRESSIVE"):
+        for profile in ("V041_STANDARD", "V041_AGGRESSIVE"):
             cards = {c.directive_code: c for c in get_all_version_cards(profile=profile, player_specific=True)}
             v1_cards = [cards["SCRIPT_KIDDIE"], cards["DATA_SCRAPER"]]
             v2_cards = [cards["RAAS"], cards["POLYMORPHIC_WORM"]]

@@ -483,6 +483,8 @@ class GameConfig:
     global_green_cube_cap: int = 0                 # [TUNE: 0 = uncapped (legacy); 5 in v0.40.0]
     triage_l2_milestone_secrets: int = 0           # [TUNE: 0 = disabled (legacy); 1 in v0.40.0]
     version_card_profile: str = "STANDARD"         # "STANDARD" | "AGGRESSIVE" | "V040_ASYMMETRIC"
+    # Phase 60: Late-Game Patient Zero Threat Escalation (v3.0 Critical Breach)
+    v3_blue_secret_damage: int = 2  # Corporate Secrets lost per unblocked Blue cube in v3.0 (baseline 2, legacy 1)
 
     # --- Operative Signature Cube & Target Lock Protocol (Phase 60) ---
     target_lock_enabled: bool = False
@@ -591,6 +593,7 @@ class GameConfig:
         overrides.setdefault("market_share_start_by_player_count", {2: 17, 3: 18, 4: 18})
         overrides.setdefault("version_share_payout", {"v2.0": 4})
         overrides.setdefault("market_leader_bonus_by_player_count", {})
+        overrides.setdefault("v3_blue_secret_damage", 1)
         return cls(**overrides)
 
     @classmethod
@@ -804,6 +807,7 @@ class GameConfig:
             ("global_green_cube_cap", 5),
             ("triage_l2_milestone_secrets", 1),
             ("version_card_profile", "V040_ASYMMETRIC"),
+            ("v3_blue_secret_damage", 1),
         ):
             overrides.setdefault(k, v)
 
@@ -824,15 +828,39 @@ class GameConfig:
 
     @classmethod
     def v041(cls, **overrides) -> "GameConfig":
-        """v0.41.0 canonical baseline."""
-        return cls.v040_roster(**overrides)
+        """v0.41.0 canonical baseline:
+        - Player-Specific SETEC Corruption Hazards (INV-TARGET-01..08)
+        - Baseline 1:1 Blue Attack Cube damage across all versions
+        - Option B SETEC Track Cube distributions
+        """
+        overrides.setdefault("v3_blue_secret_damage", 1)
+        return cls.v040(**overrides)
+
+    @classmethod
+    def v041_roster(cls, **overrides) -> "GameConfig":
+        """v0.41.0 + bot autonomous PR push and cash allocation policies enabled."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v041(**overrides)
 
     @classmethod
     def v042(cls, **overrides) -> "GameConfig":
-        """Candidate preset enabling Operative Signature Cubes and Target Lock Protocol."""
+        """v0.42.0 canonical baseline:
+        - Inherits v041 (Player-Specific Corruption Hazards)
+        - v3.0 Critical Breach: 2 Corporate Secrets lost per unblocked Blue cube
+        - v3.0 Version Cards: +1 Blue cube on Space 1 and Space 3
+        - Operative Signature Cubes & Target Lock Protocol
+        """
+        overrides.setdefault("v3_blue_secret_damage", 2)
         overrides.setdefault("target_lock_enabled", True)
         return cls.v041(**overrides)
 
+    @classmethod
+    def v042_roster(cls, **overrides) -> "GameConfig":
+        """v0.42.0 + bot autonomous PR push and cash allocation policies enabled."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v042(**overrides)
     def _validate_tower_config(self) -> None:
         """Validates Cube Tower physics parameters (spec §2.4)."""
         self.tower_mode = TowerMode(self.tower_mode)
@@ -1016,6 +1044,7 @@ class GameConfig:
         overrides.setdefault("red_mode", RedMode.RANSOM)
         overrides.setdefault("player_specific_corruption", False)
         overrides.setdefault("max_market_purchases_per_turn", 2)
+        overrides.setdefault("v3_blue_secret_damage", 1)
         # Starting Secrets resolve in __post_init__ under RANSOM: 8/8/8 (six-phase), 8/8/12 (v0.33 round).
         return cls(**overrides)
 
@@ -1027,6 +1056,7 @@ class GameConfig:
         overrides.setdefault("max_market_purchases_per_turn", 2)
         overrides.setdefault("legacy_archetype_override_bridge", True)
         overrides.setdefault("research_track_model", ResearchTrackModel.V034_THREE_LEVEL)
+        overrides.setdefault("v3_blue_secret_damage", 1)
         return cls(round_sequence=RoundSequence.V033_THREE_PHASE, **overrides)
 
     @classmethod
@@ -1036,6 +1066,7 @@ class GameConfig:
         overrides.setdefault("player_specific_corruption", False)
         overrides.setdefault("max_market_purchases_per_turn", 2)
         overrides.setdefault("research_track_model", ResearchTrackModel.V034_THREE_LEVEL)
+        overrides.setdefault("v3_blue_secret_damage", 1)
         return cls(**overrides)
 
     @property

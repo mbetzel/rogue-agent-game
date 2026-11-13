@@ -90,6 +90,16 @@ def _threat_summary(controller: GameController, pid: int, attack: Dict[CubeColor
                 "blocked": blocked, "unblocked": unblocked}
 
     red, blue, green = _col("red"), _col("blue"), _col("green")
+    active_ver = controller.state.active_version.version_str if controller.state.active_version else "v1.0"
+    blue_mult = (
+        getattr(controller.state.config, "v3_blue_secret_damage", 2)
+        if active_ver == "v3.0"
+        else 1
+    )
+    blue.update(
+        damage_multiplier=blue_mult,
+        secrets_lost=bd.get("blue_secret_loss", blue["unblocked"] * blue_mult) if bd else blue["unblocked"] * blue_mult,
+    )
     red.update(unpaid_ransom=bd.get("unpaid_ransom", 0) if bd else 0,
                flat_leak=bd.get("flat_ransom_leak", False) if bd else False)
     cfg = controller.state.config
