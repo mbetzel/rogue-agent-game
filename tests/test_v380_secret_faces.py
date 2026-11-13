@@ -112,7 +112,7 @@ class TestSF01Parity(unittest.TestCase):
 
         factories = {
             "v037": [
-                lambda **kw: GameConfig(track_step_costs=(1, 2, 2, 3), max_hardware_upgrades_per_turn=999, player_specific_corruption=False, **kw),
+                lambda **kw: GameConfig(track_step_costs=(1, 2, 2, 3), max_hardware_upgrades_per_turn=999, player_specific_corruption=False, v3_blue_secret_damage=1, **kw),
                 lambda **kw: GameConfig.v037(track_step_costs=(1, 2, 2, 3), max_hardware_upgrades_per_turn=999, **kw),
             ],
             "v037_roster": [
@@ -131,7 +131,7 @@ class TestSF01Parity(unittest.TestCase):
 
     def test_sf01_defaults_equal(self):
         for n in (2, 3, 4):
-            self.assertEqual(GameConfig(num_players=n, player_specific_corruption=False), GameConfig.v037(num_players=n))
+            self.assertEqual(GameConfig(num_players=n, player_specific_corruption=False, v3_blue_secret_damage=1), GameConfig.v037(num_players=n))
             self.assertFalse(GameConfig(num_players=n).secret_face_enabled)
 
 

@@ -404,11 +404,11 @@ VERSION_TILES: List[VersionTileSpec] = [
         version="v3.0",
         name="Zero-Day Override",
         profile="SINGULARITY",
-        banner_text="**Aggressive Infiltration:** Space 4 glitches 1 slot & adds cubes.\nFinal space triggers Singularity!",
+        banner_text="**CRITICAL BREACH:** Unblocked {BLUE} costs **2 Corporate Secrets**!\nSpace 4 glitches 1 slot & adds cubes. Space 6 = Singularity!",
         spaces=(
-            VersionTrackSpaceSpec(1, "+1 {RED} 1 {BLUE} 1 {GREEN}"),
+            VersionTrackSpaceSpec(1, "+1 {RED} 2 {BLUE} 1 {GREEN}"),
             VersionTrackSpaceSpec(2, "Most $ loses $3\nMost {RESEARCH} loses 1 {RESEARCH}\n+1 {BLACK}"),
-            VersionTrackSpaceSpec(3, "+1 {RED} +1 {BLUE}"),
+            VersionTrackSpaceSpec(3, "+1 {RED} 2 {BLUE}"),
             VersionTrackSpaceSpec(4, "Fewest Glitched\nglitches 1 slot\n+1 {BLUE} 1 {BLACK}"),
             VersionTrackSpaceSpec(5, "Most Dice\nreturns 1 die"),
             VersionTrackSpaceSpec(6, "**SINGULARITY!**", is_singularity=True),
@@ -418,11 +418,11 @@ VERSION_TILES: List[VersionTileSpec] = [
         version="v3.0",
         name="Corrupted Kernel",
         profile="SINGULARITY",
-        banner_text="**Overclocked Surge:** Space 1 glitches 1 slot & adds cubes.\nSpace 4 leaks 1 Secret.",
+        banner_text="**CRITICAL BREACH:** Unblocked {BLUE} costs **2 Corporate Secrets**!\nSpace 1 glitches 1 slot & adds cubes. Space 4 leaks 1 Secret.",
         spaces=(
-            VersionTrackSpaceSpec(1, "Fewest Glitched\nglitches 1 slot\n+1 {RED} 1 {BLUE}"),
+            VersionTrackSpaceSpec(1, "Fewest Glitched\nglitches 1 slot\n+1 {RED} 2 {BLUE}"),
             VersionTrackSpaceSpec(2, "Most MS loses $3\n& 1 {RESEARCH} +1 {BLACK}"),
-            VersionTrackSpaceSpec(3, "+1 {RED} +1 {GREEN}"),
+            VersionTrackSpaceSpec(3, "+1 {RED} 1 {BLUE} 1 {GREEN}"),
             VersionTrackSpaceSpec(4, "Most Secrets\nloses 1 Secret\n+1 {BLACK}"),
             VersionTrackSpaceSpec(5, "Most Dice\nreturns 1 die"),
             VersionTrackSpaceSpec(6, "**SINGULARITY!**\nMost Secrets -1", is_singularity=True),
@@ -1400,7 +1400,7 @@ def render_agent_board(page: PDFPage) -> None:
             "{BLUE} BLUE // SPYWARE",
             "P4 DAMAGE",
             (
-                "Lose **1 Corporate Secret** per unblocked {BLUE} cube.\n"
+                "Lose **1 Corporate Secret** per unblocked {BLUE} cube (**2** in **v3.0** [Critical Breach]).\n"
                 "**Patient Zero:** Reaching **<= 0 Secrets** triggers immediate **Total Data Breach** (eliminated)!"
             ),
             88.0,
@@ -1915,7 +1915,7 @@ def render_four_player_round_reference_cards(page: PDFPage) -> None:
         ),
         (
             "P4: ATTACK RESOLUTION (Simultaneous)",
-            "Split all **Any** shields across cubes (all must block). Unblocked: {RED} **-1 Market Share** | {BLUE} **-1 Secret** | {GREEN} 1 shield slot -> **Glitched Shield Slot**. Recycle {RED}{BLUE}{GREEN} -> Staging Cup. **End Check:** Total Wipeout, Patient Zero (<=0 Secrets), **Market Collapse** (0 Market Share = Final Round).",
+            "Split all **Any** shields across cubes (all must block). Unblocked: {RED} **-1 Market Share** | {BLUE} **-1 Secret** (**-2** in **v3.0**) | {GREEN} 1 slot -> **Glitched Shield Slot**. Recycle {RED}{BLUE}{GREEN} -> Staging Cup. **End Check:** Total Wipeout, Patient Zero (<=0 Secrets), **Market Collapse** (0 Market Share = Final Round).",
         ),
         (
             "P5: OPERATIONS (Clockwise from First Player)",
@@ -2136,7 +2136,7 @@ def render_version_tiles_page(page: PDFPage) -> None:
 
     # Left Tier Legend labels
     tier_notes = [
-        ("v3.0 TILES", "Deal 1 face-up\nto top slot.\n6-space Track:\nSpace 6 = SINGULARITY!"),
+        ("v3.0 TILES", "Deal 1 face-up to top slot.\nCritical Breach: Unblocked\n{BLUE} costs 2 Secrets!\nSpace 6 = SINGULARITY!"),
         ("v2.0 TILES", "Deal 1 face-up\nto middle slot.\n5-space Track:\nSpace 5 = Upgrade."),
         ("v1.0 TILES", "Deal 1 face-up\nto bottom slot.\n4-space Track:\nSpace 4 = Upgrade."),
     ]

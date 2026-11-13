@@ -145,9 +145,9 @@ class TestConfig(unittest.TestCase):
     def test_ms01_resolution(self):
         # v0.37 Phase B: GameConfig() is the v0.37.0 ruleset (v0.36 + Market Leader Bonus); legacy_v036() (alias
         # v036()) is the v0.36.0 baseline; legacy_v035() is the v0.35.0 baseline.
-        self.assertEqual(GameConfig(player_specific_corruption=False), GameConfig.v037())
+        self.assertEqual(GameConfig(player_specific_corruption=False, v3_blue_secret_damage=1), GameConfig.v037())
         for n in (2, 3, 4):
-            self.assertEqual(GameConfig(num_players=n, player_specific_corruption=False), GameConfig.v037(num_players=n))
+            self.assertEqual(GameConfig(num_players=n, player_specific_corruption=False, v3_blue_secret_damage=1), GameConfig.v037(num_players=n))
             self.assertEqual(GameConfig.v036(num_players=n), GameConfig.legacy_v036(num_players=n))
         c = GameConfig.legacy_v035()
         self.assertEqual((c.red_mode, c.patents_mode, c.red_variant_set, c.tiebreak_order, c.any_shield_policy),
@@ -210,7 +210,7 @@ class TestParity(unittest.TestCase):
         # Phase B: legacy_v035() is the v0.35.0 baseline (full seeds); GameConfig() is now v0.36.0.
         # GameConfig(red_mode=RANSOM) resolves identically and gets a 50-seed subset.
         for n in capture.PLAYER_COUNTS:
-            self.assertEqual(GameConfig(num_players=n, red_mode=RedMode.RANSOM, player_specific_corruption=False), GameConfig.legacy_v035(num_players=n))
+            self.assertEqual(GameConfig(num_players=n, red_mode=RedMode.RANSOM, player_specific_corruption=False, v3_blue_secret_damage=1), GameConfig.legacy_v035(num_players=n))
         v035_factory = lambda **kw: GameConfig.legacy_v035(
             track_step_costs=(1, 2, 2, 3),
             max_hardware_upgrades_per_turn=999,
@@ -221,6 +221,7 @@ class TestParity(unittest.TestCase):
             track_step_costs=(1, 2, 2, 3),
             max_hardware_upgrades_per_turn=999,
             player_specific_corruption=False,
+            v3_blue_secret_damage=1,
             **kw
         )  # noqa: E731
         for factory, seeds in ((v035_factory, capture.SEEDS), (ransom, capture.SEEDS[:50])):

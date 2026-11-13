@@ -48,8 +48,8 @@ class TestOptionBV2CubeShift(unittest.TestCase):
             )
 
     def test_cube_volume_conservation(self):
-        """6.2: Verify INV-CUBE-VOLUME-01 (15/21 and 13/19) across all 8 canonical decks."""
-        for profile in ("STANDARD", "AGGRESSIVE"):
+        """6.2: Verify INV-CUBE-VOLUME-01 (15/21 and 13/19) across all 8 canonical decks under v0.41 baseline."""
+        for profile in ("V041_STANDARD", "V041_AGGRESSIVE"):
             cards = {c.directive_code: c for c in get_all_version_cards(profile=profile)}
             v1_cards = [cards["SCRIPT_KIDDIE"], cards["DATA_SCRAPER"]]
             v2_cards = [cards["RAAS"], cards["POLYMORPHIC_WORM"]]
@@ -87,8 +87,8 @@ class TestOptionBV2CubeShift(unittest.TestCase):
                 self.assertEqual(counts[CubeColor.BLACK], 6)
 
     def test_cube_range_bounds(self):
-        """6.3: Verify INV-RANGE-RECALIB-01 (G in [2,5], B in [3,6], R in [4,8], K=6) across all 8 decks."""
-        for profile in ("STANDARD", "AGGRESSIVE"):
+        """6.3: Verify INV-RANGE-RECALIB-01 (G in [2,5], B in [3,6], R in [4,8], K=6) across all 8 decks under v0.41 baseline."""
+        for profile in ("V041_STANDARD", "V041_AGGRESSIVE"):
             cards = {c.directive_code: c for c in get_all_version_cards(profile=profile)}
             v1_cards = [cards["SCRIPT_KIDDIE"], cards["DATA_SCRAPER"]]
             v2_cards = [cards["RAAS"], cards["POLYMORPHIC_WORM"]]
