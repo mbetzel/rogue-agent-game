@@ -3,8 +3,16 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
-- [x] **Rules Draft `v0.41.0`** captured in [RULES.md](./RULES.md)
+- [x] **Rules Draft `v0.42.0`** captured in [RULES.md](./RULES.md)
 - [x] **Multi-Agent SDLC Pipeline** defined in Section 2 below
+- [x] **Phase 60: Late-Game Patient Zero Threat Escalation (`v3.0` Critical Breach)**
+  - [x] *Pre-SDLC Game Designer Modeling:* `docs/findings/phase60_v3_critical_breach_analysis.md` (6,000-game sweep across 2P/3P/4P). Modeled double Blue exfiltration damage in `v3.0` (2 Secrets/cube) and `+1 Blue` on Spaces 1 & 3 of `v3.0` cards without touching Red or Green cubes. Early KO (< R7) drift is strictly 0.00%; `v3.0` eliminations surge 14.2x.
+  - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/phase60_v3_critical_breach_spec.md` (invariants `INV-P60-01` through `INV-P60-07`, test suite TC-P60-01..08, backward compatibility).
+  - [x] *Implementation (`senior-engineer`):* `sim/config.py` (`v3_blue_secret_damage=2` in `v042`), `sim/entities.py`, `sim/engine/phase4_attack_resolution.py`, web controller & UI tooltips, and `tests/test_phase60_v3_critical_breach.py` (8/8 passed, 0 regressions).
+  - [x] *Code Review Gate (`staff-engineer`):* APPROVED (full invariant verification and backward compatibility verified).
+  - [x] *Validation Sweep (`product-owner`):* 6,000 games simulated across 2P/3P/4P (`sim_results/phase60_v3_critical_breach/validation_report.md`). Pacing centered at 7.90–8.38 rounds; Early KO (< R7) delta = 0.00%; `v3.0` eliminations surged 5.0x; circulating Green capped <= 5 cubes; survivor mean Secrets contracted to 9.31 (-17.3%).
+  - [x] *Balance Assessment (`game-designer`):* `FINDINGS.md` §55. APPROVED as `v0.42.0 Baseline`.
+  - [x] *Documentation & Asset Sync (`graphic-designer` & Main Agent):* `RULES.md` Phase 4, `RULES_APPENDIX.md` §6C, `pnp/generate_pnp.py`, and 10 PDFs regenerated.
 - [ ] **Phase 44 (exploration): Red Rebalance — $2 Ransom, Block 2 Red, Red Choice Face**
   - [x] *Pre-SDLC Game Designer Modeling:* proposal = $2 per unblocked Red cube; Red 1-pip face `Block 2 Red`; one Red `+$2` face becomes `+$1 / +1 🔬`; Blue, Green and ★ variants unchanged. Sim levers `red_ransom_per_cube` and `red_die_profile` (defaults = v0.35). Sweep `scripts/run_v360_red_rebalance_sweep.py` (1,500 games per pod). Results: `FINDINGS.md` §31.
   - [x] *User decision on sweep results:* not adopted; superseded by Phase 45 (no `RULES.md` change).
@@ -112,6 +120,14 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Milestone 4 Product Owner Sweep:* 6,000-game comparative Monte Carlo sweep across 2P/3P/4P pods (`sim_results/player_specific_corruption/validation_report.md`). Pacing centered at 8.44–8.82 rounds; tri-modal end-game split healthy (Singularity 28–33%, Patient Zero 22–42%, Market Collapse 29–44%, Total Wipeout <= 0.87% macro average); Robin Hood transfers successfully redistributed liquidity without macro inflation.
   - [x] *Milestone 5 Balance Assessment (`game-designer`):* `FINDINGS.md` §54. APPROVED as `v0.41.0 Baseline`.
   - [x] *Milestone 6 Documentation & Asset Sync (`graphic-designer` & Main Agent):* `RULES.md` Phase 2, `RULES_APPENDIX.md` §6C, `pnp/generate_pnp.py` updated and all 10 PDFs regenerated.
+- [ ] **Phase 60: Late-Game Patient Zero Threat Escalation / v3.0 Critical Breach (`v0.42.0 Baseline`)**
+  - [x] *Pre-SDLC Game Designer Modeling:* Evaluated Corporate Secrets buffer bloat, unblocked Blue Attack Cube impotence, and *Moon Colony Bloodbath* tension deficit across 6,000 games in `docs/findings/phase60_v3_critical_breach_analysis.md`. Modeled asymmetric 2:1 Blue damage in `v3.0` and +1 Blue cube on `v3.0` Spaces 1 and 3 (Zero-Day Override and Corrupted Kernel).
+  - [x] *Milestone 1 Technical Architecture Spec (`principal-engineer`):* `docs/specs/phase60_v3_critical_breach_spec.md` with invariants `INV-P60-01` through `INV-P60-07`.
+  - [x] *Milestone 2 Implementation (`senior-engineer`):* `sim/config.py` (`v3_blue_secret_damage=2` on `v042`), `sim/entities.py`, `sim/engine/phase4_attack_resolution.py`, `web/`, and unit test suite `tests/test_phase60_v3_critical_breach.py` (TC-P60-01..08 passed).
+  - [x] *Milestone 3 Code Review Gate (`staff-engineer`):* APPROVED (all invariants verified, backwards regression parity intact).
+  - [x] *Milestone 4 Product Owner Sweep:* 6,000-game comparative Monte Carlo validation sweep across 2P/3P/4P pods (`sim_results/phase60_v3_critical_breach/validation_report.md`). Macro pacing centered at 7.90–8.51 rounds; early KO invariance preserved ($\Delta = +0.00\%$); `v3.0` eliminations surged 5.0x; survivor secrets deflated by -17.3% to -20.5%; Green cap $\le 5$ maintained 100%.
+  - [x] *Milestone 5 Balance Assessment (`game-designer`):* `FINDINGS.md` §55. APPROVED as `v0.42.0 Baseline`.
+  - [ ] *Milestone 6 Documentation & Asset Sync (`graphic-designer` & Main Agent):* Update `RULES.md` Section 4 Phase 4 Step 2, `RULES_APPENDIX.md` §6C, `pnp/generate_pnp.py` (VERSION_TILES), regenerate all 10 PnP PDFs cleanly, and verify web UI attack breakdown.
 - [x] **Completed phases (Phases 1–46, 48)** are archived in [docs/archive/PLAN_completed_phases.md](docs/archive/PLAN_completed_phases.md), along with the legacy v0.3-era Sections 3–5 (code architecture, experiment matrix, SDLC checklist).
 
 ---

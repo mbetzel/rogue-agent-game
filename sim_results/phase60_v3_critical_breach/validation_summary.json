@@ -1,0 +1,469 @@
+{
+  "metadata": {
+    "execution_date": "2026-11-12",
+    "elapsed_seconds": 9.46,
+    "total_games": 6000,
+    "games_per_cell": 1000,
+    "base_seed": 42,
+    "end_seed": 1041,
+    "spec": "docs/specs/phase60_v3_critical_breach_spec.md \u00a78"
+  },
+  "cells": {
+    "cell_1_4p_baseline": {
+      "games": 1000,
+      "rounds": {
+        "mean": 8.41,
+        "std": 2.76,
+        "min": 2,
+        "max": 13
+      },
+      "end_reasons": {
+        "singularity_count": 295,
+        "singularity_pct": 29.5,
+        "patient_zero_count": 407,
+        "patient_zero_pct": 40.7,
+        "market_collapse_count": 297,
+        "market_collapse_pct": 29.7,
+        "total_wipeout_count": 1,
+        "total_wipeout_pct": 0.1
+      },
+      "early_ko": {
+        "early_ko_games": 213,
+        "early_ko_pct": 21.3
+      },
+      "eliminations": {
+        "total_eliminations": 465,
+        "v3_eliminations": 146,
+        "non_v3_eliminations": 319,
+        "v3_elimination_fraction": 31.4
+      },
+      "survivor_secrets": {
+        "count": 3535,
+        "mean": 11.26,
+        "std": 6.1,
+        "min": 1,
+        "max": 36
+      },
+      "threat_cubes": {
+        "max_peak_green": 5,
+        "max_peak_blue": 7,
+        "max_peak_red": 9,
+        "total_clamped_green": 42
+      },
+      "archetypes": {
+        "AccelerationistBot": {
+          "games_played": 1000,
+          "wins": 71,
+          "win_rate": 7.1,
+          "patient_zero_count": 164,
+          "patient_zero_rate": 16.4,
+          "v3_patient_zero_count": 48
+        },
+        "AdaptiveBalancedBot": {
+          "games_played": 1000,
+          "wins": 488,
+          "win_rate": 48.8,
+          "patient_zero_count": 34,
+          "patient_zero_rate": 3.4,
+          "v3_patient_zero_count": 14
+        },
+        "SecOpsTurtleBot": {
+          "games_played": 1000,
+          "wins": 387,
+          "win_rate": 38.7,
+          "patient_zero_count": 32,
+          "patient_zero_rate": 3.2,
+          "v3_patient_zero_count": 9
+        },
+        "VentureGreedBot": {
+          "games_played": 1000,
+          "wins": 54,
+          "win_rate": 5.4,
+          "patient_zero_count": 235,
+          "patient_zero_rate": 23.5,
+          "v3_patient_zero_count": 75
+        }
+      }
+    },
+    "cell_2_4p_candidate": {
+      "games": 1000,
+      "rounds": {
+        "mean": 7.9,
+        "std": 2.44,
+        "min": 2,
+        "max": 12
+      },
+      "end_reasons": {
+        "singularity_count": 76,
+        "singularity_pct": 7.6,
+        "patient_zero_count": 731,
+        "patient_zero_pct": 73.1,
+        "market_collapse_count": 184,
+        "market_collapse_pct": 18.4,
+        "total_wipeout_count": 9,
+        "total_wipeout_pct": 0.9
+      },
+      "early_ko": {
+        "early_ko_games": 213,
+        "early_ko_pct": 21.3
+      },
+      "eliminations": {
+        "total_eliminations": 1042,
+        "v3_eliminations": 723,
+        "non_v3_eliminations": 319,
+        "v3_elimination_fraction": 69.39
+      },
+      "survivor_secrets": {
+        "count": 2958,
+        "mean": 9.31,
+        "std": 5.28,
+        "min": 1,
+        "max": 34
+      },
+      "threat_cubes": {
+        "max_peak_green": 5,
+        "max_peak_blue": 9,
+        "max_peak_red": 9,
+        "total_clamped_green": 34
+      },
+      "archetypes": {
+        "AccelerationistBot": {
+          "games_played": 1000,
+          "wins": 79,
+          "win_rate": 7.9,
+          "patient_zero_count": 371,
+          "patient_zero_rate": 37.1,
+          "v3_patient_zero_count": 255
+        },
+        "AdaptiveBalancedBot": {
+          "games_played": 1000,
+          "wins": 496,
+          "win_rate": 49.6,
+          "patient_zero_count": 94,
+          "patient_zero_rate": 9.4,
+          "v3_patient_zero_count": 74
+        },
+        "SecOpsTurtleBot": {
+          "games_played": 1000,
+          "wins": 382,
+          "win_rate": 38.2,
+          "patient_zero_count": 83,
+          "patient_zero_rate": 8.3,
+          "v3_patient_zero_count": 60
+        },
+        "VentureGreedBot": {
+          "games_played": 1000,
+          "wins": 43,
+          "win_rate": 4.3,
+          "patient_zero_count": 494,
+          "patient_zero_rate": 49.4,
+          "v3_patient_zero_count": 334
+        }
+      }
+    },
+    "cell_3_3p_baseline": {
+      "games": 1000,
+      "rounds": {
+        "mean": 9.06,
+        "std": 2.51,
+        "min": 2,
+        "max": 13
+      },
+      "end_reasons": {
+        "singularity_count": 405,
+        "singularity_pct": 40.5,
+        "patient_zero_count": 296,
+        "patient_zero_pct": 29.6,
+        "market_collapse_count": 299,
+        "market_collapse_pct": 29.9,
+        "total_wipeout_count": 0,
+        "total_wipeout_pct": 0.0
+      },
+      "early_ko": {
+        "early_ko_games": 142,
+        "early_ko_pct": 14.2
+      },
+      "eliminations": {
+        "total_eliminations": 318,
+        "v3_eliminations": 116,
+        "non_v3_eliminations": 202,
+        "v3_elimination_fraction": 36.48
+      },
+      "survivor_secrets": {
+        "count": 2682,
+        "mean": 12.27,
+        "std": 6.4,
+        "min": 1,
+        "max": 40
+      },
+      "threat_cubes": {
+        "max_peak_green": 5,
+        "max_peak_blue": 7,
+        "max_peak_red": 9,
+        "total_clamped_green": 42
+      },
+      "archetypes": {
+        "AccelerationistBot": {
+          "games_played": 750,
+          "wins": 97,
+          "win_rate": 12.93,
+          "patient_zero_count": 113,
+          "patient_zero_rate": 15.07,
+          "v3_patient_zero_count": 46
+        },
+        "AdaptiveBalancedBot": {
+          "games_played": 750,
+          "wins": 438,
+          "win_rate": 58.4,
+          "patient_zero_count": 18,
+          "patient_zero_rate": 2.4,
+          "v3_patient_zero_count": 4
+        },
+        "SecOpsTurtleBot": {
+          "games_played": 750,
+          "wins": 386,
+          "win_rate": 51.47,
+          "patient_zero_count": 13,
+          "patient_zero_rate": 1.73,
+          "v3_patient_zero_count": 5
+        },
+        "VentureGreedBot": {
+          "games_played": 750,
+          "wins": 79,
+          "win_rate": 10.53,
+          "patient_zero_count": 174,
+          "patient_zero_rate": 23.2,
+          "v3_patient_zero_count": 61
+        }
+      }
+    },
+    "cell_4_3p_candidate": {
+      "games": 1000,
+      "rounds": {
+        "mean": 8.51,
+        "std": 2.26,
+        "min": 2,
+        "max": 12
+      },
+      "end_reasons": {
+        "singularity_count": 144,
+        "singularity_pct": 14.4,
+        "patient_zero_count": 636,
+        "patient_zero_pct": 63.6,
+        "market_collapse_count": 192,
+        "market_collapse_pct": 19.2,
+        "total_wipeout_count": 28,
+        "total_wipeout_pct": 2.8
+      },
+      "early_ko": {
+        "early_ko_games": 142,
+        "early_ko_pct": 14.2
+      },
+      "eliminations": {
+        "total_eliminations": 860,
+        "v3_eliminations": 658,
+        "non_v3_eliminations": 202,
+        "v3_elimination_fraction": 76.51
+      },
+      "survivor_secrets": {
+        "count": 2140,
+        "mean": 9.76,
+        "std": 5.59,
+        "min": 1,
+        "max": 34
+      },
+      "threat_cubes": {
+        "max_peak_green": 5,
+        "max_peak_blue": 9,
+        "max_peak_red": 9,
+        "total_clamped_green": 35
+      },
+      "archetypes": {
+        "AccelerationistBot": {
+          "games_played": 750,
+          "wins": 87,
+          "win_rate": 11.6,
+          "patient_zero_count": 306,
+          "patient_zero_rate": 40.8,
+          "v3_patient_zero_count": 239
+        },
+        "AdaptiveBalancedBot": {
+          "games_played": 750,
+          "wins": 435,
+          "win_rate": 58.0,
+          "patient_zero_count": 73,
+          "patient_zero_rate": 9.73,
+          "v3_patient_zero_count": 59
+        },
+        "SecOpsTurtleBot": {
+          "games_played": 750,
+          "wins": 395,
+          "win_rate": 52.67,
+          "patient_zero_count": 86,
+          "patient_zero_rate": 11.47,
+          "v3_patient_zero_count": 78
+        },
+        "VentureGreedBot": {
+          "games_played": 750,
+          "wins": 83,
+          "win_rate": 11.07,
+          "patient_zero_count": 395,
+          "patient_zero_rate": 52.67,
+          "v3_patient_zero_count": 282
+        }
+      }
+    },
+    "cell_5_2p_baseline": {
+      "games": 1000,
+      "rounds": {
+        "mean": 8.57,
+        "std": 2.78,
+        "min": 1,
+        "max": 13
+      },
+      "end_reasons": {
+        "singularity_count": 306,
+        "singularity_pct": 30.6,
+        "patient_zero_count": 203,
+        "patient_zero_pct": 20.3,
+        "market_collapse_count": 475,
+        "market_collapse_pct": 47.5,
+        "total_wipeout_count": 16,
+        "total_wipeout_pct": 1.6
+      },
+      "early_ko": {
+        "early_ko_games": 153,
+        "early_ko_pct": 15.3
+      },
+      "eliminations": {
+        "total_eliminations": 235,
+        "v3_eliminations": 39,
+        "non_v3_eliminations": 196,
+        "v3_elimination_fraction": 16.6
+      },
+      "survivor_secrets": {
+        "count": 1765,
+        "mean": 13.31,
+        "std": 6.56,
+        "min": 1,
+        "max": 38
+      },
+      "threat_cubes": {
+        "max_peak_green": 5,
+        "max_peak_blue": 7,
+        "max_peak_red": 9,
+        "total_clamped_green": 52
+      },
+      "archetypes": {
+        "AccelerationistBot": {
+          "games_played": 500,
+          "wins": 189,
+          "win_rate": 37.8,
+          "patient_zero_count": 91,
+          "patient_zero_rate": 18.2,
+          "v3_patient_zero_count": 9
+        },
+        "AdaptiveBalancedBot": {
+          "games_played": 500,
+          "wins": 339,
+          "win_rate": 67.8,
+          "patient_zero_count": 27,
+          "patient_zero_rate": 5.4,
+          "v3_patient_zero_count": 5
+        },
+        "SecOpsTurtleBot": {
+          "games_played": 500,
+          "wins": 320,
+          "win_rate": 64.0,
+          "patient_zero_count": 16,
+          "patient_zero_rate": 3.2,
+          "v3_patient_zero_count": 5
+        },
+        "VentureGreedBot": {
+          "games_played": 500,
+          "wins": 152,
+          "win_rate": 30.4,
+          "patient_zero_count": 101,
+          "patient_zero_rate": 20.2,
+          "v3_patient_zero_count": 20
+        }
+      }
+    },
+    "cell_6_2p_candidate": {
+      "games": 1000,
+      "rounds": {
+        "mean": 8.26,
+        "std": 2.6,
+        "min": 1,
+        "max": 13
+      },
+      "end_reasons": {
+        "singularity_count": 156,
+        "singularity_pct": 15.6,
+        "patient_zero_count": 384,
+        "patient_zero_pct": 38.4,
+        "market_collapse_count": 371,
+        "market_collapse_pct": 37.1,
+        "total_wipeout_count": 89,
+        "total_wipeout_pct": 8.9
+      },
+      "early_ko": {
+        "early_ko_games": 153,
+        "early_ko_pct": 15.3
+      },
+      "eliminations": {
+        "total_eliminations": 562,
+        "v3_eliminations": 366,
+        "non_v3_eliminations": 196,
+        "v3_elimination_fraction": 65.12
+      },
+      "survivor_secrets": {
+        "count": 1438,
+        "mean": 10.73,
+        "std": 5.98,
+        "min": 1,
+        "max": 37
+      },
+      "threat_cubes": {
+        "max_peak_green": 5,
+        "max_peak_blue": 9,
+        "max_peak_red": 9,
+        "total_clamped_green": 49
+      },
+      "archetypes": {
+        "AccelerationistBot": {
+          "games_played": 500,
+          "wins": 186,
+          "win_rate": 37.2,
+          "patient_zero_count": 182,
+          "patient_zero_rate": 36.4,
+          "v3_patient_zero_count": 100
+        },
+        "AdaptiveBalancedBot": {
+          "games_played": 500,
+          "wins": 357,
+          "win_rate": 71.4,
+          "patient_zero_count": 84,
+          "patient_zero_rate": 16.8,
+          "v3_patient_zero_count": 62
+        },
+        "SecOpsTurtleBot": {
+          "games_played": 500,
+          "wins": 293,
+          "win_rate": 58.6,
+          "patient_zero_count": 81,
+          "patient_zero_rate": 16.2,
+          "v3_patient_zero_count": 70
+        },
+        "VentureGreedBot": {
+          "games_played": 500,
+          "wins": 164,
+          "win_rate": 32.8,
+          "patient_zero_count": 215,
+          "patient_zero_rate": 43.0,
+          "v3_patient_zero_count": 134
+        }
+      }
+    }
+  }
+}

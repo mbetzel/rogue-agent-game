@@ -1,4 +1,4 @@
-# Too Many Secrets — Quick Reference Rules (v0.41.0)
+# Too Many Secrets — Quick Reference Rules (v0.42.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Format:** Simultaneous / Turn-Based Hybrid
 
@@ -120,7 +120,7 @@ Calculate total attack cubes in the tray: **Red**, **Blue**, and **Green**. Each
 * **Mandatory Blocking:** Every active shield must block an attack cube if any unblocked cubes remain. You choose how to distribute shields among colors.
 * **Unblocked Cube Penalties:**
   * **Red (Market Manipulation):** Lose **`1` Market Share** per unblocked Red cube (minimum 0).
-  * **Blue (Spyware):** Lose **`1` Corporate Secret** per unblocked Blue cube.
+  * **Blue (Spyware):** Lose **`1` Corporate Secret** per unblocked Blue cube during **`v1.0` / `v2.0`**; lose **`2` Corporate Secrets** per unblocked Blue cube during **`v3.0`** (Critical Breach).
   * **Green (Malware):** Turn **`1` Shield Slot** into a **Glitched Shield Slot** per unblocked Green cube (capped at your Defense Capacity).
 * **Post-Damage Triggers:**
   * **Defense Grid Level 4:** Gain **`+$1` per Attack Cube blocked** this phase (max `$3`).

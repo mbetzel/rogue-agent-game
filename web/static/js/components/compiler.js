@@ -262,7 +262,7 @@ export function renderCompiler() {
           <div class="cube-threat-row blue-row">
             <span class="threat-pill blue">● BLUE // SPYWARE</span>
             <div class="threat-row-text">
-              <strong>Blocks: Generic (Any) Shield.</strong> Lose 1 Corporate Secret per unblocked Blue. <strong>Reaching ≤ 0 Secrets triggers Total Data Breach (Patient Zero)!</strong>
+              <strong>Blocks: Generic (Any) Shield.</strong> Lose 1 Corporate Secret per unblocked Blue in v1.0/v2.0; lose 2 Corporate Secrets per unblocked Blue in v3.0 (Critical Breach). <strong>Reaching ≤ 0 Secrets triggers Total Data Breach (Patient Zero)!</strong>
             </div>
           </div>
           <div class="cube-threat-row green-row">

@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.41.0)
+# Too Many Secrets — Rules Draft (v0.42.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -247,7 +247,7 @@ Each surviving player simultaneously resolves all three colors against their com
    * Dice assigned to shields absorb attacks cleanly and remain deployed in **In Production**.
 2. **Unblocked Damage:**
    * **Red (Market Manipulation):** Lower your **Market Share** by **`1`** per unblocked Red cube (Market Share cannot drop below `0`; any excess has no further effect). Red cubes never cost Money or Corporate Secrets.
-   * **Blue (Spyware / Data Exfiltration):** Lose **`1` Corporate Secret** per unblocked Blue cube.
+   * **Blue (Spyware / Data Exfiltration):** Lose **`1` Corporate Secret** per unblocked Blue cube during **`v1.0`** and **`v2.0`**. While a **`v3.0`** SETEC Version Card is active (*Zero-Day Override* or *Corrupted Kernel*), catastrophic root access is achieved: lose **`2` Corporate Secrets** per unblocked Blue cube `[TUNE: v0.42.0 Critical Breach]`.
    * *(Institutional Override Timing: Contracting **Department of Telecommunications Oversight [DTO]** may trigger Slush Fund during damage calculation to absorb up to 2 Corporate Secret loss from Blue cubes for free; **once per game**, and you choose whether to use it when it would apply).*
    * **Green (Malware / Logic Bombs):** For each unblocked Green cube, turn **`1` of your shield slots** into a **Glitched Shield Slot**. No die moves. You cannot have more Glitched Shield Slots than your Defense Grid Capacity; excess unblocked Green has no effect. Glitched Shield Slots stay glitched until cleaned (Phase 1 Step 5, Phase 5 Step 3); a new slot gained from the Defense Grid Track arrives clean.
    * **Damage-Conditional `★` Outputs:** *B1 Honeypot Telemetry* bonuses are evaluated now, **only for dice still In Production** (a die returned in Phase 2, or removed in Phase 3, does not pay).

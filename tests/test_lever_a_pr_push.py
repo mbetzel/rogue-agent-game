@@ -193,7 +193,7 @@ class TestLA04Config(unittest.TestCase):
         GameConfig.v037(bot_pr_push_params=PrPushParams(push_min_share=5, dump_max_share=4))
         with self.assertRaises(ValueError):
             GameConfig.v037(bot_pr_push_params=PrPushParams(dump_condition="bogus"))
-        self.assertEqual(GameConfig(player_specific_corruption=False), GameConfig.v037())
+        self.assertEqual(GameConfig(player_specific_corruption=False, v3_blue_secret_damage=1), GameConfig.v037())
         self.assertFalse(GameConfig().bot_pr_push)
         with self.assertRaises(dataclasses.FrozenInstanceError):
             PrPushParams().push_min_share = 3  # type: ignore[misc]
