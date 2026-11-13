@@ -22,7 +22,8 @@ Minimalist, ink-saver US Letter (`11" × 8.5"` Landscape) Print-and-Play PDFs sy
    - `8` Purple Specialist dice (`1` starter + `1` in Personal Reserve per player)
 4. **Physical Cubes Needed (`8mm–10mm` wooden cubes + Cube Tower & Cup):**
    - Attack Cubes (`Red`, `Blue`, `Green` — ~`10` per color) + Corruption Cubes (`Black` — ~`12`)
-5. **Market Share Markers:** `1` per player (cut-out chit from `04`, or any small marker that fits a Central Market Share Track cell).
+   - **Player Cubes (`7` per player in their player color, `28` total across 4 players):** `4` Hardware Tracks, `1` Client Company Override, `1` Central Market Share Track, and `1` **Operative Signature Cube** (cycles through the Cube Tower).
+5. **Market Share Markers:** `1` per player (the player's Market Share cube from above, or cut-out chit from `04`).
 
 ## Regenerating Assets
 

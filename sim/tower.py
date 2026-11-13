@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import random
-from typing import Dict, Tuple
+from typing import Dict, Optional, Set, Tuple
 
 from sim.config import CubeColor, GameConfig, TowerMode
 
@@ -25,10 +25,12 @@ class CubeTower:
             CubeColor.GREEN: 0,
             CubeColor.BLACK: 0,
         }
+        self.stuck_signatures: Dict[int, int] = {}  # pid -> consecutive rounds stuck
+        self.last_exited_signatures: Set[int] = set()
 
     def total_stuck(self) -> int:
-        """Returns the total number of cubes currently stuck inside the tower."""
-        return sum(self.stuck_cubes.values())
+        """Returns the total number of cubes (threat + signatures) stuck inside the tower."""
+        return sum(self.stuck_cubes.values()) + len(self.stuck_signatures)
 
     def reset(self) -> None:
         """Clears all stuck cubes from inside the tower."""
@@ -36,11 +38,21 @@ class CubeTower:
             self.stuck_cubes[color] = 0
         for color in self.last_exited_cubes:
             self.last_exited_cubes[color] = 0
+        self.stuck_signatures.clear()
+        self.last_exited_signatures.clear()
 
     def load_stuck(self, cubes: Dict[CubeColor, int]) -> None:
         """Loads specific stuck cubes into the tower (for deterministic unit testing)."""
         for color, count in cubes.items():
             self.stuck_cubes[color] = count
+
+    def load_stuck_signatures(self, signatures: Dict[int, int]) -> None:
+        """Loads stuck signatures into the tower (for deterministic unit testing)."""
+        self.stuck_signatures = dict(signatures)
+
+    def get_stuck_signatures_copy(self) -> Dict[int, int]:
+        """Returns a copy of the currently stuck signature cubes."""
+        return dict(self.stuck_signatures)
 
     def get_stuck_copy(self) -> Dict[CubeColor, int]:
         """Returns a copy of the currently stuck cubes."""
@@ -127,14 +139,19 @@ class CubeTower:
         self,
         staged_cubes: Dict[CubeColor, int],
         rng: random.Random,
+        staged_signatures: Optional[Set[int]] = None,
     ) -> Dict[CubeColor, int]:
-        """Drops all staged cubes into the tower along with currently stuck cubes.
+        """Drops threat cubes and optional signature cubes through the compiler.
 
         Returns:
-            Dict[CubeColor, int]: Exited cubes grouped by color.
+            Dict[CubeColor, int]: Exited threat cubes by color (preserves existing contract).
+            Exited signature cube player IDs are accessible via `self.last_exited_signatures`.
         """
+        staged_sigs = set(staged_signatures or set())
+        self.last_exited_signatures = set()
+
         if self.config.tower_mode == TowerMode.SHOGUN_BAFFLE:
-            falling_count = sum(staged_cubes.get(c, 0) for c in CubeColor)
+            falling_count = sum(staged_cubes.get(c, 0) for c in CubeColor) + len(staged_sigs)
             stuck_count = self.total_stuck()
             p_fall, p_dislodge = self.calculate_shogun_probabilities(falling_count, stuck_count)
             exited: Dict[CubeColor, int] = {color: 0 for color in CubeColor}
@@ -143,30 +160,52 @@ class CubeTower:
                 return exited
 
             new_stuck: Dict[CubeColor, int] = {color: 0 for color in CubeColor}
+            # 1. Threat Cubes: Falling
             for color in CubeColor:
                 for _ in range(staged_cubes.get(color, 0)):
                     if rng.random() < p_fall:
                         exited[color] += 1
                     else:
                         new_stuck[color] += 1
+
+            # 2. Threat Cubes: Resting
+            for color in CubeColor:
                 for _ in range(self.stuck_cubes.get(color, 0)):
                     if rng.random() < p_dislodge:
                         exited[color] += 1
                     else:
                         new_stuck[color] += 1
 
+            # 3. Signature Cubes: Falling
+            new_stuck_sigs: Dict[int, int] = {}
+            for pid in staged_sigs:
+                if rng.random() < p_fall:
+                    self.last_exited_signatures.add(pid)
+                else:
+                    new_stuck_sigs[pid] = 1  # First round stuck
+
+            # 4. Signature Cubes: Resting
+            for pid, rounds in self.stuck_signatures.items():
+                if rng.random() < p_dislodge:
+                    self.last_exited_signatures.add(pid)
+                else:
+                    new_stuck_sigs[pid] = rounds + 1
+
             self.stuck_cubes = new_stuck
+            self.stuck_signatures = new_stuck_sigs
             self.last_exited_cubes = dict(exited)
             return exited
 
-        # Combine staged cubes with stuck cubes
+        # Legacy / Flat Binomial / Ledge Avalanche fallback:
+        staged_sigs = set(staged_signatures or set())
         all_pool: Dict[CubeColor, int] = {}
-        total_cubes = 0
+        total_threat = 0
         for color in CubeColor:
             pool_count = staged_cubes.get(color, 0) + self.stuck_cubes.get(color, 0)
             all_pool[color] = pool_count
-            total_cubes += pool_count
+            total_threat += pool_count
 
+        total_cubes = total_threat + len(staged_sigs) + len(self.stuck_signatures)
         exit_prob = self.calculate_exit_probability(total_cubes)
 
         exited = {color: 0 for color in CubeColor}
@@ -179,6 +218,20 @@ class CubeTower:
                 else:
                     new_stuck[color] += 1
 
+        new_stuck_sigs: Dict[int, int] = {}
+        for pid in staged_sigs:
+            if rng.random() < exit_prob:
+                self.last_exited_signatures.add(pid)
+            else:
+                new_stuck_sigs[pid] = 1
+
+        for pid, rounds in self.stuck_signatures.items():
+            if rng.random() < exit_prob:
+                self.last_exited_signatures.add(pid)
+            else:
+                new_stuck_sigs[pid] = rounds + 1
+
         self.stuck_cubes = new_stuck
+        self.stuck_signatures = new_stuck_sigs
         self.last_exited_cubes = dict(exited)
         return exited

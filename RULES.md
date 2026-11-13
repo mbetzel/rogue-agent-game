@@ -124,7 +124,12 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
   * **Purple Proprietary Specialist Dice (`2` dice per player: 1 in Ready for Release, 1 in Personal Reserve):**
     * **Purple Dice** — *Proprietary Specialist / Black-Hat AI* (not purchasable; your 2nd Purple die is gained only from the Public Relations Level 3 Breakthrough, and a Purple die lost to an effect is not replaced; standardized high-reliability baseline with a Face 5 **Secret face** + bespoke White Hat Signature Protocols)
 * **Software Module Variant Cards:** Multiple cards per market die color (**Red, Blue, Green, Yellow**); **1 card per color** is used each game to define that color's Special (`★`) Face 6. *(Purple dice do not use market variant cards; their Face 6 triggers the player's bespoke Signature Protocol).*
-* **Money Tokens (`$`)**, **Corporate Secret Tokens**, **Research Tokens (`🔬`)** *(uncapped; styled as magnetic tape data spools / cryptographic research notes)*, **1 Market Share Marker per player**, and a **First Player Marker**.
+* **Player Tracking & Signature Cubes (`7` cubes per player in their player color):**
+  * `4` Hardware Track Tracking Cubes (Defense Grid, Triage, Release, Public Relations)
+  * `1` Institutional Override Marker Cube (tracks Client Company ability usage)
+  * `1` Market Share Marker Cube (tracks position on the Central Market Share Track)
+  * `1` **Operative Signature Cube** (network handshake signature cycling through the Cube Tower)
+* **Money Tokens (`$`)**, **Corporate Secret Tokens**, **Research Tokens (`🔬`)** *(uncapped; styled as magnetic tape data spools / cryptographic research notes)*, and a **First Player Marker**.
 
 ---
 
@@ -141,6 +146,7 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
    * Take **`$6` Starting Money**.
    * **Corporate Secrets & Starting Research Tokens:** Take **`3` Corporate Secrets** at **2 players**, **`4`** at **3 players**, or **`4`** at **4 players** `[TUNE: v0.38.0]`, and **`0 🔬` Research Tokens**.
    * **Market Share:** Place your Market Share Marker on **`13`** at **2 players**, **`16`** at **3 players**, or **`17`** at **4 players** `[TUNE: v0.38.0]`. This starting value is also your maximum Market Share for the game.
+   * **Operative Signature Cube:** Place your **Operative Signature Cube** onto its cradle on your **Company Terminal Mat** (adjacent to your Processing Box). It remains idle on your mat until queued into the Staging Cup by your first banked Secret.
 4. Randomly assign the **First Player Marker** (used to resolve Operations Turn order in Phase 6: Operations).
 
 ---
@@ -214,6 +220,12 @@ If **`0 cubes of any color`** exit the tower into the tray this phase:
 * No corruption advances and **no attacks occur this round** (Phase 4 resolves no damage). **Income is still collected in Phase 3.**
 * The compiler's idle cycle triggers an overflow: take **`1 Red, 1 Blue, and 1 Green Cube`** from the supply and place them into the **Staging Cup** for next round's compile (in addition to the standard Phase 1 Black Cube).
 
+#### Operative Signature Cubes & Target Lock Trigger
+If any **Operative Signature Cubes** exit into the tray during Phase 2:
+* Each player whose Signature Cube exited triggers **Target Lock** for this round (see Phase 4).
+* Return the exited Signature Cube from the tray immediately to its idle cradle on the owner's **Company Terminal Mat**.
+* Any Signature Cubes that remain stuck on the internal baffles stay inside the Cube Tower for future rounds, building latent threat until knocked loose.
+
 #### End Game Trigger Check (End of Phase 2)
 * **Singularity** ends the game at the end of Phase 2 (see above), so a **Market Collapse** cannot also be checked that round.
 * If **all** players suffered a **Total Data Breach** (`<= 0 Secrets`) from Corruption Track effects, the game ends immediately as a **Total Wipeout** (Phases 3–6 are skipped).
@@ -255,6 +267,14 @@ Each surviving player simultaneously resolves all three colors against their com
    * **Defense Grid Level 4:** After your damage has resolved, gain **`+$1` per Attack Cube** (`Red`, `Blue`, or `Green`) your shields blocked this phase (max **`$3`**) `[TUNE]`. Cubes ignored by *Baffle Echo* were not blocked and do not count. Blocked Red cubes count.
 3. **Snowball Recycle:** Place **all exited Red, Blue, and Green cubes** from the tray back into the **Staging Cup** for next round.
 4. **Compile Buffer Overflow:** If the tray was empty in Phase 2, no damage resolves this phase (no Baffle Echo, damage-conditional `★` bonuses, or Defense Grid Level 4 cash); the End Game Trigger Check (including **Market Collapse**, since *Customer Poaching* may have lowered Market Share in Phase 3) still occurs.
+
+#### Target Lock Bonus Attack Resolution
+If you triggered a **Target Lock** in Phase 2:
+* You face **`1` additional Attack Cube** matching the most common Attack Cube color (`Red`, `Blue`, `Green`) among all exited Attack Cubes in the tray:
+  * **Tie on Most Common Color:** If multiple Attack Cube colors tie for the highest count in the tray, **the defending player chooses which of the tied colors attacks them** (`INV-TL-01`).
+  * **Buffer Overflow / Empty Attack Tray:** If `0` Attack Cubes exited in Phase 2 (the tray holds only Black cubes or is empty), the Target Lock has no attack vector and **fizzles cleanly** with no extra attack cube (`INV-TL-02`).
+* This additional cube is pooled directly with your incoming attack and is **fully blockable by your shields** (`Block 1 Any`; `INV-TL-04`). If blocked, it counts toward Defense Grid Level 4 cash (`+$1` per cube blocked).
+* **Threat Volume Conservation:** The extra Attack Cube is an isolated bonus attack against the locked operative and is **never placed in the tray or recycled in Snowball Recycle** (`INV-TL-08`). Target Lock status then clears.
 
 #### End Game Trigger Check (End of Phase 4)
 * If **all** players are now **Patient Zero** (including any Patient Zero from Phase 2), the game ends immediately as a **Total Wipeout**; Phases 5–6 are skipped and Market Collapse is not checked.
@@ -299,6 +319,7 @@ All surviving players simultaneously update their terminal pipeline in this orde
 3. **Scanned Graduation (Hardware Throughput Limit):** Move up to **`release_bandwidth` dice of your choice** (`4` baseline, upgradable to `5` and `6`) from the **Scanned Box** to your **Ready for Release Zone**. You may graduate fewer. Any remaining dice stay in the Scanned Box.
 4. **Conveyor Triage (Hardware Throughput Limit):** Move up to **`triage_bandwidth` dice** (`1` baseline across Levels 0–3, upgradable to `2` at Level 4 Capstone) from the **Processing Box** into the **Scanned Box**, **oldest first**: dice leave in the order they entered the Processing Box (any color; dice that entered together leave in roll order). You do not choose. Each die banks its Secret as it moves (see *Secret Face Yields*). When a **Green** die leaves the Processing Box and banks its Secret, it cleans `1` of your **Glitched Shield Slots**. *(Dice triaged now enter Scanned and may graduate in a subsequent round's Phase 6.)* At **Triage Track Level 4**, gain **`+1 🔬`** for each die you move beyond the 2nd (up to `+2 🔬` at Bandwidth `4`).
    * **Hardware Throughput Limits:** Throughput is strictly governed by your Triage and Release hardware bandwidths; excess dice remain in the Processing Box (keeping their Secret for a later round), and excess scanned dice remain in the Scanned Box.
+   * **Operative Signature Cube Staging:** When at least `1` die moves from your Processing Box to your Scanned Box and banks its Secret: if your **Operative Signature Cube** is currently resting on your Company Terminal Mat, move it to the **Staging Cup** to be compiled in next round's Phase 2 drop (`INV-TL-03`). Triaging multiple dice in the same turn moves the cube once. If your Signature Cube is already in the Staging Cup or trapped on the internal baffles inside the Cube Tower, banking additional secrets does not add another cube (exactly 1 Signature Cube per player exists).
 5. **Market Leader Bonus (end of Phase 6):** If at least `1` Secret face on a **Red** die was banked this round (by any player, in Phase 3 or Phase 6 Conveyor Triage), award the **Market Leader Bonus** once evaluating final Market Share positions from Phase 5 (see below). Several Red Secret faces in one round still give one award.
 
 #### Secret Face Yields `[TUNE]`

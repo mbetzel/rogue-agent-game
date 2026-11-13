@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
-from sim.config import DieColor
+from sim.config import DieColor, SignatureCubeLocation
 from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
 from sim.entities import ArchetypeCode, CompanyCode
 from sim.engine.state import PipelineShiftRecord
@@ -230,6 +230,21 @@ def graduation_slot_clear(engine: GameEngine, player: PlayerState, graduated: in
     return secret_faces.clean_slots(player, engine.config.slot_graduation_clear, "graduation")
 
 
+def check_and_queue_signature_cube(engine: GameEngine, player: PlayerState) -> bool:
+    """Invoked during Conveyor Triage whenever a die banks a Secret (INV-TL-03)."""
+    if not getattr(engine.config, "target_lock_enabled", False):
+        return False
+
+    if player.signature_cube_location == SignatureCubeLocation.IDLE_ON_MAT:
+        player.signature_cube_location = SignatureCubeLocation.STAGING_CUP
+        player.baffle_hold_visits += 1
+        player.target_lock_baffle_rounds = 0
+        engine.state.staging_signature_cubes.add(player.player_id)
+        return True
+
+    return False
+
+
 def conveyor_triage_v038(engine: GameEngine, player: PlayerState) -> List[Die]:
     """v0.38 step 4: up to ``triage_bandwidth`` dice of the player's choice Processing Box -> Scanned Box,
     banking each pending Secret at the current yield (default order: highest yield, then lowest die_id)."""
@@ -248,8 +263,11 @@ def conveyor_triage_v038(engine: GameEngine, player: PlayerState) -> List[Die]:
     moved = order[:n]
     for d in moved:
         player.glitched_dice.remove(d)
+        was_secret = getattr(d, "secret_pending", False)
         reset_die_for_pipeline(d)
         secret_faces.bank(engine.config, player, d, engine.state)
+        if was_secret:
+            check_and_queue_signature_cube(engine, player)
         player.scanned_dice.append(d)
     return moved
 

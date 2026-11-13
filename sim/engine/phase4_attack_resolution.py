@@ -164,6 +164,53 @@ def _pay_defense_l4(engine: GameEngine, player: PlayerState) -> int:
     return cash
 
 
+def calculate_target_lock_extra_cube(
+    engine: GameEngine,
+    player: PlayerState,
+    exited_cubes: Dict[CubeColor, int],
+    attack_strengths: Dict[CubeColor, int],
+) -> Optional[CubeColor]:
+    """Determines the color of the +1 Target Lock Attack Cube for a locked player."""
+    if not getattr(engine.config, "target_lock_enabled", False):
+        return None
+    if not player.target_locked or player.is_patient_zero:
+        return None
+
+    # Tally exited Attack Cubes (Red, Blue, Green ONLY; Black excluded)
+    threat_counts = {
+        c: exited_cubes.get(c, 0)
+        for c in (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN)
+    }
+    max_count = max(threat_counts.values(), default=0)
+
+    # INV-TL-02: Zero exited threat cubes -> Target Lock fizzles cleanly
+    if max_count <= 0:
+        return None
+
+    dominant_colors = [c for c, count in threat_counts.items() if count == max_count]
+
+    # Unique dominant color
+    if len(dominant_colors) == 1:
+        return dominant_colors[0]
+
+    # INV-TL-01: Dominant color tie resolution: Defending player chooses
+    hook = getattr(player.bot, "choose_target_lock_color", None) if player.bot else None
+    if callable(hook):
+        return hook(
+            player=player,
+            tied_colors=dominant_colors,
+            game_state=engine.state,
+            attack=attack_strengths,
+        )
+    from sim.bots.base import default_target_lock_color_heuristic
+    return default_target_lock_color_heuristic(
+        player=player,
+        tied_colors=dominant_colors,
+        state=engine.state,
+        attack=attack_strengths,
+    )
+
+
 def resolve_player_defense_and_wear(
     engine: GameEngine,
     player: PlayerState,
@@ -207,6 +254,15 @@ def resolve_player_defense_and_wear(
             color_shields[color] += face.block_amount
 
     player_attacks = dict(attack_strengths)
+    base_attacks = dict(attack_strengths)
+
+    # Target Lock: Extra Attack Cube calculation (INV-TL-01, INV-TL-02, INV-TL-04)
+    target_lock_extra_color = calculate_target_lock_extra_cube(
+        engine, player, exited_cubes, attack_strengths
+    )
+    if target_lock_extra_color is not None:
+        bonus = getattr(engine.config, "target_lock_bonus_attack", 1)
+        player_attacks[target_lock_extra_color] = player_attacks.get(target_lock_extra_color, 0) + bonus
 
     # 2. Pre-Defense Overrides: Aegis Defense Relay / Baffle Echo
     is_aegis = has_company_override(player, CompanyCode.AEGIS, legacy_bridge_enabled(engine)) and player.is_ability_available(active_ver)
@@ -349,6 +405,23 @@ def resolve_player_defense_and_wear(
     unblocked_blue = rem_blue
     unblocked_green = rem_green
 
+    if target_lock_extra_color is not None:
+        bonus = getattr(engine.config, "target_lock_bonus_attack", 1)
+        unblocked_map = {
+            CubeColor.RED: unblocked_red,
+            CubeColor.BLUE: unblocked_blue,
+            CubeColor.GREEN: unblocked_green,
+        }
+        unblocked_color = unblocked_map[target_lock_extra_color]
+        base_incoming = base_attacks.get(target_lock_extra_color, 0)
+        total_defense = (base_incoming + bonus) - unblocked_color
+        unblocked_without_extra = max(0, base_incoming - total_defense)
+
+        if unblocked_color > unblocked_without_extra:
+            player.extra_attacks_unblocked += 1
+        else:
+            player.extra_attacks_absorbed += 1
+
     # 6. Star face bonuses dependent on damage (R2, R3, B1). The v0.35 R2 / R3 bonuses exist only in the V035
     # Red set (belt-and-braces: the Marketing cards use distinct codes R2_MKT / R3_MKT).
     v035_red = engine.config.red_variant_set == RedVariantSet.V035
@@ -476,6 +549,7 @@ def resolve_player_defense_and_wear(
         "market_share_after": player.market_share,
         "market_share_lost": ms_lost,
         "malware_fizzled": bool(unblocked_green > 0 and len(player.in_production_dice) == 0 and len(player.contractor_dice) == 0),
+        "target_lock_extra_color": target_lock_extra_color.value if target_lock_extra_color else None,
         "blue_damage_multiplier": blue_damage_multiplier,
         "blue_secret_loss": blue_secret_loss,
         "potential_secret_loss": potential_secret_loss,
@@ -561,6 +635,7 @@ def resolve_player_defense_and_wear(
             break
 
     player.pending_unblocked_green = 0
+    _pay_defense_l4(engine, player)
 
 
 def apply_snowball_recycle(engine: GameEngine, exited_cubes: Dict[CubeColor, int]) -> None:
@@ -727,6 +802,8 @@ def finalize_attack_resolution(engine: GameEngine, cr: CompileResult) -> None:
     apply_snowball_recycle(engine, cr.exited_cubes)
     expire_contractors(engine)
     check_end_triggers_after_attacks(engine)
+    for p in engine.state.players:
+        p.target_locked = False
 
 
 def _record_generic_shield_telemetry(player, b) -> None:

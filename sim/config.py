@@ -53,6 +53,13 @@ class CubeColor(str, Enum):
     BLACK = "black"
 
 
+class SignatureCubeLocation(str, Enum):
+    """Physical location of an Operative Signature Cube in the Attention Cycle."""
+    IDLE_ON_MAT = "idle_on_mat"       # Resting in cradle on Company Terminal Mat
+    STAGING_CUP = "staging_cup"       # Queued in central Staging Cup for Phase 2 compiler drop
+    IN_TOWER = "in_tower"             # Trapped on internal baffles inside the Cube Tower
+
+
 class DieColor(str, Enum):
     GRAY = "gray"
     WHITE = "white"
@@ -479,6 +486,10 @@ class GameConfig:
     # Phase 60: Late-Game Patient Zero Threat Escalation (v3.0 Critical Breach)
     v3_blue_secret_damage: int = 2  # Corporate Secrets lost per unblocked Blue cube in v3.0 (baseline 2, legacy 1)
 
+    # --- Operative Signature Cube & Target Lock Protocol (Phase 60) ---
+    target_lock_enabled: bool = False
+    target_lock_bonus_attack: int = 1
+
     def __post_init__(self) -> None:
         if not (isinstance(self.track_step_costs, tuple) and len(self.track_step_costs) == 4 and all(isinstance(c, int) and c >= 0 for c in self.track_step_costs)):
             raise ValueError("track_step_costs must be a 4-tuple of non-negative integers")
@@ -834,12 +845,14 @@ class GameConfig:
 
     @classmethod
     def v042(cls, **overrides) -> "GameConfig":
-        """v0.42.0 canonical baseline (Phase 60: Late-Game Patient Zero Threat Escalation):
+        """v0.42.0 canonical baseline:
         - Inherits v041 (Player-Specific Corruption Hazards)
         - v3.0 Critical Breach: 2 Corporate Secrets lost per unblocked Blue cube
         - v3.0 Version Cards: +1 Blue cube on Space 1 and Space 3
+        - Operative Signature Cubes & Target Lock Protocol
         """
         overrides.setdefault("v3_blue_secret_damage", 2)
+        overrides.setdefault("target_lock_enabled", True)
         return cls.v041(**overrides)
 
     @classmethod
@@ -848,7 +861,6 @@ class GameConfig:
         overrides.setdefault("bot_pr_push", True)
         overrides.setdefault("bot_pr_push_params", PrPushParams())
         return cls.v042(**overrides)
-
     def _validate_tower_config(self) -> None:
         """Validates Cube Tower physics parameters (spec §2.4)."""
         self.tower_mode = TowerMode(self.tower_mode)

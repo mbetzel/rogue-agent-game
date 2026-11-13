@@ -387,7 +387,7 @@ class GameEngine:
         ]
 
     def _begin_telemetry(self, cr: CompileResult) -> RoundTelemetry:
-        return RoundTelemetry(
+        tel = RoundTelemetry(
             round_number=self.state.current_round,
             active_version_name=self.state.active_version.name,
             corruption_track=self.state.corruption_track,
@@ -401,6 +401,10 @@ class GameEngine:
             round_sequence=self.config.round_sequence.value,
             phases_executed=[1, 2],
         )
+        if getattr(self.config, "target_lock_enabled", False):
+            exited_sigs = getattr(cr, "exited_signature_pids", set())
+            tel.target_locks_by_player = {p.player_id: (p.player_id in exited_sigs) for p in self.state.players}
+        return tel
 
     def _begin_research_telemetry(self) -> None:
         self._research_round_start = {
@@ -477,6 +481,14 @@ class GameEngine:
 
     def _finalize_telemetry(self, tel: RoundTelemetry, end_phase: Optional[int]) -> RoundTelemetry:
         self._record_research_telemetry(tel)
+        if getattr(self.config, "target_lock_enabled", False):
+            for p in self.state.players:
+                tel.signature_cube_locations[p.player_id] = p.signature_cube_location.value
+                tel.target_lock_absorbed_by_player[p.player_id] = p.extra_attacks_absorbed
+                tel.target_lock_unblocked_by_player[p.player_id] = p.extra_attacks_unblocked
+                tel.target_lock_extra_colors[p.player_id] = (
+                    getattr(p, "last_defense_breakdown", None) or {}
+                ).get("target_lock_extra_color")
         tel.final_round_trigger_phase = self.state.final_round_trigger_phase
         tel.end_phase = end_phase
         self.telemetry_history.append(tel)  # exactly once per round (INV-SEQ-TELEMETRY-01)

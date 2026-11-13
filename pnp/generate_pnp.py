@@ -1174,7 +1174,7 @@ def render_player_board(
     _draw_track_cells(page, _cells_row(tt_x + 3.0, tt_y + 15.0, tt_w - 6.0, tt_h - 17.0, gap=2.5), TRIAGE_LEVELS, PALETTE["purple"])
 
     # --- 4C: Processing Box (Bottom Right: x = 394..752, w = 358, y = 520..576, h = 56) ---
-    # Elongated FIFO Queue (no misleading dice outlines)
+    # Elongated FIFO Queue with dedicated Operative Signature Cube cradle
     gl_x, gl_w = rx + 126.0, rw - 130.0
     gl_y, gl_h = uy + 76.0, 56.0
     page.rect(gl_x, gl_y, gl_w, gl_h, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.9)
@@ -1182,19 +1182,32 @@ def render_player_board(
     page.rich_line(gl_x + 6.0, gl_y + 9.5, "{SECRET} **PROCESSING BOX  (FIRST IN, FIRST OUT PIPELINE)**", size=6.2, color=PALETTE["purple"])
     page.text(gl_x + gl_w - 6.0, gl_y + 9.5, "P1 STEP 5: SECRET FACES ENTER", font="mono_bold", size=4.6, color=PALETTE["purple"], align="right")
 
-    # Long FIFO conveyor lane
+    # Layout: Dedicated Signature Cube cradle (left, adjacent to Scanned) + FIFO Conveyor Lane (right)
+    cube_spot_w = 48.0
+    lane_w = gl_w - cube_spot_w - 12.0
     lane_y = gl_y + 15.5
     lane_h = 23.0
-    page.rounded_rect(gl_x + 4.0, lane_y, gl_w - 8.0, lane_h, r=2.5, stroke=PALETTE["purple_light"], fill=PALETTE["paper_tint"], line_width=0.6)
-    page.rich_line(gl_x + 8.0, lane_y + 7.5, "<-- **[EXIT: OLDEST / 1ST]**", size=5.0, color=PALETTE["purple"])
-    page.rich_line(gl_x + gl_w / 2.0, lane_y + 7.5, "<=====  **FIFO CONVEYOR FLOW (TRIAGES NEXT TO SCANNED)**  <=====", size=4.8, color=PALETTE["purple"], align="center")
-    page.rich_line(gl_x + gl_w - 8.0, lane_y + 7.5, "**[ENTRY: NEWEST]** <---", size=5.0, color=PALETTE["purple"], align="right")
-    page.text(gl_x + gl_w / 2.0, lane_y + 17.5, "Dice line up in entry order; in Phase 6 Conveyor Triage, up to Triage Bandwidth oldest dice move first", font="italic", size=4.5, color=PALETTE["muted"], align="center")
+
+    # Dedicated Operative Signature Cube cradle (Left side, immediately next to Scanned Box boundary)
+    cube_x = gl_x + 4.0
+    page.rounded_rect(cube_x, lane_y, cube_spot_w, lane_h, r=2.5, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.8, dash=(2.5, 1.5))
+    page.rect(cube_x + cube_spot_w / 2.0 - 5.0, lane_y + 2.5, 10.0, 10.0, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.6)
+    page.text(cube_x + cube_spot_w / 2.0, lane_y + 9.5, "CUBE", font="mono_bold", size=4.2, color=PALETTE["purple"], align="center")
+    page.text(cube_x + cube_spot_w / 2.0, lane_y + 17.5, "SIGNATURE CUBE", font="mono_bold", size=4.4, color=PALETTE["purple"], align="center")
+    page.text(cube_x + cube_spot_w / 2.0, lane_y + 21.5, "(TOWER RELAY)", font="italic", size=3.8, color=PALETTE["muted"], align="center")
+
+    # FIFO conveyor lane (Right side, flowing right to left into Scanned Box)
+    lane_x = cube_x + cube_spot_w + 4.0
+    page.rounded_rect(lane_x, lane_y, lane_w, lane_h, r=2.5, stroke=PALETTE["purple_light"], fill=PALETTE["paper_tint"], line_width=0.6)
+    page.rich_line(lane_x + 6.0, lane_y + 7.5, "<-- **[EXIT: TO SCANNED]**", size=5.0, color=PALETTE["purple"])
+    page.rich_line(lane_x + lane_w / 2.0 + 8.0, lane_y + 7.5, "<===  **FIFO CONVEYOR FLOW**  <===", size=4.6, color=PALETTE["purple"], align="center")
+    page.rich_line(lane_x + lane_w - 6.0, lane_y + 7.5, "**[ENTRY]** <---", size=5.0, color=PALETTE["purple"], align="right")
+    page.text(lane_x + lane_w / 2.0, lane_y + 17.5, "Dice line up in entry order; in Phase 6, up to Triage Bandwidth oldest dice move first", font="italic", size=4.3, color=PALETTE["muted"], align="center")
 
     # Bank on Exit Yield Key banner below lane
     page.rich_line(
         gl_x + gl_w / 2.0, gl_y + gl_h - 5.0,
-        "**Bank on Exit (P6 Step 4):**  {PURPLE} **+1**  |  {RED} **+2** *(MLB)*  |  {BLUE} **+2** *(+1 if Def L3+)*  |  {GREEN} **+2** *(cleans 1 Glitched Slot)*",
+        "**Bank on Exit (P6 Step 4):**  {PURPLE} **+1**  |  {RED} **+2** *(MLB)*  |  {BLUE} **+2** *(+1 if Def L3+)*  |  {GREEN} **+2** *(cleans 1 Slot)*  |  *Moves Signature Cube -> Staging Cup*",
         size=4.7, color=PALETTE["ink_soft"], align="center",
     )
 
@@ -1892,7 +1905,7 @@ def render_four_player_round_reference_cards(page: PDFPage) -> None:
         ),
         (
             "P2: COMPILER DROP & CORRUPTION",
-            "**Drop** Staging Cup into Cube Tower. Exited {BLACK} fill Corruption Track **now** (excess spills over; v3.0 full = **Singularity!**). Attack Cubes wait in Exit Tray. **Empty Tray:** +1 {RED}{BLUE}{GREEN} -> Staging Cup; no attacks. *(Patient Zero skips P3-P6; survivors finish Final Round.)*",
+            "**Drop** Staging Cup into Cube Tower. Exited {BLACK} fill Corruption Track **now** (v3.0 full = **Singularity!**). Signature Cubes exit -> **Target Lock** (return to mat). Attack Cubes wait in Exit Tray. **Empty Tray:** +1 {RED}{BLUE}{GREEN} -> Staging Cup. *(Patient Zero skips P3-P6; survivors finish Final Round.)*",
         ),
         (
             "P3: INCOME (Simultaneous)",
@@ -1900,7 +1913,7 @@ def render_four_player_round_reference_cards(page: PDFPage) -> None:
         ),
         (
             "P4: ATTACK RESOLUTION (Simultaneous)",
-            "Split all **Any** shields across cubes (all must block). Unblocked: {RED} **-1 Market Share** | {BLUE} **-1 Secret** (**-2** in **v3.0**) | {GREEN} 1 slot -> **Glitched Shield Slot**. Recycle {RED}{BLUE}{GREEN} -> Staging Cup. **End Check:** Total Wipeout, Patient Zero (<=0 Secrets), **Market Collapse** (0 Market Share = Final Round).",
+            "**Target Lock:** +1 Attack Cube of dominant color (you pick ties; blockable). Split all **Any** shields across cubes (all must block). Unblocked: {RED} **-1 Market Share** | {BLUE} **-1 Secret** (**-2** in **v3.0**) | {GREEN} 1 slot -> **Glitched Shield Slot**. Recycle {RED}{BLUE}{GREEN} -> Staging Cup. **End Check:** Wipeout, PZ, **Market Collapse**.",
         ),
         (
             "P5: OPERATIONS (Clockwise from First Player)",
@@ -1908,7 +1921,7 @@ def render_four_player_round_reference_cards(page: PDFPage) -> None:
         ),
         (
             "P6: CI/CD PIPELINE SHIFT (Simultaneous)",
-            "**1.** Magnetic Splice (Omnidyne). **2.** In Production -> **Scanned Box**. **3.** Scanned -> **Ready** (<= Release Bandwidth 4/5/6; newly bought dice graduate here). **4.** Conveyor Triage: **Processing -> Scanned** (<= Triage Bandwidth 1/1/1/1/2, oldest first; each banks its Secret). **5.** If a **Red Secret** banked this round: **Market Leader Bonus**. Pass First Player Marker.",
+            "**1.** Magnetic Splice. **2.** In Production -> **Scanned Box**. **3.** Scanned -> **Ready** (<= Release Bandwidth 4/5/6). **4.** Conveyor Triage: **Processing -> Scanned** (<= Triage Bandwidth, oldest first; each banks its Secret; banking a Secret moves Signature Cube from mat -> Staging Cup). **5.** Red Secret banked: **Market Leader Bonus**. Pass First Player Marker.",
         ),
     ]
 

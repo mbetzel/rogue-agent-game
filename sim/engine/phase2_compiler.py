@@ -10,7 +10,7 @@ from __future__ import annotations
 import inspect
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
-from sim.config import CubeColor, DieColor, EndGameReason, ShieldColor
+from sim.config import CubeColor, DieColor, EndGameReason, ShieldColor, SignatureCubeLocation
 from sim.entities import CorruptionSpace, Die, TargetCriterion, TransferType
 from sim.engine.state import CompileResult
 from sim.engine import market_share
@@ -570,12 +570,37 @@ def execute_compiler_drop(engine: GameEngine, player_commitments: Commitments) -
     staged_before = dict(state.staging_cup)
     stuck_before = state.tower.get_stuck_copy()
 
-    exited_cubes = state.tower.drop(state.staging_cup, engine.rng)
+    staged_sigs = set(state.staging_signature_cubes)
+    if _accepts_kwarg(state.tower.drop, "staged_signatures"):
+        exited_cubes = state.tower.drop(state.staging_cup, engine.rng, staged_signatures=staged_sigs)
+    else:
+        exited_cubes = state.tower.drop(state.staging_cup, engine.rng)
+    state.staging_signature_cubes.clear()
     state.last_exited_cubes = dict(exited_cubes)
     stuck_after = state.tower.get_stuck_copy()
 
     for color in state.staging_cup:
         state.staging_cup[color] = 0
+
+    exited_sigs = getattr(state.tower, "last_exited_signatures", set())
+    exited_signature_pids = set(exited_sigs)
+    stuck_signature_pids = set(getattr(state.tower, "stuck_signatures", {}).keys())
+
+    if engine.config.target_lock_enabled:
+        for player in state.players:
+            pid = player.player_id
+            if pid in exited_sigs:
+                # Signature exited into tray: Target Lock established!
+                player.target_locked = True
+                player.target_locks_triggered += 1
+                player.signature_cube_location = SignatureCubeLocation.IDLE_ON_MAT
+                player.target_lock_baffle_rounds = 0
+            elif pid in stuck_signature_pids:
+                # Signature remains trapped on baffles
+                player.target_locked = False
+                player.signature_cube_location = SignatureCubeLocation.IN_TOWER
+                player.target_lock_baffle_rounds = state.tower.stuck_signatures.get(pid, 1)
+                player.baffle_hold_rounds_total += 1
 
     total_exited = sum(exited_cubes.values())
     buffer_overflow = total_exited == 0 and state.config.enable_buffer_overflow
@@ -667,6 +692,8 @@ def execute_compiler_drop(engine: GameEngine, player_commitments: Commitments) -
         black_dropped=black_dropped,
         breached_pids=breached,
         version_comparisons=list(state.version_comparisons[cmp_start:]),
+        exited_signature_pids=exited_signature_pids,
+        stuck_signature_pids=stuck_signature_pids,
     )
 
 
