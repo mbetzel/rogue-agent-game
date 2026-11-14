@@ -1,4 +1,4 @@
-"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.42.0 Baseline).
+"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.43.0 Baseline).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
   - 01_Player_Boards.pdf (6 pages — 4x Company Terminal Mats with CI/CD Pipeline loop + 6x Client Company Cards sheet + 6x White Hat Dossier Cards sheet)
@@ -19,7 +19,7 @@ from pnp.pdf_engine import PALETTE, Color, PDFDocument, PDFPage, measure_text
 
 
 # =============================================================================
-# Canonical Game Data (Synchronized 1:1 with RULES.md v0.42.0 Baseline & sim/entities.py)
+# Canonical Game Data (Synchronized 1:1 with RULES.md v0.43.0 Baseline & sim/entities.py)
 # =============================================================================
 
 @dataclass(frozen=True)
@@ -663,7 +663,7 @@ def _draw_white_hat_card(page: PDFPage, x: float, y: float, w: float, h: float, 
     )
 
 
-TRACK_STEP_COSTS = (None, 1, 2, 2, 3)  # {RESEARCH} to reach L1..L4 (RULES.md v0.42.0 baseline)
+TRACK_STEP_COSTS = (None, 1, 2, 2, 3)  # {RESEARCH} to reach L1..L4 (RULES.md v0.43.0 baseline)
 
 
 def _draw_track_cells(page: PDFPage, cells: Sequence[Tuple[float, float, float, float]],
@@ -764,7 +764,7 @@ RELEASE_LEVELS = [
     ("5 dice", "+1 {SECRET} Corporate Secret"),
     ("6 dice", "+1 free reroll in P1 Step 4"),
 ]
-PR_REGAIN_COST_MONEY = 3  # $ Cash per +1 Market Share (RULES.md v0.42.0 baseline)
+PR_REGAIN_COST_MONEY = 3  # $ Cash per +1 Market Share (RULES.md v0.43.0 baseline)
 PUBLIC_RELATIONS_LEVELS = [
     ("Regain up to 1/turn", ""),
     ("Regain up to 1/turn", "+$3"),
@@ -952,7 +952,7 @@ def render_player_board(
     draw_board_outer_frame(
         page,
         left_tag=f"TOO MANY SECRETS // COMPANY TERMINAL MAT [TERM-0{idx}/4]",
-        right_tag="PNP PROTOTYPE v0.42.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.43.0 // US LETTER",
     )
 
     # -------------------------------------------------------------------------
@@ -1217,7 +1217,7 @@ def render_company_cards_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x CLIENT COMPANY CARDS [PAGE 5/6]",
-        right_tag="PNP PROTOTYPE v0.42.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.43.0 // US LETTER",
     )
 
     page.text(
@@ -1266,7 +1266,7 @@ def render_white_hat_dossiers_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x WHITE HAT DOSSIER CARDS [PAGE 6/6]",
-        right_tag="PNP PROTOTYPE v0.42.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.43.0 // US LETTER",
     )
 
     page.text(
@@ -1318,7 +1318,7 @@ def render_agent_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // CENTRAL ROGUE AGENT & MARKET SHARE BOARD [1/2]",
-        right_tag="PNP PROTOTYPE v0.42.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.43.0 // US LETTER",
     )
 
     # Top Title Bar inside board
@@ -1367,74 +1367,88 @@ def render_agent_board(page: PDFPage) -> None:
         page.text(slot_x + slot_w / 2.0, sy + 90.0, hint2, font="regular", size=7.0, color=PALETTE["muted"], align="center")
 
     # -------------------------------------------------------------------------
-    # COLUMN 2 (Middle): Agent Cube Effect Summary (x = 308, w = 196)
+    # COLUMN 2 (Middle): Agent Cube Effect & Target Lock Summary (x = 308, w = 196)
+    # Printed in exact top-to-bottom tie-breaking priority order: Green > Black > Blue > Red
     # -------------------------------------------------------------------------
     m_x, m_w = 308.0, 196.0
     page.rect(m_x, col_top, m_w, col_h, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.1)
     page.rect(m_x, col_top, m_w, 22.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.9)
-    page.text(m_x + m_w / 2.0, col_top + 15.0, "AGENT CUBE EFFECT SUMMARY", font="bold", size=8.8, color=PALETTE["ink"], align="center")
+    page.text(m_x + m_w / 2.0, col_top + 15.0, "CUBES & TARGET LOCK SUMMARY", font="bold", size=8.6, color=PALETTE["ink"], align="center")
 
-    cy_cur = col_top + 34.0
-    page.rich_paragraph(
-        m_x + 8.0, cy_cur, m_w - 16.0,
-        "In **Phase 2**, drop the **Staging Cup** into the **Cube Tower** (stuck cubes stay inside). Exited {BLACK} resolves now; Attack Cubes wait in the **Exit Tray** for **Phase 4**:",
-        size=6.8, leading=9.2, color=PALETTE["ink_soft"],
+    # Top overview & Target Lock tie-breaking banner
+    page.rect(m_x + 7.0, col_top + 26.0, m_w - 14.0, 44.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.6)
+    _fit_paragraph(
+        page, m_x + 11.0, col_top + 34.0, m_w - 22.0,
+        "**Phase 2:** Drop **Staging Cup** into **Cube Tower**. Exited {BLACK} resolves now; {RED}{BLUE}{GREEN} attack in **Phase 4** (then recycle).\n"
+        "**Target Lock (Signature Cube Exits):** After P4 damage, resolve **Signature Attack** of most populous tray color (**Tie Priority Top->Bottom: {GREEN} > {BLACK} > {BLUE} > {RED}**; 0 cubes = fizzle):",
+        col_top + 68.0, size=5.5, leading=7.0, min_size=4.8, color=PALETTE["ink"],
     )
 
     cube_cards = [
         (
-            "black",
-            "{BLACK} BLACK // CORRUPTION",
-            "P2 (NOW)",
+            "green",
+            "{GREEN} GREEN // MALWARE",
+            "1ST TIE PRIORITY",
             (
-                "Advance active **Version Corruption Track** 1 space per exited {BLACK}.\n"
-                "**Space Effects:** Trigger immediately for all players.\n"
-                "**Track End** (**4** on v1.0, **5** on v2.0): excess {BLACK} **spills over** now; new Version takes effect next round. **6** on v3.0 = **SINGULARITY!**\n"
-                "**Glitch X Dice** space: turn X shield slots into **Glitched Shield Slots**."
+                "**P4 Unblocked:** Each unblocked {GREEN} turns **1 shield slot** into a **Glitched Shield Slot** *(max Defense Capacity)*."
             ),
-            124.0,
+            (
+                "**Target Lock (1st Tie Priority):** Place a green cube from the supply on the next space of **2 Research Tracks** without green cubes (**2x {RESEARCH}** cost to advance; unplaceable cubes glitch **1 shield slot** each)."
+            ),
+            103.0,
         ),
         (
-            "red",
-            "{RED} RED // MARKET MANIPULATION",
-            "P4 DAMAGE",
+            "black",
+            "{BLACK} BLACK // CORRUPTION",
+            "2ND TIE PRIORITY",
             (
-                "Lose **1 Market Share** per unblocked {RED} cube *(min 0; never costs $ or Secrets)*.\n"
-                "**Market Collapse:** any survivor at **0** after Phase 4 makes this the **Final Round** (no elimination)."
+                "**P2 Immediate:** Advance active **Version Corruption Track** 1 space per exited {BLACK} (**4** on v1.0, **5** on v2.0 -> excess spills over now; **6** on v3.0 = **SINGULARITY!**)."
             ),
-            88.0,
+            (
+                "**Target Lock (2nd Tie Priority):** Mark your Client Company **Institutional Override** as `Used` for this Version; if already used, lose **2 Corporate Secrets**."
+            ),
+            103.0,
         ),
         (
             "blue",
             "{BLUE} BLUE // SPYWARE",
-            "P4 DAMAGE",
+            "3RD TIE PRIORITY",
             (
-                "Lose **1 Corporate Secret** per unblocked {BLUE} cube (**2** in **v3.0** [Critical Breach]).\n"
-                "**Patient Zero:** Reaching **<= 0 Secrets** triggers immediate **Total Data Breach** (eliminated)!"
+                "**P4 Unblocked:** Lose **1 Corporate Secret** per unblocked {BLUE} (**2** in **v3.0** [Critical Breach]). **<= 0 Secrets = Patient Zero!**"
             ),
-            88.0,
+            (
+                "**Target Lock (3rd Tie Priority):** After shield blocking, move **1 Gray Legacy Die** (`Scanned Box` -> `In Production`) to the back of your **Processing Box** (**0** Secrets when triaged)."
+            ),
+            103.0,
         ),
         (
-            "green",
-            "{GREEN} GREEN // MALWARE",
-            "P4 DAMAGE",
+            "red",
+            "{RED} RED // MARKET MANIPULATION",
+            "4TH TIE PRIORITY",
             (
-                "Each unblocked {GREEN} cube turns **1 shield slot** into a **Glitched Shield Slot** *(max Defense Capacity)*.\n"
-                "Holds no shield until cleaned (P1 Step 5 or P6 Conveyor Triage)."
+                "**P4 Unblocked:** Lose **1 Market Share** per unblocked {RED} *(min 0)*. **0 Share after P4 = Market Collapse** *(Final Round, no elimination)*."
             ),
-            88.0,
+            (
+                "**Target Lock (4th Tie Priority):** Lose **2 Market Share**; the other *(non-locked)* surviving player with the least Market Share gains **2**."
+            ),
+            103.0,
         ),
     ]
 
-    cy_box = col_top + 78.0
-    card_gap = 12.0
-    for ckey, ctitle, ctag, cbody, bh_card in cube_cards:
+    cy_box = col_top + 74.0
+    card_gap = 6.5
+    for ckey, ctitle, ctag, cbody_base, cbody_sig, bh_card in cube_cards:
         fg, bg = _color_pair(ckey)
         page.rounded_rect(m_x + 7.0, cy_box, m_w - 14.0, bh_card, r=3.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.8)
-        page.rect(m_x + 7.0, cy_box, m_w - 14.0, 17.0, stroke=PALETTE["ink"], fill=bg, line_width=0.6)
-        page.rich_line(m_x + 11.0, cy_box + 12.0, f"**{ctitle}**", size=7.0, color=fg if ckey != "black" else PALETTE["ink"])
-        page.rich_line(m_x + m_w - 11.0, cy_box + 12.0, ctag, size=5.8, base_font="mono_bold", color=PALETTE["ink_soft"], align="right")
-        page.rich_paragraph(m_x + 11.0, cy_box + 28.0, m_w - 22.0, cbody, size=6.6, leading=9.0, color=PALETTE["ink"])
+        page.rect(m_x + 7.0, cy_box, m_w - 14.0, 15.5, stroke=PALETTE["ink"], fill=bg, line_width=0.6)
+        page.rich_line(m_x + 11.0, cy_box + 11.2, f"**{ctitle}**", size=6.5, color=fg if ckey != "black" else PALETTE["ink"])
+        page.rich_line(m_x + m_w - 11.0, cy_box + 11.2, ctag, size=5.2, base_font="mono_bold", color=PALETTE["ink_soft"], align="right")
+        _fit_paragraph(page, m_x + 11.0, cy_box + 23.5, m_w - 22.0, cbody_base, cy_box + 51.0, size=5.6, leading=6.9, min_size=4.8, color=PALETTE["ink"])
+        # Target Lock Signature Attack sub-box
+        sig_y = cy_box + 52.0
+        sig_h = bh_card - 55.0
+        page.rounded_rect(m_x + 10.0, sig_y, m_w - 20.0, sig_h, r=2.0, stroke=fg if ckey != "black" else PALETTE["ink_soft"], fill=PALETTE["paper_tint"], line_width=0.55)
+        _fit_paragraph(page, m_x + 13.0, sig_y + 7.5, m_w - 26.0, cbody_sig, sig_y + sig_h - 2.0, size=5.4, leading=6.6, min_size=4.6, color=PALETTE["ink"])
         cy_box += bh_card + card_gap
 
     # -------------------------------------------------------------------------
@@ -1512,7 +1526,7 @@ def render_market_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // SOFTWARE MODULE MARKET & CENTRAL SUPPLY [2/2]",
-        right_tag="PNP PROTOTYPE v0.42.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.43.0 // US LETTER",
     )
 
     # Top Title Bar
@@ -1550,10 +1564,10 @@ def render_market_board(page: PDFPage) -> None:
     page.rect(ex_x, ty, top_w, 19.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.8)
     page.text(ex_x + top_w / 2.0, ty + 13.2, "COMPILER EXIT TRAY (SORTING & RESOLUTION)", font="bold", size=8.6, color=PALETTE["ink"], align="center")
     tray_cols = [
-        ("black", "P2: CORRUPT", "Track Space"),
-        ("red", "P4: RED", "-1 Market Share"),
-        ("blue", "P4: BLUE", "-1 Secret"),
-        ("green", "P4: GREEN", "Glitch Slot"),
+        ("green", "P4: GREEN", "Glitch [1st Sig]"),
+        ("black", "P2: CORRUPT", "Track [2nd Sig]"),
+        ("blue", "P4: BLUE", "-1 Sec [3rd Sig]"),
+        ("red", "P4: RED", "-1 MS [4th Sig]"),
     ]
     tw_sub = 74.0
     tgap = 8.0
@@ -1565,7 +1579,7 @@ def render_market_board(page: PDFPage) -> None:
         page.draw_color_badge(bx + tw_sub / 2.0, ty + 46.0, 13.0, ck)
         page.text(bx + tw_sub / 2.0, ty + 72.0, clbl, font="mono_bold", size=6.5, color=PALETTE["ink"], align="center")
         page.text(bx + tw_sub / 2.0, ty + 86.0, csub, font="regular", size=5.8, color=PALETTE["ink_soft"], align="center")
-    page.text(ex_x + top_w / 2.0, ty + 117.5, "Black resolves in Phase 2; Red/Blue/Green attack in Phase 4 unless blocked.", font="italic", size=6.3, color=PALETTE["muted"], align="center")
+    page.text(ex_x + top_w / 2.0, ty + 117.5, "Black resolves in P2; Red/Blue/Green attack in P4. Target Lock Tie Priority: Green > Black > Blue > Red.", font="italic", size=6.0, color=PALETTE["muted"], align="center")
 
     # -------------------------------------------------------------------------
     # MIDDLE ROW: 4 Software Module Market Slots (x = 40..752, y = 200..498)
@@ -1655,7 +1669,7 @@ def render_master_dice_reference(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // MASTER DICE PIP & ABILITY VISUAL AID [1/4]",
-        right_tag="PNP PROTOTYPE v0.42.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.43.0 // US LETTER",
     )
 
     page.rect(40.0, 32.0, 712.0, 24.0, stroke=PALETTE["ink"], fill=PALETTE["ink"], line_width=1.0)
@@ -1913,7 +1927,7 @@ def render_four_player_round_reference_cards(page: PDFPage) -> None:
         ),
         (
             "P4: ATTACK RESOLUTION (Simultaneous)",
-            "**Target Lock:** +1 Attack Cube of dominant color (you pick ties; blockable). Split all **Any** shields across cubes (all must block). Unblocked: {RED} **-1 Market Share** | {BLUE} **-1 Secret** (**-2** in **v3.0**) | {GREEN} 1 slot -> **Glitched Shield Slot**. Recycle {RED}{BLUE}{GREEN} -> Staging Cup. **End Check:** Wipeout, PZ, **Market Collapse**.",
+            "Split all **Any** shields across cubes (all must block). Unblocked: {RED} **-1 Market Share** | {BLUE} **-1 Secret** (**-2** in **v3.0**) | {GREEN} 1 slot -> **Glitched Shield Slot**. **Target Lock Signature Attack** (most populous tray color, tie priority **{GREEN} > {BLACK} > {BLUE} > {RED}**): {GREEN} **1st:** green cube from supply on next space of **2** Research Tracks w/o green cubes (**2x {RESEARCH}** cost; unplaceable -> glitch **1** slot each) | {BLACK} **2nd:** mark **Institutional Override** `Used` (if used, **-2 Corporate Secrets**) | {BLUE} **3rd:** after blocking, move **1 Gray Legacy Die** (`Scanned Box` -> `In Production`) to back of **Processing Box** (**0** Secrets when triaged) | {RED} **4th:** **-2 Market Share**; other *(non-locked)* survivor with least Market Share gains **+2**. Recycle {RED}{BLUE}{GREEN} -> Staging Cup. **End Check:** Wipeout, PZ, **Market Collapse**.",
         ),
         (
             "P5: OPERATIONS (Clockwise from First Player)",
@@ -2281,7 +2295,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated: List[str] = []
 
     # 1. Player Terminal Mats & Split Cards (6 pages: 4x Mats with vertical resource holders, expanded PR & FIFO Processing Box + 1x Company Cards + 1x White Hat Cards)
-    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.42.0)")
+    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.43.0)")
     for idx in range(1, 5):
         p = doc_players.add_page()
         render_player_board(p, idx)
@@ -2323,7 +2337,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated.append(path_versions)
 
     # 5. Combined Master Print-and-Play Pack (All 14 pages)
-    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.42.0)")
+    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.43.0)")
     for sub_doc in (doc_central, doc_players, doc_dice, doc_versions):
         for pg in sub_doc.pages:
             doc_master.pages.append(pg)

@@ -263,10 +263,10 @@ def conveyor_triage_v038(engine: GameEngine, player: PlayerState) -> List[Die]:
     moved = order[:n]
     for d in moved:
         player.glitched_dice.remove(d)
-        was_secret = getattr(d, "secret_pending", False)
+        was_secret = getattr(d, "secret_pending", False) and d.color != DieColor.GRAY
         reset_die_for_pipeline(d)
-        secret_faces.bank(engine.config, player, d, engine.state)
-        if was_secret:
+        banked = secret_faces.bank(engine.config, player, d, engine.state)
+        if was_secret and banked > 0:
             check_and_queue_signature_cube(engine, player)
         player.scanned_dice.append(d)
     return moved

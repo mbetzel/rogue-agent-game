@@ -41,21 +41,28 @@ def _ordered_research(player: Any, state: Any, pr_first: bool, focus: Sequence[s
     rate), then the other tracks. Otherwise: the research-policy want-list without the Public Relations Track
     and no regain. ``pr_cap=4`` is the portfolio push line's behaviour."""
     from sim.bots.research_policy import LEVEL_ATTR, ResearchPolicy, _want_list
+    from sim.engine import research_tracks
 
     cfg = state.config
     costs = cfg.track_step_costs
     max_ups = getattr(cfg, "max_hardware_upgrades_per_turn", 2)
     res = int(player.research_tokens)
-    lv = {t: int(getattr(player, LEVEL_ATTR[t])) for t in LEVEL_ATTR}
+    orig_lv = {t: int(getattr(player, LEVEL_ATTR[t])) for t in LEVEL_ATTR}
+    lv = dict(orig_lv)
     upgrades: List[str] = []
 
     def buy(t: str) -> bool:
         nonlocal res
         if len(upgrades) >= max_ups:
             return False
-        if lv[t] >= 4 or res < int(costs[lv[t]]):
+        if lv[t] >= 4:
             return False
-        res -= int(costs[lv[t]])
+        c = int(costs[lv[t]])
+        if lv[t] == orig_lv[t] and research_tracks.is_track_encrypted(player, t):
+            c *= 2
+        if res < c:
+            return False
+        res -= c
         lv[t] += 1
         upgrades.append(t)
         return True

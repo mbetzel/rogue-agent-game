@@ -146,6 +146,16 @@ class PlayerState:
     baffle_hold_rounds_total: int = 0
     baffle_hold_visits: int = 0
 
+    # --- Phase 62: Dominant Color Signature Attacks (v0.43.0) ---
+    encrypted_research_tracks: Set[str] = field(default_factory=set)
+    signature_attacks_suffered: Dict[str, int] = field(
+        default_factory=lambda: {"red": 0, "blue": 0, "green": 0, "black": 0}
+    )
+    signature_override_hijacks: int = 0
+    signature_black_secrets_lost: int = 0
+    signature_red_transfers_sent: int = 0
+    signature_red_transfers_received: int = 0
+
     is_patient_zero: bool = False
     elimination_round: Optional[int] = None
     elimination_reason: Optional[str] = None
@@ -415,6 +425,55 @@ class PlayerState:
         self.baffle_hold_rounds_total = kwargs.get("baffle_hold_rounds_total", 0)
         self.baffle_hold_visits = kwargs.get("baffle_hold_visits", 0)
 
+        # --- Phase 62: Dominant Color Signature Attacks (v0.43.0) ---
+        self.encrypted_research_tracks: Set[str] = set(kwargs.get("encrypted_research_tracks", set()))
+        self.signature_attacks_suffered: Dict[str, int] = dict(
+            kwargs.get("signature_attacks_suffered", {"red": 0, "blue": 0, "green": 0, "black": 0})
+        )
+        self.signature_override_hijacks: int = int(kwargs.get("signature_override_hijacks", 0))
+        self.signature_black_secrets_lost: int = int(kwargs.get("signature_black_secrets_lost", 0))
+        self.signature_red_transfers_sent: int = int(kwargs.get("signature_red_transfers_sent", 0))
+        self.signature_red_transfers_received: int = int(kwargs.get("signature_red_transfers_received", 0))
+
+    @property
+    def max_market_share(self) -> int:
+        if self.market_share_max is not None:
+            return int(self.market_share_max)
+        if self.config is not None:
+            return int(self.config.get_market_share_max())
+        return 20
+
+    @max_market_share.setter
+    def max_market_share(self, val: Optional[int]) -> None:
+        self.market_share_max = val
+
+    @property
+    def company_ability_used_this_version(self) -> bool:
+        return not self.is_ability_available()
+
+    @company_ability_used_this_version.setter
+    def company_ability_used_this_version(self, val: bool) -> None:
+        if val:
+            if self.is_ability_available():
+                self.mark_ability_used()
+        else:
+            if self.ability_v3_status == AbilityStatus.USED:
+                self.ability_v3_status = AbilityStatus.AVAILABLE
+            elif self.ability_v2_status == AbilityStatus.USED:
+                self.ability_v2_status = AbilityStatus.AVAILABLE
+            elif self.ability_v1_status == AbilityStatus.USED:
+                self.ability_v1_status = AbilityStatus.AVAILABLE
+            else:
+                self.ability_v1_status = AbilityStatus.AVAILABLE
+
+    @property
+    def dto_slush_fund_used(self) -> bool:
+        return bool(self.slush_fund_used_game)
+
+    @dto_slush_fund_used.setter
+    def dto_slush_fund_used(self, val: bool) -> None:
+        self.slush_fund_used_game = bool(val)
+
     # --- v0.36.0 Market Share (INV-MS-LEDGER-01) ---
     def init_market_share(self, start: int, max_share: Optional[int] = None) -> None:
         """Initializes Market Share, decoupling starting marker position from track ceiling.
@@ -593,10 +652,19 @@ class PlayerState:
         if cost is None or self.research_tokens < cost:
             return False
         self.research_tokens -= cost
-        self.research_spent_tracks[t] = self.research_spent_tracks.get(t, 0) + cost
-        new_level = research_tracks.level_of(self, t) + 1
+        norm_t = research_tracks.normalize_track(t)
+        self.research_spent_tracks[norm_t] = self.research_spent_tracks.get(norm_t, 0) + cost
+        new_level = research_tracks.level_of(self, norm_t) + 1
         rnd = round_number if round_number is not None else getattr(self, "_current_round", 0)
-        research_tracks.apply_level(self.config, self, t, new_level, rnd)
+        research_tracks.apply_level(self.config, self, norm_t, new_level, rnd)
+
+        # Clear encryption marker upon successful upgrade (INV-SIG-GREEN)
+        if hasattr(self, "encrypted_research_tracks"):
+            self.encrypted_research_tracks.discard(t)
+            self.encrypted_research_tracks.discard(norm_t)
+            if norm_t == "PATENT":
+                self.encrypted_research_tracks.discard("PR")
+                self.encrypted_research_tracks.discard("PUBLIC_RELATIONS")
         return True
 
     def get_patent_cost(self) -> int:
@@ -1034,6 +1102,10 @@ class RoundTelemetry:
     target_lock_absorbed_by_player: Dict[int, int] = field(default_factory=dict)
     target_lock_unblocked_by_player: Dict[int, int] = field(default_factory=dict)
     signature_cube_locations: Dict[int, str] = field(default_factory=dict)
+    # --- Phase 62: Dominant Color Signature Attacks (v0.43.0) ---
+    dominant_tray_color: Optional[str] = None
+    signature_attacks_this_round: Dict[int, Optional[str]] = field(default_factory=dict)
+    encrypted_tracks_by_player: Dict[int, List[str]] = field(default_factory=dict)
 
 
 @dataclass
@@ -1264,6 +1336,12 @@ class GameState:
     red_secret_payouts: List[Dict[str, Any]] = field(default_factory=list)  # one record per round fired
     red_secret_payouts_fired: int = 0
     red_banks_by_round: List[int] = field(default_factory=list)  # index = round - 1
+    # --- Phase 62: Dominant Color Round Tracking (v0.43.0) ---
+    last_dominant_color: Optional[CubeColor] = None
+    signature_attack_events: List[Dict[str, Any]] = field(default_factory=list)
+    dominant_color_counts: Dict[str, int] = field(
+        default_factory=lambda: {"red": 0, "blue": 0, "green": 0, "black": 0}
+    )
 
     def __post_init__(self) -> None:
         self.tower = CubeTower(self.config)

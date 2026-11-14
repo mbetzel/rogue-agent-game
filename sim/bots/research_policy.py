@@ -56,6 +56,8 @@ def plan_research3(policy: ResearchPolicy, player: PlayerState, state: GameState
     """
     if getattr(config, "is_share_regain", False) and getattr(player, "market_share", None) is not None:
         return _plan_research_share_regain(policy, player, state, config, ms_policy)
+    from sim.engine import research_tracks
+
     costs = config.track_step_costs
     res = int(player.research_tokens)
     lv: Dict[str, int] = {t: int(getattr(player, LEVEL_ATTR[t])) for t in TRACKS}
@@ -71,6 +73,8 @@ def plan_research3(policy: ResearchPolicy, player: PlayerState, state: GameState
             if sim_lv[t] >= 4:
                 continue
             c = int(costs[sim_lv[t]])
+            if sim_lv[t] == lv[t] and research_tracks.is_track_encrypted(player, t):
+                c *= 2
             if res >= c:
                 upgrades.append(t)
                 res -= c
@@ -96,6 +100,7 @@ def _want_list(policy: ResearchPolicy, lv: Dict[str, int]) -> List[str]:
 def _plan_research_share_regain(policy: ResearchPolicy, player: PlayerState, state: GameState, config: GameConfig,
                                 ms_policy: Any = None) -> Tuple[List[str], int, int]:
     from sim.bots import market_share_policy as msp
+    from sim.engine import research_tracks
 
     pol = ms_policy or msp.DEFAULT_POLICY
     aware = msp.is_aware(state)
@@ -114,6 +119,8 @@ def _plan_research_share_regain(policy: ResearchPolicy, player: PlayerState, sta
             if sim_lv[t] >= 4:
                 continue
             c = int(costs[sim_lv[t]])
+            if sim_lv[t] == lv[t] and research_tracks.is_track_encrypted(player, t):
+                c *= 2
             if res >= c:
                 upgrades.append(t)
                 res -= c
@@ -145,6 +152,8 @@ def _plan_research_share_regain(policy: ResearchPolicy, player: PlayerState, sta
             if sim_lv[t] >= 4:
                 continue
             c = int(costs[sim_lv[t]])
+            if sim_lv[t] == lv[t] and research_tracks.is_track_encrypted(player, t):
+                c *= 2
             if res >= c:
                 upgrades.append(t)
                 res -= c
@@ -207,9 +216,12 @@ def apply_research_policy(bot: Any, plan: Any, player: PlayerState, state: GameS
             ups = None
             regain = 0
             if w == prp.PUSH:
+                from sim.engine import research_tracks
+
                 p = cfg.bot_pr_push_params
+                pr_cost = research_tracks.step_cost(cfg, player, "PATENT") or 999
                 if (player.patent_level < p.push_pr_cap and player.research_tokens <= p.push_max_research
-                        and player.research_tokens >= cfg.track_step_costs[player.patent_level]):
+                        and player.research_tokens >= pr_cost):
                     ups, regain = prp.ordered_research(player, state, True, focus, pr_cap=p.push_pr_cap)
                 else:
                     ms_pol = prp.PR_PUSH_POLICY

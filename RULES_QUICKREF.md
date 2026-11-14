@@ -1,4 +1,4 @@
-# Too Many Secrets — Quick Reference Rules (v0.42.0)
+# Too Many Secrets — Quick Reference Rules (v0.43.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Format:** Simultaneous / Turn-Based Hybrid
 
@@ -119,14 +119,18 @@ Collect all resources produced by dice still deployed **In Production** (Income 
 ### Phase 4: Attack Resolution (Simultaneous)
 
 Calculate total attack cubes in the tray: **Red**, **Blue**, and **Green**. Each player simultaneously allocates their available `Block 1 Any` shields:
-* **Target Lock (+1 Cube):** If you triggered a Target Lock in Phase 2, face **`+1 Attack Cube`** of the most common exited color in the tray (defending player breaks ties; fizzles if no attack cubes exited). This extra cube is fully blockable by shields and is not recycled.
 * **Mandatory Blocking:** Every active shield must block an attack cube if any unblocked cubes remain. You choose how to distribute shields among colors.
 * **Unblocked Cube Penalties:**
   * **Red (Market Manipulation):** Lose **`1` Market Share** per unblocked Red cube (minimum 0).
   * **Blue (Spyware):** Lose **`1` Corporate Secret** per unblocked Blue cube during **`v1.0` / `v2.0`**; lose **`2` Corporate Secrets** per unblocked Blue cube during **`v3.0`** (Critical Breach).
   * **Green (Malware):** Turn **`1` Shield Slot** into a **Glitched Shield Slot** per unblocked Green cube (capped at your Defense Capacity).
-* **Post-Damage Triggers:**
+* **Post-Damage & Target Lock Signature Attacks:**
   * **Defense Grid Level 4:** Gain **`+$1` per Attack Cube blocked** this phase (max `$3`).
+  * **Target Lock Signature Attack (Dominant Tray Color, Tie Priority `Green > Black > Blue > Red`):** If your Signature Cube exited in Phase 2, resolve the Signature Attack matching the most populous cube color in the tray (fizzles if `0` cubes exited):
+    * **Green:** Place a green cube from the supply on the next space of **`2` Research Tracks** without green cubes (**`2× 🔬` cost** to advance into; unplaceable cubes glitch `1` shield slot each).
+    * **Black:** Mark your **Institutional Override** as **`Used`** for this Version; if already used, lose **`2` Corporate Secrets**.
+    * **Blue:** Move **`1` Gray Legacy Die** (from `Scanned Box`, else `In Production`) to the back of your **Processing Box** (`0` Secrets when triaged).
+    * **Red:** Lose **`2` Market Share**; the other *(non-locked)* surviving player with the least Market Share gains **`2`** *(if tied, you choose)*.
   * **Recycle Cubes:** Place all exited Red, Blue, and Green Attack Cubes back into the **Staging Cup** for next round.
 * **End Game Check:**
   * If a surviving player's Secrets drop to `<= 0`, they become **Patient Zero** (eliminated; current round is the Final Round).

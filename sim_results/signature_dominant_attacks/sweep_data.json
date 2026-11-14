@@ -1,0 +1,1482 @@
+{
+  "candidate_v043": {
+    "4P": {
+      "games": 1200,
+      "players": 4,
+      "mean_rounds": 7.43,
+      "std_rounds": 2.433,
+      "min_rounds": 2,
+      "max_rounds": 12,
+      "round_distribution": {
+        "2": 58,
+        "3": 65,
+        "4": 71,
+        "5": 68,
+        "6": 99,
+        "7": 122,
+        "8": 204,
+        "9": 294,
+        "10": 161,
+        "11": 51,
+        "12": 7
+      },
+      "singularity_pct": 4.67,
+      "patient_zero_pct": 73.83,
+      "market_collapse_pct": 19.42,
+      "total_wipeout_pct": 2.08,
+      "round_limit_pct": 0.0,
+      "wipeouts_count": 25,
+      "early_wipeout_seeds": [],
+      "long_stall_seeds": [],
+      "archetypes": {
+        "AccelerationistBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 196.0,
+          "win_rate": 20.42,
+          "pz_rate": 29.17,
+          "avg_secrets": 4.95,
+          "avg_market_share": 10.5,
+          "tl_triggered_per_game": 1.73
+        },
+        "AdaptiveBalancedBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 326.0,
+          "win_rate": 33.96,
+          "pz_rate": 14.9,
+          "avg_secrets": 6.93,
+          "avg_market_share": 10.92,
+          "tl_triggered_per_game": 2.53
+        },
+        "RecklessSaboteurBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 91.0,
+          "win_rate": 9.48,
+          "pz_rate": 45.94,
+          "avg_secrets": 2.9,
+          "avg_market_share": 10.7,
+          "tl_triggered_per_game": 1.77
+        },
+        "SecOpsTurtleBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 447.0,
+          "win_rate": 46.56,
+          "pz_rate": 8.44,
+          "avg_secrets": 8.33,
+          "avg_market_share": 10.07,
+          "tl_triggered_per_game": 2.69
+        },
+        "VentureGreedBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 140.0,
+          "win_rate": 14.58,
+          "pz_rate": 36.25,
+          "avg_secrets": 4.07,
+          "avg_market_share": 10.71,
+          "tl_triggered_per_game": 1.75
+        }
+      },
+      "companies": {
+        "MERIDIAN": {
+          "display_name": "Meridian",
+          "seats": 805,
+          "seat_pct": 16.77,
+          "wins": 180.0,
+          "win_rate": 22.36,
+          "pz_rate": 40.99,
+          "avg_secrets": 4.38,
+          "avg_market_share": 11.75,
+          "tl_triggered_per_game": 2.18,
+          "override_hijacks": 0,
+          "black_secrets_lost": 820
+        },
+        "OMNIDYNE": {
+          "display_name": "Omnidyne",
+          "seats": 811,
+          "seat_pct": 16.9,
+          "wins": 253.0,
+          "win_rate": 31.2,
+          "pz_rate": 22.93,
+          "avg_secrets": 6.08,
+          "avg_market_share": 11.17,
+          "tl_triggered_per_game": 1.4,
+          "override_hijacks": 61,
+          "black_secrets_lost": 420
+        },
+        "AEGIS": {
+          "display_name": "Aegis",
+          "seats": 802,
+          "seat_pct": 16.71,
+          "wins": 227.0,
+          "win_rate": 28.3,
+          "pz_rate": 18.7,
+          "avg_secrets": 6.0,
+          "avg_market_share": 10.37,
+          "tl_triggered_per_game": 2.13,
+          "override_hijacks": 0,
+          "black_secrets_lost": 828
+        },
+        "DTO": {
+          "display_name": "DTO",
+          "seats": 777,
+          "seat_pct": 16.19,
+          "wins": 225.0,
+          "win_rate": 28.96,
+          "pz_rate": 16.73,
+          "avg_secrets": 6.21,
+          "avg_market_share": 9.61,
+          "tl_triggered_per_game": 2.1,
+          "override_hijacks": 186,
+          "black_secrets_lost": 382
+        },
+        "HELIX": {
+          "display_name": "Helix",
+          "seats": 823,
+          "seat_pct": 17.15,
+          "wins": 175.0,
+          "win_rate": 21.26,
+          "pz_rate": 25.03,
+          "avg_secrets": 5.22,
+          "avg_market_share": 9.93,
+          "tl_triggered_per_game": 2.38,
+          "override_hijacks": 430,
+          "black_secrets_lost": 46
+        },
+        "PROMETHEUS": {
+          "display_name": "Prometheus",
+          "seats": 782,
+          "seat_pct": 16.29,
+          "wins": 140.0,
+          "win_rate": 17.9,
+          "pz_rate": 37.21,
+          "avg_secrets": 4.74,
+          "avg_market_share": 10.63,
+          "tl_triggered_per_game": 2.38,
+          "override_hijacks": 65,
+          "black_secrets_lost": 760
+        }
+      },
+      "target_lock": {
+        "total_initial_drops": 10914,
+        "total_trapped_drops": 4375,
+        "baffle_retention_rate": 40.09,
+        "mean_baffle_hold_rounds": 0.477,
+        "tl_triggered_total": 10047,
+        "tl_triggered_per_player_game": 2.093,
+        "tl_triggered_per_round": 1.127,
+        "seat_color_counts": {
+          "green": 2862,
+          "black": 2370,
+          "blue": 1475,
+          "red": 2960,
+          "fizzle": 380
+        },
+        "seat_color_pcts": {
+          "green": 28.49,
+          "black": 23.59,
+          "blue": 14.68,
+          "red": 29.46,
+          "fizzle": 3.78
+        },
+        "tray_dominant_counts": {
+          "green": 2659,
+          "black": 2060,
+          "blue": 1595,
+          "red": 2580,
+          "fizzle": 22
+        },
+        "tray_dominant_pcts": {
+          "green": 29.82,
+          "black": 23.1,
+          "blue": 17.89,
+          "red": 28.94,
+          "fizzle": 0.25
+        },
+        "final_locations": {
+          "staging_cup": 1246,
+          "idle_on_mat": 2687,
+          "in_tower": 867
+        },
+        "subroutines": {
+          "red": {
+            "attacks_suffered": 2960,
+            "ms_drained_nominal": 5920,
+            "ms_drained_actual": 5616,
+            "ms_transferred_sent": 5646,
+            "ms_transferred_received": 5646,
+            "all_locked_fizzles": 137,
+            "all_locked_fizzle_rate": 4.63
+          },
+          "blue": {
+            "attacks_suffered": 1475,
+            "gray_dice_moved_to_processing": 1475,
+            "gray_moved_per_seat_game": 0.307
+          },
+          "green": {
+            "attacks_suffered": 2862,
+            "track_cubes_placed": 5201,
+            "doubled_cost_upgrades_completed": 1785,
+            "extra_research_spent": 2087,
+            "overflow_glitched_shield_slots": 12,
+            "ending_encrypted_tracks_total": 3416,
+            "ending_encrypted_tracks_per_player": 0.712
+          },
+          "black": {
+            "attacks_suffered": 2370,
+            "override_hijacks": 742,
+            "override_hijack_pct": 31.31,
+            "fallback_triggers": 1628,
+            "fallback_trigger_pct": 68.69,
+            "secrets_lost_nominal": 3256,
+            "secrets_lost_actual": 3243
+          }
+        }
+      }
+    },
+    "3P": {
+      "games": 1200,
+      "players": 3,
+      "mean_rounds": 7.784,
+      "std_rounds": 2.384,
+      "min_rounds": 2,
+      "max_rounds": 12,
+      "round_distribution": {
+        "2": 38,
+        "3": 57,
+        "4": 67,
+        "5": 59,
+        "6": 77,
+        "7": 121,
+        "8": 217,
+        "9": 267,
+        "10": 197,
+        "11": 87,
+        "12": 13
+      },
+      "singularity_pct": 8.17,
+      "patient_zero_pct": 65.17,
+      "market_collapse_pct": 22.33,
+      "total_wipeout_pct": 4.33,
+      "round_limit_pct": 0.0,
+      "wipeouts_count": 52,
+      "early_wipeout_seeds": [
+        279,
+        634,
+        1229
+      ],
+      "long_stall_seeds": [],
+      "archetypes": {
+        "AccelerationistBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 240.0,
+          "win_rate": 33.33,
+          "pz_rate": 28.89,
+          "avg_secrets": 5.27,
+          "avg_market_share": 10.09,
+          "tl_triggered_per_game": 1.86
+        },
+        "AdaptiveBalancedBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 286.0,
+          "win_rate": 39.72,
+          "pz_rate": 19.17,
+          "avg_secrets": 7.04,
+          "avg_market_share": 9.63,
+          "tl_triggered_per_game": 2.82
+        },
+        "RecklessSaboteurBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 131.0,
+          "win_rate": 18.19,
+          "pz_rate": 48.75,
+          "avg_secrets": 2.89,
+          "avg_market_share": 9.99,
+          "tl_triggered_per_game": 2.06
+        },
+        "SecOpsTurtleBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 387.0,
+          "win_rate": 53.75,
+          "pz_rate": 11.67,
+          "avg_secrets": 8.15,
+          "avg_market_share": 9.48,
+          "tl_triggered_per_game": 2.95
+        },
+        "VentureGreedBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 156.0,
+          "win_rate": 21.67,
+          "pz_rate": 43.75,
+          "avg_secrets": 3.44,
+          "avg_market_share": 10.38,
+          "tl_triggered_per_game": 1.95
+        }
+      },
+      "companies": {
+        "MERIDIAN": {
+          "display_name": "Meridian",
+          "seats": 580,
+          "seat_pct": 16.11,
+          "wins": 170.0,
+          "win_rate": 29.31,
+          "pz_rate": 42.07,
+          "avg_secrets": 4.23,
+          "avg_market_share": 11.17,
+          "tl_triggered_per_game": 2.43,
+          "override_hijacks": 0,
+          "black_secrets_lost": 564
+        },
+        "OMNIDYNE": {
+          "display_name": "Omnidyne",
+          "seats": 606,
+          "seat_pct": 16.83,
+          "wins": 266.0,
+          "win_rate": 43.89,
+          "pz_rate": 25.41,
+          "avg_secrets": 6.62,
+          "avg_market_share": 9.94,
+          "tl_triggered_per_game": 1.63,
+          "override_hijacks": 41,
+          "black_secrets_lost": 320
+        },
+        "AEGIS": {
+          "display_name": "Aegis",
+          "seats": 590,
+          "seat_pct": 16.39,
+          "wins": 215.0,
+          "win_rate": 36.44,
+          "pz_rate": 21.36,
+          "avg_secrets": 6.06,
+          "avg_market_share": 9.61,
+          "tl_triggered_per_game": 2.37,
+          "override_hijacks": 0,
+          "black_secrets_lost": 630
+        },
+        "DTO": {
+          "display_name": "DTO",
+          "seats": 596,
+          "seat_pct": 16.56,
+          "wins": 232.0,
+          "win_rate": 38.93,
+          "pz_rate": 22.65,
+          "avg_secrets": 5.93,
+          "avg_market_share": 9.36,
+          "tl_triggered_per_game": 2.32,
+          "override_hijacks": 155,
+          "black_secrets_lost": 362
+        },
+        "HELIX": {
+          "display_name": "Helix",
+          "seats": 639,
+          "seat_pct": 17.75,
+          "wins": 190.0,
+          "win_rate": 29.73,
+          "pz_rate": 29.73,
+          "avg_secrets": 5.07,
+          "avg_market_share": 9.12,
+          "tl_triggered_per_game": 2.62,
+          "override_hijacks": 328,
+          "black_secrets_lost": 24
+        },
+        "PROMETHEUS": {
+          "display_name": "Prometheus",
+          "seats": 589,
+          "seat_pct": 16.36,
+          "wins": 127.0,
+          "win_rate": 21.56,
+          "pz_rate": 41.94,
+          "avg_secrets": 4.22,
+          "avg_market_share": 10.38,
+          "tl_triggered_per_game": 2.6,
+          "override_hijacks": 50,
+          "black_secrets_lost": 584
+        }
+      },
+      "target_lock": {
+        "total_initial_drops": 9021,
+        "total_trapped_drops": 3491,
+        "baffle_retention_rate": 38.7,
+        "mean_baffle_hold_rounds": 0.467,
+        "tl_triggered_total": 8382,
+        "tl_triggered_per_player_game": 2.328,
+        "tl_triggered_per_round": 0.897,
+        "seat_color_counts": {
+          "green": 2439,
+          "black": 1816,
+          "blue": 1411,
+          "red": 2370,
+          "fizzle": 346
+        },
+        "seat_color_pcts": {
+          "green": 29.1,
+          "black": 21.67,
+          "blue": 16.83,
+          "red": 28.27,
+          "fizzle": 4.13
+        },
+        "tray_dominant_counts": {
+          "green": 2897,
+          "black": 2042,
+          "blue": 1806,
+          "red": 2583,
+          "fizzle": 13
+        },
+        "tray_dominant_pcts": {
+          "green": 31.01,
+          "black": 21.86,
+          "blue": 19.33,
+          "red": 27.65,
+          "fizzle": 0.14
+        },
+        "final_locations": {
+          "idle_on_mat": 2052,
+          "staging_cup": 909,
+          "in_tower": 639
+        },
+        "subroutines": {
+          "red": {
+            "attacks_suffered": 2370,
+            "ms_drained_nominal": 4740,
+            "ms_drained_actual": 4437,
+            "ms_transferred_sent": 4080,
+            "ms_transferred_received": 4080,
+            "all_locked_fizzles": 330,
+            "all_locked_fizzle_rate": 13.92
+          },
+          "blue": {
+            "attacks_suffered": 1411,
+            "gray_dice_moved_to_processing": 1411,
+            "gray_moved_per_seat_game": 0.392
+          },
+          "green": {
+            "attacks_suffered": 2439,
+            "track_cubes_placed": 4396,
+            "doubled_cost_upgrades_completed": 1554,
+            "extra_research_spent": 1796,
+            "overflow_glitched_shield_slots": 4,
+            "ending_encrypted_tracks_total": 2842,
+            "ending_encrypted_tracks_per_player": 0.789
+          },
+          "black": {
+            "attacks_suffered": 1816,
+            "override_hijacks": 574,
+            "override_hijack_pct": 31.61,
+            "fallback_triggers": 1242,
+            "fallback_trigger_pct": 68.39,
+            "secrets_lost_nominal": 2484,
+            "secrets_lost_actual": 2477
+          }
+        }
+      }
+    },
+    "2P": {
+      "games": 1200,
+      "players": 2,
+      "mean_rounds": 7.584,
+      "std_rounds": 2.597,
+      "min_rounds": 1,
+      "max_rounds": 13,
+      "round_distribution": {
+        "1": 9,
+        "2": 62,
+        "3": 58,
+        "4": 62,
+        "5": 70,
+        "6": 77,
+        "7": 129,
+        "8": 196,
+        "9": 232,
+        "10": 198,
+        "11": 90,
+        "12": 16,
+        "13": 1
+      },
+      "singularity_pct": 8.17,
+      "patient_zero_pct": 43.5,
+      "market_collapse_pct": 37.5,
+      "total_wipeout_pct": 10.83,
+      "round_limit_pct": 0.0,
+      "wipeouts_count": 130,
+      "early_wipeout_seeds": [
+        104,
+        118,
+        176,
+        216,
+        393,
+        431,
+        499,
+        579,
+        686,
+        694,
+        951,
+        1004,
+        1091,
+        1097,
+        1111,
+        1174,
+        1182,
+        1201
+      ],
+      "long_stall_seeds": [
+        860
+      ],
+      "archetypes": {
+        "AccelerationistBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 260.0,
+          "win_rate": 54.17,
+          "pz_rate": 31.87,
+          "avg_secrets": 5.25,
+          "avg_market_share": 6.7,
+          "tl_triggered_per_game": 1.86
+        },
+        "AdaptiveBalancedBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 283.0,
+          "win_rate": 58.96,
+          "pz_rate": 23.33,
+          "avg_secrets": 7.92,
+          "avg_market_share": 5.42,
+          "tl_triggered_per_game": 3.12
+        },
+        "RecklessSaboteurBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 176.0,
+          "win_rate": 36.67,
+          "pz_rate": 42.71,
+          "avg_secrets": 4.02,
+          "avg_market_share": 6.79,
+          "tl_triggered_per_game": 2.16
+        },
+        "SecOpsTurtleBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 286.0,
+          "win_rate": 59.58,
+          "pz_rate": 21.46,
+          "avg_secrets": 7.94,
+          "avg_market_share": 5.16,
+          "tl_triggered_per_game": 3.18
+        },
+        "VentureGreedBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 195.0,
+          "win_rate": 40.62,
+          "pz_rate": 43.54,
+          "avg_secrets": 4.12,
+          "avg_market_share": 7.07,
+          "tl_triggered_per_game": 1.78
+        }
+      },
+      "companies": {
+        "MERIDIAN": {
+          "display_name": "Meridian",
+          "seats": 378,
+          "seat_pct": 15.75,
+          "wins": 182.0,
+          "win_rate": 48.15,
+          "pz_rate": 40.48,
+          "avg_secrets": 5.53,
+          "avg_market_share": 7.98,
+          "tl_triggered_per_game": 2.49,
+          "override_hijacks": 0,
+          "black_secrets_lost": 424
+        },
+        "OMNIDYNE": {
+          "display_name": "Omnidyne",
+          "seats": 390,
+          "seat_pct": 16.25,
+          "wins": 221.0,
+          "win_rate": 56.67,
+          "pz_rate": 27.95,
+          "avg_secrets": 6.82,
+          "avg_market_share": 5.82,
+          "tl_triggered_per_game": 1.81,
+          "override_hijacks": 31,
+          "black_secrets_lost": 254
+        },
+        "AEGIS": {
+          "display_name": "Aegis",
+          "seats": 389,
+          "seat_pct": 16.21,
+          "wins": 216.0,
+          "win_rate": 55.53,
+          "pz_rate": 25.71,
+          "avg_secrets": 6.05,
+          "avg_market_share": 6.04,
+          "tl_triggered_per_game": 2.46,
+          "override_hijacks": 0,
+          "black_secrets_lost": 388
+        },
+        "DTO": {
+          "display_name": "DTO",
+          "seats": 408,
+          "seat_pct": 17.0,
+          "wins": 203.0,
+          "win_rate": 49.75,
+          "pz_rate": 27.94,
+          "avg_secrets": 6.02,
+          "avg_market_share": 5.1,
+          "tl_triggered_per_game": 2.38,
+          "override_hijacks": 105,
+          "black_secrets_lost": 224
+        },
+        "HELIX": {
+          "display_name": "Helix",
+          "seats": 420,
+          "seat_pct": 17.5,
+          "wins": 204.0,
+          "win_rate": 48.57,
+          "pz_rate": 30.0,
+          "avg_secrets": 5.52,
+          "avg_market_share": 5.78,
+          "tl_triggered_per_game": 2.72,
+          "override_hijacks": 255,
+          "black_secrets_lost": 36
+        },
+        "PROMETHEUS": {
+          "display_name": "Prometheus",
+          "seats": 415,
+          "seat_pct": 17.29,
+          "wins": 174.0,
+          "win_rate": 41.93,
+          "pz_rate": 43.37,
+          "avg_secrets": 5.21,
+          "avg_market_share": 6.75,
+          "tl_triggered_per_game": 2.63,
+          "override_hijacks": 36,
+          "black_secrets_lost": 412
+        }
+      },
+      "target_lock": {
+        "total_initial_drops": 6256,
+        "total_trapped_drops": 2505,
+        "baffle_retention_rate": 40.04,
+        "mean_baffle_hold_rounds": 0.487,
+        "tl_triggered_total": 5809,
+        "tl_triggered_per_player_game": 2.42,
+        "tl_triggered_per_round": 0.638,
+        "seat_color_counts": {
+          "green": 1775,
+          "black": 1296,
+          "blue": 931,
+          "red": 1531,
+          "fizzle": 276
+        },
+        "seat_color_pcts": {
+          "green": 30.56,
+          "black": 22.31,
+          "blue": 16.03,
+          "red": 26.36,
+          "fizzle": 4.75
+        },
+        "tray_dominant_counts": {
+          "green": 2849,
+          "black": 2043,
+          "blue": 1738,
+          "red": 2451,
+          "fizzle": 20
+        },
+        "tray_dominant_pcts": {
+          "green": 31.3,
+          "black": 22.45,
+          "blue": 19.1,
+          "red": 26.93,
+          "fizzle": 0.22
+        },
+        "final_locations": {
+          "staging_cup": 598,
+          "idle_on_mat": 1355,
+          "in_tower": 447
+        },
+        "subroutines": {
+          "red": {
+            "attacks_suffered": 1531,
+            "ms_drained_nominal": 3062,
+            "ms_drained_actual": 2708,
+            "ms_transferred_sent": 1884,
+            "ms_transferred_received": 1884,
+            "all_locked_fizzles": 589,
+            "all_locked_fizzle_rate": 38.47
+          },
+          "blue": {
+            "attacks_suffered": 931,
+            "gray_dice_moved_to_processing": 931,
+            "gray_moved_per_seat_game": 0.388
+          },
+          "green": {
+            "attacks_suffered": 1775,
+            "track_cubes_placed": 3064,
+            "doubled_cost_upgrades_completed": 990,
+            "extra_research_spent": 1169,
+            "overflow_glitched_shield_slots": 6,
+            "ending_encrypted_tracks_total": 2074,
+            "ending_encrypted_tracks_per_player": 0.864
+          },
+          "black": {
+            "attacks_suffered": 1296,
+            "override_hijacks": 427,
+            "override_hijack_pct": 32.95,
+            "fallback_triggers": 869,
+            "fallback_trigger_pct": 67.05,
+            "secrets_lost_nominal": 1738,
+            "secrets_lost_actual": 1726
+          }
+        }
+      }
+    }
+  },
+  "baseline_v042": {
+    "4P": {
+      "games": 1200,
+      "players": 4,
+      "mean_rounds": 7.507,
+      "std_rounds": 2.374,
+      "min_rounds": 2,
+      "max_rounds": 12,
+      "round_distribution": {
+        "2": 55,
+        "3": 61,
+        "4": 66,
+        "5": 61,
+        "6": 89,
+        "7": 116,
+        "8": 253,
+        "9": 268,
+        "10": 181,
+        "11": 46,
+        "12": 4
+      },
+      "singularity_pct": 4.5,
+      "patient_zero_pct": 70.33,
+      "market_collapse_pct": 22.92,
+      "total_wipeout_pct": 2.25,
+      "round_limit_pct": 0.0,
+      "wipeouts_count": 27,
+      "early_wipeout_seeds": [],
+      "long_stall_seeds": [],
+      "archetypes": {
+        "AccelerationistBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 162.0,
+          "win_rate": 16.88,
+          "pz_rate": 30.31,
+          "avg_secrets": 4.83,
+          "avg_market_share": 9.53,
+          "tl_triggered_per_game": 1.71
+        },
+        "AdaptiveBalancedBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 335.0,
+          "win_rate": 34.9,
+          "pz_rate": 13.33,
+          "avg_secrets": 7.7,
+          "avg_market_share": 10.27,
+          "tl_triggered_per_game": 2.57
+        },
+        "RecklessSaboteurBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 83.0,
+          "win_rate": 8.65,
+          "pz_rate": 44.48,
+          "avg_secrets": 3.0,
+          "avg_market_share": 9.57,
+          "tl_triggered_per_game": 1.82
+        },
+        "SecOpsTurtleBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 512.0,
+          "win_rate": 53.33,
+          "pz_rate": 8.44,
+          "avg_secrets": 9.21,
+          "avg_market_share": 9.76,
+          "tl_triggered_per_game": 2.71
+        },
+        "VentureGreedBot": {
+          "seats": 960,
+          "seat_pct": 20.0,
+          "wins": 108.0,
+          "win_rate": 11.25,
+          "pz_rate": 37.6,
+          "avg_secrets": 3.89,
+          "avg_market_share": 9.77,
+          "tl_triggered_per_game": 1.74
+        }
+      },
+      "companies": {
+        "MERIDIAN": {
+          "display_name": "Meridian",
+          "seats": 805,
+          "seat_pct": 16.77,
+          "wins": 211.0,
+          "win_rate": 26.21,
+          "pz_rate": 35.78,
+          "avg_secrets": 5.33,
+          "avg_market_share": 11.04,
+          "tl_triggered_per_game": 2.22,
+          "override_hijacks": 0,
+          "black_secrets_lost": 0
+        },
+        "OMNIDYNE": {
+          "display_name": "Omnidyne",
+          "seats": 811,
+          "seat_pct": 16.9,
+          "wins": 245.0,
+          "win_rate": 30.21,
+          "pz_rate": 24.78,
+          "avg_secrets": 5.9,
+          "avg_market_share": 10.02,
+          "tl_triggered_per_game": 1.38,
+          "override_hijacks": 0,
+          "black_secrets_lost": 0
+        },
+        "AEGIS": {
+          "display_name": "Aegis",
+          "seats": 802,
+          "seat_pct": 16.71,
+          "wins": 233.0,
+          "win_rate": 29.05,
+          "pz_rate": 17.58,
+          "avg_secrets": 6.57,
+          "avg_market_share": 9.69,
+          "tl_triggered_per_game": 2.13,
+          "override_hijacks": 0,
+          "black_secrets_lost": 0
+        },
+        "DTO": {
+          "display_name": "DTO",
+          "seats": 777,
+          "seat_pct": 16.19,
+          "wins": 221.0,
+          "win_rate": 28.44,
+          "pz_rate": 16.86,
+          "avg_secrets": 6.62,
+          "avg_market_share": 8.74,
+          "tl_triggered_per_game": 2.14,
+          "override_hijacks": 0,
+          "black_secrets_lost": 0
+        },
+        "HELIX": {
+          "display_name": "Helix",
+          "seats": 823,
+          "seat_pct": 17.15,
+          "wins": 132.0,
+          "win_rate": 16.04,
+          "pz_rate": 30.62,
+          "avg_secrets": 4.37,
+          "avg_market_share": 9.11,
+          "tl_triggered_per_game": 2.37,
+          "override_hijacks": 0,
+          "black_secrets_lost": 0
+        },
+        "PROMETHEUS": {
+          "display_name": "Prometheus",
+          "seats": 782,
+          "seat_pct": 16.29,
+          "wins": 158.0,
+          "win_rate": 20.2,
+          "pz_rate": 35.17,
+          "avg_secrets": 5.63,
+          "avg_market_share": 10.04,
+          "tl_triggered_per_game": 2.41,
+          "override_hijacks": 0,
+          "black_secrets_lost": 0
+        }
+      },
+      "target_lock": {
+        "total_initial_drops": 11006,
+        "total_trapped_drops": 4440,
+        "baffle_retention_rate": 40.34,
+        "mean_baffle_hold_rounds": 0.482,
+        "tl_triggered_total": 10122,
+        "tl_triggered_per_player_game": 2.109,
+        "tl_triggered_per_round": 1.124,
+        "seat_color_counts": {
+          "green": 3598,
+          "black": 0,
+          "blue": 1705,
+          "red": 4748,
+          "fizzle": 71
+        },
+        "seat_color_pcts": {
+          "green": 35.55,
+          "black": 0.0,
+          "blue": 16.84,
+          "red": 46.91,
+          "fizzle": 0.7
+        },
+        "tray_dominant_counts": {
+          "green": 0,
+          "black": 0,
+          "blue": 0,
+          "red": 0,
+          "fizzle": 0
+        },
+        "tray_dominant_pcts": {
+          "green": 0.0,
+          "black": 0.0,
+          "blue": 0.0,
+          "red": 0.0,
+          "fizzle": 0.0
+        },
+        "final_locations": {
+          "in_tower": 884,
+          "idle_on_mat": 2686,
+          "staging_cup": 1230
+        },
+        "subroutines": {
+          "red": {
+            "attacks_suffered": 0,
+            "ms_drained_nominal": 0,
+            "ms_drained_actual": 0,
+            "ms_transferred_sent": 0,
+            "ms_transferred_received": 0,
+            "all_locked_fizzles": 0,
+            "all_locked_fizzle_rate": 0.0
+          },
+          "blue": {
+            "attacks_suffered": 0,
+            "gray_dice_moved_to_processing": 0,
+            "gray_moved_per_seat_game": 0.0
+          },
+          "green": {
+            "attacks_suffered": 0,
+            "track_cubes_placed": 0,
+            "doubled_cost_upgrades_completed": 0,
+            "extra_research_spent": 0,
+            "overflow_glitched_shield_slots": 0,
+            "ending_encrypted_tracks_total": 0,
+            "ending_encrypted_tracks_per_player": 0.0
+          },
+          "black": {
+            "attacks_suffered": 0,
+            "override_hijacks": 0,
+            "override_hijack_pct": 0.0,
+            "fallback_triggers": 0,
+            "fallback_trigger_pct": 0.0,
+            "secrets_lost_nominal": 0,
+            "secrets_lost_actual": 0
+          }
+        }
+      }
+    },
+    "3P": {
+      "games": 1200,
+      "players": 3,
+      "mean_rounds": 7.898,
+      "std_rounds": 2.306,
+      "min_rounds": 2,
+      "max_rounds": 12,
+      "round_distribution": {
+        "2": 37,
+        "3": 50,
+        "4": 57,
+        "5": 56,
+        "6": 66,
+        "7": 115,
+        "8": 232,
+        "9": 279,
+        "10": 214,
+        "11": 90,
+        "12": 4
+      },
+      "singularity_pct": 7.08,
+      "patient_zero_pct": 64.0,
+      "market_collapse_pct": 23.83,
+      "total_wipeout_pct": 5.08,
+      "round_limit_pct": 0.0,
+      "wipeouts_count": 61,
+      "early_wipeout_seeds": [
+        1049,
+        1229
+      ],
+      "long_stall_seeds": [],
+      "archetypes": {
+        "AccelerationistBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 233.0,
+          "win_rate": 32.36,
+          "pz_rate": 33.61,
+          "avg_secrets": 4.7,
+          "avg_market_share": 9.39,
+          "tl_triggered_per_game": 1.86
+        },
+        "AdaptiveBalancedBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 329.0,
+          "win_rate": 45.69,
+          "pz_rate": 17.22,
+          "avg_secrets": 7.74,
+          "avg_market_share": 9.12,
+          "tl_triggered_per_game": 2.87
+        },
+        "RecklessSaboteurBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 117.0,
+          "win_rate": 16.25,
+          "pz_rate": 50.97,
+          "avg_secrets": 2.66,
+          "avg_market_share": 9.0,
+          "tl_triggered_per_game": 2.02
+        },
+        "SecOpsTurtleBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 392.0,
+          "win_rate": 54.44,
+          "pz_rate": 10.97,
+          "avg_secrets": 8.99,
+          "avg_market_share": 8.8,
+          "tl_triggered_per_game": 3.01
+        },
+        "VentureGreedBot": {
+          "seats": 720,
+          "seat_pct": 20.0,
+          "wins": 129.0,
+          "win_rate": 17.92,
+          "pz_rate": 44.03,
+          "avg_secrets": 3.45,
+          "avg_market_share": 9.43,
+          "tl_triggered_per_game": 1.94
+        }
+      },
+      "companies": {
+        "MERIDIAN": {
+          "display_name": "Meridian",
+          "seats": 580,
+          "seat_pct": 16.11,
+          "wins": 189.0,
+          "win_rate": 32.59,
+          "pz_rate": 39.31,
+          "avg_secrets": 5.07,
+          "avg_market_share": 10.54,
+          "tl_triggered_per_game": 2.4,
+          "override_hijacks": 0,
+          "black_secrets_lost": 0
+        },
+        "OMNIDYNE": {
+          "display_name": "Omnidyne",
+          "seats": 606,
+          "seat_pct": 16.83,
+          "wins": 246.0,
+          "win_rate": 40.59,
+          "pz_rate": 25.41,
+          "avg_secrets": 6.38,
+          "avg_market_share": 9.02,
+          "tl_triggered_per_game": 1.6,
+          "override_hijacks": 0,
+          "black_secrets_lost": 0
+        },
+        "AEGIS": {
+          "display_name": "Aegis",
+          "seats": 590,
+          "seat_pct": 16.39,
+          "wins": 243.0,
+          "win_rate": 41.19,
+          "pz_rate": 23.39,
+          "avg_secrets": 6.3,
+          "avg_market_share": 8.81,
+          "tl_triggered_per_game": 2.38,
+          "override_hijacks": 0,
+          "black_secrets_lost": 0
+        },
+        "DTO": {
+          "display_name": "DTO",
+          "seats": 596,
+          "seat_pct": 16.56,
+          "wins": 208.0,
+          "win_rate": 34.9,
+          "pz_rate": 22.82,
+          "avg_secrets": 6.08,
+          "avg_market_share": 8.5,
+          "tl_triggered_per_game": 2.3,
+          "override_hijacks": 0,
+          "black_secrets_lost": 0
+        },
+        "HELIX": {
+          "display_name": "Helix",
+          "seats": 639,
+          "seat_pct": 17.75,
+          "wins": 172.0,
+          "win_rate": 26.92,
+          "pz_rate": 34.12,
+          "avg_secrets": 4.59,
+          "avg_market_share": 8.45,
+          "tl_triggered_per_game": 2.7,
+          "override_hijacks": 0,
+          "black_secrets_lost": 0
+        },
+        "PROMETHEUS": {
+          "display_name": "Prometheus",
+          "seats": 589,
+          "seat_pct": 16.36,
+          "wins": 142.0,
+          "win_rate": 24.11,
+          "pz_rate": 43.29,
+          "avg_secrets": 4.66,
+          "avg_market_share": 9.66,
+          "tl_triggered_per_game": 2.64,
+          "override_hijacks": 0,
+          "black_secrets_lost": 0
+        }
+      },
+      "target_lock": {
+        "total_initial_drops": 9101,
+        "total_trapped_drops": 3593,
+        "baffle_retention_rate": 39.48,
+        "mean_baffle_hold_rounds": 0.483,
+        "tl_triggered_total": 8418,
+        "tl_triggered_per_player_game": 2.338,
+        "tl_triggered_per_round": 0.888,
+        "seat_color_counts": {
+          "green": 2978,
+          "black": 0,
+          "blue": 1560,
+          "red": 3790,
+          "fizzle": 90
+        },
+        "seat_color_pcts": {
+          "green": 35.38,
+          "black": 0.0,
+          "blue": 18.53,
+          "red": 45.02,
+          "fizzle": 1.07
+        },
+        "tray_dominant_counts": {
+          "green": 0,
+          "black": 0,
+          "blue": 0,
+          "red": 0,
+          "fizzle": 0
+        },
+        "tray_dominant_pcts": {
+          "green": 0.0,
+          "black": 0.0,
+          "blue": 0.0,
+          "red": 0.0,
+          "fizzle": 0.0
+        },
+        "final_locations": {
+          "idle_on_mat": 2038,
+          "in_tower": 683,
+          "staging_cup": 879
+        },
+        "subroutines": {
+          "red": {
+            "attacks_suffered": 0,
+            "ms_drained_nominal": 0,
+            "ms_drained_actual": 0,
+            "ms_transferred_sent": 0,
+            "ms_transferred_received": 0,
+            "all_locked_fizzles": 0,
+            "all_locked_fizzle_rate": 0.0
+          },
+          "blue": {
+            "attacks_suffered": 0,
+            "gray_dice_moved_to_processing": 0,
+            "gray_moved_per_seat_game": 0.0
+          },
+          "green": {
+            "attacks_suffered": 0,
+            "track_cubes_placed": 0,
+            "doubled_cost_upgrades_completed": 0,
+            "extra_research_spent": 0,
+            "overflow_glitched_shield_slots": 0,
+            "ending_encrypted_tracks_total": 0,
+            "ending_encrypted_tracks_per_player": 0.0
+          },
+          "black": {
+            "attacks_suffered": 0,
+            "override_hijacks": 0,
+            "override_hijack_pct": 0.0,
+            "fallback_triggers": 0,
+            "fallback_trigger_pct": 0.0,
+            "secrets_lost_nominal": 0,
+            "secrets_lost_actual": 0
+          }
+        }
+      }
+    },
+    "2P": {
+      "games": 1200,
+      "players": 2,
+      "mean_rounds": 7.731,
+      "std_rounds": 2.546,
+      "min_rounds": 1,
+      "max_rounds": 13,
+      "round_distribution": {
+        "1": 9,
+        "2": 64,
+        "3": 52,
+        "4": 49,
+        "5": 49,
+        "6": 69,
+        "7": 132,
+        "8": 215,
+        "9": 259,
+        "10": 189,
+        "11": 93,
+        "12": 19,
+        "13": 1
+      },
+      "singularity_pct": 8.92,
+      "patient_zero_pct": 39.33,
+      "market_collapse_pct": 40.42,
+      "total_wipeout_pct": 11.33,
+      "round_limit_pct": 0.0,
+      "wipeouts_count": 136,
+      "early_wipeout_seeds": [
+        104,
+        176,
+        199,
+        216,
+        393,
+        401,
+        431,
+        499,
+        579,
+        694,
+        838,
+        867,
+        951,
+        1004,
+        1097,
+        1111,
+        1182,
+        1183,
+        1201
+      ],
+      "long_stall_seeds": [
+        860
+      ],
+      "archetypes": {
+        "AccelerationistBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 281.0,
+          "win_rate": 58.54,
+          "pz_rate": 29.38,
+          "avg_secrets": 5.53,
+          "avg_market_share": 6.54,
+          "tl_triggered_per_game": 1.87
+        },
+        "AdaptiveBalancedBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 282.0,
+          "win_rate": 58.75,
+          "pz_rate": 22.29,
+          "avg_secrets": 8.53,
+          "avg_market_share": 4.79,
+          "tl_triggered_per_game": 3.26
+        },
+        "RecklessSaboteurBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 155.0,
+          "win_rate": 32.29,
+          "pz_rate": 41.67,
+          "avg_secrets": 4.59,
+          "avg_market_share": 6.01,
+          "tl_triggered_per_game": 2.18
+        },
+        "SecOpsTurtleBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 317.0,
+          "win_rate": 66.04,
+          "pz_rate": 19.38,
+          "avg_secrets": 8.73,
+          "avg_market_share": 4.87,
+          "tl_triggered_per_game": 3.26
+        },
+        "VentureGreedBot": {
+          "seats": 480,
+          "seat_pct": 20.0,
+          "wins": 165.0,
+          "win_rate": 34.38,
+          "pz_rate": 42.29,
+          "avg_secrets": 4.39,
+          "avg_market_share": 6.5,
+          "tl_triggered_per_game": 1.88
+        }
+      },
+      "companies": {
+        "MERIDIAN": {
+          "display_name": "Meridian",
+          "seats": 378,
+          "seat_pct": 15.75,
+          "wins": 196.0,
+          "win_rate": 51.85,
+          "pz_rate": 39.15,
+          "avg_secrets": 6.14,
+          "avg_market_share": 7.49,
+          "tl_triggered_per_game": 2.56,
+          "override_hijacks": 0,
+          "black_secrets_lost": 0
+        },
+        "OMNIDYNE": {
+          "display_name": "Omnidyne",
+          "seats": 390,
+          "seat_pct": 16.25,
+          "wins": 224.0,
+          "win_rate": 57.44,
+          "pz_rate": 26.41,
+          "avg_secrets": 7.03,
+          "avg_market_share": 5.2,
+          "tl_triggered_per_game": 1.83,
+          "override_hijacks": 0,
+          "black_secrets_lost": 0
+        },
+        "AEGIS": {
+          "display_name": "Aegis",
+          "seats": 389,
+          "seat_pct": 16.21,
+          "wins": 232.0,
+          "win_rate": 59.64,
+          "pz_rate": 23.14,
+          "avg_secrets": 6.75,
+          "avg_market_share": 5.56,
+          "tl_triggered_per_game": 2.54,
+          "override_hijacks": 0,
+          "black_secrets_lost": 0
+        },
+        "DTO": {
+          "display_name": "DTO",
+          "seats": 408,
+          "seat_pct": 17.0,
+          "wins": 205.0,
+          "win_rate": 50.25,
+          "pz_rate": 23.77,
+          "avg_secrets": 6.49,
+          "avg_market_share": 4.64,
+          "tl_triggered_per_game": 2.48,
+          "override_hijacks": 0,
+          "black_secrets_lost": 0
+        },
+        "HELIX": {
+          "display_name": "Helix",
+          "seats": 420,
+          "seat_pct": 17.5,
+          "wins": 169.0,
+          "win_rate": 40.24,
+          "pz_rate": 33.1,
+          "avg_secrets": 5.58,
+          "avg_market_share": 5.28,
+          "tl_triggered_per_game": 2.78,
+          "override_hijacks": 0,
+          "black_secrets_lost": 0
+        },
+        "PROMETHEUS": {
+          "display_name": "Prometheus",
+          "seats": 415,
+          "seat_pct": 17.29,
+          "wins": 174.0,
+          "win_rate": 41.93,
+          "pz_rate": 40.24,
+          "avg_secrets": 6.18,
+          "avg_market_share": 6.39,
+          "tl_triggered_per_game": 2.72,
+          "override_hijacks": 0,
+          "black_secrets_lost": 0
+        }
+      },
+      "target_lock": {
+        "total_initial_drops": 6444,
+        "total_trapped_drops": 2564,
+        "baffle_retention_rate": 39.79,
+        "mean_baffle_hold_rounds": 0.485,
+        "tl_triggered_total": 5979,
+        "tl_triggered_per_player_game": 2.491,
+        "tl_triggered_per_round": 0.644,
+        "seat_color_counts": {
+          "green": 2188,
+          "black": 0,
+          "blue": 1177,
+          "red": 2531,
+          "fizzle": 83
+        },
+        "seat_color_pcts": {
+          "green": 36.59,
+          "black": 0.0,
+          "blue": 19.69,
+          "red": 42.33,
+          "fizzle": 1.39
+        },
+        "tray_dominant_counts": {
+          "green": 0,
+          "black": 0,
+          "blue": 0,
+          "red": 0,
+          "fizzle": 0
+        },
+        "tray_dominant_pcts": {
+          "green": 0.0,
+          "black": 0.0,
+          "blue": 0.0,
+          "red": 0.0,
+          "fizzle": 0.0
+        },
+        "final_locations": {
+          "in_tower": 465,
+          "staging_cup": 604,
+          "idle_on_mat": 1331
+        },
+        "subroutines": {
+          "red": {
+            "attacks_suffered": 0,
+            "ms_drained_nominal": 0,
+            "ms_drained_actual": 0,
+            "ms_transferred_sent": 0,
+            "ms_transferred_received": 0,
+            "all_locked_fizzles": 0,
+            "all_locked_fizzle_rate": 0.0
+          },
+          "blue": {
+            "attacks_suffered": 0,
+            "gray_dice_moved_to_processing": 0,
+            "gray_moved_per_seat_game": 0.0
+          },
+          "green": {
+            "attacks_suffered": 0,
+            "track_cubes_placed": 0,
+            "doubled_cost_upgrades_completed": 0,
+            "extra_research_spent": 0,
+            "overflow_glitched_shield_slots": 0,
+            "ending_encrypted_tracks_total": 0,
+            "ending_encrypted_tracks_per_player": 0.0
+          },
+          "black": {
+            "attacks_suffered": 0,
+            "override_hijacks": 0,
+            "override_hijack_pct": 0.0,
+            "fallback_triggers": 0,
+            "fallback_trigger_pct": 0.0,
+            "secrets_lost_nominal": 0,
+            "secrets_lost_actual": 0
+          }
+        }
+      }
+    }
+  }
+}
