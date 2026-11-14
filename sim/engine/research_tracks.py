@@ -128,6 +128,20 @@ def level_of(player: PlayerState, track: str) -> int:
     return int(getattr(player, LEVEL_ATTR[normalize_track(track)]))
 
 
+def is_track_encrypted(player: PlayerState, track: str) -> bool:
+    """Returns True if ``track`` has a green Malware Encryption cube on its next step (INV-SIG-GREEN)."""
+    enc = getattr(player, "encrypted_research_tracks", None)
+    if not enc:
+        return False
+    raw = str(track).upper().strip()
+    t = normalize_track(raw)
+    if raw in enc or t in enc:
+        return True
+    if t == "PATENT" and ("PR" in enc or "PUBLIC_RELATIONS" in enc):
+        return True
+    return False
+
+
 def step_cost(config: GameConfig, player: PlayerState, track: str) -> Optional[int]:
     t = normalize_track(track)
     if t not in LEVEL_ATTR:
@@ -135,7 +149,10 @@ def step_cost(config: GameConfig, player: PlayerState, track: str) -> Optional[i
     lvl = level_of(player, t)
     if lvl >= MAX_LEVEL:
         return None
-    return int(config.track_step_costs[lvl])
+    base_cost = int(config.track_step_costs[lvl])
+    if is_track_encrypted(player, track):
+        return base_cost * 2
+    return base_cost
 
 
 def capacity_for(config: GameConfig, track: str, level: int) -> Optional[int]:

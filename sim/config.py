@@ -60,6 +60,12 @@ class SignatureCubeLocation(str, Enum):
     IN_TOWER = "in_tower"             # Trapped on internal baffles inside the Cube Tower
 
 
+class SignatureAttackMode(str, Enum):
+    NONE = "none"
+    V042_PLUS_ONE_CUBE = "v042_plus_one_cube"
+    DOMINANT_COLOR_EFFECTS = "dominant_color_effects"
+
+
 class DieColor(str, Enum):
     GRAY = "gray"
     WHITE = "white"
@@ -490,7 +496,46 @@ class GameConfig:
     target_lock_enabled: bool = False
     target_lock_bonus_attack: int = 1
 
+    # --- Phase 62: Dominant Color Signature Attacks (v0.43.0) ---
+    signature_attack_mode: str = "none"  # "none" | "v042_plus_one_cube" | "dominant_color_effects"
+    signature_attack_tie_order: Tuple[CubeColor, ...] = (
+        CubeColor.GREEN,
+        CubeColor.BLACK,
+        CubeColor.BLUE,
+        CubeColor.RED,
+    )
+    signature_red_drain_amount: int = 2
+    signature_red_transfer_amount: int = 2
+    signature_black_secret_loss: int = 2
+    signature_green_cube_count: int = 2
+    # Aliases for backward/sweep compatibility
+    signature_red_ms_loss: Optional[int] = None
+    signature_red_ms_gain: Optional[int] = None
+    signature_green_track_cubes: Optional[int] = None
+
     def __post_init__(self) -> None:
+        if self.signature_red_ms_loss is not None:
+            self.signature_red_drain_amount = int(self.signature_red_ms_loss)
+        else:
+            self.signature_red_ms_loss = int(self.signature_red_drain_amount)
+        if self.signature_red_ms_gain is not None:
+            self.signature_red_transfer_amount = int(self.signature_red_ms_gain)
+        else:
+            self.signature_red_ms_gain = int(self.signature_red_transfer_amount)
+        if self.signature_green_track_cubes is not None:
+            self.signature_green_cube_count = int(self.signature_green_track_cubes)
+        else:
+            self.signature_green_track_cubes = int(self.signature_green_cube_count)
+        self.signature_attack_tie_order = tuple(
+            c if isinstance(c, CubeColor) else CubeColor(str(c).lower())
+            for c in self.signature_attack_tie_order
+        )
+        if isinstance(self.signature_attack_mode, SignatureAttackMode):
+            self.signature_attack_mode = self.signature_attack_mode.value
+        if self.target_lock_enabled and self.signature_attack_mode == "none":
+            self.signature_attack_mode = "v042_plus_one_cube"
+        elif not self.target_lock_enabled and self.signature_attack_mode in ("v042_plus_one_cube", "dominant_color_effects"):
+            self.target_lock_enabled = True
         if not (isinstance(self.track_step_costs, tuple) and len(self.track_step_costs) == 4 and all(isinstance(c, int) and c >= 0 for c in self.track_step_costs)):
             raise ValueError("track_step_costs must be a 4-tuple of non-negative integers")
         if not (isinstance(self.max_hardware_upgrades_per_turn, int) and self.max_hardware_upgrades_per_turn > 0):
@@ -853,6 +898,7 @@ class GameConfig:
         """
         overrides.setdefault("v3_blue_secret_damage", 2)
         overrides.setdefault("target_lock_enabled", True)
+        overrides.setdefault("signature_attack_mode", "v042_plus_one_cube")
         return cls.v041(**overrides)
 
     @classmethod
@@ -861,6 +907,30 @@ class GameConfig:
         overrides.setdefault("bot_pr_push", True)
         overrides.setdefault("bot_pr_push_params", PrPushParams())
         return cls.v042(**overrides)
+
+    @classmethod
+    def v043(cls, **overrides) -> "GameConfig":
+        """v0.43.0 canonical baseline:
+        - Inherits v042 (Critical Breach, Signature Cubes, Target Lock)
+        - Dominant Cube Color Signature Attacks active
+        - Top-to-bottom tie-breaking order: Green > Black > Blue > Red
+        """
+        overrides.setdefault("target_lock_enabled", True)
+        overrides.setdefault("signature_attack_mode", "dominant_color_effects")
+        overrides.setdefault("signature_attack_tie_order", (
+            CubeColor.GREEN,
+            CubeColor.BLACK,
+            CubeColor.BLUE,
+            CubeColor.RED,
+        ))
+        return cls.v042(**overrides)
+
+    @classmethod
+    def v043_roster(cls, **overrides) -> "GameConfig":
+        """v0.43.0 + bot autonomous PR push and cash allocation policies enabled."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v043(**overrides)
     def _validate_tower_config(self) -> None:
         """Validates Cube Tower physics parameters (spec §2.4)."""
         self.tower_mode = TowerMode(self.tower_mode)

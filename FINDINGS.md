@@ -8,201 +8,15 @@ This document tracks verified balance takeaways, bot meta equilibria, card tieri
 > - [docs/findings/v0.8_to_v0.9_variant_and_archetype_sweeps.md](docs/findings/v0.8_to_v0.9_variant_and_archetype_sweeps.md): Choice faces, 15 Module Variants (★), Asymmetric Payloads, and Consultancy Archetypes.
 > - [docs/archive/FINDINGS_s01-s35.md](docs/archive/FINDINGS_s01-s35.md): Sections §1–§36 (Phases 15–45, v0.13–v0.36 baselines).
 > - [docs/archive/FINDINGS_s37-s43.md](docs/archive/FINDINGS_s37-s43.md): Sections §37–§43 (Market Share threshold probes, Market Leader Bonus, v0.38 exploration).
+> - [docs/archive/FINDINGS_s44-s49.md](docs/archive/FINDINGS_s44-s49.md): Sections §44–§49 (Phases 50–55, v0.38c–v0.39.0 baselines).
 
 ---
 
-> [!NOTE] Active Sections (§44–§54)
-> Section numbering continues here unchanged. **Agents: do not read the archives unless a task cites a specific §N ≤ 43.**
+> [!NOTE] Active Sections (§50–§57)
+> Section numbering continues here unchanged. **Agents: do not read the archives unless a task cites a specific §N ≤ 49.**
 
 ---
 
-## 44. Phase 50 Post-Telemetry Balance Assessment: `G2 — Universal Sandbox` Redesign (`v0.38c`): APPROVED
-
-Sources: `docs/specs/g2_universal_sandbox_spec.md`, `docs/findings/g2_universal_sandbox_analysis.md`, `sim_results/g2_universal_sandbox/validation_report.md` (24 cells × 600 games = 14,400 games across 2P/3P/4P, Standard & Aggressive profiles, `RANDOM / G1 / G2 / G3`, seeds 42..641).
-
-- **Context & Design Rationale:** During v0.38 shield normalization, `G2 — Universal Sandbox ($4)` was temporarily collapsed into the exact same placeholder as `G1 — Self-Healing Kernel ($5)`: `Clean 1 Glitched Shield Slot + gain +1 🔬`. This created an overpriced trap ($5 for identical effect) and redundant mechanics. User approved Option D2 from the pre-SDLC analysis: `[In Production — Income] Gain +2 🔬, plus +1 🔬 for each of your Glitched Shield Slots [TUNE]` (Phase 1 Step 5 cleaning removed; `clean_slots=0`).
-- **Mathematical Modeling & Zero-Blank Compliance:** In Phase 3 Income, players carry 0 glitched shield slots ($g=0$) in 82.4% of rounds (and 98.6% in Rounds 1–3). The pure proposal (`+1 🔬 per glitched slot`) would produce a blank face (0 🔬, $0) in over 82% of activations with a meager EV of 0.21 🔬. The implemented `+2 🔬` base ensures compliance with the "Zero Blank Faces" design pillar, scaling to `+3 🔬` ($g=1$, 14.2% PMF) and `+4 🔬` ($g=2$, 3.4% PMF) under attack.
-- **Empirical Yields & Parity:** In the 14,400-game validation sweep, realized G2 activations yielded **2.51–2.61 🔬** in Standard and **2.77–2.85 🔬** in Aggressive. In 45.7%–60.0% of realized triggers, $g=0$, proving the `+2 🔬` base was indispensable. G2 sits in near-perfect nominal parity (~2.6 🔬) against `G3 — Live Reboot` ($4: `+2 🔬 + $1`, nominal ~3.0).
-- **Market Viability & Buyer Win Rates:**
-  - `G1 ($5)`: 0.18–0.29 buys/seat, 11.7%–17.0% buyer share, 17.8%–50.0% buyer win rate.
-  - `G3 ($4)`: 0.41–0.64 buys/seat, 24.8%–34.1% buyer share, 26.1%–51.3% buyer win rate.
-  - `G2 ($4)`: **0.36–0.54 buys/seat**, **23.1%–29.9% buyer share**, **24.5%–49.1% buyer win rate** (exact fair-share parity: 2P 49.1% [fair 50%], 3P 35.4% [fair 33.3%], 4P 27.1% [fair 25%]). G2 is a highly viable, competitive choice without becoming a dominant must-buy.
-- **Company Win Rate Parity:** Under G2, starting Green companies (Omnidyne & Helix) achieve tight win rate parity across all pods: 2P 48.0% / 50.2%, 3P 34.3% / 34.4%, 4P 26.2% / 25.9%. Overall Company color split (Red / Blue / Green) under G2 is 2P 55.1 / 45.9 / 49.1%, 3P 32.5 / 33.1 / 34.4%, 4P 24.7 / 24.2 / 26.1% (within noise of fair share).
-- **Pacing & End Triggers:** Mean rounds 8.24–8.39 across all pods; 0.0% timeouts. End triggers under G2 Standard: 2P Singularity 42.7% (below ≤48% guardrail), PZ 18.5%, MC 35.5%, TW 3.3%; 3P Sing 45.8%, PZ 33.0%, MC 21.0%, TW 0.2%; 4P Sing 49.5%, PZ 33.5%, MC 17.0%, TW 0.0%. Pacing and existential tension are identical within noise to G3 and Random modes.
-- **Anti-Degeneracy Proof:** Maximum active glitches observed across 14,400 games was 3 ($<2\%$ of rounds). Stalling to farm research was non-existent because unblocked Blue cubes threaten Patient Zero elimination, unblocked Red cubes threaten Market Collapse, and each glitched slot directly penalizes banked Green Secrets ($3 - g$ Secrets, where 1 Secret = 1 VP = ~3 🔬).
-- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.38c`).** No further tuning required; G2 redesign locked.
-
-## 45. Phase 51 Package `v0.38d` Balance Assessment: Early-Game Tension & Green-Clean Variant B: APPROVED
-
-Sources: `docs/findings/early_game_pressure_modeling.md`, `docs/findings/c2_green_clean_analysis.md`, `docs/specs/v380d_c2_green_clean_spec.md`, `sim_results/shogun_tower_comparison/comparison_report.md` (3,600 games), `sim_results/v380d_c2_green_clean/validation_report.md` (3,600 games across 2P/3P/4P, Standard and Aggressive bot profiles, seeds 42..641).
-
-- **Context & Design Problem:** Physical testing with the *Shogun* Cube Tower revealed that the legacy simulation (`LEDGE_AVALANCHE`) over-estimated early round damage by +33% and ignored baffle retention. Once calibrated (`SHOGUN_BAFFLE`), the opening rounds under `v0.38c` became too calm: with 2 clean Shield Slots and starting dice allocations, players trivially blocked all incoming attack cubes through `v1.0` and into `v2.0`, removing early-game decision tension and failing to tutorialize defensive triage.
-- **Implemented Package (`v0.38d` — Candidate C2 + Green-Clean Package, Variant B):**
-  1. **Shogun Baffle Tower Physics:** Validated two-state physical retention model ($p_{\text{exit}} \approx 0.70$ empty, retention scaling with stuck cubes $S$, avalanche regime at $S \ge 3$ or $F+S \ge 7$).
-  2. **Candidate C2 Early-Game Tuning:**
-     - Setup priming: 4 cubes (`1R, 1B, 1G, 1K`).
-     - `v1.0` Staging Cup Payload: 4 attack cubes (`2R, 1B, 1G` on *Script Kiddie*; `1R, 2B, 1G` on *Data Scraper*).
-     - Starting Glitched Shield Slot: Every player begins with **1 Glitched Shield Slot** on their Company Terminal Mat (1 clean, 1 glitched out of baseline Defense Capacity 2).
-  3. **Removal of Passive CI/CD Auto-Clean:** Graduation from Scanned Box to Ready for Release in Phase 5 Step 3 no longer cleans a glitched slot (`slot_graduation_clear = 0`). Slot cleaning is strictly active.
-  4. **Green Die Specialization:** Green Face 1 converted from `Clean 1 Glitched Shield Slot / +$1` to `+2 🔬` (`V038D`), establishing Green as the premier research engine.
-  5. **Variant B Green Banking Slot Clean:** When a Green die leaves the Processing Box and banks its Secret, it yields $Y = \max(0, 3 - g)$ Corporate Secrets (calculated on pre-clean glitched slots $g$), then cleans 1 Glitched Shield Slot. Variant B prevents the runaway Green company dominance observed under Variant A (49.6% win rate).
-- **Monte Carlo Validation Metrics (3,600 Games):**
-  - **Game Pacing:** Mean rounds **8.73–8.94** across 2P/3P/4P (target 8.5–9.5). Zero timeouts (0.0%).
-  - **End Trigger Distribution:**
-    - **Singularity:** **36.4%–42.4%** (target 35%–48%).
-    - **Patient Zero:** **19.3%–30.6%** (target 20%–35%).
-    - **Market Collapse:** **26.3%–43.0%** (target 18%–35%).
-    - **Total Wipeout:** **0.8%–1.3%**.
-  - **Slot Cleaning Mechanism Breakdown:**
-    - Graduation auto-cleans: **0.00** across all player counts (passive clean successfully eradicated).
-    - Active die cleans (Phase 1 Step 5 assignment): **5.23–5.33** slots cleaned per player per game.
-    - Green Secret triage cleans: **0.69–0.79** slots cleaned per player per game.
-  - **Company & Color Win Rate Parity:**
-    - 2P: Red 53.6%, Blue 46.8%, Green 49.6%.
-    - 3P: Red 30.6%, Blue 30.6%, Green 38.9%.
-    - 4P: Red 24.3%, Blue 22.4%, Green 28.2%.
-    All color win rates remain within healthy competitive bounds without any single dominant color.
-  - **Early Round Pressure ("Tutorialization"):** In Round 1, players face an average of 1.4 incoming attack cubes with only 1 active clean Shield Slot. Players must make meaningful trade-offs from Turn 1: whether to dedicate their starter die to blocking, take damage, or accept a glitched slot penalty.
-- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.38d`).** Package `v0.38d` meets all design pillars, tension targets, and balance criteria.
-
-## 46. Phase 52 Secret Simplification & Processing Triggers: APPROVED (`v0.38e`)
-
-Sources: `docs/specs/v380e_secret_simplification_spec.md`, `sim_results/v380e_secret_simplification/validation_report.md` (3,600 games across 2P/3P/4P, seeds 42..1241, mixed roster with `MixedPolicyBot`).
-
-- **Context & Design Problem:**
-  Under `v0.38d`, Secret face banking suffered from cognitive overhead and balance asymmetry:
-  1. *Blue Tracking & Low EV:* Banking Blue required mid-round memory tracking in Phase 4 Step 1 (*"Remember how many Blue cubes you blocked this round"*), broke timing equivalence for Phase 3 instant-banking (*B3 Air-Gapped Backup*, *Jumper Diagnostics*), and depressed Blue Secret EV to 1.458 Secrets/bank (zero Blue cubes blocked in 61.9% of rounds), dragging 4P Blue Company win rate down to 20.3%.
-  2. *Green Calculation Friction:* Green Secret yield ($Y = \max(0, 3 - g)$ before cleaning $g \leftarrow \max(0, g-1)$) created order-of-operation confusion, runaway early-game payouts (3 Secrets), and feel-bad late-game zeroes (4.4% of banks).
-- **Implemented Package (`v0.38e`):**
-  1. *Universal Baselines:* Red, Blue, and Green dice bank an unconditional baseline yield of **`+2` Corporate Secrets**; Purple Specialist banks flat **`+1` Corporate Secret**.
-  2. *Four Dedicated Domain Triggers (Fired Upon Leaving Processing Box):*
-     - **Red (Market Domain):** Sets `state.red_secret_banked_this_round = True`, firing the **Market Leader Bonus** (1st `+3`, 2nd `+1` Corporate Secrets) once at the end of Phase 5.
-     - **Blue (Hardware Defense Domain):** Evaluates Defense Grid Track; awards **`+1` Corporate Secret if Defense Grid $\ge$ Level 3** (max `+3`). Zero cube tracking or attack dependencies.
-     - **Green (System Integrity Domain):** Unconditionally cleans **`1` Glitched Shield Slot** ($g \leftarrow \max(0, g - 1)$). Zero yield penalty.
-     - **Purple (Proprietary Specialist Domain):** Pure baseline (`+1` Corporate Secret, no domain trigger).
-  3. *Rules Simplification:* Cleanly excised the Phase 4 Step 1 Blue tracking reminder and Phase 3 instant-banking timing exceptions from `RULES.md`.
-- **Monte Carlo Telemetry Metrics (3,600 Games):**
-  - **Game Pacing:** Mean rounds **8.84** (2P), **9.00** (3P), **9.04** (4P) — aggregate **8.96** rounds, perfectly centered in the 8.5–9.5 target window. 0.0% timeouts.
-  - **Healthy End Trigger Triad:**
-    - **Singularity:** **37.25%** (2P), **44.67%** (3P), **45.92%** (4P) — aggregate **42.61%** (target 30%–50%).
-    - **Patient Zero:** **17.92%** (2P), **28.67%** (3P), **28.42%** (4P) — aggregate **25.00%** (target 15%–35%).
-    - **Market Collapse:** **43.25%** (2P), **26.08%** (3P), **25.42%** (4P) — aggregate **31.58%** (target 15%–45%).
-    - **Total Wipeout:** **1.58%** (2P), **0.58%** (3P), **0.25%** (4P) — aggregate **0.81%** (guardrail $\le 3.0\%$).
-- **Telemetry Invariant Confirmations (40,473 Banking Events):**
-  - **Red Invariant (`INV-V38E-05`):** 100.0% yielded exactly 2 Secrets (13,336 / 13,336).
-  - **Green Invariant (`INV-V38E-04`):** 100.0% yielded exactly 2 Secrets (12,463 / 12,463).
-  - **Purple Invariant (`INV-V38E-06`):** 100.0% yielded exactly 1 Secret (16,607 / 16,607).
-  - **Blue Invariant (`INV-V38E-01/02`):** 100.0% yielded $\in \{2, 3\}$ (8,046 / 8,046: 92.18% at 2, 7.82% at 3).
-  - **Blue L3+ Grid Trigger:** 7.82% aggregate trigger rate (2P 6.35%, 3P 8.24%, 4P 8.28%), providing a meaningful hardware reward without distortion.
-  - **Green Decontamination Efficiency:** 0.914–1.020 slots cleaned per seat (~0.95 slots/seat aggregate; 82.3%–85.8% clean efficiency when glitched slots were present).
-  - **EV & Competitive Parity:** Blue Secret EV increased from 1.458 to 2.077 (+0.619), restoring Blue Company win rates (2P 45.0%, 3P 31.2%, 4P 22.5%) and dominant path win rates (2P 43.8%, 3P 37.1%, 4P 26.7%) to healthy parity.
-- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.38e`).** Cognitive friction and memory tracking are eliminated while preserving tight pacing, healthy existential triad distributions, and strong multi-path strategic depth.
-
-## 47. Phase 53 Blue Module Die Rebalance: APPROVED (`v0.38f`)
-
-Sources: `docs/specs/v380f_blue_dice_rebalance_spec.md`, `sim_results/v380f_blue_dice_rebalance/validation_report.md` (3,600 games across 2P/3P/4P, seeds 42..1241, config `v038f_roster` with `MixedPolicyBot`).
-
-- **Context & Design Problem:**
-  Across prior iterations (`v0.38` through `v0.38e`), Blue module dice suffered from identity confusion and suppressed adoption:
-  1. *Redundant Research Overlap with Green:* Blue featured research on Faces 1, 2, and 4 (`+1 🔬`), functioning as an inferior duplicate of Green rather than embodying the "Firewall / Data Vault" archetype.
-  2. *Asymmetric Secret Banking Latency:* Red provided immediate Phase 3 cash/Market Share and banked high-yield Secrets in Phase 5. Blue Secret generation relied entirely on Face 5 navigating the Processing Box conveyor latency, penalizing Blue starter companies (DTO, Aegis) in early-round survival and tempo.
-  3. *Market Neglect & Win Rate Gap:* In `v0.38e`, Blue purchases lingered at only ~0.18–0.20 per seat, and 4P Blue Company win rate sat at 22.45% (below fair 25.0%).
-- **Implemented Package (`v0.38f`):**
-  1. *Direct Corporate Secrets on Faces 1 & 2:* Converted Blue Faces 1 & 2 from `+1 🔬` to unconditional **`+1 Corporate Secret`** directly awarded in Phase 3 Income (`"blue_face"`), bypassing the Processing Box.
-  2. *50% Secret Density Profile:* Blue dice now feature 3 of 6 faces generating Corporate Secrets (Faces 1 & 2 direct income, Face 5 banked deferred yield), establishing Blue as the premier VP and defensive buffer module.
-  3. *Topology Preservation:* Face 3 (`+$1`), Face 4 (`+1 🔬 / +$1`), Face 5 (`Secret face` yielding 2 Secrets, +1 if Defense Grid $\ge$ L3), and Face 6 (`Blue ★` Variant) remained intact.
-- **Monte Carlo Telemetry Evaluation (3,600 Games):**
-  - **Pacing & Tension:** Mean game length lands squarely in the 8.5–9.5 round target window: **8.93** (2P), **9.44** (3P), **9.26** (4P) — aggregate **9.21** rounds.
-  - **End-Game Triad Stability:**
-    - **Singularity:** **38.17%** (2P), **52.08%** (3P), **50.25%** (4P) — aggregate **46.83%** (target 30%–55%).
-    - **Market Collapse:** **44.92%** (2P), **28.83%** (3P), **27.00%** (4P) — aggregate **33.58%** (target 15%–45%).
-    - **Patient Zero:** **15.67%** (2P), **19.08%** (3P), **22.75%** (4P) — aggregate **19.17%** (target 15%–35%).
-    - **Total Wipeout:** **1.25%** (2P), **0.00%** (3P), **0.00%** (4P) — aggregate **0.42%** (guardrail $\le 2.0\%$).
-  - **Company Color Win Rate Parity:**
-    - **2P:** Blue (DTO/Aegis) **49.06%** vs Green 54.69%, Red 46.15% (fair share 50.0%, within $\pm 5.0\%$).
-    - **3P:** Blue **33.39%** vs Green 38.55%, Red 27.72% (fair share 33.3%, dead-center).
-    - **4P:** Blue **25.33%** vs Green 28.52%, Red 21.05% (fair share 25.0%, exact theoretical parity, up from 22.45%).
-  - **Market Vitality & Strategic Viability:**
-    - Market purchases per seat surged: 2P **0.356** (+74.5%), 3P **0.333** (+99.4%), 4P **0.350** (+94.4%).
-    - Blue Dominant Path ($\ge 60\%$ dice) win rate reached **30.46%** in 4P (up from 26.69%), confirming robust strategic viability.
-    - Direct Blue Face secrets delivered **+0.771 Secrets/seat** aggregate, providing a stable survival buffer that moderately softened Patient Zero spikes without inflating game length.
-  - **Invariant Adherence:** 100% compliance across all 46,103 banking events (9,371 Blue banked dice yielded strictly $\in \{2, 3\}$, with 6.23% triggering the L3+ Grid bonus).
-- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.38f`).** Blue module dice have achieved complete thematic distinction, healthy market liquidity, and exact theoretical win rate parity across all player counts without destabilizing the end-game triad.
-
-## 48. Phase 54 Post-Telemetry Balance Assessment: Unified Market Share Track & Headroom Architecture (`v0.38g` / Headroom): APPROVED
-
-Sources: `docs/specs/market_share_headroom_spec.md`, `sim_results/market_share_headroom/validation_report.md` (3,600 games across 2P/3P/4P, seeds 42..1241).
-
-- **Context & Design Flaw in Baseline (`v0.38d`):** In `v0.38d`, a player's starting Market Share was coupled to the track ceiling (`start == max` = 13 at 2P, 16 at 3P, 17 at 4P). This zero-headroom architecture violated Core Design Pillar 3 ("Zero Blank Faces"):
-  1. Red Face 1 (`+1 Market Share / +$1`) choice rate collapsed to **0.0%** for Market Share in Round 1 (100% forced into `+$1`).
-  2. Yellow Face 1 (`+2 Market Share`) was a completely blank face ($0, 0 🔬, 0 MS). Yellow Face 2 collapsed into forced research, while Yellow Face 3 and *Brand Protection* (R1 ★) wasted their `+1 Market Share` component.
-  3. The Public Relations Track was mechanically locked in early rounds until unblocked Red cubes inflicted damage.
-- **Architectural Solution (Candidate A4 — Unified Max 20 + Calibrated Headroom):**
-  - Central board track unified with a single physical ceiling of **20** (`market_share_max = 20`) across all player counts (21 cells: 0 to 20).
-  - Calibrated starting positions: **13** at 2P (+7 headroom), **16** at 3P (+4 headroom), and **16** at 4P (+4 headroom, unified with 3P).
-  - Hard clamping strictly enforced: floor at `0` (triggers Market Collapse check post-Phase 4), ceiling at `20`.
-- **Validation Against Core Design Pillars (3,600 Games):**
-  1. **Zero Blank Faces Restored (INV-MS-HEADROOM-08 & INV-MS-HEADROOM-01/02):**
-     - In Round 1, Red Face 1 selection of `+1 Market Share` over `+$1` jumped from **0.0% to 100.0%** across all player counts (target `> 30.0%`).
-     - Round 1 players at maximum track dropped from **53.8%–73.3%** in baseline to **0.0%**. In Round 2, players at max remained at **0.0%** (2P) and **0.1%** (3P/4P), completely eliminating early ceiling congestion (target `< 5.0%`).
-     - Headroom actively utilized: **42.5%** (2P), **54.2%** (3P), and **56.2%** (4P) of players climbed above their starting position during the game, with **1.6%–14.4%** reaching the 20 ceiling. Mean peak Market Share reached 13.89 (2P), 17.20 (3P), and 17.25 (4P). Yellow Market Share faces and PR research conversions are fully functional from Round 1.
-  2. **Macro Pacing Preserved:**
-     - Mean rounds played: **8.72** (2P), **9.12** (3P), and **8.90** (4P). Exactly inside the target 8.7–9.1 round window (baseline was 8.73, 8.89, 8.94).
-     - Timeouts / Limit Hits: **0 (0.0%)** across all 3,600 games.
-  3. **Tri-Modal End Trigger Diversity:**
-     - **Singularity:** 35.7% (2P), 45.2% (3P), 39.3% (4P) — all within the $\le 48\%$ guardrail.
-     - **Patient Zero:** 20.3% (2P), 27.2% (3P), 29.3% (4P) — existential breach threat remains active.
-     - **Market Collapse:** 42.0% (2P), 27.1% (3P), 31.3% (4P) — healthy economic endgame pressure.
-     - **Total Wipeout:** 2.00% (2P), 0.50% (3P), 0.00% (4P) — suitably rare edge catastrophe.
-  4. **Company & Color Balance Equity:**
-     - Starting Color Win Rates: 2P Red 56.4% / Blue 43.4% / Green 50.2% (fair 50.0%); 3P Red 39.3% / Blue 27.1% / Green 33.7% (fair 33.3%); 4P Red 33.0% / Blue 18.1% / Green 24.0% (fair 25.0%). Red starter companies enjoy early positioning agency for the Market Leader Bonus, but counter-play remains viable across Blue and Green rosters without runaway imbalance.
-     - Bot Archetype Hierarchy: AdaptiveBalancedBot (40.8%–58.5%) leads; SecOpsTurtleBot (26.4%–56.5%) and VentureGreedBot (30.3%–53.4%) demonstrate competitive diversity.
-  5. **Invariants & Mechanical Robustness:**
-     - Invariants `INV-MS-HEADROOM-01` through `08` fully validated.
-     - Floor at 0 and ceiling at 20 respected with zero overflow exceptions across all matches. Outlier seeds confirmed clean resolution on early wipeouts (seeds 87/1146 via PZ) and long engine games (seeds 254/400/650 via Singularity at Round 13).
-- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.38g` / Headroom).** The headroom architecture resolves all dead face and PR track lockout defects without perturbing game length or threat curves. The candidate is approved for baseline lock and Phase B documentation / PnP asset sync.
-
-## 49. Phase 55 Post-Telemetry Balance Assessment: Research Upgrade Limit & Track Step Costs (`v0.39.0` Candidate): APPROVED
-
-Sources: `docs/specs/spec_research_upgrade_limit.md`, `sim_results/v390_research_upgrade_limit/validation_report.md`, `sim_results/v390_research_upgrade_limit/sweep_report.json` (3,600 games across 2P/3P/4P, seeds 42..1241).
-
-- **Context & Design Problem in Baseline:**
-  Under the pre-v0.39.0 research architecture (`(1, 2, 2, 3) 🔬` step costs and unbounded per-turn hardware upgrades):
-  1. Early hardware progression suffered from steep initial friction (2 🔬 required for L2), delaying early specialization and pipeline capacity expansion.
-  2. Late-game research hoarding enabled explosive single-turn bursts (players jumping 3–4 levels on tracks simultaneously), creating severe snowballing and de-synchronizing engine development from the round counter.
-  3. The absence of a per-turn upgrade cap allowed degenerate multi-track hyper-engineering.
-- **Architectural Solution (`v0.39.0` Package):**
-  1. **Smoothed Hardware Track Step Costs:** Re-calibrated to `(1, 1, 2, 2) 🔬` across all four tracks (Defense Grid, Conveyor Triage, CI/CD Pipeline, Public Relations Track). Total track cost reduced from 8 🔬 to 6 🔬; L1 and L2 are accessible at 1 🔬 each.
-  2. **Operations Turn Hardware Upgrade Limit (`max = 2`):** A strict per-turn hardware upgrade limit (`max_hardware_upgrades_per_turn = 2`) enforced in Phase 6: Operations (Item 1). Players may execute at most 2 total hardware track upgrades per turn across all tracks combined.
-  3. **Independence of Market Share Regain:** PR Market Share regain in Item 2 remains completely independent of the hardware upgrade limit. Breakthrough bonuses (e.g. +$2 from Triage L2) immediately fund subsequent operations actions within the same turn.
-  4. **Telemetry & Controller Guardrails:** Engine, web controller, and bot policies reject excess upgrade requests, logging them to `excess_hardware_upgrades_requested` and `RoundTelemetry.excess_hardware_upgrades_by_player`.
-- **Validation Against Core Design Pillars & Balance Criteria (3,600 Games):**
-  1. **Macro Pacing Preserved:**
-     - Mean rounds played: **8.97** (2P), **9.39** (3P), and **9.04** (4P) — all solidly inside the canonical 8.5–9.5 round target window (baseline was 8.93, 9.29, 9.03).
-     - Timeouts / Limit Hits: **0 (0.0%)** across all pods.
-  2. **Tri-Modal End-Game Stability:**
-     - **Singularity:** 38.8% (2P), 52.0% (3P), 44.3% (4P) — aggregate 45.0% (target 30%–55%).
-     - **Market Collapse:** 45.0% (2P), 25.9% (3P), 29.4% (4P) — aggregate 33.4% (target 15%–45%).
-     - **Patient Zero:** 15.3% (2P), 21.9% (3P), 26.2% (4P) — aggregate 21.1% (target 15%–35%).
-     - **Total Wipeout:** 0.92% (2P), 0.17% (3P), 0.00% (4P) — aggregate 0.36% (guardrail $\le 2.0\%$).
-  3. **Track Progression & Smoothing:**
-     - Mean hardware upgrades per seat increased from 3.06–3.53 to **3.98** (2P), **4.66** (3P), and **4.25** (4P) (+0.92 to +1.13 upgrades/seat), confirming enhanced hardware liquidity from 1 🔬 step costs.
-     - L3 Breakthrough achievement surged: **62.6%** (2P, +12.2%), **70.9%** (3P, +12.2%), and **64.3%** (4P, +11.1%), ensuring players reliably access mid-game track powers.
-     - L4 Capstone achievement increased to **45.2%** (2P), **54.7%** (3P), and **48.8%** (4P) (+18.8% to +23.6%), rewarding focused endgame specialization.
-     - **Anti-Snowball Guardrail:** Players maxing 2+ tracks held strictly to **0.00%** across all pods (target $< 10.0\%$). Hyper-engineering runaway is completely suppressed.
-  4. **Turn Limit Enforcement & Telemetry:**
-     - In simulated bot matches, research policies naturally throttled want-lists at `max = 2` (TEST-RUL-08); engine telemetry confirms 0 overflow violations under compliant policies while unit tests TEST-RUL-02 and TEST-RUL-06 verify exact truncation and telemetry logging when 3+ upgrades are submitted.
-     - Burst multi-level jumps in a single turn are eradicated, pacing upgrades across rounds.
-  5. **Public Relations Track Defense & Telemetry:**
-     - Market Share regains averaged **1.95** (2P), **2.36** (3P), and **2.46** (4P) points per seat, powered by **5.85 🔬–7.37 🔬** invested in PR.
-     - Red cube block rate held steady at **18.0%** (2P), **21.3%** (3P), and **21.9%** (4P), providing active economic self-defense against unblocked Red cube pressure (mean share lost 12.36–12.82 points).
-  6. **Company Equity & Archetype Viability:**
-     - Starting Color Win Rates (3P): Red **31.7%** / Blue **33.6%** / Green **34.5%** (fair share 33.3%, all within $\pm 1.7\%$).
-     - Starting Color Win Rates (4P): Red **27.4%** / Blue **22.9%** / Green **24.7%** (fair share 25.0%, all within $\pm 2.5\%$).
-     - Starting Color Win Rates (2P): Red **50.1%** / Blue **48.7%** / Green **51.2%** (fair share 50.0%, dead-center).
-     - Client Company win rates remain balanced: Omnidyne (26.9%–56.9%), Aegis (27.5%–53.0%), Prometheus (28.1%–50.6%), Meridian (26.7%–49.5%), Helix (22.5%–46.0%), DTO (18.1%–44.6%).
-     - Competitive archetype diversity maintained: AdaptiveBalanced (46.5%–71.0%), SecOpsTurtle (26.9%–53.7%), VentureGreed (24.2%–52.1%), Accelerationist (19.6%–52.4%), MixedPolicy (25.2%–47.6%).
-- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.39.0`).** The Research Upgrade Limit (`max = 2`) and Track Step Costs `(1, 1, 2, 2) 🔬` successfully smooth early track progression, cap runaway hyper-engineering, and maintain rock-solid macro pacing and tri-modal endgame tension. Recommended for canonical lock in `RULES.md` and release as `v0.39.0`.
 ## 50. Phase 56 Validation Sweep: Complete Removal of White Contractor Dice & Glitch Faces (`v0.40.0` Baseline): APPROVED
 
 Sources: `docs/specs/remove_contractor_dice_spec.md`, `sim_results/v040/validation_sweep.json` (3,600 games across 2P/3P/4P, 1,200 games per pod, `v040_roster`, 8 procs, seeds 42..1241).
@@ -521,6 +335,58 @@ Sources: `sim_results/target_lock_validation/validation_report.md` (7,200-game d
 
 - **Official Balance Verdict: OFFICIALLY APPROVED (`v0.42.0 Baseline`).**
   The Operative Signature Cube & Target Lock Protocol successfully infuses character, thematic identity, and healthy anti-snowball tension into the Cube Tower without compromising Euro player agency or macro pacing. Officially approved for rules synchronization across all documentation, Print-and-Play assets, and quick-reference aids.
+
+## 57. Phase 62 Post-Telemetry Balance Assessment: Dominant Cube Color Signature Attacks: APPROVED (`v0.43.0 Baseline`)
+
+*(Cross-Reference: Phase 62 task prompt cited as §56 / Phase 62; numbered §57 to maintain strict monotonic section sequence following §56 Phase 61).*
+
+Sources: `sim_results/signature_dominant_attacks/validation_report.md` (7,200-game dataset across 4P, 3P, and 2P pods, Seeds 42..1241); Technical Architecture Specification `docs/specs/signature_cube_dominant_attacks_spec.md`; Pre-SDLC Research Report `docs/findings/signature_cube_mechanics_investigation.md` (§7–§11).
+
+- **Investigation Context & Architectural Rationale:**
+  While `v0.42.0` successfully established the tactile attention loop of Operative Signature Cubes (banking Secrets queues the cube into staging; drops through tower with ~40% baffle retention; returns to mat on exit), the resulting Target Lock penalty—facing `+1 dominant Attack Cube`—was deemed too generic and unexciting by players. It felt like an anonymous compiler drop rather than SETEC aggressively targeting that operative's corporate terminal.
+  Under Phase 62 (`v0.43.0 Baseline`), the generic `+1` Attack Cube is replaced with **Dominant Cube Color Signature Attacks** printed directly on the Central Board alongside the threat matrix, resolving against the most populous cube color in the Exit Tray under preset priority order **`GREEN > BLACK > BLUE > RED`**:
+  - **Red (*Market Manipulation*):** Drains `2` Market Share from the locked player; the other surviving player with the least Market Share gains `2` MS. Executes under the **Two-Step Simultaneous Epoch Rule (`INV-SIMUL-RED`)** (all locked players drain simultaneously first, then transfers resolve; drops where all survivors are locked cleanly cancel transfers).
+  - **Blue (*Buffer Congestion*):** In Phase 4 (after shields block), moves `1` Gray Legacy die from the Scanned Box (or In Production) to the back of the Processing Box (`0 Secrets`), taxing Conveyor Triage without re-queuing signature cubes (`INV-SIG-BLUE-TRIAGE`).
+  - **Green (*Malware Encryption*):** Places green cubes from the general token supply onto the next space of `2` Research Tracks that do not already have green cubes; those spaces cost double research (`2x 🔬`) to advance into (`INV-GREEN-SUPPLY`). Invariant `INV-GREEN-OVERFLOW` spills unplaced cubes into Glitched Shield Slots.
+  - **Black (*Root Override Hijack*):** Marks the locked player's Client Company Institutional Override as "Used" for the current SETEC Version; if already used, the player suffers a `-2 Corporate Secrets` fallback.
+  - **Preset Priority Tie-Breaking (`GREEN > BLACK > BLUE > RED`):** Evaluated across all 24 permutations in pre-SDLC modeling (§11 Rank #1), this order provides instant deterministic resolution with zero decision lag while counterbalancing the raw compiler physics (where Red is unique top in 28.5% of drops while Green is only 9.5% and Black does not recycle).
+
+- **Empirical Telemetry Verification (7,200 Games Across 4P, 3P, and 2P Pods):**
+
+  | Metric / Gate | Baseline (`v0.42.0`) | Candidate (`v0.43.0`) | Target Guardrail | Design Assessment |
+  | :--- | :---: | :---: | :---: | :--- |
+  | **Macro Pacing (Overall)** | 7.71 rounds | **7.60 rounds** | $\|\Delta\| \le 0.50$ rds (7.5–11.0) | **PASS** — Crisp, rock-solid macro pacing ($\Delta = -0.11$ rds) |
+  | **Macro Pacing (4P / 3P / 2P)** | 7.51 / 7.90 / 7.73 | **7.43 / 7.78 / 7.58** | 7.00–11.00 rounds | **PASS** — Flawless pacing parity across all player counts |
+  | **Total Wipeout Rate (Overall)** | 6.22% | **5.75%** | $\le$ Baseline | **PASS** — **Wipeouts reduced across all pods** (-0.47% table avg) |
+  | **Total Wipeout Rate (4P / 3P / 2P)** | 2.25% / 5.08% / 11.33% | **2.08% / 4.33% / 10.83%** | $\le$ Baseline | **PASS** — 4P wipeouts drop to 2.08%; zero early wipeouts ($\le 6$ rds) |
+  | **End-Game: Singularity (4P / 3P / 2P)** | 4.5% / 7.1% / 8.9% | **4.7% / 8.2% / 8.2%** | Active clock | **PASS** — Macro clock preserved |
+  | **End-Game: Patient Zero (4P / 3P / 2P)** | 70.3% / 64.0% / 39.3% | **73.8% / 65.2% / 43.5%** | Active pressure | **PASS** — Healthy attrition on overextended engines |
+  | **End-Game: Market Collapse (4P / 3P / 2P)** | 22.9% / 23.8% / 40.4% | **19.4% / 22.3% / 37.5%** | Active condition | **PASS** — Active secondary terminal condition |
+  | **Baffle Retention Rate** | 40.3% / 39.5% / 39.8% | **40.1% / 38.7% / 40.0%** | Model B Physics (~40%) | **PASS** — Verified physical baffle retention |
+  | **Mean Baffle Hold Duration** | 0.48 / 0.48 / 0.48 | **0.48 / 0.47 / 0.49** | Latent threat delay | **PASS** — Multi-round suspense preserved |
+  | **TL Cadence (Table / Seat-Game)** | 2.11 / 2.34 / 2.49 | **2.09 / 2.33 / 2.42** | ~2.00–2.50 / seat-game | **PASS** — Stable trigger frequency on Secret engines |
+  | **4-Color Trigger Distribution** | N/A (+1 cube) | **G: 29.2%, K: 22.6%, B: 15.7%, R: 28.3%** | Balanced spread | **PASS** — Confirms Rank #1 mathematical model within $\pm 1\%$ |
+
+- **Subroutine Mechanical Verification:**
+  1. *Red (*Market Manipulation*):* In 4P, 2,960 Red signature attacks drained 5,616 actual Market Share and transferred 5,646 MS to non-locked trailing players. All-locked drops cleanly canceled transfers (4.6% in 4P, 13.9% in 3P, 38.5% in 2P), completely preventing turn-order ping-pong bugs.
+  2. *Blue (*Buffer Congestion*):* 1,475 Gray Legacy dice moved to Processing Boxes in 4P (0.31/seat-game). All moved dice triaged out cleanly with 0 Secrets and zero re-queued signature cubes (`INV-SIG-BLUE-TRIAGE`).
+  3. *Green (*Malware Encryption*):* Placed 5,201 track cubes in 4P; players completed 1,785 doubled-cost upgrades (`2x 🔬`), spending 2,087 extra 🔬. Only 12 saturation spillover glitched slots occurred table-wide across 1,200 games, confirming smooth track placement without track demotion exploits.
+  4. *Black (*Root Override Hijack*):* Unused Client Company Overrides absorbed Black hits in **31.3%–33.0%** of cases, while the `-2 Corporate Secrets` fallback resolved in **67.0%–68.7%** of cases. Helix (*Brute-Force Bypass*) and DTO (*Slush Fund*) frequently held available overrides into Phase 4 Step 2, providing natural thematic defense.
+
+- **Core Design Pillar Evaluations:**
+  1. *Tactile & Thematic Central Board Drama:*
+     - Players no longer face an abstract generic cube; Target Lock now triggers distinct, thematic operational crises (extortion, malware encryption, pipeline congestion, or root breach).
+     - Preset priority order (`GREEN > BLACK > BLUE > RED`) eliminates all decision lag and cognitive friction while guaranteeing a balanced 4-color distribution.
+  2. *Enhanced Archetype Equity & Compression of Runaway Turtles:*
+     - In 4P pods, `SecOpsTurtleBot` win rate compressed by **-6.8%** (53.3% $\to$ 46.6%) as Black and Green attacks bypass shield-stacking turtle strategies.
+     - Trailing archetypes gained substantial competitive equity: `VentureGreedBot` rose **+3.3%** (11.2% $\to$ 14.6%) and `AccelerationistBot` rose **+3.5%** (16.9% $\to$ 20.4%).
+  3. *Client Company Parity Normalization:*
+     - `Helix Biomedical Consortium` gained **+5.2%** win equity in 4P (16.0% $\to$ 21.3%) due to its unspent Phase 1 override absorbing Black hits.
+     - Overall Client Company 4P win spread tightened from **14.2%** under `v0.42` to **13.3%** under `v0.43` (Omnidyne 31.2%, DTO 29.0%, Aegis 28.3%, Meridian 22.4%, Helix 21.3%, Prometheus 17.9%).
+
+- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.43.0 Baseline`).**
+  Dominant Cube Color Signature Attacks successfully elevate Target Lock into an exciting, thematic, and balanced centerpiece mechanic. Pacing, wipeout guardrails, color parity, and archetype equity are 100% validated across 7,200 games. Recommended for full release synchronization across rules documentation, Print-and-Play assets, and quick-reference aids.
+
 
 
 

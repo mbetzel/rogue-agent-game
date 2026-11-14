@@ -482,6 +482,8 @@ class GameEngine:
     def _finalize_telemetry(self, tel: RoundTelemetry, end_phase: Optional[int]) -> RoundTelemetry:
         self._record_research_telemetry(tel)
         if getattr(self.config, "target_lock_enabled", False):
+            dom_c = getattr(self.state, "last_dominant_color", None)
+            tel.dominant_tray_color = dom_c.value if dom_c is not None else None
             for p in self.state.players:
                 tel.signature_cube_locations[p.player_id] = p.signature_cube_location.value
                 tel.target_lock_absorbed_by_player[p.player_id] = p.extra_attacks_absorbed
@@ -489,6 +491,10 @@ class GameEngine:
                 tel.target_lock_extra_colors[p.player_id] = (
                     getattr(p, "last_defense_breakdown", None) or {}
                 ).get("target_lock_extra_color")
+                tel.encrypted_tracks_by_player[p.player_id] = sorted(getattr(p, "encrypted_research_tracks", set()))
+                tel.signature_attacks_this_round[p.player_id] = (
+                    tel.dominant_tray_color if tel.target_locks_by_player.get(p.player_id) else None
+                )
         tel.final_round_trigger_phase = self.state.final_round_trigger_phase
         tel.end_phase = end_phase
         self.telemetry_history.append(tel)  # exactly once per round (INV-SEQ-TELEMETRY-01)

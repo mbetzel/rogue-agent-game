@@ -70,8 +70,11 @@ def die_yield(cfg: "GameConfig", p: "PlayerState", die: "Die") -> int:
 
 
 def default_triage_order(cfg: "GameConfig", p: "PlayerState", dice: Iterable["Die"]) -> List["Die"]:
-    """Highest current yield first; ties lowest die_id (spec §9 ``choose_triage_order``)."""
-    return sorted(dice, key=lambda d: (-die_yield(cfg, p, d), d.die_id))
+    """Highest current yield first; colored dice before Gray; ties lowest die_id (spec §9 ``choose_triage_order``)."""
+    return sorted(
+        dice,
+        key=lambda d: (-die_yield(cfg, p, d), 0 if d.color != DieColor.GRAY else 1, d.die_id),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -99,7 +102,8 @@ def bank(cfg: "GameConfig", p: "PlayerState", die: "Die", state: Any = None) -> 
 
     Under v0.38d (Variant B: COUNT_THEN_CLEAN), Green calculates yield on current glitched slots, awards Secrets,
     and then cleans 1 Glitched Shield Slot (INV-V38D-05)."""
-    if not getattr(die, "secret_pending", False):
+    if not getattr(die, "secret_pending", False) or die.color == DieColor.GRAY:
+        die.secret_pending = False
         return 0
 
     clean_mode = getattr(cfg, "green_triage_clean_mode", "NONE")

@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.42.0)
+# Too Many Secrets — Rules Draft (v0.43.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -268,13 +268,16 @@ Each surviving player simultaneously resolves all three colors against their com
 3. **Snowball Recycle:** Place **all exited Red, Blue, and Green cubes** from the tray back into the **Staging Cup** for next round.
 4. **Compile Buffer Overflow:** If the tray was empty in Phase 2, no damage resolves this phase (no Baffle Echo, damage-conditional `★` bonuses, or Defense Grid Level 4 cash); the End Game Trigger Check (including **Market Collapse**, since *Customer Poaching* may have lowered Market Share in Phase 3) still occurs.
 
-#### Target Lock Bonus Attack Resolution
-If you triggered a **Target Lock** in Phase 2:
-* You face **`1` additional Attack Cube** matching the most common Attack Cube color (`Red`, `Blue`, `Green`) among all exited Attack Cubes in the tray:
-  * **Tie on Most Common Color:** If multiple Attack Cube colors tie for the highest count in the tray, **the defending player chooses which of the tied colors attacks them** (`INV-TL-01`).
-  * **Buffer Overflow / Empty Attack Tray:** If `0` Attack Cubes exited in Phase 2 (the tray holds only Black cubes or is empty), the Target Lock has no attack vector and **fizzles cleanly** with no extra attack cube (`INV-TL-02`).
-* This additional cube is pooled directly with your incoming attack and is **fully blockable by your shields** (`Block 1 Any`; `INV-TL-04`). If blocked, it counts toward Defense Grid Level 4 cash (`+$1` per cube blocked).
-* **Threat Volume Conservation:** The extra Attack Cube is an isolated bonus attack against the locked operative and is **never placed in the tray or recycled in Snowball Recycle** (`INV-TL-08`). Target Lock status then clears.
+#### Target Lock Signature Attack Resolution
+If you triggered a **Target Lock** in Phase 2 (and are not **Patient Zero**), after normal Attack Cube blocking, unblocked damage, and Defense Grid Level 4 cash have resolved, you suffer the **Signature Attack** matching the **most populous Compiler Cube color** (`Green`, `Black`, `Blue`, or `Red`) that exited into the tray in Phase 2 (`INV-SIG-01`):
+* **Tie-Breaking Priority Order (Central Board Top-to-Bottom):** If multiple colors tie for the highest exited cube count in the tray, resolve the highest-priority tied color in the order **`Green > Black > Blue > Red`** `[TUNE: v0.43.0]`.
+* **Buffer Overflow (Empty Tray):** If `0` total cubes exited in Phase 2, Target Lock **fizzles cleanly** with no effect (`INV-SIG-02`).
+* **The 4 Dominant Color Signature Attacks (Printed on Central Board):**
+  * **Green (Malware Encryption):** Place a green cube from the general supply onto the next space of **`2` different Research Tracks** that do not already have a green cube (and are below Level 4; you choose which eligible tracks). **A space holding a green cube costs double Research (`2× 🔬`) to advance into**; when researched, return the green cube to the general supply (never to the Staging Cup). For each green cube that cannot be placed (because fewer than 2 tracks are eligible), turn **`1` clean shield slot into a Glitched Shield Slot** (`INV-SIG-GREEN`).
+  * **Black (Root Override Hijack):** Mark your Client Company's **Institutional Override** as **`Used`** for the current SETEC Version (for **DTO** *Slush Fund*, mark it used for the game). If your Institutional Override is already used, lose **`2` Corporate Secrets** instead (`INV-SIG-BLACK`).
+  * **Blue (Buffer Congestion):** Move **`1` Gray Legacy die** from your **Scanned Box** (or **In Production** if your Scanned Box has no Gray die; or **Ready for Release** if neither has one) to the back of your **Processing Box**. When a Gray Legacy die leaves the Processing Box (via Conveyor Triage, *Magnetic Splice*, *Jumper Diagnostics*, or *B3 Air-Gapped Backup*), it yields **`0` Corporate Secrets** and does **not** queue your Operative Signature Cube into the Staging Cup (`INV-SIG-BLUE`).
+  * **Red (Market Manipulation):** You lose **`2` Market Share** (not below `0`), and the **other surviving player (who did not trigger Target Lock this round) with the least Market Share gains `2` Market Share** (not above their maximum; if multiple eligible players tie for the least Market Share, you choose which one gains `2`). If multiple players resolve a Red Signature Attack in the same round, all locked players lose `2` Market Share simultaneously first before awarding the `+2` gains; if all surviving players triggered Target Lock this round, no one gains Market Share (`INV-SIG-RED`, `INV-SIMUL-RED`).
+* Target Lock status then clears before the End Game Trigger Check.
 
 #### End Game Trigger Check (End of Phase 4)
 * If **all** players are now **Patient Zero** (including any Patient Zero from Phase 2), the game ends immediately as a **Total Wipeout**; Phases 5–6 are skipped and Market Collapse is not checked.
@@ -288,7 +291,7 @@ If you triggered a **Target Lock** in Phase 2:
 
 Surviving White Hat Operatives take clockwise **Operations Turns** starting with the **First Player**. On your turn, perform any of the following operations in any order:
 1. **Terminal Hardware Track Upgrades (Limit `2` upgrades per turn `[TUNE]`):**
-   * Spend Research Tokens (`🔬`) to raise any of your 4 tracks one level at a time: **`1 🔬`** to reach Level 1, **`2 🔬`** for Level 2, **`2 🔬`** for Level 3, **`3 🔬`** for Level 4 `[TUNE]` (no discounts; limit 2 hardware upgrades per turn `[TUNE]`, across all tracks combined). See the track table in Section 2.
+   * Spend Research Tokens (`🔬`) to raise any of your 4 tracks one level at a time: **`1 🔬`** to reach Level 1, **`2 🔬`** for Level 2, **`2 🔬`** for Level 3, **`3 🔬`** for Level 4 `[TUNE]` (no discounts; limit 2 hardware upgrades per turn `[TUNE]`, across all tracks combined). If the space you are advancing into holds a green cube (from a **Green Signature Attack**), that step costs **double Research (`2× 🔬`: `2 / 4 / 4 / 6 🔬`)** and clears the green cube back to the general supply. See the track table in Section 2.
    * **Breakthroughs (Levels 1 and 3):** When a track reaches Level 1 or Level 3, its **Breakthrough** resolves **immediately**, before your next operation. If you execute 2 upgrades in one turn, resolve them one level at a time, in the order you buy them (e.g. `$3` from the Public Relations Level 1 Breakthrough can pay for a Triage Level 3 Breakthrough bought afterwards, or fund dice purchases in the same turn). Each Breakthrough happens only once, the first time you reach that level.
      * New dice from a Breakthrough (Gray Legacy, Central Market colored or Purple) go to your **Ready for Release Zone** and do not use Release Bandwidth.
      * **Triage Level 3 Breakthrough (optional):** Pay **`$3`** `[TUNE]` to return `1` Gray Legacy die you own (from your Ready for Release Zone, Scanned Box or Processing Box) to the box and take `1` die of any Central Market color with stock left (it uses that color's active Variant Card). The new die goes to your Ready for Release Zone. The `$3` is flat (not the Variant Card price), is not a purchase (it does not count toward your dice purchase limit), and cannot be discounted by *Algorithmic Arbitrage*. If you can't pay, own no Gray Legacy die, or every Central Market stack is empty, or you decline, the Breakthrough is lost (it cannot be claimed later).
@@ -328,6 +331,7 @@ A die showing a **Secret face** banks its Secret when it leaves the **Processing
 * **Blue:** `+2`, plus `1` if your Defense Grid Track is at Level 3 or higher (maximum `+3`).
 * **Green:** `+2`; then clean `1` of your **Glitched Shield Slots**.
 * **Purple:** `+1`.
+* **Gray (placed via Blue Signature Attack):** `0` (does not queue your Operative Signature Cube into the Staging Cup).
 
 A die returned to the supply from the Processing Box, or still in the Processing Box when the game ends, banks nothing.
 

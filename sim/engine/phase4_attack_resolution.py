@@ -173,6 +173,8 @@ def calculate_target_lock_extra_cube(
     """Determines the color of the +1 Target Lock Attack Cube for a locked player."""
     if not getattr(engine.config, "target_lock_enabled", False):
         return None
+    if getattr(engine.config, "signature_attack_mode", "v042_plus_one_cube") == "dominant_color_effects":
+        return None
     if not player.target_locked or player.is_patient_zero:
         return None
 
@@ -675,12 +677,258 @@ def expire_contractors(engine: GameEngine, skip_pids: AbstractSet[int] = frozens
         player.hired_contractor_count = 0
 
 
+DEFAULT_SIGNATURE_TIE_ORDER: Tuple[CubeColor, ...] = (
+    CubeColor.GREEN,
+    CubeColor.BLACK,
+    CubeColor.BLUE,
+    CubeColor.RED,
+)
+
+
+def determine_dominant_tray_color(
+    exited_cubes: Dict[CubeColor, int],
+    tie_order: Tuple[CubeColor, ...] = DEFAULT_SIGNATURE_TIE_ORDER,
+) -> Optional[CubeColor]:
+    """Evaluates exited cubes across {Red, Blue, Green, Black} and resolves dominant color.
+
+    INV-SIG-01: Preset tie order Green > Black > Blue > Red.
+    INV-SIG-02: 0 total compiler cubes -> returns None.
+    """
+    all_colors = (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN, CubeColor.BLACK)
+    counts = {c: int(exited_cubes.get(c, 0)) for c in all_colors}
+    max_count = max(counts.values(), default=0)
+
+    if max_count <= 0:
+        return None
+
+    norm_order = tuple(
+        c if isinstance(c, CubeColor) else CubeColor(str(c).lower())
+        for c in (tie_order or DEFAULT_SIGNATURE_TIE_ORDER)
+    )
+    tied_colors = [c for c in norm_order if counts.get(c, 0) == max_count]
+    return tied_colors[0] if tied_colors else None
+
+
+def _resolve_signature_red(engine: GameEngine, locked_players: List[PlayerState]) -> None:
+    """Simultaneous Two-Epoch Market Share Drain & Transfer (INV-SIG-RED, INV-SIMUL-RED)."""
+    cfg = engine.config
+    state = engine.state
+    locked_pids = {p.player_id for p in locked_players}
+    drain_amt = int(
+        cfg.signature_red_ms_loss
+        if getattr(cfg, "signature_red_ms_loss", None) is not None and cfg.signature_red_ms_loss != 2
+        else getattr(cfg, "signature_red_drain_amount", 2)
+    )
+    transfer_amt = int(
+        cfg.signature_red_ms_gain
+        if getattr(cfg, "signature_red_ms_gain", None) is not None and cfg.signature_red_ms_gain != 2
+        else getattr(cfg, "signature_red_transfer_amount", 2)
+    )
+
+    # Epoch 1: Simultaneous Drain
+    for p in locked_players:
+        if p.market_share is not None:
+            before = p.market_share
+            p.market_share = max(0, before - drain_amt)
+            actual_lost = before - p.market_share
+            p.market_share_lost_red += actual_lost
+            if p.market_share_min is None or p.market_share < p.market_share_min:
+                p.market_share_min = p.market_share
+        p.signature_attacks_suffered["red"] = p.signature_attacks_suffered.get("red", 0) + 1
+
+    # Epoch 2: Transfer to Eligible Non-Locked Survivors
+    eligible = [
+        p for p in state.players
+        if not p.is_patient_zero and p.player_id not in locked_pids and p.market_share is not None
+    ]
+    if not eligible:
+        return  # All-locked or solo-survivor edge case: transfer fizzles cleanly
+
+    min_ms = min(p.market_share for p in eligible)
+    tied_recipients = [p for p in eligible if p.market_share == min_ms]
+
+    for p in locked_players:
+        if len(tied_recipients) == 1:
+            chosen = tied_recipients[0]
+        else:
+            hook = getattr(p.bot, "choose_signature_red_recipient", None) if p.bot else None
+            if callable(hook):
+                chosen = hook(p, tied_recipients, state)
+            else:
+                from sim.bots.base import default_signature_red_recipient_heuristic
+
+                chosen = default_signature_red_recipient_heuristic(p, tied_recipients, state)
+        max_ms = chosen.max_market_share
+        chosen.market_share = min(max_ms, chosen.market_share + transfer_amt)
+        if chosen.market_share_peak is None or chosen.market_share > chosen.market_share_peak:
+            chosen.market_share_peak = chosen.market_share
+        p.signature_red_transfers_sent += transfer_amt
+        chosen.signature_red_transfers_received += transfer_amt
+
+
+def _resolve_signature_blue(engine: GameEngine, player: PlayerState) -> None:
+    """Move 1 Gray die to back of Processing Box; yields 0 Secrets (INV-SIG-BLUE)."""
+    source_die = None
+    source_list = None
+
+    for candidate_list in (player.scanned_dice, player.in_production_dice, player.ready_for_release_dice):
+        grays = [d for d in candidate_list if d.color == DieColor.GRAY]
+        if grays:
+            source_die = grays[0]
+            source_list = candidate_list
+            break
+
+    if source_die is not None and source_list is not None:
+        source_list.remove(source_die)
+        _reset_die(source_die)
+        source_die.secret_pending = False
+        player.processing_entry_counter += 1
+        source_die.processing_entry_seq = player.processing_entry_counter
+        player.glitched_dice.append(source_die)
+
+
+def _resolve_signature_green(engine: GameEngine, player: PlayerState) -> None:
+    """Place green cubes on next space of 2 eligible tracks (INV-SIG-GREEN, INV-GREEN-OVERFLOW)."""
+    all_tracks = ("DEFENSE", "TRIAGE", "RELEASE", "PR")
+    eligible = [
+        t for t in all_tracks
+        if research_tracks.level_of(player, t) < 4 and not research_tracks.is_track_encrypted(player, t)
+    ]
+
+    cfg = engine.config
+    count_to_place = int(
+        cfg.signature_green_track_cubes
+        if getattr(cfg, "signature_green_track_cubes", None) is not None and cfg.signature_green_track_cubes != 2
+        else getattr(cfg, "signature_green_cube_count", 2)
+    )
+
+    if len(eligible) > count_to_place:
+        hook = getattr(player.bot, "choose_signature_green_tracks", None) if player.bot else None
+        if callable(hook):
+            chosen = hook(player, eligible, count_to_place, engine.state)
+        else:
+            from sim.bots.base import default_signature_green_tracks_heuristic
+
+            chosen = default_signature_green_tracks_heuristic(player, eligible, count_to_place, engine.state)
+        placed: List[str] = []
+        for t in chosen or []:
+            if len(placed) >= count_to_place:
+                break
+            if t in eligible and t not in placed:
+                placed.append(t)
+        if len(placed) < count_to_place:
+            for t in eligible:
+                if len(placed) >= count_to_place:
+                    break
+                if t not in placed:
+                    placed.append(t)
+    else:
+        placed = list(eligible[:count_to_place])
+
+    for t in placed:
+        player.encrypted_research_tracks.add(t)
+
+    shortfall = max(0, count_to_place - len(placed))
+    if shortfall > 0:
+        before_slots = player.glitched_shield_slots
+        player.glitched_shield_slots = min(player.defense_capacity, player.glitched_shield_slots + shortfall)
+        added_slots = player.glitched_shield_slots - before_slots
+        if added_slots > 0:
+            player.slots_glitched_this_round += added_slots
+            player.slots_glitched_by_source["signature_green"] = (
+                player.slots_glitched_by_source.get("signature_green", 0) + added_slots
+            )
+            player.max_glitched_slots = max(player.max_glitched_slots, player.glitched_shield_slots)
+
+
+def _resolve_signature_black(engine: GameEngine, player: PlayerState) -> None:
+    """Burn Institutional Override or lose 2 Corporate Secrets (INV-SIG-BLACK)."""
+    active_ver = engine.state.active_version.version_str if (engine.state and engine.state.version_deck) else "v1.0"
+    is_dto = (
+        has_company_override(player, CompanyCode.DTO, legacy_bridge_enabled(engine))
+        or getattr(getattr(player, "company", None), "code", None) == CompanyCode.DTO
+    )
+    override_available = (
+        player.is_ability_available(active_ver)
+        and not player.company_ability_used_this_version
+        and (not is_dto or not player.dto_slush_fund_used)
+    )
+
+    if override_available:
+        if player.is_ability_available(active_ver):
+            player.mark_ability_used(active_ver)
+        else:
+            player.company_ability_used_this_version = True
+        if is_dto:
+            player.dto_slush_fund_used = True
+        player.signature_override_hijacks += 1
+    else:
+        loss = int(getattr(engine.config, "signature_black_secret_loss", 2))
+        actual_loss = min(max(0, player.secrets), loss)
+        player.secrets = max(0, player.secrets - loss)
+        if actual_loss > 0:
+            player.secrets_by_source["signature_black"] = (
+                player.secrets_by_source.get("signature_black", 0) - actual_loss
+            )
+        player.signature_black_secrets_lost += loss
+
+
+def resolve_signature_attacks(engine: GameEngine, cr: CompileResult) -> None:
+    """Resolves Dominant Cube Color Signature Attacks in Phase 4 after base shields (INV-SIG-01..03)."""
+    cfg = engine.config
+    state = engine.state
+    if cr.buffer_overflow:
+        state.last_dominant_color = None
+        return
+
+    dominant_color = determine_dominant_tray_color(cr.exited_cubes, cfg.signature_attack_tie_order)
+    state.last_dominant_color = dominant_color
+
+    if dominant_color is None:
+        return  # INV-SIG-02: Clean tray fizzle
+
+    state.dominant_color_counts[dominant_color.value] = state.dominant_color_counts.get(dominant_color.value, 0) + 1
+
+    locked_players = [
+        p for p in state.players
+        if p.target_locked and not p.is_patient_zero and p.player_id not in getattr(cr, "breached_pids", set())
+    ]
+    if not locked_players:
+        return
+
+    if dominant_color == CubeColor.RED:
+        _resolve_signature_red(engine, locked_players)
+    else:
+        for p in locked_players:
+            if dominant_color == CubeColor.BLUE:
+                _resolve_signature_blue(engine, p)
+            elif dominant_color == CubeColor.GREEN:
+                _resolve_signature_green(engine, p)
+            elif dominant_color == CubeColor.BLACK:
+                _resolve_signature_black(engine, p)
+            p.signature_attacks_suffered[dominant_color.value] = (
+                p.signature_attacks_suffered.get(dominant_color.value, 0) + 1
+            )
+
+    state.signature_attack_events.append({
+        "round": state.current_round,
+        "dominant_color": dominant_color.value,
+        "locked_pids": [p.player_id for p in locked_players],
+    })
+
+
 def check_end_triggers_after_attacks(engine: GameEngine) -> None:
     """End-of-Phase-4 trigger check (spec §4.2). Never sets Singularity.
 
     v0.36.0: Market Collapse is checked after Patient Zero / Total Wipeout (INV-MS-COLLAPSE-PREC-01).
     """
     state = engine.state
+    for p in state.players:
+        if p.secrets <= 0 and not p.is_patient_zero:
+            p.is_patient_zero = True
+            p.elimination_round = state.current_round
+            p.elimination_reason = "Total Breach (<= 0 Secrets)"
+            p.breach_depth = max(0, -p.secrets)
     if all(p.is_patient_zero for p in state.players):
         state.game_over = True
         state.is_final_round = False
@@ -737,7 +985,7 @@ def execute_attack_resolution(
     resolve_damage: bool = True,
     finalize: bool = True,
 ) -> Dict[CubeColor, int]:
-    """Phase 4 for every survivor: damage -> Snowball Recycle -> Contractor Expiration -> end check.
+    """Phase 4 for every survivor: damage -> Signature Attacks -> Snowball Recycle -> Contractor Expiration -> end check.
 
     ``resolve_damage=False`` / ``finalize=False`` let the web controller split per-player damage
     from the closing steps.
@@ -760,6 +1008,13 @@ def execute_attack_resolution(
                 malware_target_selector=(malware_selectors_by_pid or {}).get(player.player_id),
                 aegis_color_override=(aegis_colors_by_pid or {}).get(player.player_id),
             )
+
+        # Phase 62: Dominant Cube Color Signature Attacks (INV-SIG-03)
+        if getattr(engine.config, "signature_attack_mode", "none") == "dominant_color_effects":
+            resolve_signature_attacks(engine, cr)
+    elif resolve_damage and cr.buffer_overflow:
+        if getattr(engine.config, "signature_attack_mode", "none") == "dominant_color_effects":
+            engine.state.last_dominant_color = None
     if finalize:
         finalize_attack_resolution(engine, cr)
     return attack

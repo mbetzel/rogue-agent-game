@@ -1015,6 +1015,68 @@ class BaseBot:
         """Selects which tied dominant attack color hits this player under Target Lock (INV-TL-01, INV-TL-06)."""
         return default_target_lock_color_heuristic(player, tied_colors, game_state, attack)
 
+    def choose_signature_red_recipient(
+        self,
+        player: PlayerState,
+        tied_recipients: List[PlayerState],
+        game_state: Optional[GameState] = None,
+        **kwargs: Any,
+    ) -> PlayerState:
+        """Selects which tied recipient gains +2 Market Share (INV-SIG-RED).
+
+        Default Heuristic: Selects the tied player with the fewest Corporate Secrets,
+        minimizing VP boost to competitive leaders.
+        """
+        state = game_state if game_state is not None else kwargs.get("state")
+        return default_signature_red_recipient_heuristic(player, tied_recipients, state)
+
+    def choose_signature_green_tracks(
+        self,
+        player: PlayerState,
+        eligible_tracks: List[str],
+        count: int = 2,
+        game_state: Optional[GameState] = None,
+        **kwargs: Any,
+    ) -> List[str]:
+        """Selects which eligible tracks receive green encryption cubes (INV-SIG-GREEN).
+
+        Default Strategic Heuristic:
+        1. Prefer tracks with lowest next-step base cost (L0 -> L1 = 1 🔬 extra vs L3 -> L4 = 3 🔬 extra).
+        2. Prefer secondary tracks not targeted for near-term upgrades.
+        """
+        state = game_state if game_state is not None else kwargs.get("state")
+        return default_signature_green_tracks_heuristic(player, eligible_tracks, count, state)
+
+
+def default_signature_red_recipient_heuristic(
+    player: PlayerState,
+    tied_recipients: List[PlayerState],
+    state: Optional[GameState] = None,
+) -> PlayerState:
+    """Default heuristic for choosing tied recipient of Red Signature Attack +2 Market Share."""
+    return min(tied_recipients, key=lambda p: (p.secrets, p.money, p.player_id))
+
+
+def default_signature_green_tracks_heuristic(
+    player: PlayerState,
+    eligible_tracks: List[str],
+    count: int = 2,
+    state: Optional[GameState] = None,
+) -> List[str]:
+    """Default heuristic for choosing Research Tracks to receive Green Signature Attack encryption cubes."""
+    from sim.engine import research_tracks
+
+    cfg = getattr(player, "config", None) or getattr(state, "config", None)
+    costs = cfg.track_step_costs if cfg is not None else (1, 2, 2, 3)
+
+    def track_penalty_score(t: str) -> Tuple[int, int]:
+        lvl = research_tracks.level_of(player, t)
+        base = int(costs[lvl]) if lvl < 4 else 99
+        return (base, lvl)
+
+    sorted_tracks = sorted(eligible_tracks, key=track_penalty_score)
+    return sorted_tracks[:count]
+
 
 def default_target_lock_color_heuristic(
     player: PlayerState,
