@@ -26,6 +26,7 @@ V040_TRACK_STEP_COSTS = (1, 2, 2, 3)          # (1, 2, 2, 3) 🔬 (8 🔬 total 
 V040_SHARE_REGAIN_CAP = {0: 1, 1: 1, 2: 2, 3: 2, 4: 3}
 V040_SHARE_REGAIN_COST_MONEY = {0: 3, 1: 3, 2: 3, 3: 3, 4: 3}
 _FACE_PROFILES = ("V037", "V038_DRAFT")
+_VARIANT_PROFILES = ("V037", "V038_DRAFT", "V044")
 # die_face_profile only: V038_DRAFT with the candidate-2 Yellow table (spec §14.3); _ALT = F1 "+$1 & +1 Market Share"
 # _F3 = V038_YELLOW_MS with Yellow F3 "+$1 & +1 Market Share" (spec §14.5.1, RSP-1)
 V038_DIE_FACE_PROFILES = ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D", "V038F")
@@ -513,6 +514,29 @@ class GameConfig:
     signature_red_ms_gain: Optional[int] = None
     signature_green_track_cubes: Optional[int] = None
 
+    # --- v0.44.0 Variant Overhaul Baselines ---
+    r2_cost_cash: int = 2
+    r2_gain_market_share: int = 2
+    b1_quiet_research: int = 2
+    b1_threat_cash: int = 3
+    b2_base_cash: int = 2
+    b2_market_share_gain: int = 3
+    b3_base_cash: int = 1
+    b3_shield_multiplier: int = 1
+    g1_research: int = 1
+    g1_slots_cleaned: int = 1
+    g2_glitch_multiplier: int = 1
+    g3_research: int = 1
+    g3_cash: int = 1
+    y1_base_cash: int = 4
+    y1_secret_cost: int = 2
+    y1_secret_gain: int = 1
+    y2_base_cash: int = 2
+    y2_cm_multiplier: int = 1
+    y2_max_cash: int = 6
+    y3_base_secrets: int = 1
+    y3_gray_multiplier: int = 1
+
     def __post_init__(self) -> None:
         if self.signature_red_ms_loss is not None:
             self.signature_red_drain_amount = int(self.signature_red_ms_loss)
@@ -931,6 +955,25 @@ class GameConfig:
         overrides.setdefault("bot_pr_push", True)
         overrides.setdefault("bot_pr_push_params", PrPushParams())
         return cls.v043(**overrides)
+
+    @classmethod
+    def v044(cls, **overrides) -> "GameConfig":
+        """v0.44.0 canonical baseline:
+        - Inherits v0.43 (Critical Breach, Signature Cubes, Target Lock, Dominant Cube Color Signature Attacks)
+        - Unified Phase 3 F6 (★) Variant Card Overhaul (variant_profile="V044")
+        - Streamlined Glitched Shield Slot Purge -> Block flow
+        - Pure Phase 6 Operations (zero paid F6 actions)
+        """
+        overrides.setdefault("variant_profile", "V044")
+        overrides.setdefault("b2_secret_cost", 1)
+        return cls.v043(**overrides)
+
+    @classmethod
+    def v044_roster(cls, **overrides) -> "GameConfig":
+        """v0.44.0 + bot autonomous PR push and cash allocation policies enabled."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v044(**overrides)
     def _validate_tower_config(self) -> None:
         """Validates Cube Tower physics parameters (spec §2.4)."""
         self.tower_mode = TowerMode(self.tower_mode)
@@ -960,9 +1003,10 @@ class GameConfig:
         cap = self.glitched_slots_per_round_cap
         if cap is not None and (isinstance(cap, bool) or not isinstance(cap, int) or cap < 0):
             raise ValueError("glitched_slots_per_round_cap must be None or an int >= 0")
-        for name in ("variant_profile", "power_profile"):
-            if getattr(self, name) not in _FACE_PROFILES:
-                raise ValueError(f"{name} must be one of {_FACE_PROFILES}, got {getattr(self, name)!r}")
+        if self.variant_profile not in _VARIANT_PROFILES:
+            raise ValueError(f"variant_profile must be one of {_VARIANT_PROFILES}, got {self.variant_profile!r}")
+        if self.power_profile not in _FACE_PROFILES:
+            raise ValueError(f"power_profile must be one of {_FACE_PROFILES}, got {self.power_profile!r}")
         if self.triage_l1_breakthrough not in _TRIAGE_L1_MODES:
             raise ValueError(f"triage_l1_breakthrough must be one of {_TRIAGE_L1_MODES}")
         if self.secret_face_enabled:

@@ -515,3 +515,73 @@ def apply_market_share_policy(bot: Any, plan: Any, player: "PlayerState", state:
         plan.share_regain = regain
 
     return plan
+
+
+def default_shield_slot_allocation(
+    player: "PlayerState",
+    committed_shields: list,
+    clean_capacity: int,
+    glitched_capacity: int,
+    state: Optional["GameState"] = None,
+) -> tuple:
+    """v0.44.0: Allocate shields to clean slots first (active defense), then glitched slots (purge)."""
+    clean_cap = max(0, int(clean_capacity))
+    glitched_cap = max(0, int(glitched_capacity))
+    clean_list = list(committed_shields[:clean_cap])
+    rem = list(committed_shields[clean_cap:])
+    glitched_list = rem[:glitched_cap]
+    return clean_list, glitched_list
+
+
+def default_r2_ad_campaign(player: "PlayerState", state: "GameState") -> bool:
+    """v0.44.0 R2 Ad Campaign: pay $2 Cash -> +2 Market Share."""
+    cfg = state.config
+    cost = int(getattr(cfg, "r2_cost_cash", 2))
+    if player.market_share is None or player.market_share_max is None:
+        return False
+    if player.market_share >= player.market_share_max:
+        return False
+    cushion = 0 if getattr(state, "is_final_round", False) else 3
+    return player.money >= cost + cushion and player.market_share <= player.market_share_max - 1
+
+
+def default_b2_vault_mode(player: "PlayerState", state: "GameState") -> str:
+    """v0.44.0 B2 Deep R&D Vault: 'cash' (+$2) or 'market_share' (-1 Secret -> +3 MS)."""
+    if player.secrets <= 1:
+        return "cash"
+    ms = int(player.market_share or 0)
+    if ms <= 12 or getattr(state, "is_final_round", False) or ms <= 4:
+        return "market_share"
+    return "cash"
+
+
+def default_y1_algo_mode(player: "PlayerState", state: "GameState") -> str:
+    """v0.44.0 Y1 Algorithmic Trading: 'cash' (+$4) or 'secret' (-$2 -> +1 Secret)."""
+    cost = int(getattr(state.config, "y1_secret_cost", 2))
+    if player.money < cost:
+        return "cash"
+    cushion = 0 if getattr(state, "is_final_round", False) else 3
+    if player.money >= cost + cushion and (player.secrets <= 3 or getattr(state, "is_final_round", False)):
+        return "secret"
+    return "cash"
+
+
+def default_g3_reboot_target(
+    player: "PlayerState",
+    scanned_dice: list,
+    state: Optional["GameState"] = None,
+) -> Optional[Any]:
+    """v0.44.0 G3 Live Reboot: move 1 die Scanned Box -> Ready for Release (highest cost CM > Purple > Gray)."""
+    if not scanned_dice:
+        return None
+
+    def _priority(d: Any) -> tuple:
+        if d.color in (DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW):
+            tier = 2
+        elif d.color == DieColor.PURPLE:
+            tier = 1
+        else:
+            tier = 0
+        return (tier, int(getattr(d, "cost", 0)), -int(getattr(d, "die_id", 0)))
+
+    return max(scanned_dice, key=_priority)

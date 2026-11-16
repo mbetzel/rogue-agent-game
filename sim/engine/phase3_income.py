@@ -11,7 +11,7 @@ from __future__ import annotations
 import random
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
 
-from sim.config import DieColor
+from sim.config import CubeColor, DieColor, EndGameReason
 from sim.entities import (
     ArchetypeCode,
     CompanyCode,
@@ -21,7 +21,7 @@ from sim.entities import (
     has_signature_protocol,
     legacy_bridge_enabled,
 )
-from sim.engine.state import IncomeRecord
+from sim.engine.state import IncomeRecord, ProductionRole
 from sim.engine import secret_faces
 
 if TYPE_CHECKING:
@@ -54,6 +54,16 @@ def _exited_cubes_for_acoustic(state: GameState) -> Dict[Any, int]:
     return exited or {}
 
 
+def _exited_blue_cubes(state: GameState) -> int:
+    cr = getattr(state, "last_compile_result", None)
+    if cr is not None and getattr(cr, "exited_cubes", None) is not None:
+        return int(cr.exited_cubes.get(CubeColor.BLUE, 0))
+    exited = getattr(state, "last_exited_cubes", None)
+    if not exited:
+        exited = getattr(getattr(state, "tower", None), "last_exited_cubes", {}) or {}
+    return int(exited.get(CubeColor.BLUE, 0))
+
+
 def _die_income_row(state: GameState, player: PlayerState, die: Die) -> Optional[Dict[str, Any]]:
     """Pure: the income this die yields in Phase 3 (None for glitch / no face)."""
     eff = die.effective_face or die.current_face
@@ -64,9 +74,63 @@ def _die_income_row(state: GameState, player: PlayerState, die: Die) -> Optional
     secrets = eff.secrets
     protocol_research = 0
     star_note: Optional[str] = None
+    is_v044 = getattr(state.config, "variant_profile", None) == "V044"
     if eff.is_star:
         code = eff.star_code
-        if code == "Y2":
+        if is_v044 and code in ("B1", "B2", "B3", "G1", "G2", "G3", "Y1", "Y2", "Y3", "R1", "R2", "R3"):
+            cfg = state.config
+            if code == "R1":
+                star_note = "Brand Protection (+$2, +1 MS)"
+            elif code == "R2":
+                money = 0
+                star_note = "Ad Campaign (modal -$2 -> +2 MS)"
+            elif code == "R3":
+                money = 0
+                star_note = "Customer Poaching (take 1 MS)"
+            elif code == "B1":
+                blue_exited = _exited_blue_cubes(state)
+                if blue_exited == 0:
+                    research = cfg.b1_quiet_research
+                    money = 0
+                    star_note = f"Honeypot Telemetry (+{research} 🔬)"
+                else:
+                    research = 0
+                    money = cfg.b1_threat_cash
+                    star_note = f"Honeypot Telemetry (+${money})"
+            elif code == "B2":
+                money = 0  # Resolved modally in collect_player_production_income
+                star_note = "Deep R&D Vault (modal)"
+            elif code == "B3":
+                shield_count = len(player.shield_dice)
+                money = cfg.b3_base_cash + cfg.b3_shield_multiplier * shield_count
+                star_note = f"Air-Gapped Backup (+${money})"
+            elif code == "G1":
+                research = cfg.g1_research
+                star_note = f"Self-Healing Kernel (+{research} 🔬, clean {cfg.g1_slots_cleaned} slot)"
+            elif code == "G2":
+                g = getattr(player, "glitched_shield_slots", 0)
+                research = cfg.g2_base_research + g * cfg.g2_glitch_multiplier
+                star_note = f"Universal Sandbox (+{research} 🔬)"
+            elif code == "G3":
+                research = cfg.g3_research
+                money = cfg.g3_cash
+                star_note = f"Live Reboot (+{research} 🔬, +${money})"
+            elif code == "Y1":
+                money = 0  # Resolved modally in collect_player_production_income
+                star_note = "Algorithmic Trading (modal)"
+            elif code == "Y2":
+                cm_colors = {
+                    d.color for d in player.total_dice
+                    if d.color in (DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW)
+                }
+                money = min(cfg.y2_max_cash, cfg.y2_base_cash + cfg.y2_cm_multiplier * len(cm_colors))
+                star_note = f"Cloud Monopoly (+${money})"
+            elif code == "Y3":
+                secrets = cfg.y3_base_secrets
+                gray_count = sum(1 for d in player.total_dice if d.color == DieColor.GRAY)
+                money = gray_count * cfg.y3_gray_multiplier
+                star_note = f"Proprietary Training (+{secrets} Secret, +${money})"
+        elif code == "Y2":
             count = len({d.color for d in player.colored_dice})
             total_payout = min(state.config.y2_max_payout, state.config.y2_base_payout + count)
             bonus = max(0, total_payout - eff.money)
@@ -139,6 +203,8 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
     dice_to_glitch: List[Die] = []
     dice_to_scan: List[Die] = []
     v038_cards = engine.config.variant_profile == "V038_DRAFT"
+    is_v044 = getattr(engine.config, "variant_profile", None) == "V044"
+    v044_modal_stars: List[Tuple[str, Die]] = []
 
     for die in list(player.in_production_dice):
         row = _die_income_row(engine.state, player, die)
@@ -162,7 +228,42 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
             player.change_market_share(+row["market_share"], "face")
 
         if eff and eff.is_star:
-            if eff.star_code == "Y3":
+            if is_v044:
+                code = eff.star_code
+                if code == "G1":
+                    cleaned = secret_faces.clean_slots(player, engine.config.g1_slots_cleaned, "face")
+                    player.f6_g1_activations += 1
+                    if cleaned > 0 and player.shields_on_glitched_slots > 0:
+                        to_promote = min(cleaned, player.shields_on_glitched_slots)
+                        promoted = 0
+                        for sd in player.in_production_dice:
+                            if promoted >= to_promote:
+                                break
+                            if getattr(sd, "production_role", None) == ProductionRole.PURGING_SHIELD:
+                                sd.production_role = ProductionRole.CLEAN_SHIELD
+                                promoted += 1
+                        player.shields_on_glitched_slots = max(0, player.shields_on_glitched_slots - promoted)
+                        player.shields_on_clean_slots += promoted
+                        player.f6_g1_shield_promotions += promoted
+                elif code == "G3":
+                    if player.scanned_dice:
+                        target = player.bot.choose_g3_reboot_target(player, list(player.scanned_dice), engine.state)
+                        if target is not None and target in player.scanned_dice:
+                            player.scanned_dice.remove(target)
+                            _reset(target)
+                            player.ready_for_release_dice.append(target)
+                            player.f6_g3_graduations += 1
+                        else:
+                            player.f6_g3_fizzles += 1
+                    else:
+                        player.f6_g3_fizzles += 1
+                elif code in ("R3", "R3_MKT") and engine.config.is_market_share:
+                    from sim.engine import market_share
+
+                    market_share.queue_poach(engine, player, die.die_id)
+                elif code in ("R2", "B2", "Y1"):
+                    v044_modal_stars.append((code, die))
+            elif eff.star_code == "Y3":
                 # Proprietary Training: move die to glitched_dice after collecting secret
                 # (v0.38 Variant profile: to the Scanned Box)
                 (dice_to_scan if v038_cards else dice_to_glitch).append(die)
@@ -199,6 +300,59 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
                         if hasattr(target_die, attr):
                             setattr(target_die, attr, None)
                     player.scanned_dice.append(target_die)
+
+    if is_v044 and v044_modal_stars:
+        cfg = engine.config
+        for code, _die in v044_modal_stars:
+            if code == "R2":
+                if (
+                    player.money >= cfg.r2_cost_cash
+                    and player.market_share is not None
+                    and player.market_share < player.market_share_max
+                    and player.bot.choose_r2_ad_campaign(player, engine.state)
+                ):
+                    player.money -= cfg.r2_cost_cash
+                    player.change_market_share(cfg.r2_gain_market_share, "r2")
+                    player.f6_r2_activations += 1
+                    player.r2_uses += 1
+                    record.money -= cfg.r2_cost_cash
+            elif code == "B2":
+                mode = player.bot.choose_b2_vault_mode(player, engine.state)
+                if mode == "market_share" and player.secrets >= cfg.b2_secret_cost:
+                    player.gain_secrets(-cfg.b2_secret_cost, "b2")
+                    if player.market_share is not None:
+                        player.change_market_share(cfg.b2_market_share_gain, "b2")
+                    player.f6_b2_secret_activations += 1
+                    record.secrets -= cfg.b2_secret_cost
+                    if player.secrets <= 0:
+                        player.is_patient_zero = True
+                        player.elimination_round = engine.state.current_round
+                        player.elimination_reason = "Total Breach (<= 0 Secrets)"
+                        player.breach_depth = max(0, -player.secrets)
+                        player.f6_b2_suicide_breaches += 1
+                        if all(p.is_patient_zero for p in engine.state.players):
+                            engine.state.game_over = True
+                            engine.state.end_reason = EndGameReason.TOTAL_WIPEOUT
+                        else:
+                            engine.state.is_final_round = True
+                            engine.state.end_reason = EndGameReason.PATIENT_ZERO
+                            engine.state.final_round_trigger_phase = 3
+                else:
+                    player.money += cfg.b2_base_cash
+                    player.f6_b2_cash_activations += 1
+                    record.money += cfg.b2_base_cash
+            elif code == "Y1":
+                mode = player.bot.choose_y1_algo_mode(player, engine.state)
+                if mode == "secret" and player.money >= cfg.y1_secret_cost:
+                    player.money -= cfg.y1_secret_cost
+                    player.gain_secrets(cfg.y1_secret_gain, "y1")
+                    player.f6_y1_secret_activations += 1
+                    record.money -= cfg.y1_secret_cost
+                    record.secrets += cfg.y1_secret_gain
+                else:
+                    player.money += cfg.y1_base_cash
+                    player.f6_y1_cash_activations += 1
+                    record.money += cfg.y1_base_cash
 
     for die in dice_to_glitch:
         if die in player.in_production_dice:
