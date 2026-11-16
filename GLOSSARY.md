@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Section 7 (v0.43.1)
+# Too Many Secrets — Rules Section 7 (v0.44.0)
 
 Split out of `RULES.md`; this file is canonical for Section 7.
 

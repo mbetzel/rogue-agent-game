@@ -237,12 +237,34 @@ def resolve_player_defense_and_wear(
     """
     active_ver = engine.state.active_version.version_str
     six_phase = malware_target_policy == MALWARE_POLICY_SIX_PHASE
+    is_v044 = getattr(engine.config, "variant_profile", None) == "V044"
     if engine.config.is_market_share and engine.state.phase4_snapshot_round != engine.state.current_round:
         # Snapshot once per Phase 4, before any player's Red resolves (bot rival projections)
         engine.state.phase4_snapshot_round = engine.state.current_round
         engine.state.phase4_market_share_start = {p.player_id: p.market_share for p in engine.state.players}
 
-    # 1. Tally committed shields by color and generic ANY
+    # Step 4.1 (v0.44.0): Glitched Slot Purge Step
+    purged_die_ids: set = set()
+    if is_v044:
+        for die in list(player.in_production_dice):
+            if getattr(die, "production_role", None) == ProductionRole.PURGING_SHIELD:
+                purged_die_ids.add(id(die))
+                if player.glitched_shield_slots > 0:
+                    player.glitched_shield_slots -= 1
+                player.purged_shields_this_round += 1
+                player.slots_purged_by_shields_total += 1
+                player.in_production_dice.remove(die)
+                _reset_die(die)
+                if die.color == DieColor.WHITE:
+                    if die in player.contractor_dice:
+                        player.contractor_dice.remove(die)
+                    player.hired_contractor_count = len(player.contractor_dice)
+                    engine.state.contractor_supply += 1
+                else:
+                    player.scanned_dice.append(die)
+        player.shields_on_glitched_slots = 0
+
+    # 1. Tally committed shields by color and generic ANY (Step 4.2: Clean slots only)
     color_shields: Dict[ShieldColor, int] = {
         ShieldColor.RED: 0,
         ShieldColor.BLUE: 0,
@@ -251,6 +273,8 @@ def resolve_player_defense_and_wear(
     }
     for idx, color in commitments.items():
         die = rolled_dice[idx]
+        if id(die) in purged_die_ids:
+            continue
         face = die.effective_face or die.current_face
         if face and face.is_shield:
             color_shields[color] += face.block_amount
@@ -424,21 +448,21 @@ def resolve_player_defense_and_wear(
         else:
             player.extra_attacks_absorbed += 1
 
-    # 6. Star face bonuses dependent on damage (R2, R3, B1). The v0.35 R2 / R3 bonuses exist only in the V035
-    # Red set (belt-and-braces: the Marketing cards use distinct codes R2_MKT / R3_MKT).
+    # 6. Star face bonuses dependent on damage (R2, R3, B1). Disabled under v0.44.0 (all F6 resolve in Phase 3).
     v035_red = engine.config.red_variant_set == RedVariantSet.V035
-    for die in rolled_dice:
-        if six_phase and die not in player.in_production_dice:
-            continue  # only dice still In Production at Phase 4 (INV-SEQ-COMMIT-SYNC-01)
-        face = die.effective_face or die.current_face
-        if not face or not face.is_star:
-            continue
-        if face.star_code == "R2" and v035_red and unblocked_red == 0:
-            player.money += 2
-        elif face.star_code == "R3" and v035_red and exited_cubes.get(CubeColor.RED, 0) >= 3:
-            player.money += 1
-        elif face.star_code == "B1" and exited_cubes.get(CubeColor.BLUE, 0) >= 1 and unblocked_blue == 0:
-            player.money += 2
+    if not is_v044:
+        for die in rolled_dice:
+            if six_phase and die not in player.in_production_dice:
+                continue  # only dice still In Production at Phase 4 (INV-SEQ-COMMIT-SYNC-01)
+            face = die.effective_face or die.current_face
+            if not face or not face.is_star:
+                continue
+            if face.star_code == "R2" and v035_red and unblocked_red == 0:
+                player.money += 2
+            elif face.star_code == "R3" and v035_red and exited_cubes.get(CubeColor.RED, 0) >= 3:
+                player.money += 1
+            elif face.star_code == "B1" and exited_cubes.get(CubeColor.BLUE, 0) >= 1 and unblocked_blue == 0:
+                player.money += 2
 
     # Red ledgers (both modes; telemetry only)
     player.red_incoming_total += player_attacks[CubeColor.RED]

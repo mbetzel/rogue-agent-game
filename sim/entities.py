@@ -617,6 +617,172 @@ def get_all_variant_cards(red_variant_set: Any = "V035") -> Dict[str, VariantCar
     return {card.code: card for card in cards}
 
 
+def get_v044_variant_cards() -> List[VariantCard]:
+    """v0.44.0 Colored Die F6 (★) Variant Card Overhaul (all 12 cards resolve in Phase 3: Income)."""
+    return [
+        # Red ★ Variants
+        VariantCard(
+            code="R1",
+            name="Brand Protection",
+            die_color=DieColor.RED,
+            cost=5,
+            description="Gain +$2 Cash & +1 Market Share.",
+            star_face=Face(
+                name="R1: Brand Protection",
+                money=2,
+                market_share=1,
+                is_star=True,
+                star_code="R1",
+            ),
+        ),
+        VariantCard(
+            code="R2",
+            name="Ad Campaign",
+            die_color=DieColor.RED,
+            cost=4,
+            description="You may pay $2 Cash to gain +2 Market Share.",
+            star_face=Face(
+                name="R2: Ad Campaign",
+                is_star=True,
+                star_code="R2",
+            ),
+        ),
+        VariantCard(
+            code="R3",
+            name="Customer Poaching",
+            die_color=DieColor.RED,
+            cost=5,
+            description="In Phase 3, take 1 Market Share from the rival with the most Market Share.",
+            star_face=Face(
+                name="R3: Customer Poaching",
+                is_star=True,
+                star_code="R3",
+            ),
+        ),
+        # Blue ★ Variants
+        VariantCard(
+            code="B1",
+            name="Honeypot Telemetry",
+            die_color=DieColor.BLUE,
+            cost=5,
+            description="If 0 Blue cubes exited in Phase 2, gain +2 🔬; if 1+ Blue cubes exited, gain +$3 Cash.",
+            star_face=Face(
+                name="B1: Honeypot Telemetry",
+                is_star=True,
+                star_code="B1",
+            ),
+        ),
+        VariantCard(
+            code="B2",
+            name="Deep R&D Vault",
+            die_color=DieColor.BLUE,
+            cost=5,
+            description="Gain +$2 Cash, OR spend 1 Corporate Secret to gain +3 Market Share.",
+            star_face=Face(
+                name="B2: Deep R&D Vault",
+                money=2,
+                is_star=True,
+                star_code="B2",
+            ),
+        ),
+        VariantCard(
+            code="B3",
+            name="Air-Gapped Backup",
+            die_color=DieColor.BLUE,
+            cost=4,
+            description="Gain +$1 Cash, plus +$1 per Shield die In Production.",
+            star_face=Face(
+                name="B3: Air-Gapped Backup",
+                money=1,
+                is_star=True,
+                star_code="B3",
+            ),
+        ),
+        # Green ★ Variants
+        VariantCard(
+            code="G1",
+            name="Self-Healing Kernel",
+            die_color=DieColor.GREEN,
+            cost=5,
+            description="Clean 1 Glitched Shield Slot and gain +1 🔬.",
+            star_face=Face(
+                name="G1: Self-Healing Kernel",
+                patches=1,
+                clean_slots=1,
+                is_star=True,
+                star_code="G1",
+            ),
+        ),
+        VariantCard(
+            code="G2",
+            name="Universal Sandbox",
+            die_color=DieColor.GREEN,
+            cost=5,
+            description="Gain +2 🔬, plus +1 🔬 per Glitched Shield Slot.",
+            star_face=Face(
+                name="G2: Universal Sandbox",
+                patches=2,
+                is_star=True,
+                star_code="G2",
+            ),
+        ),
+        VariantCard(
+            code="G3",
+            name="Live Reboot",
+            die_color=DieColor.GREEN,
+            cost=4,
+            description="Gain +1 🔬 & +$1 Cash, and move 1 die from Scanned Box to Ready for Release.",
+            star_face=Face(
+                name="G3: Live Reboot",
+                money=1,
+                patches=1,
+                is_star=True,
+                star_code="G3",
+            ),
+        ),
+        # Yellow ★ Variants
+        VariantCard(
+            code="Y1",
+            name="Algorithmic Trading",
+            die_color=DieColor.YELLOW,
+            cost=6,
+            description="Gain +$4 Cash, OR pay $2 Cash to gain +1 Corporate Secret.",
+            star_face=Face(
+                name="Y1: Algorithmic Trading",
+                money=4,
+                is_star=True,
+                star_code="Y1",
+            ),
+        ),
+        VariantCard(
+            code="Y2",
+            name="Cloud Monopoly",
+            die_color=DieColor.YELLOW,
+            cost=5,
+            description="Gain +$2 Cash, plus +$1 per different Central Market die color owned (max +$6).",
+            star_face=Face(
+                name="Y2: Cloud Monopoly",
+                money=2,
+                is_star=True,
+                star_code="Y2",
+            ),
+        ),
+        VariantCard(
+            code="Y3",
+            name="Proprietary Training",
+            die_color=DieColor.YELLOW,
+            cost=5,
+            description="Gain +1 Corporate Secret, plus +$1 per Gray Legacy die owned.",
+            star_face=Face(
+                name="Y3: Proprietary Training",
+                secrets=1,
+                is_star=True,
+                star_code="Y3",
+            ),
+        ),
+    ]
+
+
 def get_default_variant_cards() -> Dict[DieColor, VariantCard]:
     """Returns the default baseline variant card for central market dice (Red, Blue, Green, Yellow)."""
     all_cards = get_all_variant_cards()
@@ -1957,8 +2123,16 @@ def _v038_star(card: VariantCard, description: str, **face_kw: Any) -> VariantCa
 
 
 def apply_variant_profile(variant_cards: Dict[DieColor, VariantCard], profile: Optional[str]) -> Dict[DieColor, VariantCard]:
-    """spec v380 §5: ``V038_DRAFT`` Variant Card texts (costs unchanged; every colour-specific Block removed).
-    ``"V037"`` returns the mapping unchanged (same object)."""
+    """Applies a variant profile (``"V038_DRAFT"`` or ``"V044"``) onto a color->VariantCard mapping.
+    ``"V037"`` / ``None`` returns the mapping unchanged (same object)."""
+    if profile == "V044":
+        v044_by_code = {c.code: c for c in get_v044_variant_cards()}
+        out = dict(variant_cards)
+        for color, card in variant_cards.items():
+            target_code = card.printed_code  # maps R2_MKT -> R2, R3_MKT -> R3
+            if target_code in v044_by_code:
+                out[color] = v044_by_code[target_code]
+        return out
     if profile != "V038_DRAFT":
         return variant_cards
     out = dict(variant_cards)

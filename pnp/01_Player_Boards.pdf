@@ -1,7 +1,7 @@
 %PDF-1.4
 %‚„œ”
 1 0 obj
-<< /Title (Too Many Secrets - Player Terminal Mats & Split Cards \(v0.43.1\)) /Producer (Too Many Secrets Vector PnP Engine) >>
+<< /Title (Too Many Secrets - Player Terminal Mats & Split Cards \(v0.44.0\)) /Producer (Too Many Secrets Vector PnP Engine) >>
 endobj
 2 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
@@ -25,7 +25,7 @@ endobj
 << /Type /Pages /Kids [10 0 R 12 0 R 14 0 R 16 0 R 18 0 R 20 0 R] /Count 6 >>
 endobj
 9 0 obj
-<< /Length 115626 >>
+<< /Length 115624 >>
 stream
 q
 0.0588 0.0902 0.1647 RG
@@ -67,7 +67,7 @@ BT /F5 6.50 Tf 28.00 595.00 Td (TOO MANY SECRETS // COMPANY TERMINAL MAT [TERM-0
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.43.1 // US LETTER) Tj ET
+BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.44.0 // US LETTER) Tj ET
 Q
 q
 0.0824 0.3961 0.7529 RG
@@ -4092,39 +4092,39 @@ BT /F1 4.60 Tf 353.81 71.00 Td (Triage) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 298.24 61.00 Td (&) Tj ET
+BT /F1 4.50 Tf 299.86 61.00 Td (&) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 301.24 61.00 Td ( ) Tj ET
+BT /F1 4.50 Tf 302.86 61.00 Td ( ) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 302.49 61.00 Td (Glitched) Tj ET
+BT /F1 4.50 Tf 304.11 61.00 Td (Purged) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 319.00 61.00 Td ( ) Tj ET
+BT /F1 4.50 Tf 318.62 61.00 Td ( ) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 320.25 61.00 Td (Slot) Tj ET
+BT /F1 4.50 Tf 319.87 61.00 Td (Glitched) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 328.00 61.00 Td ( ) Tj ET
+BT /F1 4.50 Tf 336.38 61.00 Td ( ) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 329.25 61.00 Td (Cleaning) Tj ET
+BT /F1 4.50 Tf 337.63 61.00 Td (Shields) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 347.01 61.00 Td ( ) Tj ET
+BT /F1 4.50 Tf 352.39 61.00 Td ( ) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 348.26 61.00 Td (\(Green\)) Tj ET
+BT /F1 4.50 Tf 353.64 61.00 Td (\(P4\)) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
@@ -5223,7 +5223,7 @@ endobj
 << /Type /Page /Parent 8 0 R /MediaBox [0 0 792.00 612.00] /Resources 7 0 R /Contents 9 0 R >>
 endobj
 11 0 obj
-<< /Length 115626 >>
+<< /Length 115624 >>
 stream
 q
 0.0588 0.0902 0.1647 RG
@@ -5265,7 +5265,7 @@ BT /F5 6.50 Tf 28.00 595.00 Td (TOO MANY SECRETS // COMPANY TERMINAL MAT [TERM-0
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.43.1 // US LETTER) Tj ET
+BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.44.0 // US LETTER) Tj ET
 Q
 q
 0.0824 0.3961 0.7529 RG
@@ -9290,39 +9290,39 @@ BT /F1 4.60 Tf 353.81 71.00 Td (Triage) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 298.24 61.00 Td (&) Tj ET
+BT /F1 4.50 Tf 299.86 61.00 Td (&) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 301.24 61.00 Td ( ) Tj ET
+BT /F1 4.50 Tf 302.86 61.00 Td ( ) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 302.49 61.00 Td (Glitched) Tj ET
+BT /F1 4.50 Tf 304.11 61.00 Td (Purged) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 319.00 61.00 Td ( ) Tj ET
+BT /F1 4.50 Tf 318.62 61.00 Td ( ) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 320.25 61.00 Td (Slot) Tj ET
+BT /F1 4.50 Tf 319.87 61.00 Td (Glitched) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 328.00 61.00 Td ( ) Tj ET
+BT /F1 4.50 Tf 336.38 61.00 Td ( ) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 329.25 61.00 Td (Cleaning) Tj ET
+BT /F1 4.50 Tf 337.63 61.00 Td (Shields) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 347.01 61.00 Td ( ) Tj ET
+BT /F1 4.50 Tf 352.39 61.00 Td ( ) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 348.26 61.00 Td (\(Green\)) Tj ET
+BT /F1 4.50 Tf 353.64 61.00 Td (\(P4\)) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
@@ -10421,7 +10421,7 @@ endobj
 << /Type /Page /Parent 8 0 R /MediaBox [0 0 792.00 612.00] /Resources 7 0 R /Contents 11 0 R >>
 endobj
 13 0 obj
-<< /Length 115626 >>
+<< /Length 115624 >>
 stream
 q
 0.0588 0.0902 0.1647 RG
@@ -10463,7 +10463,7 @@ BT /F5 6.50 Tf 28.00 595.00 Td (TOO MANY SECRETS // COMPANY TERMINAL MAT [TERM-0
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.43.1 // US LETTER) Tj ET
+BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.44.0 // US LETTER) Tj ET
 Q
 q
 0.0824 0.3961 0.7529 RG
@@ -14488,39 +14488,39 @@ BT /F1 4.60 Tf 353.81 71.00 Td (Triage) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 298.24 61.00 Td (&) Tj ET
+BT /F1 4.50 Tf 299.86 61.00 Td (&) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 301.24 61.00 Td ( ) Tj ET
+BT /F1 4.50 Tf 302.86 61.00 Td ( ) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 302.49 61.00 Td (Glitched) Tj ET
+BT /F1 4.50 Tf 304.11 61.00 Td (Purged) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 319.00 61.00 Td ( ) Tj ET
+BT /F1 4.50 Tf 318.62 61.00 Td ( ) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 320.25 61.00 Td (Slot) Tj ET
+BT /F1 4.50 Tf 319.87 61.00 Td (Glitched) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 328.00 61.00 Td ( ) Tj ET
+BT /F1 4.50 Tf 336.38 61.00 Td ( ) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 329.25 61.00 Td (Cleaning) Tj ET
+BT /F1 4.50 Tf 337.63 61.00 Td (Shields) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 347.01 61.00 Td ( ) Tj ET
+BT /F1 4.50 Tf 352.39 61.00 Td ( ) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 348.26 61.00 Td (\(Green\)) Tj ET
+BT /F1 4.50 Tf 353.64 61.00 Td (\(P4\)) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
@@ -15619,7 +15619,7 @@ endobj
 << /Type /Page /Parent 8 0 R /MediaBox [0 0 792.00 612.00] /Resources 7 0 R /Contents 13 0 R >>
 endobj
 15 0 obj
-<< /Length 115626 >>
+<< /Length 115624 >>
 stream
 q
 0.0588 0.0902 0.1647 RG
@@ -15661,7 +15661,7 @@ BT /F5 6.50 Tf 28.00 595.00 Td (TOO MANY SECRETS // COMPANY TERMINAL MAT [TERM-0
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.43.1 // US LETTER) Tj ET
+BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.44.0 // US LETTER) Tj ET
 Q
 q
 0.0824 0.3961 0.7529 RG
@@ -19686,39 +19686,39 @@ BT /F1 4.60 Tf 353.81 71.00 Td (Triage) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 298.24 61.00 Td (&) Tj ET
+BT /F1 4.50 Tf 299.86 61.00 Td (&) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 301.24 61.00 Td ( ) Tj ET
+BT /F1 4.50 Tf 302.86 61.00 Td ( ) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 302.49 61.00 Td (Glitched) Tj ET
+BT /F1 4.50 Tf 304.11 61.00 Td (Purged) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 319.00 61.00 Td ( ) Tj ET
+BT /F1 4.50 Tf 318.62 61.00 Td ( ) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 320.25 61.00 Td (Slot) Tj ET
+BT /F1 4.50 Tf 319.87 61.00 Td (Glitched) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 328.00 61.00 Td ( ) Tj ET
+BT /F1 4.50 Tf 336.38 61.00 Td ( ) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 329.25 61.00 Td (Cleaning) Tj ET
+BT /F1 4.50 Tf 337.63 61.00 Td (Shields) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 347.01 61.00 Td ( ) Tj ET
+BT /F1 4.50 Tf 352.39 61.00 Td ( ) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
-BT /F1 4.50 Tf 348.26 61.00 Td (\(Green\)) Tj ET
+BT /F1 4.50 Tf 353.64 61.00 Td (\(P4\)) Tj ET
 Q
 q
 0.3922 0.4549 0.5451 rg
@@ -20859,7 +20859,7 @@ BT /F5 6.50 Tf 28.00 595.00 Td (TOO MANY SECRETS // 6x CLIENT COMPANY CARDS [PAG
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.43.1 // US LETTER) Tj ET
+BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.44.0 // US LETTER) Tj ET
 Q
 q
 0.2000 0.2549 0.3333 rg
@@ -24637,7 +24637,7 @@ BT /F5 6.50 Tf 28.00 595.00 Td (TOO MANY SECRETS // 6x WHITE HAT DOSSIER CARDS [
 Q
 q
 0.3922 0.4549 0.5451 rg
-BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.43.1 // US LETTER) Tj ET
+BT /F4 6.50 Tf 631.40 595.00 Td (PNP PROTOTYPE v0.44.0 // US LETTER) Tj ET
 Q
 q
 0.4157 0.1059 0.6039 rg
@@ -30084,20 +30084,20 @@ xref
 0000000657 00000 n 
 0000000740 00000 n 
 0000000833 00000 n 
-0000116512 00000 n 
-0000116623 00000 n 
-0000232303 00000 n 
-0000232415 00000 n 
-0000348095 00000 n 
-0000348207 00000 n 
-0000463887 00000 n 
-0000463999 00000 n 
-0000536522 00000 n 
-0000536634 00000 n 
-0000640344 00000 n 
-0000640456 00000 n 
+0000116510 00000 n 
+0000116621 00000 n 
+0000232299 00000 n 
+0000232411 00000 n 
+0000348089 00000 n 
+0000348201 00000 n 
+0000463879 00000 n 
+0000463991 00000 n 
+0000536514 00000 n 
+0000536626 00000 n 
+0000640336 00000 n 
+0000640448 00000 n 
 trailer
 << /Size 22 /Root 21 0 R /Info 1 0 R >>
 startxref
-640506
+640498
 %%EOF

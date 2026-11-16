@@ -47,6 +47,8 @@ class ProductionRole(str, Enum):
     BLUE_SHIELD = "BLUE_SHIELD"
     GREEN_SHIELD = "GREEN_SHIELD"
     ANY_SHIELD = "ANY_SHIELD"
+    CLEAN_SHIELD = "CLEAN_SHIELD"
+    PURGING_SHIELD = "PURGING_SHIELD"
 
     @classmethod
     def _missing_(cls, value: object) -> Any:
@@ -314,6 +316,21 @@ class PlayerState:
         self.capital_injection_uses = 0
         self.logistics_bounty_triggers = 0
         self.money_by_source: Dict[str, int] = {}
+        # v0.44.0 F6 Variant Overhaul & Glitched Shield Slot Tracking (Spec §5.3)
+        self.shields_on_clean_slots: int = 0
+        self.shields_on_glitched_slots: int = 0
+        self.purged_shields_this_round: int = 0
+        self.f6_r2_activations: int = 0
+        self.f6_b2_cash_activations: int = 0
+        self.f6_b2_secret_activations: int = 0
+        self.f6_b2_suicide_breaches: int = 0
+        self.f6_g1_activations: int = 0
+        self.f6_g1_shield_promotions: int = 0
+        self.f6_g3_graduations: int = 0
+        self.f6_g3_fizzles: int = 0
+        self.f6_y1_cash_activations: int = 0
+        self.f6_y1_secret_activations: int = 0
+        self.slots_purged_by_shields_total: int = 0
         self.player_id = player_id
         self.bot = bot
         self.money = money
@@ -513,7 +530,7 @@ class PlayerState:
             self.market_share_regained += actual
         elif source == "r2":
             self.market_share_gained_r2 += actual
-        elif source == "face":
+        elif source in ("face", "b2", "r1"):
             self.market_share_gained_face += actual
         elif source == "corruption":
             self.market_share_lost_red += -actual
@@ -912,8 +929,24 @@ class PlayerState:
         ]
 
     @property
+    def clean_shield_dice(self) -> List[Die]:
+        """Modules in In Production actively assigned to clean Defense Grid slots."""
+        return [
+            d for d in self.in_production_dice
+            if getattr(d, "production_role", None) == ProductionRole.CLEAN_SHIELD
+        ]
+
+    @property
+    def purging_shield_dice(self) -> List[Die]:
+        """Modules in In Production assigned to glitched Defense Grid slots to purge malware."""
+        return [
+            d for d in self.in_production_dice
+            if getattr(d, "production_role", None) == ProductionRole.PURGING_SHIELD
+        ]
+
+    @property
     def shield_dice(self) -> List[Die]:
-        """All modules actively assigned to defense across Red, Blue, Green, and Any."""
+        """All modules actively assigned to defense across Red, Blue, Green, Any, Clean, and Purging."""
         return [
             d for d in self.in_production_dice
             if getattr(d, "production_role", None) in (
@@ -921,6 +954,8 @@ class PlayerState:
                 ProductionRole.BLUE_SHIELD,
                 ProductionRole.GREEN_SHIELD,
                 ProductionRole.ANY_SHIELD,
+                ProductionRole.CLEAN_SHIELD,
+                ProductionRole.PURGING_SHIELD,
             )
         ]
 

@@ -921,6 +921,50 @@ class BaseBot:
         return secret_face_policy.choose_slot_cleaners(player_state, active_dice, candidates, glitched_slots,
                                                        game_state)
 
+    def choose_shield_slot_allocation(
+        self,
+        player_state: PlayerState,
+        committed_shields: List[Die],
+        clean_capacity: int,
+        glitched_capacity: int,
+        game_state: Optional[GameState] = None,
+    ) -> Tuple[List[Die], List[Die]]:
+        """v0.44.0: Partition committed shield dice into (clean_slot_dice, glitched_slot_dice)."""
+        from sim.bots import market_share_policy as msp
+
+        return msp.default_shield_slot_allocation(
+            player_state, committed_shields, clean_capacity, glitched_capacity, game_state
+        )
+
+    def choose_r2_ad_campaign(self, player_state: PlayerState, game_state: GameState) -> bool:
+        """v0.44.0 R2 Ad Campaign (Phase 3): True to pay $2 Cash for +2 Market Share."""
+        from sim.bots import market_share_policy as msp
+
+        return msp.default_r2_ad_campaign(player_state, game_state)
+
+    def choose_b2_vault_mode(self, player_state: PlayerState, game_state: GameState) -> str:
+        """v0.44.0 B2 Deep R&D Vault (Phase 3): 'cash' (+$2) or 'market_share' (-1 Secret -> +3 MS)."""
+        from sim.bots import market_share_policy as msp
+
+        return msp.default_b2_vault_mode(player_state, game_state)
+
+    def choose_y1_algo_mode(self, player_state: PlayerState, game_state: GameState) -> str:
+        """v0.44.0 Y1 Algorithmic Trading (Phase 3): 'cash' (+$4) or 'secret' (-$2 -> +1 Secret)."""
+        from sim.bots import market_share_policy as msp
+
+        return msp.default_y1_algo_mode(player_state, game_state)
+
+    def choose_g3_reboot_target(
+        self,
+        player_state: PlayerState,
+        scanned_dice: List[Die],
+        game_state: Optional[GameState] = None,
+    ) -> Optional[Die]:
+        """v0.44.0 G3 Live Reboot (Phase 3): choose 1 die in Scanned Box to move to Ready for Release."""
+        from sim.bots import market_share_policy as msp
+
+        return msp.default_g3_reboot_target(player_state, scanned_dice, game_state)
+
     def choose_helix_face_override_v038(
         self, player_state: PlayerState, active_dice: List[Die], game_state: GameState
     ) -> Optional[Tuple[int, Face]]:

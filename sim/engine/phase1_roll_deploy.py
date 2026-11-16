@@ -338,14 +338,17 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
         if player.is_patient_zero or (player_ids is not None and player.player_id not in player_ids):
             continue
 
-        # Reset round star availability
+        # Reset round star availability & v0.44.0 slot tracking
         player.b2_available = False
-        player.r2_actions_available = 0  # v0.36.0 Ad Campaign (earned in Phase 3)
+        player.r2_actions_available = 0  # v0.36.0 Ad Campaign (earned in Phase 3; unused in v0.44.0)
         player.y1_available = False
         player.p1_available = False
         player.p3_available = None
         player.purple_star_available = False
         player.purple_star_count = 0
+        player.shields_on_clean_slots = 0
+        player.shields_on_glitched_slots = 0
+        player.purged_shields_this_round = 0
 
         # Roll Active Pool (ready_for_release_dice + contractor_dice)
         active_dice: List[Die] = list(player.ready_for_release_dice) + list(player.contractor_dice)
@@ -573,11 +576,15 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
                     elif face.shield_color == ShieldColor.ANY:
                         validated_commitments[idx] = ShieldColor.ANY
 
-        # v0.38 Step 5c: clean Glitched Shield Slots (Green F1 / G1 / G2 faces, then shield-icon dice placed on a
-        # glitched slot, which go to the Scanned Box / are discarded) before shields fill the effective capacity.
+        # v0.38 Step 5c: clean Glitched Shield Slots (legacy) vs v0.44.0 unified capacity (no Phase 1 discard)
+        is_v044 = getattr(engine.config, "variant_profile", None) == "V044"
         slot_cleaner_ids: set = set()
         shield_capacity = player.defense_capacity
-        if slots_on:
+        if slots_on and is_v044:
+            shield_capacity = player.defense_capacity
+            if secret_faces.effective_capacity(player) == 0:
+                player.zero_capacity_rounds += 1
+        elif slots_on:
             for idx, die in enumerate(active_dice):
                 eff = die.effective_face  # choice index already synced by the validation pass above
                 if eff is not None and eff.clean_slots > 0:
@@ -663,29 +670,57 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
 
         # 3. Assign Production Roles and Deploy to in_production_dice
         player.in_production_dice.clear()
+        clean_slot_ids: set = set()
+        purging_slot_ids: set = set()
+        if is_v044 and new_commitments:
+            committed_shield_dice = [surviving_active[idx] for idx in sorted(new_commitments)]
+            clean_cap = max(0, player.defense_capacity - player.glitched_shield_slots)
+            glitched_cap = min(player.glitched_shield_slots, player.defense_capacity)
+            alloc_fn = getattr(player.bot, "choose_shield_slot_allocation", None)
+            if callable(alloc_fn):
+                c_list, p_list = alloc_fn(player, committed_shield_dice, clean_cap, glitched_cap, engine.state)
+            else:
+                c_list, p_list = committed_shield_dice[:clean_cap], committed_shield_dice[clean_cap:clean_cap + glitched_cap]
+            valid_ids = {id(d) for d in committed_shield_dice}
+            c_filtered = [d for d in (c_list or []) if id(d) in valid_ids][:clean_cap]
+            c_ids = {id(d) for d in c_filtered}
+            p_filtered = [d for d in (p_list or []) if id(d) in valid_ids and id(d) not in c_ids][:glitched_cap]
+            clean_slot_ids = c_ids
+            purging_slot_ids = {id(d) for d in p_filtered}
+            player.shields_on_clean_slots = len(clean_slot_ids)
+            player.shields_on_glitched_slots = len(purging_slot_ids)
+
         for idx, die in enumerate(surviving_active):
             face = die.effective_face or die.current_face
             if idx in new_commitments:
-                s_color = new_commitments[idx]
-                if s_color == ShieldColor.RED:
-                    die.production_role = ProductionRole.RED_SHIELD
-                elif s_color == ShieldColor.BLUE:
-                    die.production_role = ProductionRole.BLUE_SHIELD
-                elif s_color == ShieldColor.GREEN:
-                    die.production_role = ProductionRole.GREEN_SHIELD
-                elif s_color == ShieldColor.ANY:
-                    die.production_role = ProductionRole.ANY_SHIELD
+                if is_v044:
+                    if id(die) in purging_slot_ids:
+                        die.production_role = ProductionRole.PURGING_SHIELD
+                    elif id(die) in clean_slot_ids:
+                        die.production_role = ProductionRole.CLEAN_SHIELD
+                    else:
+                        die.production_role = ProductionRole.INCOME
                 else:
-                    die.production_role = ProductionRole.ANY_SHIELD
+                    s_color = new_commitments[idx]
+                    if s_color == ShieldColor.RED:
+                        die.production_role = ProductionRole.RED_SHIELD
+                    elif s_color == ShieldColor.BLUE:
+                        die.production_role = ProductionRole.BLUE_SHIELD
+                    elif s_color == ShieldColor.GREEN:
+                        die.production_role = ProductionRole.GREEN_SHIELD
+                    elif s_color == ShieldColor.ANY:
+                        die.production_role = ProductionRole.ANY_SHIELD
+                    else:
+                        die.production_role = ProductionRole.ANY_SHIELD
             else:
                 die.production_role = ProductionRole.INCOME
 
-            # Star Special eligibility tracking for Phase 3
+            # Star Special eligibility tracking for Phase 3/6
             if face and face.is_star:
-                if face.star_code == "B2":
+                if face.star_code == "B2" and not is_v044:
                     if idx not in new_commitments:
                         player.b2_available = True
-                elif face.star_code == "Y1":
+                elif face.star_code == "Y1" and not is_v044:
                     player.y1_available = True
                 elif face.star_code == "P1":
                     player.p1_available = True

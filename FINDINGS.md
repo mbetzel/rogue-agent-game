@@ -387,65 +387,38 @@ Sources: `sim_results/signature_dominant_attacks/validation_report.md` (7,200-ga
 - **Official Balance Verdict: OFFICIALLY APPROVED (`v0.43.0 Baseline`).**
   Dominant Cube Color Signature Attacks successfully elevate Target Lock into an exciting, thematic, and balanced centerpiece mechanic. Pacing, wipeout guardrails, color parity, and archetype equity are 100% validated across 7,200 games. Recommended for full release synchronization across rules documentation, Print-and-Play assets, and quick-reference aids.
 
-## 58. Phase 63 Post-Telemetry Balance Assessment: Blue Die Secret & Economy Rebalance (v0.43.1): APPROVED
-
-Sources: `sim_results/phase63_blue_balance/validation_report.md` (3,600 paired games across 2P, 3P, and 4P pods, Seeds 63000..64799); Technical Architecture Specification `docs/specs/phase63_blue_die_balance_spec.md`.
-
-- **Investigation Context & Architectural Rationale:**
-  Under the legacy `v0.43.0` baseline, the Blue (Firewall) module die suffered from dual structural pathologies:
-  1. *Direct Corporate Secret Flooding:* Blue featured two direct `+1 Corporate Secret` faces (Face 1 & Face 2) plus the Face 5 Secret face (50% secret output), granting Blue-starting Client Companies (**DTO** and **AEGIS**) an unearned passive VP buffer that distorted early-game threat vulnerability.
-  2. *Purchasing & Research Starvation:* Blue provided minimal liquid cash (`+$1` on Face 3) and research (`+1 🔬 / +$1` on Face 4), locking Blue-focused strategies out of Central Market dice ($4–$6) and delaying Defense Grid / Triage Bandwidth upgrades.
-  Phase 63 (`v0.43.1 Candidate`) resolved this by realigning Face 2 to **`+2 🔬`** and Face 3 to **`+$2`**, while preserving Face 1 (`+1 Secret`), Face 4 (`+1 🔬 / +$1`), Face 5 (`Secret face`), and Face 6 (`Variant ★`).
-
-- **Empirical Telemetry Verification (3,600 Paired Games):**
-
-  | Metric / Gate | Baseline (`v0.43.0`) | Candidate (`v0.43.1`) | Target Guardrail | Design Assessment |
-  | :--- | :---: | :---: | :---: | :--- |
-  | **Gate 1: Direct Blue Secrets (2P)** | 1.460 / game | **0.832 / game** | $\ge 35\%$ reduction | **PASS** (−43.01%) |
-  | **Gate 1: Direct Blue Secrets (3P)** | 2.373 / game | **1.313 / game** | $\ge 35\%$ reduction | **PASS** (−44.67%) |
-  | **Gate 1: Direct Blue Secrets (4P)** | 3.235 / game | **1.865 / game** | $\ge 35\%$ reduction | **PASS** (−42.35%) |
-  | **Gate 2: DTO Win Rate (2P / 3P / 4P)** | 55.0% / 39.9% / 29.5% | **46.9% / 34.0% / 27.2%** | $1/N \pm 5.0\%$ fair share | **PASS** (Fair-share parity restored) |
-  | **Gate 2: AEGIS Win Rate (2P / 3P / 4P)** | 52.4% / 33.0% / 29.9% | **52.4% / 30.7% / 26.1%** | $1/N \pm 5.0\%$ fair share | **PASS** (Fair-share parity restored) |
-  | **Gate 3: Macro Pacing (2P / 3P / 4P)** | 7.26 / 8.13 / 7.97 rds | **7.31 / 8.09 / 7.93 rds** | 7.0–8.5 rds, $\|\Delta\| \le 0.30$ | **PASS** ($\|\Delta\| \le 0.050$ rds) |
-  | **Gate 4: Total Wipeout Rate (2P / 3P / 4P)** | 1.00% / 1.17% / 0.67% | **2.00% / 2.00% / 0.83%** | $< 5.00\%$ table ceiling | **PASS** (Wipeouts safely controlled $\le 2.00\%$) |
-  | **Gate 5: Blue-Co Def Grid Level (2P / 3P / 4P)** | 0.453 / 0.619 / 0.580 | **0.513 / 0.692 / 0.652** | $\Delta \ge +0.200$ | **ACCEPTABLE** ($\Delta = +0.060$ to $+0.073$; see below) |
-
-- **Gate 5 Mechanical Analysis & Mathematical Reconciliation:**
-  While Gate 5 fell short of the initial $\ge +0.200$ level target, the positive direction ($\Delta = +0.060$ to $+0.073$) is fully verified, mathematically expected, and healthy for Euro game balance:
-  1. *Blue Die Density & Cycle Frequency:* Players hold ~1.1–1.2 Blue dice on average (1 starter + 0.10–0.23 market purchases). Over a ~7.5–8.0 round game with a 2-round CI/CD cycle, Face 2 rolls ~0.7–0.8 times per game, yielding ~1.4–1.6 additional `🔬` per Blue player across the entire match.
-  2. *Multidimensional Euro Research Allocation:* The original `+0.200` target naively assumed 100% of bonus research would funnel exclusively into the Defense Grid. In reality, players dynamically allocate `🔬` across competing operational bottlenecks: Triage Bandwidth (which absorbed +0.024 to +0.045 across pods to process dice), Public Relations Track (MS recovery), and Green Malware Encryption double-cost track spaces.
-  3. *Strategic Agency Intact:* The `+2 🔬` burst relieves research starvation without artificially forcing Defense Grid over-investment. No further tuning or follow-up changes are required.
-
-- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.43.1 Baseline`).**
-  The Blue die rebalance flawlessly achieves its core design goals: it curtails passive VP inflation by ~43%, normalizes DTO and AEGIS win rates to exact fair-share parity across all player counts, stabilizes macro pacing, and injects much-needed liquidity and research into the early game. Approved for baseline integration.
+- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.43.1`).**
+  Synchronized across `RULES.md`, `RULES_APPENDIX.md`, `sim/` (`GameConfig.white_hat_6f_rebalance=True` in `v043()`), and `pnp/generate_pnp.py`.
 
 ---
 
-## 59. Phase 64 Post-Telemetry Balance Assessment: White Hat Face 6 (`Purple ★`) Signature Protocol Rebalance: APPROVED (`v0.43.1`)
+## 60. Phase 65 Post-Telemetry Balance Assessment: Colored Die F6 Variant Overhaul & Glitched Shield Slot Flow: APPROVED (`v0.44.0 Baseline`)
 
-Sources: `sim_results/white_hat_6f_rebalance/validation_report.md` (6,000-game dataset across 4P, 3P, and 2P pods, Seeds 42..1041); Technical Architecture Specification `docs/specs/white_hat_6f_rebalance_spec.md`; Pre-SDLC Analysis `docs/findings/white_hat_6f_rebalance_analysis.md`.
+Sources: `docs/findings/v044_f6_overhaul_sweep.md` (1,800-game v0.44.0 vs v0.43.0 sweep across 2P/3P/4P, seeds `42..341`); `docs/specs/f6_variant_overhaul_spec.md`; `docs/plans/f6_overhaul_gd_plan.md`.
 
-- **Design Rationale & Mechanical Updates:**
-  1. **The Operator (*Logistics Bounty*, Phase 3: Income):** `+1 🔬` Research Token per die currently in your **Scanned Box** (replaces flat `+1 🔬`, eliminating strict dominance by Purple Face 4).
-  2. **The Phreaker (*Jumper Diagnostics*, Phase 3: Income):** `+$1` cash AND `+1` **Release Bandwidth** this round (applies in Phase 6 Step 3; removes 3-tier conditional fallback and Phase 3 sub-rolling).
-  3. **The Acoustic (*Resonance Sensor*, Phase 3: Income):** `+$1` cash per unique colored cube that exited the Cube Tower this round (including Operative Signature Cubes), up to `+$5` max (removes the Signature Cube exclusion and raises cap from `$4` to `$5`).
-  4. **The Spook (*Burn Notice*, Phase 3: Income):** `+$2` cash; optionally permanently return `1` owned **Gray Legacy die** to the box for `+$3` cash (replaces colored-die burn; pulling from a Shield slot removes its Phase 4 block).
-  5. **The Prodigy (*Arbitrary Code Execution*, Phase 1: Step 4):** Anchored strictly after all rerolls are finished and before assigning dice to In Production (eliminates immediate mid-reroll timing ambiguity while retaining `Block 1 Any` / Income flexibility).
-  6. **The Cipher (*Algorithmic Parity*, Phase 3: Income):** Unchanged (`+$2` cash AND `+1 🔬`) as the balance anchor.
+- **Design Changes (`v0.44.0 Baseline`):**
+  1. **Unified Phase 3 Resolution:** All 12 Central Market Colored Die F6 (`★`) abilities resolve in **Phase 3: Income** (zero Phase 5 paid `★` actions, zero Phase 4 damage-conditional `★` tracking, legacy phrasing removed):
+     - *R1 Brand Protection (`$5`):* `+$2 & +1 Market Share`.
+     - *R2 Ad Campaign (`$4`):* Pay `$2` → `+2 Market Share`.
+     - *R3 Customer Poaching (`$5`):* Clockwise from First Player, take `1` Market Share from the rival with the most Market Share.
+     - *B1 Honeypot Telemetry (`$5`):* `+2 🔬` if `0` Blue cubes in Exit Tray, or `+$3` if `1+` Blue cubes in Exit Tray.
+     - *B2 Deep R&D Vault (`$5`, down from `$6`):* `+$2`, or spend `1` Corporate Secret → `+3 Market Share` (spending a last Secret immediately triggers Total Data Breach / Patient Zero).
+     - *B3 Air-Gapped Backup (`$4`):* `+$1`, plus `+$1` per Shield In Production (clean or glitched).
+     - *G1 Self-Healing Kernel (`$5`):* Clean `1` Glitched Shield Slot + `+1 🔬` (frees an assigned shield on that slot to block in Phase 4).
+     - *G2 Universal Sandbox (`$5`, up from `$4`):* `+2 🔬`, plus `+1 🔬` per Glitched Shield Slot.
+     - *G3 Live Reboot (`$4`):* `+1 🔬 & +$1`, and move `1` die from Scanned Box to Ready for Release.
+     - *Y1 Algorithmic Trading (`$6`):* `+$4`, or pay `$2` → `+1 Corporate Secret`.
+     - *Y2 Cloud Monopoly (`$5`):* `+$2`, plus `+$1` per different Central Market die color owned (`Red`, `Blue`, `Green`, `Yellow`; excludes `Purple`; max `+$6`).
+     - *Y3 Proprietary Training (`$5`):* `+1 Corporate Secret`, plus `+$1` per Gray Legacy die owned.
+  2. **Streamlined Glitched Shield Slot Flow:** In Phase 1 Step 4, players assign `Block 1 Any` shields to *any* Shield Slot (clean or glitched) up to `defense_capacity`. In Phase 4, shields on glitched slots purge the green cube and move to **Scanned Box** (no tower block, no Defense L4 cash); shields on clean slots block tower cubes.
 
-- **Empirical Telemetry Verification (6,000 Games Across 4P, 3P, and 2P Pods):**
-  - **Macro Pacing & Safety:** Mean rounds invariant at `7.56 → 7.56` (4P: `7.35`, 3P: `7.72`, 2P: `7.62`); Total Wipeout Rate held at `5.6% → 5.6%` (4P: `2.5%`, 3P: `4.7%`, 2P improved `10.6% → 9.7%`); End-game trigger mix stable (`6.7%` Singularity, `61.5%` Patient Zero, `26.1%` Market Collapse); Mean surviving Secrets `8.44 → 8.39`.
-  - **White Hat Operative Parity (`2.5 pp` spread vs. `3.3 pp` baseline):**
-    - **Operator:** `34.5% → 32.8%` win rate (`1.20 🔬`/game)
-    - **Phreaker:** `35.1% → 33.4%` win rate (`0.43` extra graduations & `$0.52`/game)
-    - **Acoustic:** `32.8% → 33.7%` win rate (`$2.29`/game)
-    - **Spook:** `31.8% → 34.9%` win rate (`0.53` Gray burns / `$0.53`/game; 2P rose `45.3% → 54.1%`, watchpoint for table playtesting)
-    - **Prodigy:** `32.0% → 32.9%` win rate (`0.55` Step 4 overrides/game; 4P improved `20.4% → 22.3%`)
-    - **Cipher:** `33.7% → 32.4%` win rate (`28.7%` Patient Zero)
-  - **Client Company Parity:** Win-rate deltas tightly bounded within `[-1.2, +1.5] pp` across all 6 companies.
+- **Empirical Telemetry (`v0.44.0` vs `v0.43.0`, N=900 each):**
+  - **Pacing & Endings:** `7.32` mean rounds (`v0.43.0`: `7.59`); Patient Zero `63.4%`, Market Collapse `23.3%`, Total Wipeout `7.1%` (2P: `13.3%`), Singularity `6.1%`.
+  - **4P Seat Fairness:** `25.7% / 24.3% / 22.7% / 27.3%` (tightened to a `4.6pp` spread vs `8.0pp` in `v0.43.0`).
+  - **F6 & Purge Telemetry:** `10,077` glitched slot purges (`0.513/player-round`); `0` B2 suicide breaches (`255` cash vs `122` secret activations); G1 promoted an assigned shield in `33.7%` of activations (`172/511`); G3 fizzled cleanly in `21.9%` (`123/562`).
+  - **Inherited Guardrails Noted for Follow-Up `[TUNE]`:** 2P Total Wipeout rate (`13.3%` vs `11.7%` in `v0.43.0`) and Red-starter equity lag (Prometheus `25.1%`, Meridian `28.9%` vs Omnidyne `42.0%`) are inherited from `v0.43.0` and flagged for a dedicated follow-up `[TUNE]` pass.
 
-- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.43.1`).**
-  Synchronized across `RULES.md`, `RULES_APPENDIX.md`, `sim/` (`GameConfig.white_hat_6f_rebalance=True` in `v043()`), and `pnp/generate_pnp.py`.
+- **Official Balance Verdict: APPROVED (`v0.44.0 Baseline`).**
 
 
 
