@@ -42,8 +42,7 @@ You are a **White Hat Operative** contracted to defend a **Client Company** agai
      * **3–4 Players:** `4 Secrets`
    * **Starting Market Share (also maximum track cap):**
      * **2 Players:** `13`
-     * **3 Players:** `16`
-     * **4 Players:** `17`
+     * **3–4 Players:** `16`
 6. Randomly assign the **First Player Marker**.
 
 ---

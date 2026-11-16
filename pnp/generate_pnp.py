@@ -93,7 +93,7 @@ COMPANIES: List[CompanyCardSpec] = [
         name="Helix Biomedical Consortium",
         sector="Medical Research",
         override_name="Brute-Force Bypass",
-        override_timing="P1: STEP 4 REROLLS",
+        override_timing="P1: STEP 3 REROLLS",
         override_desc=(
             "Gain **1 extra free reroll** this phase. In addition, turn **1 rolled die** "
             "to any legal non-Star face of its color (the Secret face is allowed)."
@@ -398,10 +398,10 @@ VERSION_TILES: List[VersionTileSpec] = [
         banner_text="**CRITICAL BREACH:** Unblocked {BLUE} costs **2 Corporate Secrets**!\nSpace 4 glitches 1 slot & adds cubes. Space 6 = Singularity!",
         spaces=(
             VersionTrackSpaceSpec(1, "+1 {RED} 2 {BLUE} 1 {GREEN}"),
-            VersionTrackSpaceSpec(2, "Most $ loses $3\nMost {RESEARCH} loses 1 {RESEARCH}\n+1 {BLACK}"),
+            VersionTrackSpaceSpec(2, "Most $ -$3\nMost {RESEARCH} -1{RESEARCH}\n+1 {BLACK}"),
             VersionTrackSpaceSpec(3, "+1 {RED} 2 {BLUE}"),
-            VersionTrackSpaceSpec(4, "Fewest Glitched\nglitches 1 slot\n+1 {BLUE} 1 {BLACK}"),
-            VersionTrackSpaceSpec(5, "Most Dice\nreturns 1 die"),
+            VersionTrackSpaceSpec(4, "Fewest Glitched:\nglitch 1 slot\n+1 {BLUE} 1 {BLACK}"),
+            VersionTrackSpaceSpec(5, "Most Colored\nreturns 1 die"),
             VersionTrackSpaceSpec(6, "**SINGULARITY!**", is_singularity=True),
         ),
     ),
@@ -411,11 +411,11 @@ VERSION_TILES: List[VersionTileSpec] = [
         profile="SINGULARITY",
         banner_text="**CRITICAL BREACH:** Unblocked {BLUE} costs **2 Corporate Secrets**!\nSpace 1 glitches 1 slot & adds cubes. Space 4 leaks 1 Secret.",
         spaces=(
-            VersionTrackSpaceSpec(1, "Fewest Glitched\nglitches 1 slot\n+1 {RED} 2 {BLUE}"),
+            VersionTrackSpaceSpec(1, "Fewest Glitched:\nglitch 1 slot\n+1 {RED} 2 {BLUE}"),
             VersionTrackSpaceSpec(2, "Most MS loses $3\n& 1 {RESEARCH} +1 {BLACK}"),
             VersionTrackSpaceSpec(3, "+1 {RED} 1 {BLUE} 1 {GREEN}"),
             VersionTrackSpaceSpec(4, "Most Secrets\nloses 1 Secret\n+1 {BLACK}"),
-            VersionTrackSpaceSpec(5, "Most Dice\nreturns 1 die"),
+            VersionTrackSpaceSpec(5, "Most Colored\nreturns 1 die"),
             VersionTrackSpaceSpec(6, "**SINGULARITY!**\nMost Secrets -1", is_singularity=True),
         ),
     ),
@@ -592,7 +592,7 @@ def _draw_company_card(page: PDFPage, x: float, y: float, w: float, h: float, co
     page.text(x + 7.0, o_y + 8.6, title, font="bold", size=t_size, color=PALETTE["ink"])
 
     ty = o_y + o_h - 15.0
-    _fit_paragraph(page, x + 7.0, o_y + 18.5, w - 14.0, comp.override_desc, ty - 1.5, size=5.3, leading=6.7, min_size=4.5)
+    _fit_paragraph(page, x + 7.0, o_y + 21.5, w - 14.0, comp.override_desc, ty - 2.5, size=8.6, leading=10.8, min_size=5.0)
 
     # Once-per-version checkboxes
     page.line(x + 6.0, ty, x + w - 6.0, ty, stroke=PALETTE["rule"], width=0.5, dash=(2, 1.5))
@@ -604,7 +604,7 @@ def _draw_company_card(page: PDFPage, x: float, y: float, w: float, h: float, co
         page.rounded_rect(bx, ty + 2.0, sw_box, 11.0, r=2.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.5)
         page.rect(bx + 2.0, ty + 3.8, 7.2, 7.2, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.5)
         page.text(bx + 11.5, ty + 9.6, ver_lbl, font="mono_bold", size=5.2, color=PALETTE["ink"])
-    page.text(x + w - 7.0, ty + 9.5, "Unused charge forfeits on upgrade.", font="italic", size=4.5, color=PALETTE["muted"], align="right")
+    page.text(x + w - 7.0, ty + 9.5, "Unused forfeits on upgrade.", font="italic", size=4.8, color=PALETTE["muted"], align="right")
 
 
 def _draw_white_hat_card(page: PDFPage, x: float, y: float, w: float, h: float, white_hat: WhiteHatDossierSpec, is_dock: bool = False) -> None:
@@ -639,8 +639,13 @@ def _draw_white_hat_card(page: PDFPage, x: float, y: float, w: float, h: float, 
     t_size = min(5.8, 5.8 * avail / max(1.0, measure_text(title, font="bold", size=5.8)))
     page.text(x + 7.0, s_y + 8.6, title, font="bold", size=t_size, color=PALETTE["purple"])
     note_y = s_y + s_h - 2.8
-    _fit_paragraph(page, x + 7.0, s_y + 18.5, w - 14.0, white_hat.protocol_desc, note_y - 6.5, size=5.3, leading=6.7, min_size=4.5)
-    page.rich_line(x + w / 2.0, note_y, "*Repeatable: once per Purple {STAR} die (Phase 3: die must still be In Production).*", size=4.5, color=PALETTE["purple"], align="center")
+    _fit_paragraph(page, x + 7.0, s_y + 22.0, w - 14.0, white_hat.protocol_desc, note_y - 7.5, size=9.6, leading=11.6, min_size=5.0)
+    repeat_note = (
+        "*Repeatable: once per Purple {STAR} die (Phase 1 Step 3 Rerolls).*"
+        if "P1" in white_hat.protocol_timing
+        else "*Repeatable: once per Purple {STAR} die (Phase 3: die must still be In Production).*"
+    )
+    page.rich_line(x + w / 2.0, note_y, repeat_note, size=4.6, color=PALETTE["purple"], align="center")
 
     # Personal Reserve strip (the Purple Specialist Die rests on the card itself)
     r_y = y + h - r_h - 3.0
@@ -834,11 +839,11 @@ def _draw_resource_holder(
 
     # Right info lines
     tx = wx + well_sz + 8.0
-    page.rich_line(tx, y + 26.5, line1, size=5.6, color=title_color)
-    page.rich_line(tx, y + 38.0, line2, size=4.8, color=PALETTE["ink"])
-    page.rich_line(tx, y + 49.0, line3, size=4.6, color=PALETTE["ink_soft"])
+    page.rich_line(tx, y + 27.5, line1, size=6.4, color=title_color)
+    page.rich_line(tx, y + 41.0, line2, size=5.6, color=PALETTE["ink"])
+    page.rich_line(tx, y + 53.5, line3, size=5.4, color=PALETTE["ink_soft"])
     if line4:
-        page.rich_line(tx, y + 60.0, line4, size=4.3, color=PALETTE["muted"])
+        page.rich_line(tx, y + 66.0, line4, size=5.1, color=PALETTE["muted"])
 
 
 def _draw_public_relations_area(
@@ -897,19 +902,14 @@ def _draw_public_relations_area(
         bx = rx + tab_w + 6.0
 
         if lv == 0:
-            page.rich_line(bx, ry + 15.0, "**Regain up to 1 Market Share / turn**", size=5.8, color=PALETTE["ink"])
-            page.rich_line(bx, ry + 27.0, f"Cost: **${PR_REGAIN_COST_MONEY} Cash** per +1 Market Share (Phase 5 Operations)", size=4.8, color=PALETTE["ink_soft"])
-            page.text(bx, ry + 38.0, "Baseline corporate communications; active from Round 1", font="italic", size=4.5, color=PALETTE["muted"])
+            page.rich_line(bx, ry + 26.5, "**Regain up to 1 Market Share / turn**", size=6.8, color=PALETTE["ink"])
 
         elif lv == 1:
-            page.rich_line(bx, ry + 14.5, "**Regain up to 1 Market Share / turn**", size=5.8, color=PALETTE["ink"])
-            page.rich_line(bx, ry + 26.5, "★ **BREAKTHROUGH: GAIN +$3 LIQUID CASH**", size=5.5, color=PALETTE["purple"])
-            page.text(bx, ry + 38.0, "Collected immediately upon advancing to Level 1", font="italic", size=4.5, color=PALETTE["ink_soft"])
+            page.rich_line(bx, ry + 18.0, "**Regain up to 1 Market Share / turn**", size=6.6, color=PALETTE["ink"])
+            page.rich_line(bx, ry + 33.0, "{STAR} **BREAKTHROUGH: +$3 LIQUID CASH**", size=6.2, color=PALETTE["purple"])
 
         elif lv == 2:
-            page.rich_line(bx, ry + 15.0, "**Regain up to 2 Market Share / turn**", size=5.8, color=PALETTE["ink"])
-            page.rich_line(bx, ry + 27.0, f"Cost: **${PR_REGAIN_COST_MONEY} Cash** per +1 Market Share (Phase 5 Operations)", size=4.8, color=PALETTE["ink_soft"])
-            page.text(bx, ry + 38.0, "Expanded corporate PR campaigns and proactive outreach", font="italic", size=4.5, color=PALETTE["muted"])
+            page.rich_line(bx, ry + 26.5, "**Regain up to 2 Market Share / turn**", size=6.8, color=PALETTE["ink"])
 
         elif lv == 3:
             # Right side: dedicated outline space for 2nd Purple Specialist die
@@ -922,20 +922,19 @@ def _draw_public_relations_area(
             page.text(die_x + die_sz / 2.0, die_y + 30.0, "DIE 2", font="mono_bold", size=5.0, color=PALETTE["purple"], align="center")
 
             # Left of die box
-            page.rich_line(bx, ry + 14.0, "**Regain up to 2 Market Share / turn**", size=5.6, color=PALETTE["ink"])
-            page.rich_line(bx, ry + 25.5, "★ **BREAKTHROUGH: 2ND PURPLE SPECIALIST DIE**", size=5.4, color=PALETTE["purple"])
-            page.text(bx, ry + 37.0, "Moves from Personal Reserve -> Scanned Box", font="italic", size=4.6, color=PALETTE["ink_soft"])
+            page.rich_line(bx, ry + 16.0, "**Regain up to 2 Market Share / turn**", size=6.4, color=PALETTE["ink"])
+            page.rich_line(bx, ry + 28.5, "{STAR} **BREAKTHROUGH: 2ND PURPLE DIE**", size=6.0, color=PALETTE["purple"])
+            page.text(bx, ry + 39.5, "Personal Reserve -> Scanned Box", font="italic", size=5.0, color=PALETTE["ink_soft"])
 
         elif lv == 4:
-            page.rich_line(bx, ry + 15.0, "**Regain up to 3 Market Share / turn**  |  **+2 Market Share now**", size=5.5, color=PALETTE["ink"])
-            page.rich_line(bx, ry + 27.0, f"Cost: **${PR_REGAIN_COST_MONEY} Cash** per +1 Market Share (Phase 5 Operations)", size=4.8, color=PALETTE["ink_soft"])
-            page.text(bx, ry + 38.0, "Immediate +2 Market Share on reaching L4; maximum media saturation", font="italic", size=4.5, color=PALETTE["muted"])
+            page.rich_line(bx, ry + 18.0, "**Regain up to 3 Market Share / turn**", size=6.4, color=PALETTE["ink"])
+            page.rich_line(bx, ry + 32.0, "{STAR} **+2 Market Share now**", size=6.2, color=PALETTE["purple"])
 
     # Bottom setup note
     page.rich_line(
         x + w / 2.0, y + h - 5.5,
-        "*Setup: Place 2nd Purple Specialist die on L3 outline. Unlocks upon reaching L3.*",
-        size=4.7, color=PALETTE["muted"], align="center",
+        "*Setup: Place 2nd Purple die on L3 outline (unlocks at L3).*",
+        size=5.0, color=PALETTE["muted"], align="center",
     )
 
 
@@ -965,12 +964,12 @@ def render_player_board(
         title_color=PALETTE["blue"],
         border=PALETTE["blue"],
         tint=PALETTE["blue_light"],
-        tag="PRIMARY VICTORY GOAL",
+        tag="1 SECRET = 1 VP",
         icon_type="secret",
         line1="Start: **3** (2P) / **4** (3-4P)",
-        line2="Surviving player with most Secrets wins",
-        line3="Trigger: ≤ 0 Secrets = **TOTAL DATA BREACH**",
-        line4="Survivors earn Market Leader Bonus (P6 & End)",
+        line2="Most Secrets wins (1 Secret = 1 VP)",
+        line3="<= 0 Secrets = **TOTAL DATA BREACH**",
+        line4="",
     )
 
     # 2. Liquid Cash ($) Holder (y = 110..186, h = 76)
@@ -980,27 +979,27 @@ def render_player_board(
         title_color=PALETTE["ink"],
         border=PALETTE["ink"],
         tint=PALETTE["panel_tint"],
-        tag="UNCAPPED RESERVE",
+        tag="UNCAPPED",
         icon_type="money",
         line1="Start: **$6**",
-        line2="Phase 3: Gain Income from software modules",
-        line3="Phase 5: Buy 1 die ($4–$6) -> Scanned | Regain MS ($3)",
-        line4="Operational Tiebreaker #2 at game end",
+        line2="P5: Buy 1 die ($4-$6) -> Scanned",
+        line3="P5: Regain Market Share ($3 each)",
+        line4="Tiebreaker #2",
     )
 
     # 3. Research Tokens (🔬) Holder (y = 190..266, h = 76)
     _draw_resource_holder(
         page, lx, 190.0, lw, 76.0,
-        title="{RESEARCH} **RESEARCH TOKENS (🔬)**",
+        title="{RESEARCH} **RESEARCH TOKENS ({RESEARCH})**",
         title_color=PALETTE["purple"],
         border=PALETTE["purple"],
         tint=PALETTE["purple_light"],
-        tag="UNCAPPED R&D",
+        tag="UNCAPPED",
         icon_type="research",
-        line1="Start: **0 🔬**",
-        line2="Phase 5: Upgrade Hardware Tracks (1/2/2/3 🔬)",
-        line3="Max 2 hardware upgrades per turn",
-        line4="Operational Tiebreaker #4 at game end",
+        line1="Start: **0 {RESEARCH}**",
+        line2="P5: Track Upgrades (1/2/2/3 {RESEARCH})",
+        line3="Max 2 upgrades per turn",
+        line4="Tiebreaker #4",
     )
 
     # 4. Expanded Public Relations Track & Personal Reserve (y = 272..576, h = 304)
@@ -1152,12 +1151,10 @@ def render_player_board(
 
     # Open staging well
     page.rounded_rect(sc_x + 4.0, sc_y + 18.0, sc_w - 8.0, sc_h - 22.0, r=3.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.5)
-    page.rich_line(sc_x + sc_w / 2.0, sc_y + 36.0, "^ **GRADUATES TO READY** ^", size=5.8, color=PALETTE["blue"], align="center")
-    page.rich_line(sc_x + sc_w / 2.0, sc_y + 48.0, "Up to Release Bandwidth (**4 / 5 / 6**)", size=5.0, color=PALETTE["ink"], align="center")
-    page.rich_line(sc_x + sc_w / 2.0, sc_y + 66.0, "*Market Purchases & Production Return*", size=4.8, color=PALETTE["muted"], align="center")
-    page.rich_line(sc_x + sc_w / 2.0, sc_y + 78.0, "<-- Receives from Conveyor Triage", size=4.6, color=PALETTE["ink_soft"], align="center")
-    page.rich_line(sc_x + sc_w / 2.0, sc_y + 88.0, "& Purged Glitched Shields (P4)", size=4.5, color=PALETTE["ink_soft"], align="center")
-    page.rich_line(sc_x + sc_w / 2.0, sc_y + 98.0, "Dice remain here until graduated", size=4.3, color=PALETTE["muted"], align="center")
+    page.rich_line(sc_x + sc_w / 2.0, sc_y + 38.0, "^ **GRADUATES TO READY** ^", size=6.2, color=PALETTE["blue"], align="center")
+    page.rich_line(sc_x + sc_w / 2.0, sc_y + 52.0, "Up to Release Bandwidth (**4/5/6**)", size=5.6, color=PALETTE["ink"], align="center")
+    page.rich_line(sc_x + sc_w / 2.0, sc_y + 72.0, "Market Buys  ·  P6 Return", size=5.4, color=PALETTE["ink_soft"], align="center")
+    page.rich_line(sc_x + sc_w / 2.0, sc_y + 85.0, "Conveyor Triage  ·  Purged Shields", size=5.4, color=PALETTE["ink_soft"], align="center")
 
     # --- 4B: Embedded Triage Upgrade Track (Top Right: x = 394..752, w = 358, y = 463..516, h = 53) ---
     tt_x, tt_w = rx + 126.0, rw - 130.0
@@ -1176,7 +1173,7 @@ def render_player_board(
     page.rect(gl_x, gl_y, gl_w, gl_h, stroke=PALETTE["purple"], fill=PALETTE["white"], line_width=0.9)
     page.rect(gl_x, gl_y, gl_w, 13.0, stroke=PALETTE["purple"], fill=PALETTE["purple_light"], line_width=0.6)
     page.rich_line(gl_x + 6.0, gl_y + 9.5, "{SECRET} **PROCESSING BOX  (FIRST IN, FIRST OUT PIPELINE)**", size=6.2, color=PALETTE["purple"])
-    page.text(gl_x + gl_w - 6.0, gl_y + 9.5, "P1 STEP 5: SECRET FACES ENTER", font="mono_bold", size=4.6, color=PALETTE["purple"], align="right")
+    page.text(gl_x + gl_w - 6.0, gl_y + 9.5, "P1 STEP 4: SECRET FACES ENTER", font="mono_bold", size=4.8, color=PALETTE["purple"], align="right")
 
     # Layout: Dedicated Signature Cube cradle (left, adjacent to Scanned) + FIFO Conveyor Lane (right)
     cube_spot_w = 48.0
@@ -1249,12 +1246,11 @@ def render_company_cards_page(page: PDFPage) -> None:
     page.text(rx + rw - 8.0, ry + 11.5, "USE-IT-OR-LOSE-IT TIMING", font="mono_bold", size=6.0, color=PALETTE["ink_soft"], align="right")
 
     rules_text = (
-        "**1. Contract Assignment:** At setup, each player is dealt 1 Client Company card (or introductory preset). Place the card alongside your Company Terminal Mat.\n"
-        "**2. Once-per-Version Lifecycle:** Each company provides 1 Institutional Override per SETEC Version (**v1.0**, **v2.0**, and **v3.0**). Mark the checkbox upon activation.\n"
-        "**3. Version Transition Timing:** When SETEC's corruption track fills in Phase 2: Compiler Drop & Corruption, the active version remains current for the rest of the round. Defensive and operational overrides remain usable through Phases 3-6. Excess {BLACK} cubes immediately **spill over** onto the next track.\n"
-        "**4. Round-Start Switch & Unlock:** At the start of the next round (in Phase 1 Step 1), unspent overrides from the old version forfeit, and the new version's override unlocks to Available."
+        "**1. Once-per-Version Lifecycle:** Activate once per SETEC Version (**v1.0**, **v2.0**, **v3.0**); mark the checkbox when used. *(DTO Slush Fund: once per game.)*\n"
+        "**2. Version Transition Timing:** If SETEC's Corruption Track fills in Phase 2, excess {BLACK} cubes **spill over** immediately, but the old version stays active through Phases 3-6.\n"
+        "**3. Round-Start Switch:** At the start of the next round (Phase 1 Step 1), unspent old-version overrides **forfeit** and the new version's override unlocks."
     )
-    page.rich_paragraph(rx + 10.0, ry + 25.0, rw - 20.0, rules_text, size=6.4, leading=8.6, color=PALETTE["ink"])
+    page.rich_paragraph(rx + 10.0, ry + 27.0, rw - 20.0, rules_text, size=7.2, leading=11.0, color=PALETTE["ink"])
 
 
 def render_white_hat_dossiers_page(page: PDFPage) -> None:
@@ -1298,12 +1294,11 @@ def render_white_hat_dossiers_page(page: PDFPage) -> None:
     page.text(rx + rw - 8.0, ry + 11.5, "REPEATABLE PER PURPLE STAR", font="mono_bold", size=6.0, color=PALETTE["rule"], align="right")
 
     wh_rules_text = (
-        "**1. Operative Assignment:** At setup, each player is dealt 1 White Hat Dossier card (or introductory preset). Place the card alongside your Company Terminal Mat.\n"
-        "**2. Personal Reserve (1 Purple Die):** Your 2nd Purple Specialist Die waits on the Public Relations Track Level 3 outline. Purple dice are **not purchasable**: it moves to the Scanned Box only when your Public Relations Track reaches **Level 3**. A Purple die lost to an effect is not replaced.\n"
-        "**3. Standardized Faces 1-5:** All Purple Specialist dice feature: **Faces 1-2:** `Block 1 Any`, **Face 3:** `+$2`, **Face 4:** `+$1 & +1 {RESEARCH}`, **Face 5:** Secret face (`+1` Secret when it leaves the Processing Box).\n"
-        "**4. Face 6 Signature Protocol:** Rolling Face 6 ({PURPLE} {STAR}) triggers the operative's bespoke Signature Protocol. Repeatable: each Purple Star die triggers the protocol once (Phase 3: Income protocols require the die to still be In Production)."
+        "**1. Personal Reserve:** Your 2nd Purple Specialist Die sits on Public Relations Track L3 and moves to your **Scanned Box** at **Level 3** (not purchasable; not replaced if lost).\n"
+        "**2. Faces 1-5:** **1-2:** Block 1 Any  |  **3:** +$2  |  **4:** +$1 & +1 {RESEARCH}  |  **5:** Secret face (+1 Secret on exit).\n"
+        "**3. Face 6 Signature Protocol:** Repeatable per Purple {STAR} die rolled (Phase 3 protocols require the die to still be In Production; Prodigy fires in Phase 1 Step 4)."
     )
-    page.rich_paragraph(rx + 10.0, ry + 25.0, rw - 20.0, wh_rules_text, size=6.4, leading=8.6, color=PALETTE["ink"])
+    page.rich_paragraph(rx + 10.0, ry + 27.0, rw - 20.0, wh_rules_text, size=7.2, leading=11.0, color=PALETTE["ink"])
 
 
 # =============================================================================
@@ -1372,79 +1367,63 @@ def render_agent_board(page: PDFPage) -> None:
     page.text(m_x + m_w / 2.0, col_top + 15.0, "CUBES & TARGET LOCK SUMMARY", font="bold", size=8.6, color=PALETTE["ink"], align="center")
 
     # Top overview & Target Lock tie-breaking banner
-    page.rect(m_x + 7.0, col_top + 26.0, m_w - 14.0, 44.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.6)
+    page.rect(m_x + 7.0, col_top + 26.0, m_w - 14.0, 38.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.6)
     _fit_paragraph(
-        page, m_x + 11.0, col_top + 34.0, m_w - 22.0,
-        "**Phase 2:** Drop **Staging Cup** into **Cube Tower**. Exited {BLACK} resolves now; {RED}{BLUE}{GREEN} attack in **Phase 4** (then recycle).\n"
-        "**Target Lock (Signature Cube Exits):** After P4 damage, resolve **Signature Attack** of most populous tray color (**Tie Priority Top->Bottom: {GREEN} > {BLACK} > {BLUE} > {RED}**; 0 cubes = fizzle):",
-        col_top + 68.0, size=5.5, leading=7.0, min_size=4.8, color=PALETTE["ink"],
+        page, m_x + 11.0, col_top + 35.5, m_w - 22.0,
+        "**P2:** Drop Staging Cup. {BLACK} resolves now; {RED}{BLUE}{GREEN} attack in **P4**, then recycle.\n"
+        "**Target Lock (Signature Exits):** After P4 damage, resolve top tray color (**Tie Priority: {GREEN} > {BLACK} > {BLUE} > {RED}**; 0 cubes = fizzle).",
+        col_top + 63.0, size=6.8, leading=8.4, min_size=5.4, color=PALETTE["ink"],
     )
 
     cube_cards = [
         (
             "green",
             "{GREEN} GREEN // MALWARE",
-            "1ST TIE PRIORITY",
-            (
-                "**P4 Unblocked:** Each unblocked {GREEN} turns **1 shield slot** into a **Glitched Shield Slot** *(max Defense Capacity)*."
-            ),
-            (
-                "**Target Lock (1st Tie Priority):** Place a green cube from the supply on the next space of **2 Research Tracks** without green cubes (**2x {RESEARCH}** cost to advance; unplaceable cubes glitch **1 shield slot** each)."
-            ),
-            103.0,
+            "1ST TIE",
+            "**P4 Unblocked:** 1 shield slot -> **Glitched Shield Slot** *(max Defense Cap)*.",
+            "**Target Lock:** Place 1 green cube on next space of **2 Research Tracks** w/o green (**2x {RESEARCH}** to advance; unplaceable -> glitch 1 slot).",
+            104.5,
         ),
         (
             "black",
             "{BLACK} BLACK // CORRUPTION",
-            "2ND TIE PRIORITY",
-            (
-                "**P2 Immediate:** Advance active **Version Corruption Track** 1 space per exited {BLACK} (**4** on v1.0, **5** on v2.0 -> excess spills over now; **6** on v3.0 = **SINGULARITY!**)."
-            ),
-            (
-                "**Target Lock (2nd Tie Priority):** Mark your Client Company **Institutional Override** as `Used` for this Version; if already used, lose **2 Corporate Secrets**."
-            ),
-            103.0,
+            "2ND TIE",
+            "**P2 Immediate:** Advance active **Corruption Track** 1/cube (**4/5/6** spaces; **v3.0 full = SINGULARITY!**).",
+            "**Target Lock:** Mark **Institutional Override** `Used` for this Version *(if already used, lose **2 Corporate Secrets**)*.",
+            104.5,
         ),
         (
             "blue",
             "{BLUE} BLUE // SPYWARE",
-            "3RD TIE PRIORITY",
-            (
-                "**P4 Unblocked:** Lose **1 Corporate Secret** per unblocked {BLUE} (**2** in **v3.0** [Critical Breach]). **<= 0 Secrets = Patient Zero!**"
-            ),
-            (
-                "**Target Lock (3rd Tie Priority):** After shield blocking, move **1 Gray Legacy Die** (`Scanned Box` -> `In Production`) to the back of your **Processing Box** (**0** Secrets when triaged)."
-            ),
-            103.0,
+            "3RD TIE",
+            "**P4 Unblocked:** **-1 Corporate Secret** per {BLUE} (**-2** in **v3.0**). **<= 0 = Patient Zero!**",
+            "**Target Lock:** After blocking, move **1 Gray Legacy Die** (`Scanned` -> `Prod`) to back of **Processing Box** (**0** Secrets).",
+            104.5,
         ),
         (
             "red",
-            "{RED} RED // MARKET MANIPULATION",
-            "4TH TIE PRIORITY",
-            (
-                "**P4 Unblocked:** Lose **1 Market Share** per unblocked {RED} *(min 0)*. **0 Share after P4 = Market Collapse** *(Final Round, no elimination)*."
-            ),
-            (
-                "**Target Lock (4th Tie Priority):** Lose **2 Market Share**; the other *(non-locked)* surviving player with the least Market Share gains **2**."
-            ),
-            103.0,
+            "{RED} RED // MARKET MANIP.",
+            "4TH TIE",
+            "**P4 Unblocked:** **-1 Market Share** per {RED} *(min 0)*. **0 after P4 = Market Collapse**.",
+            "**Target Lock:** **-2 Market Share**; non-locked survivor with least Market Share gains **+2**.",
+            104.5,
         ),
     ]
 
-    cy_box = col_top + 74.0
+    cy_box = col_top + 68.0
     card_gap = 6.5
     for ckey, ctitle, ctag, cbody_base, cbody_sig, bh_card in cube_cards:
         fg, bg = _color_pair(ckey)
         page.rounded_rect(m_x + 7.0, cy_box, m_w - 14.0, bh_card, r=3.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.8)
-        page.rect(m_x + 7.0, cy_box, m_w - 14.0, 15.5, stroke=PALETTE["ink"], fill=bg, line_width=0.6)
-        page.rich_line(m_x + 11.0, cy_box + 11.2, f"**{ctitle}**", size=6.5, color=fg if ckey != "black" else PALETTE["ink"])
-        page.rich_line(m_x + m_w - 11.0, cy_box + 11.2, ctag, size=5.2, base_font="mono_bold", color=PALETTE["ink_soft"], align="right")
-        _fit_paragraph(page, m_x + 11.0, cy_box + 23.5, m_w - 22.0, cbody_base, cy_box + 51.0, size=5.6, leading=6.9, min_size=4.8, color=PALETTE["ink"])
+        page.rect(m_x + 7.0, cy_box, m_w - 14.0, 18.0, stroke=PALETTE["ink"], fill=bg, line_width=0.6)
+        page.rich_line(m_x + 11.0, cy_box + 12.4, f"**{ctitle}**", size=7.8, color=fg if ckey != "black" else PALETTE["ink"])
+        page.rich_line(m_x + m_w - 11.0, cy_box + 12.2, ctag, size=6.4, base_font="mono_bold", color=PALETTE["ink_soft"], align="right")
+        _fit_paragraph(page, m_x + 11.0, cy_box + 27.5, m_w - 22.0, cbody_base, cy_box + 49.0, size=7.8, leading=9.6, min_size=5.4, color=PALETTE["ink"])
         # Target Lock Signature Attack sub-box
-        sig_y = cy_box + 52.0
-        sig_h = bh_card - 55.0
+        sig_y = cy_box + 50.5
+        sig_h = bh_card - 53.5
         page.rounded_rect(m_x + 10.0, sig_y, m_w - 20.0, sig_h, r=2.0, stroke=fg if ckey != "black" else PALETTE["ink_soft"], fill=PALETTE["paper_tint"], line_width=0.55)
-        _fit_paragraph(page, m_x + 13.0, sig_y + 7.5, m_w - 26.0, cbody_sig, sig_y + sig_h - 2.0, size=5.4, leading=6.6, min_size=4.6, color=PALETTE["ink"])
+        _fit_paragraph(page, m_x + 13.0, sig_y + 11.5, m_w - 26.0, cbody_sig, sig_y + sig_h - 3.0, size=7.6, leading=9.4, min_size=5.4, color=PALETTE["ink"])
         cy_box += bh_card + card_gap
 
     # -------------------------------------------------------------------------
@@ -1457,8 +1436,8 @@ def render_agent_board(page: PDFPage) -> None:
 
     # Subheader / Start & Max instruction strip
     page.rect(g_x + 6.0, col_top + 26.0, g_w - 12.0, 22.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.6)
-    page.rich_line(g_x + g_w / 2.0, col_top + 35.0, "**START:** **13** (2P)  |  **16** (3–4P)   •   **TRACK MAX:** **20**", size=6.3, color=PALETTE["ink"], align="center")
-    page.rich_line(g_x + g_w / 2.0, col_top + 44.0, "Place all players' Market Share Markers here. **-1** per unblocked {RED}.", size=5.5, color=PALETTE["ink_soft"], align="center")
+    page.rich_line(g_x + g_w / 2.0, col_top + 36.0, "**START:** **13** (2P)  |  **16** (3-4P)  ·  **MAX:** **20**", size=7.2, color=PALETTE["ink"], align="center")
+    page.rich_line(g_x + g_w / 2.0, col_top + 45.0, "**-1** per unblocked {RED}  |  **0** = Market Collapse", size=5.8, color=PALETTE["ink_soft"], align="center")
 
     # 21-space Track Grid (20 down to 0) in 3 columns x 7 rows — large cells for multiple player markers!
     grid_top = col_top + 53.0
@@ -1477,27 +1456,23 @@ def render_agent_board(page: PDFPage) -> None:
         tag = MARKET_SHARE_START.get(val)
         if val == 0:
             page.rounded_rect(cx, cy, cw, ch, r=3.0, stroke=PALETTE["red"], fill=PALETTE["red"], line_width=1.0)
-            page.text(cx + cw / 2.0, cy + 14.0, "0", font="bold", size=12.0, color=PALETTE["white"], align="center")
-            page.text(cx + cw / 2.0, cy + 24.5, "MARKET", font="mono_bold", size=5.5, color=PALETTE["white"], align="center")
-            page.text(cx + cw / 2.0, cy + 32.5, "COLLAPSE", font="mono_bold", size=5.5, color=PALETTE["white"], align="center")
-            page.text(cx + cw / 2.0, cy + 42.5, "Final Round", font="italic", size=5.0, color=PALETTE["white"], align="center")
+            page.text(cx + cw / 2.0, cy + 16.5, "0", font="bold", size=15.0, color=PALETTE["white"], align="center")
+            page.text(cx + cw / 2.0, cy + 27.5, "MARKET", font="mono_bold", size=6.0, color=PALETTE["white"], align="center")
+            page.text(cx + cw / 2.0, cy + 35.5, "COLLAPSE", font="mono_bold", size=6.0, color=PALETTE["white"], align="center")
+            page.text(cx + cw / 2.0, cy + 45.0, "Final Round", font="italic", size=5.4, color=PALETTE["white"], align="center")
         elif tag:
             page.rounded_rect(cx, cy, cw, ch, r=3.0, stroke=PALETTE["red"], fill=PALETTE["red_light"], line_width=1.0)
-            page.rect(cx, cy, cw, 11.5, stroke=PALETTE["red"], fill=PALETTE["red"], line_width=0.6)
-            page.text(cx + cw / 2.0, cy + 8.2, tag, font="mono_bold", size=5.4, color=PALETTE["white"], align="center")
-            page.text(cx + cw / 2.0, cy + 28.0, str(val), font="bold", size=13.0, color=PALETTE["ink"], align="center")
-            page.circle(cx + cw / 2.0, cy + 38.5, 6.5, stroke=PALETTE["red"], fill=None, line_width=0.4, dash=(2.0, 2.0))
+            page.rect(cx, cy, cw, 12.0, stroke=PALETTE["red"], fill=PALETTE["red"], line_width=0.6)
+            page.text(cx + cw / 2.0, cy + 8.6, tag, font="mono_bold", size=5.8, color=PALETTE["white"], align="center")
+            page.text(cx + cw / 2.0, cy + 36.0, str(val), font="bold", size=17.0, color=PALETTE["ink"], align="center")
         elif val == MARKET_SHARE_MAX:
-            page.rounded_rect(cx, cy, cw, ch, r=3.0, stroke=PALETTE["red"], fill=PALETTE["paper_tint"], line_width=0.8)
-            page.rect(cx, cy, cw, 11.5, stroke=PALETTE["red"], fill=PALETTE["red_light"], line_width=0.6)
-            page.text(cx + cw / 2.0, cy + 8.2, "TRACK MAX", font="mono_bold", size=5.4, color=PALETTE["red"], align="center")
-            page.text(cx + cw / 2.0, cy + 28.0, str(val), font="bold", size=13.0, color=PALETTE["ink"], align="center")
-            page.circle(cx + cw / 2.0, cy + 38.5, 6.5, stroke=PALETTE["guide"], fill=None, line_width=0.4, dash=(2.0, 2.0))
+            page.rounded_rect(cx, cy, cw, ch, r=3.0, stroke=PALETTE["red"], fill=PALETTE["paper_tint"], line_width=0.9)
+            page.rect(cx, cy, cw, 12.0, stroke=PALETTE["red"], fill=PALETTE["red_light"], line_width=0.6)
+            page.text(cx + cw / 2.0, cy + 8.6, "TRACK MAX", font="mono_bold", size=5.8, color=PALETTE["red"], align="center")
+            page.text(cx + cw / 2.0, cy + 36.0, str(val), font="bold", size=17.0, color=PALETTE["ink"], align="center")
         else:
-            page.rounded_rect(cx, cy, cw, ch, r=3.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.6)
-            page.text(cx + 7.0, cy + 13.0, str(val), font="bold", size=10.0, color=PALETTE["ink_soft"])
-            # Subtle marker placement ring
-            page.circle(cx + cw / 2.0 + 6.0, cy + ch / 2.0 + 3.0, 10.0, stroke=PALETTE["guide"], fill=None, line_width=0.4, dash=(2.0, 2.0))
+            page.rounded_rect(cx, cy, cw, ch, r=3.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.7)
+            page.text(cx + cw / 2.0, cy + 31.0, str(val), font="bold", size=16.0, color=PALETTE["ink"], align="center")
 
     # Market Leader Bonus & Collapse Callout Box at bottom of Right Column
     mb_y = grid_top + grid_h + 6.0
@@ -1506,11 +1481,11 @@ def render_agent_board(page: PDFPage) -> None:
     page.rect(g_x + 6.0, mb_y, g_w - 12.0, 14.5, stroke=PALETTE["ink"], fill=PALETTE["ink"], line_width=0.6)
     page.text(g_x + g_w / 2.0, mb_y + 10.2, "MARKET LEADER BONUS & TIEBREAKERS", font="bold", size=6.6, color=PALETTE["white"], align="center")
     page.rich_paragraph(
-        g_x + 11.0, mb_y + 23.5, g_w - 22.0,
-        "**Market Leader Bonus** (by Market Share, Patient Zeros excluded): **1st +3**, **2nd +1** Corporate Secrets (ties share the better place).\n"
-        "**Awarded:** (1) End of Phase 6 in any round a **Red Secret** banks, and (2) at **Game End** (except Total Wipeout).\n"
-        "**Tiebreakers:** 1. Market Share > 2. Cash ($) > 3. Ready Colored Dice > 4. Research ({RESEARCH}) > 5. Fewest Under Dev.",
-        size=5.3, leading=7.1, color=PALETTE["ink"],
+        g_x + 10.0, mb_y + 24.5, g_w - 20.0,
+        "**Bonus (no Patient Zeros):** **1st +3**, **2nd +1** Secrets *(ties share)*.\n"
+        "**When:** End of P6 if a **Red Secret** banked, & **Game End** *(not Wipeout)*.\n"
+        "**Ties:** Market Share > $ > Ready Colored > {RESEARCH} > Fewest Under Dev.",
+        size=6.0, leading=8.2, color=PALETTE["ink"],
     )
 
 
@@ -1625,12 +1600,11 @@ def render_market_board(page: PDFPage) -> None:
     page.rect(40.0, fy, fw, 16.5, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.7)
     page.text(48.0, fy + 11.8, "SETUP QUICK-REFERENCE & COMPILER PRIMING", font="bold", size=7.8, color=PALETTE["ink"])
     page.rich_paragraph(
-        48.0, fy + 26.5, fw - 16.0,
-        "- **2P / 3P / 4P:** **$6** | **3 / 4 / 4** Secrets | **13 (2P) / 16 (3-4P) [Max 20]** Market Share | **0** {RESEARCH}\n"
-        "- **Market:** **4 / 6 / 8** dice per color | identical company start (all tracks L0); DTO Slush Fund **once per game**\n"
-        "- **Corruption Tracks:** v1.0 **4** / v2.0 **5** / v3.0 **6** spaces (all player counts)\n"
-        "- **Each player:** 2 Gray + 1 starting colored die (Company color) + 1 Purple in Ready; 1 Purple in Reserve; **1 Glitched Shield Slot** on mat; Market Share Marker on start value.",
-        size=6.2, leading=8.7, color=PALETTE["ink"],
+        48.0, fy + 27.5, fw - 16.0,
+        "- **2P / 3P / 4P:** **$6** | **3 / 4 / 4** Secrets | **13 (2P) / 16 (3-4P)** Share [Max 20] | **0** {RESEARCH}\n"
+        "- **Market:** **4 / 6 / 8** dice/color | All tracks L0 | **1 Glitched Shield Slot**\n"
+        "- **Player Start:** 2 Gray + 1 Company die + 1 Purple in Ready; 1 Purple in Reserve",
+        size=6.6, leading=9.5, color=PALETTE["ink"],
     )
 
     # Right: Portfolio Scoring & End-Game Triggers
@@ -1640,11 +1614,10 @@ def render_market_board(page: PDFPage) -> None:
     page.text(rx_f + 8.0, fy + 11.8, "SECRETS VICTORY & TIEBREAKERS  (SURVIVING OPERATIVES)", font="bold", size=7.8, color=PALETTE["ink"])
     page.rich_paragraph(
         rx_f + 8.0, fy + 27.5, fw - 16.0,
-        "- **Market Leader Bonus:** survivors by Market Share: 1st **+3**, 2nd **+1** Secrets; ties share. Awarded in any round a Red Secret banks (end of P6) and at game end.\n"
-        "- **Victory:** Most **Corporate Secrets** wins. **Ties:** Market Share > $ > Ready Colored Dice > {RESEARCH} > Fewest Under Dev.\n"
-        "- **Ends:** Singularity | Final Round after **Patient Zero** or **Market Collapse** (0 Share, no elimination) | Total Wipeout.\n"
-        "- *Patient Zero (<=0 Secrets) eliminated, no bonus. Total Wipeout: no bonus; tiebreakers only.*",
-        size=5.6, leading=7.6, color=PALETTE["ink"],
+        "- **Market Leader Bonus:** **1st +3**, **2nd +1** Secrets *(ties share; P6 if Red Secret & End)*\n"
+        "- **Victory:** Most **Corporate Secrets** wins. **Ties:** Share > $ > Ready Colored > {RESEARCH} > Fewest Dev.\n"
+        "- **Ends:** Singularity | Final Round (**Patient Zero** or **Market Collapse**) | Total Wipeout",
+        size=6.4, leading=9.5, color=PALETTE["ink"],
     )
 
 
@@ -1912,27 +1885,27 @@ def render_four_player_round_reference_cards(page: PDFPage) -> None:
     phases = [
         (
             "P1: ROLL & DEPLOY (Simultaneous)",
-            "**1. Pulse:** +1 {BLACK} -> Staging Cup (do pending Version Switch first). **2-3. Roll & Rerolls:** Roll Ready dice; up to 2 free rerolls (Secret faces can reroll). **4. Assign:** Secret faces -> Processing Box; shields -> Defense Grid (clean or glitched slots, up to Capacity); rest -> Income.",
+            "**1. Pulse:** +1 {BLACK} -> Staging Cup (do pending Version Switch first). **2-3. Roll & Rerolls:** Roll Ready dice; up to 2 free rerolls (Secret faces can reroll). **4. Assign:** Secret faces -> Processing Box; shields -> Defense Grid (clean or glitched slots, <= Capacity); rest -> Income.",
         ),
         (
             "P2: COMPILER DROP & CORRUPTION",
-            "**Drop** Staging Cup into Cube Tower. Exited {BLACK} fill Corruption Track **now** (v3.0 full = **Singularity!**). Signature Cubes exit -> **Target Lock** (return to mat). Attack Cubes wait in Exit Tray. **Empty Tray:** +1 {RED}{BLUE}{GREEN} -> Staging Cup. *(Patient Zero skips P3-P6; survivors finish Final Round.)*",
+            "**Drop** Staging Cup into Tower. Exited {BLACK} fill Corruption Track **now** (v3.0 full = **Singularity!**). Signature Cube exits -> **Target Lock** (return to mat). Empty Tray: +1 {RED}{BLUE}{GREEN} -> Staging Cup. *(Patient Zero skips P3-P6; survivors finish Final Round.)*",
         ),
         (
             "P3: INCOME (Simultaneous)",
-            "Collect $, {RESEARCH}, Market Share & {STAR} from every die still **In Production**. Purple {STAR} Signature Protocols fire once per die. Then **Customer Poaching** (clockwise from First Player): take 1 Market Share from top rival.",
+            "Collect $, {RESEARCH}, Secrets, Market Share & {STAR} from dice still **In Production**. Purple {STAR} protocols fire once/die. Then **Customer Poaching** (clockwise from First Player): -1 Share from top rival.",
         ),
         (
             "P4: ATTACK RESOLUTION (Simultaneous)",
-            "Shields on **Glitched Shield Slots** purge the slot (die -> **Scanned Box**; no block). Split remaining **Any** shields across cubes (all must block). Unblocked: {RED} **-1 Market Share** | {BLUE} **-1 Secret** (**-2** in **v3.0**) | {GREEN} 1 slot -> **Glitched Shield Slot**. **Target Lock Signature Attack** (most populous tray color, tie priority **{GREEN} > {BLACK} > {BLUE} > {RED}**): {GREEN} **1st:** green cube from supply on next space of **2** Research Tracks w/o green cubes (**2x {RESEARCH}** cost; unplaceable -> glitch **1** slot each) | {BLACK} **2nd:** mark **Institutional Override** `Used` (if used, **-2 Corporate Secrets**) | {BLUE} **3rd:** after blocking, move **1 Gray Legacy Die** (`Scanned Box` -> `In Production`) to back of **Processing Box** (**0** Secrets when triaged) | {RED} **4th:** **-2 Market Share**; other *(non-locked)* survivor with least Market Share gains **+2**. Recycle {RED}{BLUE}{GREEN} -> Staging Cup. **End Check:** Wipeout, PZ, **Market Collapse**.",
+            "Shields on **Glitched Slots** purge the slot (die -> **Scanned Box**; no block). Split remaining **Any** shields (all must block). Unblocked: {RED} **-1 Share** | {BLUE} **-1 Secret** (**-2** in **v3.0**) | {GREEN} **1 Glitched Slot**. **Target Lock** *(tie {GREEN} > {BLACK} > {BLUE} > {RED})*: {GREEN} +green on 2 tracks (2x {RESEARCH}) | {BLACK} Override Used (-2 Sec if used) | {BLUE} 1 Gray -> Processing (0 Sec) | {RED} -2 Share, +2 to lowest non-locked. Recycle {RED}{BLUE}{GREEN} -> Cup. **End Check:** Wipeout, PZ, **Market Collapse**.",
         ),
         (
             "P5: OPERATIONS (Clockwise from First Player)",
-            "Upgrade Tracks (<= 2 upgrades/turn [1/2/2/3 {RESEARCH}]; L1 & L3 Breakthroughs resolve at once) | Regain Market Share ($3 Cash each, up to PR limit 1/1/2/2/3; separate) | Buy <= 1 die -> Scanned Box.",
+            "Upgrade Tracks (<= 2/turn [1/2/2/3 {RESEARCH}]; L1/L3 Breakthroughs resolve at once) | Regain Market Share ($3 each, up to PR limit 1/1/2/2/3) | Buy <= 1 die -> Scanned Box.",
         ),
         (
             "P6: CI/CD PIPELINE SHIFT (Simultaneous)",
-            "**1.** Magnetic Splice. **2.** In Production -> **Scanned Box**. **3.** Scanned -> **Ready** (<= Release Bandwidth 4/5/6). **4.** Conveyor Triage: **Processing -> Scanned** (<= Triage Bandwidth, oldest first; each banks its Secret; banking a Secret moves Signature Cube from mat -> Staging Cup). **5.** Red Secret banked: **Market Leader Bonus**. Pass First Player Marker.",
+            "**1.** Magnetic Splice. **2.** In Production -> **Scanned Box**. **3.** Scanned -> **Ready** (<= Release Bandwidth 4/5/6). **4.** Conveyor Triage: **Processing -> Scanned** (<= Triage Bandwidth, oldest first; banks Secret & queues Signature Cube). **5.** Red Secret banked: **Market Leader Bonus**. Pass First Player.",
         ),
     ]
 
@@ -1950,17 +1923,17 @@ def render_four_player_round_reference_cards(page: PDFPage) -> None:
             cy = y + 21.0
             for p_title, p_body in phases:
                 page.rect(x + 5.0, cy, cw - 10.0, 10.5, stroke=PALETTE["rule"], fill=PALETTE["panel_tint"], line_width=0.5)
-                page.text(x + 8.0, cy + 7.6, p_title, font="bold", size=5.8, color=PALETTE["ink"])
-                cy = page.rich_paragraph(x + 8.0, cy + 16.5, cw - 16.0, p_body, size=5.0, leading=6.4, color=PALETTE["ink"])
+                page.text(x + 8.0, cy + 7.6, p_title, font="bold", size=6.0, color=PALETTE["ink"])
+                cy = page.rich_paragraph(x + 8.0, cy + 16.5, cw - 16.0, p_body, size=5.5, leading=7.0, color=PALETTE["ink"])
                 cy += 1.5
 
             # Bottom Victory & Tiebreakers Strip
             vy = y + ch - 25.0
             page.rect(x + 5.0, vy, cw - 10.0, 21.0, stroke=PALETTE["red"], fill=PALETTE["red_light"], line_width=0.6)
             page.rich_paragraph(
-                x + 8.0, vy + 7.2, cw - 16.0,
-                "**VICTORY & MARKET LEADER BONUS:** 1st **+3**, 2nd **+1** Secrets by Market Share (ties share; Patient Zeros excluded) at P6 end if a Red Secret banked, and at Game End. Most **Secrets** wins! *Ties: Market Share > $ > Ready Colored Dice > {RESEARCH} > Fewest Under Dev.*",
-                size=4.9, leading=6.2, color=PALETTE["ink"],
+                x + 8.0, vy + 7.5, cw - 16.0,
+                "**VICTORY & MARKET LEADER BONUS:** **1st +3**, **2nd +1** Secrets by Share (ties share; no PZ) at P6 if Red Secret banked & at Game End. Most **Secrets** wins! *Ties: Share > $ > Ready Colored > {RESEARCH} > Fewest Dev.*",
+                size=5.3, leading=6.8, color=PALETTE["ink"],
             )
 
 
@@ -2122,9 +2095,9 @@ def _draw_version_tile(page: PDFPage, x: float, y: float, w: float, h: float, ti
         page.rich_line(sx + sw / 2.0, y_track + 22.5, "{BLACK}", size=5.5, color=PALETTE["muted"], align="center")
 
         # Space effect text below (scaled to avoid overflow in narrow spaces, e.g. v3.0 Singularity)
-        sp_size = 3.8 if sp.is_singularity else 4.9
-        sp_leading = 5.2 if sp.is_singularity else 6.5
-        page.rich_paragraph(sx + 1.0, y_track + 33.0, sw - 2.0, sp.label, size=sp_size, leading=sp_leading, color=PALETTE["ink"], align="center")
+        sp_size = 4.1 if sp.is_singularity else 5.0
+        sp_leading = 5.4 if sp.is_singularity else 6.4
+        page.rich_paragraph(sx + 1.5, y_track + 33.0, sw - 3.0, sp.label, size=sp_size, leading=sp_leading, color=PALETTE["ink"], align="center")
 
 
 def render_version_tiles_page(page: PDFPage) -> None:
@@ -2207,13 +2180,8 @@ def render_pnp_tokens_page(page: PDFPage) -> None:
         page.text(mx + 17.0, my + 22.0, f"P{m_i + 1}", font="bold", size=5.4, color=PALETTE["ink"], align="center")
 
     # 12x Institutional Override Status Chits (place on v1.0 / v2.0 / v3.0 boxes on Company Card)
-    ax0, ay0 = 294.0, 64.0
-    aw, ah = 38.0, 25.0
-    for i in range(12):
-        r = i // 6
-        c = i % 6
-        bx = ax0 + c * (aw + 36.0 if False else (aw + 39.0))
     # Clean tight 6x2 grid across x = 294..750 (width = 456 -> 6 * 73 + 5 * 3.6 = 456)
+    ah = 25.0
     aw = 73.0
     agap = 3.6
     for i in range(12):
@@ -2263,7 +2231,7 @@ def render_pnp_tokens_page(page: PDFPage) -> None:
             page.rect(bx, by, sw, ph, stroke=PALETTE["green"], fill=PALETTE["green_light"], line_width=0.6, dash=(3, 1.5))
             page.draw_research_icon(bx + 15.0, by + 18.0, 13.0, color=PALETTE["green"])
             page.text(bx + 26.0, by + 15.5, "1 RESEARCH", font="bold", size=7.6, color=PALETTE["green"])
-            page.text(bx + 26.0, by + 26.0, "Tracks & Market Share", font="regular", size=5.6, color=PALETTE["ink_soft"])
+            page.text(bx + 26.0, by + 26.0, "Hardware Track Upgrades", font="regular", size=5.4, color=PALETTE["ink_soft"])
 
     # Section 4 (y = 404..574): Currency Chits ($1 x 24 + $5 x 16)
     page.text(42.0, 434.0, "MONEY TOKENS ($1 x 24  &  $5 x 16)", font="mono_bold", size=6.8, color=PALETTE["ink_soft"])
