@@ -29,7 +29,7 @@ _FACE_PROFILES = ("V037", "V038_DRAFT")
 _VARIANT_PROFILES = ("V037", "V038_DRAFT", "V044")
 # die_face_profile only: V038_DRAFT with the candidate-2 Yellow table (spec §14.3); _ALT = F1 "+$1 & +1 Market Share"
 # _F3 = V038_YELLOW_MS with Yellow F3 "+$1 & +1 Market Share" (spec §14.5.1, RSP-1)
-V038_DIE_FACE_PROFILES = ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D", "V038F")
+V038_DIE_FACE_PROFILES = ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D", "V038F", "V043_BLUE_TUNE")
 _DIE_FACE_PROFILES = ("V037",) + V038_DIE_FACE_PROFILES
 V038B_STARTING_SECRETS = {2: 3, 3: 4, 4: 4}  # [TUNE] §14.3
 V038B_RED_TIERS = ((11, 3), (7, 2), (3, 1), (0, 0))  # [TUNE] §14.3
@@ -481,6 +481,8 @@ class GameConfig:
     meridian_capital_injection_cash: int = 3                # [TUNE] +3 $ in Phase 3
     operator_protocol_mode: str = "CONTINGENT_STAFFING"     # "CONTINGENT_STAFFING" | "LOGISTICS_BOUNTY"
     operator_logistics_bounty_research: int = 1             # [TUNE] +1 🔬 per Purple ★ in Phase 3
+    white_hat_6f_rebalance: bool = False                    # v0.43.0 White Hat Face 6 Signature Protocol rebalance
+    acoustic_max_payout: int = 4                            # [TUNE] Max $ payout per Purple ★ for Acoustic (4 legacy, 5 v0.43.0)
 
     # --- v0.40.0 Gameplay Balance & Architecture Extensions (INV-V400-*) ---
     operations_before_pipeline_shift: bool = False  # If True, Phase 5 = Operations, Phase 6 = Pipeline Shift
@@ -947,6 +949,8 @@ class GameConfig:
             CubeColor.BLUE,
             CubeColor.RED,
         ))
+        overrides.setdefault("white_hat_6f_rebalance", True)
+        overrides.setdefault("acoustic_max_payout", 5)
         return cls.v042(**overrides)
 
     @classmethod
@@ -957,16 +961,38 @@ class GameConfig:
         return cls.v043(**overrides)
 
     @classmethod
+    def v043_1(cls, **overrides) -> "GameConfig":
+        """v0.43.1 candidate baseline (Phase 63: Blue Die Secret & Economy Rebalance).
+        Inherits v043 (Dominant Color Signature Attacks, Target Lock, v3.0 Critical Breach)
+        and introduces die_face_profile='V043_BLUE_TUNE':
+        - Blue Face 1: +1 Corporate Secret
+        - Blue Face 2: +2 🔬 (was +1 Corporate Secret)
+        - Blue Face 3: +$2 (was +$1)
+        - Blue Face 4: +1 🔬 / +$1
+        - Face 5: Secret face
+        - Face 6: Blue ★ (Variant Card)
+        """
+        overrides.setdefault("die_face_profile", "V043_BLUE_TUNE")
+        return cls.v043(**overrides)
+
+    @classmethod
+    def v043_1_roster(cls, **overrides) -> "GameConfig":
+        """v0.43.1 + bot autonomous PR push and cash allocation policies enabled."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v043_1(**overrides)
+
+    @classmethod
     def v044(cls, **overrides) -> "GameConfig":
         """v0.44.0 canonical baseline:
-        - Inherits v0.43 (Critical Breach, Signature Cubes, Target Lock, Dominant Cube Color Signature Attacks)
+        - Inherits v0.43.1 (Blue Face 2/3 & White Hat Face 6 rebalances, Dominant Color Signature Attacks, Critical Breach)
         - Unified Phase 3 F6 (★) Variant Card Overhaul (variant_profile="V044")
         - Streamlined Glitched Shield Slot Purge -> Block flow
         - Pure Phase 6 Operations (zero paid F6 actions)
         """
         overrides.setdefault("variant_profile", "V044")
         overrides.setdefault("b2_secret_cost", 1)
-        return cls.v043(**overrides)
+        return cls.v043_1(**overrides)
 
     @classmethod
     def v044_roster(cls, **overrides) -> "GameConfig":
@@ -974,6 +1000,7 @@ class GameConfig:
         overrides.setdefault("bot_pr_push", True)
         overrides.setdefault("bot_pr_push_params", PrPushParams())
         return cls.v044(**overrides)
+
     def _validate_tower_config(self) -> None:
         """Validates Cube Tower physics parameters (spec §2.4)."""
         self.tower_mode = TowerMode(self.tower_mode)

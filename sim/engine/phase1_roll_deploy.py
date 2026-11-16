@@ -91,6 +91,7 @@ def resolve_prodigy_purple_star_override(
     rng: random.Random,
     target_idx: Optional[int] = None,
     target_face: Optional[Face] = None,
+    excluded_targets: Optional[set] = None,
 ) -> bool:
     """Prodigy Face 6 Protocol (Arbitrary Code Execution):
     Turn any 1 other rolled die to any legal non-Star face of choice.
@@ -108,6 +109,26 @@ def resolve_prodigy_purple_star_override(
             target_idx, target_face = choice
 
     cfg = getattr(player, "config", None)
+    rebalance = bool(getattr(cfg, "white_hat_6f_rebalance", False))
+    if rebalance:
+        if target_idx is not None and target_face is not None and 0 <= target_idx < len(active_dice):
+            if excluded_targets is not None and target_idx in excluded_targets:
+                return False
+            if target_idx in purple_star_indices and len(purple_star_indices) == 1:
+                return False
+            if target_face.is_star or target_face.secrets_pending or getattr(target_face, "is_secret", False):
+                return False
+            target_die = active_dice[target_idx]
+            if target_face in target_die.faces:
+                target_die.current_face = target_face
+                target_die.is_locked = False
+                target_die.chosen_choice_index = None
+                player.prodigy_overrides_this_round = getattr(player, "prodigy_overrides_this_round", 0) + 1
+                if excluded_targets is not None:
+                    excluded_targets.add(target_idx)
+                return True
+        return False
+
     if (target_face is not None and target_face.secrets_pending
             and not getattr(cfg, "ace_allows_secret_face", False)):
         return False  # v0.38 (OQ-10): Arbitrary Code Execution may not set the Secret face
@@ -347,7 +368,7 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
 
         # Protocol Check: The Prodigy (Arbitrary Code Execution Face 6 Trigger)
         is_prodigy_operative = has_signature_protocol(player, WhiteHatCode.PRODIGY, legacy_bridge_enabled(engine))
-        if is_prodigy_operative:
+        if is_prodigy_operative and not getattr(engine.config, "white_hat_6f_rebalance", False):
             resolve_prodigy_purple_star_override(player, active_dice, engine.rng)
 
         # 4. Lock Evaluation & Yahtzee Rerolls Loop
@@ -442,8 +463,27 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
                 player.l4_payouts["release_rerolls_used"] = player.l4_payouts.get("release_rerolls_used", 0) + 1
 
         # Prodigy Face 6 protocol check after rerolls (Arbitrary Code Execution)
+        player.prodigy_overrides_this_round = 0
         if is_prodigy_operative:
-            resolve_prodigy_purple_star_override(player, active_dice, engine.rng)
+            if getattr(engine.config, "white_hat_6f_rebalance", False):
+                purple_count = sum(
+                    1 for d in active_dice
+                    if d.current_face and d.current_face.is_star and d.current_face.star_code == "PURPLE_STAR"
+                )
+                overridden_targets: set = set()
+                for _ in range(purple_count):
+                    remaining_stars = sum(
+                        1 for d in active_dice
+                        if d.current_face and d.current_face.is_star and d.current_face.star_code == "PURPLE_STAR"
+                    )
+                    if player.prodigy_overrides_this_round >= remaining_stars:
+                        break
+                    if not resolve_prodigy_purple_star_override(
+                        player, active_dice, engine.rng, excluded_targets=overridden_targets
+                    ):
+                        break
+            else:
+                resolve_prodigy_purple_star_override(player, active_dice, engine.rng)
             _evaluate_locks(active_dice)
 
         # Helix face override (Brute-Force Bypass)

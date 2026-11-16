@@ -140,7 +140,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         protocol_name="Logistics Bounty",
         protocol_timing="P3: INCOME",
         protocol_desc=(
-            "Gain **+1 {RESEARCH}** in Phase 3: Income per **{PURPLE} {STAR}** still In Production."
+            "Gain **+1 {RESEARCH} Research Token** per die currently in your **Scanned Box**."
         ),
     ),
     WhiteHatDossierSpec(
@@ -152,9 +152,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         protocol_name="Jumper Diagnostics",
         protocol_timing="P3: INCOME",
         protocol_desc=(
-            "When Face 6 ({PURPLE} {STAR}) is rolled, move **1 die** from your **Processing Box** to your **Scanned Box**, "
-            "banking its Secret now. If your Processing Box is empty, roll **1 Scanned Box die** and collect "
-            "only its $ / {RESEARCH} (it stays in place); if Under Development is empty, collect **+$1 cash**."
+            "Gain **+$1 cash** AND **+1 Release Bandwidth** this round *(applies in Phase 6 Step 3)*."
         ),
     ),
     WhiteHatDossierSpec(
@@ -166,8 +164,8 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         protocol_name="Resonance Sensor",
         protocol_timing="P3: INCOME",
         protocol_desc=(
-            "When Face 6 ({PURPLE} {STAR}) is rolled, gain **+$1 cash** per distinct cube color "
-            "present in the Tower Exit Tray this round ({RED}, {BLUE}, {GREEN}, {BLACK}; max **+$4**)."
+            "Gain **+$1 cash** per unique colored cube that exited the Cube Tower this round "
+            "*(including Operative Signature Cubes)*, up to **+$5 max**."
         ),
     ),
     WhiteHatDossierSpec(
@@ -179,9 +177,8 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         protocol_name="Burn Notice",
         protocol_timing="P3: INCOME",
         protocol_desc=(
-            "When Face 6 ({PURPLE} {STAR}) is rolled, gain an immediate **+$2 cash payout**; "
-            "in addition, you may optionally **permanently return 1 owned colored module die to the market** "
-            "to gain **+1 Corporate Secret**."
+            "Gain **+$2 cash**; optionally permanently return **1** owned **Gray Legacy Die** "
+            "to the box for **+$3 cash** *(if pulled from a Shield Slot, it no longer blocks in Phase 4)*."
         ),
     ),
     WhiteHatDossierSpec(
@@ -191,10 +188,10 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         flavor='"Payload injection executes before memory boundaries establish."',
         purple_faces=("Block 1 Any", "Block 1 Any", "+$2", "+$1 & +1 {RESEARCH}", "{SECRET} Secret", "{PURPLE} {STAR}"),
         protocol_name="Arbitrary Code Execution",
-        protocol_timing="P1: STEP 4 ROLLING",
+        protocol_timing="P1: STEP 4",
         protocol_desc=(
-            "When Face 6 ({PURPLE} {STAR}) is rolled, turn **1 other rolled die** in your active "
-            "pool to **any legal non-Star face of that die's color** other than the Secret face."
+            "*(After rerolls, before assignment.)* Turn **1 other rolled die** in your active "
+            "pool to **any legal non-Star face of its color** other than the Secret face."
         ),
     ),
     WhiteHatDossierSpec(
@@ -206,8 +203,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         protocol_name="Algorithmic Parity",
         protocol_timing="P3: INCOME",
         protocol_desc=(
-            "When Face 6 ({PURPLE} {STAR}) is rolled, gain an additional **+$2 cash income** "
-            "AND **+1 {RESEARCH} Research Token** during Phase 3: Income."
+            "Gain **+$2 cash** AND **+1 {RESEARCH} Research Token**."
         ),
     ),
 ]
@@ -245,7 +241,7 @@ DICE_SPECS: List[DieSpec] = [
         title="BLUE",
         subtitle="Firewall",
         cost_str="$4-$5 (by Variant)",
-        faces=("+1 Corporate Secret", "+1 Corporate Secret", "+$1", "+1 {RESEARCH} / +$1", "{SECRET} Secret", "{BLUE} {STAR}"),
+        faces=("+1 Corporate Secret", "+2 {RESEARCH}", "+$2", "+1 {RESEARCH} / +$1", "{SECRET} Secret", "{BLUE} {STAR}"),
         notes="Direct Secrets & Defense synergy. Face 5 Secret face (+2, or +3 at Defense Grid L3+), Face 6 Blue {STAR}.",
     ),
     DieSpec(
@@ -313,21 +309,21 @@ VARIANT_CARDS: List[VariantCardSpec] = [
     ),
     VariantCardSpec(
         'B1', 'blue', 'BLUE // FIREWALL', '$5',
-        '{PIP1}{PIP2} +1 Secret | {PIP3} +$1', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
+        '{PIP1} +1 Secret | {PIP2} +2{RESEARCH} | {PIP3} +$2', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
         'Honeypot Telemetry', 'P3 INCOME',
         'In Phase 3: Income, gain **+2 {RESEARCH}** if **0 {BLUE} Blue** cubes are in the Exit Tray, **OR** gain **+$3** if **1+ {BLUE} Blue** cubes are in the Exit Tray.',
         'Honeypot: +2 Research (0 Blue) or +$3 (1+ Blue).',
     ),
     VariantCardSpec(
         'B2', 'blue', 'BLUE // FIREWALL', '$5',
-        '{PIP1}{PIP2} +1 Secret | {PIP3} +$1', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
+        '{PIP1} +1 Secret | {PIP2} +2{RESEARCH} | {PIP3} +$2', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
         'Deep R&D Vault', 'P3 INCOME',
         'In Phase 3: Income, gain **+$2**, **OR** spend **1 Corporate Secret** to gain **+3 Market Share** *(not above max; outside Public Relations limit)*.',
         'R&D Vault: +$2 or spend 1 Secret for +3 Share.',
     ),
     VariantCardSpec(
         'B3', 'blue', 'BLUE // FIREWALL', '$4',
-        '{PIP1}{PIP2} +1 Secret | {PIP3} +$1', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
+        '{PIP1} +1 Secret | {PIP2} +2{RESEARCH} | {PIP3} +$2', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
         'Air-Gapped Backup', 'P3 INCOME',
         'In Phase 3: Income, gain **+$1**, plus **+$1** per Shield you have **In Production** *(clean or glitched slots)*.',
         'Air-Gapped: +$1 plus +$1 per Shield In Production.',

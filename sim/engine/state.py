@@ -113,6 +113,7 @@ class PlayerState:
     defense_capacity: int = 2
     triage_bandwidth: int = 2
     release_bandwidth: int = 4
+    temp_release_bandwidth_bonus: int = 0
     triage_level: int = 0
     release_level: int = 0
     defense_level: int = 0
@@ -420,6 +421,8 @@ class PlayerState:
         self.money_spent_regain = 0
         self.scanned_dice_purchased_this_turn = 0
         self.triage_milestones_claimed = []
+        self.temp_release_bandwidth_bonus = 0
+        self.prodigy_overrides_this_round = 0
 
         self._has_emergency_hotfix = has_emergency_hotfix or (self.triage_level >= 2)
         self._has_passive_firewall = has_passive_firewall or (self.defense_level >= 2)
@@ -451,6 +454,11 @@ class PlayerState:
         self.signature_black_secrets_lost: int = int(kwargs.get("signature_black_secrets_lost", 0))
         self.signature_red_transfers_sent: int = int(kwargs.get("signature_red_transfers_sent", 0))
         self.signature_red_transfers_received: int = int(kwargs.get("signature_red_transfers_received", 0))
+
+    @property
+    def effective_release_bandwidth(self) -> int:
+        """Total Release Bandwidth for Phase 6 Step 3, combining track level and Phreaker bonuses."""
+        return self.release_bandwidth + self.temp_release_bandwidth_bonus
 
     @property
     def max_market_share(self) -> int:
@@ -1141,6 +1149,13 @@ class RoundTelemetry:
     dominant_tray_color: Optional[str] = None
     signature_attacks_this_round: Dict[int, Optional[str]] = field(default_factory=dict)
     encrypted_tracks_by_player: Dict[int, List[str]] = field(default_factory=dict)
+    # --- White Hat 6F Rebalance Telemetry (v0.43.0) ---
+    purple_star_triggers_by_operative: Dict[str, int] = field(default_factory=dict)
+    operator_research_harvested: int = 0
+    phreaker_bandwidth_graduates: int = 0
+    acoustic_cash_harvested: int = 0
+    spook_gray_dice_burned: int = 0
+    prodigy_overrides_executed: int = 0
 
 
 @dataclass
@@ -1212,6 +1227,10 @@ class IncomeRecord:
     details: List[Dict[str, Any]] = field(default_factory=list)
     burned_die_id: Optional[int] = None
     burned_die_ids: List[int] = field(default_factory=list)
+    burned_gray_die_ids: List[int] = field(default_factory=list)
+    phreaker_bandwidth_bonus: int = 0
+    acoustic_colors_count: int = 0
+    operator_scanned_count: int = 0
     diagnostics_face: Optional[str] = None
     purple_star_triggers: int = 0
     protocol_research: int = 0
@@ -1336,6 +1355,7 @@ class GameState:
     last_round_buffer_overflow: bool = False
     total_buffer_overflows: int = 0
     last_exited_cubes: Dict[CubeColor, int] = field(default_factory=dict)
+    distinct_exited_colors_this_round: int = 0
     first_player_index: int = 0
     current_round: int = 1
     game_over: bool = False

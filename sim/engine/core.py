@@ -497,6 +497,13 @@ class GameEngine:
                 )
         tel.final_round_trigger_phase = self.state.final_round_trigger_phase
         tel.end_phase = end_phase
+        tel.prodigy_overrides_executed = sum(
+            getattr(p, "prodigy_overrides_this_round", 0) for p in self.state.players
+        )
+        for p in self.state.players:
+            p.temp_release_bandwidth_bonus = 0
+            p.prodigy_overrides_this_round = 0
+        self.state.distinct_exited_colors_this_round = 0
         self.telemetry_history.append(tel)  # exactly once per round (INV-SEQ-TELEMETRY-01)
         return tel
 
@@ -531,6 +538,20 @@ class GameEngine:
             pid: {"money": r.money, "research": r.research, "secrets": r.secrets} for pid, r in incomes.items()
         }
         tel.purple_star_triggers_per_round = {pid: r.purple_star_triggers for pid, r in incomes.items()}
+        for p in s.players:
+            rec = incomes.get(p.player_id)
+            if rec is None:
+                continue
+            if p.white_hat is not None and rec.purple_star_triggers > 0:
+                wh_key = p.white_hat.code.value
+                tel.purple_star_triggers_by_operative[wh_key] = (
+                    tel.purple_star_triggers_by_operative.get(wh_key, 0) + rec.purple_star_triggers
+                )
+                if p.white_hat.code == WhiteHatCode.OPERATOR:
+                    tel.operator_research_harvested += rec.purple_star_triggers * rec.operator_scanned_count
+                elif p.white_hat.code == WhiteHatCode.ACOUSTIC:
+                    tel.acoustic_cash_harvested += rec.purple_star_triggers * rec.acoustic_colors_count
+            tel.spook_gray_dice_burned += len(rec.burned_gray_die_ids)
         tel.phases_executed.append(3)
         tel.phase_snapshots[3] = self._snapshot_players()
 
@@ -554,6 +575,11 @@ class GameEngine:
             shifts = self._run_phase_pipeline_shift()
             tel.scanned_held_by_player = {pid: r.held_in_scanned for pid, r in shifts.items()}
             tel.graduated_by_player = {pid: len(r.graduated_ids) for pid, r in shifts.items()}
+            for p in s.players:
+                if p.temp_release_bandwidth_bonus > 0 and p.player_id in shifts:
+                    tel.phreaker_bandwidth_graduates += max(
+                        0, len(shifts[p.player_id].graduated_ids) - p.release_bandwidth
+                    )
             tel.phases_executed.append(6)
             tel.phase_snapshots[6] = self._snapshot_players()
             phase6_operations.pass_first_player_marker(self)

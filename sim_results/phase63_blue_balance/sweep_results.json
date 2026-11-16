@@ -1,0 +1,200 @@
+{
+  "2P_control_v043": {
+    "games": 600,
+    "players": 2,
+    "rounds_mean": 7.262,
+    "rounds_stdev": 1.812,
+    "rounds_min": 2,
+    "rounds_max": 11,
+    "end_trigger_pct": {
+      "market_collapse": 80.0,
+      "patient_zero": 17.67,
+      "singularity": 1.33,
+      "total_wipeout": 1.0
+    },
+    "total_wipeout_pct": 1.0,
+    "winner_secrets_mean": 15.744,
+    "blue_face_secrets_per_game": 1.46,
+    "banked_secrets_per_game": 13.182,
+    "leader_bonus_secrets_per_game": 0.0,
+    "direct_to_banked_ratio": 0.111,
+    "blue_dice_bought_per_player": 0.103,
+    "defense_level_mean": 0.521,
+    "blue_co_defense_level_mean": 0.453,
+    "pr_level_mean": 0.931,
+    "triage_level_mean": 2.293,
+    "company_win_rate_pct": {
+      "AEGIS": 52.43,
+      "DTO": 55.02,
+      "HELIX": 45.31,
+      "MERIDIAN": 39.71,
+      "OMNIDYNE": 64.71,
+      "PROMETHEUS": 43.56
+    }
+  },
+  "2P_phase63_v043_1": {
+    "games": 600,
+    "players": 2,
+    "rounds_mean": 7.312,
+    "rounds_stdev": 1.848,
+    "rounds_min": 2,
+    "rounds_max": 12,
+    "end_trigger_pct": {
+      "market_collapse": 80.33,
+      "patient_zero": 16.17,
+      "singularity": 1.5,
+      "total_wipeout": 2.0
+    },
+    "total_wipeout_pct": 2.0,
+    "winner_secrets_mean": 15.9,
+    "blue_face_secrets_per_game": 0.832,
+    "banked_secrets_per_game": 13.92,
+    "leader_bonus_secrets_per_game": 0.0,
+    "direct_to_banked_ratio": 0.06,
+    "blue_dice_bought_per_player": 0.127,
+    "defense_level_mean": 0.542,
+    "blue_co_defense_level_mean": 0.513,
+    "pr_level_mean": 0.932,
+    "triage_level_mean": 2.338,
+    "company_win_rate_pct": {
+      "AEGIS": 52.43,
+      "DTO": 46.89,
+      "HELIX": 43.75,
+      "MERIDIAN": 47.06,
+      "OMNIDYNE": 67.38,
+      "PROMETHEUS": 43.56
+    }
+  },
+  "3P_control_v043": {
+    "games": 600,
+    "players": 3,
+    "rounds_mean": 8.132,
+    "rounds_stdev": 1.741,
+    "rounds_min": 2,
+    "rounds_max": 12,
+    "end_trigger_pct": {
+      "market_collapse": 60.5,
+      "patient_zero": 33.67,
+      "singularity": 4.67,
+      "total_wipeout": 1.17
+    },
+    "total_wipeout_pct": 1.17,
+    "winner_secrets_mean": 14.84,
+    "blue_face_secrets_per_game": 2.373,
+    "banked_secrets_per_game": 20.262,
+    "leader_bonus_secrets_per_game": 0.0,
+    "direct_to_banked_ratio": 0.117,
+    "blue_dice_bought_per_player": 0.166,
+    "defense_level_mean": 0.691,
+    "blue_co_defense_level_mean": 0.619,
+    "pr_level_mean": 1.106,
+    "triage_level_mean": 2.486,
+    "company_win_rate_pct": {
+      "AEGIS": 33.0,
+      "DTO": 39.93,
+      "HELIX": 26.67,
+      "MERIDIAN": 27.52,
+      "OMNIDYNE": 48.21,
+      "PROMETHEUS": 23.97
+    }
+  },
+  "3P_phase63_v043_1": {
+    "games": 600,
+    "players": 3,
+    "rounds_mean": 8.085,
+    "rounds_stdev": 1.711,
+    "rounds_min": 2,
+    "rounds_max": 12,
+    "end_trigger_pct": {
+      "market_collapse": 61.5,
+      "patient_zero": 32.67,
+      "singularity": 3.83,
+      "total_wipeout": 2.0
+    },
+    "total_wipeout_pct": 2.0,
+    "winner_secrets_mean": 14.98,
+    "blue_face_secrets_per_game": 1.313,
+    "banked_secrets_per_game": 21.2,
+    "leader_bonus_secrets_per_game": 0.0,
+    "direct_to_banked_ratio": 0.062,
+    "blue_dice_bought_per_player": 0.197,
+    "defense_level_mean": 0.701,
+    "blue_co_defense_level_mean": 0.692,
+    "pr_level_mean": 1.08,
+    "triage_level_mean": 2.517,
+    "company_win_rate_pct": {
+      "AEGIS": 30.67,
+      "DTO": 33.99,
+      "HELIX": 30.0,
+      "MERIDIAN": 31.21,
+      "OMNIDYNE": 47.56,
+      "PROMETHEUS": 26.03
+    }
+  },
+  "4P_control_v043": {
+    "games": 600,
+    "players": 4,
+    "rounds_mean": 7.968,
+    "rounds_stdev": 1.742,
+    "rounds_min": 2,
+    "rounds_max": 12,
+    "end_trigger_pct": {
+      "market_collapse": 52.17,
+      "patient_zero": 43.67,
+      "singularity": 3.5,
+      "total_wipeout": 0.67
+    },
+    "total_wipeout_pct": 0.67,
+    "winner_secrets_mean": 14.695,
+    "blue_face_secrets_per_game": 3.235,
+    "banked_secrets_per_game": 25.405,
+    "leader_bonus_secrets_per_game": 0.0,
+    "direct_to_banked_ratio": 0.127,
+    "blue_dice_bought_per_player": 0.206,
+    "defense_level_mean": 0.678,
+    "blue_co_defense_level_mean": 0.58,
+    "pr_level_mean": 1.09,
+    "triage_level_mean": 2.516,
+    "company_win_rate_pct": {
+      "AEGIS": 29.87,
+      "DTO": 29.49,
+      "HELIX": 15.96,
+      "MERIDIAN": 21.39,
+      "OMNIDYNE": 36.22,
+      "PROMETHEUS": 18.09
+    }
+  },
+  "4P_phase63_v043_1": {
+    "games": 600,
+    "players": 4,
+    "rounds_mean": 7.927,
+    "rounds_stdev": 1.644,
+    "rounds_min": 2,
+    "rounds_max": 11,
+    "end_trigger_pct": {
+      "market_collapse": 58.17,
+      "patient_zero": 38.33,
+      "singularity": 2.67,
+      "total_wipeout": 0.83
+    },
+    "total_wipeout_pct": 0.83,
+    "winner_secrets_mean": 15.447,
+    "blue_face_secrets_per_game": 1.865,
+    "banked_secrets_per_game": 27.653,
+    "leader_bonus_secrets_per_game": 0.0,
+    "direct_to_banked_ratio": 0.067,
+    "blue_dice_bought_per_player": 0.234,
+    "defense_level_mean": 0.682,
+    "blue_co_defense_level_mean": 0.652,
+    "pr_level_mean": 1.084,
+    "triage_level_mean": 2.54,
+    "company_win_rate_pct": {
+      "AEGIS": 26.08,
+      "DTO": 27.18,
+      "HELIX": 22.3,
+      "MERIDIAN": 21.65,
+      "OMNIDYNE": 36.22,
+      "PROMETHEUS": 17.11
+    }
+  }
+}

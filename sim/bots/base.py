@@ -1014,6 +1014,75 @@ class BaseBot:
                 return candidates[0].die_id
         return None
 
+    def choose_spook_burn_gray(
+        self,
+        player_state: PlayerState,
+        game_state: GameState,
+        rng: random.Random,
+        already_burned: Set[int],
+    ) -> Optional[int]:
+        """Evaluates whether to permanently return 1 owned Gray Legacy die for +$3 cash.
+
+        Heuristic Priority:
+        1. Scan owned Gray dice in: Scanned Box -> Ready for Release -> Processing Box.
+        2. Scan owned Gray dice In Production assigned to INCOME.
+        3. If only Gray dice in SHIELD slots remain:
+           Burn only if player has surplus shields (> incoming attack strength) or non-lethal damage.
+        4. Return None to decline the burn.
+        """
+        from sim.engine.state import ProductionRole
+
+        for zone in (
+            player_state.scanned_dice,
+            player_state.ready_for_release_dice,
+            player_state.glitched_dice,
+        ):
+            for d in zone:
+                if d.color == DieColor.GRAY and d.die_id not in already_burned:
+                    return d.die_id
+
+        income_grays = [
+            d for d in player_state.in_production_dice
+            if d.color == DieColor.GRAY
+            and d.die_id not in already_burned
+            and getattr(d, "production_role", None) in (None, ProductionRole.INCOME)
+        ]
+        if income_grays:
+            return income_grays[0].die_id
+
+        shield_roles = (
+            ProductionRole.RED_SHIELD,
+            ProductionRole.BLUE_SHIELD,
+            ProductionRole.GREEN_SHIELD,
+            ProductionRole.ANY_SHIELD,
+        )
+        shield_grays = [
+            d for d in player_state.in_production_dice
+            if d.color == DieColor.GRAY
+            and d.die_id not in already_burned
+            and getattr(d, "production_role", None) in shield_roles
+        ]
+        if shield_grays:
+            exited = getattr(game_state, "last_exited_cubes", {}) or {}
+            attack_strength = sum(
+                int(exited.get(c, 0)) for c in (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN)
+            )
+            total_shields = sum(
+                (d.effective_face or d.current_face).block_amount
+                for d in player_state.in_production_dice
+                if getattr(d, "production_role", None) in shield_roles
+                and (d.effective_face or d.current_face) is not None
+            )
+            target = shield_grays[0]
+            target_block = (target.effective_face or target.current_face).block_amount if (target.effective_face or target.current_face) else 0
+            if total_shields - target_block >= attack_strength:
+                return target.die_id
+            blue_incoming = int(exited.get(CubeColor.BLUE, 0))
+            if player_state.secrets > blue_incoming + target_block and player_state.money < 3:
+                return target.die_id
+
+        return None
+
     def choose_phreaker_jumper_diagnostics(
         self,
         player_state: PlayerState,
@@ -1037,16 +1106,83 @@ class BaseBot:
         active_dice: List[Die],
         rng: random.Random,
     ) -> Optional[Tuple[int, Face]]:
-        """Selects a die in active pool to override to any legal non-Star face."""
-        # Find any other die with a Glitch or unwanted face
+        """Selects 1 other rolled die in active pool to turn to an optimal legal non-Star, non-Secret face."""
+        if not getattr(getattr(player_state, "config", None), "white_hat_6f_rebalance", False):
+            for idx, d in enumerate(active_dice):
+                eff = d.effective_face or d.current_face
+                if eff and eff.is_star and eff.star_code == "PURPLE_STAR":
+                    continue
+                if d.current_face and d.current_face.is_glitch:
+                    target = Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY)
+                    return (idx, target)
+            return None
+
+        def _legal_faces(die: Die) -> List[Face]:
+            return [
+                f for f in (die.faces or [])
+                if not f.is_star and not f.secrets_pending and not getattr(f, "is_secret", False)
+            ]
+
+        purple_indices = [
+            i for i, d in enumerate(active_dice)
+            if (d.effective_face or d.current_face)
+            and (d.effective_face or d.current_face).is_star
+            and (d.effective_face or d.current_face).star_code == "PURPLE_STAR"
+        ]
+        if not purple_indices:
+            return None
+
+        # Priority 1 & 2: Neutralize a Glitched die to Block 1 Any or best economy face
         for idx, d in enumerate(active_dice):
-            eff = d.effective_face or d.current_face
-            if eff and eff.is_star and eff.star_code == "PURPLE_STAR":
+            if idx in purple_indices and len(purple_indices) == 1:
                 continue
             if d.current_face and d.current_face.is_glitch:
-                # Override to Block 1 Any or +$2
-                target = Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY)
-                return (idx, target)
+                legal = _legal_faces(d)
+                block_face = next((f for f in legal if f.block_amount > 0), None)
+                if block_face is not None:
+                    return (idx, block_face)
+                if legal:
+                    best = max(legal, key=lambda f: (f.money + f.patches * 2 + f.market_share * 2, f.block_amount))
+                    return (idx, best)
+
+        # Priority 3: Economic Maximization on non-Star dice
+        best_choice: Optional[Tuple[int, Face]] = None
+        best_gain = 0
+        for idx, d in enumerate(active_dice):
+            if idx in purple_indices:
+                continue
+            cur = d.current_face
+            cur_val = (
+                (cur.money + cur.patches * 2 + cur.market_share * 2 + cur.block_amount)
+                if (cur and not cur.is_star and not cur.secrets_pending)
+                else 0
+            )
+            legal = _legal_faces(d)
+            if not legal:
+                continue
+            cand = max(
+                legal,
+                key=lambda f: (
+                    f.patches * 2 + f.market_share * 2 + f.money,
+                    f.block_amount,
+                ),
+            )
+            cand_val = cand.money + cand.patches * 2 + cand.market_share * 2 + cand.block_amount
+            gain = cand_val - cur_val
+            if gain > best_gain:
+                best_gain = gain
+                best_choice = (idx, cand)
+
+        if best_choice is not None:
+            return best_choice
+
+        # Fallback: convert any non-Purple-Star die to its best legal face
+        for idx, d in enumerate(active_dice):
+            if idx in purple_indices:
+                continue
+            legal = _legal_faces(d)
+            if legal:
+                return (idx, legal[0])
         return None
 
     def choose_target_lock_color(

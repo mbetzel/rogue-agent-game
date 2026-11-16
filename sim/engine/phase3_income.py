@@ -137,11 +137,18 @@ def _die_income_row(state: GameState, player: PlayerState, die: Die) -> Optional
             money += bonus
             star_note = f"Cloud Monopoly (+${bonus} bonus)"
         elif code == "PURPLE_STAR":
+            rebalance = getattr(state.config, "white_hat_6f_rebalance", False)
             if _is_operative(player, WhiteHatCode.ACOUSTIC, legacy_bridge_enabled(state)):
-                exited = _exited_cubes_for_acoustic(state)
-                gain = min(4, len({c for c, n in exited.items() if n > 0}))
+                if rebalance:
+                    gain = getattr(state, "distinct_exited_colors_this_round", 0)
+                else:
+                    exited = _exited_cubes_for_acoustic(state)
+                    gain = min(4, len({c for c, n in exited.items() if n > 0}))
                 money += gain
                 star_note = f"Resonance Sensor (+${gain})"
+            elif _is_operative(player, WhiteHatCode.PHREAKER, legacy_bridge_enabled(state)) and rebalance:
+                money += 1
+                star_note = "Jumper Diagnostics (+$1, +1 Bandwidth)"
             elif _is_operative(player, WhiteHatCode.CIPHER, legacy_bridge_enabled(state)):
                 money += 2
                 research += 1
@@ -151,7 +158,12 @@ def _die_income_row(state: GameState, player: PlayerState, die: Die) -> Optional
                 money += 2
                 star_note = "Burn Notice (+$2)"
             elif _is_operative(player, WhiteHatCode.OPERATOR, legacy_bridge_enabled(state)):
-                if getattr(state.config, "operator_protocol_mode", "CONTINGENT_STAFFING") == "LOGISTICS_BOUNTY":
+                if rebalance:
+                    gain_research = len(player.scanned_dice)
+                    research += gain_research
+                    protocol_research = gain_research
+                    star_note = f"Logistics Bounty (+{gain_research} 🔬)"
+                elif getattr(state.config, "operator_protocol_mode", "CONTINGENT_STAFFING") == "LOGISTICS_BOUNTY":
                     gain_research = getattr(state.config, "operator_logistics_bounty_research", 1)
                     research += gain_research
                     protocol_research = gain_research
@@ -365,6 +377,12 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
             _reset(die)
             player.scanned_dice.append(die)
 
+    if getattr(engine.config, "white_hat_6f_rebalance", False):
+        if _is_operative(player, WhiteHatCode.OPERATOR, legacy_bridge_enabled(engine)):
+            record.operator_scanned_count = len(player.scanned_dice)
+        if _is_operative(player, WhiteHatCode.ACOUSTIC, legacy_bridge_enabled(engine)):
+            record.acoustic_colors_count = getattr(engine.state, "distinct_exited_colors_this_round", 0)
+
     return record
 
 
@@ -403,7 +421,49 @@ def preview_player_income(state: GameState, player: PlayerState) -> IncomeRecord
         record.secrets += row["secrets"]
         record.details.append(row)
     record.purple_star_triggers = len(purple_star_dice_in_production(player))
+    if getattr(state.config, "white_hat_6f_rebalance", False):
+        if _is_operative(player, WhiteHatCode.OPERATOR, legacy_bridge_enabled(state)):
+            record.operator_scanned_count = len(player.scanned_dice)
+        if _is_operative(player, WhiteHatCode.ACOUSTIC, legacy_bridge_enabled(state)):
+            record.acoustic_colors_count = getattr(state, "distinct_exited_colors_this_round", 0)
+
     return record
+
+
+def resolve_operator_logistics_bounty(player: PlayerState, triggers: int) -> int:
+    """Awards +1 research per die currently in the Scanned Box per trigger."""
+    scanned_count = len(player.scanned_dice)
+    research_gain = triggers * scanned_count
+    if research_gain > 0:
+        player.gain_research(research_gain, "signature_protocol")
+    return research_gain
+
+
+def compute_distinct_exited_colors(exited_cubes: Dict[Any, int], exited_signature_pids: Iterable[int]) -> int:
+    """Calculates distinct exited colors from Phase 2 drop (capped at 5)."""
+    compiler_colors = sum(
+        1 for c, n in exited_cubes.items()
+        if n > 0 and c in (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN, CubeColor.BLACK)
+    )
+    sig_colors = len(set(exited_signature_pids))
+    return min(5, compiler_colors + sig_colors)
+
+
+def resolve_acoustic_resonance_sensor(state: GameState, player: PlayerState, triggers: int) -> int:
+    """Awards +$1 cash per distinct exited cube color (max $5) per trigger."""
+    unit_cash = getattr(state, "distinct_exited_colors_this_round", 0)
+    total_gain = triggers * unit_cash
+    player.money += total_gain
+    return total_gain
+
+
+def resolve_cipher_algorithmic_parity(player: PlayerState, triggers: int) -> Tuple[int, int]:
+    """Awards +$2 cash and +1 research per trigger unconditionally."""
+    cash_gain = triggers * 2
+    research_gain = triggers * 1
+    player.money += cash_gain
+    player.gain_research(research_gain, "signature_protocol")
+    return cash_gain, research_gain
 
 
 def resolve_spook_burn_notice(
@@ -412,9 +472,34 @@ def resolve_spook_burn_notice(
     die_id: int,
 ) -> bool:
     """Spook Face 6 Protocol (Burn Notice):
-    Permanently returns 1 owned colored die to market to gain +1 Corporate Secret.
+    v0.43.0: Permanently returns 1 owned Gray Legacy die to the box for +$3 cash.
+    Legacy: Permanently returns 1 owned colored die to market to gain +1 Corporate Secret.
     """
-    target_die: Optional[Die] = None
+    if getattr(engine.config, "white_hat_6f_rebalance", False):
+        target_die: Optional[Die] = None
+        target_zone: Optional[List[Die]] = None
+        for zone in (player.in_production_dice, player.scanned_dice, player.glitched_dice, player.ready_for_release_dice):
+            for d in zone:
+                if d.die_id == die_id and d.color == DieColor.GRAY:
+                    target_die = d
+                    target_zone = zone
+                    break
+            if target_die:
+                break
+
+        if not target_die or target_zone is None:
+            return False
+
+        target_zone.remove(target_die)
+        if target_zone is player.glitched_dice:
+            from sim.engine import secret_faces
+
+            secret_faces.lose_pending(player, target_die)
+
+        player.money += 3
+        return True
+
+    target_die = None
     for zone in (player.in_production_dice, player.glitched_dice, player.scanned_dice, player.ready_for_release_dice):
         for d in zone:
             if d.die_id == die_id and d.color not in (DieColor.GRAY, DieColor.WHITE):
@@ -443,15 +528,17 @@ def resolve_phreaker_jumper_diagnostics(
     die_id: Optional[int] = None,
     rng: Optional[random.Random] = None,
     forced_face: Optional[Face] = None,
+    triggers: int = 1,
 ) -> Optional[Face]:
     """Phreaker Face 6 Protocol (Jumper Diagnostics):
-    Rolls 1 die currently in Under Development; harvests rolled cash/patches; die remains in place.
-    INV-PHREAKER-FALLBACK-01: If Under Development is empty, yields +$1 cash fallback immediately.
-
-    v0.38 (``power_profile="V038_DRAFT"``, §14.2 OQ-8): move 1 die Processing Box -> Scanned Box, banking its
-    Secret; if the Processing Box is empty, roll 1 Scanned Box die (stays in place); if both are empty, +$1.
+    v0.43.0: Awards +$1 cash and +1 temporary Release Bandwidth per trigger.
+    Legacy: Rolls 1 die currently in Under Development; harvests rolled cash/patches; die remains in place.
     """
     cfg = engine.config
+    if getattr(cfg, "white_hat_6f_rebalance", False):
+        player.money += triggers * 1
+        player.temp_release_bandwidth_bonus += triggers
+        return Face(name=f"Jumper Diagnostics (+${triggers}, +{triggers} Bandwidth)")
     if cfg.power_profile == "V038_DRAFT" and player.glitched_dice:
         target = secret_faces.best_pending(cfg, player, die_id)
         player.glitched_dice.remove(target)
@@ -511,8 +598,10 @@ def _nth_choice(choice: Any, n: int) -> Any:
     return choice if n == 0 else _ASK_BOT
 
 
-def _burnable_ids(player: PlayerState) -> set:
+def _burnable_ids(player: PlayerState, rebalance: bool = False) -> set:
     zones = player.in_production_dice + player.glitched_dice + player.scanned_dice + player.ready_for_release_dice
+    if rebalance:
+        return {d.die_id for d in zones if d.color == DieColor.GRAY}
     return {d.die_id for d in zones if d.color not in (DieColor.GRAY, DieColor.WHITE)}
 
 
@@ -521,7 +610,18 @@ def _bot_burn_choice(engine: GameEngine, player: PlayerState, burned: List[int])
     longer burnable), re-ask once, then fall back to the BaseBot default, so a trigger is not wasted."""
     from sim.bots.base import BaseBot
 
-    valid = _burnable_ids(player) - set(burned)
+    rebalance = bool(getattr(engine.config, "white_hat_6f_rebalance", False))
+    valid = _burnable_ids(player, rebalance=rebalance) - set(burned)
+    if rebalance:
+        for _ in range(2):
+            choice = player.bot.choose_spook_burn_gray(player, engine.state, engine.rng, set(burned))
+            if choice is None:
+                return None
+            if choice in valid:
+                return choice
+        choice = BaseBot.choose_spook_burn_gray(player.bot, player, engine.state, engine.rng, set(burned))
+        return choice if choice in valid else None
+
     for _ in range(2):
         choice = player.bot.choose_spook_burn_notice(player, engine.state, engine.rng)
         if choice is None:
@@ -552,6 +652,15 @@ def resolve_income_signature_protocols(
     if not (is_spook or is_phreaker):
         return triggers
 
+    rebalance = bool(getattr(engine.config, "white_hat_6f_rebalance", False))
+    if rebalance and is_phreaker:
+        # +$1 cash per Purple ★ was already collected in _die_income_row; grant temporary Release Bandwidth here.
+        player.temp_release_bandwidth_bonus += triggers
+        if record is not None:
+            record.phreaker_bandwidth_bonus += triggers
+            record.diagnostics_face = f"Jumper Diagnostics (+${triggers}, +{triggers} Bandwidth)"
+        return triggers
+
     burned: List[int] = []
     for n in range(triggers):
         if is_spook:
@@ -573,6 +682,8 @@ def resolve_income_signature_protocols(
     if record is not None and burned:
         record.burned_die_ids.extend(burned)
         record.burned_die_id = burned[0]
+        if rebalance:
+            record.burned_gray_die_ids.extend(burned)
     return triggers
 
 

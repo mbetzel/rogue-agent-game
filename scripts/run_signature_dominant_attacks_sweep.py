@@ -50,11 +50,7 @@ _ORIG_RESOLVE_SIG_RED = phase4_attack_resolution._resolve_signature_red
 
 
 def _instrumented_resolve_sig_red(engine: GameEngine, locked_players: List[Any]) -> None:
-    drain_amt = int(
-        engine.config.signature_red_ms_loss
-        if getattr(engine.config, "signature_red_ms_loss", None) is not None and engine.config.signature_red_ms_loss != 2
-        else getattr(engine.config, "signature_red_drain_amount", 2)
-    )
+    drain_amt = engine.config.signature_red_drain_amount
     for p in locked_players:
         if p.market_share is not None:
             actual_loss = min(p.market_share, drain_amt)
