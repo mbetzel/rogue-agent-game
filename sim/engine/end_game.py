@@ -251,6 +251,8 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
                 "purple_dice_owned_final": sum(1 for d in p.total_dice if d.color == DieColor.PURPLE),
                 "gray_dice_owned_final": sum(1 for d in p.total_dice if d.color == DieColor.GRAY),
                 "triage_l3_upgrade_color": getattr(p, "triage_l3_upgrade_color", None),
+                **({"triage_l4_upgrade_color": getattr(p, "triage_l4_upgrade_color", None)}
+                   if getattr(cfg, "triage_l4_free_die_replacement", False) else {}),
                 "slush_fund_used_game": getattr(p, "slush_fund_used_game", False),
                 "total_dirty_income": p.total_dirty_income_taken,
                 "total_contractors_hired": p.total_contractors_hired,

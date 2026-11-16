@@ -414,7 +414,7 @@ def execute_track_upgrades(engine: GameEngine, player: PlayerState, plan: Any) -
         lvl = research_tracks.level_of(player, t)
         done.append((t, lvl))
 
-        if lvl in research_tracks.BREAKTHROUGH_LEVELS:
+        if research_tracks.has_level_effect(engine.config, t, lvl):
             choice = research_tracks.ask_breakthrough_choice(engine, player, t, lvl, choices)
             research_tracks.resolve_breakthrough(engine, player, t, lvl, choice)
 

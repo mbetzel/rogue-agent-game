@@ -46,6 +46,7 @@ HOOK_DTYPES: Dict[str, str] = {
     "choose_prodigy_ability": "phase1_roll",
     "choose_prodigy_face_override": "phase1_roll",
     "choose_prodigy_purple_star_override": "phase1_roll",
+    "choose_release_l4_gray_face": "phase1_roll",
     "choose_meridian_override": "phase1_roll",
     "choose_meridian_capital_injection": "phase3_income",
     "choose_operator_ability": "phase1_roll",
@@ -77,6 +78,7 @@ HOOK_DTYPES: Dict[str, str] = {
     "expected_income": "phase6",
     # misc: Breakthrough, graduates, Customer Poaching target
     "choose_breakthrough": "misc",
+    "choose_triage_l4_upgrade": "misc",
     "choose_scanned_graduates": "misc",
     "choose_poach_target": "misc",
 }
