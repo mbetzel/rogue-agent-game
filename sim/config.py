@@ -480,6 +480,8 @@ class GameConfig:
     meridian_capital_injection_cash: int = 3                # [TUNE] +3 $ in Phase 3
     operator_protocol_mode: str = "CONTINGENT_STAFFING"     # "CONTINGENT_STAFFING" | "LOGISTICS_BOUNTY"
     operator_logistics_bounty_research: int = 1             # [TUNE] +1 🔬 per Purple ★ in Phase 3
+    white_hat_6f_rebalance: bool = False                    # v0.43.0 White Hat Face 6 Signature Protocol rebalance
+    acoustic_max_payout: int = 4                            # [TUNE] Max $ payout per Purple ★ for Acoustic (4 legacy, 5 v0.43.0)
 
     # --- v0.40.0 Gameplay Balance & Architecture Extensions (INV-V400-*) ---
     operations_before_pipeline_shift: bool = False  # If True, Phase 5 = Operations, Phase 6 = Pipeline Shift
@@ -923,6 +925,8 @@ class GameConfig:
             CubeColor.BLUE,
             CubeColor.RED,
         ))
+        overrides.setdefault("white_hat_6f_rebalance", True)
+        overrides.setdefault("acoustic_max_payout", 5)
         return cls.v042(**overrides)
 
     @classmethod

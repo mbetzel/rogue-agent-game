@@ -586,6 +586,12 @@ def execute_compiler_drop(engine: GameEngine, player_commitments: Commitments) -
     exited_signature_pids = set(exited_sigs)
     stuck_signature_pids = set(getattr(state.tower, "stuck_signatures", {}).keys())
 
+    compiler_colors = sum(
+        1 for c, n in state.last_exited_cubes.items()
+        if n > 0 and c in (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN, CubeColor.BLACK)
+    )
+    state.distinct_exited_colors_this_round = min(5, compiler_colors + len(exited_signature_pids))
+
     if engine.config.target_lock_enabled:
         for player in state.players:
             pid = player.player_id
