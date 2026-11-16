@@ -387,6 +387,35 @@ Sources: `sim_results/signature_dominant_attacks/validation_report.md` (7,200-ga
 - **Official Balance Verdict: OFFICIALLY APPROVED (`v0.43.0 Baseline`).**
   Dominant Cube Color Signature Attacks successfully elevate Target Lock into an exciting, thematic, and balanced centerpiece mechanic. Pacing, wipeout guardrails, color parity, and archetype equity are 100% validated across 7,200 games. Recommended for full release synchronization across rules documentation, Print-and-Play assets, and quick-reference aids.
 
+---
+
+## 58. Phase 63 Post-Telemetry Balance Assessment: White Hat Face 6 (`Purple ★`) Signature Protocol Rebalance: APPROVED (`v0.43.0`)
+
+Sources: `sim_results/white_hat_6f_rebalance/validation_report.md` (6,000-game dataset across 4P, 3P, and 2P pods, Seeds 42..1041); Technical Architecture Specification `docs/specs/white_hat_6f_rebalance_spec.md`; Pre-SDLC Analysis `docs/findings/white_hat_6f_rebalance_analysis.md`.
+
+- **Design Rationale & Mechanical Updates:**
+  1. **The Operator (*Logistics Bounty*, Phase 3: Income):** `+1 🔬` Research Token per die currently in your **Scanned Box** (replaces flat `+1 🔬`, eliminating strict dominance by Purple Face 4).
+  2. **The Phreaker (*Jumper Diagnostics*, Phase 3: Income):** `+$1` cash AND `+1` **Release Bandwidth** this round (applies in Phase 6 Step 3; removes 3-tier conditional fallback and Phase 3 sub-rolling).
+  3. **The Acoustic (*Resonance Sensor*, Phase 3: Income):** `+$1` cash per unique colored cube that exited the Cube Tower this round (including Operative Signature Cubes), up to `+$5` max (removes the Signature Cube exclusion and raises cap from `$4` to `$5`).
+  4. **The Spook (*Burn Notice*, Phase 3: Income):** `+$2` cash; optionally permanently return `1` owned **Gray Legacy die** to the box for `+$3` cash (replaces colored-die burn; pulling from a Shield slot removes its Phase 4 block).
+  5. **The Prodigy (*Arbitrary Code Execution*, Phase 1: Step 4):** Anchored strictly after all rerolls are finished and before assigning dice to In Production (eliminates immediate mid-reroll timing ambiguity while retaining `Block 1 Any` / Income flexibility).
+  6. **The Cipher (*Algorithmic Parity*, Phase 3: Income):** Unchanged (`+$2` cash AND `+1 🔬`) as the balance anchor.
+
+- **Empirical Telemetry Verification (6,000 Games Across 4P, 3P, and 2P Pods):**
+  - **Macro Pacing & Safety:** Mean rounds invariant at `7.56 → 7.56` (4P: `7.35`, 3P: `7.72`, 2P: `7.62`); Total Wipeout Rate held at `5.6% → 5.6%` (4P: `2.5%`, 3P: `4.7%`, 2P improved `10.6% → 9.7%`); End-game trigger mix stable (`6.7%` Singularity, `61.5%` Patient Zero, `26.1%` Market Collapse); Mean surviving Secrets `8.44 → 8.39`.
+  - **White Hat Operative Parity (`2.5 pp` spread vs. `3.3 pp` baseline):**
+    - **Operator:** `34.5% → 32.8%` win rate (`1.20 🔬`/game)
+    - **Phreaker:** `35.1% → 33.4%` win rate (`0.43` extra graduations & `$0.52`/game)
+    - **Acoustic:** `32.8% → 33.7%` win rate (`$2.29`/game)
+    - **Spook:** `31.8% → 34.9%` win rate (`0.53` Gray burns / `$0.53`/game; 2P rose `45.3% → 54.1%`, watchpoint for table playtesting)
+    - **Prodigy:** `32.0% → 32.9%` win rate (`0.55` Step 4 overrides/game; 4P improved `20.4% → 22.3%`)
+    - **Cipher:** `33.7% → 32.4%` win rate (`28.7%` Patient Zero)
+  - **Client Company Parity:** Win-rate deltas tightly bounded within `[-1.2, +1.5] pp` across all 6 companies.
+
+- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.43.0`).**
+  Synchronized across `RULES.md`, `RULES_APPENDIX.md`, `sim/` (`GameConfig.white_hat_6f_rebalance=True` in `v043()`), and `pnp/generate_pnp.py`.
+
+
 
 
 

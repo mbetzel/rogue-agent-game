@@ -146,7 +146,7 @@ def default_graduate_priority(scanned: Iterable[Die]) -> List[Die]:
 
 
 def max_graduates(player: PlayerState) -> int:
-    return min(len(player.scanned_dice), player.release_bandwidth)
+    return min(len(player.scanned_dice), player.effective_release_bandwidth)
 
 
 def validate_graduate_ids(player: PlayerState, requested: Optional[Iterable[Any]], n: int) -> List[Die]:
