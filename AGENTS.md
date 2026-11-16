@@ -15,7 +15,7 @@ Follow this workflow across sessions:
    - **Antigravity Subagent Mapping:** In Antigravity, register each role on demand via `define_subagent` using the prompt in `.claude/agents/<role>.md` (set `EnableWriteTools: false` for `staff-engineer`; `EnableWriteTools: true` for roles that write specs, code, reports, or PnP assets) and launch via `invoke_subagent` (`Model: "pro"` for `game-designer`, `principal-engineer`, `staff-engineer`; `Model: "inherit"` or `"flash"` for `senior-engineer`, `product-owner`, `graphic-designer`).
    - Hand each subagent a short brief (goal, files, cited sections) instead of letting it re-derive context, and ask for a compact handoff back (≤ 300 words).
 5. **Keep Documentation Synchronized:**
-   - Update `RULES.md` whenever game mechanics or `[TUNE]` baselines change.
+   - Update `RULES.md` and `RULES_QUICKREF.md` whenever game mechanics, setup values, or `[TUNE]` baselines change.
    - **Version Number Bumping Protocol:** Whenever the game version is bumped (e.g., `v0.40.0` → `v0.41.0`), ensure the version string is synchronized across all relevant files:
      - `RULES.md` (Title header)
      - `RULES_APPENDIX.md` (Section 6 Title header)

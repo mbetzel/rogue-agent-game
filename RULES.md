@@ -145,7 +145,7 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
    * Place **2 Gray Legacy Dice + 1 starting colored die + 1 Purple Specialist Die** into your **Ready for Release Zone** (rolls in Round 1). The starting colored die is the color named by your Client Company (Red: Meridian, Prometheus; Blue: DTO, Aegis; Green: Omnidyne, Helix `[TUNE]`); take it from that color's Central Market stack (it uses that color's face-up Variant Card).
    * Take **`$6` Starting Money**.
    * **Corporate Secrets & Starting Research Tokens:** Take **`3` Corporate Secrets** at **2 players**, **`4`** at **3 players**, or **`4`** at **4 players** `[TUNE: v0.38.0]`, and **`0 🔬` Research Tokens**.
-   * **Market Share:** Place your Market Share Marker on **`13`** at **2 players**, **`16`** at **3 players**, or **`17`** at **4 players** `[TUNE: v0.38.0]`. This starting value is also your maximum Market Share for the game.
+   * **Market Share:** Place your Market Share Marker on **`13`** at **2 players**, **`16`** at **3 players**, or **`16`** at **4 players** `[TUNE: v0.38.0]`. This starting value is also your maximum Market Share for the game.
    * **Operative Signature Cube:** Place your **Operative Signature Cube** onto its cradle on your **Company Terminal Mat** (adjacent to your Processing Box). It remains idle on your mat until queued into the Staging Cup by your first banked Secret.
 4. Randomly assign the **First Player Marker** (used to resolve Operations Turn order in Phase 6: Operations).
 
