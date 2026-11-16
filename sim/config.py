@@ -28,7 +28,7 @@ V040_SHARE_REGAIN_COST_MONEY = {0: 3, 1: 3, 2: 3, 3: 3, 4: 3}
 _FACE_PROFILES = ("V037", "V038_DRAFT")
 # die_face_profile only: V038_DRAFT with the candidate-2 Yellow table (spec §14.3); _ALT = F1 "+$1 & +1 Market Share"
 # _F3 = V038_YELLOW_MS with Yellow F3 "+$1 & +1 Market Share" (spec §14.5.1, RSP-1)
-V038_DIE_FACE_PROFILES = ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D", "V038F")
+V038_DIE_FACE_PROFILES = ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D", "V038F", "V043_BLUE_TUNE")
 _DIE_FACE_PROFILES = ("V037",) + V038_DIE_FACE_PROFILES
 V038B_STARTING_SECRETS = {2: 3, 3: 4, 4: 4}  # [TUNE] §14.3
 V038B_RED_TIERS = ((11, 3), (7, 2), (3, 1), (0, 0))  # [TUNE] §14.3
@@ -935,6 +935,28 @@ class GameConfig:
         overrides.setdefault("bot_pr_push", True)
         overrides.setdefault("bot_pr_push_params", PrPushParams())
         return cls.v043(**overrides)
+
+    @classmethod
+    def v043_1(cls, **overrides) -> "GameConfig":
+        """v0.43.1 candidate baseline (Phase 63: Blue Die Secret & Economy Rebalance).
+        Inherits v043 (Dominant Color Signature Attacks, Target Lock, v3.0 Critical Breach)
+        and introduces die_face_profile='V043_BLUE_TUNE':
+        - Blue Face 1: +1 Corporate Secret
+        - Blue Face 2: +2 🔬 (was +1 Corporate Secret)
+        - Blue Face 3: +$2 (was +$1)
+        - Blue Face 4: +1 🔬 / +$1
+        - Face 5: Secret face
+        - Face 6: Blue ★ (Variant Card)
+        """
+        overrides.setdefault("die_face_profile", "V043_BLUE_TUNE")
+        return cls.v043(**overrides)
+
+    @classmethod
+    def v043_1_roster(cls, **overrides) -> "GameConfig":
+        """v0.43.1 + bot autonomous PR push and cash allocation policies enabled."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v043_1(**overrides)
     def _validate_tower_config(self) -> None:
         """Validates Cube Tower physics parameters (spec §2.4)."""
         self.tower_mode = TowerMode(self.tower_mode)

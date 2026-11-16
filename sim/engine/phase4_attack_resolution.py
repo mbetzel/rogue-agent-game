@@ -701,12 +701,11 @@ def determine_dominant_tray_color(
     if max_count <= 0:
         return None
 
-    norm_order = tuple(
-        c if isinstance(c, CubeColor) else CubeColor(str(c).lower())
-        for c in (tie_order or DEFAULT_SIGNATURE_TIE_ORDER)
-    )
-    tied_colors = [c for c in norm_order if counts.get(c, 0) == max_count]
-    return tied_colors[0] if tied_colors else None
+    for c in tie_order or DEFAULT_SIGNATURE_TIE_ORDER:
+        c = c if isinstance(c, CubeColor) else CubeColor(str(c).lower())
+        if counts.get(c, 0) == max_count:
+            return c
+    return None
 
 
 def _resolve_signature_red(engine: GameEngine, locked_players: List[PlayerState]) -> None:
@@ -714,16 +713,8 @@ def _resolve_signature_red(engine: GameEngine, locked_players: List[PlayerState]
     cfg = engine.config
     state = engine.state
     locked_pids = {p.player_id for p in locked_players}
-    drain_amt = int(
-        cfg.signature_red_ms_loss
-        if getattr(cfg, "signature_red_ms_loss", None) is not None and cfg.signature_red_ms_loss != 2
-        else getattr(cfg, "signature_red_drain_amount", 2)
-    )
-    transfer_amt = int(
-        cfg.signature_red_ms_gain
-        if getattr(cfg, "signature_red_ms_gain", None) is not None and cfg.signature_red_ms_gain != 2
-        else getattr(cfg, "signature_red_transfer_amount", 2)
-    )
+    drain_amt = cfg.signature_red_drain_amount
+    transfer_amt = cfg.signature_red_transfer_amount
 
     # Epoch 1: Simultaneous Drain
     for p in locked_players:
@@ -796,11 +787,7 @@ def _resolve_signature_green(engine: GameEngine, player: PlayerState) -> None:
     ]
 
     cfg = engine.config
-    count_to_place = int(
-        cfg.signature_green_track_cubes
-        if getattr(cfg, "signature_green_track_cubes", None) is not None and cfg.signature_green_track_cubes != 2
-        else getattr(cfg, "signature_green_cube_count", 2)
-    )
+    count_to_place = cfg.signature_green_cube_count
 
     if len(eligible) > count_to_place:
         hook = getattr(player.bot, "choose_signature_green_tracks", None) if player.bot else None
@@ -810,18 +797,8 @@ def _resolve_signature_green(engine: GameEngine, player: PlayerState) -> None:
             from sim.bots.base import default_signature_green_tracks_heuristic
 
             chosen = default_signature_green_tracks_heuristic(player, eligible, count_to_place, engine.state)
-        placed: List[str] = []
-        for t in chosen or []:
-            if len(placed) >= count_to_place:
-                break
-            if t in eligible and t not in placed:
-                placed.append(t)
-        if len(placed) < count_to_place:
-            for t in eligible:
-                if len(placed) >= count_to_place:
-                    break
-                if t not in placed:
-                    placed.append(t)
+        # Bot picks first (filtered to eligible), topped up from eligible order.
+        placed = list(dict.fromkeys([t for t in chosen or [] if t in eligible] + eligible))[:count_to_place]
     else:
         placed = list(eligible[:count_to_place])
 
@@ -855,10 +832,7 @@ def _resolve_signature_black(engine: GameEngine, player: PlayerState) -> None:
     )
 
     if override_available:
-        if player.is_ability_available(active_ver):
-            player.mark_ability_used(active_ver)
-        else:
-            player.company_ability_used_this_version = True
+        player.mark_ability_used(active_ver)
         if is_dto:
             player.dto_slush_fund_used = True
         player.signature_override_hijacks += 1
