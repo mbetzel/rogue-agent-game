@@ -617,6 +617,172 @@ def get_all_variant_cards(red_variant_set: Any = "V035") -> Dict[str, VariantCar
     return {card.code: card for card in cards}
 
 
+def get_v044_variant_cards() -> List[VariantCard]:
+    """v0.44.0 Colored Die F6 (★) Variant Card Overhaul (all 12 cards resolve in Phase 3: Income)."""
+    return [
+        # Red ★ Variants
+        VariantCard(
+            code="R1",
+            name="Brand Protection",
+            die_color=DieColor.RED,
+            cost=5,
+            description="Gain +$2 Cash & +1 Market Share.",
+            star_face=Face(
+                name="R1: Brand Protection",
+                money=2,
+                market_share=1,
+                is_star=True,
+                star_code="R1",
+            ),
+        ),
+        VariantCard(
+            code="R2",
+            name="Ad Campaign",
+            die_color=DieColor.RED,
+            cost=4,
+            description="You may pay $2 Cash to gain +2 Market Share.",
+            star_face=Face(
+                name="R2: Ad Campaign",
+                is_star=True,
+                star_code="R2",
+            ),
+        ),
+        VariantCard(
+            code="R3",
+            name="Customer Poaching",
+            die_color=DieColor.RED,
+            cost=5,
+            description="In Phase 3, take 1 Market Share from the rival with the most Market Share.",
+            star_face=Face(
+                name="R3: Customer Poaching",
+                is_star=True,
+                star_code="R3",
+            ),
+        ),
+        # Blue ★ Variants
+        VariantCard(
+            code="B1",
+            name="Honeypot Telemetry",
+            die_color=DieColor.BLUE,
+            cost=5,
+            description="If 0 Blue cubes exited in Phase 2, gain +2 🔬; if 1+ Blue cubes exited, gain +$3 Cash.",
+            star_face=Face(
+                name="B1: Honeypot Telemetry",
+                is_star=True,
+                star_code="B1",
+            ),
+        ),
+        VariantCard(
+            code="B2",
+            name="Deep R&D Vault",
+            die_color=DieColor.BLUE,
+            cost=5,
+            description="Gain +$2 Cash, OR spend 1 Corporate Secret to gain +3 Market Share.",
+            star_face=Face(
+                name="B2: Deep R&D Vault",
+                money=2,
+                is_star=True,
+                star_code="B2",
+            ),
+        ),
+        VariantCard(
+            code="B3",
+            name="Air-Gapped Backup",
+            die_color=DieColor.BLUE,
+            cost=4,
+            description="Gain +$1 Cash, plus +$1 per Shield die In Production.",
+            star_face=Face(
+                name="B3: Air-Gapped Backup",
+                money=1,
+                is_star=True,
+                star_code="B3",
+            ),
+        ),
+        # Green ★ Variants
+        VariantCard(
+            code="G1",
+            name="Self-Healing Kernel",
+            die_color=DieColor.GREEN,
+            cost=5,
+            description="Clean 1 Glitched Shield Slot and gain +1 🔬.",
+            star_face=Face(
+                name="G1: Self-Healing Kernel",
+                patches=1,
+                clean_slots=1,
+                is_star=True,
+                star_code="G1",
+            ),
+        ),
+        VariantCard(
+            code="G2",
+            name="Universal Sandbox",
+            die_color=DieColor.GREEN,
+            cost=5,
+            description="Gain +2 🔬, plus +1 🔬 per Glitched Shield Slot.",
+            star_face=Face(
+                name="G2: Universal Sandbox",
+                patches=2,
+                is_star=True,
+                star_code="G2",
+            ),
+        ),
+        VariantCard(
+            code="G3",
+            name="Live Reboot",
+            die_color=DieColor.GREEN,
+            cost=4,
+            description="Gain +1 🔬 & +$1 Cash, and move 1 die from Scanned Box to Ready for Release.",
+            star_face=Face(
+                name="G3: Live Reboot",
+                money=1,
+                patches=1,
+                is_star=True,
+                star_code="G3",
+            ),
+        ),
+        # Yellow ★ Variants
+        VariantCard(
+            code="Y1",
+            name="Algorithmic Trading",
+            die_color=DieColor.YELLOW,
+            cost=6,
+            description="Gain +$4 Cash, OR pay $2 Cash to gain +1 Corporate Secret.",
+            star_face=Face(
+                name="Y1: Algorithmic Trading",
+                money=4,
+                is_star=True,
+                star_code="Y1",
+            ),
+        ),
+        VariantCard(
+            code="Y2",
+            name="Cloud Monopoly",
+            die_color=DieColor.YELLOW,
+            cost=5,
+            description="Gain +$2 Cash, plus +$1 per different Central Market die color owned (max +$6).",
+            star_face=Face(
+                name="Y2: Cloud Monopoly",
+                money=2,
+                is_star=True,
+                star_code="Y2",
+            ),
+        ),
+        VariantCard(
+            code="Y3",
+            name="Proprietary Training",
+            die_color=DieColor.YELLOW,
+            cost=5,
+            description="Gain +1 Corporate Secret, plus +$1 per Gray Legacy die owned.",
+            star_face=Face(
+                name="Y3: Proprietary Training",
+                secrets=1,
+                is_star=True,
+                star_code="Y3",
+            ),
+        ),
+    ]
+
+
 def get_default_variant_cards() -> Dict[DieColor, VariantCard]:
     """Returns the default baseline variant card for central market dice (Red, Blue, Green, Yellow)."""
     all_cards = get_all_variant_cards()
@@ -1531,7 +1697,7 @@ WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
         role="Tactical Staffing & Logistics Lead",
         protocol_name="Logistics Bounty",
         timing_window="Phase 3: Income",
-        description="During Phase 3 (Income), each of your Purple ★ faces still In Production yields +1 🔬 (in addition to its base $1).",
+        description="During Phase 3 (Income), gain +1 🔬 Research Token per die currently in your Scanned Box (no fallback if empty).",
         flavor="Redundant contractor pipelines ready on zero notice.",
         reserve_cost=5,
     ),
@@ -1541,7 +1707,7 @@ WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
         role="Hardware Intrusion Specialist",
         protocol_name="Jumper Diagnostics",
         timing_window="Phase 3: Income",
-        description="When Purple ★ is rolled, roll 1 offline die in Under Development (Glitched or Scanned); if Under Development is empty, collect +$1 cash (shields/glitches produce 0; die remains in place).",
+        description="During Phase 3 (Income), gain +$1 cash AND +1 Release Bandwidth this round (applies in Phase 6 Step 3; stacks on double Purple ★; resets at round end).",
         flavor="Raw voltage pulses extract signal from dormant silicon.",
         reserve_cost=4,
     ),
@@ -1551,7 +1717,7 @@ WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
         role="Side-Channel Cryptanalyst",
         protocol_name="Resonance Sensor",
         timing_window="Phase 3: Income",
-        description="When Purple ★ is rolled, gain +$1 cash per distinct cube color present in the Exit Tray this round (Red, Blue, Green, Black; max +$4).",
+        description="During Phase 3 (Income), gain +$1 cash per unique colored cube that exited the Cube Tower this round (Red, Blue, Green, Black, plus each distinct player-colored Operative Signature Cube), up to +$5 max.",
         flavor="Harmonic resonance frequencies decode physical chassis vibrations.",
         reserve_cost=4,
     ),
@@ -1561,7 +1727,7 @@ WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
         role="Covert Intelligence Specialist",
         protocol_name="Burn Notice",
         timing_window="Phase 3: Income",
-        description="When Purple ★ is rolled, gain +$2 cash payout. Additionally, you may optionally burn 1 owned colored die back to supply to gain +1 Corporate Secret.",
+        description="During Phase 3 (Income), gain +$2 cash; optionally permanently return 1 owned Gray Legacy die to the box for +$3 cash (may pull from any zone; if pulled from a Shield slot, it no longer blocks in Phase 4).",
         flavor="Scorched-earth protocols ensure zero forensic recovery.",
         reserve_cost=5,
     ),
@@ -1570,8 +1736,8 @@ WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
         name="The Prodigy",
         role="Autonomous Exploit Hacker",
         protocol_name="Arbitrary Code Execution",
-        timing_window="Phase 1: Step 4 Rolling",
-        description="When Purple ★ is rolled, turn 1 other rolled die in your active pool to any legal non-Star face of that die's color.",
+        timing_window="Phase 1: Step 4",
+        description="In Phase 1: Step 4 (after Yahtzee rerolls), turn 1 other rolled die in your active pool to any legal non-Star face of its color other than the Secret face (must keep Purple ★).",
         flavor="Payload injection executes before memory boundaries establish.",
         reserve_cost=5,
     ),
@@ -1581,7 +1747,7 @@ WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
         role="Distributed Ledger Architect",
         protocol_name="Algorithmic Parity",
         timing_window="Phase 3: Income",
-        description="When Purple ★ is rolled, collect +$2 cash and +1 🔬 Research Token in Phase 3: Income.",
+        description="During Phase 3 (Income), gain +$2 cash AND +1 🔬 Research Token.",
         flavor="Parity calculations balance zero-knowledge proofs flawlessly.",
         reserve_cost=6,
     ),
@@ -1799,7 +1965,7 @@ def create_colored_die(
             }
             die_cost = default_costs.get(color, 4)
 
-    if face_profile in ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D", "V038F"):
+    if face_profile in ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D", "V038F", "V043_BLUE_TUNE"):
         return _create_colored_die_v038(color, die_id, variant_card, star_face, var_code, die_cost, face_profile)
 
     if color == DieColor.RED:
@@ -1901,7 +2067,16 @@ def _create_colored_die_v038(color: DieColor, die_id: int, variant_card: Optiona
                  Face(name="+$2", money=2), Face(name="+$2", money=2), Face(name="+$2", money=2),
                  SECRET_FACE, star_face]
     elif color == DieColor.BLUE:
-        if profile == "V038F":
+        if profile == "V043_BLUE_TUNE":
+            faces = [
+                Face(name="+1 Corporate Secret", secrets=1),
+                Face(name="+2 🔬", patches=2),
+                Face(name="+$2", money=2),
+                _choice(Face("+1 🔬", patches=1), Face("+$1", money=1)),
+                SECRET_FACE,
+                star_face,
+            ]
+        elif profile == "V038F":
             faces = [
                 Face(name="+1 Corporate Secret", secrets=1),
                 Face(name="+1 Corporate Secret", secrets=1),
@@ -1914,17 +2089,17 @@ def _create_colored_die_v038(color: DieColor, die_id: int, variant_card: Optiona
             faces = [Face(name="+1 🔬", patches=1), Face(name="+1 🔬", patches=1), Face(name="+$1", money=1),
                      _choice(Face("+1 🔬", patches=1), Face("+$1", money=1)), SECRET_FACE, star_face]
     elif color == DieColor.GREEN:
-        f1 = (Face(name="+2 🔬", patches=2) if profile in ("V038D", "V038F")
+        f1 = (Face(name="+2 🔬", patches=2) if profile in ("V038D", "V038F", "V043_BLUE_TUNE")
               else _choice(Face(CLEAN_SLOT_NAME, clean_slots=1), Face("+$1", money=1)))
         faces = [f1,
                  Face(name="+1 🔬", patches=1), Face(name="+2 🔬", patches=2),
                  _choice(Face("+1 🔬", patches=1), Face("+$1", money=1)), SECRET_FACE, star_face]
-    elif color == DieColor.YELLOW and profile in ("V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D", "V038F"):
+    elif color == DieColor.YELLOW and profile in ("V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D", "V038F", "V043_BLUE_TUNE"):
         y = lambda: _choice(Face("+$2", money=2), Face("+1 🔬", patches=1))  # noqa: E731
         f1 = (Face(name="+$1 & +1 Market Share", money=1, market_share=1) if profile == "V038_YELLOW_MS_ALT"
               else Face(name="+2 Market Share", market_share=2))
         # RSP-1 (spec §14.5.1): _F3 / V038D swaps F3 "+$3" for "+$1 & +1 Market Share"
-        f3 = (Face(name="+$1 & +1 Market Share", money=1, market_share=1) if profile in ("V038_YELLOW_MS_F3", "V038D", "V038F")
+        f3 = (Face(name="+$1 & +1 Market Share", money=1, market_share=1) if profile in ("V038_YELLOW_MS_F3", "V038D", "V038F", "V043_BLUE_TUNE")
               else Face(name="+$3", money=3))
         faces = [f1, _choice(Face("+1 Market Share", market_share=1), Face("+1 🔬", patches=1)),
                  f3, y(), y(), star_face]
@@ -1948,8 +2123,16 @@ def _v038_star(card: VariantCard, description: str, **face_kw: Any) -> VariantCa
 
 
 def apply_variant_profile(variant_cards: Dict[DieColor, VariantCard], profile: Optional[str]) -> Dict[DieColor, VariantCard]:
-    """spec v380 §5: ``V038_DRAFT`` Variant Card texts (costs unchanged; every colour-specific Block removed).
-    ``"V037"`` returns the mapping unchanged (same object)."""
+    """Applies a variant profile (``"V038_DRAFT"`` or ``"V044"``) onto a color->VariantCard mapping.
+    ``"V037"`` / ``None`` returns the mapping unchanged (same object)."""
+    if profile == "V044":
+        v044_by_code = {c.code: c for c in get_v044_variant_cards()}
+        out = dict(variant_cards)
+        for color, card in variant_cards.items():
+            target_code = card.printed_code  # maps R2_MKT -> R2, R3_MKT -> R3
+            if target_code in v044_by_code:
+                out[color] = v044_by_code[target_code]
+        return out
     if profile != "V038_DRAFT":
         return variant_cards
     out = dict(variant_cards)

@@ -77,11 +77,8 @@ Each round consists of **6 Phases**:
 3. **Rerolls:** Up to **2 free rerolls** of any subset of dice (3 rolls total). *(At **Release Track Level 4**, after rerolls and Prodigy/Helix overrides, you may set `1` rolled Gray Legacy die to any printed face.)*
 4. **Deploy Dice:**
    * **Secret Faces (Face 5 on Red, Blue, Green, Purple):** Move **immediately to the Processing Box** in Under Development (banks secrets later upon exit).
-   * **Clean Glitches:** 
-     * Green *G1 Self-Healing Kernel* cleans 1 Glitched Shield Slot and stays In Production.
-     * Any die showing a **Shield** may be spent to clean 1 Glitched Shield Slot (move that die directly to the **Scanned Box**; it does not block this round).
    * **In Production (Hardware Capacity):**
-     * **Shield Slots:** Assign dice showing `Block 1 Any` up to your **Defense Capacity** minus **Glitched Shield Slots**. Excess shields must move to Income (produce `$0` if no income face).
+     * **Shield Slots:** Assign dice showing `Block 1 Any` to any Shield Slot (clean or glitched) up to your **Defense Capacity**. Excess shields must move to Income (produce `$0` if no income face).
      * **Income Slot:** Assign all remaining dice (producing `$`, `🔬`, Market Share, or `★`).
      * Choice faces (`/`) are committed now. Generic shields are not locked to a specific color yet.
 
@@ -118,8 +115,9 @@ Collect all resources produced by dice still deployed **In Production** (Income 
 
 ### Phase 4: Attack Resolution (Simultaneous)
 
-Calculate total attack cubes in the tray: **Red**, **Blue**, and **Green**. Each player simultaneously allocates their available `Block 1 Any` shields:
-* **Mandatory Blocking:** Every active shield must block an attack cube if any unblocked cubes remain. You choose how to distribute shields among colors.
+Calculate total attack cubes in the tray: **Red**, **Blue**, and **Green**. Each player simultaneously resolves their Shield Slots:
+* **Purge Glitched Slots:** Any shield die on a **Glitched Shield Slot** removes that green cube and moves to the **Scanned Box** (does not block tower cubes or earn Defense L4 cash).
+* **Mandatory Blocking:** Every remaining active shield on a clean slot must block an attack cube if any unblocked cubes remain. You choose how to distribute shields among colors.
 * **Unblocked Cube Penalties:**
   * **Red (Market Manipulation):** Lose **`1` Market Share** per unblocked Red cube (minimum 0).
   * **Blue (Spyware):** Lose **`1` Corporate Secret** per unblocked Blue cube during **`v1.0` / `v2.0`**; lose **`2` Corporate Secrets** per unblocked Blue cube during **`v3.0`** (Critical Breach).
@@ -148,12 +146,11 @@ Starting with the First Player, each player takes their Operations Turn:
 2. **Public Relations (PR) Regain:**
    * Spend **`$3` Cash per `+1` Market Share** (up to your track level cap: 1/turn at L0–1, 2/turn at L2–3, 3/turn at L4).
    * Does not count toward your limit of 2 hardware upgrades.
-3. **Ad Campaign (*R2*):** If active in Phase 3, pay `$2` for `+1` Market Share (once per die).
-4. **Purchase 1 Software Module Die (Limit 1 die per turn):**
+3. **Purchase 1 Software Module Die (Limit 1 die per turn):**
    * Pay the `$` cost on the face-up Variant Card (`$4`–`$6`) to buy 1 colored die (**Red, Blue, Green, Yellow**).
    * Place purchased die into your **Scanned Box** (must graduate in Phase 6 before rolling).
    * Purple dice cannot be purchased from the market.
-5. **Retain Research:** Research tokens have no storage cap and carry over.
+4. **Retain Research:** Research tokens have no storage cap and carry over.
 
 ---
 

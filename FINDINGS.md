@@ -387,6 +387,40 @@ Sources: `sim_results/signature_dominant_attacks/validation_report.md` (7,200-ga
 - **Official Balance Verdict: OFFICIALLY APPROVED (`v0.43.0 Baseline`).**
   Dominant Cube Color Signature Attacks successfully elevate Target Lock into an exciting, thematic, and balanced centerpiece mechanic. Pacing, wipeout guardrails, color parity, and archetype equity are 100% validated across 7,200 games. Recommended for full release synchronization across rules documentation, Print-and-Play assets, and quick-reference aids.
 
+- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.43.1`).**
+  Synchronized across `RULES.md`, `RULES_APPENDIX.md`, `sim/` (`GameConfig.white_hat_6f_rebalance=True` in `v043()`), and `pnp/generate_pnp.py`.
+
+---
+
+## 60. Phase 65 Post-Telemetry Balance Assessment: Colored Die F6 Variant Overhaul & Glitched Shield Slot Flow: APPROVED (`v0.44.0 Baseline`)
+
+Sources: `docs/findings/v044_f6_overhaul_sweep.md` (1,800-game v0.44.0 vs v0.43.0 sweep across 2P/3P/4P, seeds `42..341`); `docs/specs/f6_variant_overhaul_spec.md`; `docs/plans/f6_overhaul_gd_plan.md`.
+
+- **Design Changes (`v0.44.0 Baseline`):**
+  1. **Unified Phase 3 Resolution:** All 12 Central Market Colored Die F6 (`★`) abilities resolve in **Phase 3: Income** (zero Phase 5 paid `★` actions, zero Phase 4 damage-conditional `★` tracking, legacy phrasing removed):
+     - *R1 Brand Protection (`$5`):* `+$2 & +1 Market Share`.
+     - *R2 Ad Campaign (`$4`):* Pay `$2` → `+2 Market Share`.
+     - *R3 Customer Poaching (`$5`):* Clockwise from First Player, take `1` Market Share from the rival with the most Market Share.
+     - *B1 Honeypot Telemetry (`$5`):* `+2 🔬` if `0` Blue cubes in Exit Tray, or `+$3` if `1+` Blue cubes in Exit Tray.
+     - *B2 Deep R&D Vault (`$5`, down from `$6`):* `+$2`, or spend `1` Corporate Secret → `+3 Market Share` (spending a last Secret immediately triggers Total Data Breach / Patient Zero).
+     - *B3 Air-Gapped Backup (`$4`):* `+$1`, plus `+$1` per Shield In Production (clean or glitched).
+     - *G1 Self-Healing Kernel (`$5`):* Clean `1` Glitched Shield Slot + `+1 🔬` (frees an assigned shield on that slot to block in Phase 4).
+     - *G2 Universal Sandbox (`$5`, up from `$4`):* `+2 🔬`, plus `+1 🔬` per Glitched Shield Slot.
+     - *G3 Live Reboot (`$4`):* `+1 🔬 & +$1`, and move `1` die from Scanned Box to Ready for Release.
+     - *Y1 Algorithmic Trading (`$6`):* `+$4`, or pay `$2` → `+1 Corporate Secret`.
+     - *Y2 Cloud Monopoly (`$5`):* `+$2`, plus `+$1` per different Central Market die color owned (`Red`, `Blue`, `Green`, `Yellow`; excludes `Purple`; max `+$6`).
+     - *Y3 Proprietary Training (`$5`):* `+1 Corporate Secret`, plus `+$1` per Gray Legacy die owned.
+  2. **Streamlined Glitched Shield Slot Flow:** In Phase 1 Step 4, players assign `Block 1 Any` shields to *any* Shield Slot (clean or glitched) up to `defense_capacity`. In Phase 4, shields on glitched slots purge the green cube and move to **Scanned Box** (no tower block, no Defense L4 cash); shields on clean slots block tower cubes.
+
+- **Empirical Telemetry (`v0.44.0` vs `v0.43.0`, N=900 each):**
+  - **Pacing & Endings:** `7.32` mean rounds (`v0.43.0`: `7.59`); Patient Zero `63.4%`, Market Collapse `23.3%`, Total Wipeout `7.1%` (2P: `13.3%`), Singularity `6.1%`.
+  - **4P Seat Fairness:** `25.7% / 24.3% / 22.7% / 27.3%` (tightened to a `4.6pp` spread vs `8.0pp` in `v0.43.0`).
+  - **F6 & Purge Telemetry:** `10,077` glitched slot purges (`0.513/player-round`); `0` B2 suicide breaches (`255` cash vs `122` secret activations); G1 promoted an assigned shield in `33.7%` of activations (`172/511`); G3 fizzled cleanly in `21.9%` (`123/562`).
+  - **Inherited Guardrails Noted for Follow-Up `[TUNE]`:** 2P Total Wipeout rate (`13.3%` vs `11.7%` in `v0.43.0`) and Red-starter equity lag (Prometheus `25.1%`, Meridian `28.9%` vs Omnidyne `42.0%`) are inherited from `v0.43.0` and flagged for a dedicated follow-up `[TUNE]` pass.
+
+- **Official Balance Verdict: APPROVED (`v0.44.0 Baseline`).**
+
+
 
 
 

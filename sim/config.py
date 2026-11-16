@@ -27,9 +27,10 @@ V040_TRACK_STEP_COSTS = (1, 2, 2, 3)          # (1, 2, 2, 3) 🔬 (8 🔬 total 
 V040_SHARE_REGAIN_CAP = {0: 1, 1: 1, 2: 2, 3: 2, 4: 3}
 V040_SHARE_REGAIN_COST_MONEY = {0: 3, 1: 3, 2: 3, 3: 3, 4: 3}
 _FACE_PROFILES = ("V037", "V038_DRAFT")
+_VARIANT_PROFILES = ("V037", "V038_DRAFT", "V044")
 # die_face_profile only: V038_DRAFT with the candidate-2 Yellow table (spec §14.3); _ALT = F1 "+$1 & +1 Market Share"
 # _F3 = V038_YELLOW_MS with Yellow F3 "+$1 & +1 Market Share" (spec §14.5.1, RSP-1)
-V038_DIE_FACE_PROFILES = ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D", "V038F")
+V038_DIE_FACE_PROFILES = ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D", "V038F", "V043_BLUE_TUNE")
 _DIE_FACE_PROFILES = ("V037",) + V038_DIE_FACE_PROFILES
 V038B_STARTING_SECRETS = {2: 3, 3: 4, 4: 4}  # [TUNE] §14.3
 V038B_RED_TIERS = ((11, 3), (7, 2), (3, 1), (0, 0))  # [TUNE] §14.3
@@ -486,6 +487,8 @@ class GameConfig:
     meridian_capital_injection_cash: int = 3                # [TUNE] +3 $ in Phase 3
     operator_protocol_mode: str = "CONTINGENT_STAFFING"     # "CONTINGENT_STAFFING" | "LOGISTICS_BOUNTY"
     operator_logistics_bounty_research: int = 1             # [TUNE] +1 🔬 per Purple ★ in Phase 3
+    white_hat_6f_rebalance: bool = False                    # v0.43.0 White Hat Face 6 Signature Protocol rebalance
+    acoustic_max_payout: int = 4                            # [TUNE] Max $ payout per Purple ★ for Acoustic (4 legacy, 5 v0.43.0)
 
     # --- v0.40.0 Gameplay Balance & Architecture Extensions (INV-V400-*) ---
     operations_before_pipeline_shift: bool = False  # If True, Phase 5 = Operations, Phase 6 = Pipeline Shift
@@ -518,6 +521,29 @@ class GameConfig:
     signature_red_ms_loss: Optional[int] = None
     signature_red_ms_gain: Optional[int] = None
     signature_green_track_cubes: Optional[int] = None
+
+    # --- v0.44.0 Variant Overhaul Baselines ---
+    r2_cost_cash: int = 2
+    r2_gain_market_share: int = 2
+    b1_quiet_research: int = 2
+    b1_threat_cash: int = 3
+    b2_base_cash: int = 2
+    b2_market_share_gain: int = 3
+    b3_base_cash: int = 1
+    b3_shield_multiplier: int = 1
+    g1_research: int = 1
+    g1_slots_cleaned: int = 1
+    g2_glitch_multiplier: int = 1
+    g3_research: int = 1
+    g3_cash: int = 1
+    y1_base_cash: int = 4
+    y1_secret_cost: int = 2
+    y1_secret_gain: int = 1
+    y2_base_cash: int = 2
+    y2_cm_multiplier: int = 1
+    y2_max_cash: int = 6
+    y3_base_secrets: int = 1
+    y3_gray_multiplier: int = 1
 
     def __post_init__(self) -> None:
         if self.signature_red_ms_loss is not None:
@@ -929,6 +955,8 @@ class GameConfig:
             CubeColor.BLUE,
             CubeColor.RED,
         ))
+        overrides.setdefault("white_hat_6f_rebalance", True)
+        overrides.setdefault("acoustic_max_payout", 5)
         return cls.v042(**overrides)
 
     @classmethod
@@ -939,16 +967,40 @@ class GameConfig:
         return cls.v043(**overrides)
 
     @classmethod
+    def v043_1(cls, **overrides) -> "GameConfig":
+        """v0.43.1 candidate baseline (Phase 63: Blue Die Secret & Economy Rebalance).
+        Inherits v043 (Dominant Color Signature Attacks, Target Lock, v3.0 Critical Breach)
+        and introduces die_face_profile='V043_BLUE_TUNE':
+        - Blue Face 1: +1 Corporate Secret
+        - Blue Face 2: +2 🔬 (was +1 Corporate Secret)
+        - Blue Face 3: +$2 (was +$1)
+        - Blue Face 4: +1 🔬 / +$1
+        - Face 5: Secret face
+        - Face 6: Blue ★ (Variant Card)
+        """
+        overrides.setdefault("die_face_profile", "V043_BLUE_TUNE")
+        return cls.v043(**overrides)
+
+    @classmethod
+    def v043_1_roster(cls, **overrides) -> "GameConfig":
+        """v0.43.1 + bot autonomous PR push and cash allocation policies enabled."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v043_1(**overrides)
+
+    @classmethod
     def v044(cls, **overrides) -> "GameConfig":
         """v0.44.0 canonical baseline:
-        - Inherits v043 (Dominant Color Signature Attacks, Target Lock, Critical Breach).
+        - Inherits v043.1 (Blue Face 2/3 & White Hat Face 6 rebalances, Dominant Color Signature Attacks, Critical Breach).
+        - Unified Phase 3 F6 (★) Variant Card Overhaul (variant_profile="V044", b2_secret_cost=1).
         - Defense Grid L4: naturally capped at $4 cash per Phase 4 (drop $3 cap).
         - Triage Track Option B: L1 Gray die, L2 Bandwidth 2, L3 +1 Secret, L4 Free Market die replacement.
         - Release Track L4: retains 2 base rerolls; L4 grants Bandwidth 6 + set 1 rolled Gray die to any face.
         - Public Relations Track: L3 Purple die to Scanned Box; L4 grants +2 Market Share immediately (clamped at 20).
-        - Purged dead +1 🔬 Conveyor Triage text; fixed $3 PR regain cash typo.
         """
         for k, v in (
+            ("variant_profile", "V044"),
+            ("b2_secret_cost", 1),
             ("defense_l4_cash_cap", 4),
             ("triage_l4_free_die_replacement", True),
             ("triage_l3_breakthrough", "SECRET"),
@@ -960,12 +1012,11 @@ class GameConfig:
         ):
             overrides.setdefault(k, v)
 
-        # Configure track capacity override for TRIAGE: (1, 1, 2, 2, 2)
         capacities = dict(cls().track_capacity_by_level)
         capacities["TRIAGE"] = V044_TRIAGE_CAPACITY
         overrides.setdefault("track_capacity_by_level", capacities)
 
-        return cls.v043(**overrides)
+        return cls.v043_1(**overrides)
 
     @classmethod
     def v044_roster(cls, **overrides) -> "GameConfig":
@@ -973,6 +1024,7 @@ class GameConfig:
         overrides.setdefault("bot_pr_push", True)
         overrides.setdefault("bot_pr_push_params", PrPushParams())
         return cls.v044(**overrides)
+
     def _validate_tower_config(self) -> None:
         """Validates Cube Tower physics parameters (spec §2.4)."""
         self.tower_mode = TowerMode(self.tower_mode)
@@ -1002,9 +1054,10 @@ class GameConfig:
         cap = self.glitched_slots_per_round_cap
         if cap is not None and (isinstance(cap, bool) or not isinstance(cap, int) or cap < 0):
             raise ValueError("glitched_slots_per_round_cap must be None or an int >= 0")
-        for name in ("variant_profile", "power_profile"):
-            if getattr(self, name) not in _FACE_PROFILES:
-                raise ValueError(f"{name} must be one of {_FACE_PROFILES}, got {getattr(self, name)!r}")
+        if self.variant_profile not in _VARIANT_PROFILES:
+            raise ValueError(f"variant_profile must be one of {_VARIANT_PROFILES}, got {self.variant_profile!r}")
+        if self.power_profile not in _FACE_PROFILES:
+            raise ValueError(f"power_profile must be one of {_FACE_PROFILES}, got {self.power_profile!r}")
         if self.triage_l1_breakthrough not in _TRIAGE_L1_MODES:
             raise ValueError(f"triage_l1_breakthrough must be one of {_TRIAGE_L1_MODES}")
         if self.secret_face_enabled:

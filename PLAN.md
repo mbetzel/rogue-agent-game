@@ -4,7 +4,19 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
 
 ## Current Status
 - [x] **Rules Draft `v0.44.0`** captured in [RULES.md](./RULES.md)
+- [x] **Phase 63: Blue Die Secret & Economy Rebalance (`v0.43.1`)**
+  - [x] *Pre-SDLC Modeling & Spec (`principal-engineer`):* `docs/specs/phase63_blue_die_balance_spec.md` (`V043_BLUE_TUNE`: Blue Face 2 `+1 Corporate Secret` → `+2 🔬`, Face 3 `+$1` → `+$2`; `INV-P63-01`..`04`, `TC-P63-01`..`07`).
+  - [x] *Implementation (`senior-engineer`) & Review (`staff-engineer` APPROVED):* `sim/config.py` (`GameConfig.v043_1`, `v043_1_roster`), `sim/entities.py`, `sim/bots/secret_face_policy.py`, `tests/test_phase63_blue_die_balance.py` (7/7 passed; 1,085 total tests passed, 2 skipped), `scripts/run_phase63_blue_balance_sweep.py`.
+  - [x] *Validation Sweep (`product-owner`):* 3,600 paired games across 2P/3P/4P (`sim_results/phase63_blue_balance/validation_report.md`). Direct `blue_face` Secrets dropped `-42.4%` to `-44.7%`; DTO/AEGIS at `1/N` win-rate parity; pacing `7.31–8.09` rounds; Total Wipeout `<= 2.00%`; Defense Grid mean `+0.060` to `+0.073`.
+  - [x] *Balance Assessment (`game-designer`):* `FINDINGS.md` §58. APPROVED as `v0.43.1 Baseline`.
+  - [x] *Documentation & Asset Sync (`graphic-designer` & Main Agent):* `RULES.md`, `RULES_APPENDIX.md` §6A, `GLOSSARY.md`, `RULES_QUICKREF.md`, `pnp/generate_pnp.py`, `pnp/README.md`, and PnP PDFs regenerated.
 - [x] **Multi-Agent SDLC Pipeline** defined in Section 2 below
+- [x] **Phase 65: Colored Die F6 Variant Overhaul & Glitched Shield Slot Flow (`v0.44.0 Baseline`)**
+  - [x] *Pre-SDLC Game Designer Modeling:* `docs/plans/f6_overhaul_gd_plan.md` (EV/cost parity across all 12 F6 Variant Cards, corporate starter parity, 5 invariant rulings).
+  - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/f6_variant_overhaul_spec.md` (with user-amended `INV-F6-B2-SECRETS` allowing last-Secret spend).
+  - [x] *Implementation (`senior-engineer`) + Code Review (`staff-engineer`):* `sim/` (`V044` profile, unified Phase 3 F6 resolution, Phase 1→3→4 Glitched Shield Slot purge flow, `tests/test_f6_variant_overhaul.py` 11/11 passed, full non-web suite 879 passed / 2 skipped; `staff-engineer` APPROVED).
+  - [x] *Validation Sweep (`product-owner`) & Balance Sign-off (`game-designer`):* `docs/findings/v044_f6_overhaul_sweep.md` (1,800 games, 0 crashes, 0 B2 suicide breaches, 4P seat spread 4.6pp; `FINDINGS.md` §58 APPROVED; Red-starter lag & 2P wipeouts flagged for follow-up `[TUNE]`).
+  - [x] *Documentation & PnP Sync:* `RULES.md`, `RULES_APPENDIX.md`, `GLOSSARY.md`, `RULES_QUICKREF.md`, `pnp/` updated to `v0.44.0`.
 - [x] **Phase 60: Late-Game Patient Zero Threat Escalation (`v3.0` Critical Breach)**
   - [x] *Pre-SDLC Game Designer Modeling:* `docs/findings/phase60_v3_critical_breach_analysis.md` (6,000-game sweep across 2P/3P/4P). Modeled double Blue exfiltration damage in `v3.0` (2 Secrets/cube) and `+1 Blue` on Spaces 1 & 3 of `v3.0` cards without touching Red or Green cubes. Early KO (< R7) drift is strictly 0.00%; `v3.0` eliminations surge 14.2x.
   - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/phase60_v3_critical_breach_spec.md` (invariants `INV-P60-01` through `INV-P60-07`, test suite TC-P60-01..08, backward compatibility).

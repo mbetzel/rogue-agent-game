@@ -11,7 +11,7 @@ from __future__ import annotations
 import random
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
 
-from sim.config import DieColor
+from sim.config import CubeColor, DieColor, EndGameReason
 from sim.entities import (
     ArchetypeCode,
     CompanyCode,
@@ -21,7 +21,7 @@ from sim.entities import (
     has_signature_protocol,
     legacy_bridge_enabled,
 )
-from sim.engine.state import IncomeRecord
+from sim.engine.state import IncomeRecord, ProductionRole
 from sim.engine import secret_faces
 
 if TYPE_CHECKING:
@@ -54,6 +54,16 @@ def _exited_cubes_for_acoustic(state: GameState) -> Dict[Any, int]:
     return exited or {}
 
 
+def _exited_blue_cubes(state: GameState) -> int:
+    cr = getattr(state, "last_compile_result", None)
+    if cr is not None and getattr(cr, "exited_cubes", None) is not None:
+        return int(cr.exited_cubes.get(CubeColor.BLUE, 0))
+    exited = getattr(state, "last_exited_cubes", None)
+    if not exited:
+        exited = getattr(getattr(state, "tower", None), "last_exited_cubes", {}) or {}
+    return int(exited.get(CubeColor.BLUE, 0))
+
+
 def _die_income_row(state: GameState, player: PlayerState, die: Die) -> Optional[Dict[str, Any]]:
     """Pure: the income this die yields in Phase 3 (None for glitch / no face)."""
     eff = die.effective_face or die.current_face
@@ -64,20 +74,81 @@ def _die_income_row(state: GameState, player: PlayerState, die: Die) -> Optional
     secrets = eff.secrets
     protocol_research = 0
     star_note: Optional[str] = None
+    is_v044 = getattr(state.config, "variant_profile", None) == "V044"
     if eff.is_star:
         code = eff.star_code
-        if code == "Y2":
+        if is_v044 and code in ("B1", "B2", "B3", "G1", "G2", "G3", "Y1", "Y2", "Y3", "R1", "R2", "R3"):
+            cfg = state.config
+            if code == "R1":
+                star_note = "Brand Protection (+$2, +1 MS)"
+            elif code == "R2":
+                money = 0
+                star_note = "Ad Campaign (modal -$2 -> +2 MS)"
+            elif code == "R3":
+                money = 0
+                star_note = "Customer Poaching (take 1 MS)"
+            elif code == "B1":
+                blue_exited = _exited_blue_cubes(state)
+                if blue_exited == 0:
+                    research = cfg.b1_quiet_research
+                    money = 0
+                    star_note = f"Honeypot Telemetry (+{research} 🔬)"
+                else:
+                    research = 0
+                    money = cfg.b1_threat_cash
+                    star_note = f"Honeypot Telemetry (+${money})"
+            elif code == "B2":
+                money = 0  # Resolved modally in collect_player_production_income
+                star_note = "Deep R&D Vault (modal)"
+            elif code == "B3":
+                shield_count = len(player.shield_dice)
+                money = cfg.b3_base_cash + cfg.b3_shield_multiplier * shield_count
+                star_note = f"Air-Gapped Backup (+${money})"
+            elif code == "G1":
+                research = cfg.g1_research
+                star_note = f"Self-Healing Kernel (+{research} 🔬, clean {cfg.g1_slots_cleaned} slot)"
+            elif code == "G2":
+                g = getattr(player, "glitched_shield_slots", 0)
+                research = cfg.g2_base_research + g * cfg.g2_glitch_multiplier
+                star_note = f"Universal Sandbox (+{research} 🔬)"
+            elif code == "G3":
+                research = cfg.g3_research
+                money = cfg.g3_cash
+                star_note = f"Live Reboot (+{research} 🔬, +${money})"
+            elif code == "Y1":
+                money = 0  # Resolved modally in collect_player_production_income
+                star_note = "Algorithmic Trading (modal)"
+            elif code == "Y2":
+                cm_colors = {
+                    d.color for d in player.total_dice
+                    if d.color in (DieColor.RED, DieColor.BLUE, DieColor.GREEN, DieColor.YELLOW)
+                }
+                money = min(cfg.y2_max_cash, cfg.y2_base_cash + cfg.y2_cm_multiplier * len(cm_colors))
+                star_note = f"Cloud Monopoly (+${money})"
+            elif code == "Y3":
+                secrets = cfg.y3_base_secrets
+                gray_count = sum(1 for d in player.total_dice if d.color == DieColor.GRAY)
+                money = gray_count * cfg.y3_gray_multiplier
+                star_note = f"Proprietary Training (+{secrets} Secret, +${money})"
+        elif code == "Y2":
             count = len({d.color for d in player.colored_dice})
             total_payout = min(state.config.y2_max_payout, state.config.y2_base_payout + count)
             bonus = max(0, total_payout - eff.money)
             money += bonus
             star_note = f"Cloud Monopoly (+${bonus} bonus)"
         elif code == "PURPLE_STAR":
+            rebalance = getattr(state.config, "white_hat_6f_rebalance", False)
             if _is_operative(player, WhiteHatCode.ACOUSTIC, legacy_bridge_enabled(state)):
-                exited = _exited_cubes_for_acoustic(state)
-                gain = min(4, len({c for c, n in exited.items() if n > 0}))
+                if rebalance:
+                    gain = getattr(state, "distinct_exited_colors_this_round", 0)
+                else:
+                    exited = _exited_cubes_for_acoustic(state)
+                    gain = min(4, len({c for c, n in exited.items() if n > 0}))
                 money += gain
                 star_note = f"Resonance Sensor (+${gain})"
+            elif _is_operative(player, WhiteHatCode.PHREAKER, legacy_bridge_enabled(state)) and rebalance:
+                money += 1
+                star_note = "Jumper Diagnostics (+$1, +1 Bandwidth)"
             elif _is_operative(player, WhiteHatCode.CIPHER, legacy_bridge_enabled(state)):
                 money += 2
                 research += 1
@@ -87,7 +158,12 @@ def _die_income_row(state: GameState, player: PlayerState, die: Die) -> Optional
                 money += 2
                 star_note = "Burn Notice (+$2)"
             elif _is_operative(player, WhiteHatCode.OPERATOR, legacy_bridge_enabled(state)):
-                if getattr(state.config, "operator_protocol_mode", "CONTINGENT_STAFFING") == "LOGISTICS_BOUNTY":
+                if rebalance:
+                    gain_research = len(player.scanned_dice)
+                    research += gain_research
+                    protocol_research = gain_research
+                    star_note = f"Logistics Bounty (+{gain_research} 🔬)"
+                elif getattr(state.config, "operator_protocol_mode", "CONTINGENT_STAFFING") == "LOGISTICS_BOUNTY":
                     gain_research = getattr(state.config, "operator_logistics_bounty_research", 1)
                     research += gain_research
                     protocol_research = gain_research
@@ -139,6 +215,8 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
     dice_to_glitch: List[Die] = []
     dice_to_scan: List[Die] = []
     v038_cards = engine.config.variant_profile == "V038_DRAFT"
+    is_v044 = getattr(engine.config, "variant_profile", None) == "V044"
+    v044_modal_stars: List[Tuple[str, Die]] = []
 
     for die in list(player.in_production_dice):
         row = _die_income_row(engine.state, player, die)
@@ -162,7 +240,42 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
             player.change_market_share(+row["market_share"], "face")
 
         if eff and eff.is_star:
-            if eff.star_code == "Y3":
+            if is_v044:
+                code = eff.star_code
+                if code == "G1":
+                    cleaned = secret_faces.clean_slots(player, engine.config.g1_slots_cleaned, "face")
+                    player.f6_g1_activations += 1
+                    if cleaned > 0 and player.shields_on_glitched_slots > 0:
+                        to_promote = min(cleaned, player.shields_on_glitched_slots)
+                        promoted = 0
+                        for sd in player.in_production_dice:
+                            if promoted >= to_promote:
+                                break
+                            if getattr(sd, "production_role", None) == ProductionRole.PURGING_SHIELD:
+                                sd.production_role = ProductionRole.CLEAN_SHIELD
+                                promoted += 1
+                        player.shields_on_glitched_slots = max(0, player.shields_on_glitched_slots - promoted)
+                        player.shields_on_clean_slots += promoted
+                        player.f6_g1_shield_promotions += promoted
+                elif code == "G3":
+                    if player.scanned_dice:
+                        target = player.bot.choose_g3_reboot_target(player, list(player.scanned_dice), engine.state)
+                        if target is not None and target in player.scanned_dice:
+                            player.scanned_dice.remove(target)
+                            _reset(target)
+                            player.ready_for_release_dice.append(target)
+                            player.f6_g3_graduations += 1
+                        else:
+                            player.f6_g3_fizzles += 1
+                    else:
+                        player.f6_g3_fizzles += 1
+                elif code in ("R3", "R3_MKT") and engine.config.is_market_share:
+                    from sim.engine import market_share
+
+                    market_share.queue_poach(engine, player, die.die_id)
+                elif code in ("R2", "B2", "Y1"):
+                    v044_modal_stars.append((code, die))
+            elif eff.star_code == "Y3":
                 # Proprietary Training: move die to glitched_dice after collecting secret
                 # (v0.38 Variant profile: to the Scanned Box)
                 (dice_to_scan if v038_cards else dice_to_glitch).append(die)
@@ -200,6 +313,59 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
                             setattr(target_die, attr, None)
                     player.scanned_dice.append(target_die)
 
+    if is_v044 and v044_modal_stars:
+        cfg = engine.config
+        for code, _die in v044_modal_stars:
+            if code == "R2":
+                if (
+                    player.money >= cfg.r2_cost_cash
+                    and player.market_share is not None
+                    and player.market_share < player.market_share_max
+                    and player.bot.choose_r2_ad_campaign(player, engine.state)
+                ):
+                    player.money -= cfg.r2_cost_cash
+                    player.change_market_share(cfg.r2_gain_market_share, "r2")
+                    player.f6_r2_activations += 1
+                    player.r2_uses += 1
+                    record.money -= cfg.r2_cost_cash
+            elif code == "B2":
+                mode = player.bot.choose_b2_vault_mode(player, engine.state)
+                if mode == "market_share" and player.secrets >= cfg.b2_secret_cost:
+                    player.gain_secrets(-cfg.b2_secret_cost, "b2")
+                    if player.market_share is not None:
+                        player.change_market_share(cfg.b2_market_share_gain, "b2")
+                    player.f6_b2_secret_activations += 1
+                    record.secrets -= cfg.b2_secret_cost
+                    if player.secrets <= 0:
+                        player.is_patient_zero = True
+                        player.elimination_round = engine.state.current_round
+                        player.elimination_reason = "Total Breach (<= 0 Secrets)"
+                        player.breach_depth = max(0, -player.secrets)
+                        player.f6_b2_suicide_breaches += 1
+                        if all(p.is_patient_zero for p in engine.state.players):
+                            engine.state.game_over = True
+                            engine.state.end_reason = EndGameReason.TOTAL_WIPEOUT
+                        else:
+                            engine.state.is_final_round = True
+                            engine.state.end_reason = EndGameReason.PATIENT_ZERO
+                            engine.state.final_round_trigger_phase = 3
+                else:
+                    player.money += cfg.b2_base_cash
+                    player.f6_b2_cash_activations += 1
+                    record.money += cfg.b2_base_cash
+            elif code == "Y1":
+                mode = player.bot.choose_y1_algo_mode(player, engine.state)
+                if mode == "secret" and player.money >= cfg.y1_secret_cost:
+                    player.money -= cfg.y1_secret_cost
+                    player.gain_secrets(cfg.y1_secret_gain, "y1")
+                    player.f6_y1_secret_activations += 1
+                    record.money -= cfg.y1_secret_cost
+                    record.secrets += cfg.y1_secret_gain
+                else:
+                    player.money += cfg.y1_base_cash
+                    player.f6_y1_cash_activations += 1
+                    record.money += cfg.y1_base_cash
+
     for die in dice_to_glitch:
         if die in player.in_production_dice:
             player.in_production_dice.remove(die)
@@ -210,6 +376,12 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
             player.in_production_dice.remove(die)
             _reset(die)
             player.scanned_dice.append(die)
+
+    if getattr(engine.config, "white_hat_6f_rebalance", False):
+        if _is_operative(player, WhiteHatCode.OPERATOR, legacy_bridge_enabled(engine)):
+            record.operator_scanned_count = len(player.scanned_dice)
+        if _is_operative(player, WhiteHatCode.ACOUSTIC, legacy_bridge_enabled(engine)):
+            record.acoustic_colors_count = getattr(engine.state, "distinct_exited_colors_this_round", 0)
 
     return record
 
@@ -249,7 +421,49 @@ def preview_player_income(state: GameState, player: PlayerState) -> IncomeRecord
         record.secrets += row["secrets"]
         record.details.append(row)
     record.purple_star_triggers = len(purple_star_dice_in_production(player))
+    if getattr(state.config, "white_hat_6f_rebalance", False):
+        if _is_operative(player, WhiteHatCode.OPERATOR, legacy_bridge_enabled(state)):
+            record.operator_scanned_count = len(player.scanned_dice)
+        if _is_operative(player, WhiteHatCode.ACOUSTIC, legacy_bridge_enabled(state)):
+            record.acoustic_colors_count = getattr(state, "distinct_exited_colors_this_round", 0)
+
     return record
+
+
+def resolve_operator_logistics_bounty(player: PlayerState, triggers: int) -> int:
+    """Awards +1 research per die currently in the Scanned Box per trigger."""
+    scanned_count = len(player.scanned_dice)
+    research_gain = triggers * scanned_count
+    if research_gain > 0:
+        player.gain_research(research_gain, "signature_protocol")
+    return research_gain
+
+
+def compute_distinct_exited_colors(exited_cubes: Dict[Any, int], exited_signature_pids: Iterable[int]) -> int:
+    """Calculates distinct exited colors from Phase 2 drop (capped at 5)."""
+    compiler_colors = sum(
+        1 for c, n in exited_cubes.items()
+        if n > 0 and c in (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN, CubeColor.BLACK)
+    )
+    sig_colors = len(set(exited_signature_pids))
+    return min(5, compiler_colors + sig_colors)
+
+
+def resolve_acoustic_resonance_sensor(state: GameState, player: PlayerState, triggers: int) -> int:
+    """Awards +$1 cash per distinct exited cube color (max $5) per trigger."""
+    unit_cash = getattr(state, "distinct_exited_colors_this_round", 0)
+    total_gain = triggers * unit_cash
+    player.money += total_gain
+    return total_gain
+
+
+def resolve_cipher_algorithmic_parity(player: PlayerState, triggers: int) -> Tuple[int, int]:
+    """Awards +$2 cash and +1 research per trigger unconditionally."""
+    cash_gain = triggers * 2
+    research_gain = triggers * 1
+    player.money += cash_gain
+    player.gain_research(research_gain, "signature_protocol")
+    return cash_gain, research_gain
 
 
 def resolve_spook_burn_notice(
@@ -258,9 +472,34 @@ def resolve_spook_burn_notice(
     die_id: int,
 ) -> bool:
     """Spook Face 6 Protocol (Burn Notice):
-    Permanently returns 1 owned colored die to market to gain +1 Corporate Secret.
+    v0.43.0: Permanently returns 1 owned Gray Legacy die to the box for +$3 cash.
+    Legacy: Permanently returns 1 owned colored die to market to gain +1 Corporate Secret.
     """
-    target_die: Optional[Die] = None
+    if getattr(engine.config, "white_hat_6f_rebalance", False):
+        target_die: Optional[Die] = None
+        target_zone: Optional[List[Die]] = None
+        for zone in (player.in_production_dice, player.scanned_dice, player.glitched_dice, player.ready_for_release_dice):
+            for d in zone:
+                if d.die_id == die_id and d.color == DieColor.GRAY:
+                    target_die = d
+                    target_zone = zone
+                    break
+            if target_die:
+                break
+
+        if not target_die or target_zone is None:
+            return False
+
+        target_zone.remove(target_die)
+        if target_zone is player.glitched_dice:
+            from sim.engine import secret_faces
+
+            secret_faces.lose_pending(player, target_die)
+
+        player.money += 3
+        return True
+
+    target_die = None
     for zone in (player.in_production_dice, player.glitched_dice, player.scanned_dice, player.ready_for_release_dice):
         for d in zone:
             if d.die_id == die_id and d.color not in (DieColor.GRAY, DieColor.WHITE):
@@ -289,15 +528,17 @@ def resolve_phreaker_jumper_diagnostics(
     die_id: Optional[int] = None,
     rng: Optional[random.Random] = None,
     forced_face: Optional[Face] = None,
+    triggers: int = 1,
 ) -> Optional[Face]:
     """Phreaker Face 6 Protocol (Jumper Diagnostics):
-    Rolls 1 die currently in Under Development; harvests rolled cash/patches; die remains in place.
-    INV-PHREAKER-FALLBACK-01: If Under Development is empty, yields +$1 cash fallback immediately.
-
-    v0.38 (``power_profile="V038_DRAFT"``, §14.2 OQ-8): move 1 die Processing Box -> Scanned Box, banking its
-    Secret; if the Processing Box is empty, roll 1 Scanned Box die (stays in place); if both are empty, +$1.
+    v0.43.0: Awards +$1 cash and +1 temporary Release Bandwidth per trigger.
+    Legacy: Rolls 1 die currently in Under Development; harvests rolled cash/patches; die remains in place.
     """
     cfg = engine.config
+    if getattr(cfg, "white_hat_6f_rebalance", False):
+        player.money += triggers * 1
+        player.temp_release_bandwidth_bonus += triggers
+        return Face(name=f"Jumper Diagnostics (+${triggers}, +{triggers} Bandwidth)")
     if cfg.power_profile == "V038_DRAFT" and player.glitched_dice:
         target = secret_faces.best_pending(cfg, player, die_id)
         player.glitched_dice.remove(target)
@@ -357,8 +598,10 @@ def _nth_choice(choice: Any, n: int) -> Any:
     return choice if n == 0 else _ASK_BOT
 
 
-def _burnable_ids(player: PlayerState) -> set:
+def _burnable_ids(player: PlayerState, rebalance: bool = False) -> set:
     zones = player.in_production_dice + player.glitched_dice + player.scanned_dice + player.ready_for_release_dice
+    if rebalance:
+        return {d.die_id for d in zones if d.color == DieColor.GRAY}
     return {d.die_id for d in zones if d.color not in (DieColor.GRAY, DieColor.WHITE)}
 
 
@@ -367,7 +610,18 @@ def _bot_burn_choice(engine: GameEngine, player: PlayerState, burned: List[int])
     longer burnable), re-ask once, then fall back to the BaseBot default, so a trigger is not wasted."""
     from sim.bots.base import BaseBot
 
-    valid = _burnable_ids(player) - set(burned)
+    rebalance = bool(getattr(engine.config, "white_hat_6f_rebalance", False))
+    valid = _burnable_ids(player, rebalance=rebalance) - set(burned)
+    if rebalance:
+        for _ in range(2):
+            choice = player.bot.choose_spook_burn_gray(player, engine.state, engine.rng, set(burned))
+            if choice is None:
+                return None
+            if choice in valid:
+                return choice
+        choice = BaseBot.choose_spook_burn_gray(player.bot, player, engine.state, engine.rng, set(burned))
+        return choice if choice in valid else None
+
     for _ in range(2):
         choice = player.bot.choose_spook_burn_notice(player, engine.state, engine.rng)
         if choice is None:
@@ -398,6 +652,15 @@ def resolve_income_signature_protocols(
     if not (is_spook or is_phreaker):
         return triggers
 
+    rebalance = bool(getattr(engine.config, "white_hat_6f_rebalance", False))
+    if rebalance and is_phreaker:
+        # +$1 cash per Purple ★ was already collected in _die_income_row; grant temporary Release Bandwidth here.
+        player.temp_release_bandwidth_bonus += triggers
+        if record is not None:
+            record.phreaker_bandwidth_bonus += triggers
+            record.diagnostics_face = f"Jumper Diagnostics (+${triggers}, +{triggers} Bandwidth)"
+        return triggers
+
     burned: List[int] = []
     for n in range(triggers):
         if is_spook:
@@ -419,6 +682,8 @@ def resolve_income_signature_protocols(
     if record is not None and burned:
         record.burned_die_ids.extend(burned)
         record.burned_die_id = burned[0]
+        if rebalance:
+            record.burned_gray_die_ids.extend(burned)
     return triggers
 
 
