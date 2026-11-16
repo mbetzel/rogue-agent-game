@@ -180,22 +180,27 @@ def execute_player_operations_turn(
         player.money += engine.state.config.cipher_arbitrage_cash
         player.mark_ability_used(active_ver)
 
-    # 3. Star Special Actions in Phase 3 (Guarded by Phase 1 eligibility)
-    if plan.use_b2_secret and player.b2_available:
-        if (
-            player.money >= engine.config.b2_secret_cost
-            and (engine.config.b2_secret_cap is None or player.secrets < engine.config.b2_secret_cap)
-        ):
-            player.money -= engine.config.b2_secret_cost
-            player.gain_secrets(1, "b2")
-            player.b2_available = False
+    # 3. Star Special Actions in Phase 6 (Legacy pre-v0.44.0 only; v0.44.0 resolves all F6 in Phase 3)
+    is_v044 = getattr(engine.config, "variant_profile", None) == "V044"
+    if not is_v044:
+        if plan.use_b2_secret and player.b2_available:
+            if (
+                player.money >= engine.config.b2_secret_cost
+                and (engine.config.b2_secret_cap is None or player.secrets < engine.config.b2_secret_cap)
+            ):
+                player.money -= engine.config.b2_secret_cost
+                player.gain_secrets(1, "b2")
+                player.b2_available = False
 
-    if plan.use_y1_secret and player.y1_available:
-        # Reverses +$4 from P1 and pays $2 for +1 Secret (net -$2)
-        if player.money >= 6:
-            player.money -= 6
-            player.gain_secrets(1, "y1")
-            player.y1_available = False
+        if plan.use_y1_secret and player.y1_available:
+            # Reverses +$4 from P1 and pays $2 for +1 Secret (net -$2)
+            if player.money >= 6:
+                player.money -= 6
+                player.gain_secrets(1, "y1")
+                player.y1_available = False
+    else:
+        player.b2_available = False
+        player.y1_available = False
 
     if (
         plan.p1_cube_choice in (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN)
@@ -238,7 +243,9 @@ def execute_player_operations_turn(
             resolve_phreaker_jumper_diagnostics(engine, player, diag_id, engine.rng)
 
     # 3b. Ad Campaign (R2, v0.36.0): pay $X -> +Market Share; outside the Public Relations cap (INV-MS-R2-01)
-    execute_ad_campaigns(engine, player, getattr(plan, "use_r2_share", 0))
+    # Disabled in v0.44.0 (R2 resolves in Phase 3)
+    if not is_v044:
+        execute_ad_campaigns(engine, player, getattr(plan, "use_r2_share", 0))
 
     # 4. Market Purchases (Limit 2 dice per turn; deliver directly to ready_for_release_dice)
     purchased_count = 1 if prometheus_discount_applied else 0
@@ -407,7 +414,7 @@ def execute_track_upgrades(engine: GameEngine, player: PlayerState, plan: Any) -
         lvl = research_tracks.level_of(player, t)
         done.append((t, lvl))
 
-        if lvl in research_tracks.BREAKTHROUGH_LEVELS:
+        if research_tracks.has_level_effect(engine.config, t, lvl):
             choice = research_tracks.ask_breakthrough_choice(engine, player, t, lvl, choices)
             research_tracks.resolve_breakthrough(engine, player, t, lvl, choice)
 

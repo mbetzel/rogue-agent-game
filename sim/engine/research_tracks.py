@@ -193,8 +193,20 @@ def _gray_dice_by_zone(player: PlayerState) -> List[int]:
     return out
 
 
-def triage_l3_options(engine: GameEngine, player: PlayerState) -> TriageUpgradeOptions:
-    cost = int(engine.config.triage_l3_upgrade_cost)
+def has_level_effect(config: Optional[GameConfig], track: str, level: int) -> bool:
+    """Returns True if reaching ``level`` on ``track`` triggers an immediate Breakthrough or L4 Capstone effect."""
+    if level in BREAKTHROUGH_LEVELS:
+        return True
+    if level == MAX_LEVEL and config is not None:
+        t = normalize_track(track)
+        if t == "TRIAGE" and getattr(config, "triage_l4_free_die_replacement", False):
+            return True
+        if t == "PATENT" and int(getattr(config, "pr_l4_instant_market_share", 0)) > 0:
+            return True
+    return False
+
+
+def _triage_replacement_options(engine: GameEngine, player: PlayerState, cost: int) -> TriageUpgradeOptions:
     return TriageUpgradeOptions(
         gray_die_ids=_gray_dice_by_zone(player),
         colors=[c for c in MARKET_COLORS if engine.state.market.get(c, 0) > 0],
@@ -203,9 +215,20 @@ def triage_l3_options(engine: GameEngine, player: PlayerState) -> TriageUpgradeO
     )
 
 
+def triage_l3_options(engine: GameEngine, player: PlayerState) -> TriageUpgradeOptions:
+    return _triage_replacement_options(engine, player, int(engine.config.triage_l3_upgrade_cost))
+
+
+def triage_l4_options(engine: GameEngine, player: PlayerState) -> TriageUpgradeOptions:
+    return _triage_replacement_options(engine, player, 0)
+
+
 def breakthrough_options(engine: GameEngine, player: PlayerState, track: str, level: int) -> Optional[TriageUpgradeOptions]:
-    if normalize_track(track) == "TRIAGE" and level == 3:
+    t = normalize_track(track)
+    if t == "TRIAGE" and level == 3 and getattr(engine.config, "triage_l3_breakthrough", "UPGRADE") != "SECRET":
         return triage_l3_options(engine, player)
+    if t == "TRIAGE" and level == 4 and getattr(engine.config, "triage_l4_free_die_replacement", False):
+        return triage_l4_options(engine, player)
     return None
 
 
@@ -215,8 +238,16 @@ def _new_die_id(engine: GameEngine) -> int:
     return did
 
 
-def _resolve_triage_l3(engine: GameEngine, player: PlayerState, choice: Optional[BreakthroughChoice], rec: BreakthroughRecord) -> None:
-    opts = triage_l3_options(engine, player)
+def _resolve_triage_replacement(
+    engine: GameEngine,
+    player: PlayerState,
+    choice: Optional[BreakthroughChoice],
+    rec: BreakthroughRecord,
+    *,
+    cost: int,
+    allow_decline: bool,
+) -> None:
+    opts = _triage_replacement_options(engine, player, cost)
     if not opts.gray_die_ids:
         rec.outcome, rec.detail = "FORFEITED", {"reason": "no_gray_die"}
         return
@@ -226,7 +257,7 @@ def _resolve_triage_l3(engine: GameEngine, player: PlayerState, choice: Optional
     if not opts.affordable:
         rec.outcome, rec.detail = "FORFEITED", {"reason": "unaffordable"}
         return
-    if choice is not None and not choice.accept:
+    if allow_decline and choice is not None and not choice.accept:
         rec.outcome = "DECLINED"
         return
     gray_id = choice.gray_die_id if choice is not None else None
@@ -241,7 +272,7 @@ def _resolve_triage_l3(engine: GameEngine, player: PlayerState, choice: Optional
     if color not in opts.colors:  # chosen colour empty / illegal -> another colour
         color = next((c for c in TRIAGE_L3_COLOR_FALLBACK if c in opts.colors), opts.colors[0])
 
-    # Atomic replacement (INV-RT-TRIAGE-L3-ATOMIC-01)
+    # Atomic replacement (INV-RT-TRIAGE-L3-ATOMIC-01 / INV-RT-TRIAGE-L4-FREE-01)
     for zone in (player.glitched_dice, player.scanned_dice, player.ready_for_release_dice):
         hit = next((d for d in zone if d.die_id == gray_id), None)
         if hit is not None:
@@ -256,7 +287,10 @@ def _resolve_triage_l3(engine: GameEngine, player: PlayerState, choice: Optional
         face_profile=engine.config.die_face_profile,
     )
     player.ready_for_release_dice.append(new_die)
-    player.triage_l3_upgrade_color = color.value
+    if cost == 0:
+        player.triage_l4_upgrade_color = color.value
+    else:
+        player.triage_l3_upgrade_color = color.value
     rec.outcome = "TAKEN"
     rec.detail = {"gray_die_id": gray_id, "new_color": color.value, "new_die_id": new_die.die_id, "paid": opts.cost}
 
@@ -268,17 +302,17 @@ def resolve_breakthrough(
     level: int,
     choice: Optional[BreakthroughChoice] = None,
 ) -> Optional[BreakthroughRecord]:
-    """Resolves the Breakthrough printed at ``level`` of ``track`` (INV-RT-BT-IMMEDIATE-01).
+    """Resolves the Breakthrough or Capstone effect printed at ``level`` of ``track`` (INV-RT-BT-IMMEDIATE-01).
 
-    Returns ``None`` when the level has no Breakthrough, or when this player already resolved it
+    Returns ``None`` when the level has no immediate effect, or when this player already resolved it
     (INV-RT-BT-ONCE-01).
     """
     t = normalize_track(track)
-    if level not in BREAKTHROUGH_LEVELS:
+    cfg = engine.config
+    if not has_level_effect(cfg, t, level):
         return None
     if any(b.track == t and b.level == level for b in player.breakthroughs):
         return None
-    cfg = engine.config
     rec = BreakthroughRecord(track=t, level=level, round_number=engine.state.current_round, outcome="TAKEN")
     if t in ("DEFENSE", "RELEASE") and level == 1:
         die = create_gray_die(_new_die_id(engine), cfg.gray_face_profile)
@@ -305,7 +339,15 @@ def resolve_breakthrough(
         if n == 0:
             rec.outcome = "FORFEITED"
     elif t == "TRIAGE" and level == 3:
-        _resolve_triage_l3(engine, player, choice, rec)
+        if getattr(cfg, "triage_l3_breakthrough", "UPGRADE") == "SECRET":
+            player.gain_secrets(1, "breakthrough")
+            rec.detail = {"secrets": 1}
+        else:
+            _resolve_triage_replacement(
+                engine, player, choice, rec, cost=int(cfg.triage_l3_upgrade_cost), allow_decline=True
+            )
+    elif t == "TRIAGE" and level == 4:
+        _resolve_triage_replacement(engine, player, choice, rec, cost=0, allow_decline=False)
     elif t == "PATENT" and level == 1:
         player.money += int(cfg.patent_l1_cash)
         rec.detail = {"money": int(cfg.patent_l1_cash)}
@@ -314,10 +356,17 @@ def resolve_breakthrough(
             player.personal_purple_reserve -= 1
             die = create_colored_die(color=DieColor.PURPLE, die_id=_new_die_id(engine), cost=0,
                                      face_profile=cfg.die_face_profile)
-            player.ready_for_release_dice.append(die)
+            if getattr(cfg, "pr_l3_purple_to_scanned", False):
+                player.scanned_dice.append(die)
+            else:
+                player.ready_for_release_dice.append(die)
             rec.detail = {"die_id": die.die_id}
         else:
             rec.outcome, rec.detail = "FORFEITED", {"reason": "reserve_empty"}
+    elif t == "PATENT" and level == 4:
+        gain = int(getattr(cfg, "pr_l4_instant_market_share", 0))
+        actual = player.change_market_share(gain, "pr_l4")
+        rec.detail = {"market_share_gained": actual, "requested": gain}
     player.breakthroughs.append(rec)
     return rec
 
@@ -337,6 +386,10 @@ def ask_breakthrough_choice(
     opts = breakthrough_options(engine, player, t, level)
     if opts is None:
         return None
+    if t == "TRIAGE" and level == 4:
+        l4_hook = getattr(player.bot, "choose_triage_l4_upgrade", None)
+        if l4_hook is not None:
+            return l4_hook(player, engine.state, opts)
     hook = getattr(player.bot, "choose_breakthrough", None)
     if hook is None:
         return None
@@ -359,7 +412,7 @@ def upgrade_and_resolve(
     if not player.upgrade_track(t):
         return False  # type: ignore[return-value]
     lvl = level_of(player, t)
-    if lvl not in BREAKTHROUGH_LEVELS:
+    if not has_level_effect(engine.config, t, lvl):
         return None
     if isinstance(chooser, BreakthroughChoice):
         choice: Optional[BreakthroughChoice] = chooser
@@ -378,6 +431,8 @@ def defense_l4_cash(config: GameConfig, player: PlayerState, blocked_cubes: int)
 
 
 def triage_l4_research(config: GameConfig, player: PlayerState, moved_count: int) -> int:
+    if getattr(config, "triage_l4_free_die_replacement", False):
+        return 0
     if not getattr(config, "is_v035_tracks", False) or player.triage_level < MAX_LEVEL:
         return 0
     return max(0, int(moved_count) - int(config.triage_l4_free_moves))

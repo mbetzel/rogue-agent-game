@@ -47,6 +47,8 @@ class ProductionRole(str, Enum):
     BLUE_SHIELD = "BLUE_SHIELD"
     GREEN_SHIELD = "GREEN_SHIELD"
     ANY_SHIELD = "ANY_SHIELD"
+    CLEAN_SHIELD = "CLEAN_SHIELD"
+    PURGING_SHIELD = "PURGING_SHIELD"
 
     @classmethod
     def _missing_(cls, value: object) -> Any:
@@ -111,6 +113,7 @@ class PlayerState:
     defense_capacity: int = 2
     triage_bandwidth: int = 2
     release_bandwidth: int = 4
+    temp_release_bandwidth_bonus: int = 0
     triage_level: int = 0
     release_level: int = 0
     defense_level: int = 0
@@ -249,8 +252,13 @@ class PlayerState:
         self.l4_payouts: Dict[str, int] = {
             "defense_cash": 0, "triage_research": 0, "release_rerolls_used": 0, "patent_secrets": 0,
         }
+        if getattr(config, "release_l4_set_gray_face", False):
+            self.l4_payouts["release_gray_face_sets"] = 0
+        if int(getattr(config, "pr_l4_instant_market_share", 0) or 0) > 0:
+            self.l4_payouts["pr_instant_market_share"] = 0
         self.slush_fund_used_game = False
         self.triage_l3_upgrade_color: Optional[str] = None
+        self.triage_l4_upgrade_color: Optional[str] = None
         self.excess_hardware_upgrades_requested = 0
         # v0.36.0 Market Share (None under RedMode.RANSOM; initialised by GameEngine under MARKET_SHARE)
         self.market_share: Optional[int] = None
@@ -313,6 +321,21 @@ class PlayerState:
         self.capital_injection_uses = 0
         self.logistics_bounty_triggers = 0
         self.money_by_source: Dict[str, int] = {}
+        # v0.44.0 F6 Variant Overhaul & Glitched Shield Slot Tracking (Spec §5.3)
+        self.shields_on_clean_slots: int = 0
+        self.shields_on_glitched_slots: int = 0
+        self.purged_shields_this_round: int = 0
+        self.f6_r2_activations: int = 0
+        self.f6_b2_cash_activations: int = 0
+        self.f6_b2_secret_activations: int = 0
+        self.f6_b2_suicide_breaches: int = 0
+        self.f6_g1_activations: int = 0
+        self.f6_g1_shield_promotions: int = 0
+        self.f6_g3_graduations: int = 0
+        self.f6_g3_fizzles: int = 0
+        self.f6_y1_cash_activations: int = 0
+        self.f6_y1_secret_activations: int = 0
+        self.slots_purged_by_shields_total: int = 0
         self.player_id = player_id
         self.bot = bot
         self.money = money
@@ -403,6 +426,8 @@ class PlayerState:
         self.money_spent_regain = 0
         self.scanned_dice_purchased_this_turn = 0
         self.triage_milestones_claimed = []
+        self.temp_release_bandwidth_bonus = 0
+        self.prodigy_overrides_this_round = 0
 
         self._has_emergency_hotfix = has_emergency_hotfix or (self.triage_level >= 2)
         self._has_passive_firewall = has_passive_firewall or (self.defense_level >= 2)
@@ -434,6 +459,11 @@ class PlayerState:
         self.signature_black_secrets_lost: int = int(kwargs.get("signature_black_secrets_lost", 0))
         self.signature_red_transfers_sent: int = int(kwargs.get("signature_red_transfers_sent", 0))
         self.signature_red_transfers_received: int = int(kwargs.get("signature_red_transfers_received", 0))
+
+    @property
+    def effective_release_bandwidth(self) -> int:
+        """Total Release Bandwidth for Phase 6 Step 3, combining track level and Phreaker bonuses."""
+        return self.release_bandwidth + self.temp_release_bandwidth_bonus
 
     @property
     def max_market_share(self) -> int:
@@ -505,10 +535,12 @@ class PlayerState:
             self.market_share_regained += actual
         elif source == "r2":
             self.market_share_gained_r2 += actual
-        elif source == "face":
+        elif source in ("face", "b2", "r1"):
             self.market_share_gained_face += actual
         elif source == "corruption":
             self.market_share_lost_red += -actual
+        elif source == "pr_l4":
+            self.l4_payouts["pr_instant_market_share"] = self.l4_payouts.get("pr_instant_market_share", 0) + actual
         else:
             raise ValueError(f"unknown Market Share source {source!r}")
         if self.market_share_min is None or after < self.market_share_min:
@@ -904,8 +936,24 @@ class PlayerState:
         ]
 
     @property
+    def clean_shield_dice(self) -> List[Die]:
+        """Modules in In Production actively assigned to clean Defense Grid slots."""
+        return [
+            d for d in self.in_production_dice
+            if getattr(d, "production_role", None) == ProductionRole.CLEAN_SHIELD
+        ]
+
+    @property
+    def purging_shield_dice(self) -> List[Die]:
+        """Modules in In Production assigned to glitched Defense Grid slots to purge malware."""
+        return [
+            d for d in self.in_production_dice
+            if getattr(d, "production_role", None) == ProductionRole.PURGING_SHIELD
+        ]
+
+    @property
     def shield_dice(self) -> List[Die]:
-        """All modules actively assigned to defense across Red, Blue, Green, and Any."""
+        """All modules actively assigned to defense across Red, Blue, Green, Any, Clean, and Purging."""
         return [
             d for d in self.in_production_dice
             if getattr(d, "production_role", None) in (
@@ -913,6 +961,8 @@ class PlayerState:
                 ProductionRole.BLUE_SHIELD,
                 ProductionRole.GREEN_SHIELD,
                 ProductionRole.ANY_SHIELD,
+                ProductionRole.CLEAN_SHIELD,
+                ProductionRole.PURGING_SHIELD,
             )
         ]
 
@@ -1106,6 +1156,13 @@ class RoundTelemetry:
     dominant_tray_color: Optional[str] = None
     signature_attacks_this_round: Dict[int, Optional[str]] = field(default_factory=dict)
     encrypted_tracks_by_player: Dict[int, List[str]] = field(default_factory=dict)
+    # --- White Hat 6F Rebalance Telemetry (v0.43.0) ---
+    purple_star_triggers_by_operative: Dict[str, int] = field(default_factory=dict)
+    operator_research_harvested: int = 0
+    phreaker_bandwidth_graduates: int = 0
+    acoustic_cash_harvested: int = 0
+    spook_gray_dice_burned: int = 0
+    prodigy_overrides_executed: int = 0
 
 
 @dataclass
@@ -1177,6 +1234,10 @@ class IncomeRecord:
     details: List[Dict[str, Any]] = field(default_factory=list)
     burned_die_id: Optional[int] = None
     burned_die_ids: List[int] = field(default_factory=list)
+    burned_gray_die_ids: List[int] = field(default_factory=list)
+    phreaker_bandwidth_bonus: int = 0
+    acoustic_colors_count: int = 0
+    operator_scanned_count: int = 0
     diagnostics_face: Optional[str] = None
     purple_star_triggers: int = 0
     protocol_research: int = 0
@@ -1301,6 +1362,7 @@ class GameState:
     last_round_buffer_overflow: bool = False
     total_buffer_overflows: int = 0
     last_exited_cubes: Dict[CubeColor, int] = field(default_factory=dict)
+    distinct_exited_colors_this_round: int = 0
     first_player_index: int = 0
     current_round: int = 1
     game_over: bool = False

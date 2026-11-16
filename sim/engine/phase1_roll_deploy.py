@@ -91,6 +91,7 @@ def resolve_prodigy_purple_star_override(
     rng: random.Random,
     target_idx: Optional[int] = None,
     target_face: Optional[Face] = None,
+    excluded_targets: Optional[set] = None,
 ) -> bool:
     """Prodigy Face 6 Protocol (Arbitrary Code Execution):
     Turn any 1 other rolled die to any legal non-Star face of choice.
@@ -108,6 +109,26 @@ def resolve_prodigy_purple_star_override(
             target_idx, target_face = choice
 
     cfg = getattr(player, "config", None)
+    rebalance = bool(getattr(cfg, "white_hat_6f_rebalance", False))
+    if rebalance:
+        if target_idx is not None and target_face is not None and 0 <= target_idx < len(active_dice):
+            if excluded_targets is not None and target_idx in excluded_targets:
+                return False
+            if target_idx in purple_star_indices and len(purple_star_indices) == 1:
+                return False
+            if target_face.is_star or target_face.secrets_pending or getattr(target_face, "is_secret", False):
+                return False
+            target_die = active_dice[target_idx]
+            if target_face in target_die.faces:
+                target_die.current_face = target_face
+                target_die.is_locked = False
+                target_die.chosen_choice_index = None
+                player.prodigy_overrides_this_round = getattr(player, "prodigy_overrides_this_round", 0) + 1
+                if excluded_targets is not None:
+                    excluded_targets.add(target_idx)
+                return True
+        return False
+
     if (target_face is not None and target_face.secrets_pending
             and not getattr(cfg, "ace_allows_secret_face", False)):
         return False  # v0.38 (OQ-10): Arbitrary Code Execution may not set the Secret face
@@ -119,6 +140,53 @@ def resolve_prodigy_purple_star_override(
                 active_dice[target_idx].chosen_choice_index = None
                 return True
     return False
+
+
+def resolve_release_l4_gray_face_override(
+    player: PlayerState,
+    active_dice: List[Die],
+    game_state: Optional[Any] = None,
+    target_idx: Optional[int] = None,
+    target_face: Optional[Face] = None,
+) -> bool:
+    """Release Track L4 Capstone (v0.44.0):
+    Set 1 rolled Gray Legacy die in ``active_dice`` to any printed face of that Gray die.
+    Enforces INV-REL-L4-TARGET-01 and INV-REL-L4-FACES-01.
+    """
+    cfg = getattr(player, "config", None)
+    if cfg is not None and not getattr(cfg, "release_l4_set_gray_face", False):
+        return False
+    if int(getattr(player, "release_level", 0)) < 4:
+        return False
+    gray_indices = [i for i, d in enumerate(active_dice) if d.color == DieColor.GRAY]
+    if not gray_indices:
+        return False
+
+    if target_idx is None or target_face is None:
+        hook = getattr(player.bot, "choose_release_l4_gray_face", None)
+        if hook is None:
+            return False
+        choice = hook(player, active_dice, game_state)
+        if choice is None:
+            return False
+        target_idx, target_face = choice
+
+    if target_idx is None or target_face is None:
+        return False
+    if not (0 <= target_idx < len(active_dice)):
+        return False
+    die = active_dice[target_idx]
+    if die.color != DieColor.GRAY:
+        return False
+    if target_face.is_star or getattr(target_face, "secrets_pending", 0) > 0:
+        return False
+    if target_face not in die.faces:
+        return False
+    die.current_face = target_face
+    die.is_locked = False
+    die.chosen_choice_index = None
+    player.l4_payouts["release_gray_face_sets"] = player.l4_payouts.get("release_gray_face_sets", 0) + 1
+    return True
 
 
 def check_operator_contingent_staffing(
@@ -317,14 +385,17 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
         if player.is_patient_zero or (player_ids is not None and player.player_id not in player_ids):
             continue
 
-        # Reset round star availability
+        # Reset round star availability & v0.44.0 slot tracking
         player.b2_available = False
-        player.r2_actions_available = 0  # v0.36.0 Ad Campaign (earned in Phase 3)
+        player.r2_actions_available = 0  # v0.36.0 Ad Campaign (earned in Phase 3; unused in v0.44.0)
         player.y1_available = False
         player.p1_available = False
         player.p3_available = None
         player.purple_star_available = False
         player.purple_star_count = 0
+        player.shields_on_clean_slots = 0
+        player.shields_on_glitched_slots = 0
+        player.purged_shields_this_round = 0
 
         # Roll Active Pool (ready_for_release_dice + contractor_dice)
         active_dice: List[Die] = list(player.ready_for_release_dice) + list(player.contractor_dice)
@@ -344,7 +415,7 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
 
         # Protocol Check: The Prodigy (Arbitrary Code Execution Face 6 Trigger)
         is_prodigy_operative = has_signature_protocol(player, WhiteHatCode.PRODIGY, legacy_bridge_enabled(engine))
-        if is_prodigy_operative:
+        if is_prodigy_operative and not getattr(engine.config, "white_hat_6f_rebalance", False):
             resolve_prodigy_purple_star_override(player, active_dice, engine.rng)
 
         # 4. Lock Evaluation & Yahtzee Rerolls Loop
@@ -439,8 +510,27 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
                 player.l4_payouts["release_rerolls_used"] = player.l4_payouts.get("release_rerolls_used", 0) + 1
 
         # Prodigy Face 6 protocol check after rerolls (Arbitrary Code Execution)
+        player.prodigy_overrides_this_round = 0
         if is_prodigy_operative:
-            resolve_prodigy_purple_star_override(player, active_dice, engine.rng)
+            if getattr(engine.config, "white_hat_6f_rebalance", False):
+                purple_count = sum(
+                    1 for d in active_dice
+                    if d.current_face and d.current_face.is_star and d.current_face.star_code == "PURPLE_STAR"
+                )
+                overridden_targets: set = set()
+                for _ in range(purple_count):
+                    remaining_stars = sum(
+                        1 for d in active_dice
+                        if d.current_face and d.current_face.is_star and d.current_face.star_code == "PURPLE_STAR"
+                    )
+                    if player.prodigy_overrides_this_round >= remaining_stars:
+                        break
+                    if not resolve_prodigy_purple_star_override(
+                        player, active_dice, engine.rng, excluded_targets=overridden_targets
+                    ):
+                        break
+            else:
+                resolve_prodigy_purple_star_override(player, active_dice, engine.rng)
             _evaluate_locks(active_dice)
 
         # Helix face override (Brute-Force Bypass)
@@ -467,6 +557,9 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
                     active_dice[die_idx].current_face = target_face
                     active_dice[die_idx].is_locked = False
                     active_dice[die_idx].chosen_choice_index = None
+
+        # Tier 3: Release Track L4 Capstone (set 1 rolled Gray Legacy die to any printed face)
+        resolve_release_l4_gray_face_override(player, active_dice, engine.state)
 
         # Final lock evaluation pass
         _evaluate_locks(active_dice)
@@ -533,11 +626,15 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
                     elif face.shield_color == ShieldColor.ANY:
                         validated_commitments[idx] = ShieldColor.ANY
 
-        # v0.38 Step 5c: clean Glitched Shield Slots (Green F1 / G1 / G2 faces, then shield-icon dice placed on a
-        # glitched slot, which go to the Scanned Box / are discarded) before shields fill the effective capacity.
+        # v0.38 Step 5c: clean Glitched Shield Slots (legacy) vs v0.44.0 unified capacity (no Phase 1 discard)
+        is_v044 = getattr(engine.config, "variant_profile", None) == "V044"
         slot_cleaner_ids: set = set()
         shield_capacity = player.defense_capacity
-        if slots_on:
+        if slots_on and is_v044:
+            shield_capacity = player.defense_capacity
+            if secret_faces.effective_capacity(player) == 0:
+                player.zero_capacity_rounds += 1
+        elif slots_on:
             for idx, die in enumerate(active_dice):
                 eff = die.effective_face  # choice index already synced by the validation pass above
                 if eff is not None and eff.clean_slots > 0:
@@ -623,29 +720,57 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
 
         # 3. Assign Production Roles and Deploy to in_production_dice
         player.in_production_dice.clear()
+        clean_slot_ids: set = set()
+        purging_slot_ids: set = set()
+        if is_v044 and new_commitments:
+            committed_shield_dice = [surviving_active[idx] for idx in sorted(new_commitments)]
+            clean_cap = max(0, player.defense_capacity - player.glitched_shield_slots)
+            glitched_cap = min(player.glitched_shield_slots, player.defense_capacity)
+            alloc_fn = getattr(player.bot, "choose_shield_slot_allocation", None)
+            if callable(alloc_fn):
+                c_list, p_list = alloc_fn(player, committed_shield_dice, clean_cap, glitched_cap, engine.state)
+            else:
+                c_list, p_list = committed_shield_dice[:clean_cap], committed_shield_dice[clean_cap:clean_cap + glitched_cap]
+            valid_ids = {id(d) for d in committed_shield_dice}
+            c_filtered = [d for d in (c_list or []) if id(d) in valid_ids][:clean_cap]
+            c_ids = {id(d) for d in c_filtered}
+            p_filtered = [d for d in (p_list or []) if id(d) in valid_ids and id(d) not in c_ids][:glitched_cap]
+            clean_slot_ids = c_ids
+            purging_slot_ids = {id(d) for d in p_filtered}
+            player.shields_on_clean_slots = len(clean_slot_ids)
+            player.shields_on_glitched_slots = len(purging_slot_ids)
+
         for idx, die in enumerate(surviving_active):
             face = die.effective_face or die.current_face
             if idx in new_commitments:
-                s_color = new_commitments[idx]
-                if s_color == ShieldColor.RED:
-                    die.production_role = ProductionRole.RED_SHIELD
-                elif s_color == ShieldColor.BLUE:
-                    die.production_role = ProductionRole.BLUE_SHIELD
-                elif s_color == ShieldColor.GREEN:
-                    die.production_role = ProductionRole.GREEN_SHIELD
-                elif s_color == ShieldColor.ANY:
-                    die.production_role = ProductionRole.ANY_SHIELD
+                if is_v044:
+                    if id(die) in purging_slot_ids:
+                        die.production_role = ProductionRole.PURGING_SHIELD
+                    elif id(die) in clean_slot_ids:
+                        die.production_role = ProductionRole.CLEAN_SHIELD
+                    else:
+                        die.production_role = ProductionRole.INCOME
                 else:
-                    die.production_role = ProductionRole.ANY_SHIELD
+                    s_color = new_commitments[idx]
+                    if s_color == ShieldColor.RED:
+                        die.production_role = ProductionRole.RED_SHIELD
+                    elif s_color == ShieldColor.BLUE:
+                        die.production_role = ProductionRole.BLUE_SHIELD
+                    elif s_color == ShieldColor.GREEN:
+                        die.production_role = ProductionRole.GREEN_SHIELD
+                    elif s_color == ShieldColor.ANY:
+                        die.production_role = ProductionRole.ANY_SHIELD
+                    else:
+                        die.production_role = ProductionRole.ANY_SHIELD
             else:
                 die.production_role = ProductionRole.INCOME
 
-            # Star Special eligibility tracking for Phase 3
+            # Star Special eligibility tracking for Phase 3/6
             if face and face.is_star:
-                if face.star_code == "B2":
+                if face.star_code == "B2" and not is_v044:
                     if idx not in new_commitments:
                         player.b2_available = True
-                elif face.star_code == "Y1":
+                elif face.star_code == "Y1" and not is_v044:
                     player.y1_available = True
                 elif face.star_code == "P1":
                     player.p1_available = True

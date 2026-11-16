@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Section 6 (v0.43.0)
+# Too Many Secrets — Rules Section 6 (v0.44.0)
 
 Split out of `RULES.md`; this file is canonical for Section 6.
 
@@ -10,7 +10,7 @@ Split out of `RULES.md`; this file is canonical for Section 6.
 | :--- | :---: | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Gray (Legacy)** | Starter (2) / Breakthrough | `Block 1 Any` | `Block 1 Any` | `+$1 & +1 🔬` | `+$1 / +1 🔬` | `+$1 / +1 🔬` | `+1 🔬` `[TUNE]` |
 | **Red (Marketing)** | `$4–$5` (Variant) | `+1 Market Share / +$1` | `+$2` | `+$2` | `+$2` | **Secret face** | `Red ★` |
-| **Blue (Firewall)** | `$4–$6` (Variant) | `+1 Corporate Secret` | `+1 Corporate Secret` | `+$1` | `+1 🔬 / +$1` | **Secret face** | `Blue ★` |
+| **Blue (Firewall)** | `$4–$5` (Variant) | `+1 Corporate Secret` | `+2 🔬` | `+$2` | `+1 🔬 / +$1` | **Secret face** | `Blue ★` |
 | **Green (Antivirus)** | `$4–$5` (Variant) | `+2 🔬` | `+1 🔬` | `+2 🔬` | `+1 🔬 / +$1` | **Secret face** | `Green ★` |
 | **Yellow (Commercial)**| `$5–$6` (Variant) | `+2 Market Share` | `+1 Market Share / +1 🔬` | `+$1 & +1 Market Share` | `+$2 / +1 🔬` | `+$2 / +1 🔬` | `Yellow ★` |
 | **Purple (Specialist)** | Starter / Public Relations L3 | `Block 1 Any` | `Block 1 Any` | `+$2` | `+$1 & +1 🔬` | **Secret face** | `Purple ★ (Signature Protocol)` |
@@ -22,24 +22,24 @@ Split out of `RULES.md`; this file is canonical for Section 6.
 * **Zero Blank or Glitch Faces:** Every face on every Software Module Die produces a positive shield, resource, Secret, or Star (`★`) output (`0` blank faces and `0` Glitch faces).
 
 ### B. Sample Module Variant Cards (`★` Effects)
-*(Timing: `[In Production — Income]` outputs are collected in **Phase 3: Income**; damage-conditional bonuses resolve in **Phase 4: Attack Resolution**; paid `[Phase 6 — Operations]` options resolve during your Operations Turn.)*
+*(Timing: All Colored Die `★` abilities resolve during **Phase 3: Income** while the die is **In Production**.)*
 *(Note: Common market variant cards define Face 6 for Red, Blue, Green, and Yellow module dice. The purchase cost of each colored die is printed directly on its active face-up Variant Card. Purple Proprietary Specialist dice do not use market variant cards and cannot be purchased; their Face 6 is defined on the player's assigned White Hat Dossier detailed in Section 6D).*
 * **Red `★` Variants:**
-  * *R1 — Brand Protection (`$5`):* `[In Production — Income]` gain `+$2 & +1 Market Share` (in Phase 3; not above your maximum; does not count toward your Public Relations limit).
-  * *R2 — Ad Campaign (`$4`):* No shield or Income output. `[In Production — Income]` If this die is still In Production in Phase 3, then `[Phase 6 — Operations]` you may pay `$2` `[TUNE]` during your Operations Turn to gain `+1` Market Share (not above your maximum; does not count toward your Public Relations limit; lost if unused by the end of your Operations Turn).
-  * *R3 — Customer Poaching (`$5`):* No shield or Income output. `[In Production — Income]` In Phase 3, after all players collect Income, take `1` Market Share from the surviving rival with the most Market Share (you choose among tied rivals). If you are already at your maximum, the rival still loses `1` and you gain nothing (see Phase 3).
+  * *R1 — Brand Protection (`$5`):* Gain `+$2 & +1 Market Share` (not above your maximum; does not count toward your Public Relations limit).
+  * *R2 — Ad Campaign (`$4`):* Pay `$2` `[TUNE]` to gain `+2` Market Share (not above your maximum; does not count toward your Public Relations limit).
+  * *R3 — Customer Poaching (`$5`):* After all players collect Income, take `1` Market Share from the rival with the most Market Share (you choose among tied rivals). If you are already at your maximum, the rival still loses `1` and you gain nothing (see Phase 3).
 * **Blue `★` Variants:**
-  * *B1 — Honeypot Telemetry (`$5`):* `[In Production — Income]` gain `+1 🔬`; if 1+ Blue cubes exit the tower and you take `0` Blue damage in Phase 4, gain `+$2` (this die must still be In Production in Phase 4).
-  * *B2 — Deep R&D Vault (`$6`):* `[Phase 6 — Operations]` pay `$4` during Phase 6 to gain `+1 Corporate Secret` `[TUNE]`.
-  * *B3 — Air-Gapped Backup (`$4`):* `[In Production — Income]` move `1` die from your **Processing Box** to your **Scanned Box** in Phase 3, banking its Secret `[TUNE]`.
+  * *B1 — Honeypot Telemetry (`$5`):* Gain `+2 🔬` if `0` Blue cubes are in the Exit Tray, **OR** gain `+$3` if `1+` Blue cubes are in the Exit Tray.
+  * *B2 — Deep R&D Vault (`$5`):* Gain `+$2`, **OR** spend `1` Corporate Secret to gain `+3 Market Share` (not above your maximum; does not count toward your Public Relations limit).
+  * *B3 — Air-Gapped Backup (`$4`):* Gain `+$1`, plus `+$1` per Shield you have **In Production** (clean or glitched slots).
 * **Green `★` Variants:**
-  * *G1 — Self-Healing Kernel (`$5`):* `Clean 1 Glitched Shield Slot` (in Phase 1 Step 4) + `[In Production — Income]` gain `+1 🔬`.
-  * *G2 — Universal Sandbox (`$4`):* `[In Production — Income]` Gain `+2 🔬`, plus `+1 🔬` for each of your **Glitched Shield Slots** `[TUNE]`.
-  * *G3 — Live Reboot (`$4`):* `[In Production — Income]` Gain `+2 🔬` + `+$1`.
+  * *G1 — Self-Healing Kernel (`$5`):* Clean `1` **Glitched Shield Slot** and gain `+1 🔬` (freeing any Shield already assigned to that slot to block in Phase 4).
+  * *G2 — Universal Sandbox (`$5`):* Gain `+2 🔬`, plus `+1 🔬` for each of your **Glitched Shield Slots** `[TUNE]`.
+  * *G3 — Live Reboot (`$4`):* Gain `+1 🔬 & +$1`, and move `1` die from your **Scanned Box** to your **Ready for Release Zone**.
 * **Yellow `★` Variants:**
-  * *Y1 — Algorithmic Trading (`$6`):* `[In Production — Income]` Gain `+$4`, **OR** `[Phase 6 — Operations]` pay `$2` in Phase 6 to gain `+1 Corporate Secret`.
-  * *Y2 — Cloud Monopoly (`$5`):* `[In Production — Income]` Gain `+$2`, plus `+$1` per different colored module die you own (max `+$5`) `[TUNE]`.
-  * *Y3 — Proprietary Training (`$5`):* `[In Production — Income]` Gain `+1 Corporate Secret` in Phase 3, then immediately move this die to the **Scanned Box** (before Phase 4 attacks).
+  * *Y1 — Algorithmic Trading (`$6`):* Gain `+$4`, **OR** pay `$2` to gain `+1 Corporate Secret`.
+  * *Y2 — Cloud Monopoly (`$5`):* Gain `+$2`, plus `+$1` per different Central Market die color you own (`Red`, `Blue`, `Green`, `Yellow`; excludes `Purple`; max `+$6`) `[TUNE]`.
+  * *Y3 — Proprietary Training (`$5`):* Gain `+1 Corporate Secret`, plus `+$1` per **Gray Legacy** die you own.
 
 ### C. Sample SETEC Version Cards & Per-Version Corruption Tracks `[TUNE]`
 
@@ -92,11 +92,11 @@ Each player is a specialist **White Hat Operative**. Your White Hat Dossier defi
 
 | White Hat Code | Operative Name | Role | Signature Protocol | Timing Window | Description | Flavor Quote |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **OPERATOR** | **The Operator** | Tactical Staffing & Logistics Lead | *Logistics Bounty* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain **`+1 🔬` Research Token** `[TUNE]`. | *"Dedicated telemetry pipelines harvest live operational diagnostics on zero notice."* |
-| **PHREAKER** | **The Phreaker** | Hardware Intrusion Specialist | *Jumper Diagnostics* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, move **1 die** from your **Processing Box** to your **Scanned Box**, banking its Secret now. If your Processing Box is empty, roll **1 Scanned Box die** and collect its `$` / `🔬` output (die remains in place); if Under Development is empty, collect **`+$1 cash`**. | *"Raw voltage pulses extract signal from dormant silicon."* |
-| **ACOUSTIC** | **The Acoustic** | Side-Channel Cryptanalyst | *Resonance Sensor* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain **`+$1 cash`** per distinct cube color present in the Tower Exit Tray this round (`Red`, `Blue`, `Green`, `Black`; up to **`+$4`** max). | *"Harmonic resonance frequencies decode physical chassis vibrations."* |
-| **SPOOK** | **The Spook** | Covert Intelligence Specialist | *Burn Notice* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain an immediate **`+$2` cash payout**; in addition, you may optionally **permanently return 1 owned colored module die to the market** to gain **`+1 Corporate Secret`**. | *"Scorched-earth protocols ensure zero forensic recovery."* |
-| **PRODIGY** | **The Prodigy** | Autonomous Exploit Hacker | *Arbitrary Code Execution* | Phase 1: Step 3 Rerolls | When Face 6 (`Purple ★`) is rolled, turn **1 other rolled die** in your active pool to **any legal non-Star face of that die's color** other than the Secret face. | *"Payload injection executes before memory boundaries establish."* |
+| **OPERATOR** | **The Operator** | Tactical Staffing & Logistics Lead | *Logistics Bounty* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain **`+1 🔬` Research Token** per die currently in your **Scanned Box**. | *"Dedicated telemetry pipelines harvest live operational diagnostics on zero notice."* |
+| **PHREAKER** | **The Phreaker** | Hardware Intrusion Specialist | *Jumper Diagnostics* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain **`+$1` cash** AND **`+1` Release Bandwidth** this round (applies in Phase 6 Step 3). | *"Raw voltage pulses extract signal from dormant silicon."* |
+| **ACOUSTIC** | **The Acoustic** | Side-Channel Cryptanalyst | *Resonance Sensor* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain **`+$1` cash** per unique colored cube that exited the Cube Tower this round (including **Operative Signature Cubes**), up to **`+$5`** max. | *"Harmonic resonance frequencies decode physical chassis vibrations."* |
+| **SPOOK** | **The Spook** | Covert Intelligence Specialist | *Burn Notice* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain an immediate **`+$2` cash payout**; in addition, you may optionally **permanently return `1` owned Gray Legacy die to the box** to gain **`+$3` cash**. | *"Scorched-earth protocols ensure zero forensic recovery."* |
+| **PRODIGY** | **The Prodigy** | Autonomous Exploit Hacker | *Arbitrary Code Execution* | Phase 1: Step 4 (Post-Rerolls) | After all rerolls are finished (before assigning dice to In Production), turn **`1` other rolled die** in your active pool to **any legal non-Star face of that die's color** other than the Secret face. | *"Payload injection executes before memory boundaries establish."* |
 | **CIPHER** | **The Cipher** | Distributed Ledger Architect | *Algorithmic Parity* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain an additional **`+$2` cash income** AND **`+1 🔬` Research Token**. | *"Parity calculations balance zero-knowledge proofs flawlessly."* |
 
 #### 3. Canonical Pairings & 36-Combination Synergy Setup

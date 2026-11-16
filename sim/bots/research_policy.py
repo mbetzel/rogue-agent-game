@@ -113,7 +113,20 @@ def _plan_research_share_regain(policy: ResearchPolicy, player: PlayerState, sta
     if getattr(config, "share_regain_currency", "RESEARCH") == "MONEY":
         upgrades: List[str] = []
         max_ups = getattr(config, "max_hardware_upgrades_per_turn", 2)
-        for t in _want_list(policy, lv):
+        want_order = _want_list(policy, lv)
+        if getattr(config, "triage_l4_free_die_replacement", False) and lv["TRIAGE"] < 2:
+            triage_steps = ["TRIAGE"] * (2 - lv["TRIAGE"])
+            want_order = triage_steps + [t for t in want_order if t != "TRIAGE" or lv["TRIAGE"] >= 2]
+        if int(getattr(config, "pr_l4_instant_market_share", 0)) > 0 and lv["PATENT"] == 3:
+            rivals = [
+                int(p.market_share)
+                for p in getattr(state, "players", [])
+                if not p.is_patient_zero and p.player_id != player.player_id and p.market_share is not None
+            ]
+            max_rival = max(rivals) if rivals else share
+            if share <= 6 or share < max_rival:
+                want_order = ["PATENT"] + [t for t in want_order if t != "PATENT"]
+        for t in want_order:
             if len(upgrades) >= max_ups:
                 break
             if sim_lv[t] >= 4:
