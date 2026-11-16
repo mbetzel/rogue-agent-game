@@ -871,6 +871,74 @@ class BaseBot:
                 break
         return BreakthroughChoice(accept=True, gray_die_id=options.gray_die_ids[0], color=color)
 
+    def choose_triage_l4_upgrade(
+        self,
+        player_state: PlayerState,
+        game_state: GameState,
+        options: Any,
+    ) -> Any:
+        """Selects 1 Gray die to retire and 1 Central Market colored die to acquire for free ($0)."""
+        from sim.engine.research_tracks import TRIAGE_L3_COLOR_FALLBACK, BreakthroughChoice
+
+        if options is None or not getattr(options, "gray_die_ids", None) or not getattr(options, "colors", None):
+            return BreakthroughChoice(accept=False)
+        color = None
+        for c in tuple(self.market_color_preference) + TRIAGE_L3_COLOR_FALLBACK:
+            if c in options.colors:
+                color = c
+                break
+        return BreakthroughChoice(accept=True, gray_die_id=options.gray_die_ids[0], color=color)
+
+    def choose_release_l4_gray_face(
+        self,
+        player_state: PlayerState,
+        active_dice: List[Die],
+        game_state: Optional[GameState],
+    ) -> Optional[Tuple[int, Face]]:
+        """Selects 1 rolled Gray Legacy die to set to any printed face (v0.44.0 Release L4 Capstone)."""
+        gray_indices = [i for i, d in enumerate(active_dice) if d.color == DieColor.GRAY]
+        if not gray_indices:
+            return None
+
+        incoming_threat = 0
+        if game_state is not None:
+            sc = getattr(game_state, "staging_cup", None)
+            if isinstance(sc, dict):
+                incoming_threat += sum(int(v) for v in sc.values())
+            elif sc is not None:
+                incoming_threat += len(sc)
+            tower = getattr(game_state, "tower", None)
+            stuck = getattr(tower, "stuck_cubes", None) if tower is not None else None
+            if isinstance(stuck, dict):
+                incoming_threat += sum(int(v) for v in stuck.values())
+
+        effective_cap = max(
+            0,
+            int(getattr(player_state, "defense_capacity", 0))
+            - int(getattr(player_state, "glitched_shield_slots", 0)),
+        )
+        committed_shields = sum(
+            1 for d in active_dice
+            if d.current_face is not None and d.current_face.block_amount > 0
+        )
+
+        if committed_shields < effective_cap and incoming_threat > committed_shields:
+            for idx in gray_indices:
+                f = active_dice[idx].current_face
+                if f is None or f.block_amount == 0:
+                    return (idx, Face(name="Block 1 Any", block_amount=1, shield_color=ShieldColor.ANY))
+
+        dual_face = Face(name="+$1 & +1 🔬", money=1, patches=1)
+        for idx in gray_indices:
+            f = active_dice[idx].current_face
+            if f is None or (f.is_choice or (f.block_amount > 0 and committed_shields > effective_cap)):
+                return (idx, dual_face)
+        for idx in gray_indices:
+            f = active_dice[idx].current_face
+            if f != dual_face:
+                return (idx, dual_face)
+        return None
+
     def choose_aegis_override_market_share(
         self,
         player_state: PlayerState,

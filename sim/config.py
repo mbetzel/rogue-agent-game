@@ -22,6 +22,7 @@ V038_PR_REGAIN_COST = 3  # [TUNE] OQ-9 follow-up: 3 research per +1 Market Share
 
 # --- v0.40.0 candidate constants (FINDINGS §50, spec v400) ---
 V040_TRIAGE_CAPACITY = (1, 1, 1, 1, 2)         # Levels 0..4 Triage Bandwidth
+V044_TRIAGE_CAPACITY: Tuple[int, ...] = (1, 1, 2, 2, 2)  # v0.44.0 Option B Triage Bandwidth (Levels 0..4)
 V040_TRACK_STEP_COSTS = (1, 2, 2, 3)          # (1, 2, 2, 3) 🔬 (8 🔬 total per track)
 V040_SHARE_REGAIN_CAP = {0: 1, 1: 1, 2: 2, 3: 2, 4: 3}
 V040_SHARE_REGAIN_COST_MONEY = {0: 3, 1: 3, 2: 3, 3: 3, 4: 3}
@@ -379,7 +380,12 @@ class GameConfig:
     defense_l4_cash_per_block: int = 1  # [TUNE]
     defense_l4_cash_cap: int = 3  # [TUNE]
     triage_l4_free_moves: int = 2
+    triage_l4_free_die_replacement: bool = False  # v0.44.0: Gray -> Market colored die at $0
+    triage_l3_breakthrough: str = "UPGRADE"  # v0.44.0: "SECRET" (Option B) vs legacy "UPGRADE"
     release_l4_extra_rerolls: int = 1
+    release_l4_set_gray_face: bool = False  # v0.44.0: Permits setting 1 rolled Gray die to any printed face
+    pr_l3_purple_to_scanned: bool = False  # v0.44.0: Routes 2nd Purple die to Scanned Box
+    pr_l4_instant_market_share: int = 0  # v0.44.0: One-time Market Share grant on reaching PR L4
     # Lever sub-flags: None resolves once in __post_init__ from research_track_model.
     gray_face_profile: Optional[str] = None  # "V035_D1" | "V034"
     purple_purchasable: Optional[bool] = None
@@ -931,6 +937,42 @@ class GameConfig:
         overrides.setdefault("bot_pr_push", True)
         overrides.setdefault("bot_pr_push_params", PrPushParams())
         return cls.v043(**overrides)
+
+    @classmethod
+    def v044(cls, **overrides) -> "GameConfig":
+        """v0.44.0 canonical baseline:
+        - Inherits v043 (Dominant Color Signature Attacks, Target Lock, Critical Breach).
+        - Defense Grid L4: naturally capped at $4 cash per Phase 4 (drop $3 cap).
+        - Triage Track Option B: L1 Gray die, L2 Bandwidth 2, L3 +1 Secret, L4 Free Market die replacement.
+        - Release Track L4: retains 2 base rerolls; L4 grants Bandwidth 6 + set 1 rolled Gray die to any face.
+        - Public Relations Track: L3 Purple die to Scanned Box; L4 grants +2 Market Share immediately (clamped at 20).
+        - Purged dead +1 🔬 Conveyor Triage text; fixed $3 PR regain cash typo.
+        """
+        for k, v in (
+            ("defense_l4_cash_cap", 4),
+            ("triage_l4_free_die_replacement", True),
+            ("triage_l3_breakthrough", "SECRET"),
+            ("triage_l2_milestone_secrets", 0),
+            ("release_l4_extra_rerolls", 0),
+            ("release_l4_set_gray_face", True),
+            ("pr_l3_purple_to_scanned", True),
+            ("pr_l4_instant_market_share", 2),
+        ):
+            overrides.setdefault(k, v)
+
+        # Configure track capacity override for TRIAGE: (1, 1, 2, 2, 2)
+        capacities = dict(cls().track_capacity_by_level)
+        capacities["TRIAGE"] = V044_TRIAGE_CAPACITY
+        overrides.setdefault("track_capacity_by_level", capacities)
+
+        return cls.v043(**overrides)
+
+    @classmethod
+    def v044_roster(cls, **overrides) -> "GameConfig":
+        """v0.44.0 + bot autonomous PR push and cash allocation policies enabled."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v044(**overrides)
     def _validate_tower_config(self) -> None:
         """Validates Cube Tower physics parameters (spec §2.4)."""
         self.tower_mode = TowerMode(self.tower_mode)

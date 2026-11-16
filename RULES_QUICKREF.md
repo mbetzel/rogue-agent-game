@@ -1,4 +1,4 @@
-# Too Many Secrets — Quick Reference Rules (v0.43.0)
+# Too Many Secrets — Quick Reference Rules (v0.44.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Format:** Simultaneous / Turn-Based Hybrid
 
@@ -74,7 +74,7 @@ Each round consists of **6 Phases**:
    * If SETEC's corruption track filled last round, switch to the new version now: discard any unspent override from the previous version, unlock the new version override, and advance the marker.
    * Add **1 Black Cube** from the supply into the **Staging Cup**.
 2. **Roll Active Pool:** Roll all dice in your **Ready for Release Zone**.
-3. **Rerolls:** Up to **2 free rerolls** of any subset of dice (3 rolls total; **+1 extra reroll** at Release Track Level 4).
+3. **Rerolls:** Up to **2 free rerolls** of any subset of dice (3 rolls total). *(At **Release Track Level 4**, after rerolls and Prodigy/Helix overrides, you may set `1` rolled Gray Legacy die to any printed face.)*
 4. **Deploy Dice:**
    * **Secret Faces (Face 5 on Red, Blue, Green, Purple):** Move **immediately to the Processing Box** in Under Development (banks secrets later upon exit).
    * **Clean Glitches:** 
@@ -125,7 +125,7 @@ Calculate total attack cubes in the tray: **Red**, **Blue**, and **Green**. Each
   * **Blue (Spyware):** Lose **`1` Corporate Secret** per unblocked Blue cube during **`v1.0` / `v2.0`**; lose **`2` Corporate Secrets** per unblocked Blue cube during **`v3.0`** (Critical Breach).
   * **Green (Malware):** Turn **`1` Shield Slot** into a **Glitched Shield Slot** per unblocked Green cube (capped at your Defense Capacity).
 * **Post-Damage & Target Lock Signature Attacks:**
-  * **Defense Grid Level 4:** Gain **`+$1` per Attack Cube blocked** this phase (max `$3`).
+  * **Defense Grid Level 4:** Gain **`+$1` per Attack Cube blocked** this phase (naturally capped at `$4`).
   * **Target Lock Signature Attack (Dominant Tray Color, Tie Priority `Green > Black > Blue > Red`):** If your Signature Cube exited in Phase 2, resolve the Signature Attack matching the most populous cube color in the tray (fizzles if `0` cubes exited):
     * **Green:** Place a green cube from the supply on the next space of **`2` Research Tracks** without green cubes (**`2× 🔬` cost** to advance into; unplaceable cubes glitch `1` shield slot each).
     * **Black:** Mark your **Institutional Override** as **`Used`** for this Version; if already used, lose **`2` Corporate Secrets**.
@@ -161,13 +161,12 @@ Starting with the First Player, each player takes their Operations Turn:
 
 1. **Production Return:** Move all dice from **In Production** (Income and Shields) to your **Scanned Box**.
 2. **Scanned Graduation (Hardware Throughput):** Move up to **Release Bandwidth** dice of your choice (`4` baseline, upgradable to `5` and `6`) from **Scanned Box $\to$ Ready for Release**.
-3. **Conveyor Triage (Hardware Throughput):** Move up to **Triage Bandwidth** dice (`1` baseline, `2` at Level 4) from **Processing Box $\to$ Scanned Box**, **oldest first** (FIFO order):
+3. **Conveyor Triage (Hardware Throughput):** Move up to **Triage Bandwidth** dice (`1` at L0–L1, `2` at L2+) from **Processing Box $\to$ Scanned Box**, **oldest first** (FIFO order):
    * Each die **banks its Secret** upon leaving Processing:
      * **Red:** `+2 Secrets`
      * **Blue:** `+2 Secrets` (`+3` if Defense Grid $\ge$ Level 3)
      * **Green:** `+2 Secrets` and clean `1` Glitched Shield Slot
      * **Purple:** `+1 Secret`
-   * *Triage Level 4:* Gain `+1 🔬` for each die moved beyond the 2nd.
    * **Queue Signature Cube:** When banking at least 1 Secret, if your **Operative Signature Cube** is on your mat, move it to the **Staging Cup** for next round's compile.
 4. **Market Leader Bonus Check:** If any player banked a **Red Secret** this round (Phase 3 or 6), award the **Market Leader Bonus** by current Market Share:
    * **1st Place:** `+3 Secrets`
@@ -182,12 +181,12 @@ Starting with the First Player, each player takes their Operations Turn:
 
 | Track | Level 0 | Level 1 (`1 🔬`) | Level 2 (`2 🔬`) | Level 3 (`2 🔬`) | Level 4 (`3 🔬`) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Defense Grid** | Cap: 2 shields | **★ Gain 1 Gray Die** | Cap: 3 shields | **★ Gain 1 Secret** | Cap: 4 shields + `$1`/blocked cube (max `$3`) |
-| **Triage** | Bandwidth: 1 die | **★ Gain 1 Gray Die** | Bandwidth: 1 + **★ Gain 1 Secret** | **★ Pay `$3`:** Swap 1 Gray die for any Central Market colored die | Bandwidth: 2 + `+1 🔬`/die triaged past 2nd |
-| **Release** | Bandwidth: 4 dice | **★ Gain 1 Gray Die** | Bandwidth: 5 dice | **★ Gain 1 Secret** | Bandwidth: 6 dice + 1 extra reroll in Phase 1 |
-| **Public Relations** | Regain up to 1/turn (`$3`/ea) | **★ Gain `+$3` Cash** | Regain up to 2/turn (`$3`/ea) | **★ Gain 2nd Purple Die** (from Reserve) | Regain up to 3/turn (`$3`/ea) |
+| **Defense Grid** | Cap: 2 shields | **★ Gain 1 Gray Die** | Cap: 3 shields | **★ Gain 1 Secret** *(+Blue +1)* | Cap: 4 shields + `$1`/blocked cube (max `$4`) |
+| **Triage** | Bandwidth: 1 die | **★ Gain 1 Gray Die** | Bandwidth: 2 dice | **★ Gain 1 Secret** | Bandwidth: 2 + **Swap 1 Gray → Colored (`$0`, to Ready)** |
+| **Release** | Bandwidth: 4 dice | **★ Gain 1 Gray Die** | Bandwidth: 5 dice | **★ Gain 1 Secret** | Bandwidth: 6 dice + **Set 1 rolled Gray die to any face** |
+| **Public Relations** | Regain up to 1/turn (`$3`/ea) | **★ Gain `+$3` Cash** | Regain up to 2/turn (`$3`/ea) | **★ 2nd Purple Die (to Scanned)** | Regain up to 3/turn (`$3`/ea) + **`+2` Market Share now** |
 
-*Note: Breakthrough dice gained (Level 1 Gray dice and Level 3 Purple die) go directly into your **Ready for Release Zone**.*
+*Note: Level 1 Gray Legacy dice go directly into **Ready for Release**; Public Relations Level 3's 2nd Purple die goes to the **Scanned Box**.*
 
 ---
 

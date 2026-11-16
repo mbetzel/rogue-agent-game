@@ -121,6 +121,53 @@ def resolve_prodigy_purple_star_override(
     return False
 
 
+def resolve_release_l4_gray_face_override(
+    player: PlayerState,
+    active_dice: List[Die],
+    game_state: Optional[Any] = None,
+    target_idx: Optional[int] = None,
+    target_face: Optional[Face] = None,
+) -> bool:
+    """Release Track L4 Capstone (v0.44.0):
+    Set 1 rolled Gray Legacy die in ``active_dice`` to any printed face of that Gray die.
+    Enforces INV-REL-L4-TARGET-01 and INV-REL-L4-FACES-01.
+    """
+    cfg = getattr(player, "config", None)
+    if cfg is not None and not getattr(cfg, "release_l4_set_gray_face", False):
+        return False
+    if int(getattr(player, "release_level", 0)) < 4:
+        return False
+    gray_indices = [i for i, d in enumerate(active_dice) if d.color == DieColor.GRAY]
+    if not gray_indices:
+        return False
+
+    if target_idx is None or target_face is None:
+        hook = getattr(player.bot, "choose_release_l4_gray_face", None)
+        if hook is None:
+            return False
+        choice = hook(player, active_dice, game_state)
+        if choice is None:
+            return False
+        target_idx, target_face = choice
+
+    if target_idx is None or target_face is None:
+        return False
+    if not (0 <= target_idx < len(active_dice)):
+        return False
+    die = active_dice[target_idx]
+    if die.color != DieColor.GRAY:
+        return False
+    if target_face.is_star or getattr(target_face, "secrets_pending", 0) > 0:
+        return False
+    if target_face not in die.faces:
+        return False
+    die.current_face = target_face
+    die.is_locked = False
+    die.chosen_choice_index = None
+    player.l4_payouts["release_gray_face_sets"] = player.l4_payouts.get("release_gray_face_sets", 0) + 1
+    return True
+
+
 def check_operator_contingent_staffing(
     engine: GameEngine,
     player: PlayerState,
@@ -467,6 +514,9 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
                     active_dice[die_idx].current_face = target_face
                     active_dice[die_idx].is_locked = False
                     active_dice[die_idx].chosen_choice_index = None
+
+        # Tier 3: Release Track L4 Capstone (set 1 rolled Gray Legacy die to any printed face)
+        resolve_release_l4_gray_face_override(player, active_dice, engine.state)
 
         # Final lock evaluation pass
         _evaluate_locks(active_dice)

@@ -3,7 +3,7 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
-- [x] **Rules Draft `v0.43.0`** captured in [RULES.md](./RULES.md)
+- [x] **Rules Draft `v0.44.0`** captured in [RULES.md](./RULES.md)
 - [x] **Multi-Agent SDLC Pipeline** defined in Section 2 below
 - [x] **Phase 60: Late-Game Patient Zero Threat Escalation (`v3.0` Critical Breach)**
   - [x] *Pre-SDLC Game Designer Modeling:* `docs/findings/phase60_v3_critical_breach_analysis.md` (6,000-game sweep across 2P/3P/4P). Modeled double Blue exfiltration damage in `v3.0` (2 Secrets/cube) and `+1 Blue` on Spaces 1 & 3 of `v3.0` cards without touching Red or Green cubes. Early KO (< R7) drift is strictly 0.00%; `v3.0` eliminations surge 14.2x.

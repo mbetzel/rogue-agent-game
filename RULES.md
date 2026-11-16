@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.43.0)
+# Too Many Secrets — Rules Draft (v0.44.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -44,12 +44,12 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
 
     | Track | Level 0 | Level 1 (Breakthrough) | Level 2 | Level 3 (Breakthrough) | Level 4 |
     | :--- | :--- | :--- | :--- | :--- | :--- |
-    | **Defense Grid Track** | Defense Capacity `2` | Gain `1` Gray Legacy die | Capacity `3` | Gain `1` Corporate Secret | Capacity `4` + `+$1` per Attack Cube blocked in Phase 4 (max `$3`) `[TUNE]` |
-    | **Triage Track** | Triage Bandwidth `1` | Gain `1` Gray Legacy die | Bandwidth `1` + Gain `1` Corporate Secret | Pay `$3` `[TUNE]`: replace `1` Gray Legacy die with a Central Market colored die of your choice | Bandwidth `2` + `+1 🔬` per die moved in Conveyor Triage beyond the 2nd |
-    | **Release Track** | Release Bandwidth `4` | Gain `1` Gray Legacy die | Bandwidth `5` | Gain `1` Corporate Secret | Bandwidth `6` + `1` extra free reroll in Phase 1 Step 3 |
-    | **Public Relations Track** | Regain up to `1` Market Share per turn at `$3` cash each `[TUNE]` | Gain `+$3` Liquid Cash | Regain up to `2` per turn `[TUNE]` | Gain your 2nd Purple die (from your Personal Reserve) | Regain up to `3` per turn `[TUNE]` |
+    | **Defense Grid Track** | Defense Capacity `2` | Gain `1` Gray Legacy die | Capacity `3` | Gain `1` Corporate Secret *(+Blue Secret faces yield `+3`)* | Capacity `4` + `+$1` per Attack Cube blocked in Phase 4 `[TUNE]` |
+    | **Triage Track** | Triage Bandwidth `1` | Gain `1` Gray Legacy die | Bandwidth `2` | Gain `1` Corporate Secret | Bandwidth `2` + replace `1` Gray Legacy die with a Central Market colored die (`$0`, to Ready) |
+    | **Release Track** | Release Bandwidth `4` | Gain `1` Gray Legacy die | Bandwidth `5` | Gain `1` Corporate Secret | Bandwidth `6` + set `1` rolled Gray Legacy die to any face in Phase 1 Step 3 |
+    | **Public Relations Track** | Regain up to `1` Market Share per turn at `$3` cash each `[TUNE]` | Gain `+$3` Liquid Cash | Regain up to `2` per turn `[TUNE]` | Gain your 2nd Purple die (from your Personal Reserve, to Scanned) | Regain up to `3` per turn `[TUNE]` + gain `+2` Market Share immediately |
 
-    *(As on the other tracks, a Breakthrough level keeps the value of the level below it: the Public Relations limit is `1` at Levels 0–1, `2` at Levels 2–3 and `3` at Level 4, always at `3 🔬` per `+1` Market Share. See Phase 6.)*
+    *(As on the other tracks, a Breakthrough level keeps the value of the level below it: the Public Relations limit is `1` at Levels 0–1, `2` at Levels 2–3 and `3` at Level 4, always at `$3` Cash per `+1` Market Share. See Phase 5.)*
 
   * **Personal Reserve** (1 outline space on Public Relations Track Level 3 for your 2nd Purple Proprietary Specialist die, unlocked upon reaching Level 3)
   * **Institutional Override Track (`v1.0`, `v2.0`, `v3.0`)**: 3 tracking slots on each Client Company Card (which sits alongside your mat) for once-per-version Client Company powers (DTO *Slush Fund* is once per game)
@@ -70,7 +70,7 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
 |  | LIQUID CASH ($ HOLDER)         |  |                                     |  L1 (1 🔬): ★ Gray die [DIE OUTLINE]   |
 |  | - Start: $6 (Uncapped)         |  |                                     |  L2 (2 🔬): 5 dice                     |
 |  | - Software Market / ★ Actions  |  |                                     |  L3 (2 🔬): ★ 1 Secret                 |
-|  +--------------------------------+  |                                     |  L4 (3 🔬): 6 dice + 1 free reroll    |
+|  +--------------------------------+  |                                     |  L4 (3 🔬): 6 dice + set 1 Gray face   |
 |                                      |                                     |                                       |
 |  +--------------------------------+  |  +-----------------------------------------------------------------------+  |
 |  | RESEARCH TOKENS (🔬 HOLDER)     |  |  | 2. IN PRODUCTION (Deployed Dice)                                      |  |
@@ -82,7 +82,7 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
 |  | PUBLIC RELATIONS TRACK (EXPAND)|  |  |                             |  | L0: Cap 2                        |  |  |
 |  | $3 Cash = +1 Market Share (P5)    |  |  |  |                             |  | L1 (1 🔬): ★ Gray [DIE OUTLINE]  |  |  |
 |  | - L0: Regain up to 1/rnd       |  |  |  |                             |  | L2 (2 🔬): Cap 3                 |  |  |
-|  | - L1: ★ +$3 Liquid Cash        |  |  |  |                             |  | L3 (2 🔬): ★ 1 Secret            |  |  |
+|  | - L1: ★ +$3 Liquid Cash        |  |  |  |                             |  | L3 (2 🔬): ★ 1 Secret (+Blue +1) |  |  |
 |  | - L2: Regain up to 2/rnd       |  |  |  +-----------------------------+  | L4 (3 🔬): Cap 4 + $1/block         |  |  |
 |  | - L3: ★ 2nd Purple Specialist  |  |  +-----------------------------------------------------------------------+  |
 |  |   Die Reserve [DIE OUTLINE]    |  |                                                                             |
@@ -91,8 +91,8 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
 |                                      |  |  +-------------------+  +------------------------------------------+  |  |
 |                                      |  |  | SCANNED BOX       |  | TRIAGE TRACK (Conveyor Bandwidth)        |  |  |
 |                                      |  |  | (Unbounded Tray)  |  | L0: 1 | L1 (1🔬): ★ Gray [DIE OUTLINE]   |  |  |
-|                                      |  |  |                   |  | L2 (2🔬): 1 (★ 1 Secret) | L3 (2🔬): ★ $3 swap        |  |  |
-|                                      |  |  | ^ Graduates to    |  | L4 (3🔬): 2 + 🔬/die >2                  |  |  |
+|                                      |  |  |                   |  | L2 (2🔬): 2 | L3 (2🔬): ★ 1 Secret        |  |  |
+|                                      |  |  | ^ Graduates to    |  | L4 (3🔬): 2 + Swap Gray->Colored ($0)     |  |  |
 |                                      |  |  |   Ready for       |  | PROCESSING BOX (Elongated FIFO Queue)    |  |  |
 |                                      |  |  |   Release (P6)    |  | <-- [OLDEST] <== FIFO FLOW <== [NEWEST]  |  |  |
 |                                      |  |  |                   |  | Bank on Exit: Purple +1, Red/Blue/Grn +2 |  |  |
@@ -176,11 +176,13 @@ Each player’s contracting Client Company provides a powerful Institutional Ove
    * **Pulse:** SETEC compiles new intrusion subroutines in the background. Take **`1 Black Cube`** from the general supply across all versions (`v1.0`, `v2.0`, `v3.0`) and place it into the **Staging Cup** `[TUNE: v0.21.0 9-round pacing clock]`.
 2. **Roll Ready Pool:** Every player simultaneously rolls all dice in their **Ready for Release Zone**. *(Dice in your **Under Development** zone are offline and are not rolled.)*
 3. **Yahtzee Rerolls (Simultaneous Pure Rerolls):**
-   * Each player may perform up to **`2` free rerolls** of any subset of their rolled dice (3 rolls total). At **Release Track Level 4**, you get **`1` extra free reroll** (applied after any effect that reduces your free rerolls).
+   * Each player may perform up to **`2` free rerolls** of any subset of their rolled dice (3 rolls total).
    * Between rerolls, players may set aside (keep) any dice, or pick previously kept dice back up for subsequent rerolls.
    * **Secret Faces:** A **Secret face** (Face 5 on Red, Blue, Green and Purple dice) is a normal face during rerolls: you may keep it or reroll it.
-     * *(Institutional Override Timing: Contracting **Helix Biomedical Consortium** may trigger Brute-Force Bypass here: gain  extra free reroll this phase, and turn 1 rolled die to any legal non-Star face of its color, including the Secret face).*
-     * *(Signature Protocol Timing: Rolling Face 6  triggers **The Prodigy's** Arbitrary Code Execution to turn 1 other rolled die to any legal non-Star face of its color other than the Secret face).*
+   * **Post-Reroll Die-Face Overrides (in strict order):**
+     1. *(Signature Protocol Timing: Rolling Face 6 triggers **The Prodigy's** Arbitrary Code Execution to turn `1` other rolled die to any legal non-Star face of its color other than the Secret face).*
+     2. *(Institutional Override Timing: Contracting **Helix Biomedical Consortium** may trigger Brute-Force Bypass here: gain `1` extra free reroll this phase, and turn `1` rolled die to any legal non-Star face of its color, including the Secret face).*
+     3. **Release Track Level 4:** After any rerolls and overrides above, if you have at least `1` rolled **Gray Legacy die**, you may set `1` rolled Gray Legacy die to any printed face of its die (`Block 1 Any`, `+$1 & +1 🔬`, `+$1 / +1 🔬`, or `+1 🔬`). If you rolled `0` Gray Legacy dice, this effect does not apply this round.
 4. **Assign Dice to In Production (Simultaneous):**
    * After all rerolls are finished, resolve all rolled dice:
      * **Secret Faces $	o$ Processing Box:** Any die showing a **Secret face** moves **immediately** to the **Processing Box** in your **Under Development** pipeline and produces no other output. It banks its Secret when it leaves the Processing Box (see Phase 6 and *Secret Face Yields* below).
@@ -264,7 +266,7 @@ Each surviving player simultaneously resolves all three colors against their com
    * **Green (Malware / Logic Bombs):** For each unblocked Green cube, turn **`1` of your shield slots** into a **Glitched Shield Slot**. No die moves. You cannot have more Glitched Shield Slots than your Defense Grid Capacity; excess unblocked Green has no effect. Glitched Shield Slots stay glitched until cleaned (Phase 1 Step 5, Phase 5 Step 3); a new slot gained from the Defense Grid Track arrives clean.
    * **Damage-Conditional `★` Outputs:** *B1 Honeypot Telemetry* bonuses are evaluated now, **only for dice still In Production** (a die returned in Phase 2, or removed in Phase 3, does not pay).
    * **Patient Zero Check:** If your Corporate Secrets reach **`0` (or below)**, you suffer a **Total Data Breach** and become **Patient Zero**.
-   * **Defense Grid Level 4:** After your damage has resolved, gain **`+$1` per Attack Cube** (`Red`, `Blue`, or `Green`) your shields blocked this phase (max **`$3`**) `[TUNE]`. Cubes ignored by *Baffle Echo* were not blocked and do not count. Blocked Red cubes count.
+   * **Defense Grid Level 4:** After your damage has resolved, gain **`+$1` per Attack Cube** (`Red`, `Blue`, or `Green`) your shields blocked this phase (naturally capped at `$4` by Defense Capacity `4`) `[TUNE]`. Cubes ignored by *Baffle Echo* were not blocked and do not count. Blocked Red cubes count.
 3. **Snowball Recycle:** Place **all exited Red, Blue, and Green cubes** from the tray back into the **Staging Cup** for next round.
 4. **Compile Buffer Overflow:** If the tray was empty in Phase 2, no damage resolves this phase (no Baffle Echo, damage-conditional `★` bonuses, or Defense Grid Level 4 cash); the End Game Trigger Check (including **Market Collapse**, since *Customer Poaching* may have lowered Market Share in Phase 3) still occurs.
 
@@ -293,9 +295,10 @@ Surviving White Hat Operatives take clockwise **Operations Turns** starting with
 1. **Terminal Hardware Track Upgrades (Limit `2` upgrades per turn `[TUNE]`):**
    * Spend Research Tokens (`🔬`) to raise any of your 4 tracks one level at a time: **`1 🔬`** to reach Level 1, **`2 🔬`** for Level 2, **`2 🔬`** for Level 3, **`3 🔬`** for Level 4 `[TUNE]` (no discounts; limit 2 hardware upgrades per turn `[TUNE]`, across all tracks combined). If the space you are advancing into holds a green cube (from a **Green Signature Attack**), that step costs **double Research (`2× 🔬`: `2 / 4 / 4 / 6 🔬`)** and clears the green cube back to the general supply. See the track table in Section 2.
    * **Breakthroughs (Levels 1 and 3):** When a track reaches Level 1 or Level 3, its **Breakthrough** resolves **immediately**, before your next operation. If you execute 2 upgrades in one turn, resolve them one level at a time, in the order you buy them (e.g. `$3` from the Public Relations Level 1 Breakthrough can pay for a Triage Level 3 Breakthrough bought afterwards, or fund dice purchases in the same turn). Each Breakthrough happens only once, the first time you reach that level.
-     * New dice from a Breakthrough (Gray Legacy, Central Market colored or Purple) go to your **Ready for Release Zone** and do not use Release Bandwidth.
-     * **Triage Level 3 Breakthrough (optional):** Pay **`$3`** `[TUNE]` to return `1` Gray Legacy die you own (from your Ready for Release Zone, Scanned Box or Processing Box) to the box and take `1` die of any Central Market color with stock left (it uses that color's active Variant Card). The new die goes to your Ready for Release Zone. The `$3` is flat (not the Variant Card price), is not a purchase (it does not count toward your dice purchase limit), and cannot be discounted by *Algorithmic Arbitrage*. If you can't pay, own no Gray Legacy die, or every Central Market stack is empty, or you decline, the Breakthrough is lost (it cannot be claimed later).
-     * **Public Relations Level 3 Breakthrough:** Move the Purple die from your Personal Reserve to your Ready for Release Zone.
+     * **Breakthrough Gray Legacy dice** (Defense Grid, Triage, and Release Level 1) go to your **Ready for Release Zone** and do not use Release Bandwidth.
+     * **Public Relations Level 3 Breakthrough:** Move the 2nd Purple die from your Personal Reserve to your **Scanned Box** (it graduates via Release Bandwidth in Phase 6).
+     * **Triage Level 4 Capstone (optional):** Return `1` Gray Legacy die you own (from your Ready for Release Zone, Scanned Box, or Processing Box) to the box for **`$0` (free)** and take `1` die of any Central Market color with stock left (it uses that color's active Variant Card). The new die goes to your **Ready for Release Zone**. This is not a purchase (it does not count toward your dice purchase limit). If you own no Gray Legacy die, every Central Market stack is empty, or you decline, the replacement is forfeited.
+     * **Public Relations Level 4 Capstone:** Immediately gain **`+2` Market Share** (clamped at the track maximum of `20`, without paying cash or consuming your per-turn regain limit).
    * Defense Capacity applies from next round's Phase 1; Triage and Release Bandwidth apply immediately in Phase 6 of the same round; Level 4 effects apply from the next phase in which they are used.
 2. **Regain Market Share (Public Relations Track):**
    * Spend **`$3` Cash** `[TUNE]` for each **`+1` Market Share**, up to your current Public Relations limit this turn: **`1`** at Levels 0–1, **`2`** at Levels 2–3, **`3`** at Level 4 `[TUNE]`. A level bought earlier in the same turn applies to later regains. Market Share regain is an operational resource conversion, not a hardware track upgrade, and does not count toward or consume your limit of 2 hardware upgrades per turn.
@@ -320,7 +323,7 @@ All surviving players simultaneously update their terminal pipeline in this orde
 1. **Magnetic Splice:** *(Institutional Override Timing: Contracting **Omnidyne Systems** may trigger Magnetic Splice here to move 1 die of your choice from your Processing Box directly to Ready for Release for free; it banks its Secret now).*
 2. **Production Return:** Move **all surviving dice** from **In Production** (Income and Shields) to your **Scanned Box**.
 3. **Scanned Graduation (Hardware Throughput Limit):** Move up to **`release_bandwidth` dice of your choice** (`4` baseline, upgradable to `5` and `6`) from the **Scanned Box** to your **Ready for Release Zone**. You may graduate fewer. Any remaining dice stay in the Scanned Box.
-4. **Conveyor Triage (Hardware Throughput Limit):** Move up to **`triage_bandwidth` dice** (`1` baseline across Levels 0–3, upgradable to `2` at Level 4 Capstone) from the **Processing Box** into the **Scanned Box**, **oldest first**: dice leave in the order they entered the Processing Box (any color; dice that entered together leave in roll order). You do not choose. Each die banks its Secret as it moves (see *Secret Face Yields*). When a **Green** die leaves the Processing Box and banks its Secret, it cleans `1` of your **Glitched Shield Slots**. *(Dice triaged now enter Scanned and may graduate in a subsequent round's Phase 6.)* At **Triage Track Level 4**, gain **`+1 🔬`** for each die you move beyond the 2nd (up to `+2 🔬` at Bandwidth `4`).
+4. **Conveyor Triage (Hardware Throughput Limit):** Move up to **`triage_bandwidth` dice** (`1` baseline at Levels 0–1, upgradable to `2` at Level 2+) from the **Processing Box** into the **Scanned Box**, **oldest first**: dice leave in the order they entered the Processing Box (any color; dice that entered together leave in roll order). You do not choose. Each die banks its Secret as it moves (see *Secret Face Yields*). When a **Green** die leaves the Processing Box and banks its Secret, it cleans `1` of your **Glitched Shield Slots**. *(Dice triaged now enter Scanned and may graduate in a subsequent round's Phase 6.)*
    * **Hardware Throughput Limits:** Throughput is strictly governed by your Triage and Release hardware bandwidths; excess dice remain in the Processing Box (keeping their Secret for a later round), and excess scanned dice remain in the Scanned Box.
    * **Operative Signature Cube Staging:** When at least `1` die moves from your Processing Box to your Scanned Box and banks its Secret: if your **Operative Signature Cube** is currently resting on your Company Terminal Mat, move it to the **Staging Cup** to be compiled in next round's Phase 2 drop (`INV-TL-03`). Triaging multiple dice in the same turn moves the cube once. If your Signature Cube is already in the Staging Cup or trapped on the internal baffles inside the Cube Tower, banking additional secrets does not add another cube (exactly 1 Signature Cube per player exists).
 5. **Market Leader Bonus (end of Phase 6):** If at least `1` Secret face on a **Red** die was banked this round (by any player, in Phase 3 or Phase 6 Conveyor Triage), award the **Market Leader Bonus** once evaluating final Market Share positions from Phase 5 (see below). Several Red Secret faces in one round still give one award.

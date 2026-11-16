@@ -249,8 +249,13 @@ class PlayerState:
         self.l4_payouts: Dict[str, int] = {
             "defense_cash": 0, "triage_research": 0, "release_rerolls_used": 0, "patent_secrets": 0,
         }
+        if getattr(config, "release_l4_set_gray_face", False):
+            self.l4_payouts["release_gray_face_sets"] = 0
+        if int(getattr(config, "pr_l4_instant_market_share", 0) or 0) > 0:
+            self.l4_payouts["pr_instant_market_share"] = 0
         self.slush_fund_used_game = False
         self.triage_l3_upgrade_color: Optional[str] = None
+        self.triage_l4_upgrade_color: Optional[str] = None
         self.excess_hardware_upgrades_requested = 0
         # v0.36.0 Market Share (None under RedMode.RANSOM; initialised by GameEngine under MARKET_SHARE)
         self.market_share: Optional[int] = None
@@ -509,6 +514,8 @@ class PlayerState:
             self.market_share_gained_face += actual
         elif source == "corruption":
             self.market_share_lost_red += -actual
+        elif source == "pr_l4":
+            self.l4_payouts["pr_instant_market_share"] = self.l4_payouts.get("pr_instant_market_share", 0) + actual
         else:
             raise ValueError(f"unknown Market Share source {source!r}")
         if self.market_share_min is None or after < self.market_share_min:

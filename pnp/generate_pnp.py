@@ -1,4 +1,4 @@
-"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.43.0 Baseline).
+"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.44.0 Baseline).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
   - 01_Player_Boards.pdf (6 pages — 4x Company Terminal Mats with CI/CD Pipeline loop + 6x Client Company Cards sheet + 6x White Hat Dossier Cards sheet)
@@ -19,7 +19,7 @@ from pnp.pdf_engine import PALETTE, Color, PDFDocument, PDFPage, measure_text
 
 
 # =============================================================================
-# Canonical Game Data (Synchronized 1:1 with RULES.md v0.43.0 Baseline & sim/entities.py)
+# Canonical Game Data (Synchronized 1:1 with RULES.md v0.44.0 Baseline & sim/entities.py)
 # =============================================================================
 
 @dataclass(frozen=True)
@@ -663,7 +663,7 @@ def _draw_white_hat_card(page: PDFPage, x: float, y: float, w: float, h: float, 
     )
 
 
-TRACK_STEP_COSTS = (None, 1, 2, 2, 3)  # {RESEARCH} to reach L1..L4 (RULES.md v0.43.0 baseline)
+TRACK_STEP_COSTS = (None, 1, 2, 2, 3)  # {RESEARCH} to reach L1..L4 (RULES.md v0.44.0 baseline)
 
 
 def _draw_track_cells(page: PDFPage, cells: Sequence[Tuple[float, float, float, float]],
@@ -747,30 +747,30 @@ DEFENSE_LEVELS = [
     ("Cap 2", "Block 1 Any shields only"),
     ("Cap 2", "+1 Gray Legacy die -> Ready"),
     ("Cap 3", ""),
-    ("Cap 3", "+1 {SECRET} Corporate Secret"),
-    ("Cap 4", "+$1 per Attack Cube blocked in P4 (max $3), after damage"),
+    ("Cap 3", "+1 {SECRET} Corporate Secret; Blue Secret +1"),
+    ("Cap 4", "+$1 per Attack Cube blocked in P4, after damage"),
 ]
 TRIAGE_LEVELS = [
     ("1 die", ""),
     ("1 die", "+1 Gray Legacy die -> Ready"),
-    ("1 die", "+1 {SECRET} Corporate Secret"),
-    ("1 die", "Pay $3: swap 1 Gray for 1 Market colored die"),
     ("2 dice", ""),
+    ("2 dice", "+1 {SECRET} Corporate Secret"),
+    ("2 dice", "Replace 1 Gray -> Colored ($0, to Ready)"),
 ]
 RELEASE_LEVELS = [
     ("4 dice", ""),
     ("4 dice", "+1 Gray Legacy die -> Ready"),
     ("5 dice", ""),
     ("5 dice", "+1 {SECRET} Corporate Secret"),
-    ("6 dice", "+1 free reroll in P1 Step 4"),
+    ("6 dice", "Set 1 rolled Gray die to any face (P1 Step 3)"),
 ]
-PR_REGAIN_COST_MONEY = 3  # $ Cash per +1 Market Share (RULES.md v0.43.0 baseline)
+PR_REGAIN_COST_MONEY = 3  # $ Cash per +1 Market Share (RULES.md v0.44.0 baseline)
 PUBLIC_RELATIONS_LEVELS = [
     ("Regain up to 1/turn", ""),
     ("Regain up to 1/turn", "+$3"),
     ("Regain up to 2/turn", ""),
-    ("Regain up to 2/turn", "+2nd Purple die (Reserve)"),
-    ("Regain up to 3/turn", ""),
+    ("Regain up to 2/turn", "+2nd Purple die (to Scanned)"),
+    ("Regain up to 3/turn", "+2 Market Share now"),
 ]
 
 # Market Share track (RULES.md v0.38e): start = 13 (2P) / 16 (3-4P); max = 20; 0 = Market Collapse;
@@ -928,12 +928,12 @@ def _draw_public_relations_area(
             # Left of die box
             page.rich_line(bx, ry + 14.0, "**Regain up to 2 Market Share / turn**", size=5.6, color=PALETTE["ink"])
             page.rich_line(bx, ry + 25.5, "★ **BREAKTHROUGH: 2ND PURPLE SPECIALIST DIE**", size=5.4, color=PALETTE["purple"])
-            page.text(bx, ry + 37.0, "Moves from Personal Reserve -> Ready for Release", font="italic", size=4.6, color=PALETTE["ink_soft"])
+            page.text(bx, ry + 37.0, "Moves from Personal Reserve -> Scanned Box", font="italic", size=4.6, color=PALETTE["ink_soft"])
 
         elif lv == 4:
-            page.rich_line(bx, ry + 15.0, "**Regain up to 3 Market Share / turn**", size=5.8, color=PALETTE["ink"])
+            page.rich_line(bx, ry + 15.0, "**Regain up to 3 Market Share / turn**  |  **+2 Market Share now**", size=5.5, color=PALETTE["ink"])
             page.rich_line(bx, ry + 27.0, f"Cost: **${PR_REGAIN_COST_MONEY} Cash** per +1 Market Share (Phase 5 Operations)", size=4.8, color=PALETTE["ink_soft"])
-            page.text(bx, ry + 38.0, "Maximum media saturation (full damage control blitz)", font="italic", size=4.5, color=PALETTE["muted"])
+            page.text(bx, ry + 38.0, "Immediate +2 Market Share on reaching L4; maximum media saturation", font="italic", size=4.5, color=PALETTE["muted"])
 
     # Bottom setup note
     page.rich_line(
@@ -952,7 +952,7 @@ def render_player_board(
     draw_board_outer_frame(
         page,
         left_tag=f"TOO MANY SECRETS // COMPANY TERMINAL MAT [TERM-0{idx}/4]",
-        right_tag="PNP PROTOTYPE v0.43.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.44.0 // US LETTER",
     )
 
     # -------------------------------------------------------------------------
@@ -1217,7 +1217,7 @@ def render_company_cards_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x CLIENT COMPANY CARDS [PAGE 5/6]",
-        right_tag="PNP PROTOTYPE v0.43.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.44.0 // US LETTER",
     )
 
     page.text(
@@ -1266,7 +1266,7 @@ def render_white_hat_dossiers_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x WHITE HAT DOSSIER CARDS [PAGE 6/6]",
-        right_tag="PNP PROTOTYPE v0.43.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.44.0 // US LETTER",
     )
 
     page.text(
@@ -1303,7 +1303,7 @@ def render_white_hat_dossiers_page(page: PDFPage) -> None:
 
     wh_rules_text = (
         "**1. Operative Assignment:** At setup, each player is dealt 1 White Hat Dossier card (or introductory preset). Place the card alongside your Company Terminal Mat.\n"
-        "**2. Personal Reserve (1 Purple Die):** Your 2nd Purple Specialist Die waits on the Public Relations Track Level 3 outline. Purple dice are **not purchasable**: it moves to Ready for Release only when your Public Relations Track reaches **Level 3**. A Purple die lost to an effect is not replaced.\n"
+        "**2. Personal Reserve (1 Purple Die):** Your 2nd Purple Specialist Die waits on the Public Relations Track Level 3 outline. Purple dice are **not purchasable**: it moves to the Scanned Box only when your Public Relations Track reaches **Level 3**. A Purple die lost to an effect is not replaced.\n"
         "**3. Standardized Faces 1-5:** All Purple Specialist dice feature: **Faces 1-2:** `Block 1 Any`, **Face 3:** `+$2`, **Face 4:** `+$1 & +1 {RESEARCH}`, **Face 5:** Secret face (`+1` Secret when it leaves the Processing Box).\n"
         "**4. Face 6 Signature Protocol:** Rolling Face 6 ({PURPLE} {STAR}) triggers the operative's bespoke Signature Protocol. Repeatable: each Purple Star die triggers the protocol once (Phase 3: Income protocols require the die to still be In Production)."
     )
@@ -1318,7 +1318,7 @@ def render_agent_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // CENTRAL ROGUE AGENT & MARKET SHARE BOARD [1/2]",
-        right_tag="PNP PROTOTYPE v0.43.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.44.0 // US LETTER",
     )
 
     # Top Title Bar inside board
@@ -1526,7 +1526,7 @@ def render_market_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // SOFTWARE MODULE MARKET & CENTRAL SUPPLY [2/2]",
-        right_tag="PNP PROTOTYPE v0.43.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.44.0 // US LETTER",
     )
 
     # Top Title Bar
@@ -1669,7 +1669,7 @@ def render_master_dice_reference(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // MASTER DICE PIP & ABILITY VISUAL AID [1/4]",
-        right_tag="PNP PROTOTYPE v0.43.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.44.0 // US LETTER",
     )
 
     page.rect(40.0, 32.0, 712.0, 24.0, stroke=PALETTE["ink"], fill=PALETTE["ink"], line_width=1.0)
@@ -1798,10 +1798,11 @@ def render_master_dice_reference(page: PDFPage) -> None:
         (
             "BREAKTHROUGHS & MILESTONES // TRACKS 1/2/2/3 {RESEARCH}",
             (
-                "- **Defense Grid:** L1 +1 Gray die | L3 +1 Secret.  **Release:** L1 +1 Gray die | L3 +1 Secret.\n"
-                "- **Triage:** L1 +1 Gray die | L2 +1 Secret | L3 pay $3: swap 1 Gray for 1 Market colored die | L4 Bandwidth 2.\n"
-                "- **Public Relations** ($3 Cash per +1 Market Share): L1 +$3 Cash | L3 2nd Purple from Personal Reserve (Purple is never sold).\n"
-                "- Breakthrough dice -> Ready; bought dice -> Scanned. Max 2 hardware upgrades/turn."
+                "- **Defense Grid:** L1 +1 Gray die | L3 +1 Secret (+Blue Secret +1) | L4 Cap 4 + $1/block.\n"
+                "- **Release:** L1 +1 Gray die | L3 +1 Secret | L4 BW 6 + set 1 rolled Gray die to any face.\n"
+                "- **Triage:** L1 +1 Gray die | L2 BW 2 | L3 +1 Secret | L4 BW 2 + Replace 1 Gray -> Colored ($0, to Ready).\n"
+                "- **Public Relations** ($3 Cash per +1 Market Share): L1 +$3 Cash | L3 2nd Purple die (to Scanned) | L4 Regain up to 3/turn + +2 MS now.\n"
+                "- Breakthrough Gray dice -> Ready; PR L3 Purple & bought dice -> Scanned. Max 2 hardware upgrades/turn."
             ),
         ),
     ]
@@ -2295,7 +2296,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated: List[str] = []
 
     # 1. Player Terminal Mats & Split Cards (6 pages: 4x Mats with vertical resource holders, expanded PR & FIFO Processing Box + 1x Company Cards + 1x White Hat Cards)
-    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.43.0)")
+    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.44.0)")
     for idx in range(1, 5):
         p = doc_players.add_page()
         render_player_board(p, idx)
@@ -2337,7 +2338,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated.append(path_versions)
 
     # 5. Combined Master Print-and-Play Pack (All 14 pages)
-    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.43.0)")
+    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.44.0)")
     for sub_doc in (doc_central, doc_players, doc_dice, doc_versions):
         for pg in sub_doc.pages:
             doc_master.pages.append(pg)

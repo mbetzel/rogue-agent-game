@@ -1,0 +1,953 @@
+{
+  "games_per_pod": 1200,
+  "seed_start": 42,
+  "total_games": 7200,
+  "elapsed_sec": 10.4,
+  "results": {
+    "v043": {
+      "4": {
+        "n_games": 1200,
+        "n_seats": 4800,
+        "mean_rounds": 7.43,
+        "median_rounds": 8,
+        "min_rounds": 2,
+        "max_rounds": 12,
+        "wipeout_count": 25,
+        "wipeout_rate": 2.08,
+        "end_reasons": {
+          "market_collapse": {
+            "count": 233,
+            "pct": 19.42
+          },
+          "patient_zero": {
+            "count": 886,
+            "pct": 73.83
+          },
+          "singularity": {
+            "count": 56,
+            "pct": 4.67
+          },
+          "total_wipeout": {
+            "count": 25,
+            "pct": 2.08
+          }
+        },
+        "early_wipeout_seeds": [],
+        "early_wipeout_count": 0,
+        "long_stall_seeds": [],
+        "long_stall_count": 0,
+        "seats_2plus_l4_pct": 0.0,
+        "tracks": {
+          "DEFENSE": {
+            "mean_level": 1.247,
+            "l1_plus_pct": 68.46,
+            "l2_plus_pct": 33.42,
+            "l3_plus_pct": 14.73,
+            "l4_seat_pct": 8.08,
+            "l4_game_pct": 32.33,
+            "l4_seats": 388
+          },
+          "TRIAGE": {
+            "mean_level": 1.721,
+            "l1_plus_pct": 75.48,
+            "l2_plus_pct": 39.42,
+            "l3_plus_pct": 32.79,
+            "l4_seat_pct": 24.4,
+            "l4_game_pct": 74.0,
+            "l4_seats": 1171
+          },
+          "RELEASE": {
+            "mean_level": 1.792,
+            "l1_plus_pct": 63.0,
+            "l2_plus_pct": 46.88,
+            "l3_plus_pct": 36.29,
+            "l4_seat_pct": 33.04,
+            "l4_game_pct": 88.25,
+            "l4_seats": 1586
+          },
+          "PATENT": {
+            "mean_level": 0.613,
+            "l1_plus_pct": 48.17,
+            "l2_plus_pct": 13.1,
+            "l3_plus_pct": 0.0,
+            "l4_seat_pct": 0.0,
+            "l4_game_pct": 0.0,
+            "l4_seats": 0
+          }
+        },
+        "v440_telemetry": {
+          "defense_l4_cash_total": 951,
+          "defense_l4_cash_per_l4_seat": 2.45,
+          "defense_l4_cash_per_seat": 0.198,
+          "release_gray_face_sets_total": 0,
+          "release_gray_face_sets_per_l4_seat": 0.0,
+          "release_gray_face_seats_used": 0,
+          "release_rerolls_used_total": 999,
+          "pr_l4_instant_ms_total": 0,
+          "pr_l4_instant_ms_per_l4_seat": 0.0,
+          "pr_l4_full_2_pct": 0.0,
+          "triage_l4_replacements_taken": 0,
+          "triage_l4_replacement_rate_pct": 0.0,
+          "triage_l4_colors": {},
+          "pr_l3_awarded_count": 0,
+          "pr_l3_graduated_count": 0,
+          "pr_l3_graduation_pct": 0.0
+        },
+        "archetypes": {
+          "AccelerationistBot": {
+            "games": 960,
+            "wins": 196.0,
+            "win_pct": 20.42
+          },
+          "AdaptiveBalancedBot": {
+            "games": 960,
+            "wins": 326.0,
+            "win_pct": 33.96
+          },
+          "RecklessSaboteurBot": {
+            "games": 960,
+            "wins": 91.0,
+            "win_pct": 9.48
+          },
+          "SecOpsTurtleBot": {
+            "games": 960,
+            "wins": 447.0,
+            "win_pct": 46.56
+          },
+          "VentureGreedBot": {
+            "games": 960,
+            "wins": 140.0,
+            "win_pct": 14.58
+          }
+        },
+        "companies": {
+          "AEGIS": {
+            "games": 802,
+            "wins": 227.0,
+            "win_pct": 28.3
+          },
+          "DTO": {
+            "games": 777,
+            "wins": 225.0,
+            "win_pct": 28.96
+          },
+          "HELIX": {
+            "games": 823,
+            "wins": 175.0,
+            "win_pct": 21.26
+          },
+          "MERIDIAN": {
+            "games": 805,
+            "wins": 180.0,
+            "win_pct": 22.36
+          },
+          "OMNIDYNE": {
+            "games": 811,
+            "wins": 253.0,
+            "win_pct": 31.2
+          },
+          "PROMETHEUS": {
+            "games": 782,
+            "wins": 140.0,
+            "win_pct": 17.9
+          }
+        }
+      },
+      "3": {
+        "n_games": 1200,
+        "n_seats": 3600,
+        "mean_rounds": 7.784,
+        "median_rounds": 8,
+        "min_rounds": 2,
+        "max_rounds": 12,
+        "wipeout_count": 52,
+        "wipeout_rate": 4.33,
+        "end_reasons": {
+          "market_collapse": {
+            "count": 268,
+            "pct": 22.33
+          },
+          "patient_zero": {
+            "count": 782,
+            "pct": 65.17
+          },
+          "singularity": {
+            "count": 98,
+            "pct": 8.17
+          },
+          "total_wipeout": {
+            "count": 52,
+            "pct": 4.33
+          }
+        },
+        "early_wipeout_seeds": [
+          279,
+          634,
+          1229
+        ],
+        "early_wipeout_count": 3,
+        "long_stall_seeds": [],
+        "long_stall_count": 0,
+        "seats_2plus_l4_pct": 0.0,
+        "tracks": {
+          "DEFENSE": {
+            "mean_level": 1.243,
+            "l1_plus_pct": 68.81,
+            "l2_plus_pct": 32.78,
+            "l3_plus_pct": 14.28,
+            "l4_seat_pct": 8.44,
+            "l4_game_pct": 25.33,
+            "l4_seats": 304
+          },
+          "TRIAGE": {
+            "mean_level": 1.719,
+            "l1_plus_pct": 75.39,
+            "l2_plus_pct": 39.47,
+            "l3_plus_pct": 32.67,
+            "l4_seat_pct": 24.39,
+            "l4_game_pct": 57.5,
+            "l4_seats": 878
+          },
+          "RELEASE": {
+            "mean_level": 1.816,
+            "l1_plus_pct": 64.5,
+            "l2_plus_pct": 47.25,
+            "l3_plus_pct": 36.72,
+            "l4_seat_pct": 33.14,
+            "l4_game_pct": 70.25,
+            "l4_seats": 1193
+          },
+          "PATENT": {
+            "mean_level": 0.618,
+            "l1_plus_pct": 48.97,
+            "l2_plus_pct": 12.86,
+            "l3_plus_pct": 0.0,
+            "l4_seat_pct": 0.0,
+            "l4_game_pct": 0.0,
+            "l4_seats": 0
+          }
+        },
+        "v440_telemetry": {
+          "defense_l4_cash_total": 861,
+          "defense_l4_cash_per_l4_seat": 2.83,
+          "defense_l4_cash_per_seat": 0.239,
+          "release_gray_face_sets_total": 0,
+          "release_gray_face_sets_per_l4_seat": 0.0,
+          "release_gray_face_seats_used": 0,
+          "release_rerolls_used_total": 756,
+          "pr_l4_instant_ms_total": 0,
+          "pr_l4_instant_ms_per_l4_seat": 0.0,
+          "pr_l4_full_2_pct": 0.0,
+          "triage_l4_replacements_taken": 0,
+          "triage_l4_replacement_rate_pct": 0.0,
+          "triage_l4_colors": {},
+          "pr_l3_awarded_count": 0,
+          "pr_l3_graduated_count": 0,
+          "pr_l3_graduation_pct": 0.0
+        },
+        "archetypes": {
+          "AccelerationistBot": {
+            "games": 720,
+            "wins": 240.0,
+            "win_pct": 33.33
+          },
+          "AdaptiveBalancedBot": {
+            "games": 720,
+            "wins": 286.0,
+            "win_pct": 39.72
+          },
+          "RecklessSaboteurBot": {
+            "games": 720,
+            "wins": 131.0,
+            "win_pct": 18.19
+          },
+          "SecOpsTurtleBot": {
+            "games": 720,
+            "wins": 387.0,
+            "win_pct": 53.75
+          },
+          "VentureGreedBot": {
+            "games": 720,
+            "wins": 156.0,
+            "win_pct": 21.67
+          }
+        },
+        "companies": {
+          "AEGIS": {
+            "games": 590,
+            "wins": 215.0,
+            "win_pct": 36.44
+          },
+          "DTO": {
+            "games": 596,
+            "wins": 232.0,
+            "win_pct": 38.93
+          },
+          "HELIX": {
+            "games": 639,
+            "wins": 190.0,
+            "win_pct": 29.73
+          },
+          "MERIDIAN": {
+            "games": 580,
+            "wins": 170.0,
+            "win_pct": 29.31
+          },
+          "OMNIDYNE": {
+            "games": 606,
+            "wins": 266.0,
+            "win_pct": 43.89
+          },
+          "PROMETHEUS": {
+            "games": 589,
+            "wins": 127.0,
+            "win_pct": 21.56
+          }
+        }
+      },
+      "2": {
+        "n_games": 1200,
+        "n_seats": 2400,
+        "mean_rounds": 7.584,
+        "median_rounds": 8,
+        "min_rounds": 1,
+        "max_rounds": 13,
+        "wipeout_count": 130,
+        "wipeout_rate": 10.83,
+        "end_reasons": {
+          "market_collapse": {
+            "count": 450,
+            "pct": 37.5
+          },
+          "patient_zero": {
+            "count": 522,
+            "pct": 43.5
+          },
+          "singularity": {
+            "count": 98,
+            "pct": 8.17
+          },
+          "total_wipeout": {
+            "count": 130,
+            "pct": 10.83
+          }
+        },
+        "early_wipeout_seeds": [
+          104,
+          118,
+          176,
+          216,
+          393,
+          431,
+          499,
+          579,
+          686,
+          694,
+          951,
+          1004,
+          1091,
+          1097,
+          1111
+        ],
+        "early_wipeout_count": 18,
+        "long_stall_seeds": [
+          860
+        ],
+        "long_stall_count": 1,
+        "seats_2plus_l4_pct": 0.0,
+        "tracks": {
+          "DEFENSE": {
+            "mean_level": 1.121,
+            "l1_plus_pct": 60.88,
+            "l2_plus_pct": 30.33,
+            "l3_plus_pct": 13.58,
+            "l4_seat_pct": 7.29,
+            "l4_game_pct": 14.58,
+            "l4_seats": 175
+          },
+          "TRIAGE": {
+            "mean_level": 1.606,
+            "l1_plus_pct": 70.46,
+            "l2_plus_pct": 37.88,
+            "l3_plus_pct": 30.38,
+            "l4_seat_pct": 21.88,
+            "l4_game_pct": 38.08,
+            "l4_seats": 525
+          },
+          "RELEASE": {
+            "mean_level": 1.653,
+            "l1_plus_pct": 60.12,
+            "l2_plus_pct": 42.67,
+            "l3_plus_pct": 33.33,
+            "l4_seat_pct": 29.17,
+            "l4_game_pct": 46.17,
+            "l4_seats": 700
+          },
+          "PATENT": {
+            "mean_level": 0.515,
+            "l1_plus_pct": 41.04,
+            "l2_plus_pct": 10.42,
+            "l3_plus_pct": 0.0,
+            "l4_seat_pct": 0.0,
+            "l4_game_pct": 0.0,
+            "l4_seats": 0
+          }
+        },
+        "v440_telemetry": {
+          "defense_l4_cash_total": 475,
+          "defense_l4_cash_per_l4_seat": 2.71,
+          "defense_l4_cash_per_seat": 0.198,
+          "release_gray_face_sets_total": 0,
+          "release_gray_face_sets_per_l4_seat": 0.0,
+          "release_gray_face_seats_used": 0,
+          "release_rerolls_used_total": 380,
+          "pr_l4_instant_ms_total": 0,
+          "pr_l4_instant_ms_per_l4_seat": 0.0,
+          "pr_l4_full_2_pct": 0.0,
+          "triage_l4_replacements_taken": 0,
+          "triage_l4_replacement_rate_pct": 0.0,
+          "triage_l4_colors": {},
+          "pr_l3_awarded_count": 0,
+          "pr_l3_graduated_count": 0,
+          "pr_l3_graduation_pct": 0.0
+        },
+        "archetypes": {
+          "AccelerationistBot": {
+            "games": 480,
+            "wins": 260.0,
+            "win_pct": 54.17
+          },
+          "AdaptiveBalancedBot": {
+            "games": 480,
+            "wins": 283.0,
+            "win_pct": 58.96
+          },
+          "RecklessSaboteurBot": {
+            "games": 480,
+            "wins": 176.0,
+            "win_pct": 36.67
+          },
+          "SecOpsTurtleBot": {
+            "games": 480,
+            "wins": 286.0,
+            "win_pct": 59.58
+          },
+          "VentureGreedBot": {
+            "games": 480,
+            "wins": 195.0,
+            "win_pct": 40.62
+          }
+        },
+        "companies": {
+          "AEGIS": {
+            "games": 389,
+            "wins": 216.0,
+            "win_pct": 55.53
+          },
+          "DTO": {
+            "games": 408,
+            "wins": 203.0,
+            "win_pct": 49.75
+          },
+          "HELIX": {
+            "games": 420,
+            "wins": 204.0,
+            "win_pct": 48.57
+          },
+          "MERIDIAN": {
+            "games": 378,
+            "wins": 182.0,
+            "win_pct": 48.15
+          },
+          "OMNIDYNE": {
+            "games": 390,
+            "wins": 221.0,
+            "win_pct": 56.67
+          },
+          "PROMETHEUS": {
+            "games": 415,
+            "wins": 174.0,
+            "win_pct": 41.93
+          }
+        }
+      }
+    },
+    "v044": {
+      "4": {
+        "n_games": 1200,
+        "n_seats": 4800,
+        "mean_rounds": 7.296,
+        "median_rounds": 8,
+        "min_rounds": 2,
+        "max_rounds": 12,
+        "wipeout_count": 24,
+        "wipeout_rate": 2.0,
+        "end_reasons": {
+          "market_collapse": {
+            "count": 237,
+            "pct": 19.75
+          },
+          "patient_zero": {
+            "count": 878,
+            "pct": 73.17
+          },
+          "singularity": {
+            "count": 61,
+            "pct": 5.08
+          },
+          "total_wipeout": {
+            "count": 24,
+            "pct": 2.0
+          }
+        },
+        "early_wipeout_seeds": [
+          176
+        ],
+        "early_wipeout_count": 1,
+        "long_stall_seeds": [],
+        "long_stall_count": 0,
+        "seats_2plus_l4_pct": 0.0,
+        "tracks": {
+          "DEFENSE": {
+            "mean_level": 0.952,
+            "l1_plus_pct": 59.0,
+            "l2_plus_pct": 23.94,
+            "l3_plus_pct": 8.1,
+            "l4_seat_pct": 4.19,
+            "l4_game_pct": 16.75,
+            "l4_seats": 201
+          },
+          "TRIAGE": {
+            "mean_level": 2.457,
+            "l1_plus_pct": 99.33,
+            "l2_plus_pct": 93.4,
+            "l3_plus_pct": 31.12,
+            "l4_seat_pct": 21.81,
+            "l4_game_pct": 67.0,
+            "l4_seats": 1047
+          },
+          "RELEASE": {
+            "mean_level": 1.599,
+            "l1_plus_pct": 60.58,
+            "l2_plus_pct": 42.25,
+            "l3_plus_pct": 30.71,
+            "l4_seat_pct": 26.31,
+            "l4_game_pct": 73.25,
+            "l4_seats": 1263
+          },
+          "PATENT": {
+            "mean_level": 0.502,
+            "l1_plus_pct": 39.75,
+            "l2_plus_pct": 10.46,
+            "l3_plus_pct": 0.0,
+            "l4_seat_pct": 0.0,
+            "l4_game_pct": 0.0,
+            "l4_seats": 0
+          }
+        },
+        "v440_telemetry": {
+          "defense_l4_cash_total": 365,
+          "defense_l4_cash_per_l4_seat": 1.82,
+          "defense_l4_cash_per_seat": 0.076,
+          "release_gray_face_sets_total": 2766,
+          "release_gray_face_sets_per_l4_seat": 2.19,
+          "release_gray_face_seats_used": 1050,
+          "release_rerolls_used_total": 0,
+          "pr_l4_instant_ms_total": 0,
+          "pr_l4_instant_ms_per_l4_seat": 0.0,
+          "pr_l4_full_2_pct": 0.0,
+          "triage_l4_replacements_taken": 1008,
+          "triage_l4_replacement_rate_pct": 96.3,
+          "triage_l4_colors": {
+            "yellow": 821,
+            "green": 187
+          },
+          "pr_l3_awarded_count": 0,
+          "pr_l3_graduated_count": 0,
+          "pr_l3_graduation_pct": 0.0
+        },
+        "archetypes": {
+          "AccelerationistBot": {
+            "games": 960,
+            "wins": 168.0,
+            "win_pct": 17.5
+          },
+          "AdaptiveBalancedBot": {
+            "games": 960,
+            "wins": 358.0,
+            "win_pct": 37.29
+          },
+          "RecklessSaboteurBot": {
+            "games": 960,
+            "wins": 128.0,
+            "win_pct": 13.33
+          },
+          "SecOpsTurtleBot": {
+            "games": 960,
+            "wins": 394.0,
+            "win_pct": 41.04
+          },
+          "VentureGreedBot": {
+            "games": 960,
+            "wins": 152.0,
+            "win_pct": 15.83
+          }
+        },
+        "companies": {
+          "AEGIS": {
+            "games": 802,
+            "wins": 216.0,
+            "win_pct": 26.93
+          },
+          "DTO": {
+            "games": 777,
+            "wins": 203.0,
+            "win_pct": 26.13
+          },
+          "HELIX": {
+            "games": 823,
+            "wins": 210.0,
+            "win_pct": 25.52
+          },
+          "MERIDIAN": {
+            "games": 805,
+            "wins": 166.0,
+            "win_pct": 20.62
+          },
+          "OMNIDYNE": {
+            "games": 811,
+            "wins": 245.0,
+            "win_pct": 30.21
+          },
+          "PROMETHEUS": {
+            "games": 782,
+            "wins": 160.0,
+            "win_pct": 20.46
+          }
+        }
+      },
+      "3": {
+        "n_games": 1200,
+        "n_seats": 3600,
+        "mean_rounds": 7.611,
+        "median_rounds": 8,
+        "min_rounds": 2,
+        "max_rounds": 12,
+        "wipeout_count": 54,
+        "wipeout_rate": 4.5,
+        "end_reasons": {
+          "market_collapse": {
+            "count": 287,
+            "pct": 23.92
+          },
+          "patient_zero": {
+            "count": 767,
+            "pct": 63.92
+          },
+          "singularity": {
+            "count": 92,
+            "pct": 7.67
+          },
+          "total_wipeout": {
+            "count": 54,
+            "pct": 4.5
+          }
+        },
+        "early_wipeout_seeds": [
+          122,
+          316,
+          879
+        ],
+        "early_wipeout_count": 3,
+        "long_stall_seeds": [],
+        "long_stall_count": 0,
+        "seats_2plus_l4_pct": 0.0,
+        "tracks": {
+          "DEFENSE": {
+            "mean_level": 0.972,
+            "l1_plus_pct": 60.19,
+            "l2_plus_pct": 24.17,
+            "l3_plus_pct": 8.44,
+            "l4_seat_pct": 4.36,
+            "l4_game_pct": 13.08,
+            "l4_seats": 157
+          },
+          "TRIAGE": {
+            "mean_level": 2.466,
+            "l1_plus_pct": 99.67,
+            "l2_plus_pct": 94.14,
+            "l3_plus_pct": 31.25,
+            "l4_seat_pct": 21.56,
+            "l4_game_pct": 52.17,
+            "l4_seats": 776
+          },
+          "RELEASE": {
+            "mean_level": 1.604,
+            "l1_plus_pct": 61.11,
+            "l2_plus_pct": 42.36,
+            "l3_plus_pct": 30.78,
+            "l4_seat_pct": 26.17,
+            "l4_game_pct": 58.17,
+            "l4_seats": 942
+          },
+          "PATENT": {
+            "mean_level": 0.508,
+            "l1_plus_pct": 40.25,
+            "l2_plus_pct": 10.58,
+            "l3_plus_pct": 0.0,
+            "l4_seat_pct": 0.0,
+            "l4_game_pct": 0.0,
+            "l4_seats": 0
+          }
+        },
+        "v440_telemetry": {
+          "defense_l4_cash_total": 294,
+          "defense_l4_cash_per_l4_seat": 1.87,
+          "defense_l4_cash_per_seat": 0.082,
+          "release_gray_face_sets_total": 2104,
+          "release_gray_face_sets_per_l4_seat": 2.23,
+          "release_gray_face_seats_used": 800,
+          "release_rerolls_used_total": 0,
+          "pr_l4_instant_ms_total": 0,
+          "pr_l4_instant_ms_per_l4_seat": 0.0,
+          "pr_l4_full_2_pct": 0.0,
+          "triage_l4_replacements_taken": 751,
+          "triage_l4_replacement_rate_pct": 96.8,
+          "triage_l4_colors": {
+            "yellow": 671,
+            "green": 80
+          },
+          "pr_l3_awarded_count": 0,
+          "pr_l3_graduated_count": 0,
+          "pr_l3_graduation_pct": 0.0
+        },
+        "archetypes": {
+          "AccelerationistBot": {
+            "games": 720,
+            "wins": 224.0,
+            "win_pct": 31.11
+          },
+          "AdaptiveBalancedBot": {
+            "games": 720,
+            "wins": 318.0,
+            "win_pct": 44.17
+          },
+          "RecklessSaboteurBot": {
+            "games": 720,
+            "wins": 162.0,
+            "win_pct": 22.5
+          },
+          "SecOpsTurtleBot": {
+            "games": 720,
+            "wins": 352.0,
+            "win_pct": 48.89
+          },
+          "VentureGreedBot": {
+            "games": 720,
+            "wins": 144.0,
+            "win_pct": 20.0
+          }
+        },
+        "companies": {
+          "AEGIS": {
+            "games": 590,
+            "wins": 217.0,
+            "win_pct": 36.78
+          },
+          "DTO": {
+            "games": 596,
+            "wins": 199.0,
+            "win_pct": 33.39
+          },
+          "HELIX": {
+            "games": 639,
+            "wins": 216.0,
+            "win_pct": 33.8
+          },
+          "MERIDIAN": {
+            "games": 580,
+            "wins": 161.0,
+            "win_pct": 27.76
+          },
+          "OMNIDYNE": {
+            "games": 606,
+            "wins": 256.0,
+            "win_pct": 42.24
+          },
+          "PROMETHEUS": {
+            "games": 589,
+            "wins": 151.0,
+            "win_pct": 25.64
+          }
+        }
+      },
+      "2": {
+        "n_games": 1200,
+        "n_seats": 2400,
+        "mean_rounds": 7.485,
+        "median_rounds": 8,
+        "min_rounds": 1,
+        "max_rounds": 12,
+        "wipeout_count": 132,
+        "wipeout_rate": 11.0,
+        "end_reasons": {
+          "market_collapse": {
+            "count": 448,
+            "pct": 37.33
+          },
+          "patient_zero": {
+            "count": 500,
+            "pct": 41.67
+          },
+          "singularity": {
+            "count": 120,
+            "pct": 10.0
+          },
+          "total_wipeout": {
+            "count": 132,
+            "pct": 11.0
+          }
+        },
+        "early_wipeout_seeds": [
+          104,
+          139,
+          176,
+          216,
+          328,
+          366,
+          384,
+          393,
+          414,
+          431,
+          579,
+          621,
+          634,
+          638,
+          686
+        ],
+        "early_wipeout_count": 24,
+        "long_stall_seeds": [],
+        "long_stall_count": 0,
+        "seats_2plus_l4_pct": 0.0,
+        "tracks": {
+          "DEFENSE": {
+            "mean_level": 0.842,
+            "l1_plus_pct": 51.54,
+            "l2_plus_pct": 21.21,
+            "l3_plus_pct": 7.79,
+            "l4_seat_pct": 3.67,
+            "l4_game_pct": 7.33,
+            "l4_seats": 88
+          },
+          "TRIAGE": {
+            "mean_level": 2.375,
+            "l1_plus_pct": 98.42,
+            "l2_plus_pct": 90.38,
+            "l3_plus_pct": 29.62,
+            "l4_seat_pct": 19.04,
+            "l4_game_pct": 33.08,
+            "l4_seats": 457
+          },
+          "RELEASE": {
+            "mean_level": 1.371,
+            "l1_plus_pct": 53.5,
+            "l2_plus_pct": 36.17,
+            "l3_plus_pct": 26.17,
+            "l4_seat_pct": 21.29,
+            "l4_game_pct": 35.83,
+            "l4_seats": 511
+          },
+          "PATENT": {
+            "mean_level": 0.4,
+            "l1_plus_pct": 32.33,
+            "l2_plus_pct": 7.67,
+            "l3_plus_pct": 0.0,
+            "l4_seat_pct": 0.0,
+            "l4_game_pct": 0.0,
+            "l4_seats": 0
+          }
+        },
+        "v440_telemetry": {
+          "defense_l4_cash_total": 151,
+          "defense_l4_cash_per_l4_seat": 1.72,
+          "defense_l4_cash_per_seat": 0.063,
+          "release_gray_face_sets_total": 1047,
+          "release_gray_face_sets_per_l4_seat": 2.05,
+          "release_gray_face_seats_used": 431,
+          "release_rerolls_used_total": 0,
+          "pr_l4_instant_ms_total": 0,
+          "pr_l4_instant_ms_per_l4_seat": 0.0,
+          "pr_l4_full_2_pct": 0.0,
+          "triage_l4_replacements_taken": 445,
+          "triage_l4_replacement_rate_pct": 97.4,
+          "triage_l4_colors": {
+            "yellow": 415,
+            "green": 30
+          },
+          "pr_l3_awarded_count": 0,
+          "pr_l3_graduated_count": 0,
+          "pr_l3_graduation_pct": 0.0
+        },
+        "archetypes": {
+          "AccelerationistBot": {
+            "games": 480,
+            "wins": 266.0,
+            "win_pct": 55.42
+          },
+          "AdaptiveBalancedBot": {
+            "games": 480,
+            "wins": 293.0,
+            "win_pct": 61.04
+          },
+          "RecklessSaboteurBot": {
+            "games": 480,
+            "wins": 185.0,
+            "win_pct": 38.54
+          },
+          "SecOpsTurtleBot": {
+            "games": 480,
+            "wins": 286.0,
+            "win_pct": 59.58
+          },
+          "VentureGreedBot": {
+            "games": 480,
+            "wins": 170.0,
+            "win_pct": 35.42
+          }
+        },
+        "companies": {
+          "AEGIS": {
+            "games": 389,
+            "wins": 216.0,
+            "win_pct": 55.53
+          },
+          "DTO": {
+            "games": 408,
+            "wins": 227.0,
+            "win_pct": 55.64
+          },
+          "HELIX": {
+            "games": 420,
+            "wins": 182.0,
+            "win_pct": 43.33
+          },
+          "MERIDIAN": {
+            "games": 378,
+            "wins": 177.0,
+            "win_pct": 46.83
+          },
+          "OMNIDYNE": {
+            "games": 390,
+            "wins": 231.0,
+            "win_pct": 59.23
+          },
+          "PROMETHEUS": {
+            "games": 415,
+            "wins": 167.0,
+            "win_pct": 40.24
+          }
+        }
+      }
+    }
+  }
+}
