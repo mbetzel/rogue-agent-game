@@ -152,7 +152,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         protocol_name="Jumper Diagnostics",
         protocol_timing="P3: INCOME",
         protocol_desc=(
-            "When Face 6 ({PURPLE} {STAR}) is rolled, move **1 die** from your **Processing Box** to your **Scanned Box**, "
+            "Move **1 die** from your **Processing Box** to your **Scanned Box**, "
             "banking its Secret now. If your Processing Box is empty, roll **1 Scanned Box die** and collect "
             "only its $ / {RESEARCH} (it stays in place); if Under Development is empty, collect **+$1 cash**."
         ),
@@ -166,7 +166,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         protocol_name="Resonance Sensor",
         protocol_timing="P3: INCOME",
         protocol_desc=(
-            "When Face 6 ({PURPLE} {STAR}) is rolled, gain **+$1 cash** per distinct cube color "
+            "Gain **+$1 cash** per distinct cube color "
             "present in the Tower Exit Tray this round ({RED}, {BLUE}, {GREEN}, {BLACK}; max **+$4**)."
         ),
     ),
@@ -179,7 +179,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         protocol_name="Burn Notice",
         protocol_timing="P3: INCOME",
         protocol_desc=(
-            "When Face 6 ({PURPLE} {STAR}) is rolled, gain an immediate **+$2 cash payout**; "
+            "Gain an immediate **+$2 cash payout**; "
             "in addition, you may optionally **permanently return 1 owned colored module die to the market** "
             "to gain **+1 Corporate Secret**."
         ),
@@ -193,7 +193,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         protocol_name="Arbitrary Code Execution",
         protocol_timing="P1: STEP 3 REROLLS",
         protocol_desc=(
-            "When Face 6 ({PURPLE} {STAR}) is rolled, turn **1 other rolled die** in your active "
+            "Turn **1 other rolled die** in your active "
             "pool to **any legal non-Star face of that die's color** other than the Secret face."
         ),
     ),
@@ -206,7 +206,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         protocol_name="Algorithmic Parity",
         protocol_timing="P3: INCOME",
         protocol_desc=(
-            "When Face 6 ({PURPLE} {STAR}) is rolled, gain an additional **+$2 cash income** "
+            "Gain an additional **+$2 cash income** "
             "AND **+1 {RESEARCH} Research Token** during Phase 3: Income."
         ),
     ),
@@ -596,7 +596,7 @@ def _draw_company_card(page: PDFPage, x: float, y: float, w: float, h: float, co
     page.text(x + 7.0, o_y + 8.6, title, font="bold", size=t_size, color=PALETTE["ink"])
 
     ty = o_y + o_h - 15.0
-    _fit_paragraph(page, x + 7.0, o_y + 19.5, w - 14.0, comp.override_desc, ty - 1.5, size=6.0, leading=7.6, min_size=4.8)
+    _fit_paragraph(page, x + 7.0, o_y + 21.5, w - 14.0, comp.override_desc, ty - 2.5, size=8.6, leading=10.8, min_size=5.0)
 
     # Once-per-version checkboxes
     page.line(x + 6.0, ty, x + w - 6.0, ty, stroke=PALETTE["rule"], width=0.5, dash=(2, 1.5))
@@ -643,7 +643,7 @@ def _draw_white_hat_card(page: PDFPage, x: float, y: float, w: float, h: float, 
     t_size = min(5.8, 5.8 * avail / max(1.0, measure_text(title, font="bold", size=5.8)))
     page.text(x + 7.0, s_y + 8.6, title, font="bold", size=t_size, color=PALETTE["purple"])
     note_y = s_y + s_h - 2.8
-    _fit_paragraph(page, x + 7.0, s_y + 19.5, w - 14.0, white_hat.protocol_desc, note_y - 6.5, size=6.0, leading=7.6, min_size=4.8)
+    _fit_paragraph(page, x + 7.0, s_y + 22.0, w - 14.0, white_hat.protocol_desc, note_y - 7.5, size=9.6, leading=11.6, min_size=5.0)
     repeat_note = (
         "*Repeatable: once per Purple {STAR} die (Phase 1 Step 3 Rerolls).*"
         if "P1" in white_hat.protocol_timing
@@ -1372,10 +1372,10 @@ def render_agent_board(page: PDFPage) -> None:
     # Top overview & Target Lock tie-breaking banner
     page.rect(m_x + 7.0, col_top + 26.0, m_w - 14.0, 38.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.6)
     _fit_paragraph(
-        page, m_x + 11.0, col_top + 35.0, m_w - 22.0,
+        page, m_x + 11.0, col_top + 35.5, m_w - 22.0,
         "**P2:** Drop Staging Cup. {BLACK} resolves now; {RED}{BLUE}{GREEN} attack in **P4**, then recycle.\n"
         "**Target Lock (Signature Exits):** After P4 damage, resolve top tray color (**Tie Priority: {GREEN} > {BLACK} > {BLUE} > {RED}**; 0 cubes = fizzle).",
-        col_top + 63.0, size=6.2, leading=7.8, min_size=5.4, color=PALETTE["ink"],
+        col_top + 63.0, size=6.8, leading=8.4, min_size=5.4, color=PALETTE["ink"],
     )
 
     cube_cards = [
@@ -1418,15 +1418,15 @@ def render_agent_board(page: PDFPage) -> None:
     for ckey, ctitle, ctag, cbody_base, cbody_sig, bh_card in cube_cards:
         fg, bg = _color_pair(ckey)
         page.rounded_rect(m_x + 7.0, cy_box, m_w - 14.0, bh_card, r=3.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.8)
-        page.rect(m_x + 7.0, cy_box, m_w - 14.0, 16.5, stroke=PALETTE["ink"], fill=bg, line_width=0.6)
-        page.rich_line(m_x + 11.0, cy_box + 11.6, f"**{ctitle}**", size=7.0, color=fg if ckey != "black" else PALETTE["ink"])
-        page.rich_line(m_x + m_w - 11.0, cy_box + 11.6, ctag, size=5.8, base_font="mono_bold", color=PALETTE["ink_soft"], align="right")
-        _fit_paragraph(page, m_x + 11.0, cy_box + 26.0, m_w - 22.0, cbody_base, cy_box + 52.0, size=6.4, leading=8.0, min_size=5.4, color=PALETTE["ink"])
+        page.rect(m_x + 7.0, cy_box, m_w - 14.0, 18.0, stroke=PALETTE["ink"], fill=bg, line_width=0.6)
+        page.rich_line(m_x + 11.0, cy_box + 12.4, f"**{ctitle}**", size=7.8, color=fg if ckey != "black" else PALETTE["ink"])
+        page.rich_line(m_x + m_w - 11.0, cy_box + 12.2, ctag, size=6.4, base_font="mono_bold", color=PALETTE["ink_soft"], align="right")
+        _fit_paragraph(page, m_x + 11.0, cy_box + 27.5, m_w - 22.0, cbody_base, cy_box + 49.0, size=7.8, leading=9.6, min_size=5.4, color=PALETTE["ink"])
         # Target Lock Signature Attack sub-box
-        sig_y = cy_box + 53.0
-        sig_h = bh_card - 56.0
+        sig_y = cy_box + 50.5
+        sig_h = bh_card - 53.5
         page.rounded_rect(m_x + 10.0, sig_y, m_w - 20.0, sig_h, r=2.0, stroke=fg if ckey != "black" else PALETTE["ink_soft"], fill=PALETTE["paper_tint"], line_width=0.55)
-        _fit_paragraph(page, m_x + 13.0, sig_y + 9.5, m_w - 26.0, cbody_sig, sig_y + sig_h - 2.0, size=6.2, leading=7.8, min_size=5.2, color=PALETTE["ink"])
+        _fit_paragraph(page, m_x + 13.0, sig_y + 11.5, m_w - 26.0, cbody_sig, sig_y + sig_h - 3.0, size=7.6, leading=9.4, min_size=5.4, color=PALETTE["ink"])
         cy_box += bh_card + card_gap
 
     # -------------------------------------------------------------------------
