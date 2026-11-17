@@ -65,23 +65,23 @@ class TestWhiteHat6FRebalance(unittest.TestCase):
         self.assertEqual(len(p0.scanned_dice), 0)
 
     def test_operator_scanned_box_scaling(self) -> None:
-        """TEST-WH-02: 3 dice in Scanned Box -> +3 research; Scanned Box unchanged."""
+        """TEST-WH-02: 3 dice (2 distinct colors) in Scanned Box -> +2 research; Scanned Box unchanged."""
         engine, p0 = self._make_engine(WhiteHatCode.OPERATOR)
         p0.in_production_dice.append(_purple_star_die(101))
         p0.scanned_dice.extend([create_gray_die(1), create_gray_die(2), create_colored_die(DieColor.GREEN, 3)])
         rec = phase3_income.execute_player_income(engine, p0)
-        self.assertEqual(rec.research, 3)
-        self.assertEqual(p0.research_tokens, 3)
+        self.assertEqual(rec.research, 2)
+        self.assertEqual(p0.research_tokens, 2)
         self.assertEqual(len(p0.scanned_dice), 3)
 
     def test_operator_double_purple_star(self) -> None:
-        """TEST-WH-03: 2 Purple Stars In Production with 2 Scanned dice -> +4 research."""
+        """TEST-WH-03: 2 Purple Stars In Production with 2 Gray Scanned dice (1 distinct color) -> +2 research."""
         engine, p0 = self._make_engine(WhiteHatCode.OPERATOR)
         p0.in_production_dice.extend([_purple_star_die(101), _purple_star_die(102)])
         p0.scanned_dice.extend([create_gray_die(1), create_gray_die(2)])
         rec = phase3_income.execute_player_income(engine, p0)
-        self.assertEqual(rec.research, 4)
-        self.assertEqual(p0.research_tokens, 4)
+        self.assertEqual(rec.research, 2)
+        self.assertEqual(p0.research_tokens, 2)
 
     # --- The Phreaker (Jumper Diagnostics) ---
 

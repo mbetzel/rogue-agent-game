@@ -40,6 +40,7 @@ V038C_MARKET_SHARE_START = {2: 13, 3: 16, 4: 17}  # [TUNE] §14.5.2 / FINDINGS �
 V038C_RED_SECRET_PAYOUT = {2: (3, 1), 3: (3, 1, 0), 4: (3, 1, 0, 0)}  # [TUNE] §14.5.2
 # --- Tunable Defaults for Headroom Architecture (spec: market_share_headroom_spec.md) ---
 V038E_MARKET_SHARE_START: Dict[int, int] = {2: 13, 3: 16, 4: 16}  # Unified 3P and 4P at 16
+V045_STARTING_SECRETS: Dict[int, int] = {2: 4, 3: 4, 4: 4}
 DEFAULT_MARKET_SHARE_MAX: int = 20
 _TRIAGE_ORDER_RULES = ("BOT", "OLDEST_FIRST")
 _TRIAGE_L1_MODES = ("WHITE_CONTRACTORS", "GRAY_DIE")
@@ -537,6 +538,11 @@ class GameConfig:
     g3_research: int = 1
     g3_cash: int = 1
     y1_base_cash: int = 4
+
+    # --- v0.45.0 Glitched Shield Slots Rework & 2P SETEC Corp ---
+    shield_slot_max_cubes: int = 2
+    defense_grid_overflow_enabled: bool = False
+    setec_corp_enabled: bool = False
     y1_secret_cost: int = 2
     y1_secret_gain: int = 1
     y2_base_cash: int = 2
@@ -1024,6 +1030,30 @@ class GameConfig:
         overrides.setdefault("bot_pr_push", True)
         overrides.setdefault("bot_pr_push_params", PrPushParams())
         return cls.v044(**overrides)
+
+    @classmethod
+    def v045(cls, **overrides) -> "GameConfig":
+        """v0.45.0 canonical baseline:
+        - Inherits v0.44.0.
+        - Unified starting Corporate Secrets = 4 across 2P, 3P, 4P.
+        - Glitched Shield Slots Rework (capacity 2 Green cubes/slot, even distribution, Defense Grid Overflow).
+        - 2P SETEC Corp Neutral Black Cube (starts 0 MS, +1 MS in Phase 4 if >= 1 Red exits tray, ranks in MLB).
+        """
+        for k, v in (
+            ("starting_secrets_by_player_count", dict(V045_STARTING_SECRETS)),
+            ("shield_slot_max_cubes", 2),
+            ("defense_grid_overflow_enabled", True),
+            ("setec_corp_enabled", True),
+        ):
+            overrides.setdefault(k, v)
+        return cls.v044(**overrides)
+
+    @classmethod
+    def v045_roster(cls, **overrides) -> "GameConfig":
+        """v0.45.0 + bot autonomous PR push and cash allocation policies enabled."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v045(**overrides)
 
     def _validate_tower_config(self) -> None:
         """Validates Cube Tower physics parameters (spec §2.4)."""

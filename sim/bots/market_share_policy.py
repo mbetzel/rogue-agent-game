@@ -128,13 +128,20 @@ def expected_red_payouts_remaining(state: Any, pol: Optional[MarketSharePolicy] 
     return e_in + p_end
 
 
+def _rival_shares(player: Any, state: Any) -> List[int]:
+    rivals = [int(q.market_share or 0) for q in state.players
+              if q.player_id != player.player_id and not q.is_patient_zero]
+    if getattr(state, "setec_corp_active", False):
+        rivals.append(int(getattr(state, "setec_market_share", 0)))
+    return rivals
+
+
 def payout_share_delta(player: Any, state: Any, before: int, after: int, rivals: Any = None,
                        pol: Optional[MarketSharePolicy] = None) -> float:
     """Δ expected payout value x discounted (E_in + P_end), in Corporate Secrets."""
     sched = state.config.red_secret_payout_schedule(len(state.players))
     if rivals is None:
-        rivals = [int(q.market_share or 0) for q in state.players
-                  if q.player_id != player.player_id and not q.is_patient_zero]
+        rivals = _rival_shares(player, state)
     rivals = list(rivals)
     d = expected_payout_value(after, rivals, sched) - expected_payout_value(before, rivals, sched)
     return d * expected_red_payouts_remaining(state, pol)
@@ -249,10 +256,15 @@ def estimated_rival_shares(player: "PlayerState", state: "GameState", red_attack
     Each rival is projected exactly once from its start-of-Phase-4 share, whether or not it has already
     resolved earlier in seat order.
     """
-    return {
+    out = {
         p.player_id: max(0, _phase4_start_share(p, state) - max(0, int(red_attack) - _rival_red_shields(p)))
         for p in state.players if p.player_id != player.player_id and not p.is_patient_zero
     }
+    if getattr(state, "setec_corp_active", False):
+        max_ms = int(getattr(state.config, "market_share_max", 20) or 20)
+        setec_ms = int(getattr(state, "setec_market_share", 0))
+        out[-1] = min(max_ms, setec_ms + (1 if int(red_attack) >= 1 else 0))
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -394,8 +406,7 @@ def urgent_regain(player: "PlayerState", state: "GameState", pol: MarketSharePol
 
     # Market Leader Bonus urgency
     if leader_bonus_active(player, state, pol) and (state.current_version_index >= 1 or state.is_final_round):
-        rivals = [int(p.market_share or 0) for p in state.players
-                  if p.player_id != player.player_id and not p.is_patient_zero]
+        rivals = _rival_shares(player, state)
         if rivals:
             sched = state.config.market_leader_bonus_schedule(len(state.players))
             base = expected_market_leader_bonus(player.market_share, rivals, sched)
@@ -524,9 +535,25 @@ def default_shield_slot_allocation(
     glitched_capacity: int,
     state: Optional["GameState"] = None,
 ) -> tuple:
-    """v0.44.0: Allocate shields to clean slots first (active defense), then glitched slots (purge)."""
+    """v0.44.0 / v0.45.0: Partition committed shields into (clean_slot_dice, glitched_slot_dice).
+    Prioritizes CLEAN_SHIELD when Red/Blue threaten critical damage; prioritizes PURGING_SHIELD
+    when all slots are glitched or Defense Grid Overflow threatens."""
     clean_cap = max(0, int(clean_capacity))
     glitched_cap = max(0, int(glitched_capacity))
+    if clean_cap == 0:
+        return [], list(committed_shields[:glitched_cap])
+    slots = getattr(player, "shield_slots", None) or []
+    staged_green = state.staging_cup.get(CubeColor.GREEN, 0) if state is not None else 0
+    overflow_threat = (
+        glitched_cap > 0
+        and slots
+        and (all(c >= 1 for c in slots) or (any(c >= 2 for c in slots) and staged_green >= 2 and player.secrets > 2))
+    )
+    if overflow_threat and len(committed_shields) > 0:
+        glitched_list = list(committed_shields[:glitched_cap])
+        rem = list(committed_shields[glitched_cap:])
+        clean_list = rem[:clean_cap]
+        return clean_list, glitched_list
     clean_list = list(committed_shields[:clean_cap])
     rem = list(committed_shields[clean_cap:])
     glitched_list = rem[:glitched_cap]

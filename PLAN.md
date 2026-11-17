@@ -3,6 +3,13 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
+- [x] **Rules Draft `v0.45.0`** captured in [RULES.md](./RULES.md)
+- [x] **Phase 66: Glitched Shield Slots Rework, 2P SETEC Corp, Starting Secrets, & WS-OPERATOR (`v0.45.0 Baseline`)**
+  - [x] *Pre-SDLC Game Designer Modeling:* EV/threat-curve modeling for `WS-OPERATOR` distinct Scanned Box colors (EV `1.34 🔬`/trigger), `Defense Grid Overflow` (`-1` Secret on 3rd Green cube in a slot), Starting Secrets `4` across all counts, and 2P `SETEC Corp` black cube (`0` start, `+1` MS if `>= 1` Red cube exits tray).
+  - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/glitched_shield_slots_rework.md` (`INV-OP-01`..`INV-SETEC-2P-04`, 17 unit test specs).
+  - [x] *Implementation (`senior-engineer`) + Code Review (`staff-engineer` APPROVED):* `sim/` (`V045`, `shield_slots: List[int]`, `Defense Grid Overflow`, `SETEC_CORP_ID = -1`, `V045_STARTING_SECRETS = {2: 4, 3: 4, 4: 4}`, `tests/test_v450_glitched_shield_slots_rework.py`; 1,032+ tests passing, 0 failures).
+  - [x] *Validation Sweep (`product-owner`) & Balance Sign-off (`game-designer`):* 6,000-game sweep (`sim_results/v045_telemetry_report.md`), `FINDINGS.md` §61 APPROVED.
+  - [x] *Documentation & PnP Sync (`graphic-designer` & Main Agent):* `RULES.md`, `RULES_QUICKREF.md`, `RULES_APPENDIX.md`, `GLOSSARY.md`, `pnp/` updated to `v0.45.0`.
 - [x] **Rules Draft `v0.44.0`** captured in [RULES.md](./RULES.md)
 - [x] **Phase 63: Blue Die Secret & Economy Rebalance (`v0.43.1`)**
   - [x] *Pre-SDLC Modeling & Spec (`principal-engineer`):* `docs/specs/phase63_blue_die_balance_spec.md` (`V043_BLUE_TUNE`: Blue Face 2 `+1 Corporate Secret` → `+2 🔬`, Face 3 `+$1` → `+$2`; `INV-P63-01`..`04`, `TC-P63-01`..`07`).

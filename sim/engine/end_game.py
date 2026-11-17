@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 
 from sim.config import DieColor, EndGameReason, TiebreakOrder
-from sim.engine.market_share import market_leader_bonus_awards, market_share_places
+from sim.engine.market_share import include_setec_in_shares, market_leader_bonus_awards, market_share_places
 from sim.engine.state import EndGameResult
 
 if TYPE_CHECKING:
@@ -160,8 +160,9 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
     bonus_on = bool(cfg.is_market_leader_bonus) and not all_patient_zero
     bonus_schedule = list(cfg.market_leader_bonus_schedule(len(players))) if bonus_on else []
     survivor_shares = {p.player_id: int(p.market_share or 0) for p in players if not p.is_patient_zero}
-    places = market_share_places(survivor_shares) if cfg.is_market_share and not all_patient_zero else {}
-    awards = market_leader_bonus_awards(survivor_shares, bonus_schedule) if bonus_on else {}
+    ranked_shares = include_setec_in_shares(survivor_shares, engine.state) if survivor_shares else {}
+    places = market_share_places(ranked_shares) if cfg.is_market_share and not all_patient_zero else {}
+    awards = market_leader_bonus_awards(ranked_shares, bonus_schedule) if bonus_on else {}
     # RSP-1 end payout (spec §14.5.3 step 7, INV-RSP-04): after the contractor return and (telemetry-only) stranded
     # pass, before ranking; final Market Share; skipped on a Total Wipeout, and on a Market Collapse end
     # unless red_secret_payout_skip_on_collapse is False (spec §14.5.10). Like the Market

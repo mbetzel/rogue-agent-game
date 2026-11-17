@@ -159,10 +159,10 @@ def _die_income_row(state: GameState, player: PlayerState, die: Die) -> Optional
                 star_note = "Burn Notice (+$2)"
             elif _is_operative(player, WhiteHatCode.OPERATOR, legacy_bridge_enabled(state)):
                 if rebalance:
-                    gain_research = len(player.scanned_dice)
-                    research += gain_research
-                    protocol_research = gain_research
-                    star_note = f"Logistics Bounty (+{gain_research} 🔬)"
+                    distinct_count = len({d.color for d in player.scanned_dice})
+                    research += distinct_count
+                    protocol_research = distinct_count
+                    star_note = f"Logistics Bounty (+{distinct_count} 🔬, {distinct_count} colors)"
                 elif getattr(state.config, "operator_protocol_mode", "CONTINGENT_STAFFING") == "LOGISTICS_BOUNTY":
                     gain_research = getattr(state.config, "operator_logistics_bounty_research", 1)
                     research += gain_research
@@ -366,6 +366,7 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
                     player.f6_y1_cash_activations += 1
                     record.money += cfg.y1_base_cash
 
+    pre_move_scanned_colors = len({d.color for d in player.scanned_dice})
     for die in dice_to_glitch:
         if die in player.in_production_dice:
             player.in_production_dice.remove(die)
@@ -379,7 +380,9 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
 
     if getattr(engine.config, "white_hat_6f_rebalance", False):
         if _is_operative(player, WhiteHatCode.OPERATOR, legacy_bridge_enabled(engine)):
-            record.operator_scanned_count = len(player.scanned_dice)
+            record.operator_scanned_count = pre_move_scanned_colors
+            player.operator_scanned_colors_count = pre_move_scanned_colors
+            player.operator_research_harvested += record.protocol_research
         if _is_operative(player, WhiteHatCode.ACOUSTIC, legacy_bridge_enabled(engine)):
             record.acoustic_colors_count = getattr(engine.state, "distinct_exited_colors_this_round", 0)
 
@@ -423,7 +426,7 @@ def preview_player_income(state: GameState, player: PlayerState) -> IncomeRecord
     record.purple_star_triggers = len(purple_star_dice_in_production(player))
     if getattr(state.config, "white_hat_6f_rebalance", False):
         if _is_operative(player, WhiteHatCode.OPERATOR, legacy_bridge_enabled(state)):
-            record.operator_scanned_count = len(player.scanned_dice)
+            record.operator_scanned_count = len({d.color for d in player.scanned_dice})
         if _is_operative(player, WhiteHatCode.ACOUSTIC, legacy_bridge_enabled(state)):
             record.acoustic_colors_count = getattr(state, "distinct_exited_colors_this_round", 0)
 
@@ -431,11 +434,15 @@ def preview_player_income(state: GameState, player: PlayerState) -> IncomeRecord
 
 
 def resolve_operator_logistics_bounty(player: PlayerState, triggers: int) -> int:
-    """Awards +1 research per die currently in the Scanned Box per trigger."""
-    scanned_count = len(player.scanned_dice)
-    research_gain = triggers * scanned_count
+    """Awards +1 research per distinct die color currently in the Scanned Box per trigger."""
+    if triggers <= 0 or not player.scanned_dice:
+        return 0
+    distinct_colors = len({d.color for d in player.scanned_dice})
+    research_gain = triggers * distinct_colors
     if research_gain > 0:
         player.gain_research(research_gain, "signature_protocol")
+        player.operator_scanned_colors_count = distinct_colors
+        player.operator_research_harvested += research_gain
     return research_gain
 
 

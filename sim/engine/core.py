@@ -291,6 +291,12 @@ class GameEngine:
             rng=self.rng,
         )
         self.state.first_player_index_start = first_player_index
+        self.state.setec_market_share = 0
+        self.state.setec_corp_active = (
+            len(players) == 2
+            and bool(getattr(config, "setec_corp_enabled", False))
+            and bool(config.is_market_share)
+        )
 
         self._prime_compiler()
 
