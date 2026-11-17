@@ -1,4 +1,4 @@
-"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.44.0 Baseline).
+"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.45.0 Baseline).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
   - 01_Player_Boards.pdf (6 pages — 4x Company Terminal Mats with CI/CD Pipeline loop + 6x Client Company Cards sheet + 6x White Hat Dossier Cards sheet)
@@ -19,7 +19,7 @@ from pnp.pdf_engine import PALETTE, Color, PDFDocument, PDFPage, measure_text
 
 
 # =============================================================================
-# Canonical Game Data (Synchronized 1:1 with RULES.md v0.44.0 Baseline & sim/entities.py)
+# Canonical Game Data (Synchronized 1:1 with RULES.md v0.45.0 Baseline & sim/entities.py)
 # =============================================================================
 
 @dataclass(frozen=True)
@@ -44,7 +44,7 @@ COMPANIES: List[CompanyCardSpec] = [
         override_name="Capital Injection",
         override_timing="P3: INCOME",
         override_desc=(
-            "Gain **+$3 Cash** cleanly in Phase 3: Income (once per SETEC Version)."
+            "Gain **+$3 Cash** from the bank."
         ),
         flavor='"When liquidity is limitless, capital allocation is an offensive discipline."',
         starting_die="RED",
@@ -140,7 +140,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         protocol_name="Logistics Bounty",
         protocol_timing="P3: INCOME",
         protocol_desc=(
-            "Gain **+1 {RESEARCH} Research Token** per die currently in your **Scanned Box**."
+            "Gain **+1 {RESEARCH} Research Token** per different color die currently in your **Scanned Box** *(all colors incl. Gray, Purple, Yellow)*."
         ),
     ),
     WhiteHatDossierSpec(
@@ -290,84 +290,84 @@ VARIANT_CARDS: List[VariantCardSpec] = [
         'R1', 'red', 'RED // MARKETING', '$5',
         '{PIP1} +1 Share/$1  |  {PIP2}{PIP3}{PIP4} +$2', '{PIP5} Secret  |  {PIP6} {STAR}',
         'Brand Protection', 'P3 INCOME',
-        'In Phase 3: Income, gain **+$2 & +1 Market Share** *(not above max; outside Public Relations limit)*.',
+        'Gain **+$2 & +1 Market Share** *(not above max; outside Public Relations limit)*.',
         'Brand Protection: +$2 & +1 Market Share.',
     ),
     VariantCardSpec(
         'R2', 'red', 'RED // MARKETING', '$4',
         '{PIP1} +1 Share/$1  |  {PIP2}{PIP3}{PIP4} +$2', '{PIP5} Secret  |  {PIP6} {STAR}',
         'Ad Campaign', 'P3 INCOME',
-        'In Phase 3: Income, pay **$2** to gain **+2 Market Share** *(not above max; outside Public Relations limit)*.',
-        'Ad Campaign: pay $2 in P3 for +2 Market Share.',
+        'Pay **$2** to gain **+2 Market Share** *(not above max; outside Public Relations limit)*.',
+        'Ad Campaign: pay $2 for +2 Market Share.',
     ),
     VariantCardSpec(
         'R3', 'red', 'RED // MARKETING', '$5',
         '{PIP1} +1 Share/$1  |  {PIP2}{PIP3}{PIP4} +$2', '{PIP5} Secret  |  {PIP6} {STAR}',
         'Customer Poaching', 'P3 AFTER ALL INCOME',
-        'After all players collect Income in Phase 3, take **1 Market Share** from the surviving rival with the **most** *(you choose among ties)*. At your max, the rival still loses 1.',
+        'After all players collect Income, take **1 Market Share** from the surviving rival with the **most** *(you choose among ties)*. At your max, the rival still loses 1.',
         'Poaching: take 1 Market Share from the leader.',
     ),
     VariantCardSpec(
         'B1', 'blue', 'BLUE // FIREWALL', '$5',
         '{PIP1} +1 Secret | {PIP2} +2{RESEARCH} | {PIP3} +$2', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
         'Honeypot Telemetry', 'P3 INCOME',
-        'In Phase 3: Income, gain **+2 {RESEARCH}** if **0 {BLUE} Blue** cubes are in the Exit Tray, **OR** gain **+$3** if **1+ {BLUE} Blue** cubes are in the Exit Tray.',
+        'Gain **+2 {RESEARCH}** if **0 {BLUE} Blue** cubes are in the Exit Tray, **OR** gain **+$3** if **1+ {BLUE} Blue** cubes are in the Exit Tray.',
         'Honeypot: +2 Research (0 Blue) or +$3 (1+ Blue).',
     ),
     VariantCardSpec(
         'B2', 'blue', 'BLUE // FIREWALL', '$5',
         '{PIP1} +1 Secret | {PIP2} +2{RESEARCH} | {PIP3} +$2', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
         'Deep R&D Vault', 'P3 INCOME',
-        'In Phase 3: Income, gain **+$2**, **OR** spend **1 Corporate Secret** to gain **+3 Market Share** *(not above max; outside Public Relations limit)*.',
+        'Gain **+$2**, **OR** spend **1 Corporate Secret** to gain **+3 Market Share** *(not above max; outside Public Relations limit)*.',
         'R&D Vault: +$2 or spend 1 Secret for +3 Share.',
     ),
     VariantCardSpec(
         'B3', 'blue', 'BLUE // FIREWALL', '$4',
         '{PIP1} +1 Secret | {PIP2} +2{RESEARCH} | {PIP3} +$2', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
         'Air-Gapped Backup', 'P3 INCOME',
-        'In Phase 3: Income, gain **+$1**, plus **+$1** per Shield you have **In Production** *(clean or glitched slots)*.',
+        'Gain **+$1**, plus **+$1** per Shield you have **In Production** *(clean or glitched slots)*.',
         'Air-Gapped: +$1 plus +$1 per Shield In Production.',
     ),
     VariantCardSpec(
         'G1', 'green', 'GREEN // ANTIVIRUS', '$5',
         '{PIP1} +2{RESEARCH} | {PIP2} +1{RESEARCH} | {PIP3} +2{RESEARCH}', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
         'Self-Healing Kernel', 'P3 INCOME',
-        'In Phase 3: Income, clean **1 Glitched Shield Slot** *(freeing any Shield assigned to it to block in Phase 4)* and gain **+1 {RESEARCH}**.',
+        'Clean **1 Glitched Shield Slot** *(freeing any Shield assigned to it to block in Phase 4)* and gain **+1 {RESEARCH}**.',
         'Kernel: cleans 1 slot & yields +1 Research.',
     ),
     VariantCardSpec(
         'G2', 'green', 'GREEN // ANTIVIRUS', '$5',
         '{PIP1} +2{RESEARCH} | {PIP2} +1{RESEARCH} | {PIP3} +2{RESEARCH}', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
         'Universal Sandbox', 'P3 INCOME',
-        'In Phase 3: Income, gain **+2 {RESEARCH}**, plus **+1 {RESEARCH}** for each of your **Glitched Shield Slots**.',
+        'Gain **+2 {RESEARCH}**, plus **+1 {RESEARCH}** for each of your **Glitched Shield Slots**.',
         'Sandbox: +2 Research, +1 per Glitched Slot.',
     ),
     VariantCardSpec(
         'G3', 'green', 'GREEN // ANTIVIRUS', '$4',
         '{PIP1} +2{RESEARCH} | {PIP2} +1{RESEARCH} | {PIP3} +2{RESEARCH}', '{PIP4} 1{RESEARCH}/$1 | {PIP5} Secret | {PIP6} {STAR}',
         'Live Reboot', 'P3 INCOME',
-        'In Phase 3: Income, gain **+1 {RESEARCH} & +$1**, and move **1 die** from your **Scanned Box** to your **Ready for Release Zone**.',
+        'Gain **+1 {RESEARCH} & +$1**, and move **1 die** from your **Scanned Box** to your **Ready for Release Zone**.',
         'Live Reboot: +1 Research, +$1 & Scanned -> Ready.',
     ),
     VariantCardSpec(
         'Y1', 'yellow', 'YELLOW // COMM. AI', '$6',
         '{PIP1} +2 Share  {PIP2} +1 Share/1{RESEARCH}', '{PIP3} $1 & 1 Share | {PIP4}{PIP5} $2/1{RESEARCH} | {PIP6} {STAR}',
         'Algorithmic Trading', 'P3 INCOME',
-        'In Phase 3: Income, gain **+$4**, **OR** pay **$2** to gain **+1 Corporate Secret**.',
+        'Gain **+$4**, **OR** pay **$2** to gain **+1 Corporate Secret**.',
         'Trading: +$4 OR pay $2 for +1 Secret.',
     ),
     VariantCardSpec(
         'Y2', 'yellow', 'YELLOW // COMM. AI', '$5',
         '{PIP1} +2 Share  {PIP2} +1 Share/1{RESEARCH}', '{PIP3} $1 & 1 Share | {PIP4}{PIP5} $2/1{RESEARCH} | {PIP6} {STAR}',
         'Cloud Monopoly', 'P3 INCOME',
-        'In Phase 3: Income, gain **+$2**, plus **+$1** per different Central Market die color you own *(R/B/G/Y; excludes Purple; **max +$6**)*.',
+        'Gain **+$2**, plus **+$1** per different Central Market die color you own *(R/B/G/Y; excludes Purple; **max +$6**)*.',
         'Monopoly: +$2 plus +$1 per Market color (max +$6).',
     ),
     VariantCardSpec(
         'Y3', 'yellow', 'YELLOW // COMM. AI', '$5',
         '{PIP1} +2 Share  {PIP2} +1 Share/1{RESEARCH}', '{PIP3} $1 & 1 Share | {PIP4}{PIP5} $2/1{RESEARCH} | {PIP6} {STAR}',
         'Proprietary Training', 'P3 INCOME',
-        'In Phase 3: Income, gain **+1 Corporate Secret**, plus **+$1** per **Gray Legacy** die you own.',
+        'Gain **+1 Corporate Secret**, plus **+$1** per **Gray Legacy** die you own.',
         'Training: +1 Secret plus +$1 per Gray die.',
     ),
 ]
@@ -664,7 +664,7 @@ def _draw_white_hat_card(page: PDFPage, x: float, y: float, w: float, h: float, 
     )
 
 
-TRACK_STEP_COSTS = (None, 1, 2, 2, 3)  # {RESEARCH} to reach L1..L4 (RULES.md v0.44.0 baseline)
+TRACK_STEP_COSTS = (None, 1, 2, 2, 3)  # {RESEARCH} to reach L1..L4 (RULES.md v0.45.0 baseline)
 
 
 def _draw_track_cells(page: PDFPage, cells: Sequence[Tuple[float, float, float, float]],
@@ -765,7 +765,7 @@ RELEASE_LEVELS = [
     ("5 dice", "+1 {SECRET} Corporate Secret"),
     ("6 dice", "Set 1 rolled Gray die to any face (P1 Step 3)"),
 ]
-PR_REGAIN_COST_MONEY = 3  # $ Cash per +1 Market Share (RULES.md v0.44.0 baseline)
+PR_REGAIN_COST_MONEY = 3  # $ Cash per +1 Market Share (RULES.md v0.45.0 baseline)
 PUBLIC_RELATIONS_LEVELS = [
     ("Regain up to 1/turn", ""),
     ("Regain up to 1/turn", "+$3"),
@@ -947,7 +947,7 @@ def render_player_board(
     draw_board_outer_frame(
         page,
         left_tag=f"TOO MANY SECRETS // COMPANY TERMINAL MAT [TERM-0{idx}/4]",
-        right_tag="PNP PROTOTYPE v0.44.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.45.0 // US LETTER",
     )
 
     # -------------------------------------------------------------------------
@@ -966,7 +966,7 @@ def render_player_board(
         tint=PALETTE["blue_light"],
         tag="1 SECRET = 1 VP",
         icon_type="secret",
-        line1="Start: **3** (2P) / **4** (3-4P)",
+        line1="Start: **4** Secrets (2-4P)",
         line2="Most Secrets wins (1 Secret = 1 VP)",
         line3="<= 0 Secrets = **TOTAL DATA BREACH**",
         line4="",
@@ -1096,20 +1096,20 @@ def render_player_board(
     page.rect(px + 6.0, dg_y, pw - 12.0, 104.0, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=0.85)
     page.rect(px + 6.0, dg_y, pw - 12.0, 14.0, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.6)
     page.rich_line(px + 10.0, dg_y + 10.0, "**DEFENSE GRID**  (SHIELD SLOTS — BLOCK 1 ANY)", size=6.8, color=PALETTE["ink"])
-    page.text(px + pw - 14.0, dg_y + 10.0, "START WITH 1 GLITCHED SLOT  |  RESOLVES IN P4", font="mono_bold", size=5.2, color=PALETTE["muted"], align="right")
+    page.text(px + pw - 14.0, dg_y + 10.0, "MAX 2 GREEN/SLOT (EVEN)  |  3RD = -1 SECRET", font="mono_bold", size=5.0, color=PALETTE["muted"], align="right")
 
-    # Four spacious Shield Slots; each carries a spot for a Glitched Shield Slot marker
+    # Four spacious Shield Slots; each holds up to 2 Green cubes (1 Shield purges all in slot)
     d_box_x = px + 9.0
     d_box_w = pw - 18.0
     slot_gap = 6.0
     slot_w = (d_box_w - 3 * slot_gap) / 4.0
     slot_y, slot_h = dg_y + 20.0, 78.0
-    slot_tags = ("ACTIVE (START)", "START GLITCHED", "UNLOCKS AT L2", "UNLOCKS AT L4")
+    slot_tags = ("ACTIVE (START)", "START GLITCHED (1G)", "UNLOCKS AT L2", "UNLOCKS AT L4")
     for sl in range(4):
         sx = d_box_x + sl * (slot_w + slot_gap)
         page.rounded_rect(sx, slot_y, slot_w, slot_h, r=3.0, stroke=PALETTE["border"], fill=PALETTE["white"] if sl < 2 else PALETTE["paper_tint"], line_width=0.85, dash=(3.0, 2.0))
         page.text(sx + slot_w / 2.0, slot_y + 11.0, f"SHIELD SLOT {sl + 1}", font="bold", size=6.4, color=PALETTE["ink"], align="center")
-        page.text(sx + slot_w / 2.0, slot_y + 20.0, slot_tags[sl], font="mono", size=4.8, color=PALETTE["muted"], align="center")
+        page.text(sx + slot_w / 2.0, slot_y + 20.0, slot_tags[sl], font="mono", size=4.6, color=PALETTE["muted"], align="center")
         # Die placement square in center
         ds_sz = 30.0
         page.rounded_rect(sx + (slot_w - ds_sz) / 2.0, slot_y + 25.0, ds_sz, ds_sz, r=2.5, stroke=PALETTE["rule"], fill=PALETTE["white"], line_width=0.5)
@@ -1117,7 +1117,7 @@ def render_player_board(
         # Glitched marker slot at bottom
         mk_w = slot_w - 12.0
         page.rect(sx + 6.0, slot_y + 60.0, mk_w, 13.0, stroke=PALETTE["red"], fill=PALETTE["red_light"], line_width=0.5, dash=(2.0, 1.5))
-        page.text(sx + slot_w / 2.0, slot_y + 68.5, "GLITCHED SLOT", font="mono_bold", size=4.6, color=PALETTE["red"], align="center")
+        page.text(sx + slot_w / 2.0, slot_y + 68.5, "GLITCHED (MAX 2G)", font="mono_bold", size=4.4, color=PALETTE["red"], align="center")
 
     # --- 3C: Embedded Defense Grid Track (Bottom of In Production, h = 79) ---
     st_y = py + 235.0
@@ -1210,7 +1210,7 @@ def render_company_cards_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x CLIENT COMPANY CARDS [PAGE 5/6]",
-        right_tag="PNP PROTOTYPE v0.44.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.45.0 // US LETTER",
     )
 
     page.text(
@@ -1258,7 +1258,7 @@ def render_white_hat_dossiers_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x WHITE HAT DOSSIER CARDS [PAGE 6/6]",
-        right_tag="PNP PROTOTYPE v0.44.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.45.0 // US LETTER",
     )
 
     page.text(
@@ -1309,7 +1309,7 @@ def render_agent_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // CENTRAL ROGUE AGENT & MARKET SHARE BOARD [1/2]",
-        right_tag="PNP PROTOTYPE v0.44.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.45.0 // US LETTER",
     )
 
     # Top Title Bar inside board
@@ -1380,7 +1380,7 @@ def render_agent_board(page: PDFPage) -> None:
             "green",
             "{GREEN} GREEN // MALWARE",
             "1ST TIE",
-            "**P4 Unblocked:** 1 shield slot -> **Glitched Shield Slot** *(max Defense Cap)*.",
+            "**P4 Unblocked:** Assign evenly to Shield Slots *(max 2 {GREEN}/slot)*; **3rd** {GREEN} = **Defense Grid Overflow** (**-1 Secret**).",
             "**Target Lock:** Place 1 green cube on next space of **2 Research Tracks** w/o green (**2x {RESEARCH}** to advance; unplaceable -> glitch 1 slot).",
             104.5,
         ),
@@ -1481,11 +1481,12 @@ def render_agent_board(page: PDFPage) -> None:
     page.rect(g_x + 6.0, mb_y, g_w - 12.0, 14.5, stroke=PALETTE["ink"], fill=PALETTE["ink"], line_width=0.6)
     page.text(g_x + g_w / 2.0, mb_y + 10.2, "MARKET LEADER BONUS & TIEBREAKERS", font="bold", size=6.6, color=PALETTE["white"], align="center")
     page.rich_paragraph(
-        g_x + 10.0, mb_y + 24.5, g_w - 20.0,
+        g_x + 10.0, mb_y + 23.0, g_w - 20.0,
         "**Bonus (no Patient Zeros):** **1st +3**, **2nd +1** Secrets *(ties share)*.\n"
         "**When:** End of P6 if a **Red Secret** banked, & **Game End** *(not Wipeout)*.\n"
+        "**2P SETEC Corp ({BLACK}):** Starts **0**; **+1** MS if **>=1** {RED} exits tray; ranks in MLB.\n"
         "**Ties:** Market Share > $ > Ready Colored > {RESEARCH} > Fewest Under Dev.",
-        size=6.0, leading=8.2, color=PALETTE["ink"],
+        size=5.8, leading=7.8, color=PALETTE["ink"],
     )
 
 
@@ -1497,7 +1498,7 @@ def render_market_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // SOFTWARE MODULE MARKET & CENTRAL SUPPLY [2/2]",
-        right_tag="PNP PROTOTYPE v0.44.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.45.0 // US LETTER",
     )
 
     # Top Title Bar
@@ -1601,8 +1602,8 @@ def render_market_board(page: PDFPage) -> None:
     page.text(48.0, fy + 11.8, "SETUP QUICK-REFERENCE & COMPILER PRIMING", font="bold", size=7.8, color=PALETTE["ink"])
     page.rich_paragraph(
         48.0, fy + 27.5, fw - 16.0,
-        "- **2P / 3P / 4P:** **$6** | **3 / 4 / 4** Secrets | **13 (2P) / 16 (3-4P)** Share [Max 20] | **0** {RESEARCH}\n"
-        "- **Market:** **4 / 6 / 8** dice/color | All tracks L0 | **1 Glitched Shield Slot**\n"
+        "- **2P / 3P / 4P:** **$6** | **4** Secrets | **13 (2P) / 16 (3-4P)** Share [Max 20] | **0** {RESEARCH}\n"
+        "- **Market:** **4 / 6 / 8** dice/color | All tracks L0 | **1 Glitched Slot (1G)** | 2P: **SETEC {BLACK}** at **0**\n"
         "- **Player Start:** 2 Gray + 1 Company die + 1 Purple in Ready; 1 Purple in Reserve",
         size=6.6, leading=9.5, color=PALETTE["ink"],
     )
@@ -1638,7 +1639,7 @@ def render_master_dice_reference(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // MASTER DICE PIP & ABILITY VISUAL AID [1/4]",
-        right_tag="PNP PROTOTYPE v0.44.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.45.0 // US LETTER",
     )
 
     page.rect(40.0, 32.0, 712.0, 24.0, stroke=PALETTE["ink"], fill=PALETTE["ink"], line_width=1.0)
@@ -1760,7 +1761,7 @@ def render_master_dice_reference(page: PDFPage) -> None:
             "CHOICE FACES, SHIELDS & GLITCHED SLOTS",
             (
                 "- **Slash ( / ):** Choose **1** option in Phase 1 Step 4 *(e.g. Red Face 1: +1 Market Share OR +$1)*. **Ampersand ( & ):** gain **both**.\n"
-                "- **Shields:** only Gray and Purple show shields, all **Block 1 Any**. Assign shields to **Glitched Shield Slots** in P1 Step 4 to purge them in P4 (die -> Scanned Box; no block), or clean via Green Secret exit / G1.\n"
+                "- **Shields:** only Gray and Purple show shields, all **Block 1 Any**. Each slot holds max 2 {GREEN} (even); 3rd = **-1 Secret**. Assign shields to **Glitched Slots** in P1 Step 4 to purge all {GREEN} in that slot in P4 (die -> Scanned Box; no block), or clean via Green Secret / G1.\n"
                 "- **Secret Faces:** Secret faces (Face 5) may be rerolled or kept normally during rerolls."
             ),
         ),
@@ -1897,7 +1898,7 @@ def render_four_player_round_reference_cards(page: PDFPage) -> None:
         ),
         (
             "P4: ATTACK RESOLUTION (Simultaneous)",
-            "Shields on **Glitched Slots** purge the slot (die -> **Scanned Box**; no block). Split remaining **Any** shields (all must block). Unblocked: {RED} **-1 Share** | {BLUE} **-1 Secret** (**-2** in **v3.0**) | {GREEN} **1 Glitched Slot**. **Target Lock** *(tie {GREEN} > {BLACK} > {BLUE} > {RED})*: {GREEN} +green on 2 tracks (2x {RESEARCH}) | {BLACK} Override Used (-2 Sec if used) | {BLUE} 1 Gray -> Processing (0 Sec) | {RED} -2 Share, +2 to lowest non-locked. Recycle {RED}{BLUE}{GREEN} -> Cup. **End Check:** Wipeout, PZ, **Market Collapse**.",
+            "Shields on **Glitched Slots** purge all {GREEN} in slot (die -> **Scanned Box**; no block). Split remaining **Any** shields (all must block). Unblocked: {RED} **-1 Share** | {BLUE} **-1 Secret** (**-2** in **v3.0**) | {GREEN} **even to slots** (max 2; 3rd = **-1 Secret**). **Target Lock** *(tie {GREEN} > {BLACK} > {BLUE} > {RED})*: {GREEN} +green on 2 tracks (2x {RESEARCH}) | {BLACK} Override Used (-2 Sec if used) | {BLUE} 1 Gray -> Processing (0 Sec) | {RED} -2 Share, +2 to lowest non-locked. Recycle {RED}{BLUE}{GREEN} -> Cup *(2P: {BLACK} +1 MS if >=1 {RED})*. **End Check:** Wipeout, PZ, **Market Collapse**.",
         ),
         (
             "P5: OPERATIONS (Clockwise from First Player)",
@@ -2260,7 +2261,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated: List[str] = []
 
     # 1. Player Terminal Mats & Split Cards (6 pages: 4x Mats with vertical resource holders, expanded PR & FIFO Processing Box + 1x Company Cards + 1x White Hat Cards)
-    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.44.0)")
+    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.45.0)")
     for idx in range(1, 5):
         p = doc_players.add_page()
         render_player_board(p, idx)
@@ -2302,7 +2303,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated.append(path_versions)
 
     # 5. Combined Master Print-and-Play Pack (All 14 pages)
-    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.44.0)")
+    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.45.0)")
     for sub_doc in (doc_central, doc_players, doc_dice, doc_versions):
         for pg in sub_doc.pages:
             doc_master.pages.append(pg)

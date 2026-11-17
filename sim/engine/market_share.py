@@ -39,6 +39,17 @@ def survivors(state: "GameState") -> List["PlayerState"]:
 # ---------------------------------------------------------------------------
 # v0.37.0 Market Leader Bonus (pure helpers: no state mutation, no RNG)
 # ---------------------------------------------------------------------------
+SETEC_CORP_ID = -1
+
+
+def include_setec_in_shares(shares: Dict[int, int], state: Any) -> Dict[int, int]:
+    """Returns a copy of ``shares`` including SETEC Corp (id=-1) when active in 2P."""
+    out = dict(shares)
+    if getattr(state, "setec_corp_active", False) and out:
+        out[SETEC_CORP_ID] = int(getattr(state, "setec_market_share", 0))
+    return out
+
+
 def market_share_places(shares: Dict[int, int]) -> Dict[int, int]:
     """Competition ranking (1-based) of player_id -> place by Market Share, highest first.
 

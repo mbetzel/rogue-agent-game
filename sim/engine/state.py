@@ -291,7 +291,6 @@ class PlayerState:
         self.contested_red_chosen = 0
         self.purchases_by_color: Dict[str, int] = {}  # Central Market purchases incl. Algorithmic Arbitrage
         # v0.38.0 candidate (spec v380 §3.2 / §11). Plain ints / dicts / lists so fast_clone copies them.
-        self.glitched_shield_slots = 0
         self.slots_glitched_this_round = 0  # §14.3 glitched_slots_per_round_cap
         self.blocked_blue_this_round = 0
         self.slot_clear_used_this_phase5 = False
@@ -336,6 +335,12 @@ class PlayerState:
         self.f6_y1_cash_activations: int = 0
         self.f6_y1_secret_activations: int = 0
         self.slots_purged_by_shields_total: int = 0
+        # v0.45.0 Glitched Shield Slots Rework & Operator Telemetry
+        self.operator_scanned_colors_count: int = 0
+        self.operator_research_harvested: int = 0
+        self.defense_grid_overflow_count: int = 0
+        self.secrets_lost_to_overflow: int = 0
+        self.cubes_purged_by_shields_total: int = 0
         self.player_id = player_id
         self.bot = bot
         self.money = money
@@ -424,6 +429,8 @@ class PlayerState:
             self.upgrade_discount = 0 if upgrade_discount is None else upgrade_discount
 
         self.money_spent_regain = 0
+        self.shield_slots: List[int] = [0] * max(1, int(self.defense_capacity))
+        self._extra_glitched_slots: int = 0
         self.scanned_dice_purchased_this_turn = 0
         self.triage_milestones_claimed = []
         self.temp_release_bandwidth_bonus = 0
@@ -554,6 +561,73 @@ class PlayerState:
         self.secrets += amount
         if amount:
             self.secrets_by_source[source] = self.secrets_by_source.get(source, 0) + amount
+
+    def lose_secrets(self, amount: int, source: str = "other") -> None:
+        """Deducts ``amount`` Corporate Secrets with a ledger entry."""
+        if amount > 0:
+            self.gain_secrets(-int(amount), source)
+
+    def sync_shield_slots(self) -> None:
+        """Ensures ``shield_slots`` length matches ``defense_capacity`` (new slots arrive clean)."""
+        cap = max(1, int(self.defense_capacity))
+        while len(self.shield_slots) < cap:
+            self.shield_slots.append(0)
+
+    @property
+    def clean_shield_slots_count(self) -> int:
+        self.sync_shield_slots()
+        return sum(1 for c in self.shield_slots if c == 0)
+
+    @property
+    def glitched_shield_slots_count(self) -> int:
+        self.sync_shield_slots()
+        return sum(1 for c in self.shield_slots if c >= 1)
+
+    @property
+    def total_green_cubes(self) -> int:
+        self.sync_shield_slots()
+        return sum(self.shield_slots)
+
+    @property
+    def max_green_capacity(self) -> int:
+        return 2 * max(1, int(self.defense_capacity))
+
+    @property
+    def glitched_shield_slots(self) -> int:
+        return self.glitched_shield_slots_count + getattr(self, "_extra_glitched_slots", 0)
+
+    @glitched_shield_slots.setter
+    def glitched_shield_slots(self, value: int) -> None:
+        self.sync_shield_slots()
+        raw = max(0, int(value))
+        cap = len(self.shield_slots)
+        self._extra_glitched_slots = max(0, raw - cap)
+        val = min(cap, raw)
+        cur = self.glitched_shield_slots_count
+        if val == cur:
+            return
+        if val < cur:
+            for i in range(cap - 1, -1, -1):
+                if self.shield_slots[i] > 0:
+                    self.shield_slots[i] = 0
+                    cur -= 1
+                    if cur == val:
+                        break
+        else:
+            for i in range(cap):
+                if self.shield_slots[i] == 0:
+                    self.shield_slots[i] = 1
+                    cur += 1
+                    if cur == val:
+                        break
+
+    @property
+    def defense_grid_overflows(self) -> int:
+        return self.defense_grid_overflow_count
+
+    @defense_grid_overflows.setter
+    def defense_grid_overflows(self, value: int) -> None:
+        self.defense_grid_overflow_count = int(value)
 
     def gain_money(self, amount: int, source: str = "other") -> None:
         """Cash gain with a ledger entry (telemetry only; behaviour = ``money += amount``)."""
@@ -821,6 +895,7 @@ class PlayerState:
                 self.defense_level = 2
                 self.defense_capacity = max(self.defense_capacity, 4)
                 self._has_passive_firewall = True
+            self.sync_shield_slots()
         elif t == "PATENT":
             if self.patent_level == 0:
                 self.patent_level = 1
@@ -1404,6 +1479,17 @@ class GameState:
     dominant_color_counts: Dict[str, int] = field(
         default_factory=lambda: {"red": 0, "blue": 0, "green": 0, "black": 0}
     )
+    # --- v0.45.0 2P SETEC Corp Neutral Black Cube ---
+    setec_market_share: int = 0
+    setec_corp_active: bool = False
+    setec_corp_advances_total: int = 0
+    setec_corp_mlb_1st_places: int = 0
+    setec_corp_mlb_2nd_places: int = 0
+    setec_corp_mlb_secrets_absorbed: int = 0
+
+    @property
+    def setec_corp_final_market_share(self) -> int:
+        return self.setec_market_share
 
     def __post_init__(self) -> None:
         self.tower = CubeTower(self.config)

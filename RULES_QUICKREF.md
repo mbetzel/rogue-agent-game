@@ -1,4 +1,4 @@
-# Too Many Secrets — Quick Reference Rules (v0.44.0)
+# Too Many Secrets — Quick Reference Rules (v0.45.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Format:** Simultaneous / Turn-Based Hybrid
 
@@ -38,10 +38,9 @@ You are a **White Hat Operative** contracted to defend a **Client Company** agai
    * **Money:** `$6`
    * **Research:** `0 🔬`
    * **Corporate Secrets:**
-     * **2 Players:** `3 Secrets`
-     * **3–4 Players:** `4 Secrets`
+     * **2–4 Players:** `4 Secrets`
    * **Starting Market Share (also maximum track cap):**
-     * **2 Players:** `13`
+     * **2 Players:** `13` *(plus place the neutral **SETEC Corp Black Cube** on **`0`**)*
      * **3–4 Players:** `16`
 6. Randomly assign the **First Player Marker**.
 
@@ -115,12 +114,12 @@ Collect all resources produced by dice still deployed **In Production** (Income 
 ### Phase 4: Attack Resolution (Simultaneous)
 
 Calculate total attack cubes in the tray: **Red**, **Blue**, and **Green**. Each player simultaneously resolves their Shield Slots:
-* **Purge Glitched Slots:** Any shield die on a **Glitched Shield Slot** removes that green cube and moves to the **Scanned Box** (does not block tower cubes or earn Defense L4 cash).
+* **Purge Glitched Slots:** Any shield die on a **Glitched Shield Slot** purges **all** Green cubes (`1` or `2`) in that slot and moves to the **Scanned Box** (does not block tower cubes or earn Defense L4 cash).
 * **Mandatory Blocking:** Every remaining active shield on a clean slot must block an attack cube if any unblocked cubes remain. You choose how to distribute shields among colors.
 * **Unblocked Cube Penalties:**
   * **Red (Market Manipulation):** Lose **`1` Market Share** per unblocked Red cube (minimum 0).
   * **Blue (Spyware):** Lose **`1` Corporate Secret** per unblocked Blue cube during **`v1.0` / `v2.0`**; lose **`2` Corporate Secrets** per unblocked Blue cube during **`v3.0`** (Critical Breach).
-  * **Green (Malware):** Turn **`1` Shield Slot** into a **Glitched Shield Slot** per unblocked Green cube (capped at your Defense Capacity).
+  * **Green (Malware):** Distribute unblocked Green cubes as evenly across Shield Slots as possible (`max 2` per slot). If all slots already hold `2` Green cubes, any further Green cube triggers **Defense Grid Overflow**: lose **`1` Corporate Secret**.
 * **Post-Damage & Target Lock Signature Attacks:**
   * **Defense Grid Level 4:** Gain **`+$1` per Attack Cube blocked** this phase (naturally capped at `$4`).
   * **Target Lock Signature Attack (Dominant Tray Color, Tie Priority `Green > Black > Blue > Red`):** If your Signature Cube exited in Phase 2, resolve the Signature Attack matching the most populous cube color in the tray (fizzles if `0` cubes exited):
@@ -128,7 +127,7 @@ Calculate total attack cubes in the tray: **Red**, **Blue**, and **Green**. Each
     * **Black:** Mark your **Institutional Override** as **`Used`** for this Version; if already used, lose **`2` Corporate Secrets**.
     * **Blue:** Move **`1` Gray Legacy Die** (from `Scanned Box`, else `In Production`) to the back of your **Processing Box** (`0` Secrets when triaged).
     * **Red:** Lose **`2` Market Share**; the other *(non-locked)* surviving player with the least Market Share gains **`2`** *(if tied, you choose)*.
-  * **Recycle Cubes:** Place all exited Red, Blue, and Green Attack Cubes back into the **Staging Cup** for next round.
+  * **Recycle Cubes & SETEC Corp (2P):** Place all exited Red, Blue, and Green Attack Cubes back into the **Staging Cup** for next round. In **2-player games**, if **any Red cubes (`>= 1`) exited the tray**, move the **SETEC Corp Black Cube** up **`+1` Market Share** (max `20`).
 * **End Game Check:**
   * If a surviving player's Secrets drop to `<= 0`, they become **Patient Zero** (eliminated; current round is the Final Round).
   * If a surviving player reaches `0` Market Share, a **Market Collapse** is triggered (current round is the Final Round; player is NOT eliminated).
@@ -164,7 +163,7 @@ Starting with the First Player, each player takes their Operations Turn:
      * **Green:** `+2 Secrets` and clean `1` Glitched Shield Slot
      * **Purple:** `+1 Secret`
    * **Queue Signature Cube:** When banking at least 1 Secret, if your **Operative Signature Cube** is on your mat, move it to the **Staging Cup** for next round's compile.
-4. **Market Leader Bonus Check:** If any player banked a **Red Secret** this round (Phase 3 or 6), award the **Market Leader Bonus** by current Market Share:
+4. **Market Leader Bonus Check:** If any player banked a **Red Secret** this round (Phase 3 or 6), award the **Market Leader Bonus** by current Market Share (including **SETEC Corp** in 2-player games):
    * **1st Place:** `+3 Secrets`
    * **2nd Place:** `+1 Secret`
    * *(Tied players each receive the full reward for that place. Patient Zeros are excluded).*

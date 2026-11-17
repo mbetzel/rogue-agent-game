@@ -1697,7 +1697,7 @@ WHITE_HATS: Dict[WhiteHatCode, WhiteHat] = {
         role="Tactical Staffing & Logistics Lead",
         protocol_name="Logistics Bounty",
         timing_window="Phase 3: Income",
-        description="During Phase 3 (Income), gain +1 🔬 Research Token per die currently in your Scanned Box (no fallback if empty).",
+        description="During Phase 3 (Income), gain +1 🔬 Research Token per different color die currently in your Scanned Box (no fallback if empty).",
         flavor="Redundant contractor pipelines ready on zero notice.",
         reserve_cost=5,
     ),

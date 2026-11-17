@@ -170,6 +170,8 @@ def apply_level(config: GameConfig, player: PlayerState, track: str, new_level: 
     cap = capacity_for(config, t, new_level)
     if cap is not None:
         setattr(player, CAPACITY_ATTR[t], cap)
+        if t == "DEFENSE":
+            player.sync_shield_slots()
     player.level_reached_round.setdefault(t, {}).setdefault(new_level, round_number)
     if t == "TRIAGE" and new_level == 2 and getattr(config, "triage_l2_milestone_secrets", 0) > 0:
         if "triage_l2" not in player.triage_milestones_claimed:

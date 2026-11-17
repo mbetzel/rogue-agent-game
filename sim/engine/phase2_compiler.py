@@ -398,7 +398,7 @@ def resolve_corruption_space(
         if space.demote_dice > 0 and getattr(engine.config, "glitched_shield_slots_enabled", False):
             from sim.engine import secret_faces
             for player in engine.state.players:
-                secret_faces.glitch_slots(player, space.demote_dice, "corruption")
+                secret_faces.glitch_slots(player, space.demote_dice, "corruption", round_num=engine.state.current_round)
         elif space.demote_dice > 0:
             for player in engine.state.players:
                 rolled, comm = commitments_by_pid.get(player.player_id, (list(player.ready_dice) if hasattr(player, "ready_dice") else [], {}))
@@ -467,7 +467,7 @@ def resolve_corruption_space(
         if getattr(engine.config, "glitched_shield_slots_enabled", False):
             from sim.engine import secret_faces
             for player in targets:
-                secret_faces.glitch_slots(player, space.demote_dice, "corruption")
+                secret_faces.glitch_slots(player, space.demote_dice, "corruption", round_num=engine.state.current_round)
         else:
             for player in targets:
                 rolled, comm = commitments_by_pid.get(player.player_id, (list(player.ready_dice) if hasattr(player, "ready_dice") else [], {}))

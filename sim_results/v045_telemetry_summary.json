@@ -1,0 +1,302 @@
+{
+  "2P": {
+    "v044_roster": {
+      "games": 1000,
+      "mean_rounds": 7.187,
+      "singularity_pct": 9.5,
+      "patient_zero_pct": 43.0,
+      "market_collapse_pct": 35.9,
+      "total_wipeout_pct": 11.6,
+      "v1_breach_pct": 19.2,
+      "overflow_games_pct": 0.0,
+      "mean_overflow_events": 0.0,
+      "mean_secrets_lost_overflow": 0.0,
+      "mean_slots_purged": 7.017,
+      "mean_cubes_purged": 7.017,
+      "mean_final_green_cubes_per_game": 3.719,
+      "mean_final_green_util_pct": 41.2488908606921,
+      "mean_peak_player_green_util_pct": 46.325,
+      "mean_green_clamped": 0.044,
+      "operator": {
+        "appearances": 352,
+        "win_rate_pct": 45.73863636363637,
+        "mean_research_per_game": 0.5198863636363636,
+        "mean_triggers_per_game": 0.4318181818181818,
+        "mean_research_per_trigger": 1.2039473684210527
+      },
+      "setec_corp": null,
+      "outliers": {
+        "fastest_v1_breach": {
+          "seed": 236,
+          "round": 1,
+          "end_reason": "patient_zero"
+        },
+        "shortest_game": {
+          "seed": 236,
+          "rounds": 1,
+          "end_reason": "patient_zero"
+        },
+        "longest_game": {
+          "seed": 152,
+          "rounds": 12,
+          "end_reason": "total_wipeout"
+        }
+      }
+    },
+    "v045_roster": {
+      "games": 1000,
+      "mean_rounds": 7.471,
+      "singularity_pct": 6.3,
+      "patient_zero_pct": 47.0,
+      "market_collapse_pct": 34.1,
+      "total_wipeout_pct": 12.6,
+      "v1_breach_pct": 11.0,
+      "overflow_games_pct": 55.1,
+      "mean_overflow_events": 2.835,
+      "mean_secrets_lost_overflow": 2.835,
+      "mean_slots_purged": 7.51,
+      "mean_cubes_purged": 9.748,
+      "mean_final_green_cubes_per_game": 6.082,
+      "mean_final_green_util_pct": 67.21927497789567,
+      "mean_peak_player_green_util_pct": 80.025,
+      "mean_green_clamped": 0.033,
+      "operator": {
+        "appearances": 352,
+        "win_rate_pct": 46.875,
+        "mean_research_per_game": 0.5369318181818182,
+        "mean_triggers_per_game": 0.44886363636363635,
+        "mean_research_per_trigger": 1.1962025316455696
+      },
+      "setec_corp": {
+        "games": 1000,
+        "mean_final_ms": 6.333,
+        "place_1_pct": 44.0,
+        "place_2_pct": 18.1,
+        "place_3_pct": 37.9,
+        "mean_advances": 6.333,
+        "mean_mlb_1st_events": 0.39,
+        "mean_mlb_2nd_events": 0.383,
+        "human_mlb_share_pct": 85.94570135746606,
+        "mean_human_mlb_secrets": 9.497,
+        "mean_setec_mlb_absorbed": 1.553
+      },
+      "outliers": {
+        "fastest_v1_breach": {
+          "seed": 48,
+          "round": 2,
+          "end_reason": "total_wipeout"
+        },
+        "max_overflow": {
+          "seed": 927,
+          "overflow_events": 25,
+          "secrets_lost": 25,
+          "rounds": 9
+        },
+        "max_setec_ms": {
+          "seed": 268,
+          "setec_ms": 12,
+          "rounds": 12,
+          "end_reason": "patient_zero"
+        },
+        "shortest_game": {
+          "seed": 48,
+          "rounds": 2,
+          "end_reason": "total_wipeout"
+        },
+        "longest_game": {
+          "seed": 268,
+          "rounds": 12,
+          "end_reason": "patient_zero"
+        }
+      }
+    }
+  },
+  "3P": {
+    "v044_roster": {
+      "games": 1000,
+      "mean_rounds": 7.415,
+      "singularity_pct": 6.4,
+      "patient_zero_pct": 69.0,
+      "market_collapse_pct": 19.4,
+      "total_wipeout_pct": 5.2,
+      "v1_breach_pct": 18.6,
+      "overflow_games_pct": 0.0,
+      "mean_overflow_events": 0.0,
+      "mean_secrets_lost_overflow": 0.0,
+      "mean_slots_purged": 10.536,
+      "mean_cubes_purged": 10.536,
+      "mean_final_green_cubes_per_game": 5.636,
+      "mean_final_green_util_pct": 40.983129726585226,
+      "mean_peak_player_green_util_pct": 47.79583333333333,
+      "mean_green_clamped": 0.027,
+      "operator": {
+        "appearances": 516,
+        "win_rate_pct": 34.883720930232556,
+        "mean_research_per_game": 0.5581395348837209,
+        "mean_triggers_per_game": 0.4903100775193798,
+        "mean_research_per_trigger": 1.1383399209486167
+      },
+      "setec_corp": null,
+      "outliers": {
+        "fastest_v1_breach": {
+          "seed": 78,
+          "round": 2,
+          "end_reason": "patient_zero"
+        },
+        "shortest_game": {
+          "seed": 78,
+          "rounds": 2,
+          "end_reason": "patient_zero"
+        },
+        "longest_game": {
+          "seed": 382,
+          "rounds": 12,
+          "end_reason": "singularity"
+        }
+      }
+    },
+    "v045_roster": {
+      "games": 1000,
+      "mean_rounds": 6.923,
+      "singularity_pct": 3.1,
+      "patient_zero_pct": 74.5,
+      "market_collapse_pct": 17.6,
+      "total_wipeout_pct": 4.8,
+      "v1_breach_pct": 20.4,
+      "overflow_games_pct": 57.8,
+      "mean_overflow_events": 3.427,
+      "mean_secrets_lost_overflow": 3.427,
+      "mean_slots_purged": 10.022,
+      "mean_cubes_purged": 12.574,
+      "mean_final_green_cubes_per_game": 8.661,
+      "mean_final_green_util_pct": 63.89052817940395,
+      "mean_peak_player_green_util_pct": 82.825,
+      "mean_green_clamped": 0.008,
+      "operator": {
+        "appearances": 516,
+        "win_rate_pct": 35.65891472868217,
+        "mean_research_per_game": 0.5135658914728682,
+        "mean_triggers_per_game": 0.4631782945736434,
+        "mean_research_per_trigger": 1.108786610878661
+      },
+      "setec_corp": null,
+      "outliers": {
+        "fastest_v1_breach": {
+          "seed": 78,
+          "round": 2,
+          "end_reason": "patient_zero"
+        },
+        "max_overflow": {
+          "seed": 608,
+          "overflow_events": 30,
+          "secrets_lost": 30,
+          "rounds": 9
+        },
+        "shortest_game": {
+          "seed": 78,
+          "rounds": 2,
+          "end_reason": "patient_zero"
+        },
+        "longest_game": {
+          "seed": 555,
+          "rounds": 12,
+          "end_reason": "singularity"
+        }
+      }
+    }
+  },
+  "4P": {
+    "v044_roster": {
+      "games": 1000,
+      "mean_rounds": 7.084,
+      "singularity_pct": 5.7,
+      "patient_zero_pct": 72.0,
+      "market_collapse_pct": 20.4,
+      "total_wipeout_pct": 1.9,
+      "v1_breach_pct": 22.2,
+      "overflow_games_pct": 0.0,
+      "mean_overflow_events": 0.0,
+      "mean_secrets_lost_overflow": 0.0,
+      "mean_slots_purged": 13.238,
+      "mean_cubes_purged": 13.238,
+      "mean_final_green_cubes_per_game": 7.337,
+      "mean_final_green_util_pct": 40.1455460713504,
+      "mean_peak_player_green_util_pct": 48.07916666666667,
+      "mean_green_clamped": 0.025,
+      "operator": {
+        "appearances": 684,
+        "win_rate_pct": 23.68421052631579,
+        "mean_research_per_game": 0.6710526315789473,
+        "mean_triggers_per_game": 0.5497076023391813,
+        "mean_research_per_trigger": 1.2207446808510638
+      },
+      "setec_corp": null,
+      "outliers": {
+        "fastest_v1_breach": {
+          "seed": 53,
+          "round": 2,
+          "end_reason": "patient_zero"
+        },
+        "shortest_game": {
+          "seed": 53,
+          "rounds": 2,
+          "end_reason": "patient_zero"
+        },
+        "longest_game": {
+          "seed": 109,
+          "rounds": 12,
+          "end_reason": "singularity"
+        }
+      }
+    },
+    "v045_roster": {
+      "games": 1000,
+      "mean_rounds": 6.646,
+      "singularity_pct": 3.0,
+      "patient_zero_pct": 78.0,
+      "market_collapse_pct": 17.9,
+      "total_wipeout_pct": 1.1,
+      "v1_breach_pct": 24.3,
+      "overflow_games_pct": 55.9,
+      "mean_overflow_events": 3.703,
+      "mean_secrets_lost_overflow": 3.703,
+      "mean_slots_purged": 12.606,
+      "mean_cubes_purged": 15.535,
+      "mean_final_green_cubes_per_game": 10.968,
+      "mean_final_green_util_pct": 60.70400708434802,
+      "mean_peak_player_green_util_pct": 82.62916666666666,
+      "mean_green_clamped": 0.008,
+      "operator": {
+        "appearances": 684,
+        "win_rate_pct": 22.953216374269005,
+        "mean_research_per_game": 0.5701754385964912,
+        "mean_triggers_per_game": 0.5014619883040936,
+        "mean_research_per_trigger": 1.1370262390670554
+      },
+      "setec_corp": null,
+      "outliers": {
+        "fastest_v1_breach": {
+          "seed": 53,
+          "round": 2,
+          "end_reason": "patient_zero"
+        },
+        "max_overflow": {
+          "seed": 721,
+          "overflow_events": 38,
+          "secrets_lost": 38,
+          "rounds": 8
+        },
+        "shortest_game": {
+          "seed": 53,
+          "rounds": 2,
+          "end_reason": "patient_zero"
+        },
+        "longest_game": {
+          "seed": 109,
+          "rounds": 12,
+          "end_reason": "singularity"
+        }
+      }
+    }
+  }
+}

@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Section 6 (v0.44.0)
+# Too Many Secrets — Rules Section 6 (v0.45.0)
 
 Split out of `RULES.md`; this file is canonical for Section 6.
 
@@ -76,7 +76,7 @@ Each Version Card defines its Corruption Track (`4` spaces on `v1.0`, `5` spaces
 In `v0.38.0`, every Client Company starts with identical hardware (all 4 tracks at Level 0) and resources, except the color of its starting colored die; player identity comes from the Institutional Override (Client Company) and the Signature Protocol (White Hat Dossier).
 
 #### 1. The 6 Client Companies (`Company`) — Institutional Overrides
-Each player contracts with 1 enterprise Client Company for the duration of the match. Your company grants an Institutional Override that may be activated **once per SETEC Version** (`v1.0`, `v2.0`, `v3.0`); DTO *Slush Fund* is **once per game**. All companies start at Defense Capacity `2`, Triage Bandwidth `2`, Release Bandwidth `4`, all tracks Level 0, `$6`, `3` Secrets (2 players) or `4` (3–4 players), `13` Market Share (2 players), `16` (3 players) or `17` (4 players), `0 🔬`, and 2 Gray Legacy dice + 1 Purple die + 1 starting colored die of the company's color `[TUNE]` (Red: Meridian, Prometheus; Blue: DTO, Aegis; Green: Omnidyne, Helix), taken from that color's Central Market stack:
+Each player contracts with 1 enterprise Client Company for the duration of the match. Your company grants an Institutional Override that may be activated **once per SETEC Version** (`v1.0`, `v2.0`, `v3.0`); DTO *Slush Fund* is **once per game**. All companies start at Defense Capacity `2`, Triage Bandwidth `1`, Release Bandwidth `4`, all tracks Level 0, `$6`, `4` Secrets (`2–4` players), `13` Market Share (2 players) or `16` (3–4 players), `0 🔬`, and 2 Gray Legacy dice + 1 Purple die + 1 starting colored die of the company's color `[TUNE]` (Red: Meridian, Prometheus; Blue: DTO, Aegis; Green: Omnidyne, Helix), taken from that color's Central Market stack:
 
 | Company Code | Company Name | Sector | Institutional Override | Timing Window | Description | Flavor Quote |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -92,7 +92,7 @@ Each player is a specialist **White Hat Operative**. Your White Hat Dossier defi
 
 | White Hat Code | Operative Name | Role | Signature Protocol | Timing Window | Description | Flavor Quote |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **OPERATOR** | **The Operator** | Tactical Staffing & Logistics Lead | *Logistics Bounty* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain **`+1 🔬` Research Token** per die currently in your **Scanned Box**. | *"Dedicated telemetry pipelines harvest live operational diagnostics on zero notice."* |
+| **OPERATOR** | **The Operator** | Tactical Staffing & Logistics Lead | *Logistics Bounty* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain **`+1 🔬` Research Token** per different color die currently in your **Scanned Box** (all colors including Gray, Purple, and Yellow). | *"Dedicated telemetry pipelines harvest live operational diagnostics on zero notice."* |
 | **PHREAKER** | **The Phreaker** | Hardware Intrusion Specialist | *Jumper Diagnostics* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain **`+$1` cash** AND **`+1` Release Bandwidth** this round (applies in Phase 6 Step 3). | *"Raw voltage pulses extract signal from dormant silicon."* |
 | **ACOUSTIC** | **The Acoustic** | Side-Channel Cryptanalyst | *Resonance Sensor* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain **`+$1` cash** per unique colored cube that exited the Cube Tower this round (including **Operative Signature Cubes**), up to **`+$5`** max. | *"Harmonic resonance frequencies decode physical chassis vibrations."* |
 | **SPOOK** | **The Spook** | Covert Intelligence Specialist | *Burn Notice* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain an immediate **`+$2` cash payout**; in addition, you may optionally **permanently return `1` owned Gray Legacy die to the box** to gain **`+$3` cash**. | *"Scorched-earth protocols ensure zero forensic recovery."* |

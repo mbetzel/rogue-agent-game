@@ -159,41 +159,110 @@ def stranded(cfg: "GameConfig", p: "PlayerState") -> tuple:
 
 
 # ---------------------------------------------------------------------------
-# Glitched Shield Slots (INV-SF-05)
+# Glitched Shield Slots (INV-SF-05 / v0.45.0 Defense Grid Overflow)
 # ---------------------------------------------------------------------------
 def effective_capacity(p: "PlayerState") -> int:
-    return max(0, int(p.defense_capacity) - int(getattr(p, "glitched_shield_slots", 0)))
+    return p.clean_shield_slots_count
 
 
-def glitch_slots(p: "PlayerState", n: int, source: str) -> int:
-    """Glitches up to ``n`` shield slots, capped at Defense Grid capacity (excess has no effect)."""
+def trigger_defense_grid_overflow(player: "PlayerState", round_num: int = 0) -> None:
+    """Deducts 1 Corporate Secret on Defense Grid Overflow and checks for Patient Zero breach."""
+    player.lose_secrets(1, "defense_grid_overflow")
+    player.defense_grid_overflow_count += 1
+    player.secrets_lost_to_overflow += 1
+    if player.secrets <= 0 and not player.is_patient_zero:
+        player.is_patient_zero = True
+        if round_num > 0:
+            player.elimination_round = round_num
+        player.elimination_reason = "Total Breach (<= 0 Secrets)"
+        player.breach_depth = max(0, -player.secrets)
+
+
+def apply_green_cube_infections(
+    player: "PlayerState",
+    count: int,
+    source: str = "green_cube",
+    round_num: int = 0,
+) -> int:
+    """Distributes incoming unblocked Green cubes evenly across slots (lowest count first).
+    Triggers Defense Grid Overflow when all slots are at 2 cubes.
+    Returns the number of overflow cubes."""
+    player.sync_shield_slots()
+    overflow_count = 0
+    for _ in range(max(0, int(count))):
+        min_cubes = min(player.shield_slots)
+        if min_cubes < 2:
+            target_idx = player.shield_slots.index(min_cubes)
+            player.shield_slots[target_idx] += 1
+            player.slots_glitched_this_round += 1
+            player.slots_glitched_by_source[source] = player.slots_glitched_by_source.get(source, 0) + 1
+            player.max_glitched_slots = max(player.max_glitched_slots, player.glitched_shield_slots_count)
+        else:
+            overflow_count += 1
+            trigger_defense_grid_overflow(player, round_num=round_num)
+    return overflow_count
+
+
+def glitch_slots(p: "PlayerState", n: int, source: str, round_num: int = 0) -> int:
+    """Infects shield slots with ``n`` Green cubes.
+
+    In v0.45.0 (``defense_grid_overflow_enabled=True``), distributes evenly up to 2 cubes/slot
+    and triggers Defense Grid Overflow on excess. In legacy configs, caps at 1 cube per clean slot.
+    Returns the number of cubes absorbed into slots.
+    """
+    p.sync_shield_slots()
     n = max(0, int(n))
-    cap = getattr(getattr(p, "config", None), "glitched_slots_per_round_cap", None)
+    cfg = getattr(p, "config", None)
+    cap = getattr(cfg, "glitched_slots_per_round_cap", None)
     if cap is not None:
         n = min(n, max(0, int(cap) - int(p.slots_glitched_this_round)))
-    room = max(0, int(p.defense_capacity) - int(p.glitched_shield_slots))
+    if n <= 0:
+        return 0
+    if getattr(cfg, "defense_grid_overflow_enabled", False):
+        overflow = apply_green_cube_infections(p, n, source=source, round_num=round_num)
+        return n - overflow
+    room = p.clean_shield_slots_count
     done = min(n, room)
+    for _ in range(done):
+        idx = p.shield_slots.index(0)
+        p.shield_slots[idx] = 1
     if done:
-        p.glitched_shield_slots += done
         p.slots_glitched_this_round += done
         p.slots_glitched_by_source[source] = p.slots_glitched_by_source.get(source, 0) + done
-        p.max_glitched_slots = max(p.max_glitched_slots, p.glitched_shield_slots)
+        p.max_glitched_slots = max(p.max_glitched_slots, p.glitched_shield_slots_count)
     return done
 
 
-def clean_slots(p: "PlayerState", n: int, how: str) -> int:
-    """Cleans up to ``n`` glitched slots. ``how``: ``"die"`` (placement), ``"face"`` (Green F1 / G1),
-    ``"graduation"`` (Phase 5 step 3b), ``"green_triage"`` (Phase 5 step 1 Green banking)."""
-    done = min(max(0, int(n)), int(p.glitched_shield_slots))
+def clean_slots_with_cubes(p: "PlayerState", n: int, how: str) -> tuple:
+    """Cleans up to ``n`` glitched slots (prioritizing 2-cube slots over 1-cube slots).
+    Returns ``(slots_cleaned, cubes_removed)``."""
+    p.sync_shield_slots()
+    target_count = min(max(0, int(n)), p.glitched_shield_slots_count)
+    done = 0
+    cubes_removed = 0
+    for _ in range(target_count):
+        best_idx = max(range(len(p.shield_slots)), key=lambda i: p.shield_slots[i])
+        if p.shield_slots[best_idx] <= 0:
+            break
+        cubes_removed += p.shield_slots[best_idx]
+        p.shield_slots[best_idx] = 0
+        done += 1
     if done:
-        p.glitched_shield_slots -= done
         attr = {
             "die": "slots_cleaned_by_die",
             "face": "slots_cleaned_by_face",
             "graduation": "slots_cleared_by_graduation",
             "green_triage": "slots_cleaned_by_green_triage",
-        }[how]
-        setattr(p, attr, getattr(p, attr) + done)
+        }.get(how)
+        if attr is not None:
+            setattr(p, attr, getattr(p, attr) + done)
+    return done, cubes_removed
+
+
+def clean_slots(p: "PlayerState", n: int, how: str) -> int:
+    """Cleans up to ``n`` glitched slots. ``how``: ``"die"`` (placement), ``"face"`` (Green F1 / G1),
+    ``"graduation"`` (Phase 5 step 3b), ``"green_triage"`` (Phase 5 step 1 Green banking)."""
+    done, _ = clean_slots_with_cubes(p, n, how)
     return done
 
 
@@ -205,20 +274,22 @@ def reset_round_flags(state: Any) -> None:
 
 
 def red_secret_payout_awards(cfg: "GameConfig", state: Any) -> dict:
-    """player_id -> (place, Secrets) for the non-Patient-Zero players by current Market Share (ties share the better
-    place; schedule by starting player count). Pure; {} when the payout is off or nobody survives."""
-    from sim.engine.market_share import market_leader_bonus_awards
+    """player_id -> (place, Secrets) for the non-Patient-Zero players (plus SETEC Corp in 2P) by current
+    Market Share (ties share the better place; schedule by starting player count). Pure; {} when off or nobody survives."""
+    from sim.engine.market_share import include_setec_in_shares, market_leader_bonus_awards
 
     sched = cfg.red_secret_payout_schedule(len(state.players))
     shares = {q.player_id: int(q.market_share or 0) for q in state.players if not q.is_patient_zero}
     if not sched or not shares:
         return {}
-    return market_leader_bonus_awards(shares, sched)
+    return market_leader_bonus_awards(include_setec_in_shares(shares, state), sched)
 
 
 def fire_round_payout(cfg: "GameConfig", state: Any) -> bool:
     """RSP-1 Phase 5 end hook (spec §14.5.3 step 2): at most one Red Secret payout per round, iff a Red Secret
     was banked this round. Credits ``gain_secrets(k, "red_secret_payout")``."""
+    from sim.engine.market_share import SETEC_CORP_ID
+
     if not cfg.is_red_secret_payout or not state.red_secret_banked_this_round:
         return False
     awards = red_secret_payout_awards(cfg, state)
@@ -227,6 +298,15 @@ def fire_round_payout(cfg: "GameConfig", state: Any) -> bool:
     by_pid = {q.player_id: q for q in state.players}
     shares, places, gains = {}, {}, {}
     for pid, (place, k) in sorted(awards.items()):
+        if pid == SETEC_CORP_ID:
+            shares[pid], places[pid], gains[pid] = int(getattr(state, "setec_market_share", 0)), place, k
+            if place == 1:
+                state.setec_corp_mlb_1st_places += 1
+            elif place == 2:
+                state.setec_corp_mlb_2nd_places += 1
+            if k > 0:
+                state.setec_corp_mlb_secrets_absorbed += k
+            continue
         q = by_pid[pid]
         shares[pid], places[pid], gains[pid] = int(q.market_share or 0), place, k
         q.red_payout_places[str(place)] = q.red_payout_places.get(str(place), 0) + 1

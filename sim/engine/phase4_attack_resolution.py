@@ -243,16 +243,18 @@ def resolve_player_defense_and_wear(
         engine.state.phase4_snapshot_round = engine.state.current_round
         engine.state.phase4_market_share_start = {p.player_id: p.market_share for p in engine.state.players}
 
-    # Step 4.1 (v0.44.0): Glitched Slot Purge Step
+    # Step 4.1 (v0.44.0 / v0.45.0): Glitched Slot Purge Step
     purged_die_ids: set = set()
     if is_v044:
+        from sim.engine import secret_faces
+
         for die in list(player.in_production_dice):
             if getattr(die, "production_role", None) == ProductionRole.PURGING_SHIELD:
                 purged_die_ids.add(id(die))
-                if player.glitched_shield_slots > 0:
-                    player.glitched_shield_slots -= 1
+                cleaned, cubes_purged = secret_faces.clean_slots_with_cubes(player, 1, "purge_shield")
                 player.purged_shields_this_round += 1
-                player.slots_purged_by_shields_total += 1
+                player.slots_purged_by_shields_total += cleaned
+                player.cubes_purged_by_shields_total += cubes_purged
                 player.in_production_dice.remove(die)
                 _reset_die(die)
                 if die.color == DieColor.WHITE:
@@ -588,10 +590,10 @@ def resolve_player_defense_and_wear(
 
     # 8. Green Malware Resolution (no effect when In Production is empty, INV-MALWARE-FIZZLE-01)
     if six_phase and getattr(engine.config, "glitched_shield_slots_enabled", False):
-        # v0.38: each unblocked Green cube glitches 1 shield slot (capped at capacity); no die moves
+        # v0.38 / v0.45: each unblocked Green cube infects a shield slot (with Defense Grid Overflow in v0.45)
         from sim.engine import secret_faces
 
-        secret_faces.glitch_slots(player, unblocked_green, "green_cube")
+        secret_faces.glitch_slots(player, unblocked_green, "green_cube", round_num=engine.state.current_round)
         _pay_defense_l4(engine, player)
         return
     if six_phase:
@@ -831,15 +833,9 @@ def _resolve_signature_green(engine: GameEngine, player: PlayerState) -> None:
 
     shortfall = max(0, count_to_place - len(placed))
     if shortfall > 0:
-        before_slots = player.glitched_shield_slots
-        player.glitched_shield_slots = min(player.defense_capacity, player.glitched_shield_slots + shortfall)
-        added_slots = player.glitched_shield_slots - before_slots
-        if added_slots > 0:
-            player.slots_glitched_this_round += added_slots
-            player.slots_glitched_by_source["signature_green"] = (
-                player.slots_glitched_by_source.get("signature_green", 0) + added_slots
-            )
-            player.max_glitched_slots = max(player.max_glitched_slots, player.glitched_shield_slots)
+        from sim.engine import secret_faces
+
+        secret_faces.glitch_slots(player, shortfall, "signature_green", round_num=engine.state.current_round)
 
 
 def _resolve_signature_black(engine: GameEngine, player: PlayerState) -> None:
@@ -1051,7 +1047,13 @@ def resolve_player_attack(
 
 
 def finalize_attack_resolution(engine: GameEngine, cr: CompileResult) -> None:
-    """Closing steps of Phase 4: Snowball Recycle, Contractor Expiration, End Game Trigger check."""
+    """Closing steps of Phase 4: 2P SETEC Corp advance, Snowball Recycle, Contractor Expiration, End Game Trigger check."""
+    if getattr(engine.state, "setec_corp_active", False):
+        if cr.exited_cubes.get(CubeColor.RED, 0) >= 1:
+            max_ms = int(getattr(engine.config, "market_share_max", 20) or 20)
+            if engine.state.setec_market_share < max_ms:
+                engine.state.setec_market_share = min(max_ms, engine.state.setec_market_share + 1)
+                engine.state.setec_corp_advances_total += 1
     apply_snowball_recycle(engine, cr.exited_cubes)
     expire_contractors(engine)
     check_end_triggers_after_attacks(engine)

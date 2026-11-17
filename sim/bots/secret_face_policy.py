@@ -251,7 +251,15 @@ def marginal_block_value(color: CubeColor, rem: Dict[CubeColor, int], player: "P
                                                                             player.triage_bandwidth)
         return base
     if color == CubeColor.GREEN:
-        if player.glitched_shield_slots >= player.defense_capacity:
+        if getattr(cfg, "defense_grid_overflow_enabled", False):
+            player.sync_shield_slots()
+            remaining_cap = max(0, 2 * len(player.shield_slots) - sum(player.shield_slots))
+            if r > remaining_cap:
+                overflow_count = r - remaining_cap
+                if player.secrets - overflow_count <= 0:
+                    return 100.0
+                return SECRET_VALUE + (1.0 if player.secrets <= 3 else 0.0)
+        elif player.glitched_shield_slots >= player.defense_capacity:
             return 0.0  # excess Green has no effect
         v = SHIELD_VALUE
         # If green_glitch_penalty is False (v0.38e), glitched slots do NOT reduce

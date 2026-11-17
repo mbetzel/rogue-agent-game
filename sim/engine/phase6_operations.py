@@ -230,7 +230,7 @@ def execute_player_operations_turn(
         and (d.effective_face or d.current_face).star_code == "PURPLE_STAR"
         for d in player.in_production_dice
     ))
-    if has_purple_star:
+    if not is_v044 and has_purple_star:
         is_spook = has_signature_protocol(player, WhiteHatCode.SPOOK, legacy_bridge_enabled(engine))
         is_phreaker = has_signature_protocol(player, WhiteHatCode.PHREAKER, legacy_bridge_enabled(engine))
         if is_spook and plan.spook_burn_die_id is not None:
