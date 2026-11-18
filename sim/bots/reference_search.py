@@ -38,7 +38,8 @@ HALVING_FIRST = 4
 PZ_PENALTY = -50.0
 WIN_BONUS = 3.0
 
-SEARCHED_PHASE: Dict[str, int] = {"commit_shields": 1, "choose_any_shield_allocation": 4, "take_operations_actions": 6}
+SEARCHED_PHASE: Dict[str, int] = {"commit_shields": 1, "choose_any_shield_allocation": 4, "take_operations_actions": 6,
+                                  "choose_vulnerability_stance": 1}  # v0.46.0 stance (Phase 1 snapshot reused)
 _COLORS = (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN)
 
 
@@ -123,9 +124,11 @@ class MarketShareDumpBot(_ResearchLineBot):
         return out
 
 
-def build_portfolio(bot_id: int) -> List[Tuple[str, BaseBot]]:
+def build_portfolio(bot_id: int, vulnerability: bool = False) -> List[Tuple[str, BaseBot]]:
     """Spec §5.3: 5 archetypes + 4 Adaptive Balanced focus rotations + 2 Market Share policy variants
-    + Public Relations push + Market Share dump (13; FINDINGS §40 follow-up)."""
+    + Public Relations push + Market Share dump (13; FINDINGS §40 follow-up).
+
+    ``vulnerability=True`` (v0.46.0 only) appends 3 stance members, so the v0.45 candidate sets stay unchanged."""
     members: List[Tuple[str, BaseBot]] = [(cls.__name__, cls(bot_id)) for cls in (
         AccelerationistBot, AdaptiveBalancedBot, RecklessSaboteurBot, SecOpsTurtleBot, VentureGreedBot)]
     base = tuple(AdaptiveBalancedBot.research_focus)
@@ -141,6 +144,13 @@ def build_portfolio(bot_id: int) -> List[Tuple[str, BaseBot]]:
         members.append((f"AdaptiveBalanced[{label}]", b))
     members.append(("PublicRelationsPush", PublicRelationsPushBot(bot_id)))
     members.append(("MarketShareDump", MarketShareDumpBot(bot_id)))
+    if vulnerability:
+        for label, strat in (("keep_all", "KEEP_ALL"), ("reroll_all", "REROLL_ALL"), ("pen_test_rush", "PEN_TEST_RUSH")):
+            b = AdaptiveBalancedBot(bot_id)
+            b.vuln_strategy = strat
+            if strat == "PEN_TEST_RUSH":
+                b.research_focus_v036 = ("DEFENSE", "TRIAGE", "RELEASE", "PATENT")
+            members.append((f"AdaptiveBalanced[{label}]", b))
     for _, b in members:
         force_fixed_focus(b)
     return members
@@ -245,6 +255,9 @@ def _candidate(hook: str, member: BaseBot, kwargs: Dict[str, Any], throwaway: ra
         fill = tuple(getattr(member, "any_shield_fill_order", None) or (CubeColor.BLUE, CubeColor.RED, CubeColor.GREEN))
         legal = validate_any_shield_allocation(raw or {}, remaining, kwargs["available_any"], fill)
         return tuple(legal[c] for c in _COLORS), legal
+    if hook == "choose_vulnerability_stance":
+        stance = member.choose_vulnerability_stance(kwargs["player_state"], kwargs["game_state"])
+        return stance, stance
     if hook == "take_operations_actions":
         ps, gs = kwargs["player_state"], kwargs["game_state"]
         raw = raw_operations_plan(member, ps, gs, throwaway)
@@ -259,6 +272,8 @@ def _materialise(hook: str, record: Any, bot: BaseBot) -> Any:
         raw, prof = record
         mirror_profile(bot, prof)
         return copy.deepcopy(raw)
+    if hook == "choose_vulnerability_stance":
+        return record
     return dict(record)
 
 
@@ -285,6 +300,8 @@ class ReferenceSearchBot(BaseBot):
         self.n_rollouts = n_rollouts
         self.halving_first = halving_first
         self.fallback = force_fixed_focus(AdaptiveBalancedBot(bot_id))
+        self._default_portfolio = portfolio is None
+        self._vuln_members_added = False
         self.portfolio = portfolio if portfolio is not None else build_portfolio(bot_id)
         for _, m in self.portfolio:
             force_fixed_focus(m)
@@ -301,6 +318,14 @@ class ReferenceSearchBot(BaseBot):
 
     def bind(self, engine: Any) -> None:
         self.engine = engine
+        if (self._default_portfolio and not self._vuln_members_added
+                and getattr(getattr(engine, "config", None), "is_vulnerability", False)):
+            # v0.46.0 only: stance members are appended after the v0.45 members (candidate order unchanged)
+            self._vuln_members_added = True
+            for label, m in build_portfolio(self.bot_id, vulnerability=True)[len(self.portfolio):]:
+                force_fixed_focus(m)
+                m.pr_push_reference_owned = True
+                self.portfolio.append((label, m))
 
     def begin_phase(self, phase: int) -> None:
         self._phase = phase
@@ -316,6 +341,9 @@ class ReferenceSearchBot(BaseBot):
         return self._searched("choose_any_shield_allocation", dict(
             player_state=player_state, remaining=remaining, available_any=available_any, game_state=game_state,
             attack=attack))
+
+    def choose_vulnerability_stance(self, player_state, game_state):
+        return self._searched("choose_vulnerability_stance", dict(player_state=player_state, game_state=game_state))
 
     def take_operations_actions(self, player_state, game_state, rng):
         return self._searched("take_operations_actions", dict(player_state=player_state, game_state=game_state))
@@ -361,6 +389,9 @@ class ReferenceSearchBot(BaseBot):
             bh = self.stats["by_hook"]
             bh[hook] = bh.get(hook, 0) + 1
         rec = cands[best][2]
+        if hook == "choose_vulnerability_stance":
+            sh = self.stats.setdefault("stance_hist", {})
+            sh[rec] = sh.get(rec, 0) + 1
         self.phase_log.append((hook, rec))
         return _materialise(hook, rec, self)
 
@@ -453,6 +484,9 @@ class ForcedChoiceBot(BaseBot):
         return self._forced("choose_any_shield_allocation", dict(
             player_state=player_state, remaining=remaining, available_any=available_any, game_state=game_state,
             attack=attack))
+
+    def choose_vulnerability_stance(self, player_state, game_state):
+        return self._forced("choose_vulnerability_stance", dict(player_state=player_state, game_state=game_state))
 
     def take_operations_actions(self, player_state, game_state, rng):
         return self._forced("take_operations_actions", dict(player_state=player_state, game_state=game_state))

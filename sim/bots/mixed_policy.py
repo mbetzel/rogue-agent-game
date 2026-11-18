@@ -33,7 +33,7 @@ DEFAULT_GRANULARITY = "game"
 # Bot attributes the engine / post-processing read (spec §2 "Attribute reads on the bot").
 PROFILE_ATTRS: Tuple[str, ...] = (
     "research_focus", "research_focus_v036", "research_aware", "market_share_policy", "any_shield_fill_order",
-    "market_color_preference", "pr_push_capable",
+    "market_color_preference", "pr_push_capable", "vuln_strategy",
 )
 
 # Hook -> decision type (spec §4 "Decision types"). Helper methods a delegate calls on itself
@@ -47,6 +47,7 @@ HOOK_DTYPES: Dict[str, str] = {
     "choose_prodigy_face_override": "phase1_roll",
     "choose_prodigy_purple_star_override": "phase1_roll",
     "choose_release_l4_gray_face": "phase1_roll",
+    "choose_vulnerability_stance": "phase1_roll",  # v0.46.0
     "choose_meridian_override": "phase1_roll",
     "choose_meridian_capital_injection": "phase3_income",
     "choose_operator_ability": "phase1_roll",
@@ -64,6 +65,7 @@ HOOK_DTYPES: Dict[str, str] = {
     # phase4: Aegis, Generic shields, Slush Fund, malware
     "choose_aegis_override": "phase4",
     "choose_aegis_override_market_share": "phase4",
+    "choose_aegis_green_cancel": "phase4",  # v0.46.0
     "choose_any_shield_allocation": "phase4",
     "choose_slush_fund": "phase4",
     "choose_dto_override": "phase4",
@@ -116,6 +118,10 @@ def post_process_operations_plan(bot: Any, plan: Any, player_state: Any, game_st
         from sim.bots.market_share_policy import apply_market_share_policy
 
         plan = apply_market_share_policy(bot, plan, player_state, game_state)
+    if getattr(game_state.config, "is_vulnerability", False):
+        from sim.bots.vulnerability_policy import apply_pen_test_policy
+
+        plan = apply_pen_test_policy(bot, plan, player_state, game_state)
     return plan
 
 

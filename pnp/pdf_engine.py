@@ -177,7 +177,7 @@ class RichSpan:
 
 
 _ICON_TOKENS = {
-    "{WRENCH}", "{RESEARCH}", "{STAR}", "{LOCK}", "{SECRET}",
+    "{WRENCH}", "{RESEARCH}", "{STAR}", "{LOCK}", "{SECRET}", "{WARN}",
     "{RED}", "{BLUE}", "{GREEN}", "{YELLOW}", "{PURPLE}", "{BLACK}", "{GRAY}", "{WHITE}",
     "{PIP1}", "{PIP2}", "{PIP3}", "{PIP4}", "{PIP5}", "{PIP6}",
 }
@@ -509,6 +509,18 @@ class PDFPage:
             pts.append((cx + rad * math.cos(ang), cy + rad * math.sin(ang)))
         self.polygon(pts, stroke=stroke, fill=fill, line_width=0.4)
 
+    def draw_warn_icon(self, cx: float, cy: float, size: float) -> None:
+        """Draw the Vulnerability warning icon: amber triangle, dark outline, bold exclamation mark."""
+        h = size * 0.92
+        w = size * 1.04
+        top = (cx, cy - h / 2.0)
+        bl = (cx - w / 2.0, cy + h / 2.0)
+        br = (cx + w / 2.0, cy + h / 2.0)
+        self.polygon([top, br, bl], stroke=PALETTE["ink"], fill=PALETTE["yellow_fill"], line_width=max(0.5, size * 0.09))
+        bar_w = max(0.7, size * 0.13)
+        self.rect(cx - bar_w / 2.0, cy - h * 0.14, bar_w, h * 0.34, stroke=None, fill=PALETTE["ink"])
+        self.circle(cx, cy + h * 0.31, max(0.45, size * 0.075), stroke=None, fill=PALETTE["ink"])
+
     def draw_lock_icon(self, cx: float, cy: float, size: float, color: Color = PALETTE["ink"]) -> None:
         """Draw a crisp padlock icon centered at (cx, cy)."""
         bw = size * 0.72
@@ -575,6 +587,8 @@ class PDFPage:
             self.draw_research_icon(cx, cy, size, color=PALETTE["purple"])
         elif token == "{STAR}":
             self.draw_star_icon(cx, cy, size, fill=PALETTE["ink"])
+        elif token == "{WARN}":
+            self.draw_warn_icon(cx, cy, size)
         elif token == "{LOCK}":
             self.draw_lock_icon(cx, cy, size, color=PALETTE["ink"])
         elif token == "{SECRET}":
@@ -617,7 +631,7 @@ class PDFPage:
     @staticmethod
     def _parse_rich_tokens(markup: str, base_font: str = "regular") -> List[RichSpan]:
         """Parse lightweight inline markup (`**bold**`, `*italic*`, `` `mono` ``, `{ICON}`) into word/icon spans."""
-        markup = markup.replace("🔧", "{WRENCH}").replace("★", "{STAR}").replace("🔬", "{RESEARCH}")
+        markup = markup.replace("🔧", "{WRENCH}").replace("★", "{STAR}").replace("🔬", "{RESEARCH}").replace("\u26a0\ufe0f", "{WARN}").replace("\u26a0", "{WARN}")
         style_pat = re.compile(r"(\*\*[^*]+\*\*|`[^`]+`|\*[^*]+\*)")
         icon_pat = re.compile(r"(\{[A-Z0-9_]+\})")
         spans: List[RichSpan] = []

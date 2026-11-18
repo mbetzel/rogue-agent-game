@@ -55,6 +55,8 @@ class Phase3ActionPlan:
     fast_patch_indices: List[int] = field(default_factory=list)
     # v0.36.0 Market Share: Public Relations Track regain steps and Ad Campaign (R2) uses this Operations Turn
     share_regain: int = 0
+    # v0.46.0 Vulnerability Track: Pen Test steps this Operations Turn (1 🔬 each, within the level limit)
+    pen_test: int = 0
     use_r2_share: int = 0
 
     # Legacy Backward Compatibility fields
@@ -156,10 +158,22 @@ class BaseBot:
     secret_face_color_bias: Dict[DieColor, float] = {}
     secret_face_chaser: bool = False
     follows_company_color: bool = False
+    # v0.46.0 Vulnerability stance (sim-only label: KEEP_ALL | REROLL_ALL | ADAPTIVE | PEN_TEST_RUSH | KAMIKAZE)
+    vuln_strategy: str = "ADAPTIVE"
 
     def __init__(self, bot_id: int, name: str = "BaseBot") -> None:
         self.bot_id = bot_id
         self.name = name
+
+    def choose_vulnerability_stance(self, player_state: PlayerState, game_state: GameState) -> str:
+        """v0.46.0: pure stance hook, called once per player per round before the Phase 1 reroll loop."""
+        return self.vuln_strategy
+
+    def choose_aegis_green_cancel(self, player_state: PlayerState, damage: int, game_state: GameState) -> bool:
+        """v0.46.0 Aegis *Baffle Echo* against a Green hit [TUNE-BOT]."""
+        from sim.bots import vulnerability_policy as vp
+
+        return vp.aegis_green_cancel_default(player_state, damage, game_state)
 
     def choose_contractor_hires(
         self,
@@ -896,6 +910,10 @@ class BaseBot:
         game_state: Optional[GameState],
     ) -> Optional[Tuple[int, Face]]:
         """Selects 1 rolled Gray Legacy die to set to any printed face (v0.44.0 Release L4 Capstone)."""
+        if game_state is not None and getattr(game_state.config, "is_vulnerability", False):
+            from sim.bots import vulnerability_policy as vp
+
+            return vp.choose_release_l4_face(player_state, active_dice, game_state)
         gray_indices = [i for i, d in enumerate(active_dice) if d.color == DieColor.GRAY]
         if not gray_indices:
             return None
@@ -1038,6 +1056,11 @@ class BaseBot:
     ) -> Optional[Tuple[int, Face]]:
         """v0.38 Brute-Force Bypass face choice (the Secret face is allowed, OQ-10)."""
         from sim.bots import secret_face_policy
+
+        if getattr(game_state.config, "is_vulnerability", False):
+            from sim.bots import vulnerability_policy as vp
+
+            return vp.choose_helix_face(player_state, active_dice, game_state)
 
         return secret_face_policy.helix_face_override(player_state, active_dice, game_state)
 

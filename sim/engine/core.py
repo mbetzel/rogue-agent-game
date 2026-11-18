@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import random
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
@@ -160,6 +161,17 @@ class GameEngine:
         players: List[PlayerState] = []
         next_die_id = 1
         starting_cash_bonus = 1 if self.version_deck[0].directive_code == "DATA_SCRAPER" else 0
+        starting_secrets_bonus = 0
+        if config.is_vulnerability and self.version_deck[0].directive_code == "DATA_SCRAPER":
+            # v0.46.0 (2026-11-18 balance package): Data Scraper = +1 Corporate Secret instead of +$1 (levers on config)
+            starting_cash_bonus = int(config.data_scraper_cash_bonus)
+            starting_secrets_bonus = int(config.data_scraper_secret_bonus)
+            texts = [f"+${starting_cash_bonus} extra Money" if starting_cash_bonus else "",
+                     f"+{starting_secrets_bonus} extra Corporate Secret" if starting_secrets_bonus else ""]
+            self.version_deck = [dataclasses.replace(
+                c, starting_cash_bonus=starting_cash_bonus, starting_secrets_bonus=starting_secrets_bonus,
+                directive_description="Players start with " + " and ".join(x for x in texts if x) + ".")
+                if i == 0 else c for i, c in enumerate(self.version_deck)]
 
         company_dice_taken: Dict[DieColor, int] = {}
         for i, bot in enumerate(bots):
@@ -204,7 +216,8 @@ class GameEngine:
                 player_id=i,
                 bot=bot,
                 money=config.starting_money + starting_cash_bonus + comp_cash,
-                secrets=self.config.get_starting_secrets(self.config.num_players) + comp_sec,
+                secrets=self.config.get_starting_secrets(self.config.num_players) + comp_sec + starting_secrets_bonus
+                + (config.probe_bonus_starting_secrets if i == config.probe_bonus_seat else 0),
                 patches=self.config.get_starting_patches(self.config.num_players) + comp_res,
                 ready_for_release_dice=ready_for_release_dice,
                 company=comp,
@@ -388,6 +401,7 @@ class GameEngine:
                 "is_patient_zero": p.is_patient_zero,
                 # v0.36.0: only under MARKET_SHARE so default snapshots stay byte-identical
                 **({"market_share": p.market_share} if self.config.is_market_share else {}),
+                **({"vulnerability": p.vulnerability} if self.config.is_vulnerability else {}),
             }
             for p in self.state.players
         ]
@@ -501,6 +515,8 @@ class GameEngine:
                 tel.signature_attacks_this_round[p.player_id] = (
                     tel.dominant_tray_color if tel.target_locks_by_player.get(p.player_id) else None
                 )
+        if self.config.is_vulnerability:
+            self._record_vulnerability_telemetry(tel)
         tel.final_round_trigger_phase = self.state.final_round_trigger_phase
         tel.end_phase = end_phase
         tel.prodigy_overrides_executed = sum(
@@ -512,6 +528,23 @@ class GameEngine:
         self.state.distinct_exited_colors_this_round = 0
         self.telemetry_history.append(tel)  # exactly once per round (INV-SEQ-TELEMETRY-01)
         return tel
+
+    def _record_vulnerability_telemetry(self, tel: RoundTelemetry) -> None:
+        """v0.46.0 per-round fields (spec §14.2). Read-only copy of this round's state."""
+        s = self.state
+        rnd = tel.round_number  # not state.current_round: this runs after the round counter has advanced
+        gs = s.green_round_stats if s.green_round_stats.get("round") == rnd else {}
+        tel.green_cubes_resolved = int(gs.get("resolved", 0))
+        tel.green_cubes_no_target = int(gs.get("no_target", 0))
+        tel.green_secrets_lost_by_player = dict(gs.get("lost_by_player", {}))
+        tel.green_hit_events = list(gs.get("events", []))
+        tel.staging_cup_green_at_p1 = int(s.vuln_p1_cup_green)
+        for p in s.players:
+            if p.vuln_by_round and p.vuln_by_round[-1]["round"] == rnd:
+                r = p.vuln_by_round[-1]
+                tel.vuln_after_lockin_by_player[p.player_id] = r["lockin"]
+                if r["post_p4"] is not None:
+                    tel.vuln_after_p4_by_player[p.player_id] = r["post_p4"]
 
     def run_round(self) -> RoundTelemetry:
         """Runs a single round of Rogue Agent (six-phase by default; legacy v0.33 behind the flag)."""

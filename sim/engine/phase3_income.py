@@ -22,7 +22,7 @@ from sim.entities import (
     legacy_bridge_enabled,
 )
 from sim.engine.state import IncomeRecord, ProductionRole
-from sim.engine import secret_faces
+from sim.engine import secret_faces, vulnerability
 
 if TYPE_CHECKING:
     from sim.engine.core import GameEngine
@@ -64,6 +64,17 @@ def _exited_blue_cubes(state: GameState) -> int:
     return int(exited.get(CubeColor.BLUE, 0))
 
 
+def _exited_green_cubes(state: GameState) -> int:
+    """Green cubes in this round's Exit Tray (includes Corruption additions under immediate resolution)."""
+    cr = getattr(state, "last_compile_result", None)
+    if cr is not None and getattr(cr, "exited_cubes", None) is not None:
+        return int(cr.exited_cubes.get(CubeColor.GREEN, 0))
+    exited = getattr(state, "last_exited_cubes", None)
+    if not exited:
+        exited = getattr(getattr(state, "tower", None), "last_exited_cubes", {}) or {}
+    return int(exited.get(CubeColor.GREEN, 0))
+
+
 def _die_income_row(state: GameState, player: PlayerState, die: Die) -> Optional[Dict[str, Any]]:
     """Pure: the income this die yields in Phase 3 (None for glitch / no face)."""
     eff = die.effective_face or die.current_face
@@ -74,7 +85,7 @@ def _die_income_row(state: GameState, player: PlayerState, die: Die) -> Optional
     secrets = eff.secrets
     protocol_research = 0
     star_note: Optional[str] = None
-    is_v044 = getattr(state.config, "variant_profile", None) == "V044"
+    is_v044 = bool(getattr(state.config, "is_v044_variants", False))
     if eff.is_star:
         code = eff.star_code
         if is_v044 and code in ("B1", "B2", "B3", "G1", "G2", "G3", "Y1", "Y2", "Y3", "R1", "R2", "R3"):
@@ -100,6 +111,16 @@ def _die_income_row(state: GameState, player: PlayerState, die: Die) -> Optional
             elif code == "B2":
                 money = 0  # Resolved modally in collect_player_production_income
                 star_note = "Deep R&D Vault (modal)"
+            elif code == "B3" and cfg.is_vulnerability:
+                money = cfg.b3_base_cash
+                star_note = f"Air-Gapped Backup (+${money}, -{cfg.b3_vuln_reduction} Vulnerability)"
+            elif code == "G1" and cfg.is_vulnerability:
+                research = cfg.g1_research
+                star_note = f"Self-Healing Kernel (+{research} 🔬, -{cfg.g1_vuln_reduction} Vulnerability)"
+            elif code == "G2" and cfg.is_vulnerability:
+                g = _exited_green_cubes(state)
+                research = cfg.g2_v046_base_research + min(cfg.g2_v046_bonus_cap, cfg.g2_v046_per_exit_green * g)
+                star_note = f"Universal Sandbox (+{research} 🔬)"
             elif code == "B3":
                 shield_count = len(player.shield_dice)
                 money = cfg.b3_base_cash + cfg.b3_shield_multiplier * shield_count
@@ -215,7 +236,7 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
     dice_to_glitch: List[Die] = []
     dice_to_scan: List[Die] = []
     v038_cards = engine.config.variant_profile == "V038_DRAFT"
-    is_v044 = getattr(engine.config, "variant_profile", None) == "V044"
+    is_v044 = bool(getattr(engine.config, "is_v044_variants", False))
     v044_modal_stars: List[Tuple[str, Die]] = []
 
     for die in list(player.in_production_dice):
@@ -242,7 +263,12 @@ def collect_player_production_income(engine: GameEngine, player: PlayerState, pl
         if eff and eff.is_star:
             if is_v044:
                 code = eff.star_code
-                if code == "G1":
+                if code == "G1" and engine.config.is_vulnerability:
+                    vulnerability.lower_vulnerability(player, engine.config.g1_vuln_reduction, "g1")
+                    player.f6_g1_activations += 1
+                elif code == "B3" and engine.config.is_vulnerability:
+                    vulnerability.lower_vulnerability(player, engine.config.b3_vuln_reduction, "b3")
+                elif code == "G1":
                     cleaned = secret_faces.clean_slots(player, engine.config.g1_slots_cleaned, "face")
                     player.f6_g1_activations += 1
                     if cleaned > 0 and player.shields_on_glitched_slots > 0:
@@ -750,6 +776,14 @@ def execute_player_income(
     record.money = player.money - money0
     record.research = player.research_tokens - research0
     record.secrets = player.secrets - secrets0
+    cfg = engine.config
+    if player.player_id == cfg.probe_bonus_seat:  # Step 0 probe levers (default off)
+        if cfg.probe_bonus_money_per_round > 0:
+            player.gain_money(cfg.probe_bonus_money_per_round, "probe")
+            player.probe_units_granted += cfg.probe_bonus_money_per_round
+        if cfg.probe_bonus_research_per_round > 0:
+            player.gain_research(cfg.probe_bonus_research_per_round, "probe")
+            player.probe_units_granted += cfg.probe_bonus_research_per_round
     return record
 
 

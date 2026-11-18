@@ -40,6 +40,10 @@ def resolve_operations_plan(bot: BaseBot, player_state: PlayerState, state: Game
         from sim.bots.secret_face_policy import adjust_purchases
 
         plan = adjust_purchases(bot, plan, player_state, state)
+    if getattr(state.config, "is_vulnerability", False):
+        from sim.bots.vulnerability_policy import apply_pen_test_policy
+
+        plan = apply_pen_test_policy(bot, plan, player_state, state)
     return plan
 
 
@@ -76,6 +80,11 @@ def execute_player_operations_turn(
     active_ver = engine.state.active_version.version_str
     player.scanned_dice_purchased_this_turn = 0
     player.regain_this_turn = 0
+    if engine.config.is_vulnerability:
+        from sim.engine import vulnerability
+
+        player.pen_test_this_turn = 0
+        vulnerability.apply_l4_free(engine, player)  # start of the Operations Turn (INV-PEN-02)
     v035 = bool(getattr(engine.config, "is_v035_tracks", False))
     purple_ok = bool(getattr(engine.config, "purple_purchasable", True))
 
@@ -89,6 +98,8 @@ def execute_player_operations_turn(
             execute_share_regain(engine, player, getattr(plan, "share_regain", 0))
         else:
             execute_patent_filings(player, getattr(plan, "patent_filings", 0))
+        if engine.config.is_vulnerability:
+            vulnerability.execute_pen_test(engine, player, getattr(plan, "pen_test", 0))
 
     # 1. Collect Income from ALL surviving dice in in_production_dice (legacy v0.33 only)
     if collect_income:
@@ -181,7 +192,7 @@ def execute_player_operations_turn(
         player.mark_ability_used(active_ver)
 
     # 3. Star Special Actions in Phase 6 (Legacy pre-v0.44.0 only; v0.44.0 resolves all F6 in Phase 3)
-    is_v044 = getattr(engine.config, "variant_profile", None) == "V044"
+    is_v044 = bool(getattr(engine.config, "is_v044_variants", False))
     if not is_v044:
         if plan.use_b2_secret and player.b2_available:
             if (

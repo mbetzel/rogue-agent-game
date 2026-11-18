@@ -239,6 +239,10 @@ def get_targeted_players(
         min_val = min(p.glitched_shield_slots for p in active_players)
         return [p for p in active_players if p.glitched_shield_slots == min_val]
 
+    elif criterion == TargetCriterion.LOWEST_VULNERABILITY:
+        min_val = min(p.vulnerability for p in active_players)
+        return [p for p in active_players if p.vulnerability == min_val]
+
     elif criterion == TargetCriterion.MOST_COLORED_DICE:
         get_cd = lambda p: p.colored_dice() if callable(getattr(p, "colored_dice", None)) else p.colored_dice
         max_val = max(len(get_cd(p)) for p in active_players)
@@ -249,6 +253,19 @@ def get_targeted_players(
         return [p for p in active_players if p.secrets == max_val]
 
     return active_players
+
+
+def _v046_corruption_demote(engine: GameEngine, space: CorruptionSpace, legacy_all: bool = False) -> None:
+    """spec §7: V046 remaps every demote space to +Vulnerability ("Fewest Glitched" -> "Lowest Vulnerability")."""
+    from sim.engine import vulnerability
+
+    cfg = engine.config
+    crit = space.target_demote_criterion or space.target_criterion
+    if crit == TargetCriterion.FEWEST_GLITCHED:
+        crit = TargetCriterion.LOWEST_VULNERABILITY
+    gain = cfg.corruption_lowest_vuln_gain if space.demote_dice == 1 else cfg.corruption_lowest_vuln_gain_double
+    for p in get_targeted_players(engine, TargetCriterion.ALL if legacy_all else crit):
+        vulnerability.raise_vulnerability(cfg, p, gain, "corruption")
 
 
 def resolve_corruption_transfer(engine: GameEngine, space: CorruptionSpace) -> List[Dict[str, Any]]:
@@ -394,8 +411,10 @@ def resolve_corruption_space(
             for player in engine.state.players:
                 player.change_market_share(-space.lose_market_share, "corruption")
 
-        # 4. Demote Dice (v0.38 Glitched Shield Slots)
-        if space.demote_dice > 0 and getattr(engine.config, "glitched_shield_slots_enabled", False):
+        # 4. Demote Dice (v0.38 Glitched Shield Slots; v0.46 Vulnerability)
+        if space.demote_dice > 0 and engine.config.is_vulnerability:
+            _v046_corruption_demote(engine, space, legacy_all=True)
+        elif space.demote_dice > 0 and getattr(engine.config, "glitched_shield_slots_enabled", False):
             from sim.engine import secret_faces
             for player in engine.state.players:
                 secret_faces.glitch_slots(player, space.demote_dice, "corruption", round_num=engine.state.current_round)
@@ -460,8 +479,10 @@ def resolve_corruption_space(
         for player in targets:
             player.change_market_share(-space.lose_market_share, "corruption")
 
-    # Demote Dice (Glitched Shield Slots)
-    if space.demote_dice > 0:
+    # Demote Dice (Glitched Shield Slots; v0.46 Vulnerability)
+    if space.demote_dice > 0 and engine.config.is_vulnerability:
+        _v046_corruption_demote(engine, space)
+    elif space.demote_dice > 0:
         crit = space.target_demote_criterion or space.target_criterion
         targets = get_targeted_players(engine, crit)
         if getattr(engine.config, "glitched_shield_slots_enabled", False):

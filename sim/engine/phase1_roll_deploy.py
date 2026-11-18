@@ -9,7 +9,7 @@ from sim.config import CubeColor, DieColor, ShieldColor
 from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
 from sim.entities import ArchetypeCode, CompanyCode, WhiteHatCode, Die, Face, create_white_die
 from sim.engine.state import ProductionRole
-from sim.engine import research_tracks, secret_faces
+from sim.engine import research_tracks, secret_faces, vulnerability
 from sim.bots import research_policy
 
 if TYPE_CHECKING:
@@ -380,6 +380,13 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
                     engine.state.next_die_id += 1
                     player.contractor_dice.append(c_die)
 
+    if engine.config.is_vulnerability:
+        # v0.46.0: pre-roll public values for every player, taken once before any seat rolls (bot λ reads this)
+        engine.state.vuln_p1_snapshot = {
+            "round": engine.state.current_round,
+            "by_pid": {q.player_id: (q.vulnerability, len(q.ready_for_release_dice)) for q in engine.state.players},
+        }
+
     # 3. Roll Active Pool, Yahtzee Rerolls, Outputs, Commit Defenses
     for player in engine.state.players:
         if player.is_patient_zero or (player_ids is not None and player.player_id not in player_ids):
@@ -396,6 +403,12 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
         player.shields_on_clean_slots = 0
         player.shields_on_glitched_slots = 0
         player.purged_shields_this_round = 0
+
+        if engine.config.is_vulnerability:
+            # v0.46.0 stance hook (pure; once per player per round) + public staging-cup Green (telemetry)
+            _stance = getattr(player.bot, "choose_vulnerability_stance", None)
+            player.vuln_stance_this_round = _stance(player, engine.state) if callable(_stance) else "ADAPTIVE"
+            engine.state.vuln_p1_cup_green = int(engine.state.staging_cup.get(CubeColor.GREEN, 0))
 
         # Roll Active Pool (ready_for_release_dice + contractor_dice)
         active_dice: List[Die] = list(player.ready_for_release_dice) + list(player.contractor_dice)
@@ -476,6 +489,11 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
 
                 reroll_indices = secret_face_policy.adjust_rerolls(
                     player.bot, player, active_dice, list(reroll_indices), engine.state, rerolls_remaining)
+            if engine.config.is_vulnerability:
+                from sim.bots import vulnerability_policy
+
+                reroll_indices = vulnerability_policy.adjust_rerolls(
+                    player.bot, player, active_dice, list(reroll_indices), engine.state, rerolls_remaining)
 
             # Filter reroll indices: Helix/Prodigy override may reroll locked dice; standard players cannot
             if helix_active:
@@ -488,6 +506,26 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
                     idx for idx in reroll_indices
                     if 0 <= idx < len(active_dice) and not active_dice[idx].is_locked
                 ]
+            if engine.config.is_vulnerability:
+                # keep-rate telemetry (spec §6): every unlocked ⚠ face shown at a decision with rerolls left
+                _rr = set(valid_rerolls)
+                _ev = _kept = 0
+                for _i, _d in enumerate(active_dice):
+                    if not _d.is_locked and vulnerability.face_vuln(_d.current_face) > 0:
+                        _ev += 1
+                        _kept += 0 if _i in _rr else 1
+                        _fi = next((k for k, f in enumerate(_d.faces) if f is _d.current_face), None)
+                        if _fi is None:
+                            _fi = _d.faces.index(_d.current_face)
+                        _fk = player.vuln_keep_by_face.setdefault(f"{_d.color.value}:{_fi + 1}", [0, 0])
+                        _fk[0] += 0 if _i in _rr else 1
+                        _fk[1] += 1
+                if _ev:
+                    player.vuln_keep_events += _ev
+                    player.vuln_keep_kept += _kept
+                    _slot = player.vuln_keep_by_round.setdefault(engine.state.current_round, [0, 0])
+                    _slot[0] += _kept
+                    _slot[1] += _ev
             if not valid_rerolls:
                 break
 
@@ -564,6 +602,10 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
         # Final lock evaluation pass
         _evaluate_locks(active_dice)
 
+        if engine.config.is_vulnerability:
+            # v0.46.0 lock-in: +1 Vulnerability per ⚠ on the final faces (after Prodigy, Helix and Release L4)
+            vulnerability.lock_in(engine, player, active_dice)
+
         # 5. Assign Defenses & Declare Choices (RULES.md v0.8)
         declared_choices = player.bot.declare_choices(
             player_state=player,
@@ -627,7 +669,7 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
                         validated_commitments[idx] = ShieldColor.ANY
 
         # v0.38 Step 5c: clean Glitched Shield Slots (legacy) vs v0.44.0 unified capacity (no Phase 1 discard)
-        is_v044 = getattr(engine.config, "variant_profile", None) == "V044"
+        is_v044 = bool(getattr(engine.config, "is_v044_variants", False))
         slot_cleaner_ids: set = set()
         shield_capacity = player.defense_capacity
         if slots_on and is_v044:

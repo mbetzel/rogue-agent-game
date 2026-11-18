@@ -254,6 +254,7 @@ def confirm_attacks(
     glitch_die_ids: Optional[List[int]] = None,
     aegis_color: Optional[str] = None,
     use_slush_fund: Optional[bool] = None,
+    aegis_green: Optional[str] = None,
 ) -> Dict[str, Any]:
     if controller.phase != int(RoundPhase.ATTACK_RESOLUTION) or controller.subphase != "confirm_attacks":
         raise ValueError(f"Cannot confirm attacks in phase {controller.phase}")
@@ -306,6 +307,19 @@ def confirm_attacks(
                     f"(qualifying: {[c.value for c in qualifying]})"
                 )
 
+    if controller.state.config.is_vulnerability:
+        # v0.46.0: "use" / "decline" the Baffle Echo against a Green hit; None = BaseBot heuristic.
+        # aegis_color="green" saves the Echo for a Green hit (skips the Red / Blue step).
+        key_g = None if aegis_green is None else str(aegis_green).lower()
+        if key_g not in (None, "use", "decline"):
+            raise ValueError(f"Invalid aegis_green {aegis_green!r}")
+        if key_g is None and aegis_override == CubeColor.GREEN:
+            key_g = "use"
+        meta["aegis_green"] = key_g
+        controller.engine.aegis_green_override = {
+            pid: (m["aegis_green"] == "use") for pid, m in controller.player_meta.items()
+            if m.get("aegis_green") is not None
+        }
     p4.resolve_player_attack(
         controller.engine, player, rolled, commits, controller.attack_strengths, controller.compile_result,
         any_shield_allocations=allocs, malware_target_selector=selector, aegis_color_override=aegis_override,

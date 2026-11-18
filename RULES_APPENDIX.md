@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Section 6 (v0.45.0)
+# Too Many Secrets — Rules Section 6 (v0.46.0)
 
 Split out of `RULES.md`; this file is canonical for Section 6.
 
@@ -8,33 +8,33 @@ Split out of `RULES.md`; this file is canonical for Section 6.
 
 | Die Type | Cost | Face 1 | Face 2 | Face 3 | Face 4 | Face 5 | Face 6 |
 | :--- | :---: | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Gray (Legacy)** | Starter (2) / Breakthrough | `Block 1 Any` | `Block 1 Any` | `+$1 & +1 🔬` | `+$1 / +1 🔬` | `+$1 / +1 🔬` | `+1 🔬` `[TUNE]` |
-| **Red (Marketing)** | `$4–$5` (Variant) | `+1 Market Share / +$1` | `+$2` | `+$2` | `+$2` | **Secret face** | `Red ★` |
-| **Blue (Firewall)** | `$4–$5` (Variant) | `+1 Corporate Secret` | `+2 🔬` | `+$2` | `+1 🔬 / +$1` | **Secret face** | `Blue ★` |
-| **Green (Antivirus)** | `$4–$5` (Variant) | `+2 🔬` | `+1 🔬` | `+2 🔬` | `+1 🔬 / +$1` | **Secret face** | `Green ★` |
-| **Yellow (Commercial)**| `$5–$6` (Variant) | `+2 Market Share` | `+1 Market Share / +1 🔬` | `+$1 & +1 Market Share` | `+$2 / +1 🔬` | `+$2 / +1 🔬` | `Yellow ★` |
-| **Purple (Specialist)** | Starter / Public Relations L3 | `Block 1 Any` | `Block 1 Any` | `+$2` | `+$1 & +1 🔬` | **Secret face** | `Purple ★ (Signature Protocol)` |
+| **Gray (Legacy)** | Starter (2) / Breakthrough | `+$1 & +1 🔬` ⚠ | `+2 🔬` ⚠ | `+$2 / +2 🔬` ⚠ | `+$1 / +1 🔬` | `+$1` | `+1 🔬` `[TUNE: v0.46.0]` |
+| **Red (Marketing)** | `$4–$5` (Variant) | `+1 Market Share / +$1` ⚠ | `+$2` | `+$2` | `+$2` | **Secret face** ⚠ | `Red ★` |
+| **Blue (Firewall)** | `$4–$5` (Variant) | `+1 Corporate Secret` | `+2 🔬` | `+$2` ⚠ | `+1 🔬 / +$1` | **Secret face** ⚠ | `Blue ★` |
+| **Green (Antivirus)** | `$4–$5` (Variant) | `+2 🔬` ⚠ | `+1 🔬` | `+2 🔬` | `+1 🔬 / +$1` | **Secret face** ⚠ | `Green ★` |
+| **Yellow (Commercial)**| `$5–$6` (Variant) | `+2 Market Share` ⚠ | `+1 Market Share / +1 🔬` | `+$1 & +1 Market Share` | `+$2 / +1 🔬` | `+$2 / +1 🔬` ⚠ | `Yellow ★` |
+| **Purple (Specialist)** | Starter / Public Relations L3 | `+$1 / +1 🔬` | `+$1 / +1 🔬` | `+$2` | `+$1 & +1 🔬` ⚠ | **Secret face** ⚠ | `Purple ★ (Signature Protocol)` |
 
 * **Choice Faces (`/`):** Faces with a slash (`/`) indicate a Choice Face. During Phase 1 Step 4, the player declares which of the two options the die fulfills for this round (e.g. `+1 Market Share / +$1`).
-* **Shields:** Only Gray and Purple dice have shield faces, and every shield is `Block 1 Any`. Red, Blue, Green and Yellow dice have no shield faces.
-* **Market Share Faces:** Red and Yellow Market Share outputs resolve in Phase 3: Income; they cannot raise Market Share above your maximum and do not count toward your Public Relations limit.
-* **Secret Faces:** Face 5 on Red, Blue, Green and Purple dice. A die showing it after rerolls moves to the **Processing Box** with no other output and banks its Secret when it leaves (yields: Red `+2` and triggers the Market Leader Bonus; Blue `+2`, or `+3` if Defense Grid $\ge$ Level 3; Green `+2`, then cleans `1` Glitched Shield Slot; Purple `+1`; see Phase 5 *Secret Face Yields*). It may be rerolled like any face. Yellow dice have no Secret face.
-* **Zero Blank or Glitch Faces:** Every face on every Software Module Die produces a positive shield, resource, Secret, or Star (`★`) output (`0` blank faces and `0` Glitch faces).
+* **Vulnerability (⚠):** Each ⚠ on the final face of a rolled die raises your Vulnerability by `1` at lock-in (Phase 1 Step 4), including Secret faces, which always carry ⚠. `★` faces never carry ⚠. Gray dice have three ⚠ faces; each colored die has one ⚠ core face (Yellow, which has no Secret face, has two). A ⚠ on a choice face counts whichever option you choose. *Arbitrary Code Execution*, *Brute-Force Bypass* and Release Level 4 change the face, so ⚠ is counted on the face they set.
+* **Market Share Faces:** Red and Yellow Market Share outputs resolve in Phase 3: Income; they cannot raise Market Share above the track maximum (`20`) and do not count toward your Public Relations limit.
+* **Secret Faces:** Face 5 on Red, Blue, Green and Purple dice. A die showing it after rerolls moves to the **Processing Box** with no other output and banks its Secret when it leaves (yields: Red `+2` and triggers the Market Leader Bonus; Blue `+2`, or `+3` if Pen Test $\ge$ Level 3; Green `+2`, then lower your Vulnerability by `2`; Purple `+1`; see Phase 6 *Secret Face Yields*). It may be rerolled like any face. Yellow dice have no Secret face.
+* **Zero Blank or Glitch Faces:** Every face on every Software Module Die produces a resource, Secret, or Star (`★`) output (`0` blank faces and `0` Glitch faces).
 
 ### B. Sample Module Variant Cards (`★` Effects)
 *(Timing: All Colored Die `★` abilities resolve during **Phase 3: Income** while the die is **In Production**.)*
 *(Note: Common market variant cards define Face 6 for Red, Blue, Green, and Yellow module dice. The purchase cost of each colored die is printed directly on its active face-up Variant Card. Purple Proprietary Specialist dice do not use market variant cards and cannot be purchased; their Face 6 is defined on the player's assigned White Hat Dossier detailed in Section 6D).*
 * **Red `★` Variants:**
-  * *R1 — Brand Protection (`$5`):* Gain `+$2 & +1 Market Share` (not above your maximum; does not count toward your Public Relations limit).
-  * *R2 — Ad Campaign (`$4`):* Pay `$2` `[TUNE]` to gain `+2` Market Share (not above your maximum; does not count toward your Public Relations limit).
-  * *R3 — Customer Poaching (`$5`):* After all players collect Income, take `1` Market Share from the rival with the most Market Share (you choose among tied rivals). If you are already at your maximum, the rival still loses `1` and you gain nothing (see Phase 3).
+  * *R1 — Brand Protection (`$5`):* Gain `+$2 & +1 Market Share` (not above the track maximum; does not count toward your Public Relations limit).
+  * *R2 — Ad Campaign (`$4`):* Pay `$2` `[TUNE]` to gain `+2` Market Share (not above the track maximum; does not count toward your Public Relations limit).
+  * *R3 — Customer Poaching (`$5`):* After all players collect Income, take `1` Market Share from the rival with the most Market Share (you choose among tied rivals). If you are already at the track maximum, the rival still loses `1` and you gain nothing (see Phase 3).
 * **Blue `★` Variants:**
   * *B1 — Honeypot Telemetry (`$5`):* Gain `+2 🔬` if `0` Blue cubes are in the Exit Tray, **OR** gain `+$3` if `1+` Blue cubes are in the Exit Tray.
-  * *B2 — Deep R&D Vault (`$5`):* Gain `+$2`, **OR** spend `1` Corporate Secret to gain `+3 Market Share` (not above your maximum; does not count toward your Public Relations limit).
-  * *B3 — Air-Gapped Backup (`$4`):* Gain `+$1`, plus `+$1` per Shield you have **In Production** (clean or glitched slots).
+  * *B2 — Deep R&D Vault (`$5`):* Gain `+$2`, **OR** spend `1` Corporate Secret to gain `+3 Market Share` (not above the track maximum; does not count toward your Public Relations limit).
+  * *B3 — Air-Gapped Backup (`$4`):* Gain `+$2` and lower your Vulnerability by `1` (resolves before Phase 4 Green cubes).
 * **Green `★` Variants:**
-  * *G1 — Self-Healing Kernel (`$5`):* Clean `1` **Glitched Shield Slot** and gain `+1 🔬` (freeing any Shield already assigned to that slot to block in Phase 4).
-  * *G2 — Universal Sandbox (`$5`):* Gain `+2 🔬`, plus `+1 🔬` for each of your **Glitched Shield Slots** `[TUNE]`.
+  * *G1 — Self-Healing Kernel (`$5`):* Lower your Vulnerability by `2` and gain `+1 🔬` (resolves before Phase 4 Green cubes).
+  * *G2 — Universal Sandbox (`$5`):* Gain `+1 🔬`, plus `+1 🔬` per Green cube in the Exit Tray (max `+3`) `[TUNE: v0.46.0]`.
   * *G3 — Live Reboot (`$4`):* Gain `+1 🔬 & +$1`, and move `1` die from your **Scanned Box** to your **Ready for Release Zone**.
 * **Yellow `★` Variants:**
   * *Y1 — Algorithmic Trading (`$6`):* Gain `+$4`, **OR** pay `$2` to gain `+1 Corporate Secret`.
@@ -52,22 +52,22 @@ Each Version Card defines its Corruption Track (`4` spaces on `v1.0`, `5` spaces
 | Version | Card Name | Initial Setup Cup | Space 1 | Space 2 | Space 3 | Space 4 | Space 5 | Space 6 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **`v1.0`** (4) | *Script Kiddie* | `2R, 1B, 1G` | Add `1R` | Most `$` loses `$2` + Add `1K` | Most `🔬` loses `1 🔬` | **Upgrade:** Most MS loses `1` MS | — | — |
-| **`v1.0`** (4) | *Data Scraper* | `1R, 2B, 1G` (`+$1` start) | Most `🔬` loses `1 🔬` | Most `$` loses `$2` + Add `1K` | Add `1G` | **Upgrade:** Fewest Glitched glitches `1` slot | — | — |
+| **`v1.0`** (4) | *Data Scraper* | `1R, 2B, 1G` (`+1` Secret start) | Most `🔬` loses `1 🔬` | Most `$` loses `$2` + Add `1K` | Add `1G` | **Upgrade:** Lowest Vulnerability `+2` Vulnerability | — | — |
 | **`v2.0`** (5) | *RaaS* | — | Transfer: Least MS takes `$1` from Most MS | Add `1R, 1B` + Add `1K` | Most `$` loses `$2` & Add `1R` | Most MS loses `$3` & `1 🔬` + Add `1K` | **Upgrade:** Add `1R` | — |
-| **`v2.0`** (5) | *Polymorphic Worm* | — | Transfer: Least `🔬` takes `1 🔬` from Most `🔬` | Add `1B, 1G` + Add `1K` | Fewest Glitched glitches `1` slot & Add `1G` | Most Secrets loses `$3` + Add `1K` | **Upgrade:** Add `1R` | — |
-| **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 2B, 1G` | Most `$` loses `$3`; Most `🔬` loses `1 🔬` + Add `1K` | Add `1R, 2B` | Fewest Glitched glitches `1` slot & Add `1B, 1K` | Most Colored Dice returns `1` die | **Singularity** |
-| **`v3.0`** (6) | *Corrupted Kernel* | — | Fewest Glitched glitches `1` slot + Add `1R, 2B` | Most MS loses `$3` & `1 🔬` + Add `1K` | Add `1R, 1G, 1B` | Most Secrets loses `1 Secret` + Add `1K` | Most Colored Dice returns `1` die | **Singularity:** Most Secrets loses `1 Secret` |
+| **`v2.0`** (5) | *Polymorphic Worm* | — | Transfer: Least `🔬` takes `1 🔬` from Most `🔬` | Add `1B, 1G` + Add `1K` | Lowest Vulnerability `+2` Vulnerability & Add `1G` | Most Secrets loses `$3` + Add `1K` | **Upgrade:** Add `1R` | — |
+| **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 2B, 1G` | Most `$` loses `$3`; Most `🔬` loses `1 🔬` + Add `1K` | Add `1R, 2B` | Lowest Vulnerability `+2` Vulnerability & Add `1B, 1K` | Most Colored Dice returns `1` die | **Singularity** |
+| **`v3.0`** (6) | *Corrupted Kernel* | — | Lowest Vulnerability `+2` Vulnerability + Add `1R, 2B` | Most MS loses `$3` & `1 🔬` + Add `1K` | Add `1R, 1G, 1B` | Most Secrets loses `1 Secret` + Add `1K` | Most Colored Dice returns `1` die | **Singularity:** Most Secrets loses `1 Secret` |
 
 #### Profile 2: Aggressive Escalation Tracks (`4 / 5 / 6` Spaces — Heightened Economic Friction)
 
 | Version | Card Name | Initial Setup Cup | Space 1 | Space 2 | Space 3 | Space 4 | Space 5 | Space 6 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **`v1.0`** (4) | *Script Kiddie* | `2R, 1B, 1G` | Add `1R` | Most `$` loses `$3` + Add `1K` | Fewest Glitched glitches `1` slot | **Upgrade:** Most `🔬` loses `2 🔬` | — | — |
-| **`v1.0`** (4) | *Data Scraper* | `1R, 2B, 1G` (`+$1` start) | Most `🔬` loses `2 🔬` | Most `$` loses `$3` + Add `1K` | Add `1G` | **Upgrade:** Fewest Glitched glitches `2` slots | — | — |
+| **`v1.0`** (4) | *Script Kiddie* | `2R, 1B, 1G` | Add `1R` | Most `$` loses `$3` + Add `1K` | Lowest Vulnerability `+2` Vulnerability | **Upgrade:** Most `🔬` loses `2 🔬` | — | — |
+| **`v1.0`** (4) | *Data Scraper* | `1R, 2B, 1G` (`+1` Secret start) | Most `🔬` loses `2 🔬` | Most `$` loses `$3` + Add `1K` | Add `1G` | **Upgrade:** Lowest Vulnerability `+3` Vulnerability | — | — |
 | **`v2.0`** (5) | *RaaS* | — | Transfer: Least MS takes `$2` from Most MS | Add `1R, 1B` + Add `1K` | Most `$` loses `$3` & Add `1R` | Most MS loses `$3` & `1 🔬` + Add `1K` | **Upgrade:** Add `1R` | — |
-| **`v2.0`** (5) | *Polymorphic Worm* | — | Transfer: Least `🔬` takes `2 🔬` from Most `🔬` | Add `1B, 1G` + Add `1K` | Fewest Glitched glitches `1` slot & Add `1G` | Fewest Glitched glitches `2` slots + Add `1K` | **Upgrade:** Add `1R` | — |
-| **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 2B, 1G` | Most `$` loses `$4`; Most `🔬` loses `2 🔬` + Add `1K` | Add `1R, 2B` | Fewest Glitched glitches `1` slot & Add `1B, 1K` | Most Colored Dice returns `1` die & glitches `1` slot | **Singularity** |
-| **`v3.0`** (6) | *Corrupted Kernel* | — | Fewest Glitched glitches `2` slots + Add `1R, 2B` | Most MS loses `$4` & `2 🔬` + Add `1K` | Add `1R, 1G, 1B` | Most Secrets loses `2 Secrets` + Add `1K` | Most Colored Dice returns `1` die & glitches `1` slot | **Singularity:** Most Secrets loses `1 Secret` |
+| **`v2.0`** (5) | *Polymorphic Worm* | — | Transfer: Least `🔬` takes `2 🔬` from Most `🔬` | Add `1B, 1G` + Add `1K` | Lowest Vulnerability `+2` Vulnerability & Add `1G` | Lowest Vulnerability `+3` Vulnerability + Add `1K` | **Upgrade:** Add `1R` | — |
+| **`v3.0`** (6) | *Zero-Day Override* | — | Add `1R, 2B, 1G` | Most `$` loses `$4`; Most `🔬` loses `2 🔬` + Add `1K` | Add `1R, 2B` | Lowest Vulnerability `+2` Vulnerability & Add `1B, 1K` | Most Colored Dice returns `1` die & gains `+2` Vulnerability | **Singularity** |
+| **`v3.0`** (6) | *Corrupted Kernel* | — | Lowest Vulnerability `+3` Vulnerability + Add `1R, 2B` | Most MS loses `$4` & `2 🔬` + Add `1K` | Add `1R, 1G, 1B` | Most Secrets loses `2 Secrets` + Add `1K` | Most Colored Dice returns `1` die & gains `+2` Vulnerability | **Singularity:** Most Secrets loses `1 Secret` |
 
 ---
 
@@ -76,16 +76,16 @@ Each Version Card defines its Corruption Track (`4` spaces on `v1.0`, `5` spaces
 In `v0.38.0`, every Client Company starts with identical hardware (all 4 tracks at Level 0) and resources, except the color of its starting colored die; player identity comes from the Institutional Override (Client Company) and the Signature Protocol (White Hat Dossier).
 
 #### 1. The 6 Client Companies (`Company`) — Institutional Overrides
-Each player contracts with 1 enterprise Client Company for the duration of the match. Your company grants an Institutional Override that may be activated **once per SETEC Version** (`v1.0`, `v2.0`, `v3.0`); DTO *Slush Fund* is **once per game**. All companies start at Defense Capacity `2`, Triage Bandwidth `1`, Release Bandwidth `4`, all tracks Level 0, `$6`, `4` Secrets (`2–4` players), `13` Market Share (2 players) or `16` (3–4 players), `0 🔬`, and 2 Gray Legacy dice + 1 Purple die + 1 starting colored die of the company's color `[TUNE]` (Red: Meridian, Prometheus; Blue: DTO, Aegis; Green: Omnidyne, Helix), taken from that color's Central Market stack:
+Each player contracts with 1 enterprise Client Company for the duration of the match. Your company grants an Institutional Override that may be activated **once per SETEC Version** (`v1.0`, `v2.0`, `v3.0`); DTO *Slush Fund* is **once per game**. All companies start at Pen Test limit `1`, Triage Bandwidth `1`, Release Bandwidth `4`, all tracks Level 0, Vulnerability `0`, `$6`, `5` Secrets (`2–4` players), `14` Market Share (2 players) or `18` (3–4 players), `0 🔬`, and 2 Gray Legacy dice + 1 Purple die + 1 starting colored die of the company's color `[TUNE]` (Red: Meridian, Prometheus; Blue: DTO, Aegis; Green: Omnidyne, Helix), taken from that color's Central Market stack:
 
 | Company Code | Company Name | Sector | Institutional Override | Timing Window | Description | Flavor Quote |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **MERIDIAN** | **Meridian Financial Trust** | Banking Infrastructure | *Capital Injection* | Phase 3: Income | Gain an immediate **`+$3` cash payout** from the bank `[TUNE]`. | *"When liquidity is limitless, capital allocation is merely an accounting variable."* |
-| **OMNIDYNE** | **Omnidyne Systems** | Tech Giant | *Magnetic Splice* | Phase 5: Step 1 (Magnetic Splice) | Move **1 die** from your **Processing Box** directly to your **Ready for Release Zone** for **free** (bypassing Scanned); it banks its Secret now. | *"Proprietary hardware backplanes allow instantaneous hot-swapping under live load."* |
-| **AEGIS** | **Aegis Defense Relay** | Security Firm | *Baffle Echo* | Phase 4: Attack Resolution | When resolving compiler damage, ignore **1 Attack Cube** (`Red`, `Blue`, or `Green`) of your choice for yourself this round. *(All exited cubes remain in the exit tray and recycle into the Staging Cup as normal).* | *"Multi-layered kinetic dampeners disperse inbound network blast energy."* |
-| **DTO** | **Department of Telecommunications Oversight** | Federal Agency | *Slush Fund* | Phase 4: Attack Resolution (**once per game**) | The DTO accesses emergency black budget reserves: **Absorb up to 2 Corporate Secret loss** from unblocked Blue Spyware for free. *(Any additional Secret loss applies as normal).* | *"Classified black budget allocations absorb compliance failures without public oversight."* |
+| **OMNIDYNE** | **Omnidyne Systems** | Tech Giant | *Magnetic Splice* | Phase 6: Step 1 (Magnetic Splice) | Move **1 die** from your **Processing Box** directly to your **Ready for Release Zone** for **free** (bypassing Scanned); it banks its Secret now. | *"Proprietary hardware backplanes allow instantaneous hot-swapping under live load."* |
+| **AEGIS** | **Aegis Defense Relay** | Security Firm | *Baffle Echo* | Phase 4: Attack Resolution | Ignore the damage of **1 Attack Cube** for yourself this round: `1` Red cube (no Market Share loss), `1` Blue cube (no Secret loss), or `1` Green cube that hits you (no Secret loss; your Vulnerability still resets to `0`). *(All exited cubes remain in the exit tray and recycle into the Staging Cup as normal).* | *"Multi-layered kinetic dampeners disperse inbound network blast energy."* |
+| **DTO** | **Department of Telecommunications Oversight** | Federal Agency | *Slush Fund* | Phase 4: Attack Resolution (**once per game**) | The DTO accesses emergency black budget reserves: **Absorb up to 2 Corporate Secret loss** from Blue cubes for free. *(Any additional Secret loss applies as normal).* | *"Classified black budget allocations absorb compliance failures without public oversight."* |
 | **HELIX** | **Helix Biomedical Consortium** | Medical Research | *Brute-Force Bypass* | Phase 1: Step 3 Rerolls | Gain **1 extra free reroll** this phase. In addition, turn **1 of your rolled dice to any legal non-Star face of its color** (the Secret face is allowed). | *"Massively parallel quantum sequencing breaks deterministic encryption gates."* |
-| **PROMETHEUS** | **The Prometheus Foundation** | Non-Profit | *Algorithmic Arbitrage* | Phase 6: Operations Turn | Purchase **1 Colored Die** from the Central Market at a **`$2 discount`** (minimum cost `$0`), **OR** gain an immediate **`+$2` cash payout** from the bank. | *"Open-source cryptographic protocols circumvent proprietary enterprise licensing fees."* |
+| **PROMETHEUS** | **The Prometheus Foundation** | Non-Profit | *Algorithmic Arbitrage* | Phase 5: Operations Turn | Purchase **1 Colored Die** from the Central Market at a **`$2 discount`** (minimum cost `$0`), **OR** gain an immediate **`+$2` cash payout** from the bank. | *"Open-source cryptographic protocols circumvent proprietary enterprise licensing fees."* |
 
 #### 2. The 6 White Hat Dossiers (`WhiteHat`) — Face 6 Signature Protocols
 Each player is a specialist **White Hat Operative**. Your White Hat Dossier defines the **Signature Protocol** triggered whenever you roll Face 6 (`Purple ★`) on a Purple Specialist die. (Your 2nd Purple die waits in your **Personal Reserve** until the Public Relations Level 3 Breakthrough.)
@@ -96,7 +96,7 @@ Each player is a specialist **White Hat Operative**. Your White Hat Dossier defi
 | **PHREAKER** | **The Phreaker** | Hardware Intrusion Specialist | *Jumper Diagnostics* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain **`+$1` cash** AND **`+1` Release Bandwidth** this round (applies in Phase 6 Step 3). | *"Raw voltage pulses extract signal from dormant silicon."* |
 | **ACOUSTIC** | **The Acoustic** | Side-Channel Cryptanalyst | *Resonance Sensor* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain **`+$1` cash** per unique colored cube that exited the Cube Tower this round (including **Operative Signature Cubes**), up to **`+$5`** max. | *"Harmonic resonance frequencies decode physical chassis vibrations."* |
 | **SPOOK** | **The Spook** | Covert Intelligence Specialist | *Burn Notice* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain an immediate **`+$2` cash payout**; in addition, you may optionally **permanently return `1` owned Gray Legacy die to the box** to gain **`+$3` cash**. | *"Scorched-earth protocols ensure zero forensic recovery."* |
-| **PRODIGY** | **The Prodigy** | Autonomous Exploit Hacker | *Arbitrary Code Execution* | Phase 1: Step 4 (Post-Rerolls) | After all rerolls are finished (before assigning dice to In Production), turn **`1` other rolled die** in your active pool to **any legal non-Star face of that die's color** other than the Secret face. | *"Payload injection executes before memory boundaries establish."* |
+| **PRODIGY** | **The Prodigy** | Autonomous Exploit Hacker | *Arbitrary Code Execution* | Phase 1: Step 3 (Post-Rerolls) | After all rerolls are finished (before assigning dice to In Production), turn **`1` other rolled die** in your active pool to **any legal non-Star face of that die's color** other than the Secret face. | *"Payload injection executes before memory boundaries establish."* |
 | **CIPHER** | **The Cipher** | Distributed Ledger Architect | *Algorithmic Parity* | Phase 3: Income | When Face 6 (`Purple ★`) is rolled, gain an additional **`+$2` cash income** AND **`+1 🔬` Research Token**. | *"Parity calculations balance zero-knowledge proofs flawlessly."* |
 
 #### 3. Canonical Pairings & 36-Combination Synergy Setup

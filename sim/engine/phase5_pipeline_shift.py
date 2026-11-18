@@ -317,6 +317,11 @@ def execute_pipeline_shift(engine: GameEngine) -> Dict[int, PipelineShiftRecord]
         if player.is_patient_zero:
             continue
         out[player.player_id] = execute_player_pipeline_shift(engine, player)
+    if engine.config.is_vulnerability:
+        for player in engine.state.players:  # v0.46.0 telemetry: end-of-round Vulnerability (after Green banking)
+            if (not player.is_patient_zero and player.vuln_by_round
+                    and player.vuln_by_round[-1]["round"] == engine.state.current_round):
+                player.vuln_by_round[-1]["end"] = player.vulnerability
     # RSP-1 Phase 5 end hook (spec §14.5.3 step 2): lives inside the phase function so _run_round_six_phase and
     # fast_clone.resume_round need no change (they call this function).
     if secret_faces.enabled(engine.config):

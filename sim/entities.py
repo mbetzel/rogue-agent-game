@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
-from sim.config import CubeColor, DieColor, ShieldColor
+from sim.config import V046_DIE_FACE_PROFILES, CubeColor, DieColor, ShieldColor
 
 
 class ArchetypeCode(str, Enum):
@@ -62,6 +62,7 @@ class TargetCriterion(str, Enum):
     FEWEST_GLITCHED = "FEWEST_GLITCHED"     # Player(s) with lowest glitched shield slots
     MOST_COLORED_DICE = "MOST_COLORED_DICE" # Player(s) with most colored dice
     MOST_SECRETS = "MOST_SECRETS"           # Player(s) with highest Corporate Secrets
+    LOWEST_VULNERABILITY = "LOWEST_VULNERABILITY"  # v0.46.0: player(s) with the lowest Vulnerability
 
 
 class TargetScope(str, Enum):
@@ -150,6 +151,8 @@ class Face:
     secrets_pending: bool = False
     market_share: int = 0
     clean_slots: int = 0
+    # v0.46.0 Vulnerability Track: the ⚠ icon. +1 Vulnerability at Phase 1 lock-in (spec §4.1). Sits on the parent face.
+    vuln: int = 0
 
     @property
     def is_secret_face(self) -> bool:
@@ -277,6 +280,7 @@ class VersionCard:
     staging_payload_2p: Optional[Dict[CubeColor, int]] = None
     corruption_track: Tuple[CorruptionSpace, ...] = ()
     starting_cash_bonus: int = 0
+    starting_secrets_bonus: int = 0  # v0.46.0: extra starting Corporate Secrets for every player (Data Scraper)
 
     @property
     def track_capacity(self) -> int:
@@ -1837,6 +1841,19 @@ def get_random_white_hats(num_players: int, rng: random.Random) -> List[WhiteHat
 GRAY_FACE_PROFILES = ("V034", "V035_D1")
 
 
+def _v046_gray_faces() -> List[Face]:  # 2026-11-18 balance package: F1 = +$1 & +1 🔬 ⚠
+    """spec §4.2 ``V046_VULN`` Gray table (3 ⚠ faces). Named variants (plan §3.5.7) are edits to this table."""
+    return [
+        Face(name="+$1 & +1 🔬 ⚠", money=1, patches=1, vuln=1),
+        Face(name="+2 🔬 ⚠", patches=2, vuln=1),
+        Face(name="+$2 / +2 🔬 ⚠", is_choice=True, vuln=1,
+             choices=(Face("+$2", money=2), Face("+2 🔬", patches=2))),
+        Face(name="+$1 / +1 🔬", is_choice=True, choices=(Face("+$1", money=1), Face("+1 🔬", patches=1))),
+        Face(name="+$1", money=1),
+        Face(name="+1 🔬", patches=1),
+    ]
+
+
 def create_gray_die(die_id: int, profile: Optional[str] = "V035_D1") -> Die:
     """Creates a Gray (Legacy Code) die.
 
@@ -1869,6 +1886,8 @@ def create_gray_die(die_id: int, profile: Optional[str] = "V035_D1") -> Die:
             choice(),
             Face(name="+1 🔬", patches=1),
         ]
+    elif profile == "V046_VULN":
+        faces = _v046_gray_faces()
     else:
         raise ValueError(f"Unknown Gray face profile: {profile}")
     return Die(
@@ -1965,6 +1984,9 @@ def create_colored_die(
             }
             die_cost = default_costs.get(color, 4)
 
+    if face_profile in V046_DIE_FACE_PROFILES:
+        return _create_colored_die_v046(color, die_id, star_face, var_code, die_cost, face_profile)
+
     if face_profile in ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D", "V038F", "V043_BLUE_TUNE"):
         return _create_colored_die_v038(color, die_id, variant_card, star_face, var_code, die_cost, face_profile)
 
@@ -2046,6 +2068,7 @@ def create_colored_die(
 
 
 SECRET_FACE = Face(name="Secret", secrets_pending=True)
+SECRET_FACE_VULN = Face(name="Secret ⚠", secrets_pending=True, vuln=1)  # v0.46.0 Face 5 on Red / Blue / Green / Purple
 CLEAN_SLOT_NAME = "Clean 1 Glitched Shield Slot"
 
 
@@ -2117,6 +2140,64 @@ def _create_colored_die_v038(color: DieColor, die_id: int, variant_card: Optiona
     return Die(die_id=die_id, color=color, cost=die_cost, vp=0, faces=faces, variant_code=var_code)
 
 
+def _create_colored_die_v046(color: DieColor, die_id: int, star_face: Face, var_code: Optional[str],
+                             die_cost: int, profile: str = "V046_VULN") -> Die:
+    """spec §4.2 V046 colored tables. ``V046_VULN_NOPREMIUM`` = the v0.45 core faces with ⚠ (premium removed)."""
+    np_ = profile == "V046_VULN_NOPREMIUM"
+    c = _choice
+
+    def w(face: Face) -> Face:  # same face with the ⚠ icon
+        return dataclasses.replace(face, name=f"{face.name} ⚠", vuln=1)
+
+    if color == DieColor.RED:
+        f1 = (dataclasses.replace(c(Face("+1 Market Share", market_share=1), Face("+$1", money=1)),
+                                  name="+1 Market Share / +$1 ⚠", vuln=1) if np_ else
+              Face(name="+1 Market Share & +1 🔬 ⚠", market_share=1, patches=1, vuln=1))
+        faces = [f1, Face(name="+$2", money=2), Face(name="+$2", money=2), Face(name="+$2", money=2),
+                 SECRET_FACE_VULN, star_face]
+    elif color == DieColor.BLUE:
+        f3 = w(Face(name="+$2", money=2)) if np_ else Face(name="+$2 & +1 🔬 ⚠", money=2, patches=1, vuln=1)
+        faces = [Face(name="+1 Corporate Secret", secrets=1), Face(name="+2 🔬", patches=2), f3,
+                 c(Face("+1 🔬", patches=1), Face("+$1", money=1)), SECRET_FACE_VULN, star_face]
+    elif color == DieColor.GREEN:
+        f1 = w(Face(name="+2 🔬", patches=2)) if np_ else Face(name="+3 🔬 ⚠", patches=3, vuln=1)
+        faces = [f1, Face(name="+1 🔬", patches=1), Face(name="+2 🔬", patches=2),
+                 c(Face("+1 🔬", patches=1), Face("+$1", money=1)), SECRET_FACE_VULN, star_face]
+    elif color == DieColor.YELLOW:
+        f5 = (dataclasses.replace(c(Face("+$2", money=2), Face("+1 🔬", patches=1)),
+                                  name="+$2 / +1 🔬 ⚠", vuln=1) if np_ else
+              Face(name="+$2 & +1 🔬 ⚠", money=2, patches=1, vuln=1))
+        faces = [w(Face(name="+2 Market Share", market_share=2)),
+                 c(Face("+1 Market Share", market_share=1), Face("+1 🔬", patches=1)),
+                 Face(name="+$1 & +1 Market Share", money=1, market_share=1),
+                 c(Face("+$2", money=2), Face("+1 🔬", patches=1)), f5, star_face]
+    elif color == DieColor.PURPLE:
+        f4 = w(Face(name="+$1 & +1 🔬", money=1, patches=1)) if np_ else Face(name="+$1 & +2 🔬 ⚠", money=1, patches=2, vuln=1)
+        faces = [c(Face("+$1", money=1), Face("+1 🔬", patches=1)), c(Face("+$1", money=1), Face("+1 🔬", patches=1)),
+                 Face(name="+$2", money=2), f4, SECRET_FACE_VULN,
+                 Face(name="Purple ★", is_star=True, star_code="PURPLE_STAR")]
+        return Die(die_id=die_id, color=color, cost=die_cost, vp=0, faces=faces, variant_code="PURPLE_STAR")
+    else:
+        raise ValueError(f"Unsupported die color: {color}")
+    return Die(die_id=die_id, color=color, cost=die_cost, vp=0, faces=faces, variant_code=var_code)
+
+
+def get_v046_variant_cards() -> List[VariantCard]:
+    """v0.46.0: the V044 cards with B3 / G1 / G2 replaced (spec §4.3). Costs and codes are unchanged."""
+    new = {
+        "B3": ("Gain +$2 and lower your Vulnerability by 1.", {"money": 0}),
+        "G1": ("Lower your Vulnerability by 2 and gain +1 🔬.", {"patches": 0, "clean_slots": 0}),
+        "G2": ("Gain +1 🔬, plus +1 🔬 per Green cube in the Exit Tray (max +3).", {"patches": 0}),
+    }
+    out = []
+    for card in get_v044_variant_cards():
+        if card.code in new:
+            desc, kw = new[card.code]
+            card = dataclasses.replace(card, description=desc, star_face=dataclasses.replace(card.star_face, **kw))
+        out.append(card)
+    return out
+
+
 def _v038_star(card: VariantCard, description: str, **face_kw: Any) -> VariantCard:
     face = dataclasses.replace(card.star_face, block_amount=0, shield_color=None, **face_kw)
     return dataclasses.replace(card, description=description, star_face=face)
@@ -2125,8 +2206,8 @@ def _v038_star(card: VariantCard, description: str, **face_kw: Any) -> VariantCa
 def apply_variant_profile(variant_cards: Dict[DieColor, VariantCard], profile: Optional[str]) -> Dict[DieColor, VariantCard]:
     """Applies a variant profile (``"V038_DRAFT"`` or ``"V044"``) onto a color->VariantCard mapping.
     ``"V037"`` / ``None`` returns the mapping unchanged (same object)."""
-    if profile == "V044":
-        v044_by_code = {c.code: c for c in get_v044_variant_cards()}
+    if profile in ("V044", "V046"):
+        v044_by_code = {c.code: c for c in (get_v046_variant_cards() if profile == "V046" else get_v044_variant_cards())}
         out = dict(variant_cards)
         for color, card in variant_cards.items():
             target_code = card.printed_code  # maps R2_MKT -> R2, R3_MKT -> R3

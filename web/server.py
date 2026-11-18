@@ -238,7 +238,8 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                         return
                     state = self.controller.confirm_attacks(
                         pid, any_shield_allocations=allocs, glitch_die_ids=glitch_ids, aegis_color=aegis_color,
-                        use_slush_fund=(bool(data["use_slush_fund"]) if data.get("use_slush_fund") is not None else None)
+                        use_slush_fund=(bool(data["use_slush_fund"]) if data.get("use_slush_fund") is not None else None),
+                        aegis_green=data.get("aegis_green"),
                     )
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
