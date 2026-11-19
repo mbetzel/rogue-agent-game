@@ -160,9 +160,9 @@ Starting with the First Player, each player takes their Operations Turn:
 ### Phase 6: CI/CD Pipeline Shift (Simultaneous)
 
 1. **Production Return:** Move all dice from **In Production** to your **Sprint Plan**: the **Current Sprint** if it is empty, otherwise the **Next Sprint**.
-2. **Sprint Review (Hardware Throughput):** Up to **Release Bandwidth** dice (`4` baseline, upgradable to `5` and `6`) move to **Ready for Release**:
-   * **Current Sprint first (mandatory)** until it is empty or bandwidth runs out (you choose if it has more dice than bandwidth).
-   * **Then the Next Sprint (optional)** with any bandwidth left.
+2. **Sprint Review (Hardware Throughput):** Exactly **Release Bandwidth** dice (`4` baseline, upgradable to `5` and `6`; all of them if fewer) move to **Ready for Release**:
+   * **Current Sprint first** until it is empty or bandwidth runs out (you choose if it has more dice than bandwidth).
+   * **Then the Next Sprint** to fill the bandwidth left (your choice of dice).
    * Everything left in the Sprint Plan becomes the new **Current Sprint**.
 3. **Conveyor Triage (Hardware Throughput):** Move up to **Triage Bandwidth** dice (`1` at L0–L1, `2` at L2+) from **Research & Development $\to$ Next Sprint**, **oldest first** (FIFO order):
    * Each die **banks its Secret** upon leaving Research & Development:

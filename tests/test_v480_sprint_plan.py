@@ -251,10 +251,10 @@ class TestSprintReview(unittest.TestCase):
         self.assertEqual(ids[0], 500)
         self.assertEqual(set(ids[:4]), {500, 501, 502, 503})  # Current back-filled to forced
         self.assertEqual(ids[4:], [510])  # Next capped at spare, no cross-sprint / duplicate
-        # short Next list is never back-filled
+        # a short Next list is back-filled: full Release Bandwidth is mandatory (User ruling 2026-11-19)
         self.b.grad = lambda p, c, n, bw: ([d.die_id for d in c], [])
         out = self._review([gray(self.e, 600)], [gray(self.e, 601), gray(self.e, 602)], 4)
-        self.assertEqual([d.die_id for d in out], [600])
+        self.assertEqual(sorted(d.die_id for d in out), [600, 601, 602])
 
     def test_tc_sp_10_explicit_chosen_and_check_picks(self):
         cur = [gray(self.e, 500), gray(self.e, 501)]
@@ -272,6 +272,7 @@ class TestSprintReview(unittest.TestCase):
         set_sprint(self.e, self.p, cur[:1], nxt, 3)  # 1 Current, 2 spare
         self.assertEqual(sp.check_picks(self.p, [500], [510, 511]), [])
         self.assertTrue(sp.check_picks(self.p, [500], [510, 511, 512]))
+        self.assertTrue(any("must graduate exactly 2 Next" in x for x in sp.check_picks(self.p, [500], [510])))
 
     def test_tc_sp_11_bandwidth_bonuses_inv_sp_08(self):
         cur = [gray(self.e, 500 + i) for i in range(5)]

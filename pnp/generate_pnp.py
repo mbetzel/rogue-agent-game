@@ -1098,10 +1098,8 @@ def render_player_board(
     nxt_y = cur_y + well_h + well_gap
     page.rounded_rect(sc_x + 4.0, cur_y, sc_w - 8.0, well_h, r=3.0, stroke=PALETTE["blue"], fill=PALETTE["paper_tint"], line_width=0.7)
     page.rich_line(sc_x + 9.0, cur_y + 9.5, "**CURRENT SPRINT**", size=6.4, color=PALETTE["blue"])
-    page.text(sc_x + sc_w - 9.0, cur_y + 9.5, "RELEASE FIRST", font="mono_bold", size=4.6, color=PALETTE["blue"], align="right")
     page.rounded_rect(sc_x + 4.0, nxt_y, sc_w - 8.0, well_h, r=3.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.6, dash=(3.0, 2.0))
     page.rich_line(sc_x + 9.0, nxt_y + 9.5, "**NEXT SPRINT**", size=6.4, color=PALETTE["ink"])
-    page.text(sc_x + sc_w - 9.0, nxt_y + 9.5, "THEN OPTIONAL", font="mono_bold", size=4.6, color=PALETTE["ink_soft"], align="right")
 
     # --- 4B: Embedded Triage Upgrade Track (Top Right) ---
     tt_x, tt_w = rx + 158.0, rw - 162.0
@@ -1903,7 +1901,7 @@ def render_four_player_round_reference_cards(page: PDFPage) -> None:
         ),
         (
             "P6: CI/CD PIPELINE SHIFT (Simultaneous)",
-            "**1.** Magnetic Splice. **2.** Production Return -> **Sprint Plan** (Current if empty, else Next). **3.** **Sprint Review:** Current -> **Ready** (<= Release Bandwidth 4/5/6), then optional Next; rest = Current. **4.** Conveyor Triage: **R&D -> Next Sprint** (<= Triage Bandwidth, oldest first; banks Secret & queues Signature Cube). **5.** Red R&D face banked: **Market Leader Bonus**. Pass First Player.",
+            "**1.** Magnetic Splice. **2.** Production Return -> **Sprint Plan** (Current if empty, else Next). **3.** **Sprint Review:** release **Release Bandwidth** dice (4/5/6; all if fewer) -> **Ready**, Current first, then Next; rest = Current. **4.** Conveyor Triage: **R&D -> Next Sprint** (<= Triage Bandwidth, oldest first; banks Secret & queues Signature Cube). **5.** Red R&D face banked: **Market Leader Bonus**. Pass First Player.",
         ),
     ]
 

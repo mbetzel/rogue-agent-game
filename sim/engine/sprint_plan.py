@@ -114,9 +114,12 @@ def check_picks(p: "PlayerState", cur_ids: Iterable[int], next_ids: Iterable[int
             errs.append(f"die {did} is not in the {label}" if did in other else f"unknown die id {did}")
     if len(cur_ids) != forced:
         errs.append(f"must graduate exactly {forced} Current Sprint dice, got {len(cur_ids)}")
+    need = min(spare, len(nxt))
     if len(next_ids) > spare:
         errs.append("no spare Release Bandwidth for Next Sprint picks" if spare <= 0
                     else f"at most {spare} Next Sprint dice may graduate, got {len(next_ids)}")
+    elif len(next_ids) < need:
+        errs.append(f"must graduate exactly {need} Next Sprint dice to fill Release Bandwidth, got {len(next_ids)}")
     return errs
 
 
@@ -125,7 +128,8 @@ def _tel(engine: "GameEngine", key: str) -> Dict[int, Any]:
 
 
 def sprint_review(engine: "GameEngine", p: "PlayerState", chosen_die_ids: Optional[List[int]] = None) -> List["Die"]:
-    """Phase 6 Sprint Review (spec §6.2): forced Current graduates, then optional Next graduates."""
+    """Phase 6 Sprint Review (spec §6.2; User ruling 2026-11-19): exactly ``min(bw, |Sprint Plan|)`` dice graduate,
+    Current Sprint first, then Next Sprint dice to fill the rest (both back-filled when a pick list is short)."""
     from sim.engine.phase5_pipeline_shift import reset_die_for_pipeline
 
     prune(p)
@@ -157,7 +161,7 @@ def sprint_review(engine: "GameEngine", p: "PlayerState", chosen_die_ids: Option
         cur_ids = [i for i in ids if i in cset]
         next_ids = [i for i in ids if i in nset]
     cur_pick = _validate(cur, cur_ids, forced, backfill=True)
-    next_pick = _validate(nxt, next_ids, spare, backfill=False)
+    next_pick = _validate(nxt, next_ids, spare, backfill=True)  # full throughput is mandatory
     graduates = cur_pick + next_pick
 
     for die in graduates:

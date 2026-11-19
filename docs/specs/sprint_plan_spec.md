@@ -526,7 +526,7 @@ Small drift is expected: the probe minted (then popped) L1 Gray dice, which adva
 1. **OQ-1 Blue Signature Gray source.** Default = first Gray in `scanned_dice` list order, either sprint (unchanged; mirrors the probe). The rules text says "your choice". A `choose_signature_blue_gray` hook is deferred to the web follow-up. *Resolved: default.*
 2. **OQ-2 Thinning target.** Mandatory. The bot hook defaults to the probe order (R&D first). *Resolved.*
 3. **OQ-3 `bot_thin_tracks`.** Default `("RELEASE",)` keeps the archetype identity; S2b tests `("RELEASE","DEFENSE")`. The game-designer picks after the sweep. *Open, default set.*
-4. **OQ-4 Optional Next fill.** Bots always fill spare bandwidth (as in the probe); humans may decline (engine allows a short Next list). *Resolved.*
+4. **OQ-4 Next fill.** ~~Optional~~ **Mandatory (User ruling 2026-11-19):** the Sprint Review always releases `min(Release Bandwidth, dice in the Sprint Plan)` dice, Current Sprint first; a short Next pick list is back-filled and `check_picks` rejects one. Bots already filled spare bandwidth, so bot games are unchanged (240-game digest check). *Resolved.*
 5. **OQ-5 Gray roll share guardrail.** §6.3 said ≥ 50%, but QC measured 49% (3P). Proposed bar ≥ 45%. *Game-designer to confirm.*
 6. **OQ-6 Release L1 bonus.** Uses `temp_release_bandwidth_bonus`, so it stacks with Jumper. *Resolved.*
 7. **OQ-7 Labels.** The rename is display-only via `terms.py`; the entity face / variant names are unchanged for parity. *Resolved.*
