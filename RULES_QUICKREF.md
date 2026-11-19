@@ -1,4 +1,4 @@
-# Too Many Secrets — Quick Reference Rules (v0.48.0)
+# Too Many Secrets — Quick Reference Rules (v0.49.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Format:** Simultaneous / Turn-Based Hybrid
 
@@ -8,7 +8,7 @@
 
 You are a **White Hat Operative** contracted to defend a **Client Company** against **Project: SETEC** (the Rogue Agent). Each round, SETEC's mainframe compiler drops threat cubes while players roll custom software module dice, manage their CI/CD pipeline, upgrade terminal hardware, and defend corporate assets.
 
-* **Vulnerability (⚠):** The best die faces carry ⚠. Each kept ⚠ raises your **Vulnerability** by `1`. SETEC's Green cubes hit the most vulnerable player at `4` or more. Spaces `0–3` are safe.
+* **Vulnerability (⚠):** The best die faces carry ⚠. Any die that shows ⚠ is **locked** (no more rerolls this phase), and each ⚠ raises your **Vulnerability** by `1`. SETEC's Green cubes hit the most vulnerable player at `5` or more. Spaces `0–4` are safe.
 
 * **Survival:** If your **Corporate Secrets** fall to `0` or below, you suffer a **Total Data Breach**, become **Patient Zero**, and are **eliminated**.
 * **Market Collapse:** If any surviving player's **Market Share** drops to `0`, the current round becomes the **Final Round** (no player is eliminated).
@@ -74,8 +74,8 @@ Each round consists of **6 Phases**:
    * If SETEC's corruption track filled last round, switch to the new version now: discard any unspent override from the previous version, unlock the new version override, and advance the marker.
    * Add **1 Black Cube** from the supply into the **Staging Cup**.
 2. **Roll Active Pool:** Roll all dice in your **Ready for Release Zone**.
-3. **Rerolls:** Up to **2 free rerolls** of any subset of dice (3 rolls total). A **Gray die showing its ⚠ face** (`+$2 / +2 🔬`) must be kept (no reroll); colored dice may reroll ⚠. *(At **Release Track Level 4**, after rerolls and Prodigy/Helix overrides, you may set `1` rolled Gray Legacy die to any printed face.)*
-4. **Lock-in & Deploy Dice:**
+3. **Rerolls:** Up to **2 free rerolls** of any subset of dice (3 rolls total). Any die showing a **⚠ face** (colored ⚠ faces, R&D faces and the Gray `+$2 / +2 🔬` face) is **locked**: it can't be rerolled this phase. It still produces its output. *(Helix *Brute-Force Bypass*, once per game: reroll locked dice this phase, then set `1` die to any non-★ face. At **Release Track Level 4**, after rerolls and Prodigy/Helix overrides, you may set `1` rolled Gray Legacy die to any printed face.)*
+4. **Deploy Dice** (all locks end):
    * **Gain Vulnerability:** `+1` per ⚠ on your final faces (R&D faces included), max `15`.
    * **R&D Faces (Face 5 on Red, Blue, Green, Purple):** Move **immediately to Research & Development** in Under Development (banks secrets later upon exit).
    * **In Production:** Place all other dice here (producing `$`, `🔬`, Market Share, or `★`). Choice faces (`/`) are committed now.
@@ -116,18 +116,18 @@ Collect all resources produced by dice still deployed **In Production**:
 No cube can be blocked. Resolve in order:
 1. **Red (Market Manipulation):** Every surviving player loses **`1` Market Share** per Red cube (minimum 0).
 2. **Blue (Spyware):** Every surviving player loses **`1` Corporate Secret** per Blue cube, in every version.
-3. **Green (Malware), one cube at a time:** The player(s) with the **highest Vulnerability at `4`+** are hit (ties: all). Lose Secrets by band, then reset Vulnerability to `0`. The next cube re-checks. No one at `4`+: the cube does nothing.
+3. **Green (Malware), one cube at a time:** The player(s) with the **highest Vulnerability at `5`+** are hit (ties: all). Lose Secrets by band, then reset Vulnerability to `0`. The next cube re-checks. No one at `5`+: the cube does nothing.
 
-   | Vulnerability | `0–3` | `4–6` | `7–9` | `10–15` |
+   | Vulnerability | `0–4` | `5–7` | `8–10` | `11–15` |
    | :--- | :---: | :---: | :---: | :---: |
    | Green hit | Safe | `−1` Secret | `−2` Secrets | `−3` Secrets |
 4. **Patient Zero check:** Secrets `<= 0` = **Patient Zero**.
 * **Target Lock & Recycle:**
   * **Target Lock Signature Attack (Dominant Tray Color, Tie Priority `Green > Black > Blue > Red`):** If your Signature Cube exited in Phase 2, resolve the Signature Attack matching the most populous cube color in the tray (fizzles if `0` cubes exited):
     * **Green:** Place a green cube from the supply on the next space of **`2` Research Tracks** without green cubes (**`2× 🔬` cost** to advance into; each unplaceable cube gives `+2` Vulnerability).
-    * **Black:** Mark your **Institutional Override** as **`Used`** for this Version; if already used, lose **`2` Corporate Secrets**.
+    * **Black:** Mark your **Institutional Override** as **`Used`** for this Version; if already used, lose **`2` Corporate Secrets**. *(Helix: an unused Brute-Force Bypass can't be marked Used; no effect.)*
     * **Blue:** Move **`1` Gray Legacy Die** (from either sprint of your `Sprint Plan`, else `In Production`) to the back of your **Research & Development** (`0` Secrets when triaged).
-    * **Red:** Lose **`2` Market Share**; the lowest surviving rival *(locked or not; 2P: SETEC Corp counts)* gains **`2`** *(read after all locked players lose `2`; if tied, you choose)*.
+    * **Red:** Lose **`2` Market Share**; the lowest surviving rival *(Target-Locked or not; 2P: SETEC Corp counts)* gains **`2`** *(read after all Target-Locked players lose `2`; if tied, you choose)*.
   * **Recycle Cubes & SETEC Corp (2P):** Place all exited Red, Blue, and Green Attack Cubes back into the **Staging Cup** for next round. In **2-player games**, if **any Red cubes (`>= 1`) exited the tray**, move the **SETEC Corp Black Cube** up **`+1` Market Share** (max `20`).
 * **End Game Check:**
   * If a surviving player's Secrets drop to `<= 0`, they become **Patient Zero** (eliminated; current round is the Final Round).

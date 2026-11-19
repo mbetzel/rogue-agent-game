@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Section 6 (v0.48.0)
+# Too Many Secrets — Rules Section 6 (v0.49.0)
 
 Split out of `RULES.md`; this file is canonical for Section 6.
 
@@ -9,16 +9,16 @@ Split out of `RULES.md`; this file is canonical for Section 6.
 | Die Type | Cost | Face 1 | Face 2 | Face 3 | Face 4 | Face 5 | Face 6 |
 | :--- | :---: | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Gray (Legacy)** | Starter (5) | `+$1 & +1 🔬` | `+2 🔬` | `+$2 / +2 🔬` ⚠ | `+$1 / +1 🔬` | `+$1` | `+1 🔬` `[TUNE: v0.48.0]` |
-| **Red (Marketing)** | `$4–$5` (Variant) | `+1 Market Share / +$1` ⚠ | `+$2` | `+$2` | `+$2` | **R&D face** ⚠ | `Red ★` |
-| **Blue (Firewall)** | `$4–$5` (Variant) | `+1 Corporate Secret` | `+2 🔬` | `+$2` ⚠ | `+1 🔬 / +$1` | **R&D face** ⚠ | `Blue ★` |
-| **Green (Antivirus)** | `$4–$5` (Variant) | `+2 🔬` ⚠ | `+1 🔬` | `+2 🔬` | `+1 🔬 / +$1` | **R&D face** ⚠ | `Green ★` |
-| **Yellow (Commercial)**| `$5–$6` (Variant) | `+2 Market Share` ⚠ | `+1 Market Share / +1 🔬` | `+$1 & +1 Market Share` | `+$2 / +1 🔬` | `+$2 / +1 🔬` ⚠ | `Yellow ★` |
-| **Purple (Specialist)** | Starter / Public Relations L3 | `+$1 / +1 🔬` | `+$1 / +1 🔬` | `+$2` | `+$1 & +1 🔬` ⚠ | **R&D face** ⚠ | `Purple ★ (Signature Protocol)` |
+| **Red (Marketing)** | `$4–$5` (Variant) | `+1 Market Share & +1 🔬` ⚠ `[TUNE: v0.49.0]` | `+$2` | `+$2` | `+$2` | **R&D face** ⚠ | `Red ★` |
+| **Blue (Firewall)** | `$4–$5` (Variant) | `+1 Corporate Secret` | `+2 🔬` | `+$2 & +1 🔬` ⚠ `[TUNE: v0.49.0]` | `+1 🔬 / +$1` | **R&D face** ⚠ | `Blue ★` |
+| **Green (Antivirus)** | `$4–$5` (Variant) | `+3 🔬` ⚠ `[TUNE: v0.49.0]` | `+1 🔬` | `+2 🔬` | `+1 🔬 / +$1` | **R&D face** ⚠ | `Green ★` |
+| **Yellow (Commercial)**| `$5–$6` (Variant) | `+2 Market Share` ⚠ | `+1 Market Share / +1 🔬` | `+$1 & +1 Market Share` | `+$2 / +1 🔬` | `+$2 & +1 🔬` ⚠ `[TUNE: v0.49.0]` | `Yellow ★` |
+| **Purple (Specialist)** | Starter / Public Relations L3 | `+$1 / +1 🔬` | `+$1 / +1 🔬` | `+$2` | `+$1 & +2 🔬` ⚠ `[TUNE: v0.49.0]` | **R&D face** ⚠ | `Purple ★ (Signature Protocol)` |
 
 * **Choice Faces (`/`):** Faces with a slash (`/`) indicate a Choice Face. During Phase 1 Step 4, the player declares which of the two options the die fulfills for this round (e.g. `+1 Market Share / +$1`).
-* **Vulnerability (⚠):** Each ⚠ on the final face of a rolled die raises your Vulnerability by `1` at lock-in (Phase 1 Step 4), including R&D faces, which always carry ⚠. `★` faces never carry ⚠. Gray dice have one ⚠ face (Face 3), and a Gray die showing it must be kept (it can't be rerolled); each colored die has one ⚠ core face (Yellow, which has no R&D face, has two). A ⚠ on a choice face counts whichever option you choose. *Arbitrary Code Execution*, *Brute-Force Bypass* and Release Level 4 change the face, so ⚠ is counted on the face they set.
+* **Vulnerability (⚠):** Each ⚠ on the final face of a rolled die raises your Vulnerability by `1` at Deploy (Phase 1 Step 4), including R&D faces, which always carry ⚠. `★` faces never carry ⚠. Gray dice have one ⚠ face (Face 3); each colored die has one ⚠ core face (Yellow, which has no R&D face, has two). Any die showing a ⚠ face during rerolls (R&D faces included) is a **Locked Die**: it can't be rerolled this phase `[TUNE: v0.49.0]`. Colored ⚠ core faces pay a premium over that die's clean faces. A ⚠ on a choice face counts whichever option you choose. *Arbitrary Code Execution*, *Brute-Force Bypass* and Release Level 4 change the face, so ⚠ is counted on the face they set.
 * **Market Share Faces:** Red and Yellow Market Share outputs resolve in Phase 3: Income; they cannot raise Market Share above the track maximum (`20`) and do not count toward your Public Relations limit.
-* **R&D Faces:** Face 5 on Red, Blue, Green and Purple dice. A die showing it after rerolls moves to **Research & Development** with no other output and banks its Secret when it leaves (yields: Red `+2` and triggers the Market Leader Bonus; Blue `+2`, or `+3` if Pen Test $\ge$ Level 3; Green `+2`, then lower your Vulnerability by `2`; Purple `+1`; see Phase 6 *R&D Face Yields*). It may be rerolled like any face. Yellow dice have no R&D face.
+* **R&D Faces:** Face 5 on Red, Blue, Green and Purple dice. A die showing it after rerolls moves to **Research & Development** with no other output and banks its Secret when it leaves (yields: Red `+2` and triggers the Market Leader Bonus; Blue `+2`, or `+3` if Pen Test $\ge$ Level 3; Green `+2`, then lower your Vulnerability by `2`; Purple `+1`; see Phase 6 *R&D Face Yields*). It always carries ⚠, so a die showing it during rerolls is locked. Yellow dice have no R&D face.
 * **Zero Blank or Glitch Faces:** Every face on every Software Module Die produces a resource, Secret, or Star (`★`) output (`0` blank faces and `0` Glitch faces).
 
 ### B. Sample Module Variant Cards (`★` Effects)
@@ -84,7 +84,7 @@ Each player contracts with 1 enterprise Client Company for the duration of the m
 | **OMNIDYNE** | **Omnidyne Systems** | Tech Giant | *Magnetic Splice* | Phase 6: Step 1 (Magnetic Splice) | Move **1 die** from your **Research & Development** directly to your **Ready for Release Zone** for **free** (bypassing the Sprint Plan); it banks its Secret now. | *"Proprietary hardware backplanes allow instantaneous hot-swapping under live load."* |
 | **AEGIS** | **Aegis Defense Relay** | Security Firm | *Baffle Echo* | Phase 4: Attack Resolution | Ignore the damage of **1 Attack Cube** for yourself this round: `1` Red cube (no Market Share loss), `1` Blue cube (no Secret loss), or `1` Green cube that hits you (no Secret loss; your Vulnerability still resets to `0`). *(All exited cubes remain in the exit tray and recycle into the Staging Cup as normal).* | *"Multi-layered kinetic dampeners disperse inbound network blast energy."* |
 | **DTO** | **Department of Telecommunications Oversight** | Federal Agency | *Slush Fund* | Phase 4: Attack Resolution (**once per game**) | The DTO accesses emergency black budget reserves: **Absorb up to 2 Corporate Secret loss** from Blue cubes for free. *(Any additional Secret loss applies as normal).* | *"Classified black budget allocations absorb compliance failures without public oversight."* |
-| **HELIX** | **Helix Biomedical Consortium** | Medical Research | *Brute-Force Bypass* | Phase 1: Step 3 Rerolls | Gain **1 extra free reroll** this phase. In addition, turn **1 of your rolled dice to any legal non-Star face of its color** (the R&D face is allowed). | *"Massively parallel quantum sequencing breaks deterministic encryption gates."* |
+| **HELIX** | **Helix Biomedical Consortium** | Medical Research | *Brute-Force Bypass* | Phase 1: Step 3 Rerolls | **Once per game** `[TUNE: v0.49.0]`: for the rest of this phase you may reroll **locked** dice; after rerolls, turn **1 of your rolled dice to any legal non-Star face of its color** (the R&D face is allowed). *Root Override Hijack* can't mark an unused Bypass Used. | *"Massively parallel quantum sequencing breaks deterministic encryption gates."* |
 | **PROMETHEUS** | **The Prometheus Foundation** | Non-Profit | *Algorithmic Arbitrage* | Phase 5: Operations Turn | Purchase **1 Colored Die** from the Central Market at a **`$2 discount`** (minimum cost `$0`), **OR** gain an immediate **`+$2` cash payout** from the bank. | *"Open-source cryptographic protocols circumvent proprietary enterprise licensing fees."* |
 
 #### 2. The 6 White Hat Dossiers (`WhiteHat`) — Face 6 Signature Protocols

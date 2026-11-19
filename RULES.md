@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.48.0)
+# Too Many Secrets — Rules Draft (v0.49.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -25,9 +25,9 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
 * **Compiler Cubes (4 Colors):**
   * **Red Cubes (Market Manipulation):** Lowers your **Market Share** by `1` per cube (Red cubes cannot be blocked; no Money or Corporate Secrets are lost).
   * **Blue Cubes (Spyware / Data Exfiltration):** Steals `1` **Corporate Secret** per cube in every version (Blue cubes cannot be blocked).
-  * **Green Cubes (Malware / Logic Bombs):** Hunts the most vulnerable operative. Each Green cube, one at a time, hits the surviving player(s) highest on the **Vulnerability Track** at `4` or more (all tied players are hit). Each hit player loses Corporate Secrets by band (`4–6`: `1`; `7–9`: `2`; `10+`: `3`) `[TUNE: v0.46.0]` and resets their Vulnerability to `0`. A Green cube with no player at `4` or more has no effect (see Phase 4).
+  * **Green Cubes (Malware / Logic Bombs):** Hunts the most vulnerable operative. Each Green cube, one at a time, hits the surviving player(s) highest on the **Vulnerability Track** at `5` or more (all tied players are hit). Each hit player loses Corporate Secrets by band (`5–7`: `1`; `8–10`: `2`; `11+`: `3`) `[TUNE: v0.49.0]` and resets their Vulnerability to `0`. A Green cube with no player at `5` or more has no effect (see Phase 4).
   * **Black Cubes (Corrupted Code / Master Key Search):** Advances the active **Version Corruption Track** toward cryptographic Singularity.
-* **Vulnerability Track** (on the Central SETEC Agent Board, numbered `0` to `15` `[TUNE: v0.46.0]`, with 1 Vulnerability marker per player): spaces `0–3` are the **safe zone** (Green never targets them); the bands `4–6`, `7–9` and `10–15` are printed with their Green damage (`−1 / −2 / −3` Secrets). Your Vulnerability rises by `1` per ⚠ on your kept dice in Phase 1 and can't go above `15` (excess is lost). It falls through the **Pen Test Track** and some `★` and R&D-face effects (never below `0`).
+* **Vulnerability Track** (on the Central SETEC Agent Board, numbered `0` to `15` `[TUNE: v0.46.0]`, with 1 Vulnerability marker per player): spaces `0–4` are the **safe zone** (Green never targets them) `[TUNE: v0.49.0]`; the bands `5–7`, `8–10` and `11–15` are printed with their Green damage (`−1 / −2 / −3` Secrets). Your Vulnerability rises by `1` per ⚠ on your kept dice in Phase 1 and can't go above `15` (excess is lost). It falls through the **Pen Test Track** and some `★` and R&D-face effects (never below `0`).
 * **SETEC Version Deck (`v1.0`, `v2.0`, `v3.0`):** Setup cards defining the threat's starting payload (`v1.0`) and each version's bespoke **Corruption Track** (where every space triggers a game-wide hazard or injects new cubes into the compiler).
 
 ### Player & Market Components
@@ -104,7 +104,7 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
   * **Omnidyne Systems** (*Tech Giant / Magnetic Splice*)
   * **Aegis Defense Relay** (*Security Firm / Baffle Echo*)
   * **Department of Telecommunications Oversight [DTO]** (*Federal Agency / Slush Fund, once per game*)
-  * **Helix Biomedical Consortium** (*Medical Research / Brute-Force Bypass*)
+  * **Helix Biomedical Consortium** (*Medical Research / Brute-Force Bypass, once per game*)
   * **The Prometheus Foundation** (*Non-Profit / Algorithmic Arbitrage*)
 * **6 White Hat Dossier Cards** (Specialist operative leads directing technical protocols; each defines a Face 6 Signature Protocol for that player's Purple dice):
   * **The Operator** (*Tactical Staffing & Logistics Lead / Logistics Bounty*)
@@ -162,7 +162,7 @@ Too Many Secrets is played over a series of rounds (~7–9 rounds). Each round c
 6. **Phase 6: CI/CD Pipeline Shift** *(Simultaneous)*
 
 ### Client Company Institutional Overrides ("Once per Version")
-Each player’s contracting Client Company provides a powerful Institutional Override that may be activated **once per SETEC Version** (`v1.0`, `v2.0`, and `v3.0`). **Exception:** DTO *Slush Fund* may be activated **once per game** (using it marks the current version slot used, and later version slots cannot fire it):
+Each player’s contracting Client Company provides a powerful Institutional Override that may be activated **once per SETEC Version** (`v1.0`, `v2.0`, and `v3.0`). **Exceptions:** DTO *Slush Fund* and Helix *Brute-Force Bypass* may each be activated **once per game** (using it marks the current version slot used, and later version slots cannot fire it):
 * **Start-of-Round Transition Timing:** Advancing SETEC to a new version occurs at the **start of the subsequent round** during Phase 1 Step 1 (before rolling). When an active version's corruption track is filled during Phase 2, the active version remains current for the remainder of that round.
 * **Preserved Override Usability:** Because the active version remains current through **Phases 3–6**, players maintain continuous access to their current version override. Players may freely activate overrides during **Phase 3: Income** (Meridian *Capital Injection*), **Phase 4: Attack Resolution** (e.g., Aegis *Baffle Echo*, DTO *Slush Fund*), **Phase 5: Operations** (Prometheus *Algorithmic Arbitrage*), or **Phase 6** Step 1 (Omnidyne *Magnetic Splice*). The new version's Institutional Override is not unlocked yet.
 * **Forfeiture & Unlock:** At the start of the next round (in Phase 1 Step 1), any unspent Institutional Override from the old version is **forfeited**, and the newly active version's Institutional Override slot unlocks to **Available**.
@@ -178,15 +178,15 @@ Each player’s contracting Client Company provides a powerful Institutional Ove
 3. **Yahtzee Rerolls (Simultaneous Pure Rerolls):**
    * Each player may perform up to **`2` free rerolls** of any subset of their rolled dice (3 rolls total).
    * Between rerolls, players may set aside (keep) any dice, or pick previously kept dice back up for subsequent rerolls.
-   * **R&D Faces:** An **R&D face** (Face 5 on Red, Blue, Green and Purple dice) is a normal face during rerolls: you may keep it or reroll it.
-   * **Vulnerability (⚠):** Faces marked ⚠ pay well but raise your Vulnerability if you keep them (see Step 4). Whether to keep a ⚠ face or reroll it is your main risk decision each round.
-   * **Gray ⚠ faces must be kept:** A **Gray Legacy die** that shows its ⚠ face (`+$2 / +2 🔬`) after any roll is set aside and can't be rerolled this phase `[TUNE: v0.48.0]`. Colored dice may still reroll ⚠ faces. *Brute-Force Bypass* and Release Track Level 4 may still change that die's face. The Staging Cup is public, so you can see how many Green cubes may drop.
+   * **Vulnerability (⚠):** Faces marked ⚠ pay well but raise your Vulnerability (see Step 4).
+   * **⚠ faces lock:** Any die that shows a ⚠ face after any roll is **locked**: set it aside; it can't be rerolled this phase `[TUNE: v0.49.0]`. This includes colored dice on their ⚠ core face, **R&D faces** (Face 5 on Red, Blue, Green and Purple dice, which always carry ⚠), and Gray Legacy dice on their ⚠ face (`+$2 / +2 🔬`). Every reroll of a clean die risks locking it on a ⚠ face; that is your main risk decision each round, sharpest when you are just below a Vulnerability band. The Staging Cup is public, so you can see how many Green cubes may drop.
+   * Locked dice still produce their output: locking never costs you income. *Arbitrary Code Execution*, *Brute-Force Bypass* and Release Track Level 4 may still change a locked die's face, and ⚠ is counted on the final face.
    * **Post-Reroll Die-Face Overrides (in strict order):**
      1. *(Signature Protocol Timing: Each Face 6 `Purple ★` die triggers **The Prodigy's** Arbitrary Code Execution to turn `1` other rolled die in your active pool to any legal non-Star face of its color other than the R&D face).*
-     2. *(Institutional Override Timing: Contracting **Helix Biomedical Consortium** may trigger Brute-Force Bypass here: gain `1` extra free reroll this phase, and turn `1` rolled die to any legal non-Star face of its color, including the R&D face).*
+     2. *(Institutional Override Timing: Contracting **Helix Biomedical Consortium** may trigger Brute-Force Bypass, **once per game**, at any point during this phase's rerolls: for the rest of this phase you may reroll **locked** dice, and after rerolls you turn `1` rolled die to any legal non-Star face of its color, including the R&D face `[TUNE: v0.49.0]`).*
      3. **Release Track Level 4:** After any rerolls and overrides above, if you have at least `1` rolled **Gray Legacy die**, you may set `1` rolled Gray Legacy die to any printed face of its die (`+$1 & +1 🔬`, `+2 🔬`, `+$2 / +2 🔬` ⚠, `+$1 / +1 🔬`, `+$1`, or `+1 🔬`). This can turn a ⚠ face into a clean face, or the reverse. If you rolled `0` Gray Legacy dice, this effect does not apply this round.
-4. **Lock-in & Assign Dice (Simultaneous):**
-   * After all rerolls and overrides are finished, resolve all rolled dice:
+4. **Deploy Dice (Simultaneous):**
+   * After all rerolls and overrides are finished, resolve all rolled dice (all locks end now):
      * **Gain Vulnerability:** Count the ⚠ icons on the final faces of all your rolled dice, including R&D faces. Move your Vulnerability marker up `1` space per ⚠ (not above `15`; excess is lost). Vulnerability gained now stays even if the die later leaves In Production (Corruption returns, *Burn Notice*, Signature Attacks).
      * **R&D Faces $\to$ Research & Development:** Any die showing an **R&D face** moves **immediately** to the **Research & Development** box in your **Under Development** pipeline and produces no other output. It banks its Secret when it leaves Research & Development (see Phase 6 and *R&D Face Yields* below).
      * **In Production:** Place all remaining rolled dice into your **In Production** area. They produce their outputs in Phase 3: Income.
@@ -258,10 +258,10 @@ Calculate the total attack strength of **Red**, **Blue**, and **Green** from exi
    * *(Institutional Override Timing: Contracting **Department of Telecommunications Oversight [DTO]** may trigger Slush Fund here to absorb up to 2 Corporate Secret loss from Blue cubes for free; **once per game**, and you choose whether to use it when it would apply).*
    * *(Institutional Override Timing: Defending **Aegis Defense Relay** may trigger Baffle Echo here to ignore `1` exited Red or Blue cube for themselves this round, or save it for a Green hit in Step 2).*
 2. **Green (whole table, one cube at a time):** For each exited Green cube in turn:
-   * Find the surviving player(s) with the **highest Vulnerability**, counting only players at **`4` or more**. Every player tied for highest is hit.
-   * Each hit player loses Corporate Secrets by their band: **`4–6`: `1`**, **`7–9`: `2`**, **`10+`: `3`** `[TUNE: v0.46.0]`. Then they **reset their Vulnerability to `0`**.
+   * Find the surviving player(s) with the **highest Vulnerability**, counting only players at **`5` or more**. Every player tied for highest is hit.
+   * Each hit player loses Corporate Secrets by their band: **`5–7`: `1`**, **`8–10`: `2`**, **`11+`: `3`** `[TUNE: v0.49.0]`. Then they **reset their Vulnerability to `0`**.
    * The next Green cube checks again from the new positions, so a second cube usually hits a different player.
-   * If no surviving player is at `4` or more, the cube has no effect (players in the safe zone `0–3` are never hit). It still recycles in Step 5.
+   * If no surviving player is at `5` or more, the cube has no effect (players in the safe zone `0–4` are never hit). It still recycles in Step 5.
    * A player taken to `0` Secrets by Blue this phase can still be hit by Green.
    * *(Institutional Override Timing: **Aegis Defense Relay** may use Baffle Echo, if still unused this version, to cancel the Secret loss of `1` Green hit. Their Vulnerability still resets to `0`).*
 3. **Patient Zero Check:** If your Corporate Secrets are now **`0` (or below)**, you suffer a **Total Data Breach** and become **Patient Zero**.
@@ -275,9 +275,9 @@ If you triggered a **Target Lock** in Phase 2 (and are not **Patient Zero**), af
 * **Buffer Overflow (Empty Tray):** If `0` total cubes exited in Phase 2, Target Lock **fizzles cleanly** with no effect (`INV-SIG-02`).
 * **The 4 Dominant Color Signature Attacks (Printed on Central Board):**
   * **Green (Malware Encryption):** Place a green cube from the general supply onto the next space of **`2` different Research Tracks** that do not already have a green cube (and are below Level 4; you choose which eligible tracks). **A space holding a green cube costs double Research (`2× 🔬`) to advance into**; when researched, return the green cube to the general supply (never to the Staging Cup). The Pen Test Track is an eligible track. For each green cube that cannot be placed (because fewer than 2 tracks are eligible), **gain `+2` Vulnerability** `[TUNE: v0.46.0]` instead (`INV-SIG-GREEN`); it can only draw a Green hit from next round.
-  * **Black (Root Override Hijack):** Mark your Client Company's **Institutional Override** as **`Used`** for the current SETEC Version (for **DTO** *Slush Fund*, mark it used for the game). If your Institutional Override is already used, lose **`2` Corporate Secrets** instead (`INV-SIG-BLACK`).
+  * **Black (Root Override Hijack):** Mark your Client Company's **Institutional Override** as **`Used`** for the current SETEC Version (for **DTO** *Slush Fund*, mark it used for the game). If your Institutional Override is already used, lose **`2` Corporate Secrets** instead (`INV-SIG-BLACK`). **Helix** *Brute-Force Bypass* can't be marked Used this way: if it is unused, Root Override Hijack has no effect on Helix `[TUNE: v0.49.0]`.
   * **Blue (Buffer Congestion):** Move **`1` Gray Legacy die** from your **Sprint Plan** (either sprint, your choice; or **In Production** if your Sprint Plan has no Gray die; or **Ready for Release** if neither has one) to the back of your **Research & Development** queue (it enters the **Next Sprint** when it leaves). When a Gray Legacy die leaves Research & Development (via Conveyor Triage or *Magnetic Splice*), it yields **`0` Corporate Secrets** and does **not** queue your Operative Signature Cube into the Staging Cup (`INV-SIG-BLUE`).
-  * **Red (Market Manipulation):** You lose **`2` Market Share** (not below `0`), and the **surviving rival with the least Market Share gains `2` Market Share** (not above the track maximum of `20`). Rivals who also triggered Target Lock this round are eligible. In **2-player games**, the **SETEC Corp Black Cube** also counts as a possible recipient. If several eligible recipients tie for the least Market Share, you choose which one gains `2`. If multiple players resolve a Red Signature Attack in the same round, all locked players lose `2` Market Share simultaneously first; then each locked player's lowest rival is read from those new values, and all `+2` gains are applied together (gains to the same recipient add up before the cap). A Patient Zero never gains. If you have no surviving rival (and there is no SETEC Corp), no one gains Market Share `[TUNE: v0.47.0]` (`INV-SIG-RED`, `INV-SIMUL-RED`).
+  * **Red (Market Manipulation):** You lose **`2` Market Share** (not below `0`), and the **surviving rival with the least Market Share gains `2` Market Share** (not above the track maximum of `20`). Rivals who also triggered Target Lock this round are eligible. In **2-player games**, the **SETEC Corp Black Cube** also counts as a possible recipient. If several eligible recipients tie for the least Market Share, you choose which one gains `2`. If multiple players resolve a Red Signature Attack in the same round, all Target-Locked players lose `2` Market Share simultaneously first; then each Target-Locked player's lowest rival is read from those new values, and all `+2` gains are applied together (gains to the same recipient add up before the cap). A Patient Zero never gains. If you have no surviving rival (and there is no SETEC Corp), no one gains Market Share `[TUNE: v0.47.0]` (`INV-SIG-RED`, `INV-SIMUL-RED`).
 * Target Lock status then clears before the End Game Trigger Check. Corporate Secrets lost to a Target Lock are checked for **Patient Zero** at the End Game Trigger Check.
 
 #### End Game Trigger Check (End of Phase 4)
