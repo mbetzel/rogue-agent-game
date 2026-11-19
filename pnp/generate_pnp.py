@@ -1091,24 +1091,17 @@ def render_player_board(
     page.rich_line(sc_x + 6.0, sc_y + 10.0, "{BLUE} **SPRINT PLAN**", size=6.8, color=PALETTE["blue"])
     page.text(sc_x + sc_w - 6.0, sc_y + 10.0, "P6 STEP 2-3", font="mono_bold", size=4.6, color=PALETTE["blue"], align="right")
 
-    well_h = 38.0
+    # Two equal dice wells filling the Sprint Plan body (one label line each; the rest is open space for dice)
+    well_gap, well_pad = 3.0, 4.0
     cur_y = sc_y + 17.0
-    nxt_y = cur_y + well_h + 3.0
+    well_h = (sc_y + sc_h - well_pad - cur_y - well_gap) / 2.0
+    nxt_y = cur_y + well_h + well_gap
     page.rounded_rect(sc_x + 4.0, cur_y, sc_w - 8.0, well_h, r=3.0, stroke=PALETTE["blue"], fill=PALETTE["paper_tint"], line_width=0.7)
-    page.rich_line(sc_x + sc_w / 2.0, cur_y + 10.0, "**CURRENT SPRINT**", size=6.4, color=PALETTE["blue"], align="center")
-    page.rich_line(sc_x + sc_w / 2.0, cur_y + 21.0, "REVIEW FIRST: **must graduate**", size=5.2, color=PALETTE["ink"], align="center")
-    page.rich_line(sc_x + sc_w / 2.0, cur_y + 30.0, "up to Release Bandwidth (**4/5/6**)", size=5.2, color=PALETTE["ink"], align="center")
+    page.rich_line(sc_x + 9.0, cur_y + 9.5, "**CURRENT SPRINT**", size=6.4, color=PALETTE["blue"])
+    page.text(sc_x + sc_w - 9.0, cur_y + 9.5, "RELEASE FIRST", font="mono_bold", size=4.6, color=PALETTE["blue"], align="right")
     page.rounded_rect(sc_x + 4.0, nxt_y, sc_w - 8.0, well_h, r=3.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.6, dash=(3.0, 2.0))
-    page.rich_line(sc_x + sc_w / 2.0, nxt_y + 10.0, "**NEXT SPRINT**", size=6.4, color=PALETTE["ink"], align="center")
-    page.rich_line(sc_x + sc_w / 2.0, nxt_y + 21.0, "REVIEW SECOND: **optional**", size=5.2, color=PALETTE["ink"], align="center")
-    page.rich_line(sc_x + sc_w / 2.0, nxt_y + 30.0, "with leftover bandwidth", size=5.2, color=PALETTE["ink"], align="center")
-    page.rich_paragraph(
-        sc_x + 6.0, nxt_y + well_h + 8.0, sc_w - 12.0,
-        "**Return** -> Current if empty, else Next\n"
-        "**R&D, buys, PR L3 Purple, Blue Signature Gray** -> Next\n"
-        "**After Review:** remaining dice -> Current",
-        size=4.6, leading=6.0, color=PALETTE["ink_soft"],
-    )
+    page.rich_line(sc_x + 9.0, nxt_y + 9.5, "**NEXT SPRINT**", size=6.4, color=PALETTE["ink"])
+    page.text(sc_x + sc_w - 9.0, nxt_y + 9.5, "THEN OPTIONAL", font="mono_bold", size=4.6, color=PALETTE["ink_soft"], align="right")
 
     # --- 4B: Embedded Triage Upgrade Track (Top Right) ---
     tt_x, tt_w = rx + 158.0, rw - 162.0
