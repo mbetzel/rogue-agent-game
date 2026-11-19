@@ -832,7 +832,11 @@ def _resolve_signature_green(engine: GameEngine, player: PlayerState) -> None:
         player.encrypted_research_tracks.add(t)
 
     shortfall = max(0, count_to_place - len(placed))
-    if shortfall > 0:
+    if shortfall > 0 and cfg.is_vulnerability:
+        from sim.engine import vulnerability
+
+        vulnerability.raise_vulnerability(cfg, player, shortfall * cfg.target_lock_green_fallback_vuln, "target_lock")
+    elif shortfall > 0:
         from sim.engine import secret_faces
 
         secret_faces.glitch_slots(player, shortfall, "signature_green", round_num=engine.state.current_round)
@@ -1003,6 +1007,12 @@ def execute_attack_resolution(
                 aegis_color_override=(aegis_colors_by_pid or {}).get(player.player_id),
             )
 
+        if engine.config.is_vulnerability:
+            from sim.engine import vulnerability
+
+            vulnerability.resolve_green(engine, cr, attack)  # table-wide Green (spec §9.2)
+            vulnerability.flag_patient_zero(engine)          # the single breach check (INV-VULN-06)
+
         # Phase 62: Dominant Cube Color Signature Attacks (INV-SIG-03)
         if getattr(engine.config, "signature_attack_mode", "none") == "dominant_color_effects":
             resolve_signature_attacks(engine, cr)
@@ -1012,6 +1022,120 @@ def execute_attack_resolution(
     if finalize:
         finalize_attack_resolution(engine, cr)
     return attack
+
+
+def _aegis_red_blue_choice(engine: GameEngine, player: PlayerState, attack: Dict[CubeColor, int],
+                           cr: CompileResult, override: Optional[Any]) -> Optional[CubeColor]:
+    """spec §9.3 step 1: Aegis *Baffle Echo* may ignore 1 Red or 1 Blue cube (Green is offered at hit time)."""
+    if not is_aegis_echo_available(engine, player):
+        return None
+    qualifying = [c for c in (CubeColor.RED, CubeColor.BLUE) if attack.get(c, 0) > 0 and cr.exited_cubes.get(c, 0) > 0]
+    if override == "green" or override == AEGIS_DECLINE or not qualifying:
+        return None  # "green" = web human saves the Echo for a Green hit
+    if override is not None:
+        if override not in qualifying:
+            raise ValueError(
+                f"Aegis Baffle Echo color {getattr(override, 'value', override)} is not a qualifying color this round "
+                f"(qualifying: {[c.value for c in qualifying]})")
+        chosen = override
+    else:
+        chosen = None
+        ms_hook = getattr(player.bot, "choose_aegis_override_market_share", None)
+        if engine.config.is_market_share and callable(ms_hook):
+            chosen = ms_hook(
+                player_state=player, qualifying_colors=qualifying, game_state=engine.state,
+                remaining={c: max(0, attack.get(c, 0)) for c in (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN)},
+                attack=dict(attack))
+        if chosen is None:
+            chosen = player.bot.choose_aegis_override(
+                player_state=player, qualifying_colors=qualifying, exited_cubes=cr.exited_cubes,
+                active_version_str=engine.state.active_version.version_str, rng=engine.rng,
+                corruption_track=engine.state.corruption_track)
+    if chosen in qualifying:
+        player.mark_ability_used(engine.state.active_version.version_str)
+        return chosen
+    return None
+
+
+def resolve_player_red_blue_v046(
+    engine: GameEngine,
+    player: PlayerState,
+    attack: Dict[CubeColor, int],
+    cr: CompileResult,
+    *,
+    aegis_color_override: Optional[Any] = None,
+    slush_fund_override: Optional[bool] = None,
+) -> None:
+    """v0.46.0 (spec §9.1): one survivor's Red + Blue. No blocking path (INV-RB-01); Blue is x1; Green resolves
+    table-wide afterwards (``vulnerability.resolve_green``); no Patient Zero flag here (INV-VULN-06)."""
+    cfg = engine.config
+    active_ver = engine.state.active_version.version_str
+    if cfg.is_market_share and engine.state.phase4_snapshot_round != engine.state.current_round:
+        engine.state.phase4_snapshot_round = engine.state.current_round
+        engine.state.phase4_market_share_start = {p.player_id: p.market_share for p in engine.state.players}
+    red, blue = int(attack[CubeColor.RED]), int(attack[CubeColor.BLUE])
+    green = int(attack[CubeColor.GREEN])
+    color = _aegis_red_blue_choice(engine, player, attack, cr, aegis_color_override)
+    if color == CubeColor.RED:
+        red -= 1
+    elif color == CubeColor.BLUE:
+        blue -= 1
+    player.red_incoming_total += red
+    player.red_unblocked_total += red
+    ms_before = player.market_share
+    ms_lost = 0
+    if red > 0:
+        ms_lost = -player.change_market_share(-red, "red")
+    blue_mult = int(cfg.v3_blue_secret_damage) if active_ver == "v3.0" else 1  # honours the lever (preset: 1)
+    potential_secret_loss = blue * blue_mult  # no blocking
+    is_dto = has_company_override(player, CompanyCode.DTO, legacy_bridge_enabled(engine)) and (
+        player.is_slush_fund_available(active_ver) if bool(getattr(cfg, "slush_fund_once_per_game", False))
+        else player.is_ability_available(active_ver))
+    once_per_game = bool(getattr(cfg, "slush_fund_once_per_game", False))
+    if potential_secret_loss > 0 and is_dto and once_per_game:
+        if slush_fund_override is not None:
+            is_dto = bool(slush_fund_override)
+        else:
+            hook = getattr(player.bot, "choose_slush_fund", None)
+            is_dto = bool(hook(player, engine.state, potential_secret_loss)) if hook is not None else True
+    if potential_secret_loss > 0 and is_dto:
+        if once_per_game:
+            player.slush_fund_used_game = True
+        free_absorb = min(2, potential_secret_loss)
+        potential_secret_loss -= free_absorb
+        player.mark_ability_used(active_ver)
+        if potential_secret_loss > 0 and player.money > 0:
+            cash_absorb = min(player.money, potential_secret_loss)
+            player.money -= cash_absorb
+            potential_secret_loss -= cash_absorb
+    if potential_secret_loss > 0:
+        player.gain_secrets(-potential_secret_loss, "blue_damage")
+    player.money = max(0, player.money)
+    if player.vuln_by_round and player.vuln_by_round[-1]["round"] == engine.state.current_round:
+        player.vuln_by_round[-1]["pre_p4"] = player.vulnerability
+    zero = {"red": 0, "blue": 0, "green": 0}
+    player.last_defense_breakdown = {
+        "color_shields": {"red": 0, "blue": 0, "green": 0, "any": 0},
+        "any_allocated": dict(zero),
+        "firewall_blocked": None,
+        "effective_attacks": {"red": red, "blue": blue, "green": green},
+        "blocked": dict(zero),
+        "unblocked": {"red": red, "blue": blue, "green": green},
+        "unpaid_ransom": 0,
+        "flat_ransom_leak": False,
+        "ransom_secret_loss": 0,
+        "market_share_before": ms_before,
+        "market_share_after": player.market_share,
+        "market_share_lost": ms_lost,
+        "malware_fizzled": False,
+        "target_lock_extra_color": None,
+        "blue_damage_multiplier": blue_mult,
+        "blue_secret_loss": blue * blue_mult,
+        "potential_secret_loss": potential_secret_loss,
+        "green": 0,
+        "aegis_color": color.value if color is not None else None,
+        "vulnerability_pre_p4": player.vulnerability,
+    }
 
 
 def resolve_player_attack(
@@ -1029,6 +1153,10 @@ def resolve_player_attack(
     slush_fund_override: Optional[bool] = None,
 ) -> None:
     """One survivor's Phase 4 damage (six-phase policy)."""
+    if engine.config.is_vulnerability:
+        resolve_player_red_blue_v046(engine, player, attack, cr, aegis_color_override=aegis_color_override,
+                                     slush_fund_override=slush_fund_override)
+        return
     sync_commitments_with_production(player, rolled_dice, commitments)
     resolve_player_defense_and_wear(
         engine=engine,
@@ -1048,6 +1176,15 @@ def resolve_player_attack(
 
 def finalize_attack_resolution(engine: GameEngine, cr: CompileResult) -> None:
     """Closing steps of Phase 4: 2P SETEC Corp advance, Snowball Recycle, Contractor Expiration, End Game Trigger check."""
+    if engine.config.is_vulnerability:
+        from sim.engine import vulnerability
+
+        if not cr.buffer_overflow:  # web path: no-op when execute_attack_resolution already ran Green (INV-VULN-07)
+            vulnerability.resolve_green(engine, cr, compute_attack_strengths(engine, cr))
+            vulnerability.flag_patient_zero(engine)
+        for p in engine.state.players:
+            if p.vuln_by_round and p.vuln_by_round[-1]["round"] == engine.state.current_round:
+                p.vuln_by_round[-1]["post_p4"] = p.vulnerability
     if getattr(engine.state, "setec_corp_active", False):
         if cr.exited_cubes.get(CubeColor.RED, 0) >= 1:
             max_ms = int(getattr(engine.config, "market_share_max", 20) or 20)

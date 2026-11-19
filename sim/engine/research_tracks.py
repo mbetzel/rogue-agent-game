@@ -100,7 +100,8 @@ Chooser = Callable[["PlayerState", str, int, Optional[TriageUpgradeOptions]], Op
 # Costs / levels
 # ----------------------------------------------------------------------------------------------
 # v0.36.0: the Public Relations Track keeps the internal key "PATENT"
-TRACK_ALIASES = {"PUBLIC_RELATIONS": "PATENT", "PR": "PATENT"}
+# v0.46.0: the Defense track key "DEFENSE" is the Pen Test Track under defense_mode == "VULNERABILITY"
+TRACK_ALIASES = {"PUBLIC_RELATIONS": "PATENT", "PR": "PATENT", "PEN_TEST": "DEFENSE"}
 
 
 def normalize_track(track: str) -> str:
@@ -115,6 +116,8 @@ def track_display_name(config: Optional[GameConfig], track: str) -> str:
         if config is not None and getattr(config, "is_share_regain", False):
             return "Public Relations Track"
         return "Cryptographic Patents Track"
+    if t == "DEFENSE" and config is not None and getattr(config, "is_vulnerability", False):
+        return "Pen Test Track"
     return {"DEFENSE": "Defense Grid Track", "TRIAGE": "Triage Track", "RELEASE": "Release Track"}.get(t, t.title())
 
 
@@ -201,6 +204,8 @@ def has_level_effect(config: Optional[GameConfig], track: str, level: int) -> bo
         return True
     if level == MAX_LEVEL and config is not None:
         t = normalize_track(track)
+        if t == "DEFENSE" and getattr(config, "pen_test_l4_set_zero_on_reach", False):
+            return True
         if t == "TRIAGE" and getattr(config, "triage_l4_free_die_replacement", False):
             return True
         if t == "PATENT" and int(getattr(config, "pr_l4_instant_market_share", 0)) > 0:
@@ -316,7 +321,17 @@ def resolve_breakthrough(
     if any(b.track == t and b.level == level for b in player.breakthroughs):
         return None
     rec = BreakthroughRecord(track=t, level=level, round_number=engine.state.current_round, outcome="TAKEN")
-    if t in ("DEFENSE", "RELEASE") and level == 1:
+    if t == "DEFENSE" and cfg.is_vulnerability and level == 1 and cfg.pen_test_l1 == "SET_ZERO":
+        from sim.engine import vulnerability
+
+        zeroed = vulnerability.lower_vulnerability(player, player.vulnerability, "pen_l1_zero")
+        rec.detail = {"vulnerability_lowered": zeroed}
+    elif t == "DEFENSE" and cfg.is_vulnerability and level == 4 and cfg.pen_test_l4_set_zero_on_reach:
+        from sim.engine import vulnerability
+
+        zeroed = vulnerability.lower_vulnerability(player, player.vulnerability, "pen_l4_zero")
+        rec.detail = {"vulnerability_lowered": zeroed}
+    elif t in ("DEFENSE", "RELEASE") and level == 1:
         die = create_gray_die(_new_die_id(engine), cfg.gray_face_profile)
         player.ready_for_release_dice.append(die)
         rec.detail = {"die_id": die.die_id}
@@ -447,7 +462,7 @@ def free_rerolls_for(config: GameConfig, player: PlayerState, base: int) -> int:
     return int(base)
 
 
-def breakthrough_preview(player: PlayerState) -> Dict[str, Dict[str, Any]]:
+def breakthrough_preview(player: PlayerState) -> Dict[str, Dict[str, Any]]:  # noqa: C901
     """Per-track next-level info for web capabilities."""
     out: Dict[str, Dict[str, Any]] = {}
     cfg = getattr(player, "config", None)
@@ -462,6 +477,14 @@ def breakthrough_preview(player: PlayerState) -> Dict[str, Dict[str, Any]]:
         }
         if (t, nxt) == ("TRIAGE", 1) and getattr(cfg, "triage_l1_breakthrough", "") == "GRAY_DIE":
             out[t]["breakthrough"] = "Gain 1 Gray Legacy die"
+        if t == "DEFENSE" and cfg is not None and getattr(cfg, "is_vulnerability", False):
+            out[t]["display_name"] = track_display_name(cfg, t)
+            out[t]["pen_test_limit"] = int(cfg.pen_test_limits[max(0, min(MAX_LEVEL, lvl))])
+            txt = {1: "Lower your Vulnerability to 0" if cfg.pen_test_l1 == "SET_ZERO" else "Gain 1 Gray Legacy die",
+                   3: "Gain 1 Corporate Secret; Blue Secret faces yield +3",
+                   4: "Pen Test limit 3; lower your Vulnerability by 1 at the start of each Operations Turn"}.get(nxt)
+            if txt:
+                out[t]["breakthrough"] = txt
         if t == "PATENT" and cfg is not None and getattr(cfg, "is_share_regain", False):
             cost, cap = regain_rate(cfg, player)
             out[t]["display_name"] = track_display_name(cfg, t)

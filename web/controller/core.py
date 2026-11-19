@@ -562,11 +562,13 @@ class GameController:
         glitch_die_ids: Optional[List[int]] = None,
         aegis_color: Optional[str] = None,
         use_slush_fund: Optional[bool] = None,
+        aegis_green: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Phase 4: Attack Resolution."""
         return phase4_attack_actions.confirm_attacks(
             self, player_id, any_shield_allocations=any_shield_allocations,
             glitch_die_ids=glitch_die_ids, aegis_color=aegis_color, use_slush_fund=use_slush_fund,
+            aegis_green=aegis_green,
         )
 
     def choose_graduates(

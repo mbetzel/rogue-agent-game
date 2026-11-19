@@ -3,6 +3,17 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
+- [x] **Rules Draft `v0.46.0`** captured in [RULES.md](./RULES.md)
+- [ ] **Phase 67: Vulnerability Track Redesign (`v0.46.0 Baseline`)**: no shields or blocking; ⚠ faces raise **Vulnerability**; Green cubes hit the highest Vulnerability at `4`+ (bands `4–6 / 7–9 / 10+` = `−1 / −2 / −3` Secrets, reset to `0`); **Pen Test Track** replaces the Defense Grid Track (`2 🔬` per `−1`, limits `1/1/2/2/3`, L4 free `−1`/turn); Secrets `5`; Market Share `14 / 18 / 18`; Blue `1`/cube in every version; *Data Scraper* `+1` Secret start.
+  - [x] *Pre-SDLC Game Designer Modeling:* `docs/plans/vulnerability_track_gd_plan.md` (User sign-off 2026-11-17, §12).
+  - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/vulnerability_track_spec.md` (§19 defaults accepted).
+  - [x] *Implementation (`senior-engineer`) + Code Review (`staff-engineer` APPROVE WITH FIXES, fixes applied):* `GameConfig.v046()`, `sim/engine/vulnerability.py`, `sim/bots/vulnerability_policy.py`, `tests/test_v460_vulnerability_track.py`, v0.45 parity golden `tests/parity_v045/`.
+  - [x] *Validation Sweeps (`product-owner`):* `docs/reports/v046_step0_exchange_rate_probe.md`, `docs/reports/v046_steps1-3_sweeps.md` (main, dominance matrix, ref1, arms).
+  - [x] *Balance Assessment (`game-designer`):* `docs/reports/v046_balance_assessment.md` §8, `FINDINGS.md` §62. User accepted D1–D6 on 2026-11-18 (4P Market Collapse judged with Patient Zero; Singularity 16–27%; new ref1 bar; colored ⚠ faces "reroll if you can").
+  - [x] *Documentation Sync (Main Agent):* `RULES.md`, `RULES_QUICKREF.md`, `RULES_APPENDIX.md`, `GLOSSARY.md`, `CLAUDE.md` / `AGENTS.md` pillars updated to `v0.46.0`.
+  - [x] *PnP Sync (`graphic-designer`):* ⚠ dice art, Vulnerability Track (0–3 safe; bands), Pen Test Track strip, `pnp/README.md` and `pnp/generate_pnp.py` to `v0.46.0`.
+  - [ ] *Web follow-up:* retire shield / Defense Grid UI; Signature Attacks missing from the web Phase 4 path (pre-existing).
+  - [ ] *Follow-ups (v0.47):* company-power parity pass (Aegis *Baffle Echo*, DTO *Slush Fund*, Helix); *Data Scraper* / *Script Kiddie* v1.0 card pass.
 - [x] **Rules Draft `v0.45.0`** captured in [RULES.md](./RULES.md)
 - [x] **Phase 66: Glitched Shield Slots Rework, 2P SETEC Corp, Starting Secrets, & WS-OPERATOR (`v0.45.0 Baseline`)**
   - [x] *Pre-SDLC Game Designer Modeling:* EV/threat-curve modeling for `WS-OPERATOR` distinct Scanned Box colors (EV `1.34 🔬`/trigger), `Defense Grid Overflow` (`-1` Secret on 3rd Green cube in a slot), Starting Secrets `4` across all counts, and 2P `SETEC Corp` black cube (`0` start, `+1` MS if `>= 1` Red cube exits tray).

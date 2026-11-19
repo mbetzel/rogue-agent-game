@@ -140,6 +140,11 @@ def bank(cfg: "GameConfig", p: "PlayerState", die: "Die", state: Any = None) -> 
     hist[str(y)] = hist.get(str(y), 0) + 1
     if y > 0:
         p.gain_secrets(y, f"secret_face_{k}")
+    if die.color == DieColor.GREEN and getattr(cfg, "is_vulnerability", False):
+        from sim.engine import vulnerability
+
+        # v0.46.0: banking a Green Secret face lowers Vulnerability (after the Secrets, plan §12.4)
+        vulnerability.lower_vulnerability(p, int(cfg.green_secret_vuln_reduction), "green_bank")
     return y
 
 

@@ -27,10 +27,13 @@ V040_TRACK_STEP_COSTS = (1, 2, 2, 3)          # (1, 2, 2, 3) 🔬 (8 🔬 total 
 V040_SHARE_REGAIN_CAP = {0: 1, 1: 1, 2: 2, 3: 2, 4: 3}
 V040_SHARE_REGAIN_COST_MONEY = {0: 3, 1: 3, 2: 3, 3: 3, 4: 3}
 _FACE_PROFILES = ("V037", "V038_DRAFT")
-_VARIANT_PROFILES = ("V037", "V038_DRAFT", "V044")
+_VARIANT_PROFILES = ("V037", "V038_DRAFT", "V044", "V046")
 # die_face_profile only: V038_DRAFT with the candidate-2 Yellow table (spec §14.3); _ALT = F1 "+$1 & +1 Market Share"
 # _F3 = V038_YELLOW_MS with Yellow F3 "+$1 & +1 Market Share" (spec §14.5.1, RSP-1)
 V038_DIE_FACE_PROFILES = ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D", "V038F", "V043_BLUE_TUNE")
+# v0.46.0 Vulnerability Track face profiles (spec §4.2); both are also V038-style (Secret Face 5) profiles
+V046_DIE_FACE_PROFILES = ("V046_VULN", "V046_VULN_NOPREMIUM")
+V038_DIE_FACE_PROFILES = V038_DIE_FACE_PROFILES + V046_DIE_FACE_PROFILES
 _DIE_FACE_PROFILES = ("V037",) + V038_DIE_FACE_PROFILES
 V038B_STARTING_SECRETS = {2: 3, 3: 4, 4: 4}  # [TUNE] §14.3
 V038B_RED_TIERS = ((11, 3), (7, 2), (3, 1), (0, 0))  # [TUNE] §14.3
@@ -41,6 +44,11 @@ V038C_RED_SECRET_PAYOUT = {2: (3, 1), 3: (3, 1, 0), 4: (3, 1, 0, 0)}  # [TUNE] �
 # --- Tunable Defaults for Headroom Architecture (spec: market_share_headroom_spec.md) ---
 V038E_MARKET_SHARE_START: Dict[int, int] = {2: 13, 3: 16, 4: 16}  # Unified 3P and 4P at 16
 V045_STARTING_SECRETS: Dict[int, int] = {2: 4, 3: 4, 4: 4}
+V046_STARTING_SECRETS: Dict[int, int] = {2: 5, 3: 5, 4: 5}
+V046_MARKET_SHARE_START: Dict[int, int] = {2: 14, 3: 18, 4: 18}
+_DEFENSE_MODES = ("SHIELDS", "VULNERABILITY")
+_PEN_TEST_L1_MODES = ("GRAY_DIE", "SET_ZERO")
+_AEGIS_ECHO_MODES = ("IGNORE_CUBE", "IGNORE_DAMAGE_V046")
 DEFAULT_MARKET_SHARE_MAX: int = 20
 _TRIAGE_ORDER_RULES = ("BOT", "OLDEST_FIRST")
 _TRIAGE_L1_MODES = ("WHITE_CONTRACTORS", "GRAY_DIE")
@@ -224,6 +232,26 @@ class PrPushParams:
                 raise ValueError(f"PrPushParams.{name} must be an int")
         if not self.push_min_share > self.dump_max_share:
             raise ValueError("PUSH_MIN_SHARE must exceed DUMP_MAX_SHARE (windows must be disjoint)")
+
+
+@dataclass(frozen=True)
+class VulnPolicyParams:
+    """[TUNE-BOT] Vulnerability bot policy parameters (spec §13.2, OQ-8). Sim-only, not a rule.
+
+    Read by ``sim/bots/vulnerability_policy.py``. Frozen because rollout clones share ``config`` by reference."""
+
+    p_exit_cup_green: float = 0.60      # chance a Green cube in the (public) cup exits the tower this round
+    stuck_green_exit_mean: float = 0.30  # Poisson mean of Green cubes exiting from the (hidden) stuck cubes
+    prior_cup_green: int = 2             # cup Green prior when the staging cup is not public
+    carry_steps: float = 1.0             # B-1: future Pen Test steps priced at pen_value when > 1 round is left (no cap)
+    pen_clean_target: int = 2            # B-2: Adaptive spends spare research on Pen Test down to this Vulnerability
+    pen_clean_trigger: int = 3           # B-2: ... whenever Vulnerability is at least this (99 disables)
+    secret_value: float = 3.0            # money-equivalent of 1 Corporate Secret
+    sv_decay: float = 0.05               # per-round decay of the Secret value
+    sv_floor: float = 0.6
+    pen_value: float = 1.75              # money-equivalent of 1 research token spent on Pen Test
+    rival_vuln_per_die: float = 0.40     # expected pre-roll Vulnerability per rival rolled die
+    reroll_margin: float = 0.0
 
 
 @dataclass
@@ -502,6 +530,43 @@ class GameConfig:
     # Phase 60: Late-Game Patient Zero Threat Escalation (v3.0 Critical Breach)
     v3_blue_secret_damage: int = 2  # Corporate Secrets lost per unblocked Blue cube in v3.0 (baseline 2, legacy 1)
 
+    # --- v0.46.0 Vulnerability Track (docs/specs/vulnerability_track_spec.md §3.1; defaults reproduce v0.45) ---
+    defense_mode: str = "SHIELDS"                  # "SHIELDS" (legacy) | "VULNERABILITY" (v0.46.0)
+    vuln_track_max: int = 15                       # [TUNE]
+    vuln_band_thresholds: Tuple[int, ...] = (3, 6, 9)  # [TUNE]
+    vuln_band_damage: Tuple[int, ...] = (1, 2, 3)      # [TUNE]
+    vuln_min_target_by_version: Tuple[int, int, int] = (3, 3, 3)  # [TUNE] v1.0 / v2.0 / v3.0
+    vuln_hit_reset: int = 0                        # [TUNE]
+    vuln_tie_mode: str = "ALL"
+    pen_test_cost: int = 1                         # [TUNE] research per -1 Vulnerability (v0.46 preset: 2)
+    pen_test_first_step_cost: Optional[int] = None  # [TUNE] counter-lever: cost of the first step each turn
+    pen_test_limits: Tuple[int, ...] = (1, 1, 2, 2, 3)  # [TUNE] by Pen Test level
+    pen_test_l1: str = "GRAY_DIE"                  # "GRAY_DIE" | "SET_ZERO"
+    pen_test_l3: str = "SECRET_BLUE_BONUS"
+    pen_test_l4_free: int = 1                      # [TUNE]
+    pen_test_l4_set_zero_on_reach: bool = False    # parked arm
+    green_secret_vuln_reduction: int = 2           # [TUNE]
+    corruption_lowest_vuln_gain: int = 2           # [TUNE] printed demote 1
+    corruption_lowest_vuln_gain_double: int = 3    # [TUNE] printed demote >= 2
+    target_lock_green_fallback_vuln: int = 2       # [TUNE]
+    aegis_baffle_echo_mode: str = "IGNORE_CUBE"    # "IGNORE_CUBE" | "IGNORE_DAMAGE_V046"
+    staging_cup_public: bool = False               # sim-only (bot information)
+    b3_vuln_reduction: int = 1
+    g1_vuln_reduction: int = 2
+    g2_v046_base_research: int = 1
+    g2_v046_per_exit_green: int = 1
+    g2_v046_bonus_cap: int = 3
+    # v0.46.0 Data Scraper (v1.0 card) starting bonuses for every player; legacy = +$1 / +0 Secrets, v046() = +0 / +1
+    data_scraper_cash_bonus: int = 1
+    data_scraper_secret_bonus: int = 0
+    vuln_bot_params: VulnPolicyParams = field(default_factory=VulnPolicyParams)  # sim-only [TUNE-BOT]
+
+    # --- Step 0 exchange-rate probe levers (sim-only; default off => every preset is bit-identical) ---
+    probe_bonus_seat: int = -1                 # seat that receives the probe bonus (-1 = off)
+    probe_bonus_starting_secrets: int = 0      # one-off +Secrets at setup for that seat
+    probe_bonus_money_per_round: int = 0       # +$ at the end of that seat's Income each round it survives
+    probe_bonus_research_per_round: int = 0    # +Research Tokens at the end of that seat's Income each round
+
     # --- Operative Signature Cube & Target Lock Protocol (Phase 60) ---
     target_lock_enabled: bool = False
     target_lock_bonus_attack: int = 1
@@ -647,6 +712,7 @@ class GameConfig:
         self._validate_tower_config()
         self._validate_v038()
         self._validate_v040()
+        self._validate_v046()
         if self.starting_secrets_by_player_count is None:
             # NOTE: resolved once at construction. Re-assigning round_sequence later does NOT
             # re-resolve this dict; use GameConfig.legacy_v033() or pass round_sequence to __init__.
@@ -1055,6 +1121,35 @@ class GameConfig:
         overrides.setdefault("bot_pr_push_params", PrPushParams())
         return cls.v045(**overrides)
 
+    @classmethod
+    def v046(cls, **overrides) -> "GameConfig":
+        """v0.46.0 Vulnerability Track (docs/specs/vulnerability_track_spec.md). Inherits v045()."""
+        for k, v in (
+            ("defense_mode", "VULNERABILITY"),
+            # 2026-11-18 no colored premium: colored ⚠ faces keep their v0.45 payouts (arm ``premium_on`` = V046_VULN)
+            ("die_face_profile", "V046_VULN_NOPREMIUM"), ("gray_face_profile", "V046_VULN"), ("variant_profile", "V046"),
+            ("glitched_shield_slots_enabled", False), ("defense_grid_overflow_enabled", False),
+            ("starting_glitched_shield_slots", 0), ("green_bank_cleans_slot", False),
+            ("green_triage_clean_mode", "NONE"), ("slot_graduation_clear", 0),
+            ("starting_secrets_by_player_count", dict(V046_STARTING_SECRETS)),
+            ("market_share_start_by_player_count", dict(V046_MARKET_SHARE_START)),
+            ("v3_blue_secret_damage", 1), ("b3_base_cash", 2),
+            ("aegis_baffle_echo_mode", "IGNORE_DAMAGE_V046"), ("staging_cup_public", True),
+            # 2026-11-18 balance package (docs/reports/v046_balance_assessment.md §4, §7)
+            ("pen_test_cost", 2), ("vuln_band_thresholds", (4, 7, 10)),
+            ("vuln_min_target_by_version", (4, 4, 4)),  # 2026-11-18 safe zone 0-3: Vulnerability <= 3 is never targeted
+            ("data_scraper_cash_bonus", 0), ("data_scraper_secret_bonus", 1),
+        ):
+            overrides.setdefault(k, v)
+        return cls.v045(**overrides)
+
+    @classmethod
+    def v046_roster(cls, **overrides) -> "GameConfig":
+        """v0.46.0 + bot autonomous PR push and cash allocation policies enabled."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v046(**overrides)
+
     def _validate_tower_config(self) -> None:
         """Validates Cube Tower physics parameters (spec §2.4)."""
         self.tower_mode = TowerMode(self.tower_mode)
@@ -1098,7 +1193,7 @@ class GameConfig:
                 bad.append("red_mode=MARKET_SHARE")
             if self.round_sequence != RoundSequence.SIX_PHASE:
                 bad.append("round_sequence=SIX_PHASE")
-            if not self.glitched_shield_slots_enabled:
+            if not self.glitched_shield_slots_enabled and self.defense_mode != "VULNERABILITY":
                 bad.append("glitched_shield_slots_enabled=True")
             if self.dirty_income_enabled:
                 bad.append("dirty_income_enabled=False")
@@ -1158,6 +1253,87 @@ class GameConfig:
             val = getattr(self, name)
             if isinstance(val, bool) or not isinstance(val, int) or val < 0:
                 raise ValueError(f"{name} must be an int >= 0, got {val!r}")
+
+    def _validate_v046(self) -> None:
+        """spec §3.4 (Vulnerability Track validation)."""
+        if self.defense_mode not in _DEFENSE_MODES:
+            raise ValueError(f"defense_mode must be one of {_DEFENSE_MODES}, got {self.defense_mode!r}")
+        vuln = self.defense_mode == "VULNERABILITY"
+        v046_profiles = (self.die_face_profile in V046_DIE_FACE_PROFILES or self.gray_face_profile == "V046_VULN"
+                         or self.variant_profile == "V046")
+        if v046_profiles and not vuln:
+            raise ValueError("V046 die / gray / variant profiles require defense_mode='VULNERABILITY'")
+        if self.aegis_baffle_echo_mode not in _AEGIS_ECHO_MODES:
+            raise ValueError(f"aegis_baffle_echo_mode must be one of {_AEGIS_ECHO_MODES}")
+        if self.aegis_baffle_echo_mode == "IGNORE_DAMAGE_V046" and not vuln:
+            raise ValueError("aegis_baffle_echo_mode='IGNORE_DAMAGE_V046' requires defense_mode='VULNERABILITY'")
+        if vuln:
+            bad = []
+            if not self.secret_face_enabled:
+                bad.append("secret_face_enabled")
+            if self.round_sequence != RoundSequence.SIX_PHASE:
+                bad.append("round_sequence=SIX_PHASE")
+            if not self.is_v035_tracks:
+                bad.append("is_v035_tracks")
+            if not self.operations_before_pipeline_shift:
+                bad.append("operations_before_pipeline_shift=True")
+            if self.die_face_profile not in V046_DIE_FACE_PROFILES:
+                bad.append(f"die_face_profile in {V046_DIE_FACE_PROFILES}")
+            if self.gray_face_profile != "V046_VULN":
+                bad.append("gray_face_profile='V046_VULN'")
+            if self.variant_profile != "V046":
+                bad.append("variant_profile='V046'")
+            if self.glitched_shield_slots_enabled:
+                bad.append("glitched_shield_slots_enabled=False")
+            if self.defense_grid_overflow_enabled:
+                bad.append("defense_grid_overflow_enabled=False")
+            if self.starting_glitched_shield_slots != 0:
+                bad.append("starting_glitched_shield_slots=0")
+            if self.green_triage_clean_mode != "NONE":
+                bad.append("green_triage_clean_mode='NONE'")
+            if self.aegis_baffle_echo_mode != "IGNORE_DAMAGE_V046":
+                bad.append("aegis_baffle_echo_mode='IGNORE_DAMAGE_V046' (the V046 Echo is reactive; IGNORE_CUBE is unsupported)")
+            if self.signature_attack_mode not in ("none", "dominant_color_effects"):
+                bad.append("signature_attack_mode in ('none', 'dominant_color_effects')")
+            if bad:
+                raise ValueError(f"defense_mode='VULNERABILITY' requires {', '.join(bad)}")
+        th, dm = tuple(self.vuln_band_thresholds), tuple(self.vuln_band_damage)
+        if (not th or any(isinstance(t, bool) or not isinstance(t, int) or t < 1 for t in th)
+                or any(th[i] >= th[i + 1] for i in range(len(th) - 1))):
+            raise ValueError("vuln_band_thresholds must be strictly increasing ints >= 1")
+        if (len(dm) != len(th) or any(isinstance(d, bool) or not isinstance(d, int) or d < 0 for d in dm)
+                or any(dm[i] > dm[i + 1] for i in range(len(dm) - 1))):
+            raise ValueError("vuln_band_damage must be non-decreasing ints >= 0 with the thresholds' length")
+        if self.vuln_track_max < max(th):
+            raise ValueError("vuln_track_max must be >= max(vuln_band_thresholds)")
+        mt = tuple(self.vuln_min_target_by_version)
+        if len(mt) != 3 or any(not (1 <= m <= self.vuln_track_max) for m in mt):
+            raise ValueError("vuln_min_target_by_version: 3 entries in [1, vuln_track_max]")
+        if not (0 <= self.vuln_hit_reset < min(mt)):
+            raise ValueError("vuln_hit_reset must satisfy 0 <= reset < min(vuln_min_target_by_version)")
+        if self.vuln_tie_mode != "ALL":
+            raise ValueError("vuln_tie_mode must be 'ALL'")
+        if self.pen_test_cost < 1:
+            raise ValueError("pen_test_cost must be >= 1")
+        if self.pen_test_first_step_cost is not None and self.pen_test_first_step_cost < 1:
+            raise ValueError("pen_test_first_step_cost must be None or >= 1")
+        lim = tuple(self.pen_test_limits)
+        if (len(lim) != 5 or any(isinstance(x, bool) or not isinstance(x, int) or x < 0 for x in lim)
+                or any(lim[i] > lim[i + 1] for i in range(4))):
+            raise ValueError("pen_test_limits must be a non-decreasing 5-tuple of ints >= 0")
+        if self.pen_test_l1 not in _PEN_TEST_L1_MODES:
+            raise ValueError(f"pen_test_l1 must be one of {_PEN_TEST_L1_MODES}")
+        if self.pen_test_l3 != "SECRET_BLUE_BONUS":
+            raise ValueError("pen_test_l3 must be 'SECRET_BLUE_BONUS'")
+        for name in ("pen_test_l4_free", "green_secret_vuln_reduction", "corruption_lowest_vuln_gain",
+                     "corruption_lowest_vuln_gain_double", "target_lock_green_fallback_vuln", "b3_vuln_reduction",
+                     "g1_vuln_reduction", "g2_v046_base_research", "g2_v046_per_exit_green", "g2_v046_bonus_cap",
+                     "data_scraper_cash_bonus", "data_scraper_secret_bonus"):
+            if isinstance(getattr(self, name), bool) or int(getattr(self, name)) < 0:
+                raise ValueError(f"{name} must be an int >= 0")
+        seat = self.probe_bonus_seat
+        if seat != -1 and not (0 <= seat < self.num_players):
+            raise ValueError("probe_bonus_seat must be -1 (off) or in [0, num_players)")
 
     def _validate_v038d(self) -> None:
         """spec v0.38d §3.1.2 validation."""
@@ -1267,6 +1443,14 @@ class GameConfig:
     @property
     def is_v035_tracks(self) -> bool:
         return self.research_track_model == ResearchTrackModel.V035_FIVE_LEVEL
+
+    @property
+    def is_vulnerability(self) -> bool:
+        return self.defense_mode == "VULNERABILITY"
+
+    @property
+    def is_v044_variants(self) -> bool:
+        return self.variant_profile in ("V044", "V046")
 
     @property
     def is_market_share(self) -> bool:

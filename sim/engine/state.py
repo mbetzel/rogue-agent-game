@@ -340,7 +340,33 @@ class PlayerState:
         self.operator_research_harvested: int = 0
         self.defense_grid_overflow_count: int = 0
         self.secrets_lost_to_overflow: int = 0
+        self.probe_units_granted: int = 0  # Step 0 probe: $ + research granted by the probe levers
         self.cubes_purged_by_shields_total: int = 0
+        # v0.46.0 Vulnerability Track (spec §4.5)
+        self.vulnerability: int = 0
+        self.vuln_gained_by_source: Dict[str, int] = {}
+        self.vuln_lowered_by_source: Dict[str, int] = {}
+        self.vuln_reset_by_hit_total: int = 0
+        self.vuln_overflow_lost: int = 0
+        self.vuln_peak: int = 0
+        self.vuln_rounds_at_cap: int = 0
+        self.vuln_icons_kept_total: int = 0
+        self.vuln_keep_events: int = 0
+        self.vuln_keep_kept: int = 0
+        self.vuln_keep_by_round: Dict[int, List[int]] = {}
+        self.vuln_keep_by_face: Dict[str, List[int]] = {}  # telemetry: "<die colour>:<face #>" -> [kept, events]
+        self.vuln_stance_this_round: str = "ADAPTIVE"
+        self.vuln_by_round: List[Dict[str, Any]] = []
+        self.green_hits: int = 0
+        self.green_secrets_lost: int = 0
+        self.green_hits_by_damage: Dict[int, int] = {}
+        self.green_hits_cancelled: int = 0
+        self.green_secrets_cancelled: int = 0
+        self.pen_test_steps: int = 0
+        self.pen_test_research_spent: int = 0
+        self.pen_test_this_turn: int = 0
+        self.pen_test_l4_free_uses: int = 0
+        self.aegis_green_used_round: int = 0
         self.player_id = player_id
         self.bot = bot
         self.money = money
@@ -1238,6 +1264,14 @@ class RoundTelemetry:
     acoustic_cash_harvested: int = 0
     spook_gray_dice_burned: int = 0
     prodigy_overrides_executed: int = 0
+    # --- v0.46.0 Vulnerability Track telemetry (populated only under defense_mode == "VULNERABILITY") ---
+    green_cubes_resolved: int = 0
+    green_cubes_no_target: int = 0
+    green_secrets_lost_by_player: Dict[int, int] = field(default_factory=dict)
+    vuln_after_lockin_by_player: Dict[int, int] = field(default_factory=dict)
+    vuln_after_p4_by_player: Dict[int, int] = field(default_factory=dict)
+    green_hit_events: List[Dict[str, Any]] = field(default_factory=list)
+    staging_cup_green_at_p1: int = 0
 
 
 @dataclass
@@ -1440,6 +1474,13 @@ class GameState:
     distinct_exited_colors_this_round: int = 0
     first_player_index: int = 0
     current_round: int = 1
+    green_resolved_round: int = 0  # v0.46.0: idempotence guard for vulnerability.resolve_green
+    green_hit_events: List[Dict[str, Any]] = field(default_factory=list)  # v0.46.0 telemetry
+    green_round_stats: Dict[str, Any] = field(default_factory=dict)  # v0.46.0: this round's Green summary (-> RoundTelemetry)
+    vuln_p1_cup_green: int = 0  # v0.46.0: public staging-cup Green count at Phase 1 (telemetry)
+    # v0.46.0: every player's pre-roll Vulnerability and die count, snapshotted once at the start of Phase 1 so the
+    # bot policy never sees an earlier seat's post-roll value (plain dict: fast_clone copies it)
+    vuln_p1_snapshot: Dict[str, Any] = field(default_factory=dict)
     game_over: bool = False
     is_final_round: bool = False
     final_round_trigger_phase: Optional[int] = None  # v0.34.0: 2 or 4 (six-phase path only)

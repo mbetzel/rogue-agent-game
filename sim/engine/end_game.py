@@ -148,6 +148,45 @@ def _v038_row(cfg: Any, p: Any, bonus: int, end_award: int = 0) -> Dict[str, Any
     return out
 
 
+def _v046_row(cfg: Any, p: Any) -> Dict[str, Any]:
+    """v0.46.0 Vulnerability telemetry (spec §14.3); only emitted under defense_mode == "VULNERABILITY"."""
+    early = [0, 0]
+    late = [0, 0]
+    for rnd, (kept, ev) in p.vuln_keep_by_round.items():
+        tgt = early if rnd <= 3 else (late if rnd >= 6 else None)
+        if tgt is not None:
+            tgt[0] += kept
+            tgt[1] += ev
+    return {
+        "vuln_final": p.vulnerability,
+        "vuln_peak": p.vuln_peak,
+        "vuln_gained_by_source": dict(p.vuln_gained_by_source),
+        "vuln_lowered_by_source": dict(p.vuln_lowered_by_source),
+        "vuln_reset_by_hit_total": p.vuln_reset_by_hit_total,
+        "vuln_overflow_lost": p.vuln_overflow_lost,
+        "vuln_rounds_at_cap": p.vuln_rounds_at_cap,
+        "vuln_icons_kept_total": p.vuln_icons_kept_total,
+        "vuln_keep_events": p.vuln_keep_events,
+        "vuln_keep_kept": p.vuln_keep_kept,
+        "vuln_keep_early": early,
+        "vuln_keep_late": late,
+        "vuln_by_round": [dict(r) for r in p.vuln_by_round],
+        "vuln_keep_by_face": {k: list(v) for k, v in p.vuln_keep_by_face.items()},
+        "green_hits": p.green_hits,
+        "green_secrets_lost": p.green_secrets_lost,
+        "green_hits_by_damage": dict(p.green_hits_by_damage),
+        "green_hits_cancelled": p.green_hits_cancelled,
+        "green_secrets_cancelled": p.green_secrets_cancelled,
+        "pen_test_steps": p.pen_test_steps,
+        "pen_test_research_spent": p.pen_test_research_spent,
+        "pen_test_l4_free_uses": p.pen_test_l4_free_uses,
+        "pen_test_level": p.defense_level,
+        "pen_test_level_reached_round": dict((getattr(p, "level_reached_round", {}) or {}).get("DEFENSE", {})),
+        "aegis_green_cancels": p.green_hits_cancelled,
+        "vuln_stance": p.vuln_stance_this_round,
+    }
+
+
 def evaluate_end_game(engine: GameEngine) -> EndGameResult:
     cfg = engine.config
     _return_held_contractors(engine)
@@ -293,6 +332,7 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
                 "white_hat_code": getattr(getattr(p.white_hat, "code", None), "value", None),
                 "seat": p.player_id,
                 **(_v038_row(cfg, p, bonus, end_award) if getattr(cfg, "secret_face_enabled", False) else {}),
+                **(_v046_row(cfg, p) if getattr(cfg, "is_vulnerability", False) else {}),
             }
         )
 
