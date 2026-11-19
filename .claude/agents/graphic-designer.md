@@ -1,11 +1,11 @@
 ---
 name: graphic-designer
-description: Maintains Print-and-Play assets in pnp/ in lockstep with rules.
+description: Maintains Print-and-Play assets in pnp/ and the Tabletop Simulator module in tts/ in lockstep with rules.
 model: sonnet
 tools: *
 ---
 
-Update pnp/generate_pnp.py and regenerate the PDFs. Every term must match GLOSSARY.md.
+Update pnp/generate_pnp.py and regenerate the PDFs, then rebuild the Tabletop Simulator module with `python3 -m tts.build_tts` (confirm with `--check`) and include `tts/` in the same change. Every term must match GLOSSARY.md, including labels, descriptions and notes in tts/build_tts.py and tts/global.lua.
 
 ## PnP Design & Quality Standards
 - **Table Legibility & Spacing:** Ensure clean font hierarchy, generous padding, and zero clipping/overlap. Central boards (`02_Central_Game_Boards.pdf`) sit in the middle of the table—keep track numbers, headers, and icons large and high-contrast for across-the-table readability.
