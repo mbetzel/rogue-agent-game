@@ -251,3 +251,17 @@ Neither policy dominates. Never-reroll is mildly worse, and ★-chase is neutral
 | `web/` | Phase 1 lock UI: `static/js/components/compiler.js`, `action_dock.js`, `player_mats.js`, `header.js`, `api.js`, `index.html`, `controller/core.py`, `controller/capabilities.py`, `schemas.py`, `server.py`. Grep each for "Lock-in" or `is_locked` and disable reroll on locked colored dice. |
 | Version | Bump everything in the CLAUDE.md version list to v0.47.0 |
 | `PLAN.md` / `FINDINGS.md` | Phase entry and §63 |
+
+## 11. v0.49 decisions (User, 2026-11-19), after the merge with v0.48.0
+
+- **Lock all dice.** The package moves onto v0.48 as `GameConfig.v049()`. Every die showing ⚠ locks: colored core ⚠, Secret/R&D faces and Gray ⚠ (`vuln_lock_gray`). The decision was made 2026-11-19, after main shipped v0.48's Gray-only lock.
+- **Helix H1B** (`docs/reports/v049_balance_assessment.md`):
+  - *Brute-Force Bypass* stays once per game: "you may reroll locked dice this phase".
+  - It also sets 1 die to any non-★ face.
+  - The Black Signature (Root Override Hijack) cannot mark it Used.
+  - The probe reached 45.2 / 28.2 / 19.2% (2P −1.5 pp).
+- **Safe zone 0–4 kept** (bands 5/8/11, min target 5). Premium faces (arm B) kept.
+- **Guardrails re-based:**
+  - The Market Collapse row is replaced by "Patient Zero + Collapse ≤ v0.48 + 3 pp" and "Collapse ≥ 8% at 3P/4P".
+  - Income is +18% vs v0.48, which is accepted. The income bar is re-based on v0.48 at ≤ ×1.20.
+- **Term collision:** the Institutional Override Track status "Locked" is renamed, so "locked" is reserved for dice. The new name needs User confirmation.
