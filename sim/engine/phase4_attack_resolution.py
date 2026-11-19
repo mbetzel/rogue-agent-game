@@ -968,6 +968,10 @@ def _resolve_signature_black(engine: GameEngine, player: PlayerState) -> None:
         has_company_override(player, CompanyCode.HELIX, legacy_bridge_enabled(engine))
         or getattr(getattr(player, "company", None), "code", None) == CompanyCode.HELIX
     )
+    if is_helix_once and getattr(engine.config, "helix_bypass_black_immune", False) and not player.helix_bypass_used_game:
+        # v0.49 H1B: Root Override Hijack cannot mark an unused Brute-Force Bypass Used; the hijack has no effect.
+        player.helix_bypass_black_blocked += 1
+        return
     override_available = (
         player.is_ability_available(active_ver)
         and not player.company_ability_used_this_version

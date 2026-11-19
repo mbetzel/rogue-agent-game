@@ -191,7 +191,7 @@ _V047_FIELDS = (
     "lock_events", "lock_events_by_face", "lock_dice_by_round", "locked_vuln_kept_by_face", "vuln_kept_by_source",
     "vuln_kept_by_color", "colored_dice_rolled_by_color", "colored_star_by_color", "lock_declined_rerolls",
     "ace_lock_breaks", "helix_bypass_uses", "helix_bypass_use_log", "helix_bypass_locked_rerolled",
-    "helix_bypass_vuln_removed", "helix_bypass_lost_to_black", "helix_bypass_used_game",
+    "helix_bypass_vuln_removed", "helix_bypass_lost_to_black", "helix_bypass_face_sets", "helix_bypass_black_blocked", "helix_bypass_used_game",
 )
 
 

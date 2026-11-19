@@ -594,6 +594,8 @@ class GameConfig:
     colored_vuln_lock_secret: bool = True          # [RULE] the Secret face F5 (⚠) locks too (read only under colored_vuln_lock)
     vuln_lock_gray: bool = False                   # [RULE] v0.49 "lock all dice": Gray dice showing ⚠ lock too (sets is_locked; requires colored_vuln_lock)
     helix_bypass_mode: str = "LEGACY"              # "LEGACY" | "REROLL_LOCKED"
+    helix_bypass_face_set: bool = False            # [RULE] v0.49 H1B: Bypass also sets 1 rolled die to any non-star face of its colour
+    helix_bypass_black_immune: bool = False        # [RULE] v0.49 H1B: Root Override Hijack cannot mark an unused Bypass Used
     helix_bypass_once_per_game: bool = False       # [RULE] Brute-Force Bypass once per game (DTO Slush Fund model)
 
     # --- Step 0 exchange-rate probe levers (sim-only; default off => every preset is bit-identical) ---
@@ -1249,6 +1251,7 @@ class GameConfig:
             ("die_face_profile", "V046_VULN"),                                          # D2 premium faces
             ("vuln_band_thresholds", (5, 8, 11)), ("vuln_min_target_by_version", (5, 5, 5)),  # D1 safe zone 0-4
             ("helix_bypass_mode", "REROLL_LOCKED"), ("helix_bypass_once_per_game", True),     # D3
+            ("helix_bypass_face_set", True), ("helix_bypass_black_immune", True),             # H1B
         ):
             overrides.setdefault(k, v)
         return cls.v048(**overrides)
@@ -1293,6 +1296,8 @@ class GameConfig:
             raise ValueError("helix_bypass_mode='REROLL_LOCKED' requires colored_vuln_lock")
         if self.helix_bypass_once_per_game and self.helix_bypass_mode != "REROLL_LOCKED":
             raise ValueError("helix_bypass_once_per_game requires helix_bypass_mode='REROLL_LOCKED'")
+        if (self.helix_bypass_face_set or self.helix_bypass_black_immune) and not self.helix_bypass_once_per_game:
+            raise ValueError("helix_bypass_face_set / helix_bypass_black_immune require helix_bypass_once_per_game")
         if self.vuln_bot_params.lock_policy not in ("NONE", "AWARE", "LAMBDA", "LAMBDA_AWARE"):
             raise ValueError(f"unknown vuln_bot_params.lock_policy {self.vuln_bot_params.lock_policy!r}")
 

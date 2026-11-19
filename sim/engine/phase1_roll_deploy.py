@@ -659,7 +659,17 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
 
         # Helix face override (Brute-Force Bypass); REROLL_LOCKED has no face-set
         if helix_mode:
-            pass
+            if helix_active and getattr(engine.config, "helix_bypass_face_set", False):
+                # v0.49 H1B: set 1 rolled die to any non-star face of its colour (R&D face allowed); ⚠ is counted
+                # by the final lock pass and lock_in below.
+                override = player.bot.choose_helix_face_override_v038(player, active_dice, engine.state)
+                if override:
+                    die_idx, target_face = override
+                    if 0 <= die_idx < len(active_dice) and not target_face.is_star and target_face in active_dice[die_idx].faces:
+                        active_dice[die_idx].current_face = target_face
+                        active_dice[die_idx].is_locked = False
+                        active_dice[die_idx].chosen_choice_index = None
+                        player.helix_bypass_face_sets += 1
         elif helix_active and v038:
             override = player.bot.choose_helix_face_override_v038(player, active_dice, engine.state)
             if override:

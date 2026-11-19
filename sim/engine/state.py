@@ -275,6 +275,8 @@ class PlayerState:
         self.helix_bypass_locked_rerolled: int = 0
         self.helix_bypass_vuln_removed: int = 0
         self.helix_bypass_lost_to_black: int = 0
+        self.helix_bypass_face_sets: int = 0
+        self.helix_bypass_black_blocked: int = 0
         self.triage_l3_upgrade_color: Optional[str] = None
         self.triage_l4_upgrade_color: Optional[str] = None
         self.excess_hardware_upgrades_requested = 0
