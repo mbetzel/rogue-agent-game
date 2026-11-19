@@ -3,19 +3,7 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
-- [x] **Rules Draft `v0.47.0`** (Red Signature "lowest rival"; Phase 68)
-- [ ] **Phase 68: Red Signature "Lowest Rival" (`v0.47.0`)**: the Red Target Lock Signature locker takes `-2` Market Share; the surviving rival with the least Market Share gains `+2`, locked or not (2P: SETEC Corp counts, `+2`; D1 `+1` in reserve); recipients read post-drain; fizzle only when the locker has no surviving rival. Wording: "-2 Market Share; lowest rival gains +2 (2P: SETEC Corp counts)".
-  - [x] *Pre-SDLC Game Designer Modeling:* `docs/findings/red_signature_lowest_rival_analysis.md` (12k games per pod; User decisions 2026-11-19: arm A, 2P SETEC +2, post-drain, wording, `v0.47.0`, 4P spread watch item with a `+4` block).
-  - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/red_signature_lowest_rival_spec.md`.
-  - [x] *Implementation (`senior-engineer`):* `sim/config.py` (`v047_roster`, `signature_red_setec_gain`), `sim/engine/phase4_attack_resolution.py`, `sim/engine/state.py`, `sim/bots/base.py`, `tests/test_signature_dominant_attacks.py`.
-  - [x] *Code Review (`staff-engineer`).*
-  - [x] *Validation Sweep (`product-owner`):* `sim_results/v047_red_signature/validation_report.md` (4,000 games per arm; all spec §9.2 / §9.3 criteria PASS).
-  - [x] *Balance Sign-off (`game-designer`):* `FINDINGS.md` §63 APPROVED. Watch: 2P SecOpsTurtle about 60%, 4P spread `+2.4` against the `+4` block.
-  - [x] *Documentation Sync (Main Agent):* `RULES.md` Phase 4 Step 4 + Market Share component note, `RULES_QUICKREF.md`, `RULES_APPENDIX.md`, `GLOSSARY.md` (Target Lock), checked against the glossary.
-  - [x] *PnP Sync (`graphic-designer`):* Red Signature card / reference text; `pnp/README.md`, `pnp/generate_pnp.py`.
-  - [x] *TTS rebuild:* `python3 -m tts.build_tts` (`--check` clean); `tts/global.lua` header.
-  - [x] *Web sync:* Red Signature recipient (locked rivals and 2P SETEC Corp eligible; no fizzle), log text, tests.
-  - [x] *Version bump `v0.46.0` → `v0.47.0`* across every file in the CLAUDE.md protocol (then tick **Rules Draft `v0.47.0`**).
+- [x] **Rules Draft `v0.47.0`** captured in [RULES.md](./RULES.md) (Red Signature "lowest rival"; Phase 68 in [docs/archive/PLAN_completed_phases.md](./docs/archive/PLAN_completed_phases.md))
 - [x] **Rules Draft `v0.46.0`** captured in [RULES.md](./RULES.md)
 - [ ] **Phase 67: Vulnerability Track Redesign (`v0.46.0 Baseline`)**: no shields or blocking; ⚠ faces raise **Vulnerability**; Green cubes hit the highest Vulnerability at `4`+ (bands `4–6 / 7–9 / 10+` = `−1 / −2 / −3` Secrets, reset to `0`); **Pen Test Track** replaces the Defense Grid Track (`2 🔬` per `−1`, limits `1/1/2/2/3`, L4 free `−1`/turn); Secrets `5`; Market Share `14 / 18 / 18`; Blue `1`/cube in every version; *Data Scraper* `+1` Secret start.
   - [x] *Pre-SDLC Game Designer Modeling:* `docs/plans/vulnerability_track_gd_plan.md` (User sign-off 2026-11-17, §12).
@@ -26,7 +14,7 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [x] *Documentation Sync (Main Agent):* `RULES.md`, `RULES_QUICKREF.md`, `RULES_APPENDIX.md`, `GLOSSARY.md`, `CLAUDE.md` / `AGENTS.md` pillars updated to `v0.46.0`.
   - [x] *PnP Sync (`graphic-designer`):* ⚠ dice art, Vulnerability Track (0–3 safe; bands), Pen Test Track strip, `pnp/README.md` and `pnp/generate_pnp.py` to `v0.46.0`.
   - [x] *Web follow-up (Main Agent, 2026-11-18):* the web plays `GameConfig.v046()` only (legacy rulesets retired). Shield / Defense Grid / Glitched Shield Slot UI and code removed; Phase 1 lock-in (+1 Vulnerability per ⚠), Vulnerability Track on the Agent Board and player mats, Pen Test action, Release L4 Gray-face override; rules phase order (5 Operations → 6 CI/CD Pipeline Shift); Phase 4 now runs table-wide Green, the Patient Zero check and Target Lock Signature Attacks (human Green-track / Red-recipient choices); purchases to the Scanned Box, Market Share regain for cash, L4 Capstones on the human path; 2P SETEC Corp name in the Market Leader Bonus log. `tests/test_v460_web.py` (17 tests incl. a 240-game random-human fuzz); ~120 legacy web tests removed; full suite 1139 OK. Not yet browser-tested.
-  - [ ] *Follow-ups (v0.47):* company-power parity pass (Aegis *Baffle Echo*, DTO *Slush Fund*, Helix); *Data Scraper* / *Script Kiddie* v1.0 card pass.
+  - [ ] *Follow-ups (v0.47):* company-power parity pass (Aegis *Baffle Echo*, DTO *Slush Fund*, Helix); *Data Scraper* / *Script Kiddie* v1.0 card pass. Watch (FINDINGS §63): 2P SecOpsTurtle win rate about 60%; 4P archetype spread +2.4 (Red Signature release block +4); reserve arm `signature_red_setec_gain=1`.
 - [x] **Rules Draft `v0.45.0`** captured in [RULES.md](./RULES.md)
 - [x] **Phase 66: Glitched Shield Slots Rework, 2P SETEC Corp, Starting Secrets, & WS-OPERATOR (`v0.45.0 Baseline`)**
   - [x] *Pre-SDLC Game Designer Modeling:* EV/threat-curve modeling for `WS-OPERATOR` distinct Scanned Box colors (EV `1.34 🔬`/trigger), `Defense Grid Overflow` (`-1` Secret on 3rd Green cube in a slot), Starting Secrets `4` across all counts, and 2P `SETEC Corp` black cube (`0` start, `+1` MS if `>= 1` Red cube exits tray).
