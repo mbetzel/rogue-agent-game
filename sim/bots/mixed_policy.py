@@ -43,6 +43,7 @@ HOOK_DTYPES: Dict[str, str] = {
     "choose_yahtzee_rerolls": "phase1_roll",
     "choose_helix_override": "phase1_roll",
     "choose_helix_face_override": "phase1_roll",
+    "choose_helix_bypass": "phase1_roll",  # v0.47.0
     "choose_prodigy_ability": "phase1_roll",
     "choose_prodigy_face_override": "phase1_roll",
     "choose_prodigy_purple_star_override": "phase1_roll",

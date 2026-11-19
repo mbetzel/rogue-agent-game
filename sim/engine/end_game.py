@@ -187,6 +187,23 @@ def _v046_row(cfg: Any, p: Any) -> Dict[str, Any]:
     }
 
 
+_V047_FIELDS = (
+    "lock_events", "lock_events_by_face", "lock_dice_by_round", "locked_vuln_kept_by_face", "vuln_kept_by_source",
+    "vuln_kept_by_color", "colored_dice_rolled_by_color", "colored_star_by_color", "lock_declined_rerolls",
+    "ace_lock_breaks", "helix_bypass_uses", "helix_bypass_use_log", "helix_bypass_locked_rerolled",
+    "helix_bypass_vuln_removed", "helix_bypass_lost_to_black", "helix_bypass_used_game",
+)
+
+
+def _v047_row(cfg: Any, p: Any) -> Dict[str, Any]:
+    """v0.47.0 Locked ⚠ Faces telemetry (spec §8.2); only emitted under ``colored_vuln_lock`` (parity digest)."""
+    out: Dict[str, Any] = {}
+    for k in _V047_FIELDS:
+        v = getattr(p, k)
+        out[k] = (dict(v) if isinstance(v, dict) else [dict(x) for x in v] if isinstance(v, list) else v)
+    return out
+
+
 def evaluate_end_game(engine: GameEngine) -> EndGameResult:
     cfg = engine.config
     _return_held_contractors(engine)
@@ -333,6 +350,7 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
                 "seat": p.player_id,
                 **(_v038_row(cfg, p, bonus, end_award) if getattr(cfg, "secret_face_enabled", False) else {}),
                 **(_v046_row(cfg, p) if getattr(cfg, "is_vulnerability", False) else {}),
+                **(_v047_row(cfg, p) if getattr(cfg, "colored_vuln_lock", False) else {}),
             }
         )
 
