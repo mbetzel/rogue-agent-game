@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from typing import Any, Dict, List, Optional, Tuple
 
-from sim.config import ROUND_PHASE_NAMES, CubeColor, DieColor, EndGameReason, ShieldColor
+from sim.config import ROUND_PHASE_NAMES, CubeColor, DieColor, EndGameReason
 from sim.engine import EndGameResult, GameState, PlayerState, RoundTelemetry
 from sim.entities import AbilityStatus, ArchetypeCard, Company, Die, effective_company, Face, VariantCard, VersionCard, WhiteHat
 
@@ -38,23 +38,33 @@ ARCHETYPE_FLAVOR: Dict[str, Dict[str, str]] = {
 }
 
 
-# v0.38.0 card texts (RULES_APPENDIX.md section D); the simulation entities still carry the v0.37 wording.
-V038_COMPANY_TEXT: Dict[str, str] = {
-    "OMNIDYNE": "Move 1 die of your choice from your Processing Box directly to your Ready for Release Zone for free "
+# v0.46.0 card texts (RULES_APPENDIX.md Section 6 D); several simulation entities still carry older wording.
+V046_COMPANY_TEXT: Dict[str, str] = {
+    "MERIDIAN": "Gain an immediate +$3 cash payout from the bank.",
+    "OMNIDYNE": "Move 1 die from your Processing Box directly to your Ready for Release Zone for free "
                 "(bypassing Scanned); it banks its Secret now.",
-    "DTO": "Absorb up to 2 Corporate Secret loss from unblocked Blue Spyware for free (once per game). Any additional "
-           "Secret loss applies as normal.",
-    "HELIX": "Gain 1 extra free reroll this phase, and you may include any number of Glitch dice in your free rerolls. "
-             "In addition, turn 1 of your rolled dice to any legal non-Star face of its color (the Secret face is allowed).",
+    "AEGIS": "Ignore the damage of 1 Attack Cube for yourself this round: 1 Red cube (no Market Share loss), 1 Blue "
+             "cube (no Secret loss), or 1 Green cube that hits you (no Secret loss; your Vulnerability still resets "
+             "to 0). (All exited cubes remain in the exit tray and recycle into the Staging Cup as normal.)",
+    "DTO": "Absorb up to 2 Corporate Secret loss from Blue cubes for free (once per game). Any additional Secret loss "
+           "applies as normal.",
+    "HELIX": "Gain 1 extra free reroll this phase. In addition, turn 1 of your rolled dice to any legal non-Star face "
+             "of its color (the Secret face is allowed).",
     "PROMETHEUS": "Purchase 1 Colored Die from the Central Market at a $2 discount (minimum cost $0), OR gain an "
                   "immediate +$2 cash payout from the bank.",
 }
-V038_WHITE_HAT_TEXT: Dict[str, str] = {
-    "PHREAKER": "When Purple ★ is rolled, move 1 die from your Processing Box to your Scanned Box, banking its Secret "
-                "now. If your Processing Box is empty, roll 1 Scanned Box die and collect its $ / 🔬 output (the die "
-                "stays in place); if Under Development is empty, collect +$1 cash.",
-    "PRODIGY": "When Purple ★ is rolled, turn 1 other rolled die in your active pool to any legal non-Star face of that "
-               "die's color other than the Secret face.",
+V046_WHITE_HAT_TEXT: Dict[str, str] = {
+    "OPERATOR": "When Face 6 (Purple ★) is rolled, gain +1 🔬 Research Token per different color die currently in "
+                "your Scanned Box (all colors including Gray, Purple, and Yellow).",
+    "PHREAKER": "When Face 6 (Purple ★) is rolled, gain +$1 cash AND +1 Release Bandwidth this round (applies in "
+                "Phase 6 Step 3).",
+    "ACOUSTIC": "When Face 6 (Purple ★) is rolled, gain +$1 cash per unique colored cube that exited the Cube Tower "
+                "this round (including Operative Signature Cubes), up to +$5 max.",
+    "SPOOK": "When Face 6 (Purple ★) is rolled, gain an immediate +$2 cash payout; in addition, you may optionally "
+             "permanently return 1 owned Gray Legacy die to the box to gain +$3 cash.",
+    "PRODIGY": "After all rerolls are finished (before assigning dice to In Production), turn 1 other rolled die in "
+               "your active pool to any legal non-Star face of that die's color other than the Secret face.",
+    "CIPHER": "When Face 6 (Purple ★) is rolled, gain an additional +$2 cash income AND +1 🔬 Research Token.",
 }
 
 
@@ -82,14 +92,11 @@ class GameStateSerializer:
             return None
         return {
             "name": face.name,
-            "block_amount": face.block_amount,
-            "shield_color": face.shield_color.value if face.shield_color else None,
             "money": face.money,
             "patches": face.patches,
             "secrets": face.secrets,
             "is_star": face.is_star,
             "star_code": face.star_code,
-            "is_shield": face.is_shield,
             "is_glitch": getattr(face, "is_glitch", False),
             "is_choice": getattr(face, "is_choice", False),
             "choices": [
@@ -97,12 +104,11 @@ class GameStateSerializer:
                 for c in getattr(face, "choices", ())
             ],
             "has_cash_option": getattr(face, "has_cash_option", False),
-            "has_shield_option": getattr(face, "has_shield_option", False),
             "has_patch_option": getattr(face, "has_patch_option", False),
             # v0.38.0
             "secrets_pending": bool(getattr(face, "secrets_pending", False)),
-            "clean_slots": int(getattr(face, "clean_slots", 0)),
             "market_share": int(getattr(face, "market_share", 0)),
+            "vuln": int(getattr(face, "vuln", 0) or 0),  # v0.46.0 ⚠ icons on this face
         }
 
     @staticmethod
@@ -176,38 +182,6 @@ class GameStateSerializer:
     def serialize_company(company: Optional[Company]) -> Optional[Dict[str, Any]]:
         if company is None:
             return None
-        desc_parts = []
-        def_cap = getattr(company, "starting_defense_capacity", 2)
-        tri_bw = getattr(company, "starting_triage_bandwidth", 2)
-        rel_bw = getattr(company, "starting_release_bandwidth", 4)
-        tri_lvl = getattr(company, "starting_triage_level", 0)
-        rel_lvl = getattr(company, "starting_release_level", 0)
-        def_lvl = getattr(company, "starting_defense_level", 0)
-        pat_lvl = getattr(company, "starting_patent_level", 0)
-        cash_bonus = getattr(company, "starting_cash_bonus", 0)
-        res_bonus = getattr(company, "starting_research_bonus", 0)
-        sec_bonus = getattr(company, "starting_secrets_bonus", 0)
-        up_disc = getattr(company, "upgrade_discount", 0)
-
-        if pat_lvl > 0:
-            desc_parts.append(f"Starts at Patent Lvl {pat_lvl} (3 🔬 cost)")
-        if res_bonus > 0:
-            desc_parts.append(f"+{res_bonus} 🔬 Starting Research")
-        if cash_bonus > 0:
-            desc_parts.append(f"+${cash_bonus} Starting Cash")
-        if sec_bonus > 0:
-            desc_parts.append(f"+{sec_bonus} Starting Secret")
-        if def_lvl > 0:
-            desc_parts.append(f"Defense Lvl {def_lvl} ({def_cap} Shields Cap)")
-        if tri_lvl > 0:
-            desc_parts.append(f"Triage Lvl {tri_lvl} (Bandwidth {tri_bw})")
-        if rel_lvl > 0:
-            desc_parts.append(f"Release Lvl {rel_lvl} (Bandwidth {rel_bw})")
-        if up_disc > 0:
-            desc_parts.append(f"-{up_disc} 🔬 Track Upgrade Discount")
-        if not desc_parts:
-            desc_parts.append(f"Def Cap {def_cap}, Triage {tri_bw}, Release {rel_bw}")
-
         return {
             "code": company.code.value if hasattr(company.code, "value") else str(company.code),
             "name": company.name,
@@ -216,18 +190,7 @@ class GameStateSerializer:
             "timing_window": company.timing_window,
             "description": company.description,
             "flavor": company.flavor,
-            "starting_setup_desc": ", ".join(desc_parts),
-            "starting_defense_capacity": def_cap,
-            "starting_triage_bandwidth": tri_bw,
-            "starting_release_bandwidth": rel_bw,
-            "starting_triage_level": tri_lvl,
-            "starting_release_level": rel_lvl,
-            "starting_defense_level": def_lvl,
-            "starting_patent_level": pat_lvl,
-            "starting_cash_bonus": cash_bonus,
-            "starting_research_bonus": res_bonus,
-            "starting_secrets_bonus": sec_bonus,
-            "upgrade_discount": up_disc,
+            "starting_setup_desc": "All tracks Level 0",
         }
 
     @staticmethod
@@ -271,14 +234,13 @@ class GameStateSerializer:
 
     @staticmethod
     def _company_with_start(company: Optional[Dict[str, Any]], player: PlayerState, config: Any) -> Optional[Dict[str, Any]]:
-        """v0.38.0: every Client Company starts identically except the colour of its starting colored die."""
-        if company is not None and getattr(config, "secret_face_enabled", False) and company["code"] in V038_COMPANY_TEXT:
-            company = dict(company, description=V038_COMPANY_TEXT[company["code"]])
-        if company is not None and getattr(config, "company_starting_die_enabled", False) and getattr(player, "company_color", None):
-            company = dict(company)
+        """Every Client Company starts identically except the colour of its starting colored die."""
+        if company is None:
+            return None
+        company = dict(company, description=V046_COMPANY_TEXT.get(company["code"], company["description"]))
+        if getattr(player, "company_color", None):
             company["starting_setup_desc"] = (
-                f"Def Cap {company['starting_defense_capacity']}, Triage {company['starting_triage_bandwidth']}, "
-                f"Release {company['starting_release_bandwidth']}; 2 Gray + Purple + {str(player.company_color).capitalize()} starting dice")
+                f"All tracks Level 0; 2 Gray + Purple + {str(player.company_color).capitalize()} starting dice")
         return company
 
     @staticmethod
@@ -291,8 +253,8 @@ class GameStateSerializer:
 
     @staticmethod
     def _white_hat_text(wh: Optional[Dict[str, Any]], config: Any) -> Optional[Dict[str, Any]]:
-        if wh is not None and getattr(config, "secret_face_enabled", False) and wh["code"] in V038_WHITE_HAT_TEXT:
-            wh = dict(wh, description=V038_WHITE_HAT_TEXT[wh["code"]])
+        if wh is not None and wh["code"] in V046_WHITE_HAT_TEXT:
+            wh = dict(wh, description=V046_WHITE_HAT_TEXT[wh["code"]])
         return wh
 
     @staticmethod
@@ -332,10 +294,8 @@ class GameStateSerializer:
         name: str,
         bot_archetype: Optional[str] = None,
         rolled_pool: Optional[List[Die]] = None,
-        shield_slots: Optional[Dict[str, List[Die]]] = None,
         has_rolled: bool = False,
         has_committed: bool = False,
-        commitments: Optional[Dict[int, str]] = None,
         purchases_this_turn: int = 0,
         dirty_income_taken_this_turn: bool = False,
         locked_reroll_indices: Optional[List[int]] = None,
@@ -362,21 +322,6 @@ class GameStateSerializer:
             visual_ready = [d for d in player.ready_dice if d.die_id not in active_rolled_ids]
         else:
             visual_ready = player.ready_dice
-
-        slots_serialized: Dict[str, List[Dict[str, Any]]] = {
-            "red": [],
-            "blue": [],
-            "green": [],
-            "any": [],
-        }
-        if shield_slots:
-            for color_key, dice_list in shield_slots.items():
-                # Only include shield dice that haven't worn into unpatched
-                slots_serialized[color_key] = [
-                    cls.serialize_die(d)
-                    for d in dice_list
-                    if d.die_id not in unpatched_ids
-                ]
 
         hired_count = hired_contractors if hired_contractors else getattr(player, "hired_contractor_count", len(player.contractor_dice))
         max_hire = getattr(config, "contractor_max_hire", 3)
@@ -420,32 +365,28 @@ class GameStateSerializer:
             "secrets": player.secrets,
             "patches": player.patches,
             "research_tokens": getattr(player, "research_tokens", player.patches),
-            "defense_capacity": getattr(player, "defense_capacity", 2),
+            # v0.46.0 Vulnerability Track & Pen Test Track
+            **cls._vulnerability(player, config),
             "triage_bandwidth": getattr(player, "triage_bandwidth", 2),
             "release_bandwidth": getattr(player, "release_bandwidth", 4),
             "scanned_over_release": max(0, len(player.scanned_dice) - getattr(player, "release_bandwidth", 4)),
             "income_this_round": income_this_round,
             "triage_level": getattr(player, "triage_level", 0),
             "release_level": getattr(player, "release_level", 0),
-            "pipeline_level": getattr(player, "pipeline_level", 0),
             "defense_level": getattr(player, "defense_level", 0),
             "patent_level": getattr(player, "patent_level", 0),
-            "has_emergency_hotfix": getattr(player, "has_emergency_hotfix", False),
-            "has_passive_firewall": getattr(player, "has_passive_firewall", False),
-            # v0.35.0 research tracks (levels 0..4)
-            "research_track_model": getattr(getattr(config, "research_track_model", None), "value", "V034_THREE_LEVEL"),
-            "max_track_level": 4 if getattr(config, "is_v035_tracks", False) else 2,
+            "max_track_level": 4,
             "research_earned_total": getattr(player, "research_earned_total", 0),
             "breakthroughs": [b.as_dict() for b in getattr(player, "breakthroughs", [])],
             "l4_payouts": dict(getattr(player, "l4_payouts", {})),
-            "patent_cost": player.get_patent_cost() if hasattr(player, "get_patent_cost") else 4,
-            "patent_gain": player.get_patent_gain() if hasattr(player, "get_patent_gain") else 1,
             "slush_fund_used_game": bool(getattr(player, "slush_fund_used_game", False)),
             "purple_purchasable": bool(getattr(config, "purple_purchasable", True)),
             # v0.36.0 Market Share / Public Relations Track (None under the v0.35 ruleset)
             "market_share": getattr(player, "market_share", None),
             "market_share_max": getattr(player, "market_share_max", None),
             "patent_track_name": _patent_track_name(config),
+            "target_locked": bool(getattr(player, "target_locked", False)),
+            "encrypted_research_tracks": sorted(getattr(player, "encrypted_research_tracks", set()) or []),
             "regain_cost": _regain(config, player)[0],
             "regain_cap": _regain(config, player)[1],
             "regain_this_turn": getattr(player, "regain_this_turn", 0),
@@ -465,18 +406,9 @@ class GameStateSerializer:
             "glitched_dice": [cls.serialize_die(d) for d in player.glitched_dice],
             # v0.38.0 Processing Box (same zone as ``glitched_dice``), oldest first, with each die's current yield
             "processing_box_dice": cls._processing_box(player, config),
-            "glitched_shield_slots": int(getattr(player, "glitched_shield_slots", 0)),
             "secret_yield_now": cls._secret_yield_now(player, config),
-            "effective_defense_capacity": max(0, getattr(player, "defense_capacity", 2) - int(getattr(player, "glitched_shield_slots", 0))),
             "company_color": getattr(player, "company_color", None),
             "scanned_dice": [cls.serialize_die(d) for d in player.scanned_dice],
-            "production_slots": {
-                "income": [cls.serialize_die(d) for d in player.income_dice],
-                "red_shield": [cls.serialize_die(d) for d in player.red_shield_dice],
-                "blue_shield": [cls.serialize_die(d) for d in player.blue_shield_dice],
-                "green_shield": [cls.serialize_die(d) for d in player.green_shield_dice],
-                "any_shield": [cls.serialize_die(d) for d in player.any_shield_dice],
-            },
             "under_development_count": len(player.glitched_dice) + len(player.scanned_dice),
             "glitched_count": len(player.glitched_dice),
             "scanned_count": len(player.scanned_dice),
@@ -485,11 +417,9 @@ class GameStateSerializer:
             "all_ready_dice": [cls.serialize_die(d) for d in player.ready_dice],
             "unpatched_dice": [cls.serialize_die(d) for d in player.unpatched_dice],
             "rolled_pool": rolled_dice,
-            "shield_slots": slots_serialized,
             # Phase 1 interaction state
             "has_rolled": has_rolled,
             "has_committed": has_committed,
-            "commitments": commitments or {},
             "locked_reroll_indices": locked_reroll_indices or [],
             "hired_contractors": hired_count,
             "next_contractor_cost": next_contractor_cost,
@@ -513,6 +443,43 @@ class GameStateSerializer:
             "y1_available": player.y1_available,
             "p1_available": player.p1_available,
             "p3_available": player.p3_available.value if player.p3_available else None,
+        }
+
+    @staticmethod
+    def _vulnerability(player: PlayerState, config: Any) -> Dict[str, Any]:
+        from sim.engine import vulnerability
+
+        v = int(player.vulnerability)
+        floor = min(config.vuln_min_target_by_version)
+        return {
+            "vulnerability": v,
+            "vulnerability_band_damage": vulnerability.band_damage(config, v) if v >= floor else 0,
+            "pen_test_level": int(player.defense_level),
+            "pen_test_limit": vulnerability.pen_test_limit(config, player),
+            "pen_test_this_turn": int(getattr(player, "pen_test_this_turn", 0)),
+        }
+
+    @staticmethod
+    def _vulnerability_track(state: GameState) -> Dict[str, Any]:
+        from sim.engine import vulnerability
+
+        cfg = state.config
+        floor = vulnerability.min_target(cfg, state)
+        th = list(cfg.vuln_band_thresholds)
+        bands = []
+        for i, (t, d) in enumerate(zip(th, cfg.vuln_band_damage)):
+            lo, hi = max(t, floor), ((th[i + 1] - 1) if i + 1 < len(th) else cfg.vuln_track_max)
+            if lo <= hi:
+                bands.append({"from": lo, "to": hi, "damage": int(d)})
+        return {
+            "max": int(cfg.vuln_track_max),
+            "safe_max": floor - 1,
+            "min_target": floor,
+            "bands": bands,
+            "hit_reset": int(cfg.vuln_hit_reset),
+            "pen_test_cost": int(cfg.pen_test_cost),
+            "pen_test_limits": list(cfg.pen_test_limits),
+            "pen_test_l4_free": int(cfg.pen_test_l4_free),
         }
 
     @classmethod
@@ -556,10 +523,8 @@ class GameStateSerializer:
                 name=p_meta.get("name", f"Player {p.player_id + 1}"),
                 bot_archetype=p_meta.get("bot_archetype"),
                 rolled_pool=p_meta.get("rolled_pool", []),
-                shield_slots=p_meta.get("shield_slots"),
                 has_rolled=p_meta.get("has_rolled", False),
                 has_committed=p_meta.get("has_committed", False),
-                commitments=p_meta.get("commitments"),
                 purchases_this_turn=p_meta.get("purchases_this_turn", 0),
                 dirty_income_taken_this_turn=p_meta.get("dirty_income_taken_this_turn", False),
                 locked_reroll_indices=p_meta.get("locked_reroll_indices", []),
@@ -583,7 +548,6 @@ class GameStateSerializer:
             "phase_name": controller_meta.get("phase_name", ROUND_PHASE_NAMES[1]),
             "phase_names": controller_meta.get("phase_names", dict(ROUND_PHASE_NAMES)),
             "round_sequence": controller_meta.get("round_sequence", state.config.round_sequence.value),
-            "research_track_model": state.config.research_track_model.value,
             "subphase": controller_meta.get("subphase", "waiting_for_roll"),
             "active_player_index": controller_meta.get("active_player_index", 0),
             "first_player_index": state.first_player_index,
@@ -606,10 +570,10 @@ class GameStateSerializer:
             "starting_secrets": state.config.get_starting_secrets(len(state.players)),
             # v0.37.0 Market Leader Bonus schedule for this player count ([] when disabled)
             "is_market_leader_bonus": bool(getattr(state.config, "is_market_leader_bonus", False)),
-            # v0.38.0: Secret faces / Processing Box / Glitched Shield Slots / Market Leader Bonus on Red Secret banks
-            "rules_version": "v0.38.0" if getattr(state.config, "secret_face_enabled", False) else "v0.37.0",
+            "rules_version": "v0.46.0",
             "is_secret_faces": bool(getattr(state.config, "secret_face_enabled", False)),
-            "is_glitched_slots": bool(getattr(state.config, "glitched_shield_slots_enabled", False)),
+            # v0.46.0 Vulnerability Track (Central SETEC Agent Board) and Pen Test Track
+            "vulnerability_track": cls._vulnerability_track(state),
             "is_round_leader_bonus": bool(getattr(state.config, "is_red_secret_payout", False)),
             "round_leader_bonus_schedule": list(state.config.red_secret_payout_schedule(len(state.players))
                                                 if getattr(state.config, "is_red_secret_payout", False) else []),
@@ -617,10 +581,10 @@ class GameStateSerializer:
             "last_round_bonus": controller_meta.get("last_round_bonus"),
             "secret_yields": {
                 "red": state.config.red_secret_owner_yield if state.config.red_secret_owner_yield is not None else None,
-                "blue_base": state.config.secret_yield_blue_base, "blue_block": state.config.secret_yield_blue_block_bonus,
+                "blue_base": state.config.secret_yield_blue_base,
                 "blue_grid": state.config.secret_yield_blue_grid_l3_bonus, "blue_cap": state.config.secret_yield_blue_cap,
                 "green_base": state.config.secret_yield_green_base,
-                "green_glitch_penalty": getattr(state.config, "secret_yield_green_glitch_penalty", True),
+                "green_vuln_reduction": int(state.config.green_secret_vuln_reduction),
                 "purple": state.config.secret_yield_purple,
             },
             "market_leader_bonus_schedule": list(state.config.market_leader_bonus_schedule(len(state.players))
@@ -631,7 +595,6 @@ class GameStateSerializer:
             "contractor_cost_progression": list(getattr(state.config, "contractor_cost_progression", (1, 2, 3))),
             "contractor_max_hire": getattr(state.config, "contractor_max_hire", 3),
             "next_contractor_cost": controller_meta.get("action_capabilities", {}).get("next_contractor_cost"),
-            "max_patch_tokens": state.config.max_patch_tokens,
             # Compiler / Tower & Corruption
             "staging_cup": staged,
             "tower_stuck_cubes": stuck,
@@ -649,7 +612,7 @@ class GameStateSerializer:
             "active_version": active_version,
             "version_deck": version_deck_serialized,
             "last_compile_result": controller_meta.get("last_compile_result"),
-            # v0.34 six-phase results (Phase 3 Income / Phase 4 Attack Resolution / Phase 5 Pipeline Shift)
+            # Phase results (3 Income / 4 Attack Resolution / 6 CI/CD Pipeline Shift)
             "last_income_result": controller_meta.get("last_income_result", {}),
             "last_attack_result": controller_meta.get("last_attack_result"),
             "last_pipeline_result": controller_meta.get("last_pipeline_result", {}),
@@ -718,16 +681,6 @@ def validate_color(color_str: str) -> Tuple[Optional[DieColor], Optional[str]]:
     except ValueError:
         valid_colors = [c.value for c in DieColor]
         return None, f"Invalid color '{color_str}'. Must be one of: {valid_colors}"
-
-
-def validate_shield_color(color_str: str) -> Tuple[Optional[ShieldColor], Optional[str]]:
-    try:
-        color = ShieldColor(color_str.lower())
-        if color not in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN):
-            return None, f"Shield color must be 'red', 'blue', or 'green', got '{color_str}'"
-        return color, None
-    except ValueError:
-        return None, f"Invalid shield color '{color_str}'. Must be 'red', 'blue', or 'green'"
 
 
 def error_response(message: str, status_code: int = 400) -> Tuple[Dict[str, Any], int]:

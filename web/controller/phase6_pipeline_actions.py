@@ -1,4 +1,4 @@
-"""Web Phase 5: CI/CD Pipeline Shift (v0.34.0 six-phase).
+"""Web Phase 6: CI/CD Pipeline Shift (v0.46.0: after Phase 5 Operations).
 
 Order: Magnetic Splice -> Production Return (to Scanned Box) -> Scanned Graduation (<= Release Bandwidth, dice of
 the player's choice; fewer allowed) -> Conveyor Triage (Processing Box, oldest first, no choice) -> Market Leader
@@ -9,7 +9,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from sim.config import ROUND_PHASE_NAMES, DieColor, RoundPhase
+from sim.config import DieColor
+from web.controller import phases
 from sim.engine import phase5_pipeline_shift as p5, secret_faces
 
 if TYPE_CHECKING:
@@ -46,7 +47,6 @@ def _needs_choice(controller: GameController, player: PlayerState) -> Dict[str, 
         "candidates": [_die_view(d) for d in p5.default_graduate_priority(player.scanned_dice)],
         "default_graduate_ids": [d.die_id for d in p5.default_graduate_priority(player.scanned_dice)[:n]],
         "splice_available": splice,
-        "hotfix_available": False,
         "processing_box": _processing_view(controller, player),
         "glitched": [_die_view(d) for d in player.glitched_dice],
         "needs_choice": len(player.scanned_dice) > player.release_bandwidth or splice,
@@ -61,9 +61,9 @@ def _log_shift(controller: GameController, pid: int, rec, is_bot: bool) -> None:
     )
 
 
-def enter_phase_5(controller: GameController) -> None:
-    controller.phase = int(RoundPhase.CICD_PIPELINE_SHIFT)
-    controller.phase_name = ROUND_PHASE_NAMES[controller.phase]
+def enter_pipeline_shift(controller: GameController) -> None:
+    controller.phase = phases.PIPELINE_SHIFT
+    controller.phase_name = phases.PHASE_NAMES[controller.phase]
     controller.subphase = "choose_graduates"
     controller.pending_graduation = {}
     controller.last_pipeline_result = {}
@@ -71,7 +71,6 @@ def enter_phase_5(controller: GameController) -> None:
     for pid, player in enumerate(controller.state.players):
         meta = controller.player_meta[pid]
         meta["pending_splice_die_id"] = None
-        meta["shield_slots"] = {"red": [], "blue": [], "green": [], "any": []}
         if player.is_patient_zero:
             continue
         if not meta.get("is_human"):
@@ -94,19 +93,18 @@ def enter_phase_5(controller: GameController) -> None:
             _log_shift(controller, pid, rec, is_bot=False)
 
     if not controller.pending_graduation:
-        _finish_phase_5(controller)
+        _finish_pipeline_shift(controller)
 
 
-def _finish_phase_5(controller: GameController) -> None:
-    from web.controller.phase6_operations_actions import enter_phase_6
-
+def _finish_pipeline_shift(controller: GameController) -> None:
+    """Step 5: Market Leader Bonus, then the end of the round (First Player Marker, next round or Game Over)."""
     controller.pending_graduation = {}
     _fire_market_leader_bonus(controller)
-    enter_phase_6(controller)
+    controller._complete_round()
 
 
 def _fire_market_leader_bonus(controller: GameController) -> None:
-    """Step 5 (v0.38.0): Market Leader Bonus at the end of Phase 5 if a Red Secret face was banked this round."""
+    """Step 5: Market Leader Bonus at the end of Phase 6 if a Red Secret face was banked this round."""
     cfg = controller.state.config
     controller.last_round_bonus = None
     if not secret_faces.enabled(cfg):
@@ -115,9 +113,11 @@ def _fire_market_leader_bonus(controller: GameController) -> None:
     if not secret_faces.fire_round_payout(cfg, controller.state):
         return
     rec = controller.state.red_secret_payouts[before]
-    names = controller.player_meta
+    def _name(pid: int) -> str:  # pid -1 = the 2P SETEC Corp neutral seat (v0.45.0)
+        return controller.player_meta[pid]["name"] if pid in controller.player_meta else "SETEC Corp"
+
     parts = ", ".join(
-        f"{names[pid]['name']} {rec['places'][pid]}{ {1: 'st', 2: 'nd', 3: 'rd'}.get(rec['places'][pid], 'th')} +{k}"
+        f"{_name(pid)} {rec['places'][pid]}{ {1: 'st', 2: 'nd', 3: 'rd'}.get(rec['places'][pid], 'th')} +{k}"
         for pid, k in sorted(rec["gains"].items(), key=lambda kv: (rec["places"][kv[0]], kv[0]))
     )
     controller.event_log.append(f"MARKET LEADER BONUS (Red Secret face banked this round): {parts}.")
@@ -132,9 +132,8 @@ def choose_graduates(
     player_id: int,
     graduate_die_ids: Optional[List[int]],
     splice_die_id: Optional[int] = None,
-    hotfix_die_id: Optional[int] = None,
 ) -> Dict[str, Any]:
-    if controller.phase != int(RoundPhase.CICD_PIPELINE_SHIFT) or controller.subphase != "choose_graduates":
+    if controller.phase != phases.PIPELINE_SHIFT or controller.subphase != "choose_graduates":
         raise ValueError(f"Cannot choose graduates in phase {controller.phase}")
     if player_id not in controller.pending_graduation:
         raise ValueError(f"Player {player_id} has no pending Scanned Graduation choice")
@@ -172,14 +171,14 @@ def choose_graduates(
     _log_shift(controller, player_id, rec, is_bot=False)
     del controller.pending_graduation[player_id]
     if not controller.pending_graduation:
-        _finish_phase_5(controller)
+        _finish_pipeline_shift(controller)
     return controller.get_full_state()
 
 
 def record_magnetic_splice(controller: GameController, player_id: int, die_id: Optional[int] = None,
                            die_index: int = 0) -> Dict[str, Any]:
-    """Omnidyne Magnetic Splice (Phase 5 step 1): records the Processing Box die to splice."""
-    if controller.phase != int(RoundPhase.CICD_PIPELINE_SHIFT) or player_id not in controller.pending_graduation:
+    """Omnidyne Magnetic Splice (Phase 6 step 1): records the Processing Box die to splice."""
+    if controller.phase != phases.PIPELINE_SHIFT or player_id not in controller.pending_graduation:
         raise ValueError(f"Cannot use Omnidyne Magnetic Splice in phase {controller.phase}")
     player = controller.state.players[player_id]
     if not controller.pending_graduation[player_id].get("splice_available"):
@@ -192,6 +191,6 @@ def record_magnetic_splice(controller: GameController, player_id: int, die_id: O
         raise ValueError(f"Die with die_id {die_id} is not in the Processing Box")
     controller.player_meta[player_id]["pending_splice_die_id"] = die_id
     controller.event_log.append(
-        f"{controller.player_meta[player_id]['name']} queued Omnidyne Magnetic Splice (Processing Box -> Ready for Release in Phase 5)."
+        f"{controller.player_meta[player_id]['name']} queued Omnidyne Magnetic Splice (Processing Box -> Ready for Release in Phase 6)."
     )
     return controller.get_full_state()

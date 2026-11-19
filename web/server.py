@@ -108,7 +108,6 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                         seed = int(seed)
                     randomize_cards = bool(data.get("randomize_cards", False))
                     enable_corporate_asymmetry = bool(data.get("enable_corporate_asymmetry", True))
-                    research_track_model = data.get("research_track_model") or data.get("ruleset")
                     rules_version = data.get("rules_version")
 
                     state = self.controller.new_game(
@@ -117,7 +116,6 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                         seed=seed,
                         randomize_cards=randomize_cards,
                         enable_corporate_asymmetry=enable_corporate_asymmetry,
-                        research_track_model=research_track_model,
                         rules_version=rules_version,
                     )
                     payload, code = success_response({"state": state})
@@ -144,36 +142,21 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
 
-                elif clean_path == "/api/game/action/debug_unlock":
-                    payload, code = error_response(
-                        "Debug unlocks deprecated in v0.23.0.",
-                        400,
-                    )
-                    self._send_json_response(payload, code)
-
                 elif clean_path == "/api/game/action/roll":
                     pid = get_target_pid(default_to_human=True)
                     state = self.controller.roll_pool(pid)
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
 
-                elif clean_path == "/api/game/action/hotfix":
+                elif clean_path == "/api/game/action/lock_in":
+                    # Phase 1 Step 4: Lock-in & Assign Dice (Choice Face declarations by rolled-pool index)
                     pid = get_target_pid(default_to_human=True)
-                    if "die_index" not in data:
-                        payload, code = error_response("Missing required field 'die_index'", 400)
+                    decls = data.get("choice_declarations")
+                    if decls is not None and not isinstance(decls, dict):
+                        payload, code = error_response("choice_declarations must be an object {die_index: option}", 400)
                         self._send_json_response(payload, code)
                         return
-                    die_idx = int(data["die_index"])
-                    state = self.controller.hotfix_reroll(pid, die_idx)
-                    payload, code = success_response({"state": state})
-                    self._send_json_response(payload, code)
-
-                elif clean_path == "/api/game/action/commit":
-                    pid = get_target_pid(default_to_human=True)
-                    commitments = data.get("commitments", {})
-                    choice_declarations = data.get("choice_declarations", None)
-                    slot_cleaners = data.get("slot_cleaner_indices", None)
-                    state = self.controller.commit_defenses(pid, commitments, choice_declarations, slot_cleaners)
+                    state = self.controller.lock_in(pid, decls)
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
 
@@ -203,13 +186,6 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                 elif clean_path == "/api/game/action/confirm_income":
                     # Phase 3: Income
                     pid = get_target_pid(default_to_human=True)
-                    if "glitch_die_ids" in data or "any_shield_allocations" in data:
-                        payload, code = error_response(
-                            "glitch_die_ids / any_shield_allocations moved to /api/game/action/confirm_attacks (Phase 4: Attack Resolution)",
-                            400,
-                        )
-                        self._send_json_response(payload, code)
-                        return
                     state = self.controller.confirm_income(
                         pid,
                         spook_burn_die_id=data.get("spook_burn_die_id"),
@@ -221,31 +197,29 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                 elif clean_path == "/api/game/action/confirm_attacks":
                     # Phase 4: Attack Resolution
                     pid = get_target_pid(default_to_human=True)
-                    allocs = data.get("any_shield_allocations")
-                    if allocs is not None and not isinstance(allocs, dict):
-                        payload, code = error_response("any_shield_allocations must be an object {red, blue, green}", 400)
-                        self._send_json_response(payload, code)
-                        return
-                    glitch_ids = data.get("glitch_die_ids")
-                    if glitch_ids is not None and not isinstance(glitch_ids, list):
-                        payload, code = error_response("glitch_die_ids must be a list of die ids", 400)
-                        self._send_json_response(payload, code)
-                        return
                     aegis_color = data.get("aegis_color")
-                    if aegis_color is not None and str(aegis_color).lower() not in ("red", "blue", "green", "none"):
+                    if aegis_color is not None and str(aegis_color).lower() not in ("red", "blue", "green", "none", "decline"):
                         payload, code = error_response("aegis_color must be one of red, blue, green, none", 400)
                         self._send_json_response(payload, code)
                         return
+                    tracks = data.get("signature_green_tracks")
+                    if tracks is not None and not isinstance(tracks, list):
+                        payload, code = error_response("signature_green_tracks must be a list of track names", 400)
+                        self._send_json_response(payload, code)
+                        return
+                    recipient = data.get("signature_red_recipient")
                     state = self.controller.confirm_attacks(
-                        pid, any_shield_allocations=allocs, glitch_die_ids=glitch_ids, aegis_color=aegis_color,
+                        pid, aegis_color=aegis_color,
                         use_slush_fund=(bool(data["use_slush_fund"]) if data.get("use_slush_fund") is not None else None),
                         aegis_green=data.get("aegis_green"),
+                        signature_green_tracks=tracks,
+                        signature_red_recipient=int(recipient) if recipient is not None else None,
                     )
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
 
                 elif clean_path == "/api/game/action/choose_graduates":
-                    # Phase 5: CI/CD Pipeline Shift (Scanned Graduation, <= Release Bandwidth)
+                    # Phase 6: CI/CD Pipeline Shift (Scanned Graduation, <= Release Bandwidth)
                     pid = get_target_pid(default_to_human=True)
                     grads = data.get("graduate_die_ids")
                     if not isinstance(grads, list):
@@ -253,12 +227,10 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                         self._send_json_response(payload, code)
                         return
                     splice = data.get("splice_die_id")
-                    hotfix = data.get("hotfix_die_id")
                     state = self.controller.choose_graduates(
                         pid,
                         [int(x) for x in grads],
                         splice_die_id=int(splice) if splice is not None else None,
-                        hotfix_die_id=int(hotfix) if hotfix is not None else None,
                     )
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
@@ -272,18 +244,6 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     color_str = str(data["color"])
                     use_cipher = bool(data.get("use_cipher_ability", False))
                     state = self.controller.buy_die(pid, color_str, use_cipher_ability=use_cipher)
-                    payload, code = success_response({"state": state})
-                    self._send_json_response(payload, code)
-
-                elif clean_path == "/api/game/action/patch":
-                    pid = get_target_pid(default_to_human=False)
-                    if "die_index" not in data:
-                        payload, code = error_response("Missing required field 'die_index'", 400)
-                        self._send_json_response(payload, code)
-                        return
-                    die_idx = int(data["die_index"])
-                    use_cash = bool(data.get("use_cash", False))
-                    state = self.controller.patch_die(pid, die_idx, use_cash)
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
 
@@ -393,9 +353,10 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
 
-                elif clean_path == "/api/game/action/patent":
+                elif clean_path == "/api/game/action/pen_test":
+                    # Phase 5: Pen Test Track (-1 Vulnerability per step)
                     pid = get_target_pid(default_to_human=False)
-                    state = self.controller.file_patent(pid)
+                    state = self.controller.pen_test(pid, int(data.get("steps", 1)))
                     payload, code = success_response({"state": state})
                     self._send_json_response(payload, code)
 

@@ -145,11 +145,26 @@ export function renderCompiler() {
             ${state.pending_next_phase_locks && state.pending_next_phase_locks.length > 0 ? `<div style="color: #ffaa00; font-weight: bold; margin-top: 3px;">⏳ Queued Next Phase 1 Locks: ${state.pending_next_phase_locks.join(', ')}</div>` : ''}
           </div>
         </div>
+
+        <!-- Vulnerability Track (v0.46.0, Central SETEC Agent Board) -->
+        <div class="agent-corruption-track-box vulnerability-track-box">
+          <div class="agent-track-header">
+            <span class="track-title">VULNERABILITY TRACK (0–${(state.vulnerability_track || {}).max || 15})</span>
+            <span class="track-step-badge">PHASE 4 GREEN</span>
+          </div>
+          ${renderVulnerabilityTrack()}
+          <div class="agent-track-footnote">
+            <strong>+1 per ⚠</strong> on your final faces at lock-in (Phase 1). Each Green cube hits the highest Vulnerability at
+            <strong>${(state.vulnerability_track || {}).min_target || 4}+</strong> (ties all hit), costs Corporate Secrets by band, and resets it to 0.
+            Lower it with the <strong>Pen Test Track</strong> in Phase 5.
+          </div>
+        </div>
       </div>
 
       <!-- ========================================================= -->
       <!-- COLUMN 2 (Middle): Threat Compiler & Cube Tower            -->
       <!-- ========================================================= -->
+
       <div class="agent-board-col compiler-col">
         <div class="col-title-bar">
           <span class="col-title">AGENT THREAT COMPILER & CUBE TOWER</span>
@@ -256,25 +271,25 @@ export function renderCompiler() {
           <div class="cube-threat-row red-row">
             <span class="threat-pill red">◆ RED // MARKET MANIPULATION</span>
             <div class="threat-row-text">
-              <strong>Blocks: Generic (Any) Shield.</strong> Lose 1 Market Share per unblocked Red (never below 0). <em>Market Collapse: any surviving player at 0 Market Share after Phase 4 makes this the Final Round.</em>
+              <strong>Cannot be blocked.</strong> Every surviving player loses 1 Market Share per exited Red (never below 0). <em>Market Collapse: any surviving player at 0 Market Share after Phase 4 makes this the Final Round.</em>
             </div>
           </div>
           <div class="cube-threat-row blue-row">
             <span class="threat-pill blue">● BLUE // SPYWARE</span>
             <div class="threat-row-text">
-              <strong>Blocks: Generic (Any) Shield.</strong> Lose 1 Corporate Secret per unblocked Blue in v1.0/v2.0; lose 2 Corporate Secrets per unblocked Blue in v3.0 (Critical Breach). <strong>Reaching ≤ 0 Secrets triggers Total Data Breach (Patient Zero)!</strong>
+              <strong>Cannot be blocked.</strong> Every surviving player loses 1 Corporate Secret per exited Blue, in every version. <strong>Reaching ≤ 0 Secrets triggers Total Data Breach (Patient Zero)!</strong>
             </div>
           </div>
           <div class="cube-threat-row green-row">
             <span class="threat-pill green">▲ GREEN // MALWARE</span>
             <div class="threat-row-text">
-              <strong>Blocks: Generic (Any) Shield.</strong> Each unblocked Green turns 1 shield slot into a <strong>Glitched Shield Slot</strong> (no die moves; max = Defense Grid Capacity). <em>A Glitched Shield Slot cannot hold a shield die.</em>
+              <strong>One cube at a time:</strong> hits the player(s) with the highest <strong>Vulnerability</strong> at ${(state.vulnerability_track || {}).min_target || 4}+ (${((state.vulnerability_track || {}).bands || []).map((b) => `${b.from}–${b.to}: −${b.damage}`).join(", ")} Corporate Secrets), then resets them to 0. <em>Players in the safe zone are never hit.</em>
             </div>
           </div>
         </div>
 
         <div class="wear-recycle-summary-box">
-          <strong>SHIELD PERSISTENCE:</strong> Shields blocking attacks stay In Production and return through the Scanned Box in Phase 5. Contractors return to supply.<br>
+          <strong>TARGET LOCK:</strong> a player whose Signature Cube exited suffers the Signature Attack of the most populous tray color (Green &gt; Black &gt; Blue &gt; Red) after Green damage.<br>
           <strong>RECYCLE:</strong> Exited Red, Blue, and Green cubes recycle back into the Staging Cup.
         </div>
       </div>
@@ -294,9 +309,9 @@ export function renderCompiler() {
             <div class="seq-card-body">
               <strong>0. Version Transition:</strong> Apply queued Version upgrade at start of round.<br>
               <strong>1. Pulse:</strong> Add +1 Black → Staging Cup.<br>
-              <strong>2. Staffing:</strong> Hire White Contractors ($1 / $2 / $3, max 3).<br>
-              <strong>3. Roll & Rerolls:</strong> Roll Ready for Release + Contractors. Up to 2 free rerolls (a Secret face may be kept or rerolled; a White Contractor Glitch locks).<br>
-              <strong>4. Assign Dice:</strong> Secret faces → Processing Box. Clean Glitched Shield Slots, then deploy Any shields (up to Defense Grid Capacity minus Glitched Shield Slots) &amp; Income dice to In Production.
+              <strong>2. Roll:</strong> Roll every die in Ready for Release.<br>
+              <strong>3. Rerolls:</strong> Up to 2 free rerolls (a Secret face may be kept or rerolled), then Prodigy / Helix / Release L4 overrides.<br>
+              <strong>4. Lock-in &amp; Assign Dice:</strong> +1 Vulnerability per ⚠ on your final faces. Secret faces → Processing Box; every other die → In Production.
             </div>
           </div>
 
@@ -315,7 +330,7 @@ export function renderCompiler() {
           <div class="seq-card">
             <div class="seq-card-header">PHASE 3: INCOME (Simultaneous)</div>
             <div class="seq-card-body">
-              Collect $, 🔬, &amp; ★ from every die still In Production (Income + Shield slots, incl. White Contractors). Signature Protocols (Burn Notice, Jumper Diagnostics) resolve here.
+              Collect $, 🔬, Market Share &amp; ★ from every die still In Production. Capital Injection and income-timed Signature Protocols resolve here.
             </div>
           </div>
 
@@ -323,28 +338,28 @@ export function renderCompiler() {
           <div class="seq-card">
             <div class="seq-card-header">PHASE 4: ATTACK RESOLUTION (Simultaneous)</div>
             <div class="seq-card-body">
-              Split your Generic (Any) shields across the exited cubes → Red / Blue / Green damage → Defense L4 payout.<br>
-              <strong>Snowball Recycle</strong> exited R/B/G → Staging Cup; <strong>Contractor Expiration</strong>; End Check.
+              No cube can be blocked: Red &amp; Blue → Green (one cube at a time vs highest Vulnerability) → Patient Zero → Target Lock.<br>
+              <strong>Snowball Recycle</strong> exited R/B/G → Staging Cup; End Check.
             </div>
           </div>
 
           <!-- Phase 5 -->
           <div class="seq-card">
-            <div class="seq-card-header">PHASE 5: CI/CD PIPELINE SHIFT (Simultaneous)</div>
+            <div class="seq-card-header">PHASE 5: OPERATIONS (Clockwise)</div>
             <div class="seq-card-body">
-              1. <strong>Magnetic Splice:</strong> Processing Box → Ready for Release (Omnidyne), banking its Secret.<br>
-              2. <strong>Production Return:</strong> In Production → Scanned Box.<br>
-              3. <strong>Scanned Graduation:</strong> Scanned → Ready (≤ Release Bandwidth, your choice); clean 1 Glitched Shield Slot if any die graduated.<br>
-              4. <strong>Conveyor Triage:</strong> Processing Box → Scanned, oldest first (≤ Triage Bandwidth), banking Secret face yields.<br>
-              ${state.is_round_leader_bonus ? `5. <strong>Market Leader Bonus:</strong> if a Red Secret face was banked this round (${(state.round_leader_bonus_schedule || []).map((b, i) => `${i + 1}${["st", "nd", "rd"][i] || "th"} +${b}`).filter((t) => !t.endsWith("+0")).join(", ")} by Market Share place).` : ""}
+              Upgrade up to 2 Research Tracks (🔬), Pen Test (2 🔬 per −1 Vulnerability, up to your limit), regain Market Share on the Public Relations Track ($), buy 1 die into the Scanned Box.
             </div>
           </div>
 
           <!-- Phase 6 -->
           <div class="seq-card">
-            <div class="seq-card-header">PHASE 6: OPERATIONS (Clockwise)</div>
+            <div class="seq-card-header">PHASE 6: CI/CD PIPELINE SHIFT (Simultaneous)</div>
             <div class="seq-card-body">
-              Buy Dice (max 2, straight to Ready for Release), Upgrade Tracks (🔬), ${state.is_share_regain ? 'regain Market Share on the Public Relations Track (🔬)' : 'File Patents (🔬)'}, paid ★ actions; then pass the First Player Marker.
+              1. <strong>Magnetic Splice:</strong> Processing Box → Ready for Release (Omnidyne), banking its Secret.<br>
+              2. <strong>Production Return:</strong> In Production → Scanned Box.<br>
+              3. <strong>Scanned Graduation:</strong> Scanned → Ready (≤ Release Bandwidth, your choice).<br>
+              4. <strong>Conveyor Triage:</strong> Processing Box → Scanned, oldest first (≤ Triage Bandwidth), banking Secret face yields (Green also −2 Vulnerability).<br>
+              ${state.is_round_leader_bonus ? `5. <strong>Market Leader Bonus:</strong> if a Red Secret face was banked this round (${(state.round_leader_bonus_schedule || []).map((b, i) => `${i + 1}${["st", "nd", "rd"][i] || "th"} +${b}`).filter((t) => !t.endsWith("+0")).join(", ")} by Market Share place).` : ""}
             </div>
           </div>
 
@@ -353,7 +368,7 @@ export function renderCompiler() {
             <div class="seq-card-header">SECRETS VICTORY &amp; TIEBREAKERS</div>
             <div class="seq-card-body">
               <strong>Surviving White Hat Operatives Only</strong> (Patient Zero eliminated):<br>
-              ${bonusSchedule() ? `<strong>Market Leader Bonus:</strong> survivors gain Corporate Secrets by final <strong>Market Share</strong> place (${bonusSchedule()}; ties share the better place)${state.is_round_leader_bonus ? ", also at the end of Phase 5 in any round a Red Secret face was banked" : ""}.<br>` : ""}
+              ${bonusSchedule() ? `<strong>Market Leader Bonus:</strong> survivors gain Corporate Secrets by final <strong>Market Share</strong> place (${bonusSchedule()}; ties share the better place)${state.is_round_leader_bonus ? ", also at the end of Phase 6 in any round a Red Secret face was banked" : ""}.<br>` : ""}
               <strong>Primary Victory Goal:</strong> Most <strong>Corporate Secrets</strong>${bonusSchedule() ? " (held + Market Leader Bonus)" : " held"}. Dice still in the Processing Box at game end yield nothing.<br>
               ${state.is_market_share ? `<strong>Tiebreaker 1:</strong> Highest <strong>Market Share</strong>.<br>
               <strong>Tiebreaker 2:</strong> Most remaining <strong>Money ($)</strong>.<br>
@@ -370,6 +385,24 @@ export function renderCompiler() {
 
     </div>
   `;
+}
+
+// v0.46.0 Vulnerability Track: safe zone + damage bands, one marker per surviving player
+function renderVulnerabilityTrack() {
+  const vt = state.vulnerability_track || { max: 15, min_target: 4, bands: [] };
+  const cells = [];
+  for (let v = 0; v <= vt.max; v++) {
+    const band = (vt.bands || []).find((b) => v >= b.from && v <= b.to);
+    const here = (state.players || []).filter((p) => !p.is_patient_zero && (p.vulnerability || 0) === v);
+    cells.push(`
+      <div class="vuln-cell ${band ? `band-${band.damage}` : "safe"}" title="${v}: ${band ? `Green hit −${band.damage} Corporate Secret${band.damage === 1 ? "" : "s"}` : "safe zone (never hit)"}">
+        <span class="cell-num">${v}</span>
+        ${here.map((p) => `<span class="vuln-marker ${p.is_human ? "human" : ""}" title="${p.name}">${p.is_human ? "👤" : "🤖"}</span>`).join("")}
+      </div>`);
+  }
+  const legend = [`<span class="vuln-legend safe">0–${vt.min_target - 1} safe</span>`]
+    .concat((vt.bands || []).map((b) => `<span class="vuln-legend band-${b.damage}">${b.from}–${b.to}: −${b.damage}</span>`)).join(" ");
+  return `<div class="vuln-track-row">${cells.join("")}</div><div class="vuln-legend-row">${legend}</div>`;
 }
 
 function bonusSchedule() {

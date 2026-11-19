@@ -5,15 +5,13 @@
 import {
   state,
   setState,
-  selectedCommitments,
-  resetCommitments,
+  resetChoiceDeclarations,
   selectedBacklashIndex,
   selectedBacklashDieId,
   selectedPhreakerDieId,
   selectedRerollIndices,
   clearSelectedRerolls,
   selectedChoiceDeclarations,
-  selectedSlotCleaners,
   setCipherDiscountSelected,
   getHumanPlayerId,
 } from "./state.js";
@@ -124,7 +122,7 @@ export async function startNewGame(
   const newState = await apiCall("/api/game/new", "POST", payload);
   if (newState) {
     setState(newState);
-    resetCommitments();
+    resetChoiceDeclarations();
     notifyRender();
     const modal = document.getElementById("newGameModal");
     if (modal) modal.classList.remove("open");
@@ -169,21 +167,17 @@ export async function doReroll(useProdigy = false) {
   }
 }
 
-export async function doDebugUnlock(dieIndex) {
-  console.warn("Debug unlocks deprecated in v0.23.0.");
-}
-
 export async function doRoll() {
   const newState = await apiCall("/api/game/action/roll", "POST", { player_id: getHumanPlayerId() });
   if (newState) {
     setState(newState);
-    resetCommitments();
+    resetChoiceDeclarations();
     clearSelectedRerolls();
     notifyRender();
   }
 }
 
-// Phase 1: Brute-Force Bypass (source "helix") / Arbitrary Code Execution (source "prodigy")
+// Phase 1: Brute-Force Bypass ("helix") / Arbitrary Code Execution ("prodigy") / Release Track Level 4 ("release_l4")
 export async function doOverrideFace(dieIndex, faceIndex, source = "helix") {
   const newState = await apiCall("/api/game/action/override_face", "POST", {
     player_id: getHumanPlayerId(),
@@ -197,19 +191,15 @@ export async function doOverrideFace(dieIndex, faceIndex, source = "helix") {
   }
 }
 
-export async function doCommit() {
-  const newState = await apiCall("/api/game/action/commit", "POST", {
+// Phase 1 Step 4: Lock-in & Assign Dice (+1 Vulnerability per ⚠ on the final faces)
+export async function doLockIn() {
+  const newState = await apiCall("/api/game/action/lock_in", "POST", {
     player_id: getHumanPlayerId(),
-    commitments: selectedCommitments,
     choice_declarations: selectedChoiceDeclarations,
-    slot_cleaner_indices: Array.from(selectedSlotCleaners),
   });
   if (newState) {
     setState(newState);
-    resetCommitments();
-    for (const key of Object.keys(selectedChoiceDeclarations)) {
-      delete selectedChoiceDeclarations[key];
-    }
+    resetChoiceDeclarations();
     notifyRender();
   }
 }
@@ -238,20 +228,17 @@ export async function doConfirmIncome(spookBurnDieId = null, phreakerDieId = nul
   }
 }
 
-// Phase 4: Attack Resolution (Generic Any shield allocation, Green Malware targets, Aegis color)
-export async function doConfirmAttacks(glitchDieIds = [], anyShieldAllocations = null, aegisColor = null, useSlushFund = null) {
-  const payload = {
-    player_id: getHumanPlayerId(),
-    glitch_die_ids: glitchDieIds,
-  };
-  if (anyShieldAllocations !== null && anyShieldAllocations !== undefined) {
-    payload.any_shield_allocations = anyShieldAllocations;
+// Phase 4: Attack Resolution choices (nothing is blocked): Aegis Baffle Echo, DTO Slush Fund, Target Lock choices
+export async function doConfirmAttacks(choices = {}) {
+  const payload = { player_id: getHumanPlayerId() };
+  if (choices.aegisColor) payload.aegis_color = choices.aegisColor;
+  if (choices.aegisGreen) payload.aegis_green = choices.aegisGreen;
+  if (choices.useSlushFund !== null && choices.useSlushFund !== undefined) {
+    payload.use_slush_fund = !!choices.useSlushFund;
   }
-  if (aegisColor) {
-    payload.aegis_color = aegisColor;
-  }
-  if (useSlushFund !== null && useSlushFund !== undefined) {
-    payload.use_slush_fund = !!useSlushFund;
+  if (Array.isArray(choices.signatureGreenTracks)) payload.signature_green_tracks = choices.signatureGreenTracks;
+  if (choices.signatureRedRecipient !== null && choices.signatureRedRecipient !== undefined) {
+    payload.signature_red_recipient = choices.signatureRedRecipient;
   }
   const newState = await apiCall("/api/game/action/confirm_attacks", "POST", payload);
   if (newState) {
@@ -260,7 +247,7 @@ export async function doConfirmAttacks(glitchDieIds = [], anyShieldAllocations =
   }
 }
 
-// Phase 5: CI/CD Pipeline Shift (Scanned Graduation <= Release Bandwidth; Magnetic Splice target)
+// Phase 6: CI/CD Pipeline Shift (Scanned Graduation <= Release Bandwidth; Magnetic Splice target)
 export async function doChooseGraduates(graduateDieIds = [], spliceDieId = null) {
   const payload = {
     player_id: getHumanPlayerId(),
@@ -285,18 +272,6 @@ export async function doBuy(color, useCipher = false) {
   if (newState) {
     setState(newState);
     setCipherDiscountSelected(false);
-    notifyRender();
-  }
-}
-
-export async function doPatch(dieIndex, useCash) {
-  const newState = await apiCall("/api/game/action/patch", "POST", {
-    player_id: getHumanPlayerId(),
-    die_index: dieIndex,
-    use_cash: useCash,
-  });
-  if (newState) {
-    setState(newState);
     notifyRender();
   }
 }
@@ -367,10 +342,6 @@ export async function doStarAction(actionType, cubeColor = null) {
   }
 }
 
-export async function doFastPatch(dieIds = null, dieIndices = null) {
-  console.warn("doFastPatch is deprecated in v0.29.0: fast-patching has been excised.");
-}
-
 export async function doUpgradeTrack(trackType) {
   const newState = await apiCall("/api/game/action/upgrade_track", "POST", {
     player_id: getHumanPlayerId(),
@@ -395,9 +366,11 @@ export async function doResolveBreakthrough(accept, grayDieId, color) {
   }
 }
 
-export async function doFilePatent() {
-  const newState = await apiCall("/api/game/action/patent", "POST", {
+// Phase 5: Pen Test Track (-1 Vulnerability per step for research, up to the level's limit per turn)
+export async function doPenTest(steps = 1) {
+  const newState = await apiCall("/api/game/action/pen_test", "POST", {
     player_id: getHumanPlayerId(),
+    steps: steps,
   });
   if (newState) {
     setState(newState);
@@ -405,7 +378,7 @@ export async function doFilePatent() {
   }
 }
 
-// v0.36.0 Public Relations Track: +1 Market Share for research (Phase 6)
+// Phase 5: Public Relations Track: +1 Market Share for cash
 export async function doRegainMarketShare() {
   const newState = await apiCall("/api/game/action/regain_market_share", "POST", {
     player_id: getHumanPlayerId(),

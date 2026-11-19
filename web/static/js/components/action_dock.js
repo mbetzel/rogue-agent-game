@@ -4,30 +4,18 @@
 
 import {
   state,
-  selectedCommitments,
-  selectedBacklashIndex,
-  setSelectedBacklashIndex,
+  PHASE_OPERATIONS,
+  PHASE_PIPELINE,
   selectedBacklashDieId,
   setSelectedBacklashDieId,
   selectedPhreakerDieId,
   setSelectedPhreakerDieId,
   getEligibleBacklashDice,
-  patchCashSelected,
-  setPatchCashSelected,
   cipherDiscountSelected,
   setCipherDiscountSelected,
   selectedRerollIndices,
   clearSelectedRerolls,
   selectedChoiceDeclarations,
-  selectedSlotCleaners,
-  toggleSlotCleaner,
-  selectedGlitchDieIds,
-  toggleSelectedGlitchDieId,
-  clearSelectedGlitchDieIds,
-  selectedAnyAllocations,
-  setSelectedAnyAllocation,
-  initSelectedAnyAllocations,
-  clearSelectedAnyAllocations,
   selectedGraduateIds,
   initSelectedGraduateIds,
   toggleSelectedGraduateId,
@@ -39,7 +27,7 @@ import {
   doRoll,
   doReroll,
   doOverrideFace,
-  doCommit,
+  doLockIn,
   doCompile,
   doConfirmIncome,
   doConfirmAttacks,
@@ -48,12 +36,11 @@ import {
   doSpook,
   doDirtyIncome,
   doPhreaker,
-  doFastPatch,
   doStarAction,
   doEndTurn,
   doUpgradeTrack,
-  doFilePatent,
   doRegainMarketShare,
+  doPenTest,
 } from "../api.js";
 import { openModal } from "./modals.js";
 import { renderMarket } from "./market.js";
@@ -136,17 +123,8 @@ export function renderActionDock() {
       }
     }
 
-    if (caps.can_commit || caps.can_reroll) {
-      const unresolvedGlitches = (human.rolled_pool || []).filter(
-        (d) => d && d.current_face && d.current_face.is_glitch
-      ).length;
-      if (unresolvedGlitches > 0) {
-        const glitchWarn = document.createElement("div");
-        glitchWarn.className = "glitch-warning";
-        glitchWarn.innerHTML = `<span>⚠️ ${unresolvedGlitches} unresolved Glitch${unresolvedGlitches > 1 ? "es" : ""}: a White Contractor that still shows Glitch is discarded to the supply.</span>`;
-        controls.appendChild(glitchWarn);
-      }
-
+    if (caps.can_lock_in || caps.can_reroll) {
+      const rolled = human.rolled_pool || [];
       const rerollsLeft = human.rerolls_remaining !== undefined ? human.rerolls_remaining : 0;
       const maxRerolls = human.max_rerolls !== undefined ? human.max_rerolls : 2;
 
@@ -154,12 +132,12 @@ export function renderActionDock() {
       rerollInfo.style.fontSize = "0.8rem";
       rerollInfo.style.color = "#38bdf8";
       rerollInfo.style.fontWeight = "600";
-      rerollInfo.innerText = `Rerolls: ${rerollsLeft}/${maxRerolls} left | Click dice to reroll (a Secret face may be kept or rerolled) | Contractor Glitches lock`;
+      rerollInfo.innerText = `Rerolls: ${rerollsLeft}/${maxRerolls} left | Click dice to reroll (a Secret face may be kept or rerolled)`;
       controls.appendChild(rerollInfo);
 
       if (caps.can_reroll && selectedRerollIndices.size > 0) {
         const hasLockedSelected = Array.from(selectedRerollIndices).some((i) => {
-          const d = human.rolled_pool[i];
+          const d = rolled[i];
           return d && d.is_locked;
         });
         const rerollBtn = document.createElement("button");
@@ -177,39 +155,9 @@ export function renderActionDock() {
 
       if (caps.can_override_face_helix) buildOverridePanel(controls, human, "helix");
       if (caps.can_override_face_prodigy) buildOverridePanel(controls, human, "prodigy");
+      if (caps.can_override_face_release_l4) buildOverridePanel(controls, human, "release_l4", caps.release_l4_gray_indices || []);
 
-      // Clean up stale commitments and choice declarations for dice that changed after reroll
-      const rolled = human.rolled_pool || [];
-      Array.from(selectedSlotCleaners).forEach((i) => {
-        const f = rolled[i] && rolled[i].current_face;
-        if (!f || !f.is_shield) selectedSlotCleaners.delete(i);
-      });
-
-      // Defense Grid capacity line (Glitched Shield Slots lower it; cleaning raises it again before shields are placed)
-      if (state.is_glitched_slots) {
-        let faceCleans = 0;
-        rolled.forEach((d, i) => {
-          const f = d.current_face;
-          if (!f || f.is_glitch || f.secrets_pending) return;
-          const eff = f.is_choice ? (f.choices || [])[selectedChoiceDeclarations[i] !== undefined ? selectedChoiceDeclarations[i] : 0] : f;
-          if (eff && eff.clean_slots) faceCleans += eff.clean_slots;
-        });
-        const glitchedNow = Math.max(0, (human.glitched_shield_slots || 0) - faceCleans - selectedSlotCleaners.size);
-        const capNow = Math.max(0, (human.defense_capacity || 2) - glitchedNow);
-        const capInfo = document.createElement("span");
-        capInfo.style.fontSize = "0.8rem";
-        capInfo.style.color = glitchedNow > 0 ? "#f43f5e" : "#4ade80";
-        capInfo.style.fontWeight = "600";
-        capInfo.innerText = `Defense Grid: ${human.defense_capacity || 2} capacity − ${glitchedNow} Glitched Shield Slot${glitchedNow === 1 ? "" : "s"} = ${capNow} shield${capNow === 1 ? "" : "s"}`
-          + ((human.glitched_shield_slots || 0) > 0 ? ` | Tick "clean a slot" on a Block 1 Any die to clean one (no output; the die goes to the Scanned Box)` : "");
-        controls.appendChild(capInfo);
-      }
-      Object.keys(selectedCommitments).forEach((idxStr) => {
-        const i = parseInt(idxStr, 10);
-        if (!rolled[i] || !rolled[i].current_face || (!rolled[i].current_face.is_shield && !rolled[i].current_face.has_shield_option)) {
-          delete selectedCommitments[idxStr];
-        }
-      });
+      // Drop stale choice declarations for dice that changed after a reroll
       Object.keys(selectedChoiceDeclarations).forEach((idxStr) => {
         const i = parseInt(idxStr, 10);
         if (!rolled[i] || !rolled[i].current_face || !rolled[i].current_face.is_choice) {
@@ -217,17 +165,32 @@ export function renderActionDock() {
         }
       });
 
-      // Build Shield Commitment & Choice selectors for rolled pool
+      // Vulnerability preview: +1 per ⚠ on the final faces at lock-in
+      const vt = state.vulnerability_track || { max: 15, min_target: 4, bands: [] };
+      const icons = rolled.reduce((n, d) => n + ((d.current_face && d.current_face.vuln) || 0), 0);
+      const vNow = human.vulnerability || 0;
+      const vAfter = Math.min(vt.max, vNow + icons);
+      const band = (v) => (vt.bands || []).find((b) => v >= b.from && v <= b.to);
+      const bAfter = band(vAfter);
+      const vulnInfo = document.createElement("span");
+      vulnInfo.className = "vuln-preview " + (bAfter ? "at-risk" : "safe");
+      vulnInfo.innerText = `⚠ ${icons} on your faces → Vulnerability ${vNow} → ${vAfter}`
+        + (bAfter
+          ? ` (a Green hit costs ${bAfter.damage} Corporate Secret${bAfter.damage === 1 ? "" : "s"})`
+          : ` (safe zone 0–${vt.min_target - 1}: Green cubes never hit you)`);
+      controls.appendChild(vulnInfo);
+
+      // Choice Face selectors and Secret face notes for the rolled pool
       rolled.forEach((d, idx) => {
         const face = d.current_face;
         if (!face || face.is_glitch) return;
+        const colStr = d.color === "gray" ? "#94a3b8" : `var(--color-${d.color})`;
 
         if (face.secrets_pending) {
           const noteWrap = document.createElement("div");
           noteWrap.style.fontSize = "0.8rem";
           const yNow = (human.secret_yield_now || {})[d.color];
-          const colStr = `var(--color-${d.color})`;
-          noteWrap.innerHTML = `<span style="color: ${colStr};">Die #${idx + 1} (${d.color.toUpperCase()}):</span> <span style="background: rgba(244, 63, 94, 0.15); border: 1px solid #f43f5e; color: #fda4af; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">🔒 SECRET FACE → PROCESSING BOX${yNow !== undefined ? ` (+${yNow} Corporate Secrets if it left now)` : ""}</span>`;
+          noteWrap.innerHTML = `<span style="color: ${colStr};">Die #${idx + 1} (${d.color.toUpperCase()}):</span> <span class="secret-face-tag">🔒 SECRET FACE ⚠ → PROCESSING BOX${yNow !== undefined ? ` (+${yNow} Corporate Secrets if it left now)` : ""}</span>`;
           controls.appendChild(noteWrap);
           return;
         }
@@ -240,140 +203,34 @@ export function renderActionDock() {
           wrap.style.fontSize = "0.8rem";
 
           const select = document.createElement("select");
-          select.style.padding = "4px 8px";
-          select.style.background = "var(--bg-card)";
-          select.style.color = "#fff";
-          select.style.border = "1px solid var(--border-color)";
-          select.style.borderRadius = "4px";
-
-          if (face.has_shield_option) {
-            // Blue Face 4: Block 1 Blue vs +1 🔬
-            const optShield = document.createElement("option");
-            optShield.value = "shield";
-            optShield.innerText = "Commit Block 1 Blue";
-            const optPatch = document.createElement("option");
-            optPatch.value = "patch";
-            optPatch.innerText = "Gain +1 🔬 (Research)";
-            select.appendChild(optShield);
-            select.appendChild(optPatch);
-
-            if (selectedCommitments[idx] === "blue") {
-              select.value = "shield";
-              selectedChoiceDeclarations[idx] = 0;
-            } else {
-              select.value = "patch";
-              delete selectedCommitments[idx];
-              selectedChoiceDeclarations[idx] = 1;
-            }
-
-            select.onchange = (e) => {
-              if (e.target.value === "shield") {
-                selectedCommitments[idx] = "blue";
-                selectedChoiceDeclarations[idx] = 0;
-              } else {
-                delete selectedCommitments[idx];
-                selectedChoiceDeclarations[idx] = 1;
-              }
-            };
-            wrap.innerHTML = `<span style="color: var(--color-blue);">Die #${idx + 1} (Blue Choice):</span>`;
-          } else {
-            // Gray or Green Choice Face
-            const choices = face.choices || [];
-            choices.forEach((c, cIdx) => {
-              const opt = document.createElement("option");
-              opt.value = String(cIdx);
-              opt.innerText = c.name;
-              select.appendChild(opt);
-            });
-
-            const curDecl = selectedChoiceDeclarations[idx] !== undefined ? selectedChoiceDeclarations[idx] : 0;
-            select.value = String(curDecl);
-            selectedChoiceDeclarations[idx] = curDecl;
-
-            select.onchange = (e) => {
-              selectedChoiceDeclarations[idx] = parseInt(e.target.value, 10);
-            };
-
-            const colStr = d.color === "gray" ? "#94a3b8" : `var(--color-${d.color})`;
-            wrap.innerHTML = `<span style="color: ${colStr};">Die #${idx + 1} (${d.color.toUpperCase()} Choice):</span>`;
-          }
-
+          select.className = "dock-select";
+          (face.choices || []).forEach((c, cIdx) => {
+            const opt = document.createElement("option");
+            opt.value = String(cIdx);
+            opt.innerText = c.name;
+            select.appendChild(opt);
+          });
+          const curDecl = selectedChoiceDeclarations[idx] !== undefined ? selectedChoiceDeclarations[idx] : 0;
+          select.value = String(curDecl);
+          selectedChoiceDeclarations[idx] = curDecl;
+          select.onchange = (e) => {
+            selectedChoiceDeclarations[idx] = parseInt(e.target.value, 10);
+          };
+          wrap.innerHTML = `<span style="color: ${colStr};">Die #${idx + 1} (${d.color.toUpperCase()} Choice${face.vuln ? " ⚠" : ""}):</span>`;
           wrap.appendChild(select);
-          controls.appendChild(wrap);
-        } else if (face.is_shield) {
-          const wrap = document.createElement("div");
-          wrap.style.display = "inline-flex";
-          wrap.style.alignItems = "center";
-          wrap.style.gap = "4px";
-          wrap.style.fontSize = "0.8rem";
-
-          if (face.star_code === "B2") {
-            const select = document.createElement("select");
-            select.style.padding = "4px 8px";
-            select.style.background = "var(--bg-card)";
-            select.style.color = "#fff";
-            select.style.border = "1px solid var(--border-color)";
-            select.style.borderRadius = "4px";
-
-            const optHold = document.createElement("option");
-            optHold.value = "hold";
-            optHold.innerText = "Hold for Phase 3 Deep R&D";
-            const optCommit = document.createElement("option");
-            optCommit.value = "blue";
-            optCommit.innerText = "Commit Block 1 Blue";
-            select.appendChild(optHold);
-            select.appendChild(optCommit);
-
-            if (selectedCommitments[idx] === "blue") {
-              select.value = "blue";
-            } else {
-              select.value = "hold";
-              delete selectedCommitments[idx];
-            }
-
-            select.onchange = (e) => {
-              if (e.target.value === "blue") {
-                selectedCommitments[idx] = "blue";
-              } else {
-                delete selectedCommitments[idx];
-              }
-            };
-
-            wrap.innerHTML = `<span style="color: var(--color-blue);">Die #${idx + 1} (B2):</span>`;
-            wrap.appendChild(select);
-          } else if (face.shield_color === "any") {
-            selectedCommitments[idx] = "any";
-            const colStr = d.color === "white" ? "#f8fafc" : `var(--color-${d.color})`;
-            wrap.innerHTML = `<span style="color: ${colStr};">Die #${idx + 1} (${d.color}):</span> <span style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">🛡️ GENERIC (ANY) SHIELD</span>`;
-            if (state.is_glitched_slots && (human.glitched_shield_slots || 0) > 0 && !face.is_star) {
-              const cl = document.createElement("label");
-              cl.style.fontSize = "0.75rem";
-              cl.style.color = "#fda4af";
-              const cb = document.createElement("input");
-              cb.type = "checkbox";
-              cb.checked = selectedSlotCleaners.has(idx);
-              cb.disabled = !cb.checked && selectedSlotCleaners.size >= (human.glitched_shield_slots || 0);
-              cb.onchange = () => { toggleSlotCleaner(idx); renderActionDock(); };
-              cl.appendChild(cb);
-              cl.appendChild(document.createTextNode(" clean a Glitched Shield Slot"));
-              wrap.appendChild(cl);
-            }
-          } else {
-            selectedCommitments[idx] = face.shield_color;
-            wrap.innerHTML = `<span style="color: var(--color-${face.shield_color});">Die #${idx + 1} (${face.shield_color.toUpperCase()})</span>`;
-          }
           controls.appendChild(wrap);
         }
       });
 
-      const commitBtn = document.createElement("button");
-      commitBtn.className = "action-btn btn-accent";
-      commitBtn.innerText = "Commit Defenses";
-      commitBtn.onclick = () => {
+      const lockBtn = document.createElement("button");
+      lockBtn.className = "action-btn btn-accent";
+      lockBtn.innerText = `Lock In Dice (+${vAfter - vNow} Vulnerability)`;
+      lockBtn.disabled = !caps.can_lock_in;
+      lockBtn.onclick = () => {
         clearSelectedRerolls();
-        doCommit();
+        doLockIn();
       };
-      controls.appendChild(commitBtn);
+      controls.appendChild(lockBtn);
     }
   } else if (state.phase === 2) {
     const compileBtn = document.createElement("button");
@@ -456,467 +313,11 @@ export function renderActionDock() {
     }
   } else if (state.phase === 3) {
     renderIncomePanel(controls, human, caps);
-  } else if (state.phase === 5) {
+  } else if (state.phase === PHASE_PIPELINE) {
     renderGraduationPanel(controls, human, caps);
-  } else if (state.phase === 4 || state.phase === 6) {
-    if (state.phase === 4) {
-      const compileRes = state.last_compile_result || {};
-      const attackRes = state.last_attack_result || {};
-      const exited = compileRes.exited_cubes || {};
-      const incomeMap = state.last_income_result || {};
-      const rawIncome = incomeMap[human.player_id] || incomeMap[String(human.player_id)] || { money: 0, patches: 0, secrets: 0, details: [] };
-      const threatMap = attackRes.threat_summary || {};
-      const humanThreat = threatMap[human.player_id] || threatMap[String(human.player_id)] || attackRes.human_threat || {};
-      if (!caps.can_confirm_attacks) {
-        const waitMsg = document.createElement("span");
-        waitMsg.style.fontSize = "0.8rem";
-        waitMsg.style.color = "var(--text-dim)";
-        waitMsg.innerText = "Phase 4: Attack Resolution — waiting for other corporations to confirm defenses.";
-        controls.appendChild(waitMsg);
-        return;
-      }
-
-      const redInfo = humanThreat.red || { cubes: exited.red || 0, shields: 0, unblocked: exited.red || 0 };
-      const blueInfo = humanThreat.blue || { cubes: exited.blue || 0, shields: 0, unblocked: exited.blue || 0 };
-      const greenInfo = humanThreat.green || { cubes: exited.green || 0, shields: 0, unblocked: exited.green || 0 };
-      const blackCubes = exited.black || 0;
-
-      const anyShieldCount = (humanThreat.any && humanThreat.any.shields) || 0;
-      const anyDice = (humanThreat.any && humanThreat.any.dice) || [];
-
-      // Build expanded list of individual Any-shield units (1 per shield point)
-      const anyShieldUnits = [];
-      if (anyDice.length > 0) {
-        anyDice.forEach((d, dIdx) => {
-          const amt = d.block_amount || 1;
-          for (let k = 0; k < amt; k++) {
-            anyShieldUnits.push({
-              unit_idx: anyShieldUnits.length,
-              die_id: d.die_id,
-              color: d.color || "gray",
-              face_name: d.face_name || "Block 1 Any",
-              label: amt > 1 ? `${(d.color || "gray").toUpperCase()} Die (${k + 1}/${amt})` : `${(d.color || "gray").toUpperCase()} Die`,
-            });
-          }
-        });
-      }
-      while (anyShieldUnits.length < anyShieldCount) {
-        anyShieldUnits.push({
-          unit_idx: anyShieldUnits.length,
-          die_id: null,
-          color: "gray",
-          face_name: "Block 1 Any",
-          label: `Any Shield #${anyShieldUnits.length + 1}`,
-        });
-      }
-
-      // Initialize selectedAnyAllocations from server default if not yet initialized
-      if (anyShieldCount > 0 && selectedAnyAllocations.length !== anyShieldCount) {
-        const defaultAllocObj = (humanThreat.any && humanThreat.any.allocated) || { red: 0, blue: 0, green: 0 };
-        const initialList = [];
-        for (let i = 0; i < (defaultAllocObj.blue || 0); i++) initialList.push("blue");
-        for (let i = 0; i < (defaultAllocObj.red || 0); i++) initialList.push("red");
-        for (let i = 0; i < (defaultAllocObj.green || 0); i++) initialList.push("green");
-        const fallbackColor = (exited.blue > 0) ? "blue" : (exited.green > 0 ? "green" : (exited.red > 0 ? "red" : "blue"));
-        while (initialList.length < anyShieldCount) {
-          initialList.push(fallbackColor);
-        }
-        initSelectedAnyAllocations(initialList.slice(0, anyShieldCount));
-      }
-
-      // Tally current user-selected Any shield allocations
-      const userAnyAlloc = { red: 0, blue: 0, green: 0 };
-      if (anyShieldCount > 0) {
-        selectedAnyAllocations.forEach((col) => {
-          if (col === "red" || col === "blue" || col === "green") {
-            userAnyAlloc[col] += 1;
-          }
-        });
-      }
-
-      // Compute live blocked / unblocked counts based on userAnyAlloc
-      const effAtk = humanThreat.effective_attacks || {
-        red: redInfo.attack !== undefined ? redInfo.attack : (exited.red || 0),
-        blue: blueInfo.attack !== undefined ? blueInfo.attack : (exited.blue || 0),
-        green: greenInfo.attack !== undefined ? greenInfo.attack : (exited.green || 0),
-      };
-
-      const fixedRedShields = redInfo.shields || 0;
-      const fixedBlueShields = blueInfo.shields || 0;
-      const fixedGreenShields = greenInfo.shields || 0;
-
-      const remRedStage1 = Math.max(0, (effAtk.red || 0) - fixedRedShields);
-      const remBlueStage1 = Math.max(0, (effAtk.blue || 0) - fixedBlueShields);
-      const remGreenStage1 = Math.max(0, (effAtk.green || 0) - fixedGreenShields);
-
-      // v0.36.0 free choice: every available Any shield must block while unblocked cubes remain; the player
-      // chooses only the split. Mirror the engine's legalisation (clamp, trim Blue > Red > Green, back-fill).
-      if (anyShieldCount > 0 && humanThreat.any_shield_policy === "FREE_CHOICE") {
-        const rem = { red: remRedStage1, blue: remBlueStage1, green: remGreenStage1 };
-        let budget = anyShieldCount;
-        ["blue", "red", "green"].forEach((c) => {
-          userAnyAlloc[c] = Math.min(Math.max(0, userAnyAlloc[c]), rem[c], budget);
-          budget -= userAnyAlloc[c];
-        });
-        let short = Math.min(anyShieldCount, rem.red + rem.blue + rem.green) - (userAnyAlloc.red + userAnyAlloc.blue + userAnyAlloc.green);
-        ["blue", "red", "green"].forEach((c) => {
-          const add = Math.min(short, rem[c] - userAnyAlloc[c]);
-          if (add > 0) { userAnyAlloc[c] += add; short -= add; }
-        });
-      }
-
-      const liveUnblockedRed = anyShieldCount > 0
-        ? Math.max(0, remRedStage1 - userAnyAlloc.red)
-        : (redInfo.unblocked || 0);
-      const liveUnblockedBlue = anyShieldCount > 0
-        ? Math.max(0, remBlueStage1 - userAnyAlloc.blue)
-        : (blueInfo.unblocked || 0);
-      const liveUnblockedGreen = anyShieldCount > 0
-        ? Math.max(0, remGreenStage1 - userAnyAlloc.green)
-        : (greenInfo.unblocked || 0);
-
-      const liveBlockedRed = (effAtk.red || 0) - liveUnblockedRed;
-      const liveBlockedBlue = (effAtk.blue || 0) - liveUnblockedBlue;
-      const liveBlockedGreen = (effAtk.green || 0) - liveUnblockedGreen;
-
-      // Post-income cash (Phase 3 already paid) + star bonuses to determine live flat leak
-      const preMoney = humanThreat.money !== undefined ? humanThreat.money : (human.money || 0);
-      const r2Bonus = (humanThreat.r2_count || 0) > 0 && liveUnblockedRed === 0 ? 2 * humanThreat.r2_count : 0;
-      const r3Bonus = (humanThreat.r3_count || 0) > 0 && (exited.red || 0) >= 3 ? 1 * humanThreat.r3_count : 0;
-      const b1Bonus = (humanThreat.b1_count || 0) > 0 && (exited.blue || 0) >= 1 && liveUnblockedBlue === 0 ? 2 * humanThreat.b1_count : 0;
-      const availableCashForRansom = preMoney + r2Bonus + r3Bonus + b1Bonus;
-      const liveFlatLeak = anyShieldCount > 0
-        ? (liveUnblockedRed > availableCashForRansom)
-        : Boolean(redInfo.flat_leak);
-
-      const unblockedGreen = liveUnblockedGreen;
-      let candidates = attackRes.candidate_glitch_dice || (greenInfo.candidate_dice) || [];
-      if ((!candidates || candidates.length === 0) && greenInfo.glitched_shield_slots === undefined) {
-        const fallbackCandidates = [];
-        (human.contractor_dice || []).forEach((d) => {
-          fallbackCandidates.push({
-            die_id: d.die_id,
-            color: "white",
-            face_name: (d.current_face && d.current_face.name) || "Contractor",
-            role: "Contractor",
-            money: 0,
-            patches: 0,
-            secrets: 0,
-            is_contractor: true,
-            is_shield: false,
-            is_income: false,
-          });
-        });
-        (human.in_production_dice || []).forEach((d) => {
-          const eff = d.effective_face || d.current_face;
-          const role = d.production_role || "income";
-          const isShield = String(role).toLowerCase().includes("shield");
-          fallbackCandidates.push({
-            die_id: d.die_id,
-            color: d.color,
-            face_name: (eff && eff.name) || "Module",
-            role: isShield ? String(role).replace(/_/g, " ").toUpperCase() : "Income",
-            money: (eff && !isShield) ? (eff.money || 0) : 0,
-            patches: (eff && !isShield) ? (eff.patches || 0) : 0,
-            secrets: (eff && !isShield) ? (eff.secrets || 0) : 0,
-            is_contractor: d.color === "white",
-            is_shield: isShield,
-            is_income: !isShield,
-          });
-        });
-        candidates = fallbackCandidates;
-      }
-
-      const actualRequired = Math.min(unblockedGreen, candidates.length);
-
-      // Clean up stale or excess selections
-      const validCandidateIds = new Set(candidates.map((c) => c.die_id));
-      for (const id of Array.from(selectedGlitchDieIds)) {
-        if (!validCandidateIds.has(id)) {
-          selectedGlitchDieIds.delete(id);
-        }
-      }
-      while (selectedGlitchDieIds.size > actualRequired) {
-        const lastId = Array.from(selectedGlitchDieIds).pop();
-        selectedGlitchDieIds.delete(lastId);
-      }
-
-      // If only 1 candidate die exists and 1 is required, auto-select it for convenience
-      if (actualRequired === 1 && candidates.length === 1 && selectedGlitchDieIds.size === 0) {
-        selectedGlitchDieIds.add(candidates[0].die_id);
-      }
-
-      // Phase 3 income was already collected; a glitch now only costs future tempo
-      const effectiveDetails = (rawIncome.details || []).map((det) => ({
-        ...det,
-        is_glitched: selectedGlitchDieIds.has(det.die_id),
-      }));
-      const effectiveMoney = rawIncome.money || 0;
-      const effectiveResearch = rawIncome.research || 0;
-      const effectiveSecrets = rawIncome.secrets || 0;
-
-      const hasEnoughSelections = (actualRequired === 0) || (selectedGlitchDieIds.size === actualRequired);
-
-      let btnText = "✓ Confirm Defenses & Resolve Attacks";
-      if (actualRequired > 0) {
-        if (!hasEnoughSelections) {
-          const needed = actualRequired - selectedGlitchDieIds.size;
-          btnText = `Select ${needed} Die to Glitch (${selectedGlitchDieIds.size}/${actualRequired})`;
-        } else {
-          btnText = `✓ Confirm & Move ${actualRequired} Selected Die${actualRequired > 1 ? 's' : ''} to Under Development`;
-        }
-      }
-
-      const panel = document.createElement("div");
-      panel.className = "confirm-income-panel";
-
-      // Build Interactive Any Shield Assignment section if player has Block 1 Any dice
-      let anyShieldSelectorHtml = "";
-      if (anyShieldCount > 0) {
-        anyShieldSelectorHtml = `
-          <div class="confirm-any-shield-panel" style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.45); border-radius: 6px; padding: 10px 12px; margin-bottom: 10px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="background: rgba(168, 85, 247, 0.25); color: #d8b4fe; border: 1px solid #a855f7; font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">🛡️ ANY SHIELD ASSIGNMENT</span>
-                <span style="font-size: 0.8rem; font-weight: 700; color: #f3e8ff;">CHOOSE THE CUBE COLOR EACH OF YOUR ${anyShieldCount} GENERIC (ANY) SHIELD${anyShieldCount > 1 ? 'S' : ''} BLOCKS</span>
-              </div>
-              <span style="font-size: 0.72rem; color: #cbd5e1;">
-                Unblocked before Any: <strong>${remRedStage1}R</strong> · <strong>${remBlueStage1}B</strong> · <strong>${remGreenStage1}G</strong>
-              </span>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 6px;">
-              ${anyShieldUnits.map((unit, uIdx) => {
-                const curCol = selectedAnyAllocations[uIdx] || "blue";
-                const btnStyle = (col, hex, bgRgba) => {
-                  const active = curCol === col;
-                  return `padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; cursor: pointer; border: 1px solid ${active ? hex : 'rgba(255,255,255,0.18)'}; background: ${active ? bgRgba : 'rgba(15, 23, 42, 0.7)'}; color: ${active ? '#fff' : '#94a3b8'}; box-shadow: ${active ? '0 0 8px ' + bgRgba : 'none'};`;
-                };
-                return `
-                  <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(15, 23, 42, 0.55); padding: 6px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap; gap: 8px;">
-                    <span style="font-size: 0.78rem; font-weight: 700; color: #e2e8f0;">
-                      🎲 ${unit.label}: <span style="color: #c084fc;">${unit.face_name}</span>
-                    </span>
-                    <div style="display: inline-flex; gap: 6px; align-items: center;">
-                      <button type="button" class="any-alloc-btn" data-unit-idx="${uIdx}" data-target-color="red" style="${btnStyle('red', '#f43f5e', 'rgba(244, 63, 94, 0.35)')}">
-                        ◆ Block Red (${remRedStage1} atk)
-                      </button>
-                      <button type="button" class="any-alloc-btn" data-unit-idx="${uIdx}" data-target-color="blue" style="${btnStyle('blue', '#38bdf8', 'rgba(56, 189, 248, 0.35)')}">
-                        ● Block Blue (${remBlueStage1} atk)
-                      </button>
-                      <button type="button" class="any-alloc-btn" data-unit-idx="${uIdx}" data-target-color="green" style="${btnStyle('green', '#4ade80', 'rgba(74, 222, 128, 0.35)')}">
-                        ▲ Block Green (${remGreenStage1} atk)
-                      </button>
-                    </div>
-                  </div>
-                `;
-              }).join("")}
-            </div>
-          </div>
-        `;
-      }
-
-      let malwareHtml = "";
-      if (actualRequired > 0) {
-        malwareHtml = `
-          <div class="confirm-malware-panel">
-            <div class="confirm-malware-hdr">
-              <div class="confirm-malware-title-row">
-                <span class="confirm-malware-badge">⚠️ MALWARE BREACH</span>
-                <span class="confirm-malware-title">LOGIC BOMB INFECTION (${unblockedGreen} Unblocked Green Cube${unblockedGreen > 1 ? 's' : ''})</span>
-              </div>
-              <span class="confirm-malware-sub">
-                You took unblocked malware damage! Click below to select <strong>${actualRequired}</strong> active module${actualRequired > 1 ? 's' : ''} to move to <strong>Under Development</strong> (or sacrifice a White Contractor). This round's income was already collected in Phase 3, so a glitch only delays that die.
-              </span>
-            </div>
-            <div class="confirm-malware-grid">
-              ${candidates.map((c) => {
-                const isSel = selectedGlitchDieIds.has(c.die_id);
-                const roleClass = (c.role || "").toLowerCase().replace(/[^a-z0-9]/g, "-");
-                let consequenceText = "";
-                if (c.is_contractor) {
-                  consequenceText = "Contractor Sacrifice: Discard to supply (saves permanent modules)";
-                } else if (c.is_shield) {
-                  consequenceText = "Shield die: moves to Under Development (its block still counts)";
-                } else {
-                  consequenceText = "Moves to Under Development (income already collected in Phase 3)";
-                }
-                return `
-                  <div class="malware-die-card ${c.color} ${isSel ? 'selected' : ''}" data-die-id="${c.die_id}">
-                    <div class="malware-die-top">
-                      <span class="malware-die-role ${roleClass}">${c.role.toUpperCase()}</span>
-                      <span style="font-weight: 700; font-size: 0.72rem; color: #fff;">${c.color.toUpperCase()} DIE</span>
-                    </div>
-                    <div class="malware-die-face">${c.face_name}${c.star_note ? ' (' + c.star_note + ')' : ''}</div>
-                    <div class="malware-die-consequence">${consequenceText}</div>
-                    <div class="malware-die-status">
-                      ${isSel ? '⚠️ SELECTED FOR GLITCH' : '○ Click to Glitch'}
-                    </div>
-                  </div>
-                `;
-              }).join("")}
-            </div>
-          </div>
-        `;
-      } else if (unblockedGreen > 0 && greenInfo.glitched_shield_slots !== undefined) {
-        const room = Math.max(0, (greenInfo.defense_capacity || 0) - (greenInfo.glitched_shield_slots || 0));
-        const newSlots = Math.min(unblockedGreen, room);
-        malwareHtml = `
-          <div class="confirm-malware-panel">
-            <div class="confirm-malware-hdr">
-              <div class="confirm-malware-title-row">
-                <span class="confirm-malware-badge">⚠️ GLITCHED SHIELD SLOTS</span>
-                <span class="confirm-malware-title">${unblockedGreen} Unblocked Green Cube${unblockedGreen > 1 ? 's' : ''}</span>
-              </div>
-              <span class="confirm-malware-sub">
-                ${newSlots > 0 ? `<strong>${newSlots}</strong> of your shield slots will become Glitched Shield Slots (no die moves; ${greenInfo.glitched_shield_slots || 0} already glitched of ${greenInfo.defense_capacity || 0} capacity).` : 'All of your shield slots are already glitched: the excess has no effect.'}
-                A Glitched Shield Slot cannot hold a shield. Clean slots in Phase 1 or Phase 5.
-              </span>
-            </div>
-          </div>
-        `;
-      } else if (unblockedGreen > 0) {
-        malwareHtml = `
-          <div class="confirm-malware-panel" style="border-color: rgba(74, 222, 128, 0.4); background: rgba(74, 222, 128, 0.05);">
-            <div class="confirm-malware-hdr">
-              <div class="confirm-malware-title-row">
-                <span class="confirm-malware-badge" style="background: rgba(74, 222, 128, 0.2); color: #4ade80;">🛡️ 0 MALWARE EFFECT</span>
-                <span class="confirm-malware-title" style="color: #4ade80;">ZERO ACTIVE PRODUCTION EXPLOITS</span>
-              </div>
-              <span class="confirm-malware-sub" style="color: #86efac;">
-                ${unblockedGreen} unblocked Green Malware cube${unblockedGreen > 1 ? 's' : ''} struck your corporate network, but your In Production zone is completely empty! Excess malware has 0 effect (no dice destroyed).
-              </span>
-            </div>
-          </div>
-        `;
-      }
-
-      panel.innerHTML = `
-        <div class="confirm-income-header">
-          <div class="confirm-income-title-wrap">
-            <span class="confirm-badge">PHASE 4: ATTACK RESOLUTION</span>
-            <span class="confirm-income-title">GENERIC (ANY) SHIELD DEFENSE SUMMARY</span>
-          </div>
-          <span style="font-size: 0.72rem; color: var(--text-dim); font-family: monospace;">
-            Round ${state.current_round} // Split your Any shields across the exited cubes before damage resolves
-          </span>
-        </div>
-
-        ${anyShieldSelectorHtml}
-
-        <div class="confirm-income-grid">
-          <!-- Card 1: Threat Resolution -->
-          <div class="confirm-income-card">
-            <div class="confirm-income-card-hdr">
-              <span>CUBE TOWER OUTPUT & DEFENSES</span>
-              <span style="color: var(--text-highlight);">${exited.red || 0}R · ${exited.blue || 0}B · ${exited.green || 0}G · ${exited.black || 0}K</span>
-            </div>
-            ${anyShieldCount > 0 ? `
-              <div class="confirm-threat-row" style="background: rgba(168, 85, 247, 0.1); border-left: 3px solid #a855f7; padding-left: 6px;">
-                <span style="color: #c084fc; font-weight: 700;">🛡️ ANY // GENERIC</span>
-                <span>${anyShieldCount} shield${anyShieldCount > 1 ? 's' : ''} -> Blocking <strong>${userAnyAlloc.red}R · ${userAnyAlloc.blue}B · ${userAnyAlloc.green}G</strong></span>
-              </div>
-            ` : ''}
-            <div class="confirm-threat-row">
-              <span style="color: var(--color-black); font-weight: 700;">■ BLACK // CORRUPTION</span>
-              <span>${blackCubes} cube${blackCubes === 1 ? '' : 's'} -> Track space ${state.corruption_track || 0}</span>
-            </div>
-            <div class="confirm-threat-row">
-              <span style="color: var(--color-red); font-weight: 700;">◆ RED // MARKET MANIPULATION</span>
-              <span>${redInfo.cubes} exited vs ${liveBlockedRed} blocked -> ${liveUnblockedRed > 0 ? `<strong style="color: #f43f5e;">-${Math.min(liveUnblockedRed, humanThreat.market_share || 0)} Market Share${(humanThreat.market_share || 0) - liveUnblockedRed <= 0 ? ' (MARKET COLLAPSE!)' : ''}</strong>` : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
-            </div>
-            <div class="confirm-threat-row">
-              <span style="color: var(--color-blue); font-weight: 700;">● BLUE // SPYWARE</span>
-              <span>${blueInfo.cubes} exited vs ${liveBlockedBlue} blocked -> ${liveUnblockedBlue > 0 ? `<strong style="color: #f43f5e;">-${liveUnblockedBlue} Secrets</strong>` : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
-            </div>
-            <div class="confirm-threat-row">
-              <span style="color: var(--color-green); font-weight: 700;">▲ GREEN // MALWARE</span>
-              <span>${greenInfo.cubes} exited vs ${liveBlockedGreen} blocked -> ${liveUnblockedGreen > 0 ? (greenInfo.glitched_shield_slots !== undefined ? `<strong style="color: #f43f5e;">${Math.min(liveUnblockedGreen, Math.max(0, (greenInfo.defense_capacity || 0) - (greenInfo.glitched_shield_slots || 0)))} Glitched Shield Slot${liveUnblockedGreen > 1 ? 's' : ''}</strong>` : (actualRequired === 0 ? '<strong style="color: #4ade80;">0 effect (Empty Production)</strong>' : `<strong style="color: #f43f5e;">${liveUnblockedGreen} Unblocked Malware</strong>`)) : '<strong style="color: #4ade80;">Fully Blocked</strong>'}</span>
-            </div>
-          </div>
-
-          <!-- Card 2: Harvested Income -->
-          <div class="confirm-income-card" style="border-color: rgba(234, 179, 8, 0.4);">
-            <div class="confirm-income-card-hdr">
-              <span style="color: #facc15;">PHASE 3 INCOME (COLLECTED)</span>
-              <span>Banked before attacks</span>
-            </div>
-            <div class="confirm-pills-row">
-              <span class="income-pill money">+$${effectiveMoney} Cash</span>
-              <span class="income-pill research">+${effectiveResearch} 🔬 Research</span>
-              ${effectiveSecrets > 0 ? `<span class="income-pill secrets">+${effectiveSecrets} Secrets</span>` : ''}
-            </div>
-            <div class="confirm-dice-chips">
-              ${(effectiveDetails && effectiveDetails.length > 0)
-                ? effectiveDetails.map((d) => `
-                    <span class="confirm-die-chip ${d.color} ${d.is_glitched ? 'glitched-chip' : ''}">
-                      <strong>${d.color.toUpperCase()}:</strong> ${d.face_name}${d.star_note ? ' (' + d.star_note + ')' : ''} ${d.is_glitched ? '<em>(GLITCHED)</em>' : ''}
-                    </span>
-                  `).join('')
-                : '<span style="font-size: 0.75rem; color: var(--text-dim); font-style: italic;">No surviving production dice yielded income.</span>'}
-            </div>
-          </div>
-        </div>
-
-        ${malwareHtml}
-
-        <div class="confirm-action-bar">
-          <span style="font-size: 0.75rem; color: var(--text-dim);">
-            Confirming resolves Red / Blue / Green damage. Unblocked Green cubes turn shield slots into <strong>Glitched Shield Slots</strong>; contractors expire at the end of Phase 4.
-          </span>
-          ${(humanThreat.aegis && humanThreat.aegis.available) ? `
-            <select id="aegisEchoSelect" style="padding: 4px 8px;" title="Aegis Baffle Echo (Institutional Override, once per Version)">
-              <option value="none">Aegis Baffle Echo: do not use</option>
-              ${(humanThreat.aegis.qualifying_colors || []).map((c) => `<option value="${c}">Aegis Baffle Echo: ignore 1 ${c.toUpperCase()}</option>`).join("")}
-            </select>` : ''}
-          ${(humanThreat.slush_fund && humanThreat.slush_fund.available) ? `
-            <label style="font-size: 0.75rem;" title="DTO Slush Fund (Institutional Override, once per game)">
-              <input type="checkbox" id="slushFundCheck"> Use DTO Slush Fund (absorb up to 2 Secret loss; once per game)
-            </label>` : ''}
-          <button class="action-btn btn-confirm-income ${hasEnoughSelections ? '' : 'disabled'}" id="btnConfirmIncome" ${hasEnoughSelections ? '' : 'disabled'}>
-            ${btnText}
-          </button>
-        </div>
-      `;
-
-      panel.querySelectorAll(".any-alloc-btn").forEach((btn) => {
-        btn.onclick = () => {
-          const uIdx = parseInt(btn.getAttribute("data-unit-idx"), 10);
-          const chosenColor = btn.getAttribute("data-target-color");
-          setSelectedAnyAllocation(uIdx, chosenColor);
-          renderActionDock();
-        };
-      });
-
-      panel.querySelectorAll(".malware-die-card").forEach((card) => {
-        card.onclick = () => {
-          const dId = parseInt(card.getAttribute("data-die-id"), 10);
-          toggleSelectedGlitchDieId(dId, actualRequired);
-          renderActionDock();
-        };
-      });
-
-      const confirmBtn = panel.querySelector("#btnConfirmIncome");
-      if (confirmBtn) {
-        confirmBtn.onclick = () => {
-          if (!hasEnoughSelections && actualRequired > 0) return;
-          const toGlitch = Array.from(selectedGlitchDieIds);
-          const allocPayload = anyShieldCount > 0 ? {
-            red: userAnyAlloc.red,
-            blue: userAnyAlloc.blue,
-            green: userAnyAlloc.green,
-          } : null;
-          clearSelectedGlitchDieIds();
-          clearSelectedAnyAllocations();
-          const aegisSel = panel.querySelector("#aegisEchoSelect");
-          const slushChk = panel.querySelector("#slushFundCheck");
-          doConfirmAttacks(toGlitch, allocPayload, aegisSel ? aegisSel.value : null, slushChk ? slushChk.checked : null);
-        };
-      }
-
-      controls.appendChild(panel);
-      return;
-    }
-
+  } else if (state.phase === 4) {
+    renderAttackPanel(controls, human, caps);
+  } else if (state.phase === PHASE_OPERATIONS) {
     // Dirty Income with Backlash die selector
     if (caps.can_dirty_income || caps.can_cipher_dirty) {
       const dirtyWrap = document.createElement("div");
@@ -975,52 +376,6 @@ export function renderActionDock() {
       }
 
       controls.appendChild(dirtyWrap);
-    }
-
-    // Phreaker Ability: Free Repair with target selector
-    if (caps.can_phreaker && (human.unpatched_dice || []).length > 0) {
-      const phreakWrap = document.createElement("div");
-      phreakWrap.style.display = "inline-flex";
-      phreakWrap.style.alignItems = "center";
-      phreakWrap.style.gap = "6px";
-
-      const phreakSelect = document.createElement("select");
-      phreakSelect.id = "phreakerDieSelect";
-      phreakSelect.style.padding = "4px 8px";
-      phreakSelect.style.background = "var(--bg-card)";
-      phreakSelect.style.color = "#fff";
-      phreakSelect.style.border = "1px solid var(--border-color)";
-      phreakSelect.style.borderRadius = "4px";
-
-      human.unpatched_dice.forEach((die, idx) => {
-        const opt = document.createElement("option");
-        opt.value = String(die.die_id);
-        opt.innerText = `Repair: #${idx + 1} ${die.color.toUpperCase()}${die.vp ? ' (' + die.vp + 'VP)' : ''}`;
-        phreakSelect.appendChild(opt);
-      });
-
-      const validPhreakTarget = human.unpatched_dice.some((d) => d.die_id === selectedPhreakerDieId)
-        ? selectedPhreakerDieId
-        : human.unpatched_dice[0].die_id;
-      phreakSelect.value = String(validPhreakTarget);
-      setSelectedPhreakerDieId(validPhreakTarget);
-      phreakSelect.onchange = (e) => {
-        setSelectedPhreakerDieId(parseInt(e.target.value, 10));
-      };
-
-      const phreakBtn = document.createElement("button");
-      phreakBtn.className = "action-btn";
-      phreakBtn.style.borderColor = "#4ade80";
-      phreakBtn.style.color = "#4ade80";
-      phreakBtn.innerText = "⚡ Omnidyne: Magnetic Splice (Glitched → Ready)";
-      phreakBtn.onclick = () => {
-        setSelectedPhreakerDieId(parseInt(phreakSelect.value, 10));
-        doPhreaker(1);
-      };
-
-      phreakWrap.appendChild(phreakSelect);
-      phreakWrap.appendChild(phreakBtn);
-      controls.appendChild(phreakWrap);
     }
 
     // Cipher Market Discount Toggle
@@ -1193,40 +548,38 @@ export function renderActionDock() {
     }
 
 
+    // Pen Test Track: lower Vulnerability for research (limit per Operations Turn)
+    const penLeft = caps.pen_test_left_this_turn || 0;
+    const penBtn = document.createElement("button");
+    penBtn.className = "action-btn btn-pen-test";
+    penBtn.innerText = `🧪 Pen Test (${caps.pen_test_cost} 🔬 → −1 Vulnerability; ${penLeft}/${caps.pen_test_limit} left this turn)`;
+    penBtn.disabled = !caps.can_pen_test;
+    penBtn.title = caps.can_pen_test
+      ? `Vulnerability ${human.vulnerability} → ${human.vulnerability - 1}`
+      : "Requires research, Vulnerability above 0, and Pen Test limit remaining";
+    penBtn.onclick = () => doPenTest(1);
+    controls.appendChild(penBtn);
+
     if (caps.is_share_regain) {
-      // v0.36.0 Public Relations Track: spend research to regain Market Share (limit per Operations Turn)
+      // Public Relations Track: regain Market Share (limit per Operations Turn)
+      const price = caps.regain_currency === "money" ? `$${caps.regain_cost}` : `${caps.regain_cost} 🔬`;
       const prBtn = document.createElement("button");
       prBtn.className = "action-btn";
       prBtn.style.borderColor = "#c084fc";
       prBtn.style.color = "#c084fc";
-      prBtn.innerText = `📣 Regain Market Share (${caps.regain_cost} 🔬 → +1; ${caps.regain_left_this_turn}/${caps.regain_cap} left this turn)`;
+      prBtn.innerText = `📣 Regain Market Share (${price} → +1; ${caps.regain_left_this_turn}/${caps.regain_cap} left this turn)`;
       prBtn.disabled = !caps.can_regain_market_share;
       prBtn.title = caps.can_regain_market_share
-        ? `Public Relations Track: spend ${caps.regain_cost} 🔬 for +1 Market Share`
-        : "Requires research, Market Share below its maximum, and turn limit remaining";
+        ? `Public Relations Track: pay ${price} for +1 Market Share`
+        : `Requires ${price}, Market Share below its maximum, and turn limit remaining`;
       prBtn.onclick = () => doRegainMarketShare();
       controls.appendChild(prBtn);
     }
 
-    // Research-to-Secret conversion (INV-PATENT-CONV-01) - v0.35 ruleset only
-    const patCost = caps.patent_cost || 4;
-    const canPat = caps.can_file_patent || false;
-    const patBtn = document.createElement("button");
-    patBtn.className = "action-btn";
-    patBtn.style.borderColor = "#c084fc";
-    patBtn.style.color = "#c084fc";
-const patGain = caps.patent_gain || 1;
-    const legacyPatCash = (caps.max_track_level || 2) === 2 && (human.patent_level || 0) >= 2;
-    patBtn.innerText = `📜 File Patent (${patCost} 🔬 → +${patGain} Sec${legacyPatCash ? ', +$1' : ''})`;
-    patBtn.disabled = !canPat;
-    patBtn.title = canPat ? `Spend ${patCost} 🔬 to gain +${patGain} Corporate Secret${patGain === 1 ? '' : 's'}` : `Requires ${patCost} 🔬 to file patent`;
-    patBtn.onclick = () => doFilePatent();
-    if (!caps.is_share_regain) controls.appendChild(patBtn);
-
     // Terminal Hardware Upgrade Tracks (INV-UPGRADE-TRACK-01)
     const upgradeCosts = caps.upgrade_track_costs || {};
     const canUp = caps.can_upgrade_track || {};
-    const maxTrackLevel = caps.max_track_level || 2;
+    const maxTrackLevel = caps.max_track_level || 4;
     const btPreview = caps.breakthrough_preview || {};
     const btNote = (key) => (btPreview[key] && btPreview[key].breakthrough ? ` — Breakthrough: ${btPreview[key].breakthrough}` : "");
 
@@ -1260,61 +613,25 @@ const patGain = caps.patent_gain || 1;
       controls.appendChild(box);
     }
 
-    if ((human.triage_level || 0) < maxTrackLevel && upgradeCosts.triage !== null && upgradeCosts.triage !== undefined) {
-      const triageCost = upgradeCosts.triage;
-      const triageBtn = document.createElement("button");
-      triageBtn.className = "action-btn";
-      triageBtn.style.borderColor = "#38bdf8";
-      triageBtn.style.color = "#38bdf8";
-      triageBtn.innerText = `⚙️ Upgr Triage [L${(human.triage_level || 0) + 1}] (${triageCost} 🔬)`;
-      triageBtn.disabled = !canUp.triage;
-      triageBtn.title = canUp.triage ? `Upgrade Triage to Level ${(human.triage_level || 0) + 1} (${triageCost} 🔬)` : `Requires ${triageCost} 🔬`;
-      triageBtn.title += btNote("triage");
-      triageBtn.onclick = () => doUpgradeTrack("triage");
-      controls.appendChild(triageBtn);
-    }
-
-    if ((human.release_level || 0) < maxTrackLevel && upgradeCosts.release !== null && upgradeCosts.release !== undefined) {
-      const relCost = upgradeCosts.release;
-      const relBtn = document.createElement("button");
-      relBtn.className = "action-btn";
-      relBtn.style.borderColor = "#06b6d4";
-      relBtn.style.color = "#06b6d4";
-      relBtn.innerText = `🚀 Upgr Release [L${(human.release_level || 0) + 1}] (${relCost} 🔬)`;
-      relBtn.disabled = !canUp.release;
-      relBtn.title = canUp.release ? `Upgrade Release to Level ${(human.release_level || 0) + 1} (${relCost} 🔬)` : `Requires ${relCost} 🔬`;
-      relBtn.title += btNote("release");
-      relBtn.onclick = () => doUpgradeTrack("release");
-      controls.appendChild(relBtn);
-    }
-
-    if ((human.defense_level || 0) < maxTrackLevel && upgradeCosts.defense !== null && upgradeCosts.defense !== undefined) {
-      const defCost = upgradeCosts.defense;
-      const defBtn = document.createElement("button");
-      defBtn.className = "action-btn";
-      defBtn.style.borderColor = "#4ade80";
-      defBtn.style.color = "#4ade80";
-      defBtn.innerText = `🛡️ Upgr Defense [L${(human.defense_level || 0) + 1}] (${defCost} 🔬)`;
-      defBtn.disabled = !canUp.defense;
-      defBtn.title = canUp.defense ? `Upgrade Defense Grid to Level ${(human.defense_level || 0) + 1} (${defCost} 🔬)` : `Requires ${defCost} 🔬`;
-      defBtn.title += btNote("defense");
-      defBtn.onclick = () => doUpgradeTrack("defense");
-      controls.appendChild(defBtn);
-    }
-
-    if ((human.patent_level || 0) < maxTrackLevel && upgradeCosts.patent !== null && upgradeCosts.patent !== undefined) {
-      const patentTrackCost = upgradeCosts.patent;
-      const patUpBtn = document.createElement("button");
-      patUpBtn.className = "action-btn";
-      patUpBtn.style.borderColor = "#a855f7";
-      patUpBtn.style.color = "#a855f7";
-      patUpBtn.innerText = `🔬 Upgr ${caps.is_share_regain ? 'Public Relations' : 'Patents'} [L${(human.patent_level || 0) + 1}] (${patentTrackCost} 🔬)`;
-      patUpBtn.disabled = !canUp.patent;
-      patUpBtn.title = canUp.patent ? `Upgrade ${caps.patent_track_name || 'Patent R&D'} to Level ${(human.patent_level || 0) + 1} (${patentTrackCost} 🔬)` : `Requires ${patentTrackCost} 🔬`;
-      patUpBtn.title += btNote("patent");
-      patUpBtn.onclick = () => doUpgradeTrack("patent");
-      controls.appendChild(patUpBtn);
-    }
+    const trackNames = caps.track_names || {};
+    const trackStyle = { defense: ["🧪", "#4ade80"], triage: ["⚙️", "#38bdf8"], release: ["🚀", "#06b6d4"], patent: ["📣", "#a855f7"] };
+    ["defense", "triage", "release", "patent"].forEach((key) => {
+      const lvl = human[`${key}_level`] || 0;
+      const cost = upgradeCosts[key];
+      if (lvl >= maxTrackLevel || cost === null || cost === undefined) return;
+      const [icon, color] = trackStyle[key];
+      const name = (trackNames[key] || key).replace(/ Track$/, "");
+      const enc = (human.encrypted_research_tracks || []).some((t) => t === key.toUpperCase() || (key === "patent" && t === "PR"));
+      const btn = document.createElement("button");
+      btn.className = "action-btn";
+      btn.style.borderColor = color;
+      btn.style.color = color;
+      btn.innerText = `${icon} Upgr ${name} [L${lvl + 1}] (${cost} 🔬${enc ? ", green cube: 2×" : ""})`;
+      btn.disabled = !canUp[key];
+      btn.title = (canUp[key] ? `Upgrade ${trackNames[key] || key} to Level ${lvl + 1} (${cost} 🔬)` : `Requires ${cost} 🔬`) + btNote(key);
+      btn.onclick = () => doUpgradeTrack(key);
+      controls.appendChild(btn);
+    });
 
     // End Turn
     const endTurnBtn = document.createElement("button");
@@ -1332,6 +649,175 @@ const patGain = caps.patent_gain || 1;
   }
 }
 
+
+// ---------------------------------------------------------------------------
+// Phase 4: Attack Resolution (v0.46.0) — nothing is blocked. Red & Blue hit every survivor, Green cubes hit the
+// highest Vulnerability at the minimum target or more (one cube at a time), then Target Lock Signature Attacks.
+// The human only declares Institutional Override and Target Lock choices before damage resolves.
+// ---------------------------------------------------------------------------
+function renderAttackPanel(controls, human, caps) {
+  const attackRes = state.last_attack_result || {};
+  const exited = (state.last_compile_result || {}).exited_cubes || {};
+  const threatMap = attackRes.threat_summary || {};
+  const ts = threatMap[human.player_id] || threatMap[String(human.player_id)] || attackRes.human_threat || {};
+  const vt = attackRes.vulnerability_track || state.vulnerability_track || { bands: [], min_target: 4 };
+  const names = {};
+  (state.players || []).forEach((p) => { names[p.player_id] = p.player_id === human.player_id ? "You" : p.name; });
+  const red = ts.red || { cubes: exited.red || 0, attack: 0, market_share_lost: 0 };
+  const blue = ts.blue || { cubes: exited.blue || 0, attack: 0, secrets_lost: 0 };
+  const green = ts.green || { cubes: exited.green || 0, attack: 0, hits: [], secrets_at_risk: 0 };
+  const sig = attackRes.signature || {};
+  const greenHits = attackRes.green_hits || [];
+
+  const panel = document.createElement("div");
+  panel.className = "confirm-income-panel";
+
+  const greenRows = greenHits.length === 0
+    ? `<div class="confirm-threat-row"><span class="threat-label green">▲ GREEN // MALWARE</span><span>No Green cubes this round</span></div>`
+    : greenHits.map((g) => {
+      const who = g.pids.length ? g.pids.map((pid) => names[pid] || `Player ${pid + 1}`).join(", ") : null;
+      const mine = g.pids.includes(human.player_id);
+      return `<div class="confirm-threat-row ${mine ? "threat-row-hit" : ""}">
+        <span class="threat-label green">▲ GREEN CUBE ${g.cube + 1}</span>
+        <span>${who
+          ? `hits <strong>${who}</strong> at Vulnerability ${g.v} → <strong class="${mine ? "loss" : ""}">−${g.damage} Corporate Secret${g.damage === 1 ? "" : "s"}</strong>, reset to 0`
+          : `no player at Vulnerability ${vt.min_target}+ (no effect)`}</span>
+      </div>`;
+    }).join("");
+
+  const vulnRows = (state.players || [])
+    .filter((p) => !p.is_patient_zero)
+    .map((p) => {
+      const v = p.vulnerability || 0;
+      const b = (vt.bands || []).find((x) => v >= x.from && v <= x.to);
+      return `<span class="vuln-chip ${b ? "at-risk" : "safe"} ${p.player_id === human.player_id ? "mine" : ""}">
+        ${names[p.player_id]}: ⚠ ${v}${b ? ` (−${b.damage})` : " (safe)"}</span>`;
+    }).join("");
+
+  const locked = (sig.locked_pids || []).includes(human.player_id);
+  const choices = ts.signature_choices || {};
+  let sigHtml = "";
+  if (sig.enabled && (sig.locked_pids || []).length > 0 && sig.dominant_color) {
+    const who = sig.locked_pids.map((pid) => names[pid]).join(", ");
+    let choiceHtml = "";
+    if (locked && choices.green_tracks) {
+      choiceHtml = `<div class="sig-choice">Choose ${choices.green_tracks.count} Research Tracks for the green cubes:
+        ${choices.green_tracks.options.map((o) => `<label><input type="checkbox" class="sig-track" value="${o.track}"> ${o.name}</label>`).join(" ")}</div>`;
+    } else if (locked && choices.red_recipients) {
+      choiceHtml = `<div class="sig-choice">Tied for the least Market Share — choose who gains 2:
+        <select id="sigRedRecipient" class="dock-select">${choices.red_recipients.map((pid) => `<option value="${pid}">${names[pid]}</option>`).join("")}</select></div>`;
+    }
+    sigHtml = `
+      <div class="confirm-income-card sig-card ${sig.dominant_color}">
+        <div class="confirm-income-card-hdr">
+          <span>🎯 TARGET LOCK — ${sig.dominant_color.toUpperCase()} DOMINANT</span>
+          <span>${who}</span>
+        </div>
+        <div class="confirm-threat-row"><span>${sig.effect}</span></div>
+        ${choiceHtml}
+      </div>`;
+  }
+
+  panel.innerHTML = `
+    <div class="confirm-income-header">
+      <div class="confirm-income-title-wrap">
+        <span class="confirm-badge">PHASE 4: ATTACK RESOLUTION</span>
+        <span class="confirm-income-title">NO CUBE CAN BE BLOCKED</span>
+      </div>
+      <span style="font-size: 0.72rem; color: var(--text-dim); font-family: monospace;">
+        Round ${state.current_round} // Red → Blue → Green (one cube at a time) → Patient Zero → Target Lock
+      </span>
+    </div>
+    ${attackRes.buffer_overflow ? `<div class="confirm-threat-row"><strong>Compile Buffer Overflow:</strong> no damage resolves this round; every Vulnerability carries over.</div>` : ""}
+    <div class="confirm-income-grid">
+      <div class="confirm-income-card">
+        <div class="confirm-income-card-hdr">
+          <span>EXIT TRAY</span>
+          <span style="color: var(--text-highlight);">${exited.red || 0}R · ${exited.blue || 0}B · ${exited.green || 0}G · ${exited.black || 0}K</span>
+        </div>
+        <div class="confirm-threat-row">
+          <span class="threat-label red">◆ RED // MARKET MANIPULATION</span>
+          <span>${red.attack} cube${red.attack === 1 ? "" : "s"} → ${red.attack > 0
+            ? `<strong class="loss">−${red.market_share_lost} Market Share</strong> (${ts.market_share} → ${Math.max(0, (ts.market_share || 0) - red.market_share_lost)}${(ts.market_share || 0) - red.market_share_lost <= 0 ? ", MARKET COLLAPSE" : ""})`
+            : "no effect"}</span>
+        </div>
+        <div class="confirm-threat-row">
+          <span class="threat-label blue">● BLUE // SPYWARE</span>
+          <span>${blue.attack} cube${blue.attack === 1 ? "" : "s"} → ${blue.attack > 0 ? `<strong class="loss">−${blue.secrets_lost} Corporate Secret${blue.secrets_lost === 1 ? "" : "s"}</strong>` : "no effect"}</span>
+        </div>
+        ${greenRows}
+      </div>
+      <div class="confirm-income-card">
+        <div class="confirm-income-card-hdr">
+          <span>VULNERABILITY TRACK</span>
+          <span>Safe zone 0–${vt.min_target - 1} · ${(vt.bands || []).map((b) => `${b.from}–${b.to}: −${b.damage}`).join(" · ")}</span>
+        </div>
+        <div class="vuln-chip-row">${vulnRows}</div>
+        <div class="confirm-threat-row">
+          <span>Your Green damage this round</span>
+          <strong class="${green.secrets_at_risk > 0 ? "loss" : "safe-text"}">${green.secrets_at_risk > 0 ? `−${green.secrets_at_risk} Corporate Secrets` : "none"}</strong>
+        </div>
+      </div>
+    </div>
+    ${sigHtml}
+    <div class="confirm-action-bar" id="attackActionBar"></div>
+  `;
+
+  const bar = panel.querySelector("#attackActionBar");
+  if (!caps.can_confirm_attacks) {
+    const waitMsg = document.createElement("span");
+    waitMsg.style.fontSize = "0.8rem";
+    waitMsg.style.color = "var(--text-dim)";
+    waitMsg.innerText = "Waiting for other corporations to confirm their Phase 4 choices.";
+    bar.appendChild(waitMsg);
+    controls.appendChild(panel);
+    return;
+  }
+
+  let aegisSel = null;
+  if (ts.aegis && ts.aegis.available) {
+    aegisSel = document.createElement("select");
+    aegisSel.className = "dock-select";
+    aegisSel.title = "Aegis Baffle Echo (Institutional Override, once per Version)";
+    aegisSel.innerHTML = `<option value="none">Baffle Echo: do not use</option>`
+      + (ts.aegis.qualifying_colors || []).map((c) => `<option value="${c}">Baffle Echo: ignore 1 ${c.toUpperCase()} cube</option>`).join("")
+      + (ts.aegis.green_hit ? `<option value="green">Baffle Echo: cancel the Secret loss of 1 Green hit</option>` : "");
+    bar.appendChild(aegisSel);
+  }
+  let slushChk = null;
+  if (ts.slush_fund && ts.slush_fund.available) {
+    const lbl = document.createElement("label");
+    lbl.style.fontSize = "0.75rem";
+    lbl.title = "DTO Slush Fund (Institutional Override, once per game)";
+    lbl.innerHTML = `<input type="checkbox" id="slushFundCheck"> Use DTO Slush Fund (absorb up to 2 Secret loss from Blue cubes; once per game)`;
+    bar.appendChild(lbl);
+    slushChk = lbl.querySelector("input");
+  }
+
+  const btn = document.createElement("button");
+  btn.className = "action-btn btn-confirm-income";
+  btn.innerText = "✓ Confirm & Resolve Attacks";
+  const needTracks = locked && choices.green_tracks ? choices.green_tracks.count : 0;
+  const syncBtn = () => {
+    const n = panel.querySelectorAll(".sig-track:checked").length;
+    btn.disabled = needTracks > 0 && n !== needTracks;
+    if (needTracks > 0) btn.innerText = n === needTracks ? "✓ Confirm & Resolve Attacks" : `Choose ${needTracks} tracks (${n}/${needTracks})`;
+  };
+  panel.querySelectorAll(".sig-track").forEach((cb) => { cb.onchange = syncBtn; });
+  syncBtn();
+  btn.onclick = () => {
+    const tracks = Array.from(panel.querySelectorAll(".sig-track:checked")).map((cb) => cb.value);
+    const recSel = panel.querySelector("#sigRedRecipient");
+    doConfirmAttacks({
+      aegisColor: aegisSel ? aegisSel.value : null,
+      useSlushFund: slushChk ? slushChk.checked : null,
+      signatureGreenTracks: needTracks > 0 ? tracks : null,
+      signatureRedRecipient: recSel ? parseInt(recSel.value, 10) : null,
+    });
+  };
+  bar.appendChild(btn);
+  controls.appendChild(panel);
+}
 
 // ---------------------------------------------------------------------------
 // Phase 3: Income (simultaneous) — preview, optional Signature Protocol targets, confirm
@@ -1361,7 +847,7 @@ function renderIncomePanel(controls, human, caps) {
     <div class="confirm-income-card" style="border-color: rgba(234, 179, 8, 0.4);">
       <div class="confirm-income-card-hdr">
         <span style="color: #facc15;">${inc.preview ? "INCOME PREVIEW" : "INCOME COLLECTED"}</span>
-        <span>Income slot + Shield slots + White Contractor dice</span>
+        <span>Every die In Production</span>
       </div>
       <div class="confirm-pills-row">
         <span class="income-pill money">+$${inc.money || 0} Cash</span>
@@ -1431,7 +917,7 @@ function renderIncomePanel(controls, human, caps) {
 }
 
 // ---------------------------------------------------------------------------
-// Phase 5: CI/CD Pipeline Shift — Magnetic Splice, Scanned Graduation choice
+// Phase 6: CI/CD Pipeline Shift — Magnetic Splice, Scanned Graduation choice
 // ---------------------------------------------------------------------------
 function renderGraduationPanel(controls, human, caps) {
   const pendMap = state.pending_graduation || {};
@@ -1440,7 +926,7 @@ function renderGraduationPanel(controls, human, caps) {
     const waitMsg = document.createElement("span");
     waitMsg.style.fontSize = "0.8rem";
     waitMsg.style.color = "var(--text-dim)";
-    waitMsg.innerText = "Phase 5: CI/CD Pipeline Shift — waiting for other corporations.";
+    waitMsg.innerText = "Phase 6: CI/CD Pipeline Shift — waiting for other corporations.";
     controls.appendChild(waitMsg);
     return;
   }
@@ -1453,7 +939,7 @@ function renderGraduationPanel(controls, human, caps) {
   panel.innerHTML = `
     <div class="confirm-income-header">
       <div class="confirm-income-title-wrap">
-        <span class="confirm-badge">PHASE 5: CI/CD PIPELINE SHIFT</span>
+        <span class="confirm-badge">PHASE 6: CI/CD PIPELINE SHIFT</span>
         <span class="confirm-income-title">SCANNED GRADUATION (${chosen.size} / ${pend.n} — Release Bandwidth ${pend.release_bandwidth})</span>
       </div>
       <span style="font-size: 0.72rem; color: var(--text-dim);">
@@ -1506,8 +992,9 @@ function renderGraduationPanel(controls, human, caps) {
 }
 
 
-/** Brute-Force Bypass (Helix) / Arbitrary Code Execution (Prodigy): turn one rolled die to a legal non-Star face. */
-function buildOverridePanel(controls, human, source) {
+/** Brute-Force Bypass (Helix) / Arbitrary Code Execution (Prodigy) / Release Track Level 4 (1 Gray Legacy die):
+ * turn one rolled die to a legal face. */
+function buildOverridePanel(controls, human, source, onlyIndices = null) {
   const rolled = human.rolled_pool || [];
   if (rolled.length === 0) return;
   const wrap = document.createElement("div");
@@ -1525,12 +1012,15 @@ function buildOverridePanel(controls, human, source) {
   const label = document.createElement("span");
   label.style.fontSize = "0.8rem";
   label.style.color = "#38bdf8";
-  label.innerText = source === "helix"
-    ? "⚡ Brute-Force Bypass (+1 free reroll; set 1 die to any non-Star face, Secret face allowed):"
-    : "⚡ Arbitrary Code Execution (set 1 other die to any non-Star, non-Secret face):";
+  label.innerText = {
+    helix: "⚡ Brute-Force Bypass (+1 free reroll; set 1 die to any non-Star face, Secret face allowed):",
+    prodigy: "⚡ Arbitrary Code Execution (set 1 other die to any non-Star, non-Secret face):",
+    release_l4: "🚀 Release Track Level 4 (set 1 rolled Gray Legacy die to any printed face):",
+  }[source];
   const dieSel = document.createElement("select");
   styleSel(dieSel);
   rolled.forEach((d, i) => {
+    if (onlyIndices && !onlyIndices.includes(i)) return;
     const o = document.createElement("option");
     o.value = String(i);
     o.innerText = `Die #${i + 1} ${d.color.toUpperCase()} (${d.current_face ? d.current_face.name : "?"})`;
@@ -1546,7 +1036,7 @@ function buildOverridePanel(controls, human, source) {
       if (source === "prodigy" && f.secrets_pending) return;
       const o = document.createElement("option");
       o.value = String(fi);
-      o.innerText = f.secrets_pending ? "Secret face" : f.name;
+      o.innerText = (f.secrets_pending ? "Secret face" : f.name) + (f.vuln && !String(f.name).includes("⚠") ? " ⚠" : "");
       faceSel.appendChild(o);
     });
   };

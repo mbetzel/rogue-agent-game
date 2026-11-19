@@ -139,11 +139,11 @@
           style="padding: 8px; background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); border-radius: 4px;">
           <option value="RANDOM" selected>🎲 Random Deal (Standard Rules)</option>
           <option value="HELIX">Helix Biomedical Consortium (Brute-Force Bypass)</option>
-          <option value="OMNIDYNE">Omnidyne Systems (Triage Lvl 1 [Bandwidth 3], Release Lvl 1 [Bandwidth 5])</option>
-          <option value="AEGIS">Aegis Defense Relay (Defense Lvl 1 [3 Shields Cap])</option>
-          <option value="MERIDIAN">Meridian Financial Trust (Banking Infrastructure / +$2 Starting Cash)</option>
-          <option value="DTO">Department of Telecommunications Oversight [DTO] (+1 Corporate Secret)</option>
-          <option value="PROMETHEUS">The Prometheus Foundation (-1 🔬 Upgrade Discount on all tracks)</option>
+          <option value="OMNIDYNE">Omnidyne Systems (Magnetic Splice)</option>
+          <option value="AEGIS">Aegis Defense Relay (Baffle Echo)</option>
+          <option value="MERIDIAN">Meridian Financial Trust (Capital Injection)</option>
+          <option value="DTO">Department of Telecommunications Oversight [DTO] (Slush Fund, once per game)</option>
+          <option value="PROMETHEUS">The Prometheus Foundation (Algorithmic Arbitrage)</option>
         </select>
       </div>
 
@@ -157,8 +157,7 @@
         <label style="font-size: 0.85rem; color: var(--text-dim);">Rules Version:</label>
         <select id="modalRulesVersion"
           style="padding: 8px; background: var(--bg-card); color: #fff; border: 1px solid var(--border-color); border-radius: 4px;">
-          <option value="v0.38.0" selected>v0.38.0 (Secret faces, Processing Box, Market Leader Bonus)</option>
-          <option value="v0.37.0">v0.37.0 (previous rules)</option>
+          <option value="v0.46.0" selected>v0.46.0 (Vulnerability Track, Pen Test Track)</option>
         </select>
       </div>
 
@@ -216,31 +215,32 @@
         <div class="cube-effect-item">
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <span class="cube-badge red">Red (Market Manipulation)</span>
-            <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Generic (Any) Shield</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Cannot be blocked</span>
           </div>
-          <p>Each unblocked cube lowers your <strong>Market Share</strong> by 1 (never below 0). Any surviving player
+          <p>Each exited cube lowers every surviving player's <strong>Market Share</strong> by 1 (never below 0). Any surviving player
             at <strong>0 Market Share</strong> after Phase 4 triggers <strong>Market Collapse</strong>: this round is the
-            Final Round. Regain Market Share on the <strong>Public Relations Track</strong> in Phase 6.</p>
+            Final Round. Regain Market Share for cash on the <strong>Public Relations Track</strong> in Phase 5.</p>
         </div>
 
         <div class="cube-effect-item">
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <span class="cube-badge blue">Blue (Spyware)</span>
-            <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Generic (Any) Shield</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Cannot be blocked</span>
           </div>
-          <p>Directly exfiltrates data: lose <strong>1 Corporate Secret</strong> per unblocked cube in v1.0/v2.0, or <strong>2 Corporate Secrets</strong> in v3.0 (Critical Breach). Reaching <strong>0
+          <p>Directly exfiltrates data: every surviving player loses <strong>1 Corporate Secret</strong> per exited cube, in every version. Reaching <strong>0
               (or fewer) Secrets</strong> immediately triggers a <strong>Total Data Breach (Patient Zero)</strong>!</p>
         </div>
 
         <div class="cube-effect-item">
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <span class="cube-badge green">Malware (Logic Bombs)</span>
-            <span style="font-size: 0.72rem; color: var(--text-dim);">Blocks with: Generic (Any) Shield</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Targets the highest Vulnerability</span>
           </div>
-          <p>Corrupts systems: each unblocked cube turns <strong>1 of your shield slots</strong> into a <strong>Glitched
-            Shield Slot</strong> (no die moves). A Glitched Shield Slot cannot hold a shield, and each one lowers your Green
-            <strong>Secret face</strong> yield by 1. You can never have more Glitched Shield Slots than your Defense Grid
-            Capacity; extra Green cubes have no effect. Clean slots in Phase 1 or Phase 5.</p>
+          <p>Resolves after Red and Blue, <strong>one cube at a time</strong>: each cube hits the surviving player(s) with the
+            highest <strong>Vulnerability</strong> at <strong>4 or more</strong> (all tied players are hit). Each loses Corporate
+            Secrets by band (<strong>4–6: 1</strong>, <strong>7–9: 2</strong>, <strong>10+: 3</strong>) and resets their Vulnerability
+            to 0; the next cube checks again. Players in the safe zone (0–3) are never hit. Vulnerability rises by 1 per ⚠ on your
+            final faces at lock-in and falls through the <strong>Pen Test Track</strong> in Phase 5.</p>
         </div>
 
         <div class="cube-effect-item">

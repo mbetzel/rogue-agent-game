@@ -18,11 +18,9 @@ from sim.entities import (
     create_gray_die,
     get_all_variant_cards,
 )
-from tests.web_legacy import use_v037_rules
 from web.controller.core import GameController
 
 
-@use_v037_rules
 class TestV320BlueVariants(unittest.TestCase):
     """Test suite verifying v0.32.0 Blue Variant Rebalance invariants (TEST-V320-01 through TEST-V320-13)."""
 
@@ -417,56 +415,6 @@ class TestV320BlueVariants(unittest.TestCase):
         # Surviving: d_gray_income (1, 1, 0, 0)
         self.assertEqual(p0.glitched_dice, [d_pure_shield, d_dual_shield])
         self.assertEqual(p0.in_production_dice, [d_gray_income])
-
-    def test_v320_13_web_controller_b3_star_note_and_confirm_income_recovery(self) -> None:
-        """TEST-V320-13 (re-timed for v0.34): INV-WEB-UI-SYNC-01 web controller integration.
-        Phase 3 Income preview carries the B3 star_note; B3 resolves in Phase 3, i.e. BEFORE Phase 4 Green
-        Malware, so a die the human chooses to glitch in Phase 4 is not rescued by B3 that round (spec E5).
-        """
-        controller = GameController()
-        controller.new_game(num_players=2, seed=42)
-        p0 = controller.state.players[0]
-        meta0 = controller.player_meta[0]
-
-        b3_card = self.variants["B3"]
-        d_b3 = create_colored_die(DieColor.BLUE, 101, variant_card=b3_card)
-        d_b3.current_face = b3_card.star_face
-        d_b3.production_role = ProductionRole.BLUE_SHIELD
-
-        d_red = create_colored_die(DieColor.RED, 102, variant_card=self.variants["R1"])
-        d_red.current_face = Face("+$2", money=2)
-        d_red.production_role = ProductionRole.INCOME
-
-        p0.in_production_dice = [d_b3, d_red]
-        p0.ready_for_release_dice = []
-        p0.glitched_dice = []
-        p0.scanned_dice = []
-        meta0["rolled_pool"] = [d_b3, d_red]
-        meta0["commitments"] = {"0": "blue"}
-
-        controller.phase = 2
-        controller.state.tower.drop = lambda cup, rng: {
-            CubeColor.RED: 0, CubeColor.BLUE: 0, CubeColor.GREEN: 1, CubeColor.BLACK: 0,
-        }
-        res = controller.compile_drop()
-        self.assertEqual(res["phase"], 3)
-
-        # Phase 3 Income preview: B3 star_note
-        p0_details = res["last_income_result"][0]["details"]
-        b3_detail = next((item for item in p0_details if item["die_id"] == 101), None)
-        self.assertIsNotNone(b3_detail)
-        self.assertEqual(b3_detail["star_note"], "Air-Gapped Backup (1 Glitched → Scanned)")
-
-        money_before = p0.money
-        res = controller.confirm_income(player_id=0)
-        self.assertEqual(res["phase"], 4)
-        self.assertEqual(p0.money, money_before + 2)  # d_red paid before Green resolves
-
-        # Phase 4: the human picks d_red (102) for the unblocked Green cube
-        controller.confirm_attacks(player_id=0, glitch_die_ids=[102])
-        self.assertIn(102, controller.last_pipeline_result[0]["triaged_ids"])  # Glitched -> Scanned via Triage
-        self.assertIn(d_red, p0.scanned_dice)
-        self.assertIn(d_b3, p0.ready_for_release_dice)  # B3 die: In Production -> Scanned -> Ready (<= Release Bandwidth)
 
 
 if __name__ == "__main__":

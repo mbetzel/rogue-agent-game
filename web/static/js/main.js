@@ -10,21 +10,19 @@ import {
   doCapitalInjection,
   doHireContractors,
   doReroll,
-  doDebugUnlock,
   doRoll,
   doOverrideFace,
-  doCommit,
+  doLockIn,
   doCompile,
   doConfirmIncome,
   doBuy,
-  doPatch,
   doDirtyIncome,
   doPhreaker,
-  doFastPatch,
   doAcoustic,
   doSpook,
   doStarAction,
   doEndTurn,
+  doPenTest,
 } from "./api.js";
 import {
   openModal,
@@ -84,21 +82,19 @@ window.startNewGame = startNewGame;
 window.doCapitalInjection = doCapitalInjection;
 window.doHireContractors = doHireContractors;
 window.doReroll = doReroll;
-window.doDebugUnlock = doDebugUnlock;
 window.doRoll = doRoll;
 window.doOverrideFace = doOverrideFace;
-window.doCommit = doCommit;
+window.doLockIn = doLockIn;
 window.doCompile = doCompile;
 window.doConfirmIncome = doConfirmIncome;
 window.doBuy = doBuy;
-window.doPatch = doPatch;
 window.doDirtyIncome = doDirtyIncome;
 window.doPhreaker = doPhreaker;
-window.doFastPatch = doFastPatch;
 window.doAcoustic = doAcoustic;
 window.doSpook = doSpook;
 window.doStarAction = doStarAction;
 window.doEndTurn = doEndTurn;
+window.doPenTest = doPenTest;
 window.setBoardView = setBoardView;
 
 // Initial Boot

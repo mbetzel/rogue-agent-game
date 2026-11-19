@@ -30,7 +30,7 @@ from sim.entities import (
 )
 from web.controller.core import GameController
 from web.controller.capabilities import get_action_capabilities
-from web.controller.phase1_actions import debug_unlock_die, perform_reroll, auto_execute_bots_phase_1
+from web.controller.phase1_actions import perform_reroll, auto_execute_bots_phase_1
 
 
 class TestV230Rules(unittest.TestCase):
@@ -449,13 +449,6 @@ class TestV230Rules(unittest.TestCase):
     # Category 5: Web API & Controller Synchronization
     # =========================================================================
 
-    def test_controller_debug_unlock_endpoint_deprecated(self) -> None:
-        """Calling debug_unlock_die on controller raises ValueError deprecation notice."""
-        ctrl = GameController()
-        ctrl.new_game(num_players=2, seed=42)
-        with self.assertRaises(ValueError) as ctx:
-            debug_unlock_die(ctrl, 0, 0)
-        self.assertIn("deprecated in v0.23.0", str(ctx.exception))
 
     def test_controller_capabilities_omits_can_debug_unlock(self) -> None:
         """get_action_capabilities does not expose can_debug_unlock."""

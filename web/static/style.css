@@ -1283,107 +1283,6 @@ button.btn-primary:hover {
   opacity: 0.75;
 }
 
-/* Production & Shield Matrix Row */
-.production-matrix-row {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 8px;
-}
-
-.shield-matrix-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
-}
-
-.shield-box {
-  background: var(--bg-card);
-  border: 1.5px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: 6px 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.shield-box.defense-grid-box {
-  border-color: rgba(56, 189, 248, 0.5);
-  background: rgba(56, 189, 248, 0.05);
-}
-
-.defense-grid-unified-tray {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  min-height: 36px;
-  align-items: center;
-}
-
-.shield-box.red-shield-box { border-color: var(--color-red-dim); }
-.shield-box.blue-shield-box { border-color: var(--color-blue-dim); }
-.shield-box.green-shield-box { border-color: var(--color-green-dim); }
-
-.shield-header-bar {
-  border-bottom: 1px solid var(--border-subtle);
-  padding-bottom: 3px;
-}
-
-.shield-title {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.68rem;
-  font-weight: 900;
-  letter-spacing: 0.5px;
-}
-
-.red-shield-box .shield-title { color: var(--color-red); }
-.blue-shield-box .shield-title { color: var(--color-blue); }
-.green-shield-box .shield-title { color: var(--color-green); }
-
-.shield-symbol {
-  font-size: 0.75rem;
-}
-
-.shield-count {
-  font-size: 0.62rem;
-  font-family: monospace;
-  opacity: 0.8;
-}
-
-.shield-desc-sub1 {
-  font-size: 0.62rem;
-  font-weight: 700;
-  color: var(--text-dim);
-}
-
-.shield-desc-sub2 {
-  font-size: 0.58rem;
-  color: var(--text-muted);
-}
-
-.shield-slots-tray {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-height: 24px;
-  margin-top: 4px;
-}
-
-.shield-die-chip {
-  font-size: 0.66rem;
-  font-family: monospace;
-  font-weight: 700;
-  padding: 2px 5px;
-  border-radius: var(--radius-xs);
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid var(--border-color);
-}
-
-.shield-die-chip.red { color: var(--color-red); border-color: var(--color-red); }
-.shield-die-chip.blue { color: var(--color-blue); border-color: var(--color-blue); }
-.shield-die-chip.green { color: var(--color-green); border-color: var(--color-green); }
-
 .wear-transition-caption {
   font-size: 0.6rem;
   font-style: italic;
@@ -2663,21 +2562,6 @@ button.btn-confirm-income:disabled {
   color: #facc15;
 }
 
-.malware-die-role.red-shield {
-  background: rgba(244, 63, 94, 0.2);
-  color: #f43f5e;
-}
-
-.malware-die-role.blue-shield {
-  background: rgba(56, 189, 248, 0.2);
-  color: #38bdf8;
-}
-
-.malware-die-role.green-shield {
-  background: rgba(74, 222, 128, 0.2);
-  color: #4ade80;
-}
-
 .malware-die-role.contractor {
   background: rgba(255, 255, 255, 0.2);
   color: #fff;
@@ -2707,13 +2591,6 @@ button.btn-confirm-income:disabled {
   color: #f43f5e;
 }
 
-.confirm-die-chip.glitched-chip {
-  opacity: 0.45;
-  text-decoration: line-through;
-  border-color: #f43f5e !important;
-  color: #f43f5e !important;
-}
-
 @media (max-width: 900px) {
   .confirm-income-grid {
     grid-template-columns: 1fr;
@@ -2722,3 +2599,149 @@ button.btn-confirm-income:disabled {
     grid-template-columns: 1fr;
   }
 }
+
+/* =============================================================================
+   v0.46.0 Vulnerability Track and Pen Test Track
+   ============================================================================= */
+:root {
+  --vuln-safe: #4ade80;
+  --vuln-band-1: #facc15;
+  --vuln-band-2: #fb923c;
+  --vuln-band-3: #f43f5e;
+  --vuln-safe-bg: rgba(74, 222, 128, 0.10);
+  --vuln-band-1-bg: rgba(250, 204, 21, 0.12);
+  --vuln-band-2-bg: rgba(251, 146, 60, 0.14);
+  --vuln-band-3-bg: rgba(244, 63, 94, 0.16);
+}
+
+.dock-select {
+  padding: 4px 8px;
+  background: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.vuln-preview {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+.vuln-preview.safe { color: var(--vuln-safe); background: var(--vuln-safe-bg); }
+.vuln-preview.at-risk { color: var(--vuln-band-2); background: var(--vuln-band-2-bg); }
+
+.secret-face-tag {
+  background: rgba(244, 63, 94, 0.15);
+  border: 1px solid #f43f5e;
+  color: #fda4af;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+}
+
+.badge-vuln {
+  background: var(--vuln-band-1);
+  color: #111;
+  font-size: 0.62rem;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-weight: 800;
+}
+
+.btn-pen-test { border-color: var(--vuln-safe); color: var(--vuln-safe); }
+
+/* Agent Board: Vulnerability Track row */
+.vulnerability-track-box { margin-top: 10px; }
+.vuln-track-row {
+  display: grid;
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+  gap: 2px;
+  margin-top: 6px;
+}
+.vuln-cell {
+  min-height: 42px;
+  border-radius: 3px;
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 2px 0;
+  font-size: 0.6rem;
+}
+.vuln-cell .cell-num { color: var(--text-dim); font-weight: 700; }
+.vuln-cell.safe { background: var(--vuln-safe-bg); }
+.vuln-cell.band-1 { background: var(--vuln-band-1-bg); }
+.vuln-cell.band-2 { background: var(--vuln-band-2-bg); }
+.vuln-cell.band-3 { background: var(--vuln-band-3-bg); }
+.vuln-marker { font-size: 0.7rem; line-height: 1; }
+.vuln-legend-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; font-size: 0.62rem; }
+.vuln-legend { padding: 1px 6px; border-radius: 3px; }
+.vuln-legend.safe { color: var(--vuln-safe); background: var(--vuln-safe-bg); }
+.vuln-legend.band-1 { color: var(--vuln-band-1); background: var(--vuln-band-1-bg); }
+.vuln-legend.band-2 { color: var(--vuln-band-2); background: var(--vuln-band-2-bg); }
+.vuln-legend.band-3 { color: var(--vuln-band-3); background: var(--vuln-band-3-bg); }
+
+/* Player mat: Vulnerability reserve card */
+.reserve-card.vulnerability-card.safe { border-color: rgba(74, 222, 128, 0.45); }
+.reserve-card.vulnerability-card.at-risk { border-color: rgba(244, 63, 94, 0.55); }
+.vulnerability-card .reserve-card-title { color: var(--vuln-band-1); }
+.vulnerability-card.at-risk .reserve-secrets-value { color: var(--vuln-band-3); }
+.vulnerability-card.safe .reserve-secrets-value { color: var(--vuln-safe); }
+.vuln-max { color: var(--text-dim); font-size: 0.8rem; margin-left: 2px; }
+.vuln-bar {
+  height: 5px;
+  margin: 4px 8px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--vuln-safe) 0 25%, var(--vuln-band-1) 25% 44%, var(--vuln-band-2) 44% 63%, var(--vuln-band-3) 63% 100%);
+  opacity: 0.35;
+  position: relative;
+}
+.vuln-bar span {
+  display: block;
+  height: 100%;
+  border-right: 2px solid var(--text-main);
+  background: transparent;
+}
+
+.track-strip-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 900px) {
+  .track-strip-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vuln-track-row { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+}
+
+.production-zone-panel {
+  border: 1px solid rgba(234, 179, 8, 0.35);
+  background: rgba(15, 23, 42, 0.4);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  margin-bottom: 12px;
+}
+.empty-tray-msg { font-size: 0.68rem; color: var(--text-muted); font-style: italic; padding: 4px 8px; }
+
+/* Phase 4 panel */
+.threat-label { font-weight: 700; }
+.threat-label.red { color: var(--color-red); }
+.threat-label.blue { color: var(--color-blue); }
+.threat-label.green { color: var(--color-green); }
+.confirm-threat-row strong.loss { color: #f43f5e; }
+.safe-text { color: var(--vuln-safe); }
+.threat-row-hit { background: rgba(244, 63, 94, 0.08); border-left: 3px solid #f43f5e; padding-left: 6px; }
+.vuln-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.vuln-chip {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+.vuln-chip.safe { color: var(--vuln-safe); background: var(--vuln-safe-bg); }
+.vuln-chip.at-risk { color: var(--vuln-band-2); background: var(--vuln-band-2-bg); }
+.vuln-chip.mine { font-weight: 800; border-color: var(--text-highlight); }
+.sig-card { margin-top: 8px; }
+.sig-card.green { border-color: var(--color-green); }
+.sig-card.black { border-color: var(--color-black-glow); }
+.sig-card.blue { border-color: var(--color-blue); }
+.sig-card.red { border-color: var(--color-red); }
+.sig-choice { font-size: 0.78rem; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 6px; }

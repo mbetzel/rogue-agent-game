@@ -3,18 +3,15 @@
  */
 
 export let state = null;
-export let selectedCommitments = {};
 export let selectedBacklashIndex = 0;
 export let selectedBacklashDieId = null;
 export let selectedPhreakerDieId = null;
-export let patchCashSelected = false;
 export let cipherDiscountSelected = false;
 export let selectedRerollIndices = new Set();
 export let selectedChoiceDeclarations = {};
-export const selectedSlotCleaners = new Set(); // Phase 1: rolled-pool indices of Block 1 Any dice placed on a Glitched Shield Slot
-export let selectedGlitchDieIds = new Set();
-export let selectedAnyAllocations = [];
-export let selectedGraduateIds = null; // Phase 5: Set of die ids (null = not yet initialised from server default)
+export let selectedGraduateIds = null; // Phase 6: Set of die ids (null = not yet initialised from server default)
+export const PHASE_OPERATIONS = 5; // v0.46.0 rules order: Phase 5 Operations, then Phase 6 CI/CD Pipeline Shift
+export const PHASE_PIPELINE = 6;
 export let activePlayerTab = "human"; // "human", player_id number, or "all"
 export let activeBoardView = "tabletop"; // "tabletop", "terminals", "agent", "market"
 
@@ -47,11 +44,9 @@ export function sanitizeSelectionState(newState) {
   if (!human) return;
   const caps = newState.action_capabilities || {};
 
-  // 1. Phase 1 reroll / commitment state
+  // 1. Phase 1 reroll / Choice Face state
   if (newState.phase !== 1 || !human.has_rolled || human.has_committed) {
     selectedRerollIndices.clear();
-    selectedSlotCleaners.clear();
-    selectedCommitments = {};
     for (const k of Object.keys(selectedChoiceDeclarations)) {
       delete selectedChoiceDeclarations[k];
     }
@@ -66,21 +61,12 @@ export function sanitizeSelectionState(newState) {
 
   // 2. Cipher discount toggle auto-reset when no longer available
   const canAnyCipherBuy = Boolean(
-    newState.phase === 6 &&
+    newState.phase === PHASE_OPERATIONS &&
     caps.can_cipher_buy &&
     Object.values(caps.can_cipher_buy).some(Boolean)
   );
   if (!canAnyCipherBuy) {
     cipherDiscountSelected = false;
-  }
-
-  // 3. Patch mode toggle auto-sync
-  if (newState.phase === 6) {
-    if (patchCashSelected && !caps.can_patch_cash && caps.can_patch_token) {
-      patchCashSelected = false;
-    } else if (!patchCashSelected && !caps.can_patch_token && caps.can_patch_cash) {
-      patchCashSelected = true;
-    }
   }
 
   // 4. Backlash die ID & Phreaker die ID validation
@@ -94,14 +80,8 @@ export function sanitizeSelectionState(newState) {
     selectedPhreakerDieId = unpatched.length > 0 ? unpatched[0].die_id : null;
   }
 
-  // 5. Glitch & Any shield allocation selection state
-  if (newState.phase !== 4 || newState.subphase !== "confirm_attacks") {
-    selectedGlitchDieIds.clear();
-    selectedAnyAllocations = [];
-  }
-
-  // 6. Phase 5 Scanned Graduation selection
-  if (newState.phase !== 5) {
+  // 5. Phase 6 Scanned Graduation selection
+  if (newState.phase !== PHASE_PIPELINE) {
     selectedGraduateIds = null;
   }
 }
@@ -117,37 +97,6 @@ export function toggleSelectedGraduateId(dieId, maxAllowed) {
   } else if (selectedGraduateIds.size < maxAllowed) {
     selectedGraduateIds.add(dieId);
   }
-}
-
-export function setSelectedAnyAllocation(index, colorStr) {
-  if (index >= 0 && index < selectedAnyAllocations.length) {
-    selectedAnyAllocations[index] = colorStr;
-  }
-}
-
-export function initSelectedAnyAllocations(allocList) {
-  selectedAnyAllocations = Array.isArray(allocList) ? [...allocList] : [];
-}
-
-export function clearSelectedAnyAllocations() {
-  selectedAnyAllocations = [];
-}
-
-export function toggleSelectedGlitchDieId(dieId, maxAllowed = 1) {
-  if (selectedGlitchDieIds.has(dieId)) {
-    selectedGlitchDieIds.delete(dieId);
-  } else {
-    if (maxAllowed === 1) {
-      selectedGlitchDieIds.clear();
-      selectedGlitchDieIds.add(dieId);
-    } else if (selectedGlitchDieIds.size < maxAllowed) {
-      selectedGlitchDieIds.add(dieId);
-    }
-  }
-}
-
-export function clearSelectedGlitchDieIds() {
-  selectedGlitchDieIds.clear();
 }
 
 export function setState(newState) {
@@ -167,10 +116,6 @@ export function setSelectedPhreakerDieId(id) {
   selectedPhreakerDieId = id !== null && id !== undefined ? Number(id) : null;
 }
 
-export function setPatchCashSelected(val) {
-  patchCashSelected = Boolean(val);
-}
-
 export function setCipherDiscountSelected(val) {
   cipherDiscountSelected = Boolean(val);
 }
@@ -179,14 +124,10 @@ export function clearSelectedRerolls() {
   selectedRerollIndices.clear();
 }
 
-export function toggleSlotCleaner(idx) {
-  if (selectedSlotCleaners.has(idx)) selectedSlotCleaners.delete(idx);
-  else selectedSlotCleaners.add(idx);
-}
-
-export function resetCommitments() {
-  selectedCommitments = {};
-  selectedSlotCleaners.clear();
+export function resetChoiceDeclarations() {
+  for (const k of Object.keys(selectedChoiceDeclarations)) {
+    delete selectedChoiceDeclarations[k];
+  }
 }
 
 export function getHumanPlayerId() {

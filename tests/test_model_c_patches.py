@@ -20,13 +20,11 @@ from sim.engine.phase1_boot import execute_phase_1
 from sim.engine.phase3_ops import execute_phase_3
 from sim.entities import Die, Face, create_gray_die
 from sim.bots.base import BaseBot, Phase3ActionPlan
-from tests.web_legacy import use_v037_rules
 from web.controller.core import GameController
 from web.controller.serializer import complete_round
 from web.schemas import GameStateSerializer
 
 
-@use_v037_rules
 class TestModelCPatches(unittest.TestCase):
     """Test suite for Model C: End-of-Round Cleanup Cap for Patches."""
 
@@ -65,35 +63,6 @@ class TestModelCPatches(unittest.TestCase):
         self.assertEqual(player.patches, 6)
         self.assertGreater(player.patches, engine.config.max_patch_tokens)
 
-    def test_tc02_phase1_hotfixing_with_above_cap_patches(self):
-        """TC-02: Hotfixing in Phase 1 allows spending down from an above-cap patch balance."""
-        controller = GameController()
-        controller.new_game(num_players=2, seed=42)
-        human_player = controller.state.players[0]
-        # Start Phase 1 by rolling the pool
-        controller.roll_pool(0)
-
-        # Set human player patches to 5 (> max_patch_tokens of 3)
-        human_player.patches = 5
-        self.assertEqual(controller.state.config.max_patch_tokens, 3)
-
-        # Hotfix die index 0 using 1 patch token
-        state = controller.hotfix_reroll(0, 0)
-        self.assertIsNotNone(state)
-        # Patches should be 4, still above cap of 3
-        self.assertEqual(human_player.patches, 4)
-
-        # Hotfix die index 1 using another patch token
-        state2 = controller.hotfix_reroll(0, 1)
-        self.assertIsNotNone(state2)
-        # Patches should now be 3
-        self.assertEqual(human_player.patches, 3)
-
-        # Now test commit_defenses when player has > 3 patches
-        human_player.patches = 5
-        # Set rolled die faces to non-patch, non-glitch to verify commit doesn't clamp patches
-        controller.commit_defenses(0, commitments={})
-        self.assertEqual(human_player.patches, 5)
 
     def test_tc03_phase3_ops_spending_down_excess_patches(self):
         """TC-03: Phase 3 operations can spend down from an above-cap patch total."""
@@ -217,16 +186,6 @@ class TestModelCPatches(unittest.TestCase):
         self.assertEqual(pz_player_web.patches, 7)
         for entry in controller.event_log[initial_log_count:]:
             self.assertNotIn("discarded", entry)
-
-    def test_tc08_web_schema_serializes_max_patch_tokens(self):
-        """TC-08: Web schema serialize_game_state exposes max_patch_tokens at top level."""
-        controller = GameController()
-        controller.new_game(num_players=2, seed=42)
-        controller.state.config.max_patch_tokens = 3
-
-        full_state = controller.get_full_state()
-        self.assertIn("max_patch_tokens", full_state)
-        self.assertEqual(full_state["max_patch_tokens"], 3)
 
 
 if __name__ == "__main__":

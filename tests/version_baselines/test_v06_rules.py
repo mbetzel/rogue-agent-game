@@ -20,7 +20,6 @@ Covers all 16 technical test cases from the Principal Engineer specification:
 """
 
 from __future__ import annotations
-from tests.web_legacy import use_v037_rules
 
 import random
 import unittest
@@ -51,7 +50,6 @@ from web.game_controller import GameController
 from web.schemas import GameStateSerializer
 
 
-@use_v037_rules
 class TestV06Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     # 1. GameConfig Parameters
@@ -186,83 +184,14 @@ class TestV06Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     # 5. Contractor Hiring Deduction and Supply
     # -------------------------------------------------------------------------
-    def test_contractor_hiring_deduction_and_supply(self) -> None:
-        """Hiring contractors deducts $1 per die, decrements supply, and adds dice to player."""
-        engine = GameEngine(config=GameConfig.legacy_v035(num_players=2), bots=[BaseBot(0), BaseBot(1)], seed=42)
-        p0 = engine.state.players[0]
-        p0.money = 7
-        self.assertEqual(engine.state.contractor_supply, 12)
-
-        ctrl = GameController()
-        ctrl.new_game(num_players=2, seed=42)
-        ctrl.state.players[0].money = 7
-        initial_supply = ctrl.state.contractor_supply
-
-        ctrl.hire_contractors(player_id=0, count=2)
-        self.assertEqual(ctrl.state.players[0].money, 4)  # $7 - ($1 + $2) = $4
-        self.assertEqual(ctrl.state.contractor_supply, initial_supply - 2)
-        self.assertEqual(len(ctrl.state.players[0].contractor_dice), 2)
-        self.assertEqual(ctrl.state.players[0].hired_contractor_count, 2)
-        self.assertEqual(ctrl.state.players[0].total_contractors_hired, 2)
-        self.assertEqual(ctrl.player_meta[0]["hired_contractors"], 2)
 
     # -------------------------------------------------------------------------
     # 6. Contractor Hiring Limits
     # -------------------------------------------------------------------------
-    def test_contractor_hiring_limits(self) -> None:
-        """Contractor hiring strictly enforces max 3 per round, cash limits, and supply limits."""
-        ctrl = GameController()
-        ctrl.new_game(num_players=2, seed=42)
-
-        # 1. Cash limit: Player has $1, tries to hire 2 -> rejected
-        ctrl.state.players[0].money = 1
-        with self.assertRaises(ValueError):
-            ctrl.hire_contractors(player_id=0, count=2)
-
-        # 2. Max hire limit: Try to hire 4 -> rejected
-        ctrl.state.players[0].money = 10
-        with self.assertRaises(ValueError):
-            ctrl.hire_contractors(player_id=0, count=4)
-
-        # Hire 2 successfully
-        ctrl.hire_contractors(player_id=0, count=2)
-        self.assertEqual(ctrl.player_meta[0]["hired_contractors"], 2)
-
-        # Try to hire 2 more (2 + 2 = 4 > 3 max) -> rejected
-        with self.assertRaises(ValueError):
-            ctrl.hire_contractors(player_id=0, count=2)
-
-        # Hire 1 more -> now at 3 (max reached)
-        ctrl.hire_contractors(player_id=0, count=1)
-        self.assertEqual(ctrl.player_meta[0]["hired_contractors"], 3)
-
-        # Further hire rejected
-        with self.assertRaises(ValueError):
-            ctrl.hire_contractors(player_id=0, count=1)
-
-        # 3. Supply limit
-        ctrl.new_game(num_players=2, seed=42)
-        ctrl.state.contractor_supply = 1
-        ctrl.state.players[0].money = 5
-        with self.assertRaises(ValueError):
-            ctrl.hire_contractors(player_id=0, count=2)
 
     # -------------------------------------------------------------------------
     # 7. Phase 1 Active Pool Includes Contractors
     # -------------------------------------------------------------------------
-    def test_phase1_active_pool_includes_contractors(self) -> None:
-        """Active pool rolled in Phase 1 includes ready dice + contractor dice."""
-        ctrl = GameController()
-        ctrl.new_game(num_players=2, seed=42)
-        ctrl.state.players[0].money = 5
-        ctrl.hire_contractors(player_id=0, count=2)
-
-        ctrl.roll_pool(player_id=0)
-        p0_meta = ctrl.player_meta[0]
-        # 4 ready starter dice + 2 hired contractors = 6 active dice
-        self.assertEqual(len(p0_meta["rolled_pool"]), 6)
-        white_count = sum(1 for d in p0_meta["rolled_pool"] if d.color == DieColor.WHITE)
-        self.assertEqual(white_count, 2)
 
     # -------------------------------------------------------------------------
     # 8. Glitch Face Immediate Lock
@@ -385,66 +314,10 @@ class TestV06Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     # 13. Debug Unlock Action
     # -------------------------------------------------------------------------
-    def test_debug_unlock_action(self) -> None:
-        """Debug unlock spends 1 🔬 token to unlock a locked die."""
-        ctrl = GameController()
-        ctrl.new_game(num_players=2, seed=42)
-        ctrl.state.players[0].patches = 2
-
-        face = Face("Test", money=1)
-        die0 = Die(1, DieColor.GRAY, 0, 0, faces=[face] * 6)
-        ctrl.state.players[0].ready_dice = [die0]
-        ctrl.roll_pool(player_id=0)
-
-        ctrl.player_meta[0]["rolled_pool"][0].is_locked = True
-        self.assertTrue(ctrl.player_meta[0]["rolled_pool"][0].is_locked)
-
-        # Debug unlock is deprecated in v0.23.0
-        with self.assertRaises(ValueError) as ctx:
-            ctrl.debug_unlock_die(player_id=0, die_index=0)
-        self.assertIn("deprecated in v0.23.0", str(ctx.exception))
 
     # -------------------------------------------------------------------------
     # 14. Immediate Outputs Collection
     # -------------------------------------------------------------------------
-    def test_immediate_outputs_collection(self) -> None:
-        """Glitch produces 0 outputs; locked cash grants cash; locked shields remain shields."""
-        ctrl = GameController()
-        ctrl.new_game(num_players=2, seed=42)
-
-        glitch_face = Face("Glitch", is_glitch=True)
-        cash_face = Face("+$2 Cash", money=2)
-        shield_face = Face("Block 1 Blue", shield_color=ShieldColor.BLUE, block_amount=1)
-
-        d_glitch = Die(1, DieColor.WHITE, 1, 0, faces=[glitch_face] * 6)
-        d_cash = Die(2, DieColor.GRAY, 0, 0, faces=[cash_face] * 6)
-        d_shield = Die(3, DieColor.GRAY, 0, 0, faces=[shield_face] * 6)
-
-        ctrl.state.version_deck = [c for c in get_all_version_cards() if c.directive_code == "RAAS"]
-        ctrl.state.current_version_index = 0
-        ctrl.state.players[0].ready_dice = [d_glitch, d_cash, d_shield]
-        ctrl.state.players[0].money = 0
-        ctrl.state.players[0].patches = 0
-        ctrl.state.active_phase1_locks = {"CASH"}
-
-        ctrl.roll_pool(player_id=0)
-
-        # d_glitch is locked, d_cash and d_shield are unlocked (locks excised in v0.29.0)
-        rolled = ctrl.player_meta[0]["rolled_pool"]
-        self.assertTrue(rolled[0].is_locked)
-        self.assertFalse(rolled[1].is_locked)
-        self.assertFalse(rolled[2].is_locked)
-
-        # Commit defenses
-        ctrl.commit_defenses(player_id=0, commitments={2: "blue"})
-
-        # Verify immediate outputs:
-        # Glitch gave 0 cash and 0 patches
-        # Shield was committed to blue shields
-        self.assertEqual(len(ctrl.player_meta[0]["shield_slots"]["blue"]), 1)
-        # In v0.22.0 Delayed Income, cash is collected from surviving in_production_dice at start of Phase 3
-        collect_player_production_income(ctrl.engine, ctrl.state.players[0], None)
-        self.assertEqual(ctrl.state.players[0].money, 2)
 
     # -------------------------------------------------------------------------
     # 15. White Contractor Dice Wear Immunity

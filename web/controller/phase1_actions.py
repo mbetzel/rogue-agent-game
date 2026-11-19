@@ -14,7 +14,7 @@ from sim.bots import (
 )
 from sim.config import ROUND_PHASE_NAMES, CubeColor, DieColor, EndGameReason, GameConfig, RoundPhase, ShieldColor
 from sim.bots import research_policy
-from sim.engine import research_tracks, secret_faces, phase1_roll_deploy
+from sim.engine import research_tracks, secret_faces, phase1_roll_deploy, vulnerability
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
 from sim.engine.phase1_boot import (
     check_operator_contingent_staffing,
@@ -240,6 +240,13 @@ def override_face(controller: GameController, player_id: int, die_index: int, fa
             raise ValueError("Arbitrary Code Execution cannot set the Secret face")
         meta["ace_uses"] = meta.get("ace_uses", 0) + 1
         label = "Arbitrary Code Execution"
+    elif source == "release_l4":
+        if die_index not in release_l4_gray_faces(player, rolled):
+            raise ValueError("The Release Track Level 4 Capstone sets 1 rolled Gray Legacy die")
+        if meta.get("release_l4_used"):
+            raise ValueError("The Release Track Level 4 Capstone was already used this round")
+        meta["release_l4_used"] = True
+        label = "Release Track Level 4 Capstone"
     else:
         raise ValueError(f"Unknown face override source {source!r}")
     die.current_face = target
@@ -316,76 +323,6 @@ def perform_reroll(
 
 
 
-def debug_unlock_die(controller: GameController, player_id: int, die_index: int) -> Dict[str, Any]:
-    """DEPRECATED in v0.23.0. Debug unlocks have been removed."""
-    raise ValueError("Debug unlocks deprecated in v0.23.0. Fast-Patching is also deprecated (v0.29.0).")
-
-
-
-def hotfix_reroll(controller: GameController, player_id: int, die_index: int) -> Dict[str, Any]:
-    """Legacy v0.37 only: spends 1 🔬 token to reroll any 1 rolled die before committing defenses."""
-    if secret_faces.enabled(controller.state.config):
-        raise ValueError("Rerolls in v0.38.0 are the free rerolls only (no 🔬 reroll)")
-    if controller.phase != 1:
-        raise ValueError(f"Cannot hotfix reroll in phase {controller.phase}")
-    if player_id not in controller.player_meta:
-        raise ValueError(f"Invalid player_id {player_id}")
-
-    meta = controller.player_meta[player_id]
-    player = controller.state.players[player_id]
-
-    if player.is_patient_zero:
-        raise ValueError(f"Player {player_id} is eliminated")
-    if not meta["has_rolled"]:
-        raise ValueError("Must roll ready pool before using hotfix rerolls")
-    if meta["has_committed"]:
-        raise ValueError("Cannot reroll dice after committing defenses")
-
-    rolled = meta["rolled_pool"]
-    if not (0 <= die_index < len(rolled)):
-        raise ValueError(f"Invalid die_index {die_index}. Rolled pool size: {len(rolled)}")
-
-    locked = set(meta.get("locked_reroll_indices", []))
-    if die_index in locked:
-        raise ValueError(f"Die #{die_index + 1} is locked (its patch output was spent for a hotfix) and cannot be rerolled")
-
-    # Available patch tokens = player.patches + any patches showing on kept unlocked rolled dice minus spent_from_kept
-    kept_rolled_patches = sum(
-        d.current_face.patches
-        for i, d in enumerate(rolled)
-        if i != die_index and i not in locked and d.current_face
-    )
-    spent_from_kept = meta.get("spent_from_kept", 0)
-    available_kept = max(0, kept_rolled_patches - spent_from_kept)
-    total_available = player.patches + available_kept
-
-    if total_available < 1:
-        raise ValueError(f"Not enough patch tokens (🔬). Available: {total_available}")
-
-    # Spend 1 patch: prefer spending from held tokens first
-    if player.patches > 0:
-        player.patches -= 1
-    else:
-        spend_idx = None
-        for i, d in enumerate(rolled):
-            if i != die_index and i not in locked and d.current_face and d.current_face.patches > 0:
-                spend_idx = i
-                break
-        if spend_idx is not None:
-            meta.setdefault("locked_reroll_indices", []).append(spend_idx)
-        meta["spent_from_kept"] = spent_from_kept + 1
-
-    # Reroll the specified die
-    die_to_reroll = rolled[die_index]
-    new_face = die_to_reroll.roll(controller.engine.rng)
-
-    controller.event_log.append(
-        f"{meta['name']} spent 1 🔬 to hotfix reroll die #{die_index + 1} ({die_to_reroll.color.value.capitalize()}) -> rolled '{new_face.name}'."
-    )
-    return controller.get_full_state()
-
-
-
 def _log_pipeline(controller: GameController, meta: Dict[str, Any], msg: str) -> None:
     controller.event_log.append(f"{meta['name']} {msg}")
 
@@ -395,35 +332,14 @@ def finalize_assignment(
     player: PlayerState,
     meta: Dict[str, Any],
     active_dice: List[Die],
-    validated: Dict[int, ShieldColor],
-    slot_cleaner_ids: set,
 ) -> None:
-    """Phase 1 Step 5 post-processing shared by the human commit (mirrors ``sim.engine.phase1_roll_deploy``):
-    White Contractor Glitch -> supply, Secret faces -> Processing Box, slot-cleaning dice -> Scanned Box,
-    everything else deployed In Production (Income slot or Defense Grid)."""
+    """Phase 1 Step 4 post-processing for a human (mirrors ``sim.engine.phase1_roll_deploy``): White Contractor
+    Glitch -> supply, Secret faces -> Processing Box, every other die deployed In Production."""
     st = controller.state
     surviving_active: List[Die] = []
-    new_commitments: Dict[int, ShieldColor] = {}
-    for idx, die in enumerate(active_dice):
+    for die in active_dice:
         face = die.current_face
-        if idx in slot_cleaner_ids:
-            die.production_role = None
-            die.is_locked = False
-            die.chosen_choice_index = None
-            die.current_face = None
-            if die.color == DieColor.WHITE:
-                if die in player.contractor_dice:
-                    player.contractor_dice.remove(die)
-                st.contractor_supply += 1
-                player.hired_contractor_count = max(0, len(player.contractor_dice))
-                meta["hired_contractors"] = len(player.contractor_dice)
-                _log_pipeline(controller, meta, "placed a White Contractor die on a Glitched Shield Slot: slot cleaned, die discarded to supply.")
-            else:
-                if die in player.ready_for_release_dice:
-                    player.ready_for_release_dice.remove(die)
-                player.scanned_dice.append(die)
-                _log_pipeline(controller, meta, f"placed a {die.color.value.capitalize()} die on a Glitched Shield Slot: slot cleaned, die moved to the Scanned Box.")
-        elif face and face.secrets_pending:
+        if face and face.secrets_pending:
             if die in player.ready_for_release_dice:
                 player.ready_for_release_dice.remove(die)
             secret_faces.enter_processing_box(player, die, st.current_round)
@@ -442,38 +358,15 @@ def finalize_assignment(
                 player.glitched_dice.append(die)
                 _log_pipeline(controller, meta, f"{die.color.value.capitalize()} die glitched: moved to Under Development.")
         else:
-            new_idx = len(surviving_active)
             surviving_active.append(die)
-            if idx in validated:
-                new_commitments[new_idx] = validated[idx]
 
     player.in_production_dice.clear()
-    slots: Dict[str, List[Die]] = {"red": [], "blue": [], "green": [], "any": []}
-    role_by_color = {
-        ShieldColor.RED: (ProductionRole.RED_SHIELD, "red"),
-        ShieldColor.BLUE: (ProductionRole.BLUE_SHIELD, "blue"),
-        ShieldColor.GREEN: (ProductionRole.GREEN_SHIELD, "green"),
-        ShieldColor.ANY: (ProductionRole.ANY_SHIELD, "any"),
-    }
-    for idx, die in enumerate(surviving_active):
+    for die in surviving_active:
         face = die.effective_face or die.current_face
-        if idx in new_commitments:
-            role, key = role_by_color.get(new_commitments[idx], (ProductionRole.ANY_SHIELD, "any"))
-            die.production_role = role
-            slots[key].append(die)
-        else:
-            die.production_role = ProductionRole.INCOME
-        if face and face.is_star:
-            if face.star_code == "B2":
-                if idx not in new_commitments:
-                    player.b2_available = True
-            elif face.star_code == "Y1":
-                player.y1_available = True
-            elif face.star_code == "P1":
+        die.production_role = ProductionRole.INCOME
+        if face and face.is_star:  # v0.44+ resolves B2 / Y1 in Phase 3; P3 needed a shield (retired)
+            if face.star_code == "P1":
                 player.p1_available = True
-            elif face.star_code == "P3":
-                if idx in new_commitments:
-                    player.p3_available = new_commitments[idx]
             elif face.star_code == "PURPLE_STAR":
                 player.purple_star_available = True
                 player.purple_star_count += 1
@@ -481,150 +374,70 @@ def finalize_assignment(
 
     player.ready_for_release_dice.clear()
     meta["rolled_pool"] = surviving_active
-    meta["commitments"] = {idx: s.value for idx, s in new_commitments.items()}
     meta["has_rolled"] = True
     meta["has_committed"] = True
-    meta["shield_slots"] = slots
 
 
-def commit_defenses(
+def release_l4_gray_faces(player: PlayerState, rolled: List[Die]) -> List[int]:
+    """Rolled-pool indices of Gray dice the Release Track L4 Capstone may set (empty when it is unavailable)."""
+    cfg = player.config
+    if not getattr(cfg, "release_l4_set_gray_face", False) or int(player.release_level) < 4:
+        return []
+    return [i for i, d in enumerate(rolled) if d.color == DieColor.GRAY]
+
+
+def lock_in(
     controller: GameController,
     player_id: int,
-    commitments: Dict[int, ShieldColor | str],
     choice_declarations: Optional[Dict[int, int]] = None,
-    slot_cleaner_indices: Optional[List[int]] = None,
 ) -> Dict[str, Any]:
-    """Phase 1 Step 5 for a human: declare Choice Faces, clean Glitched Shield Slots, place shields, deploy dice.
+    """Phase 1 Step 4 for a human: Lock-in & Assign Dice.
 
-    ``commitments`` lists the dice (by rolled-pool index) placed on the Defense Grid; every shield is a Generic
-    ``Any`` shield (any other colour string is accepted only on the legacy v0.37 ruleset)."""
+    Declares Choice Faces (``choice_declarations`` maps rolled-pool index -> option index; default option 0), gains
+    ``+1`` Vulnerability per ⚠ on the final faces (``vulnerability.lock_in``), sends Secret faces to the Processing
+    Box and deploys every other die In Production. Nothing is blocked in v0.46.0, so there is no shield step."""
     if controller.phase != 1:
-        raise ValueError(f"Cannot commit defenses in phase {controller.phase}")
+        raise ValueError(f"Cannot lock in dice in phase {controller.phase}")
     if player_id not in controller.player_meta:
         raise ValueError(f"Invalid player_id {player_id}")
 
     meta = controller.player_meta[player_id]
     player = controller.state.players[player_id]
-    cfg = controller.state.config
-    slots_on = secret_faces.slots_enabled(cfg)
 
     if player.is_patient_zero:
         raise ValueError(f"Player {player_id} is eliminated")
     if not meta["has_rolled"]:
-        raise ValueError("Must roll ready pool before committing defenses")
+        raise ValueError("Must roll the Ready Pool before locking in")
     if meta["has_committed"]:
-        raise ValueError("Defenses have already been committed this round")
+        raise ValueError("Dice have already been locked in this round")
 
     rolled = meta["rolled_pool"]
     choice_decls: Dict[int, int] = {}
-    if choice_declarations:
-        for k, v in choice_declarations.items():
-            try:
-                choice_decls[int(k)] = int(v)
-            except (ValueError, TypeError):
-                pass
-
-    validated_commitments: Dict[int, ShieldColor] = {}
-    legacy_colors = not secret_faces.enabled(cfg)
-
-    for idx_str, color_str in commitments.items():
-        idx = int(idx_str)
+    for k, v in (choice_declarations or {}).items():
+        try:
+            choice_decls[int(k)] = int(v)
+        except (ValueError, TypeError):
+            raise ValueError(f"Invalid choice declaration {k!r}: {v!r}")
+    for idx in choice_decls:
         if not (0 <= idx < len(rolled)):
-            raise ValueError(f"Invalid die index {idx} in commitments")
-        die = rolled[idx]
-        face = die.current_face
-        if not face or face.is_glitch or face.secrets_pending:
-            raise ValueError(f"Die #{idx + 1} ({die.color.value}) cannot be committed ({face.name if face else 'None'})")
-        shield_target = ShieldColor(str(color_str).lower())
-        if not legacy_colors and shield_target != ShieldColor.ANY:
-            raise ValueError(f"Every shield is a Generic (Any) shield, got {color_str}")
-        if face.is_shield:
-            if face.shield_color == ShieldColor.ANY:
-                validated_commitments[idx] = ShieldColor.ANY
-            elif face.shield_color in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN):
-                validated_commitments[idx] = face.shield_color
-        elif face.has_shield_option:
-            if shield_target in (ShieldColor.BLUE, ShieldColor.ANY):
-                validated_commitments[idx] = ShieldColor.BLUE
-                die.chosen_choice_index = 0
-            else:
-                raise ValueError(f"Die #{idx + 1} ({die.color.value}) can only block Blue, got {color_str}")
-        else:
-            raise ValueError(f"Die #{idx + 1} ({die.color.value}) is not a shield die ({face.name})")
+            raise ValueError(f"Invalid die index {idx} in choice_declarations")
 
-    # Auto-assign any unassigned shields (excluding B2, and excluding choice faces)
     for idx, die in enumerate(rolled):
         face = die.current_face
-        if face and face.is_shield and not face.is_choice and not face.secrets_pending and idx not in validated_commitments:
-            if face.shield_color in (ShieldColor.RED, ShieldColor.BLUE, ShieldColor.GREEN) and face.star_code != "B2":
-                validated_commitments[idx] = face.shield_color
-            elif face.shield_color == ShieldColor.ANY:
-                validated_commitments[idx] = ShieldColor.ANY
-
-    # Choice faces without a shield option take the declared option now (needed before slot cleaning)
-    for idx, die in enumerate(rolled):
-        face = die.current_face
-        if face and face.is_choice and not face.has_shield_option:
+        if face and face.is_choice:
             chosen = choice_decls.get(idx, 0)
             die.chosen_choice_index = chosen if 0 <= chosen < len(face.choices) else 0
 
-    # v0.38 Step 5c: clean Glitched Shield Slots (Clean 1 faces, then Block 1 Any dice placed on a slot)
-    slot_cleaner_ids: set = set()
-    shield_capacity = player.defense_capacity
-    if slots_on:
-        for idx, die in enumerate(rolled):
-            face = die.current_face
-            if not face or face.is_glitch or face.secrets_pending:
-                continue
-            eff = die.effective_face
-            if eff is not None and eff.clean_slots > 0:
-                if secret_faces.clean_slots(player, eff.clean_slots, "face"):
-                    controller.event_log.append(f"{meta['name']} cleaned a Glitched Shield Slot with {eff.name}.")
-        for raw in slot_cleaner_indices or []:
-            idx = int(raw)
-            if player.glitched_shield_slots <= 0:
-                break
-            if not (0 <= idx < len(rolled)) or idx in slot_cleaner_ids:
-                raise ValueError(f"Invalid slot-cleaning die index {idx}")
-            face = rolled[idx].current_face
-            if idx not in validated_commitments or not face or not face.is_shield or face.is_star:
-                raise ValueError(f"Die #{idx + 1} must show Block 1 Any to clean a Glitched Shield Slot")
-            slot_cleaner_ids.add(idx)
-            validated_commitments.pop(idx, None)
-            secret_faces.clean_slots(player, 1, "die")
-        shield_capacity = secret_faces.effective_capacity(player)
-        if shield_capacity == 0:
-            player.zero_capacity_rounds += 1
-
-    # Enforce Defense Grid Shield Capacity (INV-DEF-CAP-01): capacity minus Glitched Shield Slots
-    if len(validated_commitments) > shield_capacity:
-        priority_map = {ShieldColor.BLUE: 0, ShieldColor.ANY: 1, ShieldColor.RED: 2, ShieldColor.GREEN: 3}
-        sorted_items = sorted(validated_commitments.items(), key=lambda item: priority_map.get(item[1], 4))
-        allowed = dict(sorted_items[:shield_capacity])
-        rejected_indices = set(validated_commitments.keys()) - set(allowed.keys())
-        validated_commitments = allowed
-        for r_idx in rejected_indices:
-            r_die = rolled[r_idx]
-            if r_die.current_face and r_die.current_face.is_choice and r_die.current_face.has_shield_option:
-                r_die.chosen_choice_index = 1
-
-    # Sync shield-option choice faces
-    for idx, die in enumerate(rolled):
-        face = die.current_face
-        if face and face.is_choice and face.has_shield_option:
-            die.chosen_choice_index = 0 if validated_commitments.get(idx) == ShieldColor.BLUE else 1
-
-    spent_from_kept = meta.get("spent_from_kept", 0)
-    player.patches = max(0, player.patches - spent_from_kept)
-
-    finalize_assignment(controller, player, meta, rolled, validated_commitments, slot_cleaner_ids)
-
-    slots = meta["shield_slots"]
-    shield_summary = [f"{len(slots[c])} Generic (Any)" if c == "any" else f"{len(slots[c])} {c.capitalize()}"
-                      for c in ["any", "red", "blue", "green"] if slots[c]]
+    before = player.vulnerability
+    gained = vulnerability.lock_in(controller.engine, player, rolled)
+    icons = sum(vulnerability.face_vuln(d.current_face) for d in rolled)
+    lost = icons - gained
     controller.event_log.append(
-        f"{meta['name']} committed shields: {', '.join(shield_summary) if shield_summary else 'No shields'}."
+        f"{meta['name']} locked in {len(rolled)} dice: {icons} ⚠, Vulnerability {before} -> {player.vulnerability}"
+        + (f" ({lost} lost at the top of the Vulnerability Track)" if lost > 0 else "") + "."
     )
+
+    finalize_assignment(controller, player, meta, rolled)
 
     all_humans_committed = all(
         m["has_committed"]
@@ -636,7 +449,7 @@ def commit_defenses(
         controller.phase = int(RoundPhase.COMPILER_DROP_AND_CORRUPTION)
         controller.phase_name = ROUND_PHASE_NAMES[controller.phase]
         controller.subphase = "ready_for_compile"
-        controller.event_log.append("All corporations have committed defenses. Ready for Compile Drop.")
+        controller.event_log.append("All corporations have locked in. Ready for Compile Drop.")
 
     return controller.get_full_state()
 
@@ -653,13 +466,7 @@ def auto_execute_bots_phase_1(controller: GameController) -> None:
     results = phase1_roll_deploy.execute_phase_1(controller.engine, player_ids=bot_ids, prelude=False)
     for player, surviving, commitments in results:
         meta = controller.player_meta[player.player_id]
-        slots: Dict[str, List[Die]] = {"red": [], "blue": [], "green": [], "any": []}
-        for idx, color in commitments.items():
-            if idx < len(surviving):
-                slots[color.value if color.value in slots else "any"].append(surviving[idx])
         meta["rolled_pool"] = list(surviving)
-        meta["commitments"] = {idx: c.value for idx, c in commitments.items()}
         meta["has_rolled"] = True
         meta["has_committed"] = True
-        meta["shield_slots"] = slots
         meta["hired_contractors"] = player.hired_contractor_count

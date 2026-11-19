@@ -396,42 +396,6 @@ class TestV290RulesStreamlining(unittest.TestCase):
         self.assertEqual(prom.starting_release_bandwidth, 4)
         self.assertEqual(prom.upgrade_discount, 1)
 
-    def test_web_api_four_track_upgrades(self) -> None:
-        """TEST-V290-12 (INV-UPGRADE-TRACK-01): Verify GameController / web API handles
-
-        'triage' and 'release' independently.
-        """
-        ctrl = GameController()
-        ctrl.new_game(research_track_model="V034_THREE_LEVEL", num_players=2, seed=42)
-        ctrl.phase = 6
-        ctrl.subphase = "operations"
-        ctrl.active_player_index = 0
-
-        p0 = ctrl.state.players[0]
-        p0.triage_level = 0
-        p0.triage_bandwidth = 2
-        p0.release_level = 0
-        p0.release_bandwidth = 4
-        p0.research_tokens = 6
-
-        # Upgrade triage
-        state_triage = ctrl.upgrade_track(player_id=0, track_type="triage")
-        self.assertIsNotNone(state_triage)
-        self.assertEqual(p0.triage_level, 1)
-        self.assertEqual(p0.triage_bandwidth, 3)
-        self.assertEqual(p0.release_level, 0)
-        self.assertEqual(p0.release_bandwidth, 4)
-        self.assertEqual(p0.research_tokens, 4)
-
-        # Upgrade release
-        state_release = ctrl.upgrade_track(player_id=0, track_type="release")
-        self.assertIsNotNone(state_release)
-        self.assertEqual(p0.triage_level, 1)
-        self.assertEqual(p0.triage_bandwidth, 3)
-        self.assertEqual(p0.release_level, 1)
-        self.assertEqual(p0.release_bandwidth, 5)
-        self.assertEqual(p0.research_tokens, 2)
-
 
 if __name__ == "__main__":
     unittest.main()

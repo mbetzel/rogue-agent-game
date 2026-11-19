@@ -2,7 +2,6 @@
 Purple not purchasable, Slush Fund once per game and the new Gray Legacy faces (spec R-01..R-32)."""
 
 from __future__ import annotations
-from tests.web_legacy import use_v037_rules
 
 import json
 import os
@@ -712,98 +711,6 @@ class TestResearchPolicy(unittest.TestCase):
         g.current_face = g.faces[3]
         self.assertEqual(adjust_declared_choices(p.bot, p, [g], {0: 0}, e.config), {0: 1})
         self.assertEqual(adjust_declared_choices(p.bot, p, [g], {0: 0}, GameConfig.legacy_v034()), {0: 0})
-
-
-@use_v037_rules
-class TestWebV035(unittest.TestCase):
-    def test_r31_web_round_trip(self):
-        from web.game_controller import GameController
-
-        ctrl = GameController()
-        st = ctrl.new_game(num_players=2, seed=42)
-        self.assertEqual(st["players"][0]["max_track_level"], 4)
-        self.assertEqual(st["players"][0]["research_track_model"], "V035_FIVE_LEVEL")
-        self.assertFalse(st["players"][0]["can_buy_purple_reserve"])
-        ctrl.phase = 6
-        ctrl.active_player_index = 0
-        p0 = ctrl.state.players[0]
-        caps = ctrl.get_action_capabilities(0)
-        self.assertNotIn("can_buy_purple_reserve", caps)
-        self.assertNotIn("purple", caps["can_buy"])
-        self.assertIn("breakthrough_preview", caps)
-        with self.assertRaises(ValueError):
-            ctrl.buy_die(0, "purple") if hasattr(ctrl, "buy_die") else ctrl.buy(0, "purple")
-        p0.triage_level, p0.triage_bandwidth = 2, 3
-        p0.research_tokens, p0.money = 2, 5
-        ctrl.upgrade_track(0, "triage")
-        caps = ctrl.get_action_capabilities(0)
-        self.assertIsNotNone(caps["pending_breakthrough"])
-        self.assertFalse(caps["can_file_patent"])
-        opts = caps["pending_breakthrough"]["options"]
-        gray_id = opts["gray_die_ids"][0]
-        state = ctrl.resolve_breakthrough(0, accept=True, gray_die_id=gray_id, color="green")
-        self.assertIsNone(ctrl.get_action_capabilities(0)["pending_breakthrough"])
-        self.assertEqual(p0.money, 2)
-        self.assertTrue(any(d.color == DieColor.GREEN for d in p0.ready_for_release_dice))
-        self.assertEqual(state["players"][0]["breakthroughs"][-1]["outcome"], "TAKEN")
-        # Levels serialize up to 4
-        p0.research_tokens = 3
-        ctrl.upgrade_track(0, "triage")
-        self.assertEqual(ctrl.get_full_state()["players"][0]["triage_level"], 4)
-
-    def _web_dto_phase4(self, seed=3):
-        from web.game_controller import GameController
-        from web.controller import phase4_attack_actions as w4
-
-        ctrl = GameController()
-        ctrl.new_game(num_players=2, seed=seed, players_config=[
-            {"is_human": True, "name": "H", "company": "DTO", "white_hat": "OPERATOR"},
-            {"is_human": False, "name": "B", "company": "MERIDIAN"}])
-        for _ in range(200):
-            if ctrl.phase == 4 and ctrl.subphase == "confirm_attacks":
-                return ctrl, w4
-            st = ctrl.get_full_state()
-            if ctrl.phase == 1:
-                if not ctrl.player_meta[0]["has_rolled"]:
-                    ctrl.roll_pool(0)
-                ctrl.commit_defenses(0, {})
-            elif ctrl.phase == 2:
-                ctrl.compile_drop()
-            elif ctrl.phase == 3:
-                ctrl.confirm_income(0)
-            elif ctrl.phase == 5:
-                ctrl.choose_graduates(0, ctrl.pending_graduation[0]["default_graduate_ids"])
-            elif ctrl.phase == 6:
-                ctrl.end_turn(0)
-            else:
-                return None, None
-        return None, None
-
-    def test_r18b_web_human_slush_fund_choice(self):
-        """OQ-5: a human DTO player chooses Slush Fund at Phase 4 confirmation; the bot hook never decides."""
-        from sim.engine import phase4_attack_resolution as p4
-        from web.controller import capabilities
-
-        for use, expect_used in ((False, False), (True, True), (None, False)):
-            ctrl, w4 = self._web_dto_phase4()
-            self.assertIsNotNone(ctrl)
-            p0 = ctrl.state.players[0]
-            self.assertFalse(ctrl.get_action_capabilities(0)["can_spook"])  # no manual button under v0.35
-            ctrl.attack_strengths = {CubeColor.RED: 0, CubeColor.BLUE: 3, CubeColor.GREEN: 0}
-            p0.in_production_dice.clear()
-            ctrl.player_meta[0]["commitments"] = {}
-            p0.money = 0  # no cash absorption: only the free 2-Secret Slush Fund absorb
-            secrets = p0.secrets
-            ctrl.confirm_attacks(0, any_shield_allocations={}, glitch_die_ids=[], use_slush_fund=use)
-            self.assertEqual(p0.slush_fund_used_game, expect_used, use)
-            self.assertEqual(p0.secrets, secrets - (1 if expect_used else 3), use)
-
-    def test_r31b_web_legacy_ruleset(self):
-        from web.game_controller import GameController
-
-        ctrl = GameController()
-        st = ctrl.new_game(num_players=2, seed=42, research_track_model="V034_THREE_LEVEL")
-        self.assertEqual(st["players"][0]["max_track_level"], 2)
 
 
 if __name__ == "__main__":

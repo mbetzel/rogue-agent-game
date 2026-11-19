@@ -70,7 +70,6 @@ from sim.entities import (
     get_random_version_deck,
 )
 from sim.experiments import ExperimentMetrics, run_batch
-from tests.web_legacy import use_v037_rules
 from web.game_controller import GameController
 from web.server import create_server
 
@@ -439,72 +438,6 @@ class TestGroupBVariantCardBehaviors(unittest.TestCase):
         finally:
             engine.state.tower.drop = original_drop
 
-    def test_b2_deep_rd_vault_cost_and_rejection(self) -> None:
-        """B2 costs $4 to gain +1 Secret; rejects activation when cash < $4 or secrets >= 10."""
-        gc = GameController()
-        gc.new_game(num_players=2, randomize_cards=False)
-        gc.phase = 6
-        gc.phase_name = "Market & Operations"
-        gc.active_player_index = 0
-        p0 = gc.state.players[0]
-
-        # Case A: Successful activation with $4
-        p0.money = 5
-        p0.secrets = 6
-        p0.b2_available = True
-        gc.execute_star_action(player_id=0, action_type="B2")
-        self.assertEqual(p0.money, 1)  # 5 - 4 = $1
-        self.assertEqual(p0.secrets, 7)  # 6 + 1 = 7
-        self.assertFalse(p0.b2_available)
-
-        # Case B: Rejection when insufficient cash (< $4)
-        p0.money = 3
-        p0.b2_available = True
-        with self.assertRaises(ValueError) as ctx:
-            gc.execute_star_action(player_id=0, action_type="B2")
-        self.assertIn("B2 requires $4 cash", str(ctx.exception))
-
-        # Case C: Rejection when at secrets cap if configured
-        gc.state.config.b2_secret_cap = 10
-        p0.money = 10
-        p0.secrets = 10
-        p0.b2_available = True
-        with self.assertRaises(ValueError) as ctx:
-            gc.execute_star_action(player_id=0, action_type="B2")
-        self.assertIn("maximum capacity (10)", str(ctx.exception))
-
-    def test_p3_packet_deflection_paid_injection_and_rejection(self) -> None:
-        """P3 requires $1 cash to deflect a cube of the blocked color; rejects activation when cash < $1."""
-        gc = GameController()
-        gc.new_game(num_players=2, randomize_cards=False)
-        gc.phase = 6
-        gc.phase_name = "Market & Operations"
-        gc.active_player_index = 0
-        p0 = gc.state.players[0]
-
-        # Case A: Successful activation with $1 cash
-        p0.money = 2
-        p0.p3_available = ShieldColor.BLUE
-        blue_before = gc.state.staging_cup.get(CubeColor.BLUE, 0)
-        gc.execute_star_action(player_id=0, action_type="P3", cube_color="blue")
-        self.assertEqual(p0.money, 1)  # 2 - 1 = $1
-        self.assertEqual(gc.state.staging_cup.get(CubeColor.BLUE, 0), blue_before + 1)
-        self.assertIsNone(p0.p3_available)
-
-        # Case B: Rejection when cash < $1 (zero cash)
-        p0.money = 0
-        p0.p3_available = ShieldColor.BLUE
-        with self.assertRaises(ValueError) as ctx:
-            gc.execute_star_action(player_id=0, action_type="P3", cube_color="blue")
-        self.assertIn("P3 requires $1 cash", str(ctx.exception))
-
-        # Case C: Rejection when color does not match blocked color
-        p0.money = 5
-        p0.p3_available = ShieldColor.BLUE
-        with self.assertRaises(ValueError) as ctx:
-            gc.execute_star_action(player_id=0, action_type="P3", cube_color="red")
-        self.assertIn("matching the blocked color", str(ctx.exception))
-
 
 # =====================================================================
 # Group C: Version Directive Mechanics
@@ -593,7 +526,6 @@ class TestGroupCVersionDirectives(unittest.TestCase):
 # Group D: Web Game Controller & State Machine
 # =====================================================================
 
-@use_v037_rules
 class TestGroupDWebGameController(unittest.TestCase):
     """Unit tests for GameController initialization and variant tracking."""
 
@@ -644,55 +576,11 @@ class TestGroupDWebGameController(unittest.TestCase):
         self.assertIn("G1", log_text)
         self.assertIn("Y1", log_text)
 
-    def test_polymorphic_worm_patch_cash_cost_matches_config(self) -> None:
-        """Verifies that under POLYMORPHIC_WORM:
-        - Phase 1 max_rerolls is 1
-        - Cash patch cost in Phase 3 is strictly $2 (GameConfig.patch_cash_cost),
-          successfully patching an unpatched die with $2 cash without raising an error.
-        """
-        all_versions = get_all_version_cards()
-        worm_card = [v for v in all_versions if v.directive_code == "POLYMORPHIC_WORM"][0]
-        custom_deck = [worm_card, all_versions[2], all_versions[4]]
-
-        gc = GameController()
-        gc.new_game(num_players=2, version_deck=custom_deck, randomize_cards=False)
-
-        # 1. Under v0.15.0 POLYMORPHIC_WORM, Phase 1 default free rerolls is 2 (Space 4 locks Patch faces)
-        self.assertEqual(gc.state.active_directive_code, "POLYMORPHIC_WORM")
-        self.assertEqual(gc.player_meta[0]["max_rerolls"], 2)
-        self.assertEqual(gc.player_meta[0]["rerolls_remaining"], 2)
-
-        # 2. Setup Phase 3 state for human player 0
-        gc.phase = 6
-        gc.phase_name = "Market & Operations"
-        gc.active_player_index = 0
-
-        player = gc.state.players[0]
-        config_cost = gc.state.config.patch_cash_cost
-        self.assertEqual(config_cost, 2)
-
-        # Give player exactly $2 cash and 1 unpatched die (and 0 patch tokens)
-        player.money = config_cost
-        player.patches = 0
-        unpatched_die = player.ready_dice.pop()
-        player.unpatched_dice.append(unpatched_die)
-
-        initial_unpatched_count = len(player.unpatched_dice)
-        initial_ready_count = len(player.ready_dice)
-
-        # In v0.22.0, cash patching is abolished; attempting cash patch raises ValueError
-        with self.assertRaises(ValueError):
-            gc.patch_die(player_id=0, die_index=0, use_cash=True)
-
-        self.assertEqual(player.money, config_cost)
-        self.assertEqual(len(player.unpatched_dice), initial_unpatched_count)
-
 
 # =====================================================================
 # Group E: Web Server REST API Endpoints
 # =====================================================================
 
-@use_v037_rules
 class TestGroupEWebAPIServer(unittest.TestCase):
     """Integration tests for POST /api/game/new handling of randomize_cards."""
 

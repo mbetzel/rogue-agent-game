@@ -121,25 +121,6 @@ class TestV160Rules(unittest.TestCase):
         self.assertEqual(engine.state.staging_cup[CubeColor.BLACK], black_before)  # No black cube added
         self.assertEqual(p0.ability_v1_status, AbilityStatus.USED)
 
-    def test_controller_dirty_income_rejection_and_cipher_action(self) -> None:
-        """Web controller rejects dirty income by default, but allows Cipher cash arbitrage."""
-        ctrl = GameController()
-        cipher_card = get_archetype_by_code(ArchetypeCode.CIPHER)
-        ctrl.new_game(num_players=4, seed=42, archetypes=[cipher_card, None, None, None])
-        ctrl.phase = 6
-        ctrl.active_player_index = 0
-
-        # Attempt dirty income without cipher -> ValueError (eliminated in v0.16.0)
-        with self.assertRaises(ValueError) as ctx:
-            ctrl.take_dirty_income(player_id=0, use_cipher_ability=False)
-        self.assertIn("v0.16.0", str(ctx.exception))
-
-        # Use Cipher ability for cash arbitrage
-        p0 = ctrl.state.players[0]
-        money_before = p0.money
-        res = ctrl.use_cipher_ability(player_id=0)
-        self.assertEqual(p0.money, money_before + 2)
-        self.assertEqual(p0.ability_v1_status, AbilityStatus.USED)
 
     def test_all_bot_types_run_cleanly_without_dirty_income(self) -> None:
         """All 5 bot archetypes play full matches to completion with dirty income disabled."""

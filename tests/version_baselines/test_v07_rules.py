@@ -298,78 +298,18 @@ class TestV07Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     # 8. Contractor Hiring Single Call Deduction
     # -------------------------------------------------------------------------
-    def test_contractor_hiring_single_call_deduction(self) -> None:
-        """Hiring 3 contractors in a single call costs $6 ($1 + $2 + $3)."""
-        ctrl = GameController()
-        ctrl.new_game(num_players=2, seed=42)
-        ctrl.state.players[0].money = 7
-
-        ctrl.hire_contractors(player_id=0, count=3)
-        self.assertEqual(ctrl.state.players[0].money, 1)  # $7 - $6 = $1
-        self.assertEqual(len(ctrl.state.players[0].contractor_dice), 3)
-        self.assertEqual(ctrl.player_meta[0]["hired_contractors"], 3)
-        self.assertEqual(ctrl.state.contractor_supply, 9)
 
     # -------------------------------------------------------------------------
     # 9. Contractor Hiring Sequential Calls
     # -------------------------------------------------------------------------
-    def test_contractor_hiring_sequential_calls(self) -> None:
-        """Sequential Phase 1 hire calls charge incremental progressive costs ($1, $2, $3)."""
-        ctrl = GameController()
-        ctrl.new_game(num_players=2, seed=42)
-        ctrl.state.players[0].money = 7
-
-        # 1st hire: 1 contractor costs $1
-        ctrl.hire_contractors(player_id=0, count=1)
-        self.assertEqual(ctrl.state.players[0].money, 6)
-        self.assertEqual(ctrl.player_meta[0]["hired_contractors"], 1)
-
-        # 2nd hire: 1 contractor costs $2
-        ctrl.hire_contractors(player_id=0, count=1)
-        self.assertEqual(ctrl.state.players[0].money, 4)  # $6 - $2 = $4
-        self.assertEqual(ctrl.player_meta[0]["hired_contractors"], 2)
-
-        # 3rd hire: 1 contractor costs $3
-        ctrl.hire_contractors(player_id=0, count=1)
-        self.assertEqual(ctrl.state.players[0].money, 1)  # $4 - $3 = $1
-        self.assertEqual(ctrl.player_meta[0]["hired_contractors"], 3)
-        self.assertEqual(len(ctrl.state.players[0].contractor_dice), 3)
 
     # -------------------------------------------------------------------------
     # 10. Contractor Hiring Max Limit Enforced
     # -------------------------------------------------------------------------
-    def test_contractor_hiring_max_hire_limit_enforced(self) -> None:
-        """Cannot exceed maximum 3 contractors per round across sequential calls."""
-        ctrl = GameController()
-        ctrl.new_game(num_players=2, seed=42)
-        ctrl.state.players[0].money = 15
-
-        ctrl.hire_contractors(player_id=0, count=2)  # Hired 2
-        with self.assertRaises(ValueError):
-            ctrl.hire_contractors(player_id=0, count=2)  # 2 + 2 = 4 > 3 -> reject
-
-        ctrl.hire_contractors(player_id=0, count=1)  # Hired 3rd (now 3)
-        self.assertEqual(ctrl.player_meta[0]["hired_contractors"], 3)
-
-        with self.assertRaises(ValueError):
-            ctrl.hire_contractors(player_id=0, count=1)  # 3 + 1 = 4 > 3 -> reject
 
     # -------------------------------------------------------------------------
     # 11. Contractor Hiring Insufficient Funds Progressive
     # -------------------------------------------------------------------------
-    def test_contractor_hiring_insufficient_funds_progressive(self) -> None:
-        """Player with $2 can afford 1st contractor ($1) but cannot afford 2nd ($2)."""
-        ctrl = GameController()
-        ctrl.new_game(num_players=2, seed=42)
-        ctrl.state.players[0].money = 2
-
-        # 1st die costs $1 -> succeeds
-        ctrl.hire_contractors(player_id=0, count=1)
-        self.assertEqual(ctrl.state.players[0].money, 1)
-
-        # 2nd die costs $2, but player only has $1 -> raises ValueError
-        with self.assertRaises(ValueError):
-            ctrl.hire_contractors(player_id=0, count=1)
 
     # -------------------------------------------------------------------------
     # 12. Commercial Exposure: Ready Yellow Demoted First
@@ -578,67 +518,10 @@ class TestV07Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     # 17. Schema Serialization v0.7
     # -------------------------------------------------------------------------
-    def test_schema_serialization_v07(self) -> None:
-        """GameStateSerializer exports contractor_cost_progression, staging_payload_2p, and next_contractor_cost."""
-        ctrl = GameController()
-        ctrl.new_game(num_players=2, seed=42)
-        state_dict = ctrl.get_full_state()
-
-        # Config / Top-level serialization
-        self.assertIn("contractor_cost_progression", state_dict)
-        self.assertEqual(state_dict["contractor_cost_progression"], [1, 2, 3])
-        self.assertIn("next_contractor_cost", state_dict)
-        self.assertEqual(state_dict["next_contractor_cost"], 1)
-
-        # Yellow die VP in market is 0 in v0.19.0
-        self.assertEqual(state_dict["market"]["yellow"]["vp"], 0)
-
-        # Player serialization includes next_contractor_cost
-        p0 = state_dict["players"][0]
-        self.assertIn("next_contractor_cost", p0)
-        self.assertEqual(p0["next_contractor_cost"], 1)
-
-        # Version cards include staging_payload_2p
-        for v in state_dict["version_deck"]:
-            self.assertIn("staging_payload_2p", v)
-            if v["directive_code"] == "RAAS":
-                self.assertEqual(v["staging_payload_2p"], {})
 
     # -------------------------------------------------------------------------
     # 18. Action Capabilities Dynamic Next Contractor Cost
     # -------------------------------------------------------------------------
-    def test_action_capabilities_next_contractor_cost(self) -> None:
-        """Capabilities reflect dynamic next contractor cost across progressive hires."""
-        ctrl = GameController()
-        ctrl.new_game(num_players=2, seed=42)
-        ctrl.state.players[0].money = 4  # Can afford die 1 ($1) and die 2 ($2), but not die 3 ($3)
-
-        caps0 = ctrl.get_action_capabilities(0)
-        self.assertTrue(caps0["can_hire_contractors"])
-        self.assertEqual(caps0["next_contractor_cost"], 1)
-
-        # Hire 1st die ($1 paid, $3 left)
-        ctrl.hire_contractors(player_id=0, count=1)
-        caps1 = ctrl.get_action_capabilities(0)
-        self.assertTrue(caps1["can_hire_contractors"])
-        self.assertEqual(caps1["next_contractor_cost"], 2)
-
-        # Hire 2nd die ($2 paid, $1 left)
-        ctrl.hire_contractors(player_id=0, count=1)
-        caps2 = ctrl.get_action_capabilities(0)
-        self.assertEqual(caps2["next_contractor_cost"], 3)
-        self.assertFalse(caps2["can_hire_contractors"])  # Needs $3, has $1
-
-        # Give $5 cash -> now can afford 3rd die ($3)
-        ctrl.state.players[0].money += 5
-        caps2b = ctrl.get_action_capabilities(0)
-        self.assertTrue(caps2b["can_hire_contractors"])
-
-        # Hire 3rd die -> max hire reached
-        ctrl.hire_contractors(player_id=0, count=1)
-        caps3 = ctrl.get_action_capabilities(0)
-        self.assertIsNone(caps3["next_contractor_cost"])
-        self.assertFalse(caps3["can_hire_contractors"])
 
 
 if __name__ == "__main__":
