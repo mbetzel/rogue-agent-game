@@ -456,6 +456,7 @@ def main() -> None:
     base = a.base or "v046_roster"
     if a.out_dir:
         OUT_DIR = os.path.join(ROOT, "sim_results", a.out_dir)
+    os.makedirs(OUT_DIR, exist_ok=True)
     if a.list_arms:
         print("\n".join(ARMS))
         return
