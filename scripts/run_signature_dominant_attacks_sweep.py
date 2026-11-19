@@ -49,13 +49,13 @@ COMPANY_DISPLAY_NAMES = {
 _ORIG_RESOLVE_SIG_RED = phase4_attack_resolution._resolve_signature_red
 
 
-def _instrumented_resolve_sig_red(engine: GameEngine, locked_players: List[Any]) -> None:
+def _instrumented_resolve_sig_red(engine: GameEngine, locked_players: List[Any], *args: Any, **kwargs: Any) -> None:
     drain_amt = engine.config.signature_red_drain_amount
     for p in locked_players:
         if p.market_share is not None:
             actual_loss = min(p.market_share, drain_amt)
             p._sig_red_ms_drained_actual = getattr(p, "_sig_red_ms_drained_actual", 0) + actual_loss
-    _ORIG_RESOLVE_SIG_RED(engine, locked_players)
+    _ORIG_RESOLVE_SIG_RED(engine, locked_players, *args, **kwargs)
 
 
 phase4_attack_resolution._resolve_signature_red = _instrumented_resolve_sig_red

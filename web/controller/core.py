@@ -61,15 +61,15 @@ from web.controller import (
 )
 
 
-WEB_DEFAULT_RULES_VERSION = "v0.46.0"
-WEB_RULES_VERSIONS = ("v0.46.0",)
+WEB_DEFAULT_RULES_VERSION = "v0.47.0"
+WEB_RULES_VERSIONS = ("v0.47.0",)
 
 
 class GameController:
     """Manages the full game lifecycle and the v0.34 six-phase turn state machine.
 
     Phases (``web.controller.phases``): 1 Roll & Deploy, 2 Compiler Drop & Corruption, 3 Income,
-    4 Attack Resolution, 5 Operations, 6 CI/CD Pipeline Shift, 7 Game Over (v0.46.0 order).
+    4 Attack Resolution, 5 Operations, 6 CI/CD Pipeline Shift, 7 Game Over (v0.47.0 order).
     """
 
     def __init__(self) -> None:
@@ -116,11 +116,11 @@ class GameController:
 
     @staticmethod
     def _build_config(num_players: int, enable_corporate_asymmetry: bool, rules_version: Optional[str]) -> GameConfig:
-        """Web ruleset: v0.46.0 (``GameConfig.v046()``, Vulnerability Track) only; older rulesets are retired."""
+        """Web ruleset: v0.47.0 (``GameConfig.v047()``, Vulnerability Track) only; older rulesets are retired."""
         version = str(rules_version or WEB_DEFAULT_RULES_VERSION).lower().lstrip("v")
-        if version not in ("0.46.0", "0.46", "046"):
+        if version not in ("0.47.0", "0.47", "047"):
             raise ValueError(f"Unknown rules_version {rules_version!r}; the web supports {WEB_DEFAULT_RULES_VERSION} only")
-        return GameConfig.v046(num_players=num_players, enable_corporate_asymmetry=enable_corporate_asymmetry,
+        return GameConfig.v047(num_players=num_players, enable_corporate_asymmetry=enable_corporate_asymmetry,
                                round_sequence=RoundSequence.SIX_PHASE)  # the web is SIX_PHASE only (OQ-7)
 
     def new_game(
@@ -278,7 +278,7 @@ class GameController:
         ]
         for p in self.state.players:
             p_name = self.player_meta[p.player_id]["name"]
-            if p.company:  # v0.46.0 has no company setup bonuses (``company_setup_bonuses=False``)
+            if p.company:  # v0.47.0 has no company setup bonuses (``company_setup_bonuses=False``)
                 wh_str = f" / {p.white_hat.name}" if p.white_hat else ""
                 self.event_log.append(
                     f"{p_name} contracted with {p.company.name} ({p.company.override_name}){wh_str}."

@@ -651,7 +651,7 @@ export function renderActionDock() {
 
 
 // ---------------------------------------------------------------------------
-// Phase 4: Attack Resolution (v0.46.0) — nothing is blocked. Red & Blue hit every survivor, Green cubes hit the
+// Phase 4: Attack Resolution (v0.47.0) — nothing is blocked. Red & Blue hit every survivor, Green cubes hit the
 // highest Vulnerability at the minimum target or more (one cube at a time), then Target Lock Signature Attacks.
 // The human only declares Institutional Override and Target Lock choices before damage resolves.
 // ---------------------------------------------------------------------------
@@ -704,8 +704,8 @@ function renderAttackPanel(controls, human, caps) {
       choiceHtml = `<div class="sig-choice">Choose ${choices.green_tracks.count} Research Tracks for the green cubes:
         ${choices.green_tracks.options.map((o) => `<label><input type="checkbox" class="sig-track" value="${o.track}"> ${o.name}</label>`).join(" ")}</div>`;
     } else if (locked && choices.red_recipients) {
-      choiceHtml = `<div class="sig-choice">Tied for the least Market Share — choose who gains 2:
-        <select id="sigRedRecipient" class="dock-select">${choices.red_recipients.map((pid) => `<option value="${pid}">${names[pid]}</option>`).join("")}</select></div>`;
+      choiceHtml = `<div class="sig-choice">Tied for the least Market Share after the drain — choose who gains 2:
+        <select id="sigRedRecipient" class="dock-select">${choices.red_recipients.map((pid) => `<option value="${pid}">${pid === -1 ? "SETEC Corp" : names[pid]}</option>`).join("")}</select></div>`;
     }
     sigHtml = `
       <div class="confirm-income-card sig-card ${sig.dominant_color}">

@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from sim.config import CubeColor, DieColor, ShieldColor
 from sim.entities import ArchetypeCode, Face, TransferType
+SETEC_CORP_ID = -1  # mirrors sim.engine.market_share.SETEC_CORP_ID (not imported: circular)
 
 if TYPE_CHECKING:
     from sim.engine import GameState, PlayerState
@@ -1289,11 +1290,14 @@ class BaseBot:
     def choose_signature_red_recipient(
         self,
         player: PlayerState,
-        tied_recipients: List[PlayerState],
+        tied_recipients: List[Union[PlayerState, "SetecRecipient"]],
         game_state: Optional[GameState] = None,
         **kwargs: Any,
-    ) -> PlayerState:
+    ) -> Union[PlayerState, "SetecRecipient"]:
         """Selects which tied recipient gains +2 Market Share (INV-SIG-RED).
+
+        v0.47 ("lowest_rival"): the tied list may contain a ``SetecRecipient`` sentinel (player_id -1) at 2P;
+        the default prefers it (D-3).
 
         Default Heuristic: Selects the tied player with the fewest Corporate Secrets,
         minimizing VP boost to competitive leaders.
@@ -1319,12 +1323,29 @@ class BaseBot:
         return default_signature_green_tracks_heuristic(player, eligible_tracks, count, state)
 
 
+@dataclass(frozen=True)
+class SetecRecipient:
+    """Stand-in for 2P SETEC Corp in a Red Signature recipient tie (v0.47.0)."""
+
+    player_id: int = SETEC_CORP_ID
+    market_share: int = 0  # post-drain snapshot value
+    secrets: int = 0  # SETEC Corp scores no VP
+    money: int = 0
+    is_setec_corp: bool = True
+
+
 def default_signature_red_recipient_heuristic(
     player: PlayerState,
-    tied_recipients: List[PlayerState],
+    tied_recipients: List[Union[PlayerState, SetecRecipient]],
     state: Optional[GameState] = None,
-) -> PlayerState:
-    """Default heuristic for choosing tied recipient of Red Signature Attack +2 Market Share."""
+) -> Union[PlayerState, SetecRecipient]:
+    """Default heuristic for choosing tied recipient of Red Signature Attack +2 Market Share.
+
+    Prefers SETEC Corp when it is in the tie (v0.47 D-3); otherwise unchanged from v0.46.
+    """
+    for r in tied_recipients:
+        if getattr(r, "is_setec_corp", False):
+            return r
     return min(tied_recipients, key=lambda p: (p.secrets, p.money, p.player_id))
 
 

@@ -1,4 +1,4 @@
-"""Web Phase 6: CI/CD Pipeline Shift (v0.46.0: after Phase 5 Operations).
+"""Web Phase 6: CI/CD Pipeline Shift (v0.47.0: after Phase 5 Operations).
 
 Order: Magnetic Splice -> Production Return (to Scanned Box) -> Scanned Graduation (<= Release Bandwidth, dice of
 the player's choice; fewer allowed) -> Conveyor Triage (Processing Box, oldest first, no choice) -> Market Leader

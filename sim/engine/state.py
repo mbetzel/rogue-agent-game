@@ -1527,6 +1527,15 @@ class GameState:
     setec_corp_mlb_1st_places: int = 0
     setec_corp_mlb_2nd_places: int = 0
     setec_corp_mlb_secrets_absorbed: int = 0
+    # --- v0.47.0 Red Signature telemetry (both recipient rules report these) ---
+    signature_red_events: int = 0
+    signature_red_gifts_to_locked: int = 0
+    signature_red_mutual_cancels: int = 0
+    signature_red_fizzles: int = 0
+    signature_red_setec_gifts: int = 0
+    signature_red_setec_ms_gained: int = 0
+    signature_red_capped_gains: int = 0
+    signature_red_zero_rescues: int = 0
 
     @property
     def setec_corp_final_market_share(self) -> int:

@@ -581,6 +581,10 @@ class GameConfig:
     )
     signature_red_drain_amount: int = 2
     signature_red_transfer_amount: int = 2
+    # v0.47.0 Red Signature recipient rule (docs/specs/red_signature_lowest_rival_spec.md)
+    signature_red_recipient_rule: str = "non_locked"  # "non_locked" (v0.43-v0.46) | "lowest_rival" (v0.47)
+    signature_red_setec_eligible: bool = False  # 2P SETEC Corp joins the recipient pool (only if setec_corp_active)
+    signature_red_setec_gain: Optional[int] = None  # None -> signature_red_transfer_amount; 1 = arm D1 reserve
     signature_black_secret_loss: int = 2
     signature_green_cube_count: int = 2
     # Aliases for backward/sweep compatibility
@@ -617,6 +621,18 @@ class GameConfig:
     y3_gray_multiplier: int = 1
 
     def __post_init__(self) -> None:
+        if self.signature_red_recipient_rule not in ("non_locked", "lowest_rival"):
+            raise ValueError(
+                f"signature_red_recipient_rule must be 'non_locked' or 'lowest_rival', got {self.signature_red_recipient_rule!r}"
+            )
+        if self.signature_red_setec_gain is not None and (
+            isinstance(self.signature_red_setec_gain, bool)
+            or not isinstance(self.signature_red_setec_gain, int)
+            or self.signature_red_setec_gain < 0
+        ):
+            raise ValueError(f"signature_red_setec_gain must be None or an int >= 0, got {self.signature_red_setec_gain!r}")
+        if self.signature_red_setec_eligible and self.signature_red_recipient_rule == "non_locked":
+            raise ValueError("signature_red_setec_eligible=True requires signature_red_recipient_rule='lowest_rival'")
         if self.signature_red_ms_loss is not None:
             self.signature_red_drain_amount = int(self.signature_red_ms_loss)
         else:
@@ -1149,6 +1165,20 @@ class GameConfig:
         overrides.setdefault("bot_pr_push", True)
         overrides.setdefault("bot_pr_push_params", PrPushParams())
         return cls.v046(**overrides)
+
+    @classmethod
+    def v047(cls, **overrides) -> "GameConfig":
+        """v0.47.0 Red Signature: lowest rival gains +2 (2P: SETEC Corp counts). Inherits v046()."""
+        overrides.setdefault("signature_red_recipient_rule", "lowest_rival")
+        overrides.setdefault("signature_red_setec_eligible", True)
+        return cls.v046(**overrides)
+
+    @classmethod
+    def v047_roster(cls, **overrides) -> "GameConfig":
+        """v0.47.0 + bot autonomous PR push and cash allocation policies enabled."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v047(**overrides)
 
     def _validate_tower_config(self) -> None:
         """Validates Cube Tower physics parameters (spec §2.4)."""

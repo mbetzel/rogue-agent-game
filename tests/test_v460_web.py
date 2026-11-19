@@ -244,15 +244,64 @@ def _to_phase4(gc):
             gc.confirm_income(pid)
 
 
+class TestWebRedSignatureLowestRival(unittest.TestCase):
+    """v0.47.0: Target Lock Red recipient choices are the post-drain lowest rivals (locked included, SETEC at 2P)."""
+
+    def _setup(self, n, seed=3):
+        from web.controller.phase4_attack_actions import _signature_choices
+        gc = _fresh(n=n, seed=seed)
+        _to_phase4(gc)
+        return gc, _signature_choices
+
+    def test_web_uses_v047_preset(self):
+        cfg = _fresh().state.config
+        self.assertEqual(cfg.signature_red_recipient_rule, "lowest_rival")
+        self.assertTrue(cfg.signature_red_setec_eligible)
+
+    def test_2p_tie_includes_setec(self):
+        gc, choices = self._setup(2)
+        s = gc.state
+        if not getattr(s, "setec_corp_active", False):
+            self.skipTest("no SETEC Corp at 2P")
+        s.players[0].market_share = 5
+        s.players[1].market_share = 9
+        s.setec_market_share = 3  # locker 0 drops to 3 (not in own pool); pool = {1: 9, SETEC: 3}
+        s.players[0].market_share = 5
+        sig = {"dominant_color": "red", "locked_pids": [0]}
+        self.assertIsNone(choices(gc, 0, sig)["red_recipients"])  # SETEC alone is lowest: no choice
+        s.setec_market_share = 9
+        self.assertEqual(sorted(choices(gc, 0, sig)["red_recipients"]), [-1, 1])
+
+    def test_locked_rival_is_offered_post_drain(self):
+        gc, choices = self._setup(3)
+        s = gc.state
+        for p, ms in zip(s.players, (6, 6, 4)):
+            p.market_share = ms
+        # players 0 and 1 locked: 1 drops to 4 and ties player 2 (4) as locker 0's lowest rival
+        sig = {"dominant_color": "red", "locked_pids": [0, 1]}
+        self.assertEqual(sorted(choices(gc, 0, sig)["red_recipients"]), [1, 2])
+
+    def test_human_picks_setec(self):
+        from web.controller.phase4_attack_actions import _human_signature_hooks
+        gc, _ = self._setup(2)
+        bot = gc.state.players[0].bot
+        gc.player_meta[0]["signature_red_recipient"] = -1
+        from sim.bots.base import SetecRecipient
+        tied = [gc.state.players[1], SetecRecipient(market_share=4)]
+        with _human_signature_hooks(gc):
+            self.assertEqual(bot.choose_signature_red_recipient(gc.state.players[0], tied, gc.state).player_id, -1)
+
+
+
 class TestWebV046Config(unittest.TestCase):
-    def test_default_is_v046_only(self):
+    def test_default_is_v047_only(self):
         gc = _fresh()
         cfg = gc.state.config
         self.assertTrue(cfg.is_vulnerability)
         self.assertTrue(cfg.operations_before_pipeline_shift)
         self.assertFalse(cfg.glitched_shield_slots_enabled)
         st = gc.get_full_state()
-        self.assertEqual(st["rules_version"], "v0.46.0")
+        self.assertEqual(st["rules_version"], "v0.47.0")
         self.assertEqual(st["phase_names"][5], "Operations")
         self.assertEqual(st["phase_names"][6], "CI/CD Pipeline Shift")
         self.assertEqual(st["vulnerability_track"]["min_target"], 4)
@@ -260,10 +309,10 @@ class TestWebV046Config(unittest.TestCase):
         self.assertEqual([b["damage"] for b in st["vulnerability_track"]["bands"]], [1, 2, 3])
 
     def test_legacy_rules_versions_rejected(self):
-        for v in ("v0.38.0", "v0.37.0", "v0.40.0", "v0.45.0"):
+        for v in ("v0.38.0", "v0.37.0", "v0.40.0", "v0.45.0", "v0.46.0"):
             with self.assertRaises(ValueError):
                 GameController().new_game(num_players=2, seed=1, rules_version=v)
-        GameController().new_game(num_players=2, seed=1, rules_version="v0.46.0")
+        GameController().new_game(num_players=2, seed=1, rules_version="v0.47.0")
 
     def test_no_shield_or_defense_grid_fields_serialized(self):
         gc = _fresh()
@@ -521,7 +570,7 @@ class TestWebV046Http(unittest.TestCase):
     def test_endpoints(self):
         code, body = self._post("/api/game/new", {"num_players": 2, "seed": 4})
         self.assertEqual(code, 200)
-        self.assertEqual(body["state"]["rules_version"], "v0.46.0")
+        self.assertEqual(body["state"]["rules_version"], "v0.47.0")
         code, _ = self._post("/api/game/new", {"num_players": 2, "seed": 4, "rules_version": "v0.38.0"})
         self.assertEqual(code, 400)
         self._post("/api/game/new", {"num_players": 2, "seed": 4})

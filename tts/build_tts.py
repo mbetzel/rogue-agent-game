@@ -1,4 +1,4 @@
-"""Tabletop Simulator module builder for Too Many Secrets (v0.46.0).
+"""Tabletop Simulator module builder for Too Many Secrets (v0.47.0).
 
 Renders the Print-and-Play components (pnp/generate_pnp.py draw functions) to PNG
 images and writes a Tabletop Simulator save file that uses them.
@@ -27,7 +27,7 @@ from typing import Dict, List, Optional, Sequence, Tuple
 from pnp import generate_pnp as g
 from pnp.pdf_engine import PALETTE, PDFDocument, PDFPage, measure_text
 
-VERSION = "v0.46.0"
+VERSION = "v0.47.0"
 HERE = os.path.dirname(os.path.abspath(__file__))
 ASSET_DIR = os.path.join(HERE, "assets")
 SAVE_NAME = f"Too Many Secrets ({VERSION})"
