@@ -351,7 +351,7 @@ def confirm_attacks(
         raise ValueError(f"Player {player_id} has already confirmed attacks this round")
     entry = next((e for e in controller.round_commitments or [] if e[0].player_id == player_id), None)
     if entry is None:
-        raise ValueError(f"Player {player_id} has no Phase 1 lock-in this round")
+        raise ValueError(f"Player {player_id} has no Phase 1 Deploy this round")
     _, rolled, commits = entry
     cr = controller.compile_result
 

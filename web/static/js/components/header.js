@@ -7,7 +7,7 @@ import { state } from "../state.js";
 export function renderVersionSlotBadge(ver, status) {
   let statusClass = "locked";
   let icon = "🔒";
-  let label = "LOCKED";
+  let label = "PENDING";
 
   if (status === "AVAILABLE") {
     statusClass = "available";

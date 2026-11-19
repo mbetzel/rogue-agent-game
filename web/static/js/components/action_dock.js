@@ -165,7 +165,7 @@ export function renderActionDock() {
         }
       });
 
-      // Vulnerability preview: +1 per ⚠ on the final faces at lock-in
+      // Vulnerability preview: +1 per ⚠ on the final faces at Deploy
       const vt = state.vulnerability_track || { max: 15, min_target: 4, bands: [] };
       const icons = rolled.reduce((n, d) => n + ((d.current_face && d.current_face.vuln) || 0), 0);
       const vNow = human.vulnerability || 0;
@@ -224,7 +224,7 @@ export function renderActionDock() {
 
       const lockBtn = document.createElement("button");
       lockBtn.className = "action-btn btn-accent";
-      lockBtn.innerText = `Lock In Dice (+${vAfter - vNow} Vulnerability)`;
+      lockBtn.innerText = `Deploy Dice (+${vAfter - vNow} Vulnerability)`;
       lockBtn.disabled = !caps.can_lock_in;
       lockBtn.onclick = () => {
         clearSelectedRerolls();

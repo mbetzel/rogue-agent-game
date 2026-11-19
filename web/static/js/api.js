@@ -191,7 +191,7 @@ export async function doOverrideFace(dieIndex, faceIndex, source = "helix") {
   }
 }
 
-// Phase 1 Step 4: Lock-in & Assign Dice (+1 Vulnerability per ⚠ on the final faces)
+// Phase 1 Step 4: Deploy Dice (+1 Vulnerability per ⚠ on the final faces)
 export async function doLockIn() {
   const newState = await apiCall("/api/game/action/lock_in", "POST", {
     player_id: getHumanPlayerId(),
