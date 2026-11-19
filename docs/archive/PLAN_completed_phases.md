@@ -4,6 +4,19 @@ Archived from `PLAN.md` on 2026-11-09. Content is unchanged.
 
 ## Completed Phases (from Current Status)
 
+- [x] **Phase 68: Red Signature "Lowest Rival" (`v0.47.0`)**: the Red Target Lock Signature locker takes `-2` Market Share; the surviving rival with the least Market Share gains `+2`, locked or not (2P: SETEC Corp counts, `+2`; D1 `+1` in reserve); recipients read post-drain; fizzle only when the locker has no surviving rival. Wording: "-2 Market Share; lowest rival gains +2 (2P: SETEC Corp counts)".
+  - [x] *Pre-SDLC Game Designer Modeling:* `docs/findings/red_signature_lowest_rival_analysis.md` (12k games per pod; User decisions 2026-11-19: arm A, 2P SETEC +2, post-drain, wording, `v0.47.0`, 4P spread watch item with a `+4` block).
+  - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/red_signature_lowest_rival_spec.md`.
+  - [x] *Implementation (`senior-engineer`):* `sim/config.py` (`v047_roster`, `signature_red_setec_gain`), `sim/engine/phase4_attack_resolution.py`, `sim/engine/state.py`, `sim/bots/base.py`, `tests/test_signature_dominant_attacks.py`.
+  - [x] *Code Review (`staff-engineer`).*
+  - [x] *Validation Sweep (`product-owner`):* `sim_results/v047_red_signature/validation_report.md` (4,000 games per arm; all spec §9.2 / §9.3 criteria PASS).
+  - [x] *Balance Sign-off (`game-designer`):* `FINDINGS.md` §63 APPROVED. Watch: 2P SecOpsTurtle about 60%, 4P spread `+2.4` against the `+4` block.
+  - [x] *Documentation Sync (Main Agent):* `RULES.md` Phase 4 Step 4 + Market Share component note, `RULES_QUICKREF.md`, `RULES_APPENDIX.md`, `GLOSSARY.md` (Target Lock), checked against the glossary.
+  - [x] *PnP Sync (`graphic-designer`):* Red Signature card / reference text; `pnp/README.md`, `pnp/generate_pnp.py`.
+  - [x] *TTS rebuild:* `python3 -m tts.build_tts` (`--check` clean); `tts/global.lua` header.
+  - [x] *Web sync:* Red Signature recipient (locked rivals and 2P SETEC Corp eligible; no fizzle), log text, tests.
+  - [x] *Version bump `v0.46.0` → `v0.47.0`* across every file in the CLAUDE.md protocol (then tick **Rules Draft `v0.47.0`**).
+  - [x] *Merged 2026-11-19:* mbetzel/rogue-agent-game PR #32. Watch items carried into PLAN.md Phase 67 follow-ups.
 - [x] **Phase 48: Roster Upgrade — Lever A (bot-only, no rules change)**
   - [x] *Pre-SDLC Game Designer Scoping:* `docs/findings/lever_a_roster_upgrade_scoping.md` (situational push + dump for AdaptiveBalanced behind a `bot_pr_push` [TUNE-BOT] switch, default off). User decisions 2026-11-07 recorded in the doc.
   - [x] *1,200-game state log + threshold refinement (`game-designer`):* thresholds in scoping §3; User decisions on §9 recorded 2026-11-07.
