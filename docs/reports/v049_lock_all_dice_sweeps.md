@@ -92,3 +92,56 @@ No v0.48 ref1 figure existed in FINDINGS or docs/reports, so v048 was run here. 
 
 ## Verdict
 v0.49 makes a large Green loss and Market Collapse cut (about -0.47 Green lost, -6 to -10 pp Market Collapse) and keeps Singularity/rounds in band. Open failures: Market Collapse below the v0.45 band (all pods), 2P no-target (71.3 % overall, 74.2 % at rounds 7+) and 3P late no-target (63.7 %), Helix 2P -7.1 pp, Operator +3.4 / +3.6 pp, 4P company spread 20.1 pp, colour parity and the pre-existing income metric. ref1 rises to 60.7 %. Candidate fixes from the arms: safe zone 0-3 (A_safe03) for the no-target rows, helix_per_version for the Helix row.
+
+## Final package (H1B) confirmation
+`v049_roster` with Helix H1B (commit b344770), main step, mixed1 roster, 1,200 games per pod, seeds 42..1241, `--assert-invariants` (no invariant failures). Output: `sim_results/v049_final/`; ref1 output: `sim_results/reference_bot_v049_final/`. Columns are v0.48 -> v0.49 (H1B).
+
+| Metric | 2P | 3P | 4P |
+|:--|:--|:--|:--|
+| Rounds | 8.31 -> 8.42 | 8.37 -> 8.34 | 8.12 -> 8.12 |
+| Patient Zero % | 31.3 -> 40.6 | 54.4 -> 59.5 | 60.4 -> 66.6 |
+| Total Wipeout % | 7.0 -> 7.8 | 1.9 -> 2.1 | 0.6 -> 0.5 |
+| Market Collapse % | 36.4 -> 26.6 | 16.4 -> 11.0 | 16.3 -> 10.2 |
+| PZ + Collapse % | 67.8 -> 67.2 | 70.8 -> 70.5 | 76.8 -> 76.8 |
+| Green lost / player-game | 2.29 -> 1.83 | 2.11 -> 1.63 | 1.92 -> 1.46 |
+| Green no-target % | 64.5 -> 71.3 | 53.4 -> 61.9 | 44.7 -> 54.1 |
+| Pen Test steps / player-game | 2.10 -> 2.24 | 2.33 -> 2.45 | 2.44 -> 2.48 |
+| End Secrets | 8.01 -> 6.52 | 8.03 -> 7.18 | 8.13 -> 7.58 |
+| Liquid income / player-round (v0.49) | 8.15 | 8.25 | 8.23 |
+
+Paired deltas (95% CI): Market Collapse -9.8 [-12.8,-7.3] / -5.4 [-7.4,-3.2] / -6.2 [-8.3,-3.8]; Green lost -0.46 / -0.49 / -0.47 (CIs exclude 0).
+
+**Helix win % (probe target 45.2 / 28.2 / 19.2):** 45.2 / 28.2 / 19.2 (exactly the probe). Delta vs v0.48: -1.4 / +2.8 / +1.7 pp (bar >= -2 pp: PASS at all pods; 2P CI -8.1 to +5.6). Bypass use 52.6 / 56.2 / 54.6 % of seats. `helix_lost_to_black` = **0.0 %** at all pods (must be 0: PASS). `helix_bypass_face_sets` and `helix_bypass_black_blocked` are not printed by the script and were not read from the JSON. Helix mean warnings removed 0.95 / 1.11 / 1.16. Prodigy 47.5 / 31.4 / 21.9, Operator 54.3 / 32.9 / 22.0.
+
+**4P company win %:** Acoustic 25.4, Cipher 24.9, Operator 22.0, Phreaker 24.7, Prodigy 21.9, Spook 30.9, Helix 19.2. Script-reported company spread **18.41 pp** (v0.49 main earlier: 20.1); seat spread 0.58 pp. The bar is still FAIL; it is driven by Spook (+6 above the field) and by the colour-die confound.
+
+**Reference bot ref1 (3P, 1,200 games, `v049_roster`):** ref1 win **60.6 %** (fair 33.3; SE about 1.4 pp), field 19.7 %, ref keep rate 33.8 %, Pen Test steps/seat 2.33, ref 2+ L4 88.3 % (field 0 %). Previous v0.49 run at 600 games read 60.7; v0.48 read 53.0 (600 games). Delta vs v0.48 is +7.6 pp (about 2.6 SE with the v0.48 600-game SE). Stance mix: Adaptive 29 %, KeepAll 18 %, StarChase 16 %, PenTestRush 15 %, NoColorReroll 15 %, RerollAll 0.6 %.
+
+### Guardrails (re-based per GD plan section 11)
+| Guardrail | 2P | 3P | 4P |
+|:--|:--|:--|:--|
+| Rounds 6.5-8.5 | PASS 8.42 | PASS 8.34 | PASS 8.12 |
+| Patient Zero <= v0.45 + 3 | PASS | PASS | PASS |
+| Total Wipeout cap | PASS 7.8 | PASS 2.1 | PASS 0.5 |
+| PZ + Collapse <= v0.48 + 3 pp | PASS -0.6 | PASS -0.3 | PASS 0.0 |
+| Collapse >= 8 % (3P/4P) | n/a | PASS 11.0 | PASS 10.2 |
+| v1.0 breach <= v0.45 | PASS 7.2 | PASS 9.8 | PASS 11.0 |
+| Green lost 1.2-2.5 | PASS | PASS | PASS |
+| No-target overall 25-70 | FAIL 71.3 | PASS 61.9 | PASS 54.1 |
+| No-target rounds 7+ <= 60 | FAIL 74.3 | FAIL 64.0 | PASS 56.2 |
+| Lose-3 <= 5 % | PASS | PASS | PASS |
+| Income <= v0.48 x 1.20 | PASS 1.17 (8.15 vs 6.94) | PASS* | PASS* |
+| 4P company spread <= 10 | n/a | n/a | FAIL 18.41 |
+| 4P seat spread <= 6 | n/a | n/a | PASS 0.58 |
+| 2+ L4, cap, back-to-back | PASS | PASS | PASS |
+| Per-colour parity 5 pp | FAIL | FAIL | FAIL |
+| Helix win >= v0.48 - 2 pp | PASS -1.4 | PASS +2.8 | PASS +1.7 |
+| Helix lost to Black = 0 | PASS | PASS | PASS |
+| Prodigy within +-3 pp | PASS | PASS | PASS |
+| Operator within +-3 pp | FAIL +3.2 | FAIL +3.3 | PASS -0.3 |
+| P(star) >= 0.12 | PASS | PASS | PASS |
+| Colored dice bought >= v0.48 -10 % | PASS | PASS | PASS |
+
+\* The script does not print v0.48 income for 3P/4P. 2P v0.48 = 6.94 is from `docs/reports/v049_balance_assessment.md`. At 3P/4P the v0.49 income (8.25 / 8.23) matches the earlier run, which the assessment put at +18 % vs v0.48, so about x1.18; this is inferred, not computed from a printed v0.48 row.
+
+Verdict: H1B restores Helix to the probe target at every pod with zero Black Signature losses. The re-based Market Collapse and income rows PASS. Remaining FAILs are unchanged from the main run: 2P and 3P late no-target, 2P overall no-target, 4P company spread, per-colour parity, and Operator +3 pp at 2P/3P (CIs include 0).
