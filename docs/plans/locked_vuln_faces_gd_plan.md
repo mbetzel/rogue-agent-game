@@ -264,4 +264,4 @@ Neither policy dominates. Never-reroll is mildly worse, and ★-chase is neutral
 - **Guardrails re-based:**
   - The Market Collapse row is replaced by "Patient Zero + Collapse ≤ v0.48 + 3 pp" and "Collapse ≥ 8% at 3P/4P".
   - Income is +18% vs v0.48, which is accepted. The income bar is re-based on v0.48 at ≤ ×1.20.
-- **Term collision:** the Institutional Override Track status "Locked" is renamed, so "locked" is reserved for dice. The new name needs User confirmation.
+- **Term collision:** the Institutional Override Track status "Locked" is renamed **"Pending"** (User, 2026-11-19), so "locked" is reserved for dice. "Target Lock" wording becomes "Target-Locked player".
