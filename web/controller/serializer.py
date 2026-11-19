@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from web.controller.core import GameController
 
 
+from web.controller import phases
 from web.schemas import GameStateSerializer
 
 def _game_end_bonus(controller: GameController, res: EndGameResult) -> Dict[str, Any]:
@@ -89,10 +90,8 @@ def serialize_end_game_result(controller: GameController, res: EndGameResult) ->
 
 
 def complete_round(controller: GameController) -> None:
-    """End of Phase 6: Final Round -> Game Over; else pass the First Player Marker and start the next round.
-
-    The CI/CD Pipeline Shift already ran in Phase 5 (web/controller/phase5_pipeline_actions.py).
-    """
+    """End of Phase 6 (CI/CD Pipeline Shift): Final Round -> Game Over; else pass the First Player Marker and start
+    the next round."""
     from web.controller.phase2_actions import enter_game_over
 
     num_players = len(controller.state.players)
@@ -146,7 +145,7 @@ def get_full_state(controller: GameController) -> Dict[str, Any]:
         "last_pipeline_result": getattr(controller, "last_pipeline_result", {}) or {},
         "pending_graduation": getattr(controller, "pending_graduation", {}) or {},
         "round_sequence": controller.state.config.round_sequence.value,
-        "phase_names": dict(ROUND_PHASE_NAMES),
+        "phase_names": dict(phases.PHASE_NAMES),
         "action_capabilities": controller.get_action_capabilities(primary_human),
         "event_log": list(reversed(controller.event_log[-50:])),  # Most recent first
         "final_result": controller.final_result,

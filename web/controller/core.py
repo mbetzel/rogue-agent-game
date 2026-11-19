@@ -14,7 +14,7 @@ from sim.bots import (
     SecOpsTurtleBot,
     VentureGreedBot,
 )
-from sim.config import ROUND_PHASE_NAMES, CubeColor, DieColor, EndGameReason, GameConfig, RoundPhase, ResearchTrackModel, RoundSequence, ShieldColor
+from sim.config import ROUND_PHASE_NAMES, CubeColor, DieColor, EndGameReason, GameConfig, RoundPhase, RoundSequence
 from sim.engine import EndGameResult, GameEngine, GameState, PlayerState
 from sim.engine import research_tracks
 from sim.engine import phase1_roll_deploy
@@ -54,24 +54,22 @@ from web.controller import (
     phase2_actions,
     phase3_income_actions,
     phase4_attack_actions,
-    phase5_pipeline_actions,
-    phase6_operations_actions,
+    phase5_operations_actions,
+    phase6_pipeline_actions,
+    phases,
     serializer,
 )
 
-# Deprecated v0.33 module alias (kept one release)
-from web.controller import phase3_actions  # noqa: E402,F401
 
-
-WEB_DEFAULT_RULES_VERSION = "v0.38.0"
-WEB_RULES_VERSIONS = ("v0.38.0", "v0.37.0")
+WEB_DEFAULT_RULES_VERSION = "v0.46.0"
+WEB_RULES_VERSIONS = ("v0.46.0",)
 
 
 class GameController:
     """Manages the full game lifecycle and the v0.34 six-phase turn state machine.
 
-    Phases (``RoundPhase``): 1 Roll & Deploy, 2 Compiler Drop & Corruption, 3 Income,
-    4 Attack Resolution, 5 CI/CD Pipeline Shift, 6 Operations, 7 Game Over. The web is SIX_PHASE only.
+    Phases (``web.controller.phases``): 1 Roll & Deploy, 2 Compiler Drop & Corruption, 3 Income,
+    4 Attack Resolution, 5 Operations, 6 CI/CD Pipeline Shift, 7 Game Over (v0.46.0 order).
     """
 
     def __init__(self) -> None:
@@ -117,30 +115,13 @@ class GameController:
         return self.engine.state
 
     @staticmethod
-    def _build_config(num_players: int, enable_corporate_asymmetry: bool, research_track_model: Any,
-                      rules_version: Optional[str]) -> GameConfig:
-        """Web ruleset: v0.38.0 (``GameConfig.v038c()``) by default; ``"v0.37.0"`` keeps the previous rules.
-
-        An explicit legacy ``research_track_model`` (the old ``ruleset`` field) selects the pre-v0.37 plain config.
-        """
-        common = dict(num_players=num_players, enable_corporate_asymmetry=enable_corporate_asymmetry,
-                      round_sequence=RoundSequence.SIX_PHASE)  # the web is SIX_PHASE only (OQ-7)
-        if research_track_model is not None:
-            return GameConfig(research_track_model=research_track_model, max_market_purchases_per_turn=2, **common)
+    def _build_config(num_players: int, enable_corporate_asymmetry: bool, rules_version: Optional[str]) -> GameConfig:
+        """Web ruleset: v0.46.0 (``GameConfig.v046()``, Vulnerability Track) only; older rulesets are retired."""
         version = str(rules_version or WEB_DEFAULT_RULES_VERSION).lower().lstrip("v")
-        if version in ("041", "0.41.0", "0.41", "040", "0.40.0", "0.40", "0391", "0.39.1", "039", "0.39.0"):
-            return GameConfig.v040(**common)
-        if version in ("038f", "0.38f"):
-            return GameConfig.v038f(**common)
-        if version in ("038e", "0.38e"):
-            return GameConfig.v038e(**common)
-        if version in ("038d", "0.38d"):
-            return GameConfig.v038d(**common)
-        if version in ("0.38.0", "0.38", "038c"):
-            return GameConfig.v038c(**common)
-        if version in ("0.37.0", "0.37"):
-            return GameConfig.v037(research_track_model=ResearchTrackModel.V035_FIVE_LEVEL, **common)
-        raise ValueError(f"Unknown rules_version {rules_version!r}; expected 'v0.38.0' or 'v0.37.0'")
+        if version not in ("0.46.0", "0.46", "046"):
+            raise ValueError(f"Unknown rules_version {rules_version!r}; the web supports {WEB_DEFAULT_RULES_VERSION} only")
+        return GameConfig.v046(num_players=num_players, enable_corporate_asymmetry=enable_corporate_asymmetry,
+                               round_sequence=RoundSequence.SIX_PHASE)  # the web is SIX_PHASE only (OQ-7)
 
     def new_game(
         self,
@@ -154,14 +135,13 @@ class GameController:
         companies: Optional[List[Company]] = None,
         white_hats: Optional[List[WhiteHat]] = None,
         enable_corporate_asymmetry: bool = True,
-        research_track_model: Any = None,
         rules_version: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Creates and initializes a new game match."""
         if not (1 <= num_players <= 4):
             raise ValueError(f"Player count must be between 1 and 4, got {num_players}")
 
-        config = self._build_config(num_players, enable_corporate_asymmetry, research_track_model, rules_version)
+        config = self._build_config(num_players, enable_corporate_asymmetry, rules_version)
         rng = random.Random(seed)
 
         # Default bots pool
@@ -210,10 +190,8 @@ class GameController:
                 "is_human": is_human,
                 "bot_archetype": archetype_name if not is_human else None,
                 "rolled_pool": [],
-                "shield_slots": {"red": [], "blue": [], "green": []},
                 "has_rolled": False,
                 "has_committed": False,
-                "commitments": {},
                 "purchases_this_turn": 0,
                 "upgrades_this_turn": 0,
                 "dirty_income_taken_this_turn": False,
@@ -300,33 +278,10 @@ class GameController:
         ]
         for p in self.state.players:
             p_name = self.player_meta[p.player_id]["name"]
-            if p.company:
-                bonuses = []
-                if not config.company_setup_bonuses:
-                    wh_str = f" / {p.white_hat.name}" if p.white_hat else ""
-                    self.event_log.append(
-                        f"{p_name} contracted with {p.company.name} ({p.company.override_name}){wh_str}."
-                    )
-                    continue
-                starting_cash_bonus = 1 if self.state.active_directive_code == "DATA_SCRAPER" else 0
-                if p.money > config.starting_money + starting_cash_bonus:
-                    bonuses.append(f"+${p.company.starting_cash_bonus} Cash")
-                if p.patches > 0:
-                    bonuses.append(f"+{p.patches} 🔬 Research")
-                if p.secrets > config.get_starting_secrets(num_players):
-                    bonuses.append(f"+{p.company.starting_secrets_bonus} Secret")
-                if getattr(p, "patent_level", 0) > 0:
-                    bonuses.append(f"Patent Lvl {p.patent_level}")
-                if getattr(p, "defense_level", 0) > 0:
-                    bonuses.append(f"Defense Lvl {p.defense_level} [Cap {p.defense_capacity}]")
-                if getattr(p, "triage_level", 0) > 0 or getattr(p, "release_level", 0) > 0:
-                    bonuses.append(f"Triage Lvl {p.triage_level}, Release Lvl {p.release_level}")
-                if getattr(p, "upgrade_discount", 0) > 0:
-                    bonuses.append(f"-{p.upgrade_discount} 🔬 Track Upgrade Discount")
-                bonus_str = f" [{', '.join(bonuses)}]" if bonuses else ""
+            if p.company:  # v0.46.0 has no company setup bonuses (``company_setup_bonuses=False``)
                 wh_str = f" / {p.white_hat.name}" if p.white_hat else ""
                 self.event_log.append(
-                    f"{p_name} contracted with {p.company.name} ({p.company.override_name}){wh_str}{bonus_str}."
+                    f"{p_name} contracted with {p.company.name} ({p.company.override_name}){wh_str}."
                 )
             elif p.archetype:
                 self.event_log.append(
@@ -384,10 +339,8 @@ class GameController:
             max_rerolls = research_tracks.free_rerolls_for(self.state.config, p, self.state.config.default_free_rerolls)
             meta = self.player_meta[i]
             meta["rolled_pool"] = []
-            meta["shield_slots"] = {"red": [], "blue": [], "green": []}
             meta["has_rolled"] = False
             meta["has_committed"] = False
-            meta["commitments"] = {}
             meta["purchases_this_turn"] = 0
             meta["upgrades_this_turn"] = 0
             meta["dirty_income_taken_this_turn"] = False
@@ -396,6 +349,7 @@ class GameController:
             meta["hired_contractors"] = 0
             meta["prodigy_active"] = False
             meta["helix_override_used"] = False
+            meta["release_l4_used"] = False
             meta["ace_uses"] = 0
             meta["rerolls_remaining"] = max_rerolls
             meta["max_rerolls"] = max_rerolls
@@ -441,20 +395,9 @@ class GameController:
     ) -> Dict[str, Any]:
         return phase1_actions.perform_reroll(self, player_id, reroll_indices, use_prodigy_ability)
 
-    def debug_unlock_die(self, player_id: int, die_index: int) -> Dict[str, Any]:
-        return phase1_actions.debug_unlock_die(self, player_id, die_index)
-
-    def hotfix_reroll(self, player_id: int, die_index: int) -> Dict[str, Any]:
-        return phase1_actions.hotfix_reroll(self, player_id, die_index)
-
-    def commit_defenses(
-        self,
-        player_id: int,
-        commitments: Dict[int, ShieldColor | str],
-        choice_declarations: Optional[Dict[int, int]] = None,
-        slot_cleaner_indices: Optional[List[int]] = None,
-    ) -> Dict[str, Any]:
-        return phase1_actions.commit_defenses(self, player_id, commitments, choice_declarations, slot_cleaner_indices)
+    def lock_in(self, player_id: int, choice_declarations: Optional[Dict[int, int]] = None) -> Dict[str, Any]:
+        """Phase 1 Step 4: Lock-in & Assign Dice."""
+        return phase1_actions.lock_in(self, player_id, choice_declarations)
 
     def override_face(self, player_id: int, die_index: int, face_index: int, source: str = "helix") -> Dict[str, Any]:
         return phase1_actions.override_face(self, player_id, die_index, face_index, source)
@@ -466,14 +409,10 @@ class GameController:
         return phase2_actions.compile_drop(self)
 
     def _advance_operations_turns(self) -> None:
-        phase6_operations_actions.advance_operations_turns(self)
-
-    _advance_phase3_turns = _advance_operations_turns  # deprecated v0.33 name
+        phase5_operations_actions.advance_operations_turns(self)
 
     def _execute_bot_operations(self, player: PlayerState, meta: Dict[str, Any]) -> None:
-        phase6_operations_actions.execute_bot_operations(self, player, meta)
-
-    _execute_bot_phase3 = _execute_bot_operations  # deprecated v0.33 name
+        phase5_operations_actions.execute_bot_operations(self, player, meta)
 
     def buy_die(
         self,
@@ -481,10 +420,7 @@ class GameController:
         color_str: str,
         use_cipher_ability: bool = False,
     ) -> Dict[str, Any]:
-        return phase6_operations_actions.buy_die(self, player_id, color_str, use_cipher_ability)
-
-    def patch_die(self, player_id: int, die_index: int, use_cash: bool) -> Dict[str, Any]:
-        return phase6_operations_actions.patch_die(self, player_id, die_index, use_cash)
+        return phase5_operations_actions.buy_die(self, player_id, color_str, use_cipher_ability)
 
     def take_dirty_income(
         self,
@@ -493,7 +429,7 @@ class GameController:
         use_cipher_ability: bool = False,
         backlash_die_id: Optional[int] = None,
     ) -> Dict[str, Any]:
-        return phase6_operations_actions.take_dirty_income(
+        return phase5_operations_actions.take_dirty_income(
             self,
             player_id,
             backlash_die_index,
@@ -502,7 +438,7 @@ class GameController:
         )
 
     def use_cipher_ability(self, player_id: int) -> Dict[str, Any]:
-        return phase6_operations_actions.take_cipher_arbitrage(self, player_id)
+        return phase5_operations_actions.take_cipher_arbitrage(self, player_id)
 
     def use_phreaker_ability(
         self,
@@ -511,7 +447,7 @@ class GameController:
         die_index: int = 0,
         die_id: Optional[int] = None,
     ) -> Dict[str, Any]:
-        return phase6_operations_actions.use_phreaker_ability(
+        return phase5_operations_actions.use_phreaker_ability(
             self,
             player_id,
             count=count,
@@ -520,16 +456,16 @@ class GameController:
         )
 
     def use_acoustic_ability(self, player_id: int, chosen_color_str: str) -> Dict[str, Any]:
-        return phase6_operations_actions.use_acoustic_ability(self, player_id, chosen_color_str)
+        return phase5_operations_actions.use_acoustic_ability(self, player_id, chosen_color_str)
 
     def use_spook_ability(self, player_id: int, dollars: int) -> Dict[str, Any]:
-        return phase6_operations_actions.use_spook_ability(self, player_id, dollars)
+        return phase5_operations_actions.use_spook_ability(self, player_id, dollars)
 
     def spook_burn(self, player_id: int, die_id: int) -> Dict[str, Any]:
-        return phase6_operations_actions.spook_burn(self, player_id, die_id)
+        return phase5_operations_actions.spook_burn(self, player_id, die_id)
 
     def phreaker_diagnostics(self, player_id: int, die_id: Optional[int] = None) -> Dict[str, Any]:
-        return phase6_operations_actions.phreaker_diagnostics(self, player_id, die_id)
+        return phase5_operations_actions.phreaker_diagnostics(self, player_id, die_id)
 
     def execute_star_action(
         self,
@@ -537,7 +473,7 @@ class GameController:
         action_type: str,
         cube_color: Optional[str] = None,
     ) -> Dict[str, Any]:
-        return phase6_operations_actions.execute_star_action(self, player_id, action_type, cube_color)
+        return phase5_operations_actions.execute_star_action(self, player_id, action_type, cube_color)
 
     def confirm_income(
         self,
@@ -558,17 +494,16 @@ class GameController:
     def confirm_attacks(
         self,
         player_id: int,
-        any_shield_allocations: Optional[Dict[str, int]] = None,
-        glitch_die_ids: Optional[List[int]] = None,
         aegis_color: Optional[str] = None,
         use_slush_fund: Optional[bool] = None,
         aegis_green: Optional[str] = None,
+        signature_green_tracks: Optional[List[str]] = None,
+        signature_red_recipient: Optional[int] = None,
     ) -> Dict[str, Any]:
-        """Phase 4: Attack Resolution."""
+        """Phase 4: Attack Resolution choices (Baffle Echo, Slush Fund, Target Lock)."""
         return phase4_attack_actions.confirm_attacks(
-            self, player_id, any_shield_allocations=any_shield_allocations,
-            glitch_die_ids=glitch_die_ids, aegis_color=aegis_color, use_slush_fund=use_slush_fund,
-            aegis_green=aegis_green,
+            self, player_id, aegis_color=aegis_color, use_slush_fund=use_slush_fund, aegis_green=aegis_green,
+            signature_green_tracks=signature_green_tracks, signature_red_recipient=signature_red_recipient,
         )
 
     def choose_graduates(
@@ -576,34 +511,24 @@ class GameController:
         player_id: int,
         graduate_die_ids: Optional[List[int]] = None,
         splice_die_id: Optional[int] = None,
-        hotfix_die_id: Optional[int] = None,
     ) -> Dict[str, Any]:
-        """Phase 5: CI/CD Pipeline Shift (Scanned Graduation choice)."""
-        return phase5_pipeline_actions.choose_graduates(
-            self, player_id, graduate_die_ids, splice_die_id=splice_die_id, hotfix_die_id=hotfix_die_id
-        )
+        """Phase 6: CI/CD Pipeline Shift (Scanned Graduation choice)."""
+        return phase6_pipeline_actions.choose_graduates(self, player_id, graduate_die_ids, splice_die_id=splice_die_id)
 
     def end_turn(self, player_id: int) -> Dict[str, Any]:
-        return phase6_operations_actions.end_turn(self, player_id)
-
-    def fast_patch(
-        self,
-        player_id: int,
-        die_ids: Optional[List[int]] = None,
-        die_indices: Optional[List[int]] = None,
-    ) -> Dict[str, Any]:
-        return phase6_operations_actions.fast_patch(self, player_id, die_ids=die_ids, die_indices=die_indices)
+        return phase5_operations_actions.end_turn(self, player_id)
 
     def upgrade_track(self, player_id: int, track_type: str) -> Dict[str, Any]:
-        return phase6_operations_actions.upgrade_hardware_track(self, player_id, track_type)
+        return phase5_operations_actions.upgrade_hardware_track(self, player_id, track_type)
 
     upgrade_hardware_track = upgrade_track
 
-    def file_patent(self, player_id: int) -> Dict[str, Any]:
-        return phase6_operations_actions.file_cryptographic_patent(self, player_id)
+    def pen_test(self, player_id: int, steps: int = 1) -> Dict[str, Any]:
+        """Phase 5: Pen Test Track (lower Vulnerability for research)."""
+        return phase5_operations_actions.pen_test(self, player_id, steps)
 
     def regain_market_share(self, player_id: int) -> Dict[str, Any]:
-        return phase6_operations_actions.regain_market_share(self, player_id)
+        return phase5_operations_actions.regain_market_share(self, player_id)
 
     def resolve_breakthrough(
         self,
@@ -612,12 +537,12 @@ class GameController:
         gray_die_id: Optional[int] = None,
         color: Optional[str] = None,
     ) -> Dict[str, Any]:
-        return phase6_operations_actions.resolve_pending_breakthrough(
+        return phase5_operations_actions.resolve_pending_breakthrough(
             self, player_id, accept=accept, gray_die_id=gray_die_id, color=color
         )
 
     def system_reboot(self, player_id: int) -> Dict[str, Any]:
-        return phase6_operations_actions.system_reboot(self, player_id)
+        return phase5_operations_actions.system_reboot(self, player_id)
 
     def _complete_round(self) -> None:
         serializer.complete_round(self)

@@ -214,20 +214,6 @@ class TestRemoveContractorDice(unittest.TestCase):
         self.assertFalse(bot.choose_operator_buy_third_die(player, 0, {}, {}, random.Random(42)))
         self.assertTrue(bot.choose_meridian_capital_injection(player))
 
-    def test_rcd_09_web_controller_capabilities(self) -> None:
-        """TEST-RCD-09: Web controller capabilities and actions under v0.40.0."""
-        controller = GameController()
-        controller.new_game(rules_version="v0.40.0")
-        caps = controller.get_action_capabilities(0)
-
-        # Contractor hiring must be disabled
-        self.assertFalse(caps["can_hire_contractors"])
-        self.assertIsNone(caps["next_contractor_cost"])
-
-        # hire_contractors() should raise ValueError
-        with self.assertRaises(ValueError):
-            controller.hire_contractors(0, count=1)
-
 
 if __name__ == "__main__":
     unittest.main()

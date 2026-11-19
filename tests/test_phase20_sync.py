@@ -20,9 +20,7 @@ from sim.entities import (
     create_gray_die,
     get_archetype_by_code,
 )
-from tests.web_legacy import use_v037_rules
 from web.server import RogueAgentRequestHandler, create_server
-
 
 
 def _pause_in_phase5(controller, pid):
@@ -33,7 +31,6 @@ def _pause_in_phase5(controller, pid):
     controller.subphase = "choose_graduates"
     controller.pending_graduation = {pid: _needs_choice(controller, controller.state.players[pid])}
 
-@use_v037_rules
 class TestPhase20Sync(unittest.TestCase):
     """Tests for Phase 20 state synchronization, player selection agency, and rule ordering fixes."""
 
@@ -73,104 +70,10 @@ class TestPhase20Sync(unittest.TestCase):
     # -------------------------------------------------------------------------
     # 1. Dirty Income Backlash by die_id, rolled_pool sync, and atomic validation
     # -------------------------------------------------------------------------
-    def test_dirty_income_backlash_by_die_id_and_rolled_pool_sync(self) -> None:
-        """Dirty Income supports backlash_die_id across Ready Zone and Active Pool, and validates before mutating."""
-        ctrl = RogueAgentRequestHandler.controller
-        ctrl.new_game(num_players=4, seed=42)
-        self._post("/api/game/action/roll", {"player_id": 0})
-        self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
-        self._post("/api/game/action/compile", {})
-
-        # Force Phase 3 active turn on human player 0
-        ctrl.phase = 6
-        ctrl.active_player_index = 0
-        p0 = ctrl.state.players[0]
-        meta0 = ctrl.player_meta[0]
-        ctrl.state.config.dirty_income_enabled = True
-        meta0["dirty_income_taken_this_turn"] = False
-        p0.secrets = 6
-        p0.money = 4
-
-        # Ensure player has rolled dice in rolled_pool AND a newly bought colored die in ready_dice
-        yellow_die = create_colored_die(DieColor.YELLOW, die_id=999)
-        p0.ready_dice.append(yellow_die)
-        gray_starter = create_gray_die(die_id=888)
-        p0.ready_dice.append(gray_starter)
-        meta0["rolled_pool"] = [gray_starter]
-        # Active rolled_pool has the starter gray dice, while visual ready_dice has yellow_die
-        state_before = ctrl.get_full_state()
-        p0_ser_before = state_before["players"][0]
-        self.assertIn("all_ready_dice", p0_ser_before)
-        self.assertTrue(any(d["die_id"] == 999 for d in p0_ser_before["ready_dice"]))
-
-        # Pick a starter gray die that is in rolled_pool (Active Pool)
-        active_gray_id = meta0["rolled_pool"][0].die_id
-        black_before = ctrl.state.staging_cup[CubeColor.BLACK]
-
-        # 1A: Invalid backlash_die_id must fail BEFORE mutating secrets/money/black cubes
-        url = f"{self.base_url}/api/game/action/dirty_income"
-        bad_body = json.dumps({"player_id": 0, "backlash_die_id": 123456}).encode("utf-8")
-        req_bad = urllib.request.Request(url, data=bad_body, headers={"Content-Type": "application/json"}, method="POST")
-        with self.assertRaises(urllib.error.HTTPError) as ctx:
-            urllib.request.urlopen(req_bad)
-        self.assertEqual(ctx.exception.code, 400)
-        self.assertEqual(p0.secrets, 6)
-        self.assertEqual(p0.money, 4)
-        self.assertEqual(ctrl.state.staging_cup[CubeColor.BLACK], black_before)
-
-        # 1B: Valid backlash_die_id targeting the starter gray die in Active Pool
-        res = self._post("/api/game/action/dirty_income", {
-            "player_id": 0,
-            "backlash_die_id": active_gray_id,
-        })
-        self.assertTrue(res["success"])
-        p0_after = res["state"]["players"][0]
-        self.assertEqual(p0_after["secrets"], 5)
-        self.assertEqual(p0_after["money"], 7)
-        # Demoted die must be in unpatched_dice and NOT in rolled_pool or ready_dice
-        unpatched_ids = [d["die_id"] for d in p0_after["unpatched_dice"]]
-        rolled_ids = [d["die_id"] for d in p0_after["rolled_pool"]]
-        ready_ids = [d["die_id"] for d in p0_after["ready_dice"]]
-        self.assertIn(active_gray_id, unpatched_ids)
-        self.assertNotIn(active_gray_id, rolled_ids)
-        self.assertNotIn(active_gray_id, ready_ids)
-        # Yellow die (999) was preserved!
-        self.assertIn(999, ready_ids)
 
     # -------------------------------------------------------------------------
     # 2. Phreaker Single Die Selection by die_id and die_index
     # -------------------------------------------------------------------------
-    def test_phreaker_single_die_selection_by_id_and_index(self) -> None:
-        """Phreaker Magnetic Splice repairs exactly 1 chosen die by die_id or die_index."""
-        ctrl = RogueAgentRequestHandler.controller
-        ctrl.new_game(num_players=4, seed=42)
-        ctrl.active_player_index = 0
-        p0 = ctrl.state.players[0]
-        p0.archetype = get_archetype_by_code(ArchetypeCode.PHREAKER)
-        p0.ability_v1_status = AbilityStatus.AVAILABLE
-
-        # Put a Gray die at index 0 and a Yellow die at index 1 in unpatched_dice
-        gray_die = p0.ready_dice.pop(0)
-        yellow_die = create_colored_die(DieColor.YELLOW, die_id=777)
-        p0.unpatched_dice = [gray_die, yellow_die]
-
-        # v0.34: Magnetic Splice is chosen in Phase 5 (step 1) and resolves with the Scanned Graduation choice
-        _pause_in_phase5(ctrl, 0)
-        res = self._post("/api/game/action/phreaker", {
-            "player_id": 0,
-            "count": 1,
-            "die_id": 777,
-        })
-        self.assertTrue(res["success"])
-        res = self._post("/api/game/action/choose_graduates", {"player_id": 0, "graduate_die_ids": []})
-        self.assertTrue(res["success"])
-        p0_state = res["state"]["players"][0]
-        unpatched_ids = [d["die_id"] for d in p0_state["unpatched_dice"]]
-        all_ready_ids = [d["die_id"] for d in p0_state["all_ready_dice"]]
-        self.assertEqual(len(unpatched_ids), 1)
-        self.assertIn(gray_die.die_id, unpatched_ids)
-        self.assertIn(777, all_ready_ids)
-        self.assertEqual(p0_state["ability_v1_status"], "USED")
 
     # -------------------------------------------------------------------------
     # 3. Bot Phreaker 1-Die Cap & Priority in Web Controller and Sim Engine
@@ -221,103 +124,14 @@ class TestPhase20Sync(unittest.TestCase):
     # -------------------------------------------------------------------------
     # 4. Glitch Backlash Demotion & Zero Glitch Output
     # -------------------------------------------------------------------------
-    def test_glitch_backlash_before_resource_collection(self) -> None:
-        """Glitch face yields 0 outputs and Glitch Backlash demotes target die and removes it from rolled_pool."""
-        ctrl = RogueAgentRequestHandler.controller
-        ctrl.new_game(num_players=4, seed=42)
-        self._post("/api/game/action/roll", {"player_id": 0})
-        p0 = ctrl.state.players[0]
-
-        yellow_glitch = create_colored_die(DieColor.YELLOW, die_id=301)
-        gray_cash = create_gray_die(die_id=302)
-        yellow_glitch.current_face = Face(name="Hardware Glitch", is_glitch=True, money=5)
-        gray_cash.current_face = Face(name="+$2", money=2)
-        p0.ready_dice = [yellow_glitch, gray_cash]
-        ctrl.player_meta[0]["rolled_pool"] = [yellow_glitch, gray_cash]
-        p0.money = 5
-
-        res2 = self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
-        self.assertTrue(res2["success"])
-        p0_state = res2["state"]["players"][0]
-        # Delayed Income: money remains 5 until Phase 3 operations
-        self.assertEqual(p0_state["money"], 5)
-        unpatched_ids = [d["die_id"] for d in p0_state["unpatched_dice"]]
-        rolled_ids = [d["die_id"] for d in p0_state["rolled_pool"]]
-        self.assertIn(301, unpatched_ids)
-        self.assertNotIn(301, rolled_ids)
 
     # -------------------------------------------------------------------------
     # 5. Glitch Contractor Sacrifice Cleanup & Commitment Re-indexing
     # -------------------------------------------------------------------------
-    def test_glitch_contractor_sacrifice_cleanup(self) -> None:
-        """Sacrificing a White Contractor die in Glitch Backlash removes it from rolled_pool and re-indexes commitments."""
-        ctrl = RogueAgentRequestHandler.controller
-        ctrl.new_game(num_players=4, seed=42)
-        self._post("/api/game/action/hire_contractors", {"player_id": 0, "count": 1})
-        self._post("/api/game/action/roll", {"player_id": 0})
-
-        p0 = ctrl.state.players[0]
-        rolled = ctrl.player_meta[0]["rolled_pool"]
-        # Put Contractor die at index 0 (so removing it shifts indices of subsequent dice!)
-        contractor_die = p0.contractor_dice[0]
-        other_dice = list(p0.ready_dice)
-        rolled = [contractor_die] + other_dice
-        ctrl.player_meta[0]["rolled_pool"] = rolled
-
-        # Contractor die shows Glitch, Die 1 shows +$1, Die 2 shows Block 1 Red
-        contractor_die.current_face = Face(name="Glitch", is_glitch=True)
-        rolled[1].current_face = Face(name="+$1", money=1)
-        rolled[2].current_face = Face(name="Block 1 Red", block_amount=1, shield_color=ShieldColor.RED)
-        rolled[3].current_face = Face(name="+$1", money=1)
-        rolled[4].current_face = Face(name="+$1", money=1)
-
-        supply_before = ctrl.state.contractor_supply
-        res_commit = self._post("/api/game/action/commit", {
-            "player_id": 0,
-            "commitments": {"2": "red"},
-        })
-        self.assertTrue(res_commit["success"])
-        state_p2 = res_commit["state"]
-        p0_p2 = state_p2["players"][0]
-
-        # Contractor die was sacrificed to supply, removed from contractor_dice and rolled_pool
-        self.assertEqual(len(p0_p2["contractor_dice"]), 0)
-        self.assertEqual(p0_p2["hired_contractors"], 0)
-        rolled_ids = [d["die_id"] for d in p0_p2["rolled_pool"]]
-        self.assertNotIn(contractor_die.die_id, rolled_ids)
-
-        # Compile drop in Phase 2 must succeed without IndexError and apply the Red shield
-        res_compile = self._post("/api/game/action/compile", {})
-        self.assertTrue(res_compile["success"])
-        self.assertEqual(res_compile["state"]["phase"], 3)
 
     # -------------------------------------------------------------------------
     # 6. Spook $0 Free Activation Capability & Execution
     # -------------------------------------------------------------------------
-    def test_spook_zero_dollar_capability_and_execution(self) -> None:
-        """Spook ability is enabled at $0 cash after a compile drop and absorbs 2 free secrets."""
-        ctrl = RogueAgentRequestHandler.controller
-        ctrl.new_game(num_players=4, seed=42, research_track_model="V034_THREE_LEVEL")
-        p0 = ctrl.state.players[0]
-        p0.archetype = get_archetype_by_code(ArchetypeCode.SPOOK)
-        p0.ability_v1_status = AbilityStatus.AVAILABLE
-
-        self._post("/api/game/action/roll", {"player_id": 0})
-        self._post("/api/game/action/commit", {"player_id": 0, "commitments": {}})
-        self._post("/api/game/action/compile", {})
-
-        p0.money = 0
-        p0.secrets = 5
-        p0.ability_v1_status = AbilityStatus.AVAILABLE
-        state = ctrl.get_full_state()
-        self.assertTrue(state["action_capabilities"]["can_spook"])
-
-        res_spook = self._post("/api/game/action/spook", {"player_id": 0, "dollars": 0})
-        self.assertTrue(res_spook["success"])
-        p0_after = res_spook["state"]["players"][0]
-        self.assertEqual(p0_after["secrets"], 7)
-        self.assertEqual(p0_after["money"], 0)
-        self.assertEqual(p0_after["ability_v1_status"], "USED")
 
     # -------------------------------------------------------------------------
     # 7. No-Cache Headers and Concurrency Lock
@@ -334,40 +148,6 @@ class TestPhase20Sync(unittest.TestCase):
     # -------------------------------------------------------------------------
     # 8. Frontend Selection Sanitization & Agency Selectors Verification
     # -------------------------------------------------------------------------
-    def test_frontend_selection_sanitization_and_selectors(self) -> None:
-        """Verifies frontend JS modules implement state sanitization and die_id selectors."""
-        js_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "web", "static", "js"))
-
-        with open(os.path.join(js_dir, "state.js"), "r", encoding="utf-8") as f:
-            state_js = f.read()
-        self.assertIn("sanitizeSelectionState", state_js)
-        self.assertIn("getEligibleBacklashDice", state_js)
-        self.assertIn("selectedBacklashDieId", state_js)
-        self.assertIn("selectedPhreakerDieId", state_js)
-
-        with open(os.path.join(js_dir, "api.js"), "r", encoding="utf-8") as f:
-            api_js = f.read()
-        self.assertIn("isActionInFlight", api_js)
-        self.assertIn("backlash_die_id", api_js)
-        self.assertIn("phreakerDieSelect", api_js)
-        self.assertIn("no-store", api_js)
-
-        with open(os.path.join(js_dir, "components", "action_dock.js"), "r", encoding="utf-8") as f:
-            dock_js = f.read()
-        self.assertIn("phreakerDieSelect", dock_js)
-        self.assertIn("getEligibleBacklashDice", dock_js)
-        self.assertIn("Magnetic Splice", dock_js)
-        self.assertIn("Ignore 1", dock_js)
-        # v0.34 six-phase panels
-        self.assertIn("doConfirmAttacks", dock_js)
-        self.assertIn("doChooseGraduates", dock_js)
-        self.assertIn("confirm_attacks", api_js)
-        self.assertIn("choose_graduates", api_js)
-
-        with open(os.path.join(js_dir, "components", "player_mats.js"), "r", encoding="utf-8") as f:
-            mats_js = f.read()
-        self.assertIn("!p.has_rolled && p.contractor_dice", mats_js)
-        self.assertIn("glitched_tray", mats_js)
 
 
 if __name__ == "__main__":

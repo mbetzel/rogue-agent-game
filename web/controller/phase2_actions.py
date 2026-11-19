@@ -1,10 +1,10 @@
-"""Web Phase 2: Compiler Drop & Corruption (v0.34.0 six-phase)."""
+"""Web Phase 2: Compiler Drop & Corruption."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 
-from sim.config import ROUND_PHASE_NAMES, DieColor, EndGameReason, RoundPhase, ShieldColor
+from sim.config import ROUND_PHASE_NAMES, DieColor, EndGameReason, RoundPhase
 from sim.engine import phase2_compiler
 from sim.engine.state import PlayerState
 from sim.entities import Die
@@ -13,17 +13,12 @@ if TYPE_CHECKING:
     from web.controller.core import GameController
 
 
-def build_round_commitments(controller: GameController) -> List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]]:
-    """Builds engine commitments from the Phase 1 web metadata (alive players only)."""
-    player_commitments: List[Tuple[PlayerState, List[Die], Dict[int, ShieldColor]]] = []
-    for pid, player in enumerate(controller.state.players):
-        if player.is_patient_zero:
-            continue
-        meta = controller.player_meta[pid]
-        rolled = meta["rolled_pool"]
-        commitments_enum = {int(k): ShieldColor(v) for k, v in meta["commitments"].items()}
-        player_commitments.append((player, rolled, commitments_enum))
-    return player_commitments
+def build_round_commitments(controller: GameController) -> List[Tuple[PlayerState, List[Die], Dict[int, Any]]]:
+    """Builds the engine's per-player Phase 1 tuples from the web metadata (alive players only).
+
+    v0.46.0 has no shields, so every commitment map is empty; the engine still takes the tuple shape."""
+    return [(player, controller.player_meta[pid]["rolled_pool"], {})
+            for pid, player in enumerate(controller.state.players) if not player.is_patient_zero]
 
 
 def enter_game_over(controller: GameController) -> None:
@@ -115,6 +110,11 @@ def compile_drop(controller: GameController) -> Dict[str, Any]:
         )
         controller.event_log.append(
             f"{rec.version} complete: Market Share comparison (${rec.payout}). Highest: {top}. Lowest: {bottom}."
+        )
+    locked = [names[p.player_id] for p in controller.state.players if p.target_locked and not p.is_patient_zero]
+    if locked:
+        controller.event_log.append(
+            f"Target Lock: {', '.join(locked)} - Signature Cube exited; a Signature Attack resolves in Phase 4."
         )
     for pid in sorted(cr.breached_pids):
         controller.event_log.append(

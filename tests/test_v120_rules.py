@@ -26,12 +26,10 @@ from sim.entities import (
     get_archetype_by_code,
     get_default_variant_cards,
 )
-from tests.web_legacy import use_v037_rules
 from web.controller.core import GameController
-from web.controller.phase1_actions import auto_execute_bots_phase_1, commit_defenses, hire_contractors, roll_pool
+from web.controller.phase1_actions import auto_execute_bots_phase_1, hire_contractors, roll_pool
 
 
-@use_v037_rules
 class TestV120Rules(unittest.TestCase):
     """Test suite covering the 16 unit test specifications for v0.12.0 Push-Your-Luck Hardware Glitches."""
 
@@ -419,27 +417,6 @@ class TestV120Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     # Test 15: Web Controller Human Glitch Triage
     # -------------------------------------------------------------------------
-    def test_15_web_controller_human_glitch_backlash(self) -> None:
-        """15. Web controller handles glitch triage in commit_defenses for human player."""
-        controller = GameController()
-        controller.new_game(num_players=2, seed=42)
-
-        # Hire 1 contractor
-        hire_contractors(controller, 0, count=1)
-        human = controller.state.players[0]
-        meta = controller.player_meta[0]
-
-        # Force a glitch face on the hired contractor die
-        roll_pool(controller, 0)
-        contractor = human.contractor_dice[0]
-        contractor.current_face = Face("Glitch (Locked)", is_glitch=True)
-
-        initial_contractors = len(human.contractor_dice)
-        commit_defenses(controller, 0, commitments={})
-
-        # Glitched contractor discarded to supply
-        self.assertEqual(len(human.contractor_dice), initial_contractors - 1)
-        self.assertTrue(any("White Contractor glitched: discarded to supply" in event for event in controller.event_log))
 
     # -------------------------------------------------------------------------
     # Test 16: Web Controller Bot Glitch Triage

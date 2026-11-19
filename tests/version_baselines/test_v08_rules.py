@@ -23,7 +23,6 @@ Covers all 18 technical test cases from the Principal Engineer specification:
 """
 
 from __future__ import annotations
-from tests.web_legacy import use_v037_rules
 
 import random
 import unittest
@@ -55,7 +54,6 @@ from web.game_controller import GameController
 from web.schemas import GameStateSerializer
 
 
-@use_v037_rules
 class TestV08Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     # 1. Face Dataclass Choice Fields & Properties
@@ -553,70 +551,10 @@ class TestV08Rules(unittest.TestCase):
     # -------------------------------------------------------------------------
     # 17. Web Schemas Serialization of Choice Faces
     # -------------------------------------------------------------------------
-    def test_web_schemas_serialization_choice_faces(self) -> None:
-        """GameStateSerializer exports is_choice, choices, has_*_option, chosen_choice_index, and effective_face."""
-        gray = create_gray_die(1)
-        gray.current_face = gray.faces[4]  # +$1 / +1 🔬
-        gray.chosen_choice_index = 1
-
-        face_data = GameStateSerializer.serialize_face(gray.current_face)
-        self.assertTrue(face_data["is_choice"])
-        self.assertEqual(len(face_data["choices"]), 2)
-        self.assertTrue(face_data["has_cash_option"])
-        self.assertTrue(face_data["has_patch_option"])
-        self.assertFalse(face_data["has_shield_option"])
-
-        die_data = GameStateSerializer.serialize_die(gray)
-        self.assertEqual(die_data["chosen_choice_index"], 1)
-        self.assertIsNotNone(die_data["effective_face"])
-        self.assertEqual(die_data["effective_face"]["name"], "+1 🔬")
-        self.assertEqual(die_data["effective_face"]["patches"], 1)
 
     # -------------------------------------------------------------------------
     # 18. Web Controller commit_defenses with Choice Declarations
     # -------------------------------------------------------------------------
-    def test_web_controller_commit_defenses_choice_declarations(self) -> None:
-        """GameController.commit_defenses processes choice_declarations and applies Step 6 outputs."""
-        ctrl = GameController()
-        ctrl.new_game(num_players=2, seed=42)
-
-        # Setup rolled pool with choice faces
-        p0 = ctrl.state.players[0]
-        meta0 = ctrl.player_meta[0]
-
-        gray = create_gray_die(1)
-        gray.current_face = gray.faces[4]  # +$1 / +1 🔬
-
-        green = create_colored_die(DieColor.GREEN, 2)
-        green.current_face = green.faces[3]  # +1 🔬 / +$1
-
-        blue = create_colored_die(DieColor.BLUE, 3)
-        blue.current_face = blue.faces[3]  # Block 1 Blue / +1 🔬
-
-        meta0["rolled_pool"] = [gray, green, blue]
-        meta0["has_rolled"] = True
-        p0.patches = 0
-        p0.money = 7
-
-        # Commit Blue die to defense, declare Gray choice 0 (+$1) and Green choice 0 (+1 🔬)
-        res = ctrl.commit_defenses(
-            player_id=0,
-            commitments={2: "blue"},
-            choice_declarations={0: 0, 1: 0},
-        )
-
-        self.assertTrue(meta0["has_committed"])
-        self.assertEqual(blue.chosen_choice_index, 0)
-        self.assertEqual(gray.chosen_choice_index, 0)
-        self.assertEqual(green.chosen_choice_index, 0)
-
-        # Outputs applied in Phase 3 turn:
-        # Gray choice 0: +$1 -> money 8
-        # Green choice 0: +1 🔬 -> patches 1
-        # Blue choice 0: committed to defense -> 0 patches
-        collect_player_production_income(ctrl.engine, p0, None)
-        self.assertEqual(p0.money, 8)
-        self.assertEqual(p0.patches, 1)
 
     # -------------------------------------------------------------------------
     # 19. Blue Choice Face Blocks Damage and Wears in Phase 2

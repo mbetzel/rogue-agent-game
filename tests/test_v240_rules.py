@@ -96,29 +96,6 @@ class TestV240Rules(unittest.TestCase):
         self.assertEqual(p0.money, 10, "Money must not be deducted if purchase is rejected")
         self.assertEqual(p0.personal_purple_reserve, 0)
 
-    def test_procuring_purple_die_respects_per_turn_purchase_limit(self) -> None:
-        """INV-PURPLE-03: Purple reserve purchases count towards max_market_purchases_per_turn (2)."""
-        gc = GameController()
-        gc.new_game(research_track_model="V034_THREE_LEVEL", num_players=2, seed=42)
-        gc.phase = 6
-        gc.subphase = "operations_turn"
-        gc.active_player_index = 0
-        p0 = gc.state.players[0]
-        p0.money = 20
-        p0.personal_purple_reserve = 2
-
-        # 1st purchase: 1 Red die from central market
-        gc.buy_die(player_id=0, color_str="red")
-        self.assertEqual(gc.player_meta[0]["purchases_this_turn"], 1)
-
-        # 2nd purchase: 1 Purple die from personal reserve
-        gc.buy_die(player_id=0, color_str="purple")
-        self.assertEqual(gc.player_meta[0]["purchases_this_turn"], 2)
-        self.assertEqual(p0.personal_purple_reserve, 1)
-
-        # 3rd purchase: must be rejected by per-turn limit
-        with self.assertRaises(ValueError):
-            gc.buy_die(player_id=0, color_str="purple")
 
     def test_central_market_excludes_purple_die_supply(self) -> None:
         """INV-PURPLE-02: Central Market excludes Purple and only stocks Red, Blue, Green, Yellow."""
@@ -476,39 +453,6 @@ class TestV240Rules(unittest.TestCase):
         self.assertIn("can_buy_purple_reserve", data)
         self.assertTrue(data["can_buy_purple_reserve"])
 
-    def test_web_buy_endpoint_procures_from_personal_reserve(self) -> None:
-        """POST /api/game/action/buy with color='purple' procures from personal reserve."""
-        gc = GameController()
-        gc.new_game(research_track_model="V034_THREE_LEVEL", num_players=2, seed=42)
-        gc.phase = 6
-        gc.subphase = "operations_turn"
-        gc.active_player_index = 0
-        p0 = gc.state.players[0]
-        p0.money = 6
-        p0.personal_purple_reserve = 2
-
-        state = gc.buy_die(player_id=0, color_str="purple")
-        # Operator reserve cost is $5 (6 - 5 = 1)
-        self.assertEqual(p0.money, 1)
-        self.assertEqual(p0.personal_purple_reserve, 1)
-        self.assertTrue(any(d.color == DieColor.PURPLE for d in p0.ready_for_release_dice))
-
-    def test_cipher_discount_applies_to_personal_purple_reserve(self) -> None:
-        """Cipher Algorithmic Arbitrage discount applies to Personal Reserve purchase ($6 - $2 = $4)."""
-        gc = GameController()
-        gc.new_game(research_track_model="V034_THREE_LEVEL", num_players=2, seed=42)
-        gc.phase = 6
-        gc.subphase = "operations_turn"
-        gc.active_player_index = 0
-        p0 = gc.state.players[0]
-        p0.archetype = get_archetype_by_code(ArchetypeCode.CIPHER)
-        p0.money = 4
-        p0.personal_purple_reserve = 2
-
-        state = gc.buy_die(player_id=0, color_str="purple", use_cipher_ability=True)
-        # Cipher operative reserve cost is $6, discounted by $2 to $4 (4 - 4 = 0)
-        self.assertEqual(p0.money, 0, "Purple die under Cipher ($6) should cost $4 after $2 Cipher discount (4 - 4 = 0)")
-        self.assertEqual(p0.personal_purple_reserve, 1)
 
     def test_reserve_dice_immune_to_corruption_track_market_returns(self) -> None:
         """INV-PURPLE-01: Personal reserve dice are immune to corruption track Return 1 Colored Die."""

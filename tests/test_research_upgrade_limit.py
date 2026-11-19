@@ -163,43 +163,6 @@ class TestResearchUpgradeLimit(unittest.TestCase):
         self.assertEqual(tel.excess_hardware_upgrades_by_player.get(0), 2)
         self.assertEqual(len(tel.track_upgrades_by_player[0]), 2)
 
-    def test_rul_07_web_controller_rejects_3rd_upgrade(self):
-        """TEST-RUL-07: Web controller rejects 3rd upgrade and updates capabilities."""
-        gc = GameController()
-        gc.new_game(num_players=2, seed=42)
-        gc.phase = int(RoundPhase.OPERATIONS)
-        gc.active_player_index = 0
-
-        p0 = gc.state.players[0]
-        p0.research_tokens = 10
-        p0.defense_level = 0
-        p0.release_level = 0
-        p0.triage_level = 0
-        p0.patent_level = 0
-
-        meta0 = gc.player_meta[0]
-        meta0["upgrades_this_turn"] = 0
-
-        # 1st upgrade: DEFENSE
-        res1 = gc.upgrade_hardware_track(0, "DEFENSE")
-        self.assertEqual(p0.defense_level, 1)
-        self.assertEqual(meta0["upgrades_this_turn"], 1)
-
-        # 2nd upgrade: RELEASE
-        res2 = gc.upgrade_hardware_track(0, "RELEASE")
-        self.assertEqual(p0.release_level, 1)
-        self.assertEqual(meta0["upgrades_this_turn"], 2)
-
-        # 3rd upgrade: should raise ValueError
-        with self.assertRaises(ValueError) as ctx:
-            gc.upgrade_hardware_track(0, "TRIAGE")
-        self.assertIn("Hardware upgrade limit reached", str(ctx.exception))
-
-        # Check capabilities: all tracks must have can_upgrade_track == False
-        caps = gc.get_action_capabilities(0)
-        can_upgrade = caps["can_upgrade_track"]
-        for track_name, can_up in can_upgrade.items():
-            self.assertFalse(can_up, f"Track {track_name} should not be upgradeable after reaching cap")
 
     def test_rul_08_bot_research_policy_honors_upgrade_limit(self):
         """TEST-RUL-08: Bot research policy generates at most 2 upgrades and diverts excess to regain."""

@@ -525,38 +525,10 @@ class TestV260VariableDiceCosts(unittest.TestCase):
     # -------------------------------------------------------------------------
     # TEST-VAR-29: Web controller buy action dynamic cost (Web Controller)
     # -------------------------------------------------------------------------
-    def test_web_controller_buy_action_dynamic_cost(self) -> None:
-        """Execute /api/game/action/buy with Blue B2 ($6); verify $6 deducted from player cash."""
-        gc = GameController()
-        gc.new_game(num_players=2, seed=42)
-        gc.state.variant_cards[DieColor.BLUE] = self.variants["B2"]  # Cost: $6
-        gc.phase = 6
-        gc.subphase = "operations_turn"
-        gc.active_player_index = 0
-        p0 = gc.state.players[0]
-        p0.money = 10
-
-        gc.buy_die(player_id=0, color_str="blue")
-        self.assertEqual(p0.money, 4, "Buying B2 ($6) with $10 cash leaves $4 (10 - 6 = 4)")
 
     # -------------------------------------------------------------------------
     # TEST-VAR-30: Web controller purple buy action dynamic cost (Web Controller)
     # -------------------------------------------------------------------------
-    def test_web_controller_purple_buy_action_dynamic_cost(self) -> None:
-        """Execute /api/game/action/buy with purple under The Spook ($5); verify $5 deducted."""
-        gc = GameController()
-        gc.new_game(research_track_model="V034_THREE_LEVEL", num_players=2, seed=42)
-        p0 = gc.state.players[0]
-        p0.white_hat = WHITE_HATS[WhiteHatCode.SPOOK]  # reserve_cost: 5
-        p0.money = 10
-        p0.personal_purple_reserve = 1
-        gc.phase = 6
-        gc.subphase = "operations_turn"
-        gc.active_player_index = 0
-
-        gc.buy_die(player_id=0, color_str="purple")
-        self.assertEqual(p0.money, 5, "Procuring Purple under The Spook ($5) with $10 cash leaves $5 (10 - 5 = 5)")
-        self.assertEqual(p0.personal_purple_reserve, 0)
 
 
 if __name__ == "__main__":

@@ -29,16 +29,10 @@ function secretNote(color) {
   if (!state || !state.is_secret_faces || color === "yellow") return null;
   if (color === "red") return `Secret face: +${y.red} Corporate Secrets when it leaves the Processing Box`;
   if (color === "blue") {
-    if (y.blue_block && y.blue_block > 0) {
-      return `Secret face: +${y.blue_base} (+${y.blue_block} if you blocked a Blue cube, +${y.blue_grid} at Defense Grid Level 3+; max ${y.blue_cap})`;
-    }
-    return `Secret face: +${y.blue_base} Corporate Secrets (+${y.blue_grid} at Defense Grid Level 3+; max ${y.blue_cap})`;
+    return `Secret face: +${y.blue_base} Corporate Secrets (+${y.blue_grid} at Pen Test Level 3+; max ${y.blue_cap})`;
   }
   if (color === "green") {
-    if (y.green_glitch_penalty) {
-      return `Secret face: ${y.green_base} minus your Glitched Shield Slots`;
-    }
-    return `Secret face: +${y.green_base} Corporate Secrets (cleans 1 Glitched Shield Slot)`;
+    return `Secret face: +${y.green_base} Corporate Secrets, then −${y.green_vuln_reduction || 2} Vulnerability`;
   }
   return `Secret face: +${y.purple} Corporate Secret`;
 }
@@ -98,7 +92,7 @@ export function renderMarket() {
           <span class="tier-cost">$3</span>
         </div>
         <div class="contractor-faces-summary">
-          <strong>Faces:</strong> ⚀⚁⚂ Block 1 Any &nbsp;|&nbsp; ⚃ +$1 &nbsp;|&nbsp; ⚄⚅ ⚠️ Glitch (0 output, discarded to supply; the only Glitch faces)
+          <strong>Faces:</strong> see the White Contractor die
         </div>
       </div>
     `;
