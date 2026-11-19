@@ -349,3 +349,98 @@ Reports:
 - 2P SecOpsTurtle at about `60%` (fair `50%`);
 - 4P spread against the `+4` block;
 - recheck both in the next sweep that touches 2P SETEC Corp or the company-power pass.
+## 64. Phase 69 Post-Telemetry Balance Assessment: Sprint Plan & Gray Legacy Rotation (`v0.48.0` Candidate): APPROVED (`v0.48.0 Baseline`)
+
+> **Version note (2026-11-19):** this package was built and swept as `v0.47.0` on top of `v0.46.0`, in parallel with the Red Signature change (§63) that shipped as `v0.47.0`. It is renumbered `v0.48.0` / Phase 69 and rebased onto `v0.47.0`; the numbers below are against `v0.46.0`. See the combined-rules re-sweep note at the end of this section.
+
+**Experiments:**
+- `scripts/run_v047_sweep.py`: arms S0–S3 and R0–R3, 1,200 games per pod, 2P / 3P / 4P, seeds `42..1241`, `mixed1` roster.
+- A re-run with fixed tooling (method-b income for every arm, win rates by bot / company / White Hat).
+- A game-designer lever probe: 600 games per pod, seeds `42..641`.
+
+Reports:
+- `docs/reports/v047_sweep_report.md`;
+- `docs/reports/v047_balance_assessment.md`;
+- `docs/reports/sprint_plan_analysis.md` §9;
+- `docs/specs/sprint_plan_spec.md` §17.
+
+### Key Changes (`v0.47.0` vs `v0.46.0`)
+1. **Sprint Plan with Gray Legacy Rotation.**
+   - Setup: Ready for Release holds 2 Gray dice, the Purple die and the company die. The Current Sprint holds 3 Gray dice.
+   - Gray dice have one ⚠, on F3, and that face is locked.
+2. **Thinning at Level 3.**
+   - Release L3 and Pen Test L3 read "return 1 Gray Legacy die you own to the box".
+   - Pen Test L3 keeps the Blue Secret +3.
+3. **QC Level 1 rewards:**
+   - Pen Test L1 gives +1 Corporate Secret.
+   - Triage L1 gives `+$2`.
+   - Release L1 gives +1 Release Bandwidth this round.
+4. **6 starting Corporate Secrets.**
+5. **Bots (sim-only):**
+   - `THINNING_AWARE` research focus;
+   - `bot_thin_tracks=("RELEASE",)`.
+
+### Telemetry & Balance Verdict (`PASS` on the like-for-like base)
+- **Against the spec base (S0 and v0.45, both LEGACY bots), S2 fails two guardrails:**
+  - Δ rounds +0.06 / +0.35 / +0.30;
+  - income ×v0.45 1.30 / 1.26 / 1.26.
+- **About 70% of the overshoot comes from the bots:**
+  - The bot fix alone on v0.46 rules (S3 − S0) adds +0.13 / +0.13 / +0.12 income.
+  - The v0.47 rules under the fixed bots (S2 − S3) add only +0.05 / +0.05 / +0.06.
+  - The fixed bots also lift v0.45 by ×1.10.
+- **Like-for-like, with both sides on `THINNING_AWARE`:**
+  - Δ rounds vs S3: +0.05 / +0.24 / +0.05.
+  - Income ×v0.45: 1.19 / 1.15 / 1.16.
+  - Singularity: 82–86% of S3.
+  - Green: 2.26 / 2.04 / 1.84. With the fixed bots, v0.46 itself breaks the 2P band at 2.75.
+- **S2 is preferred over S2b**, which also thins on Pen Test L3:
+  - White Hat spread 4.8 / 7.2 / 8.0 against 8.2 / 10.7 / 10.6 pp;
+  - company spread 19.6 / 17.4 / 15.8 against 26.4 / 19.0 / 18.9 pp;
+  - S2b's lower income is the only thing it does better.
+- **Lever probes, 600 per pod. None is useful:**
+  - **Triage L1 `+$1`:** no change. Breakthrough cash is outside the Phase 3 income metric.
+  - **Gray F3 `+$1 / +2 🔬`:** bit-identical to S2. The bots always take 🔬 on choice faces (`adjust_declared_choices`), so this lever cannot be tested in the sim.
+  - **5 Secrets at 3P / 4P:** −0.72 / −0.85 rounds against S2, an overcorrection.
+
+### Key findings
+1. **Guardrails must use the same bot policy on both sides.** The ×1.25 income cap and the ±0.30 rounds bar were calibrated with the LEGACY bots, which are known to undervalue research.
+2. **The income guardrail measures Phase 3 dice income only.** Breakthrough rewards (Triage L1 `+$2`, PR L1 `+$3`) are invisible to it.
+3. **The extra v0.47 income is early research:**
+   - 🔬 in R1–4 is 3.83 per seat-round, against 2.98;
+   - cash is 2.78, against 2.86.
+   - This is the intended 5-Gray start.
+
+### Residuals (none blocking)
+- **Rush edge:**
+  - v0.47: +0.3 / **+5.0** / +3.6 pp (bar +4).
+  - v0.46 with the fixed bots: −3.5 / +3.5 / +2.3 (600 games). The SE is about 2 pp, so v0.47 is within noise of it.
+  - v0.46 with the LEGACY bots: +12.4 pp at 3P.
+  - If every seat rushes (R3), games run +0.60 / +0.46 rounds at 3P / 4P. Watch this in playtest.
+- **Spook at 3P:** 38.0, against 38.8 in v0.46. Pre-existing.
+- **Helix** is the lowest company in every arm, and the company spread is unchanged. Both go to the planned company-power pass.
+- **Round 2 dip:** 0.43 Secret faces per roll at 3P, against 0.51. Dead turns are 0.3%, against 2.3%. The Round 1 company-die priority lever stays parked.
+
+### User decisions (2026-11-19)
+- **D-69-1 ACCEPTED:** the Δ-rounds and income guardrails are re-based on the fixed-bot baseline (S3 and V45TA); other bars stay absolute.
+- **D-69-2 ACCEPTED:** ship S2 (Release-only thinning focus) as `v048_roster`.
+- **D-69-3 ACCEPTED:** no `[TUNE]` change.
+- **Next:**
+  - the dominance matrix and ref1 on S2;
+  - a matched-bot V45TA reference arm in the sweep script;
+  - a bot cash/🔬 choice-face policy, needed before any Gray face-mix lever can be tested.
+
+### Combined-rules re-sweep (`v0.48.0` on top of `v0.47.0` Red Signature, 2026-11-19)
+`scripts/run_v048_sweep.py`, 1,200 games per pod, seeds `42..1241`, `mixed1`; S0 = `v047_roster`, S3 = `v047_roster` + fixed bots, S2 = `v048_roster` (`--assert-invariants`, no failures). Raw output is not committed.
+
+| Measure (2P / 3P / 4P) | S3 (fixed-bot v0.47) | S2 (v0.48) | Bar |
+|---|---|---|---|
+| Rounds | 8.28 / 8.11 / 8.09 | 8.31 / 8.37 / 8.12 (Δ +0.03 / +0.26 / +0.03) | Δ within ±0.30 vs S3: PASS |
+| Income ×v0.45 (old-bot ref) | 1.25 / 1.21 / 1.19 | 1.30 / 1.26 / 1.26 (Δ +0.05 / +0.05 / +0.07) | re-based (÷1.10 fixed-bot v0.45) ≈ 1.18 / 1.15 / 1.15: PASS |
+| Singularity % | 30.3 / 31.0 / 28.2 | 25.3 / 27.3 / 22.7 (83 / 88 / 80% of S3) | PASS |
+| Market Collapse % | 32.6 / 12.9 / 13.0 | 36.4 / 16.4 / 16.3 | watch (Red Signature's §63 gain partly given back, still well under v0.46's 21–24% at 3P/4P) |
+| Green lost / seat | 2.79 / 2.47 / 2.32 | 2.29 / 2.11 / 1.92 | 1.2–2.5: PASS |
+| Gray roll share % | — | 56.1 / 54.7 / 54.6 | ≥ 45: PASS |
+| Longest Gray streak | — | 5 / 8 / 6 | ≤ 8: PASS |
+| Seat-0 rush edge (R1 / R3 vs S2) | — | +1.7 / +5.6 / +4.1 pp; R3 −0.4 / +3.1 / +4.0 | 3P R1 over the +4 bar, as in the v0.46-based sweep (+5.0); residual |
+
+**Verdict:** the `v0.46`-based assessment above carries over to the combined rules unchanged. The Sprint Plan adds the same +0.05–0.07 income on top of `v0.47` as it did on `v0.46`; no interaction with the Red Signature rule beyond a +3 pp Market Collapse give-back at 3P/4P. APPROVED as `v0.48.0`. Watch items: 3P rush edge, 3P/4P Market Collapse, 2P SecOpsTurtle (§63).

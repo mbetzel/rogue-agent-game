@@ -97,6 +97,61 @@ def _want_list(policy: ResearchPolicy, lv: Dict[str, int]) -> List[str]:
     return wants
 
 
+def _rushes(config: GameConfig, player: PlayerState, state: GameState) -> bool:
+    mode = config.bot_research_rush
+    if mode == "all":
+        return True
+    if mode == "p0":
+        return player.player_id == 0
+    if mode == "p0half":
+        return player.player_id == 0 and bool(hash((int(getattr(state, "rush_seed", 0)), int(state.current_round))) & 1)
+    return False
+
+
+def _plan_rush(player: PlayerState, config: GameConfig, lv: Dict[str, int], res: int) -> Optional[Tuple[List[str], int, int]]:
+    """Rush Release L3 then Pen Test L3: buy in order, stop at the first unaffordable step; no RNG."""
+    need = [t for t in ("RELEASE", "DEFENSE") for _ in range(max(0, 3 - lv[t]))]
+    if not need:
+        return None
+    lv = dict(lv)
+    ups: List[str] = []
+    for t in need:
+        if len(ups) >= getattr(config, "max_hardware_upgrades_per_turn", 2):
+            break
+        c = int(config.track_step_costs[lv[t]])
+        if res < c:
+            break
+        ups.append(t)
+        res -= c
+        lv[t] += 1
+    return ups, 0, 0
+
+
+def _thinning_aware_want_order(policy: ResearchPolicy, player: PlayerState, config: GameConfig,
+                               lv: Dict[str, int]) -> List[str]:
+    """v0.48 THINNING_AWARE research focus (sprint_plan_spec §11.2): Triage L1, then push the thinning tracks to L3
+    while Gray dice remain, then the bot's archetype list (legacy Triage-to-L2 injection after the head)."""
+    from sim.engine import sprint_plan
+
+    g = len(sprint_plan.owned_gray(player))
+    head: List[str] = []
+    if lv["TRIAGE"] < 1:
+        head += ["TRIAGE"]
+    for t in config.bot_thin_tracks:
+        if lv[t] < 3 and (g >= config.bot_thin_gray_floor or (t == "RELEASE" and lv[t] < 2)):
+            head += [t] * (3 - lv[t])
+    rest = _want_list(policy, lv)
+    if getattr(config, "triage_l4_free_die_replacement", False) and lv["TRIAGE"] < 2:
+        rest = ["TRIAGE"] * (2 - lv["TRIAGE"]) + [x for x in rest if x != "TRIAGE" or lv["TRIAGE"] >= 2]
+    counts: Dict[str, int] = {}
+    out: List[str] = []
+    for t in head + rest:
+        if counts.get(t, 0) < 4 - lv[t]:
+            out.append(t)
+            counts[t] = counts.get(t, 0) + 1
+    return out
+
+
 def _plan_research_share_regain(policy: ResearchPolicy, player: PlayerState, state: GameState, config: GameConfig,
                                 ms_policy: Any = None) -> Tuple[List[str], int, int]:
     from sim.bots import market_share_policy as msp
@@ -109,12 +164,18 @@ def _plan_research_share_regain(policy: ResearchPolicy, player: PlayerState, sta
     lv: Dict[str, int] = {t: int(getattr(player, LEVEL_ATTR[t])) for t in TRACKS}
     sim_lv = dict(lv)
     share, smax = int(player.market_share), int(player.market_share_max)
+    if config.bot_research_rush != "none" and _rushes(config, player, state):
+        rush = _plan_rush(player, config, lv, res)  # v0.48 sim-only stress policy (sprint_plan_spec §11.3)
+        if rush is not None:
+            return rush
 
     if getattr(config, "share_regain_currency", "RESEARCH") == "MONEY":
         upgrades: List[str] = []
         max_ups = getattr(config, "max_hardware_upgrades_per_turn", 2)
         want_order = _want_list(policy, lv)
-        if getattr(config, "triage_l4_free_die_replacement", False) and lv["TRIAGE"] < 2:
+        if config.bot_research_mode == "THINNING_AWARE":
+            want_order = _thinning_aware_want_order(policy, player, config, lv)
+        elif getattr(config, "triage_l4_free_die_replacement", False) and lv["TRIAGE"] < 2:
             triage_steps = ["TRIAGE"] * (2 - lv["TRIAGE"])
             want_order = triage_steps + [t for t in want_order if t != "TRIAGE" or lv["TRIAGE"] >= 2]
         if int(getattr(config, "pr_l4_instant_market_share", 0)) > 0 and lv["PATENT"] == 3:

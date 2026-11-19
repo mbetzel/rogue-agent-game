@@ -46,12 +46,20 @@ V038E_MARKET_SHARE_START: Dict[int, int] = {2: 13, 3: 16, 4: 16}  # Unified 3P a
 V045_STARTING_SECRETS: Dict[int, int] = {2: 4, 3: 4, 4: 4}
 V046_STARTING_SECRETS: Dict[int, int] = {2: 5, 3: 5, 4: 5}
 V046_MARKET_SHARE_START: Dict[int, int] = {2: 14, 3: 18, 4: 18}
+V048_STARTING_SECRETS: Dict[int, int] = {2: 6, 3: 6, 4: 6}  # [TUNE] v0.48 Sprint Plan (docs/specs/sprint_plan_spec.md)
+V046_GRAY_FACE_PROFILES = ("V046_VULN", "V048_SPRINT")
+_RELEASE_L1_MODES = ("GRAY_DIE", "BANDWIDTH")
+_L3_MODES = ("SECRET", "THIN_GRAY")
+_VULN_FACE_LOCK_MODES = ("NONE", "GRAY")
+_BOT_RESEARCH_MODES = ("LEGACY", "THINNING_AWARE")
+_BOT_RESEARCH_RUSH_MODES = ("none", "p0", "p0half", "all")
+_BOT_THIN_TRACKS = ("RELEASE", "DEFENSE")
 _DEFENSE_MODES = ("SHIELDS", "VULNERABILITY")
-_PEN_TEST_L1_MODES = ("GRAY_DIE", "SET_ZERO")
+_PEN_TEST_L1_MODES = ("GRAY_DIE", "SET_ZERO", "SECRET")
 _AEGIS_ECHO_MODES = ("IGNORE_CUBE", "IGNORE_DAMAGE_V046")
 DEFAULT_MARKET_SHARE_MAX: int = 20
 _TRIAGE_ORDER_RULES = ("BOT", "OLDEST_FIRST")
-_TRIAGE_L1_MODES = ("WHITE_CONTRACTORS", "GRAY_DIE")
+_TRIAGE_L1_MODES = ("WHITE_CONTRACTORS", "GRAY_DIE", "CASH")
 _GREEN_TRIAGE_CLEAN_MODES = ("NONE", "COUNT_THEN_CLEAN", "CLEAN_THEN_COUNT")
 _MERIDIAN_OVERRIDE_MODES = ("REDUNDANT_CREW", "CAPITAL_INJECTION")
 _OPERATOR_PROTOCOL_MODES = ("CONTINGENT_STAFFING", "LOGISTICS_BOUNTY")
@@ -543,6 +551,20 @@ class GameConfig:
     pen_test_limits: Tuple[int, ...] = (1, 1, 2, 2, 3)  # [TUNE] by Pen Test level
     pen_test_l1: str = "GRAY_DIE"                  # "GRAY_DIE" | "SET_ZERO"
     pen_test_l3: str = "SECRET_BLUE_BONUS"
+    # --- v0.48 Sprint Plan & Gray Legacy Rotation (docs/specs/sprint_plan_spec.md); every default = v0.46 behaviour ---
+    sprint_plan_enabled: bool = False
+    starting_current_sprint_gray: int = 0          # [TUNE] extra Gray dice placed in the Current Sprint at setup
+    vuln_face_lock: str = "NONE"                   # "NONE" | "GRAY" (Gray dice showing a vulnerability face cannot be rerolled)
+    pen_test_l1_secrets: int = 1                   # [TUNE] Pen Test L1 "SECRET" Breakthrough
+    triage_l1_cash: int = 2                        # [TUNE] Triage L1 "CASH" Breakthrough
+    release_l1_breakthrough: str = "GRAY_DIE"      # "GRAY_DIE" | "BANDWIDTH"
+    release_l1_bandwidth: int = 1                  # [TUNE] Release L1 "BANDWIDTH": +Release Bandwidth this round
+    pen_test_l3_breakthrough: str = "SECRET"       # "SECRET" | "THIN_GRAY"
+    release_l3_breakthrough: str = "SECRET"        # "SECRET" | "THIN_GRAY"
+    bot_research_mode: str = "LEGACY"              # sim-only: "LEGACY" | "THINNING_AWARE"
+    bot_thin_tracks: Tuple[str, ...] = ("RELEASE",)  # sim-only, ordered subset of ("RELEASE", "DEFENSE")
+    bot_thin_gray_floor: int = 3                   # sim-only
+    bot_research_rush: str = "none"                # sim-only stress: "none" | "p0" | "p0half" | "all"
     pen_test_l4_free: int = 1                      # [TUNE]
     pen_test_l4_set_zero_on_reach: bool = False    # parked arm
     green_secret_vuln_reduction: int = 2           # [TUNE]
@@ -729,6 +751,7 @@ class GameConfig:
         self._validate_v038()
         self._validate_v040()
         self._validate_v046()
+        self._validate_v048()
         if self.starting_secrets_by_player_count is None:
             # NOTE: resolved once at construction. Re-assigning round_sequence later does NOT
             # re-resolve this dict; use GameConfig.legacy_v033() or pass round_sequence to __init__.
@@ -1160,6 +1183,28 @@ class GameConfig:
         return cls.v045(**overrides)
 
     @classmethod
+    def v048(cls, **overrides) -> "GameConfig":
+        """v0.48.0 Sprint Plan & Gray Legacy Rotation (docs/specs/sprint_plan_spec.md). Inherits v047() (Red Signature)."""
+        for k, v in (
+            ("sprint_plan_enabled", True), ("starting_current_sprint_gray", 3),
+            ("gray_face_profile", "V048_SPRINT"), ("vuln_face_lock", "GRAY"),
+            ("starting_secrets_by_player_count", dict(V048_STARTING_SECRETS)),
+            ("pen_test_l1", "SECRET"), ("triage_l1_breakthrough", "CASH"),
+            ("release_l1_breakthrough", "BANDWIDTH"),
+            ("pen_test_l3_breakthrough", "THIN_GRAY"), ("release_l3_breakthrough", "THIN_GRAY"),
+        ):
+            overrides.setdefault(k, v)
+        return cls.v047(**overrides)
+
+    @classmethod
+    def v048_roster(cls, **overrides) -> "GameConfig":
+        """v0.48.0 + bot PR push and thinning-aware research focus."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        overrides.setdefault("bot_research_mode", "THINNING_AWARE")
+        return cls.v048(**overrides)
+
+    @classmethod
     def v046_roster(cls, **overrides) -> "GameConfig":
         """v0.46.0 + bot autonomous PR push and cash allocation policies enabled."""
         overrides.setdefault("bot_pr_push", True)
@@ -1289,7 +1334,7 @@ class GameConfig:
         if self.defense_mode not in _DEFENSE_MODES:
             raise ValueError(f"defense_mode must be one of {_DEFENSE_MODES}, got {self.defense_mode!r}")
         vuln = self.defense_mode == "VULNERABILITY"
-        v046_profiles = (self.die_face_profile in V046_DIE_FACE_PROFILES or self.gray_face_profile == "V046_VULN"
+        v046_profiles = (self.die_face_profile in V046_DIE_FACE_PROFILES or self.gray_face_profile in V046_GRAY_FACE_PROFILES
                          or self.variant_profile == "V046")
         if v046_profiles and not vuln:
             raise ValueError("V046 die / gray / variant profiles require defense_mode='VULNERABILITY'")
@@ -1309,8 +1354,8 @@ class GameConfig:
                 bad.append("operations_before_pipeline_shift=True")
             if self.die_face_profile not in V046_DIE_FACE_PROFILES:
                 bad.append(f"die_face_profile in {V046_DIE_FACE_PROFILES}")
-            if self.gray_face_profile != "V046_VULN":
-                bad.append("gray_face_profile='V046_VULN'")
+            if self.gray_face_profile not in V046_GRAY_FACE_PROFILES:
+                bad.append(f"gray_face_profile in {V046_GRAY_FACE_PROFILES}")
             if self.variant_profile != "V046":
                 bad.append("variant_profile='V046'")
             if self.glitched_shield_slots_enabled:
@@ -1364,6 +1409,51 @@ class GameConfig:
         seat = self.probe_bonus_seat
         if seat != -1 and not (0 <= seat < self.num_players):
             raise ValueError("probe_bonus_seat must be -1 (off) or in [0, num_players)")
+
+    def _validate_v048(self) -> None:
+        """docs/specs/sprint_plan_spec.md §3.3."""
+        def _int_ge0(name: str) -> None:
+            val = getattr(self, name)
+            if isinstance(val, bool) or not isinstance(val, int) or val < 0:
+                raise ValueError(f"{name} must be an int >= 0, got {val!r}")
+
+        if not isinstance(self.sprint_plan_enabled, bool):
+            raise ValueError("sprint_plan_enabled must be a bool")
+        for name in ("starting_current_sprint_gray", "pen_test_l1_secrets", "triage_l1_cash",
+                     "release_l1_bandwidth", "bot_thin_gray_floor"):
+            _int_ge0(name)
+        for name, allowed in (("vuln_face_lock", _VULN_FACE_LOCK_MODES), ("release_l1_breakthrough", _RELEASE_L1_MODES),
+                              ("pen_test_l3_breakthrough", _L3_MODES), ("release_l3_breakthrough", _L3_MODES),
+                              ("bot_research_mode", _BOT_RESEARCH_MODES), ("bot_research_rush", _BOT_RESEARCH_RUSH_MODES)):
+            if getattr(self, name) not in allowed:
+                raise ValueError(f"{name} must be one of {allowed}, got {getattr(self, name)!r}")
+        tt = tuple(self.bot_thin_tracks)
+        if any(t not in _BOT_THIN_TRACKS for t in tt) or len(set(tt)) != len(tt):
+            raise ValueError(f"bot_thin_tracks must be a duplicate-free subset of {_BOT_THIN_TRACKS}")
+        vuln = self.defense_mode == "VULNERABILITY"
+        if self.gray_face_profile == "V048_SPRINT" and not vuln:
+            raise ValueError("gray_face_profile='V048_SPRINT' requires defense_mode='VULNERABILITY'")
+        if self.vuln_face_lock == "GRAY" and not vuln:
+            raise ValueError("vuln_face_lock='GRAY' requires defense_mode='VULNERABILITY'")
+        if self.sprint_plan_enabled:
+            bad = []
+            if not vuln:
+                bad.append("defense_mode='VULNERABILITY'")
+            if self.round_sequence != RoundSequence.SIX_PHASE:
+                bad.append("round_sequence=SIX_PHASE")
+            if not self.operations_before_pipeline_shift:
+                bad.append("operations_before_pipeline_shift=True")
+            if not self.secret_face_enabled:
+                bad.append("secret_face_enabled=True")
+            if not self.purchased_dice_to_scanned:
+                bad.append("purchased_dice_to_scanned=True")
+            if bad:
+                raise ValueError(f"sprint_plan_enabled requires {', '.join(bad)}")
+        elif self.starting_current_sprint_gray > 0:
+            raise ValueError("starting_current_sprint_gray > 0 requires sprint_plan_enabled")
+        if ("THIN_GRAY" in (self.pen_test_l3_breakthrough, self.release_l3_breakthrough)
+                or self.release_l1_breakthrough == "BANDWIDTH") and not self.is_v035_tracks:
+            raise ValueError("THIN_GRAY / BANDWIDTH Breakthroughs require is_v035_tracks")
 
     def _validate_v038d(self) -> None:
         """spec v0.38d §3.1.2 validation."""

@@ -782,6 +782,34 @@ class BaseBot:
         )
         return sorted(player_state.scanned_dice, key=key)[: max(0, n)]
 
+    def choose_sprint_graduates(
+        self,
+        player_state: PlayerState,
+        current: List[Die],
+        next_: List[Die],
+        bw: int,
+        game_state: Optional[GameState] = None,
+        rng: Optional[random.Random] = None,
+    ) -> Tuple[List[int], List[int]]:
+        """v0.48 Sprint Review: ``(current_ids, next_ids)``. Current graduates are forced (``min(|Current|, bw)``);
+        spare bandwidth fills from the Next Sprint (bots always fill it). Priority: Purple, colored by descending
+        cost, then Gray; ties by die_id."""
+        from sim.engine.phase5_pipeline_shift import default_graduate_priority
+
+        cur_ids = [d.die_id for d in default_graduate_priority(current)[: min(len(current), bw)]]
+        next_ids = [d.die_id for d in default_graduate_priority(next_)[: max(0, bw - len(cur_ids))]]
+        return cur_ids, next_ids
+
+    def choose_thin_gray(
+        self,
+        player_state: PlayerState,
+        game_state: Optional[GameState] = None,
+        candidates: Optional[List[Tuple[str, Die]]] = None,
+    ) -> Optional[int]:
+        """v0.48 L3 thinning: the die_id of the owned Gray die to return to the box (default: first candidate,
+        i.e. R&D, then the Next Sprint, In Production, the Current Sprint, Ready)."""
+        return candidates[0][1].die_id if candidates else None
+
     def choose_malware_glitch_targets(
         self,
         player_state: PlayerState,

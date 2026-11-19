@@ -82,6 +82,8 @@ HOOK_DTYPES: Dict[str, str] = {
     "choose_breakthrough": "misc",
     "choose_triage_l4_upgrade": "misc",
     "choose_scanned_graduates": "misc",
+    "choose_sprint_graduates": "misc",  # v0.48
+    "choose_thin_gray": "misc",  # v0.48
     "choose_poach_target": "misc",
 }
 
