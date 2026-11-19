@@ -530,6 +530,8 @@ def resolve_spook_burn_notice(
             secret_faces.lose_pending(player, target_die)
 
         player.money += 3
+        if engine.config.sprint_plan_enabled:  # v0.48 telemetry (spec §10.3)
+            player.gray_removed_by_source["BURN_NOTICE"] = player.gray_removed_by_source.get("BURN_NOTICE", 0) + 1
         return True
 
     target_die = None

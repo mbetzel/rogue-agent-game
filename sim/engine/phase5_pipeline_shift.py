@@ -118,10 +118,20 @@ def production_return_to_scanned(engine: GameEngine, player: PlayerState) -> Lis
             f"INV-PIPE-PROD-TO-SCANNED-01: White Contractor dice {[d.die_id for d in whites]} remain In Production "
             "at Phase 5; contractors must expire at the end of Phase 4."
         )
+    sprint_on = engine.config.sprint_plan_enabled
+    if sprint_on:  # v0.48 (spec §6.1): returned dice are Current iff the pruned Current Sprint was empty
+        from sim.engine import sprint_plan
+
+        sprint_plan.prune(player)
+        was_empty = not sprint_plan.current_sprint(player)
     for die in moved:
         reset_die_for_pipeline(die)
         player.scanned_dice.append(die)
     player.in_production_dice.clear()
+    if sprint_on:
+        if was_empty:
+            sprint_plan.mark_current(player, moved)
+        engine.state.sprint_round.setdefault("sprint_prod_to_current_by_player", {})[player.player_id] = was_empty
     return moved
 
 
@@ -189,6 +199,11 @@ def graduate_scanned(
     use_bot_choice: bool = True,
 ) -> List[Die]:
     """Step 3: Scanned Graduation (<= release_bandwidth, INV-PIPE-RELEASE-CAP-01)."""
+    if engine.config.sprint_plan_enabled:  # v0.48: Sprint Review (docs/specs/sprint_plan_spec.md §6.2)
+        assert use_bot_choice, "legacy FIFO graduation is unreachable under sprint_plan_enabled"
+        from sim.engine import sprint_plan
+
+        return sprint_plan.sprint_review(engine, player, chosen_die_ids)
     n = max_graduates(player)
     if n <= 0:
         return []

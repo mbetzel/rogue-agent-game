@@ -1,4 +1,4 @@
-# Too Many Secrets — Tabletop Simulator Module (`v0.47.0`)
+# Too Many Secrets — Tabletop Simulator Module (`v0.48.0`)
 
 A Tabletop Simulator save built from the Print-and-Play components in [`pnp/`](../pnp/README.md). The PnP draw functions render every board, card and token to PNG, so the module stays in step with the PDFs.
 
@@ -26,8 +26,8 @@ Edit `tts/global.lua` / `tts/global.xml` for the script and UI, not the generate
 | :--- | :--- |
 | Centre | SETEC Central Agent & Market Share Board, Software Module Market & Central Supply Board (locked) |
 | Left | SETEC Version tile stacks (`v1.0` / `v2.0` / `v3.0`), Client Company and White Hat Dossier decks, Corporate Secret / Research / `$1` / `$5` token bags, First Player Marker, Active Version Marker, Master Dice Reference |
-| Right | Red / Blue / Green / Yellow market dice (`8` each), Gray Legacy dice (`12` spare), Variant (`★`) card decks per colour and the summary cards, Attack Cube and Corruption Cube supplies, **Staging Cup** bag, **Cube Tower** |
-| Each seat (White, Pink, Teal, Orange) | Company Terminal Mat, a 2-sided Player Reference card (dice front, round back), `8` player cubes (named per track or marker), `2` Gray + `2` Purple dice |
+| Right | Red / Blue / Green / Yellow market dice (`8` each), Variant (`★`) card decks per colour and the summary cards, Attack Cube and Corruption Cube supplies, **Staging Cup** bag, **Cube Tower** |
+| Each seat (White, Pink, Teal, Orange) | Company Terminal Mat, a 2-sided Player Reference card (dice front, round back), `8` player cubes (named per track or marker), `5` Gray + `2` Purple dice |
 
 Dice are standard tinted d6s, matching the PnP (the reference cards map pips to abilities).
 

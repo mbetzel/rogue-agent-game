@@ -1,10 +1,10 @@
 --[[
-Too Many Secrets (v0.47.0) -- Tabletop Simulator Global script.
+Too Many Secrets (v0.48.0) -- Tabletop Simulator Global script.
 Generated alongside the save by `python3 -m tts.build_tts`; edit tts/global.lua, not the save.
 
 1. Fit: every object whose GM Notes read "fit:<w>x<d>" is scaled to exactly
    <w> x <d> table units, so card and board images keep their PnP proportions.
-2. Cube Tower: the Shogun Baffle model from sim/tower.py (the v0.46.0 preset).
+2. Cube Tower: the Shogun Baffle model from sim/tower.py (the v0.48.0 preset).
    Cubes stuck on the internal baffles are kept hidden in the script state.
    "Drop Staging Cup" compiles everything in the Staging Cup bag; the cubes that
    exit appear in the Exit Tray area beside the tower.
@@ -12,7 +12,7 @@ Generated alongside the save by `python3 -m tts.build_tts`; edit tts/global.lua,
 
 -- __CONFIG__ (replaced by the builder: STAGING_CUP_GUID, TOWER_GUID, TRAY_ORIGIN, CUBE_TEMPLATES)
 
--- Shogun Baffle physics (GameConfig.v046(): sim/config.py)
+-- Shogun Baffle physics (GameConfig.v047(): sim/config.py)
 local PHYS = {
   empty_exit     = 0.70, -- falling pass-through when the tower is empty
   alpha          = 0.15, -- pass-through lost per stuck cube (trapping regime)

@@ -506,11 +506,19 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
                     idx for idx in reroll_indices
                     if 0 <= idx < len(active_dice) and not active_dice[idx].is_locked
                 ]
+            # v0.48 Gray lock (sprint_plan_spec §8): a Gray die showing ⚠ cannot be rerolled (Helix is exempt)
+            _lock_on = engine.config.vuln_face_lock != "NONE" and not helix_active
+            if _lock_on:
+                _kept_rr = [idx for idx in valid_rerolls if not vulnerability.is_reroll_locked(engine.config, active_dice[idx])]
+                player.gray_lock_blocked += len(valid_rerolls) - len(_kept_rr)
+                valid_rerolls = _kept_rr
             if engine.config.is_vulnerability:
                 # keep-rate telemetry (spec §6): every unlocked ⚠ face shown at a decision with rerolls left
                 _rr = set(valid_rerolls)
                 _ev = _kept = 0
                 for _i, _d in enumerate(active_dice):
+                    if _lock_on and vulnerability.is_reroll_locked(engine.config, _d):
+                        continue  # no choice was offered
                     if not _d.is_locked and vulnerability.face_vuln(_d.current_face) > 0:
                         _ev += 1
                         _kept += 0 if _i in _rr else 1

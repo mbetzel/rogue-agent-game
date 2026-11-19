@@ -3,6 +3,27 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
+- [x] **Rules Draft `v0.48.0`** captured in [RULES.md](./RULES.md) (Sprint Plan & Gray Legacy Rotation)
+- [ ] **Phase 69: Sprint Plan & Gray Legacy Rotation (`v0.48.0 Baseline`)**: Scanned Box → **Sprint Plan** (**Current Sprint** / **Next Sprint**; Current graduates first, forced up to Release Bandwidth; leftover bandwidth may take Next; leftovers become Current); Processing Box → **Research & Development**; Secret face → **R&D face**; Scanned Graduation → **Sprint Review**; new arrivals (R&D, purchases, PR L3 Purple, Blue Signature Gray) enter the Next Sprint. Gray dice: `1` ⚠ (Face 3) and locked on ⚠ (colored dice not locked). Start: 2 Gray + Purple + company die in Ready, 3 Gray in the Current Sprint; `6` Secrets. Tracks: Pen Test L1 `+1` Secret / L3 return 1 Gray; Triage L1 `+$2` / L3 `+1` Secret; Release L1 `+1` Release Bandwidth this round / L3 return 1 Gray; PR unchanged. *Deep R&D Vault* → *Deep Data Vault*; "Terminal Hardware & R&D Upgrade Tracks" → "Terminal Hardware Tracks".
+  - [x] *Pre-SDLC Game Designer Modeling:* `docs/reports/sprint_plan_analysis.md` §1–§9 (User sign-off 2026-11-19, arm QC + 6 Secrets).
+  - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/sprint_plan_spec.md` (INV-SP-01..20, TC-SP-01..29; §19 defaults).
+  - [x] *Implementation (`senior-engineer`) + Code Review (`staff-engineer` APPROVE WITH FIXES, 4 Low fixes applied 2026-11-19):* `GameConfig.v048()` / `v048_roster()` (built on v0.47 Red Signature), `sim/engine/sprint_plan.py`, `scripts/run_v048_sweep.py`, `tests/test_v480_sprint_plan.py`, v0.46 + v0.47 parity goldens `tests/parity_v046/`, `tests/parity_v047/`. All test files pass; v046 replays bit-identically. Not done: display relabelling (`sim/engine/terms.py`, spec §13) — deferred to the web follow-up.
+  - [x] *Validation Sweep (`product-owner`) + Balance Assessment (`game-designer`):* `docs/reports/v047_sweep_report.md`, `docs/reports/v047_balance_assessment.md`, `FINDINGS.md` §64 APPROVED. User accepted D-69-1 (guardrails re-based on fixed-bot v0.46), D-69-2 (ship S2 Release-only thinning bots), D-69-3 (no `[TUNE]` change) on 2026-11-19.
+  - [x] *Documentation Sync (Main Agent) + PnP / TTS Sync (`graphic-designer`):* `RULES.md`, `RULES_QUICKREF.md`, `RULES_APPENDIX.md`, `GLOSSARY.md`, `CLAUDE.md` / `AGENTS.md` pillars, `pnp/` (regenerated) and `tts/` (rebuilt, `--check` clean) at `v0.48.0` (rebased onto v0.47.0 Red Signature 2026-11-19; re-sweep on combined rules below).
+  - [ ] *Follow-ups — sweeps & tooling (`product-owner` / `senior-engineer`; FINDINGS §64 "Next"):*
+    - [ ] Dominance matrix and ref1 edge check on S2 (`v048_roster`).
+    - [ ] Matched-bot v0.45 reference arm (V45TA) in `scripts/run_v048_sweep.py`, so the re-based income guardrail (D-69-1) is measured, not estimated (current ÷1.10 approximation).
+    - [ ] Bot cash/🔬 choice-face policy (bots always take 🔬 today), needed before any Gray face-mix lever can be tested.
+  - [ ] *Follow-ups — balance (`game-designer`):*
+    - [ ] Company-power pass: Helix trails and Spook leads in every arm (pre-existing in v0.46 / v0.47); also the v0.47 items below.
+    - [ ] Watch (FINDINGS §64 combined-rules re-sweep): 3P seat-0 rush edge `+5.6 pp` vs the `+4` bar; 3P/4P Market Collapse `13% → 16%` (gives back part of the §63 Red Signature gain); 2P SecOpsTurtle (§63).
+  - [ ] *Follow-ups — parked rule options (need User approval first; `docs/specs/sprint_plan_spec.md` §19 item 8):* stranding backup rule (leftover Current dice stay Current; Next joins only when Current is empty); `STRICT` Sprint Review reading; Round 2 company-die priority (the Round 2 R&D-face dip); colored dice also locked on ⚠ (`vuln_face_lock="ALL"`, overlaps the locked-⚠ proposal branch, which now needs v0.49+); Gray Face 3 `+$1 / +2 🔬` income lever.
+  - [ ] *Web follow-up (spec §19 item 9; web still plays `v047()`):*
+    - [ ] Switch the web to `GameConfig.v048()` and bump its `rules_version`.
+    - [ ] Display relabelling (`sim/engine/terms.py`, spec §13 — never built): Sprint Plan / Current Sprint / Next Sprint / Research & Development / R&D face / Sprint Review / *Deep Data Vault*.
+    - [ ] Two Sprint drop zones; forced Current Sprint picks at the Sprint Review (400 from `check_picks` on an illegal pick).
+    - [ ] Phase 1 rejection of Gray ⚠ rerolls; Level 3 thinning picker; Blue Signature Gray choice hook (`choose_signature_blue_gray`, spec §19 OQ-1).
+  - [ ] *Follow-up — PnP visual check:* review the regenerated player board (wider Sprint Plan box) for clipping or overlap.
 - [x] **Rules Draft `v0.47.0`** captured in [RULES.md](./RULES.md) (Red Signature "lowest rival"; Phase 68 in [docs/archive/PLAN_completed_phases.md](./docs/archive/PLAN_completed_phases.md))
 - [x] **Rules Draft `v0.46.0`** captured in [RULES.md](./RULES.md)
 - [ ] **Phase 67: Vulnerability Track Redesign (`v0.46.0 Baseline`)**: no shields or blocking; ⚠ faces raise **Vulnerability**; Green cubes hit the highest Vulnerability at `4`+ (bands `4–6 / 7–9 / 10+` = `−1 / −2 / −3` Secrets, reset to `0`); **Pen Test Track** replaces the Defense Grid Track (`2 🔬` per `−1`, limits `1/1/2/2/3`, L4 free `−1`/turn); Secrets `5`; Market Share `14 / 18 / 18`; Blue `1`/cube in every version; *Data Scraper* `+1` Secret start.

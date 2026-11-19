@@ -194,6 +194,14 @@ def resume_round(engine: Any, phase: int, commitments: Any = None, cr: Any = Non
                 engine._run_phase_6_operations()
             else:
                 raise ValueError(f"resume_round: unsupported phase {phase}")
+    if s.config.sprint_plan_enabled:  # v0.48: end-of-round bonus reset (``_finalize_telemetry`` is not run here)
+        from sim.engine import sprint_plan
+
+        for p in s.players:
+            p.temp_release_bandwidth_bonus = 0
+            p.release_l1_bw_bonus_this_round = 0
+        sprint_plan.prune_all(s)
+        s.sprint_round = {}
     if s.is_final_round:
         s.game_over = True
     else:

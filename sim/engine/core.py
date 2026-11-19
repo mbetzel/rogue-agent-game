@@ -56,6 +56,7 @@ from sim.engine import (
     phase4_attack_resolution,
     phase5_pipeline_shift,
     phase6_operations,
+    sprint_plan,
 )
 
 from sim.engine import phase2_threat, phase3_ops  # noqa: F401,E402  (v0.33 shim modules, kept importable)
@@ -304,6 +305,15 @@ class GameEngine:
             rng=self.rng,
         )
         self.state.first_player_index_start = first_player_index
+        if config.sprint_plan_enabled and config.starting_current_sprint_gray > 0:
+            # v0.48 (sprint_plan_spec §9): extra Gray dice in the Current Sprint, after every seat is built
+            from sim.engine import research_tracks as _rt, sprint_plan as _sp
+
+            for _pl in players:
+                for _ in range(config.starting_current_sprint_gray):
+                    _d = create_gray_die(_rt._new_die_id(self), config.gray_face_profile)
+                    _pl.scanned_dice.append(_d)
+                    _sp.mark_current(_pl, [_d])
         self.state.setec_market_share = 0
         self.state.setec_corp_active = (
             len(players) == 2
@@ -522,8 +532,13 @@ class GameEngine:
         tel.prodigy_overrides_executed = sum(
             getattr(p, "prodigy_overrides_this_round", 0) for p in self.state.players
         )
+        if self.config.sprint_plan_enabled:
+            for _name, _vals in self.state.sprint_round.items():
+                if hasattr(tel, _name):
+                    setattr(tel, _name, dict(_vals))
         for p in self.state.players:
             p.temp_release_bandwidth_bonus = 0
+            p.release_l1_bw_bonus_this_round = 0
             p.prodigy_overrides_this_round = 0
         self.state.distinct_exited_colors_this_round = 0
         self.telemetry_history.append(tel)  # exactly once per round (INV-SEQ-TELEMETRY-01)
@@ -557,6 +572,9 @@ class GameEngine:
     def _run_round_six_phase(self) -> RoundTelemetry:
         s = self.state
         self._begin_research_telemetry()
+        sprint_on = self.config.sprint_plan_enabled
+        if sprint_on:
+            s.sprint_round = {}
 
         # Phase 1: Roll & Deploy
         commitments = self._execute_phase_1()
@@ -564,6 +582,8 @@ class GameEngine:
 
         # Phase 2: Compiler Drop & Corruption (+ end-trigger check)
         cr = self._run_phase_2_compiler(commitments)
+        if sprint_on:
+            sprint_plan.prune_all(s)
         tel = self._begin_telemetry(cr)
         tel.phase_snapshots[1] = p1_snap
         tel.phase_snapshots[2] = self._snapshot_players()
@@ -573,6 +593,8 @@ class GameEngine:
 
         # Phase 3: Income (survivors only)
         incomes = self._run_phase_3_income(commitments)
+        if sprint_on:
+            sprint_plan.prune_all(s)
         tel.income_by_player = {
             pid: {"money": r.money, "research": r.research, "secrets": r.secrets} for pid, r in incomes.items()
         }
@@ -596,6 +618,8 @@ class GameEngine:
 
         # Phase 4: Attack Resolution (damage, Snowball Recycle, Contractor Expiration, end check)
         tel.attack_strengths = self._run_phase_4_attack_resolution(commitments, cr)
+        if sprint_on:
+            sprint_plan.prune_all(s)
         tel.phases_executed.append(4)
         tel.phase_snapshots[4] = self._snapshot_players()
         tel.player_snapshots = tel.phase_snapshots[4]
@@ -607,6 +631,8 @@ class GameEngine:
         if self.config.operations_before_pipeline_shift:
             # Phase 5: Operations (Clockwise turns from First Player)
             self._run_phase_operations()
+            if sprint_on:
+                sprint_plan.prune_all(s)
             tel.phases_executed.append(5)
             tel.phase_snapshots[5] = self._snapshot_players()
 
@@ -616,6 +642,13 @@ class GameEngine:
             tel.graduated_by_player = {pid: len(r.graduated_ids) for pid, r in shifts.items()}
             for p in s.players:
                 if p.temp_release_bandwidth_bonus > 0 and p.player_id in shifts:
+                    if sprint_on:  # v0.48 (spec §12): split the Jumper bonus from the Release L1 bonus
+                        grads = len(shifts[p.player_id].graduated_ids)
+                        base = p.release_bandwidth
+                        jumper = p.temp_release_bandwidth_bonus - p.release_l1_bw_bonus_this_round
+                        tel.phreaker_bandwidth_graduates += max(0, min(grads, base + jumper) - base)
+                        tel.release_l1_bandwidth_graduates += max(0, grads - (base + jumper))
+                        continue
                     tel.phreaker_bandwidth_graduates += max(
                         0, len(shifts[p.player_id].graduated_ids) - p.release_bandwidth
                     )
