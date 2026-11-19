@@ -363,7 +363,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         "ad_campaign_cost": cfg.r2_share_cost,
         "ad_campaign_actions": getattr(player, "r2_actions_available", 0),
         "track_names": {t.lower(): research_tracks.track_display_name(cfg, t) for t in research_tracks.TRACKS},
-        # v0.46.0 Pen Test Track
+        # v0.47.0 Pen Test Track
         "can_pen_test": pen_max_now > 0,
         "pen_test_max_now": pen_max_now,
         "pen_test_limit": pen_limit,

@@ -1,4 +1,4 @@
-# Too Many Secrets — Quick Reference Rules (v0.46.0)
+# Too Many Secrets — Quick Reference Rules (v0.47.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Format:** Simultaneous / Turn-Based Hybrid
 
@@ -126,7 +126,7 @@ No cube can be blocked. Resolve in order:
     * **Green:** Place a green cube from the supply on the next space of **`2` Research Tracks** without green cubes (**`2× 🔬` cost** to advance into; each unplaceable cube gives `+2` Vulnerability).
     * **Black:** Mark your **Institutional Override** as **`Used`** for this Version; if already used, lose **`2` Corporate Secrets**.
     * **Blue:** Move **`1` Gray Legacy Die** (from `Scanned Box`, else `In Production`) to the back of your **Processing Box** (`0` Secrets when triaged).
-    * **Red:** Lose **`2` Market Share**; the other *(non-locked)* surviving player with the least Market Share gains **`2`** *(if tied, you choose)*.
+    * **Red:** Lose **`2` Market Share**; the lowest surviving rival *(locked or not; 2P: SETEC Corp counts)* gains **`2`** *(read after all locked players lose `2`; if tied, you choose)*.
   * **Recycle Cubes & SETEC Corp (2P):** Place all exited Red, Blue, and Green Attack Cubes back into the **Staging Cup** for next round. In **2-player games**, if **any Red cubes (`>= 1`) exited the tray**, move the **SETEC Corp Black Cube** up **`+1` Market Share** (max `20`).
 * **End Game Check:**
   * If a surviving player's Secrets drop to `<= 0`, they become **Patient Zero** (eliminated; current round is the Final Round).

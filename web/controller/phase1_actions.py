@@ -395,7 +395,7 @@ def lock_in(
 
     Declares Choice Faces (``choice_declarations`` maps rolled-pool index -> option index; default option 0), gains
     ``+1`` Vulnerability per ⚠ on the final faces (``vulnerability.lock_in``), sends Secret faces to the Processing
-    Box and deploys every other die In Production. Nothing is blocked in v0.46.0, so there is no shield step."""
+    Box and deploys every other die In Production. Nothing is blocked in v0.47.0, so there is no shield step."""
     if controller.phase != 1:
         raise ValueError(f"Cannot lock in dice in phase {controller.phase}")
     if player_id not in controller.player_meta:

@@ -10,7 +10,7 @@ export let cipherDiscountSelected = false;
 export let selectedRerollIndices = new Set();
 export let selectedChoiceDeclarations = {};
 export let selectedGraduateIds = null; // Phase 6: Set of die ids (null = not yet initialised from server default)
-export const PHASE_OPERATIONS = 5; // v0.46.0 rules order: Phase 5 Operations, then Phase 6 CI/CD Pipeline Shift
+export const PHASE_OPERATIONS = 5; // v0.47.0 rules order: Phase 5 Operations, then Phase 6 CI/CD Pipeline Shift
 export const PHASE_PIPELINE = 6;
 export let activePlayerTab = "human"; // "human", player_id number, or "all"
 export let activeBoardView = "tabletop"; // "tabletop", "terminals", "agent", "market"
