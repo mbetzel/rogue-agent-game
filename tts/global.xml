@@ -1,0 +1,14 @@
+<Defaults>
+  <Button fontSize="13" textColor="#0F172A" colors="#E2E8F0|#CBD5E1|#94A3B8|#64748B" />
+  <Text color="#F8FAFC" />
+</Defaults>
+<Panel id="towerPanel" width="230" height="168" rectAlignment="UpperRight" offsetXY="-12 -70"
+       color="#0F172AE6" outline="#475569" outlineSize="1 1" allowDragging="true" returnToOriginalPositionWhenReleased="false">
+  <VerticalLayout padding="10 10 8 8" spacing="6" childForceExpandHeight="false">
+    <Text fontSize="15" fontStyle="Bold" alignment="MiddleCenter" preferredHeight="20">CUBE TOWER</Text>
+    <Button preferredHeight="30" onClick="uiDropCup" tooltip="Phase 2: drop every cube in the Staging Cup">Drop Staging Cup</Button>
+    <Button preferredHeight="26" onClick="uiPrime" tooltip="Setup step 1: drop 1 Red, 1 Blue, 1 Green and 1 Black cube into the empty tower">Prime the Compiler</Button>
+    <Button preferredHeight="22" fontSize="11" onClick="uiEmptyTower" tooltip="End of game / reset: dump the cubes stuck inside the tower">Empty tower</Button>
+    <Text id="towerStatus" fontSize="11" color="#CBD5E1" alignment="MiddleCenter" preferredHeight="28">Tower ready.</Text>
+  </VerticalLayout>
+</Panel>
