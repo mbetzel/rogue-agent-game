@@ -7,7 +7,7 @@ Follow this workflow across sessions:
 1. **Pre-SDLC Game Designer Analysis & Modeling:** Before proposing rule changes or kicking off the full engineering SDLC, the `game-designer` must perform mathematical modeling and impact analysis of the changes, provide a full statistical analysis (expected values, threat curves, pacing/economy distributions, edge cases), and generate a concrete implementation plan. Align with the user on these findings and plan *before* handing off to the full SDLC.
 2. **Rules & Design Alignment:** Review rules critically for player agency, pacing, edge cases, and degenerate strategies (stalling, kamikaze wipeouts, runaway leaders, player-count scaling bugs). Ensure the user has reviewed and approved the game designer's statistical analysis and implementation plan before modifying rules or writing simulation code.
 3. **Canonical Glossary & Terminology Governance:**
-   - All changes to `RULES.md`, Print-and-Play assets (`pnp/`), and the Web UI (`web/`) **must be validated to align strictly with Section 7: Glossary of Key Terms (`GLOSSARY.md`)**.
+   - All changes to `RULES.md`, Print-and-Play assets (`pnp/`), the Tabletop Simulator module (`tts/`), and the Web UI (`web/`) **must be validated to align strictly with Section 7: Glossary of Key Terms (`GLOSSARY.md`)**.
    - Never introduce new game terms or resurrect deprecated terminology (e.g., *Consultancy*, *Consultancy Terminal Mat*, *Lead Consultant*, *CISO*, *Patches / 🔧*, *Unpatched Zone*, *Demote*, *Zero Wear Retention*, *Malware Fizzle*, *Phase 1: Boot & Configure*, *Phase 2: SETEC Compile*, *Net Wipeout Score*, *Emergency Hotfix*, *Passive Firewall*, *Personal Reserve Procurement*, *Unpaid Ransom Leak*, *Ransomware / Financial Wiretaps*, *Cryptographic Patents Track*, *Patent Filing*, *FinSec*, *Ransom Insurance*, *Threat Bounty*, *Short Squeeze*, *Shield Slot*, *Glitched Shield Slot*, *Defense Grid (Track / Capacity / Overflow)*, *Block 1 Any*, *Critical Breach*) without explicit user approval.
    - If a new term appears necessary, **ask and confirm with the user first** before adding it to the glossary and introducing the terminology into the codebase.
 4. **Enforce Multi-Agent SDLC (scaled to the change):** For **rule or mechanics changes** (anything touching `RULES.md`, `[TUNE]` baselines, or balance), once the pre-SDLC analysis and plan are signed off, route work through the subagents in `.claude/agents/` (`principal-engineer` → `senior-engineer` ↔ `staff-engineer` → `product-owner` ↔ `game-designer` + `graphic-designer`). Keep strict separation between design, implementation, review, scenario runs, balance validation and asset design.
@@ -23,7 +23,9 @@ Follow this workflow across sessions:
      - `RULES_QUICKREF.md` (Title header)
      - `pnp/README.md` (Pack title & component summary)
      - `pnp/generate_pnp.py` (Docstring & version strings / header badges)
+     - `tts/build_tts.py` (`VERSION` & docstring), `tts/global.lua` (header) and `tts/README.md` (title); then rebuild the TTS module
      - `PLAN.md` (Active baseline milestones & rules draft checkboxes)
+   - **Keep the Tabletop Simulator module in sync, like the Web UI:** after any change to `pnp/` or to rules it depicts, run `python3 -m tts.build_tts` and commit `tts/` with that change (`python3 -m tts.build_tts --check` exits 1 when `tts/` is stale). When the Cube Tower `[TUNE]` values in `sim/config.py` change, update the matching odds in `tts/global.lua`.
    - Update `PLAN.md` (status checkboxes & upcoming experiments) before and after implementation milestones.
    - Record Monte Carlo experiment outputs, balance takeaways, and rule iteration rationale in `FINDINGS.md`. When it grows past ~8 sections, move the oldest into `docs/archive/` and keep the numbering. Move completed `PLAN.md` phases into `docs/archive/PLAN_completed_phases.md`.
 
@@ -48,4 +50,5 @@ Follow this workflow across sessions:
 - `.claude/agents/` — Subagent definitions with per-role models and reading lists.
 - `sim/` — Python 3 Monte Carlo simulation & stress-testing suite *(run via WSL per global rules)*.
 - `pnp/` — Print-and-Play prototype generator & PDF assets (`python3 -m pnp.generate_pnp`).
+- `tts/` — Tabletop Simulator module built from the PnP draw code (`python3 -m tts.build_tts`; `--check` to verify it is current).
 - `scripts/` — Utility scripts for Monte Carlo sweeps and report generation.

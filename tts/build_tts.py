@@ -5,6 +5,7 @@ images and writes a Tabletop Simulator save file that uses them.
 
     python3 -m tts.build_tts                     # images + save using GitHub raw URLs
     python3 -m tts.build_tts --install-dir DIR   # also a local-file save + images in DIR
+    python3 -m tts.build_tts --check             # exit 1 if tts/ is stale vs pnp/ (no writes)
 
 Needs `pdftoppm` (poppler-utils) for rasterizing. No other dependencies.
 """
@@ -29,8 +30,8 @@ from pnp.pdf_engine import PALETTE, PDFDocument, PDFPage, measure_text
 VERSION = "v0.46.0"
 HERE = os.path.dirname(os.path.abspath(__file__))
 ASSET_DIR = os.path.join(HERE, "assets")
-SAVE_NAME = "Too Many Secrets (v0.46.0)"
-SAVE_FILE = "TooManySecrets_v0.46.0.json"
+SAVE_NAME = f"Too Many Secrets ({VERSION})"
+SAVE_FILE = "TooManySecrets.json"  # stable name: a version bump overwrites it
 DEFAULT_BASE_URL = "https://raw.githubusercontent.com/mbetzel/rogue-agent-game/main/tts/assets/"
 
 # One PnP point -> table units. A 792 pt (11") board is 16 units wide; cards keep
@@ -525,7 +526,7 @@ def build_save(url_for) -> dict:
     }
 
 
-NOTE = """[b]Too Many Secrets v0.46.0 -- Tabletop Simulator PnP module[/b]
+NOTE = f"""[b]Too Many Secrets {VERSION} -- Tabletop Simulator PnP module[/b]
 Rules: RULES.md / RULES_QUICKREF.md in the repo.
 
 [b]Setup[/b]
@@ -552,7 +553,11 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     ap.add_argument("--base-url", default=DEFAULT_BASE_URL, help="URL prefix the hosted images live under")
     ap.add_argument("--install-dir", help="TTS Saves folder (WSL path): writes a local-file save + images there")
     ap.add_argument("--skip-render", action="store_true", help="reuse the images already in tts/assets/")
+    ap.add_argument("--check", action="store_true", help="exit 1 if the committed module is out of date; writes nothing")
     args = ap.parse_args(argv)
+
+    if args.check:
+        raise SystemExit(check(args.base_url))
 
     if args.skip_render:
         hashes = {}
@@ -564,11 +569,9 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         hashes = render_assets(ASSET_DIR)
         print(f"Rendered {len(hashes)} images -> {ASSET_DIR}")
 
-    base = args.base_url if args.base_url.endswith("/") else args.base_url + "/"
-    save = build_save(lambda n: f"{base}{n}.png?v={hashes[n]}")
     out = os.path.join(HERE, SAVE_FILE)
     with open(out, "w", encoding="utf-8") as f:
-        json.dump(save, f, indent=2)
+        f.write(_save_text(hashes, args.base_url))
     print(f"Save (hosted images): {out}")
 
     if args.install_dir:
@@ -580,10 +583,45 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         local = build_save(lambda n: f"file:///{win_dir}/{n}.png")
         local["SaveName"] = SAVE_NAME + " [local images]"
         local_out = os.path.join(args.install_dir, SAVE_FILE.replace(".json", "_local.json"))
+        for old in os.listdir(args.install_dir):  # earlier versioned installs
+            if old.startswith("TooManySecrets_v") and old.endswith(".json"):
+                os.remove(os.path.join(args.install_dir, old))
         with open(local_out, "w", encoding="utf-8") as f:
             json.dump(local, f, indent=2)
         shutil.copy2(out, args.install_dir)
         print(f"Installed: {local_out} and {os.path.join(args.install_dir, SAVE_FILE)}")
+
+
+def _save_text(hashes: Dict[str, str], base_url: str) -> str:
+    base = base_url if base_url.endswith("/") else base_url + "/"
+    return json.dumps(build_save(lambda n: f"{base}{n}.png?v={hashes[n]}"), indent=2)
+
+
+def check(base_url: str = DEFAULT_BASE_URL) -> int:
+    """Re-render into a temp dir and compare with tts/assets/ and the committed save."""
+    with tempfile.TemporaryDirectory() as tmp:
+        fresh = render_assets(tmp)
+    committed = {fn[:-4] for fn in os.listdir(ASSET_DIR) if fn.endswith(".png")} if os.path.isdir(ASSET_DIR) else set()
+    stale = []
+    for name, digest in sorted(fresh.items()):
+        path = os.path.join(ASSET_DIR, name + ".png")
+        if not os.path.exists(path):
+            stale.append(f"missing  tts/assets/{name}.png")
+            continue
+        with open(path, "rb") as f:
+            if hashlib.sha1(f.read()).hexdigest()[:10] != digest:
+                stale.append(f"changed  tts/assets/{name}.png")
+    stale += [f"orphan   tts/assets/{n}.png" for n in sorted(committed - set(fresh))]
+    save_path = os.path.join(HERE, SAVE_FILE)
+    current = open(save_path, encoding="utf-8").read() if os.path.exists(save_path) else ""
+    if current != _save_text(fresh, base_url):
+        stale.append(f"changed  tts/{SAVE_FILE}")
+    if stale:
+        print("TTS module is out of date; run `python3 -m tts.build_tts`:")
+        print("\n".join("  " + s for s in stale))
+        return 1
+    print(f"TTS module is up to date ({len(fresh)} images, {VERSION}).")
+    return 0
 
 
 def _to_windows_path(path: str) -> str:

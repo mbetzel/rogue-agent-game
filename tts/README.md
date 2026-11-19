@@ -9,9 +9,14 @@ python3 -m tts.build_tts
 ```
 
 - Renders 23 images into `tts/assets/` (needs `pdftoppm`, from poppler-utils).
-- Writes `tts/TooManySecrets_v0.46.0.json`, whose images point at GitHub raw URLs on `main`. Use this one for multiplayer once the assets are pushed. Each URL carries a `?v=<hash>` so TTS reloads changed images.
-- Add `--install-dir "<TTS Saves folder>"` to copy the images there and write `TooManySecrets_v0.46.0_local.json` (it uses `file:///` paths, so it works before pushing, but only on that machine).
+- Writes `tts/TooManySecrets.json`, whose images point at GitHub raw URLs on `main`. Use this one for multiplayer once the assets are pushed. Each URL carries a `?v=<hash>` so TTS reloads changed images.
+- Add `--install-dir "<TTS Saves folder>"` to copy the images there and write `TooManySecrets_local.json` (it uses `file:///` paths, so it works before pushing, but only on that machine).
 - Add `--skip-render` to reuse the existing images.
+- `--check` re-renders into a temp folder and exits 1 if `tts/` is stale against `pnp/` (it writes nothing).
+
+## Keeping it in sync
+
+The module is a sync target like `pnp/` and `web/`. After any change to `pnp/generate_pnp.py` (or to the rules it draws), rerun the builder and commit `tts/`. On a version bump, update `VERSION` in `tts/build_tts.py`, the header of `tts/global.lua` and this README's title. The tower odds in `tts/global.lua` mirror the current `sim/config.py` preset, so update them when the tower `[TUNE]` values change.
 
 Edit `tts/global.lua` / `tts/global.xml` for the script and UI, not the generated save.
 
