@@ -1,4 +1,4 @@
-"""Web Phase 4: Attack Resolution (v0.46.0, RULES.md Section 4 Phase 4). No cube can be blocked.
+"""Web Phase 4: Attack Resolution (v0.47.0, RULES.md Section 4 Phase 4). No cube can be blocked.
 
 Order (same as ``sim.engine.phase4_attack_resolution.execute_attack_resolution``):
 1. Red & Blue for every survivor (bots in ``enter_phase_4``, humans in ``confirm_attacks``),
@@ -30,7 +30,7 @@ _SIG_EFFECTS = {
     "green": "Malware Encryption: a green cube on the next space of 2 Research Tracks (2x 🔬 to advance)",
     "black": "Root Override Hijack: Institutional Override marked Used (or lose 2 Corporate Secrets)",
     "blue": "Buffer Congestion: 1 Gray Legacy die to the back of the Processing Box",
-    "red": "Market Manipulation: lose 2 Market Share; the non-locked rival with the least Market Share gains 2",
+    "red": "Market Manipulation: lose 2 Market Share; the rival with the least Market Share gains 2 (2P: SETEC Corp counts)",
 }
 
 
@@ -92,11 +92,13 @@ def _signature_choices(controller: GameController, pid: int, sig: Dict[str, Any]
                 "options": [{"track": t, "name": research_tracks.track_display_name(s.config, t)} for t in eligible],
             }
     elif sig["dominant_color"] == "red":
-        locked = set(sig["locked_pids"])
-        elig = [p for p in s.players if not p.is_patient_zero and p.player_id not in locked and p.market_share is not None]
-        if elig:
-            low = min(p.market_share for p in elig)
-            tied = [p.player_id for p in elig if p.market_share == low]
+        cr = controller.compile_result
+        breached = set(cr.breached_pids) if cr is not None else set()
+        snap = p4.red_signature_recipient_pool(s, s.config, set(sig["locked_pids"]), breached)
+        pool = {k: v for k, v in snap.items() if k != pid}  # post-drain; locked rivals and SETEC Corp included
+        if pool:
+            low = min(pool.values())
+            tied = [k for k, v in pool.items() if v == low]
             if len(tied) > 1:
                 out["red_recipients"] = tied
     return out

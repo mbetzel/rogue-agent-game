@@ -4,7 +4,7 @@ import json
 import unittest
 
 from sim.config import GameConfig
-from tests.parity_v046.capture import GOLDEN_PATH, digest, digest_for_key, keys
+from tests.parity_v046_mixed.capture import GOLDEN_PATH, digest, digest_for_key, keys
 
 
 class TestV046Parity(unittest.TestCase):
@@ -25,15 +25,15 @@ class TestV046Parity(unittest.TestCase):
         revert = dict(colored_vuln_lock=False, helix_bypass_mode="LEGACY", helix_bypass_once_per_game=False,
                       die_face_profile="V046_VULN_NOPREMIUM", vuln_band_thresholds=(4, 7, 10),
                       vuln_min_target_by_version=(4, 4, 4))
-        orig = GameConfig.v047.__func__
+        orig = GameConfig.v046_locked.__func__
         for players in (2, 3, 4):
             for seed in range(42, 72):
                 want = digest("v046", players, seed)
-                GameConfig.v047 = classmethod(lambda cls, **o: orig(cls, **{**revert, **o}))
+                GameConfig.v046_locked = classmethod(lambda cls, **o: orig(cls, **{**revert, **o}))
                 try:
-                    got = digest("v047", players, seed)
+                    got = digest("v046_locked", players, seed)
                 finally:
-                    GameConfig.v047 = classmethod(orig)
+                    GameConfig.v046_locked = classmethod(orig)
                 self.assertEqual(got, want, (players, seed))
 
 

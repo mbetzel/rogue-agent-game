@@ -36,7 +36,7 @@ FOCALS = ("KeepAll", "RerollAllVuln", "Adaptive", "PenTestRush", "Kamikaze")
 FIELDS = ("Adaptive", "KeepAll", "RerollAllVuln")
 STRATEGY = {"KeepAll": "KEEP_ALL", "RerollAllVuln": "REROLL_ALL", "Adaptive": "ADAPTIVE", "PenTestRush": "PEN_TEST_RUSH",
             "Kamikaze": "KAMIKAZE", "NoColorReroll": "NO_COLOR_REROLL", "StarChase": "STAR_CHASE"}
-# v0.47 (--config v047_roster): the two lock-era stances join the focal set (spec §11.2)
+# Locked ⚠ Faces draft (--config v046_locked_roster): the two lock-era stances join the focal set (spec §11.2)
 FOCALS_V047 = ("KeepAll", "RerollAllVuln", "Adaptive", "NoColorReroll", "StarChase", "PenTestRush", "Kamikaze")
 OUT = os.path.join(ROOT, "sim_results", "v046", "dominance_matrix.json")
 
@@ -127,7 +127,7 @@ def main() -> None:
     ap.add_argument("--seed0", type=int, default=42)
     ap.add_argument("--procs", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     ap.add_argument("--out", default=OUT)
-    ap.add_argument("--config", default="v046_roster", help="preset name (v047_roster adds the NoColorReroll / StarChase focals)")
+    ap.add_argument("--config", default="v046_roster", help="preset name (v046_locked_roster adds the NoColorReroll / StarChase focals)")
     ap.add_argument("--set", default=None, help='JSON GameConfig overrides, e.g. \'{"vuln_band_thresholds":[4,7,10]}\'')
     ap.add_argument("--vuln-params", default=None, help='VulnPolicyParams overrides (JSON), e.g. \'{"secret_value": 2.0}\'')
     ap.add_argument("--no-repeat-2p4p", action="store_true", help="skip the 2P / 4P Adaptive-field rows")
@@ -142,7 +142,7 @@ def main() -> None:
         # layered onto the preset's own params (not rebuilt from defaults)
         overrides["vuln_bot_params"] = dataclasses.replace(
             getattr(GameConfig, a.config)(num_players=3).vuln_bot_params, **json.loads(a.vuln_params))
-    focals = FOCALS_V047 if a.config.startswith("v047") else FOCALS
+    focals = FOCALS_V047 if a.config.startswith("v046_locked") else FOCALS
     out: Dict[str, Any] = {"games": a.games, "seed0": a.seed0, "cells": {}}
     pods = [(3, FIELDS)] + ([] if a.no_repeat_2p4p else [(2, ("Adaptive",)), (4, ("Adaptive",))])
     for players, fields in pods:
@@ -163,7 +163,7 @@ def main() -> None:
                 if focal != "Adaptive" and field == "Adaptive":
                     flag = "FAIL (dominates > +5 pp)" if st["vs_fair_pp"] > 5 else "ok"
                     print(f"  dominance {focal:14} vs Adaptive field: {st['vs_fair_pp']:+5.1f} pp  {flag}")
-                    if a.config.startswith("v047"):
+                    if a.config.startswith("v046_locked"):
                         # spec §11.2: flag a focal policy beating the Adaptive control by > 3 pp with the paired 95% CI above 0
                         d, lo, hi = paired_win_delta(cell_recs[(focal, field)], cell_recs[("Adaptive", field)])
                         st["delta_vs_adaptive_pp"] = [d, lo, hi]

@@ -3,7 +3,7 @@
 **Author:** Principal Engineer
 **Date:** 2026-11-19
 **Status:** Ready for senior-engineer implementation. The User signed off on the package on 2026-11-19 (`docs/plans/locked_vuln_faces_gd_plan.md` §8, User decisions block).
-**Source:** `docs/plans/locked_vuln_faces_gd_plan.md` §1, §4, §8, §9, §10. The probe scripts `scripts/probe_v047_locked_vuln.py` and `scripts/probe_v047_locked_vuln_math.py` are reference only. Nothing in this spec imports them.
+**Source:** `docs/plans/locked_vuln_faces_gd_plan.md` §1, §4, §8, §9, §10. The probe scripts `scripts/probe_locked_vuln.py` and `scripts/probe_locked_vuln_math.py` are reference only. Nothing in this spec imports them.
 **Out of scope:** `RULES.md`, `RULES_QUICKREF.md`, `GLOSSARY.md`, `RULES_APPENDIX.md`, `pnp/`, `tts/`, `web/` and version strings. Those are a later doc-sync step (GD plan §10). The web default rules version does not change.
 
 ---
@@ -27,7 +27,7 @@
 | 4 | **Helix *Brute-Force Bypass* is replaced** by "You may reroll locked dice this phase". It is **once per game**, with no +1 reroll and no face-set. | `phase1_roll_deploy.py`, `state.py`, `phase4_attack_resolution.py` |
 | 5 | **Lock-aware bots.** They price the 1/3 lock risk of each clean colored reroll near band thresholds. The GD probe's "aware" rule is the minimum bar. Helix and ACE choices become lock-aware too. | `vulnerability_policy.py`, `base.py`, `reference_search.py` |
 | 6 | **Telemetry.** Locks per player-round, locked ⚠ by face, Helix uses, Helix win rate and per-colour win rates. | `state.py`, `end_game.py`, sweep script |
-| 7 | **Preset.** `GameConfig.v047()` / `v047_roster()` inherit `v046()`. Every new flag is off by default, so `v046()` replays byte-identically. | `config.py` |
+| 7 | **Preset.** `GameConfig.v046_locked()` / `v047_roster()` inherit `v046()`. Every new flag is off by default, so `v046()` replays byte-identically. | `config.py` |
 
 ---
 
@@ -107,7 +107,7 @@ def v047_roster(cls, **overrides) -> "GameConfig":
 
 Inherited values and why they stay valid: `vuln_track_max = 15 ≥ 11`, `vuln_hit_reset = 0 < 5`, `vuln_band_damage = (1, 2, 3)`, `pen_test_cost = 2`, `power_profile = "V038_DRAFT"`, `white_hat_6f_rebalance = True` (ACE resolves after rerolls) and `signature_attack_mode = "dominant_color_effects"` (Black Signature active).
 
-Register `v047` and `v047_roster` anywhere the preset names are listed (the sweep `build_engine` resolves them by `getattr(GameConfig, name)`). Leave the web preset list alone.
+Register `v047` and `v046_locked_roster` anywhere the preset names are listed (the sweep `build_engine` resolves them by `getattr(GameConfig, name)`). Leave the web preset list alone.
 
 ### 3.4 Validation (`_validate_v047`, called from `__post_init__` right after `_validate_v046`)
 
@@ -313,7 +313,7 @@ tbl_v = player.vulnerability + Σ_{j ∉ out} face_vuln(dice[j].current_face)   
 drop i  if  (tbl_v + 1) in vulnerability.crossings(cfg, state)
 ```
 
-This is the probe's rule (`probe_v047_locked_vuln.py:39-44`), with one fix. The probe hard-coded `(4, 7, 10)` even in the "safe 0–4" arms. The engine uses `crossings(cfg, state)`, which is `(5, 8, 11)` under v0.47. See OQ-1.
+This is the probe's rule (`probe_locked_vuln.py:39-44`), with one fix. The probe hard-coded `(4, 7, 10)` even in the "safe 0–4" arms. The engine uses `crossings(cfg, state)`, which is `(5, 8, 11)` under v0.47. See OQ-1.
 
 ### 6.2 `LAMBDA` rule (§9 Senior-engineer plan)
 
@@ -410,7 +410,7 @@ When `floor == 4` this is the identity, so v0.46 and its arms with `min_target =
 - **No new RNG draws.** The lock evaluation, the Helix offer, every bot policy and all telemetry consume nothing from `engine.rng`. RNG streams diverge from v0.46 only because fewer or different dice get rerolled (INV-LOCK-08).
 - **Common random numbers.** Every sweep arm and preset runs on the same seeds, `42..1241` (1,200 per pod), with the `mixed1` roster rule: one `MixedPolicyBot` seat, rotated by `seed % P` (`run_v380_secret_faces_sweep.build_engine`). Paired-seed bootstrap gives the 95% CIs for the deltas.
 - Unit tests use the fixed seeds `42 / 43 / 44` for 2P / 3P / 4P unless noted.
-- The `fast_clone` round trip must be identical on `v047_roster`. The new `PlayerState` fields are plain `bool` / `int` / `dict` / `list`, so they clone with the existing generic copy. The transient `helix_bypass_active` is always `False` at a round boundary.
+- The `fast_clone` round trip must be identical on `v046_locked_roster`. The new `PlayerState` fields are plain `bool` / `int` / `dict` / `list`, so they clone with the existing generic copy. The transient `helix_bypass_active` is always `False` at a round boundary.
 
 ---
 
@@ -444,7 +444,7 @@ Write the step-11 fields only when `lock_on`. Write the Helix fields only in `RE
 - Keys: every §8.1 field, plus `helix_bypass_used_game`, `company_color` (the Client Company die colour, from the `config.py:17` map) and `purchases_by_color` (existing).
 - The rankings dict feeds the v0.46 parity digest, so an unconditional emit would break INV-LOCK-07.
 
-### 8.3 Sweep-derived metrics (`scripts/run_v047_sweep.py`; per pod)
+### 8.3 Sweep-derived metrics (`scripts/run_locked_vuln_sweep.py`; per pod)
 
 | Metric | Definition |
 |:---|:---|
@@ -474,7 +474,7 @@ Write the step-11 fields only when `lock_on`. Write the Helix fields only in `RE
 | **INV-LOCK-05** | Brute-Force Bypass under `REROLL_LOCKED` grants no extra reroll and no face-set. It is offered only to a Helix player with rerolls left, at least one locked die and `is_helix_bypass_available`. Under `helix_bypass_once_per_game`, `helix_bypass_uses + helix_bypass_lost_to_black ≤ 1` per game. Each use marks the active Version's Institutional Override `USED`. |
 | **INV-LOCK-06** | A Black Signature against a Helix player with `helix_bypass_once_per_game` either burns the unused bypass (no Secret loss, `helix_bypass_used_game` set) or, if it is already used, costs `signature_black_secret_loss` Secrets. Never both, never neither. This mirrors INV-SIG-BLACK for DTO. |
 | **INV-LOCK-07** | With every v0.47 flag at its default, `v046()` / `v046_roster()` replay byte-identically against a golden captured **before** any v0.47 change. INV-PARITY (v0.45 golden) and all older parity tests still pass. `_v047_row` is absent from pre-v0.47 rankings. |
-| **INV-LOCK-08** | v0.47 code consumes no RNG. Bot lock policies are pure and never write to `PlayerState` or bot objects. Same seed means the same result, and the `fast_clone` round trip on `v047_roster` is identical. |
+| **INV-LOCK-08** | v0.47 code consumes no RNG. Bot lock policies are pure and never write to `PlayerState` or bot objects. Same seed means the same result, and the `fast_clone` round trip on `v046_locked_roster` is identical. |
 | **INV-LOCK-09** | The §3.4 validation rejects every unsupported combination. |
 | **INV-LOCK-10** | Release L4's extra free reroll and the Gray face-set behave as in v0.46. Gray dice can be rerolled at every step. |
 | **INV-LOCK-11** | With `colored_vuln_lock_secret=False`, a Secret face never locks, and a die showing it can be rerolled like in v0.46. |
@@ -482,11 +482,11 @@ Write the step-11 fields only when `lock_on`. Write the Helix fields only in `RE
 
 ---
 
-## 10. Test list (`tests/test_v470_locked_vuln_faces.py` unless noted; `-q`; fixed seeds)
+## 10. Test list (`tests/test_locked_vuln_faces.py` unless noted; `-q`; fixed seeds)
 
 **Step 0: golden (before any engine edit)**
-- `tests/parity_v046/capture.py`: the same `digest` as `tests/parity_v045/capture.py`. `CONFIGS = ("v046", "v046_roster")` × 2/3/4P × seeds `42..141`, plus `v046_roster|mixed1` × 2/3/4P × seeds `42..91` (built with `run_v380_secret_faces_sweep.build_engine`). Commit `golden.json` first. Store it outside `tests/fixtures/` (write-protected).
-- `tests/test_v470_parity.py::test_v046_replays_golden`: **the v0.46 regression-reproduction test** (INV-LOCK-07).
+- `tests/parity_v046_mixed/capture.py`: the same `digest` as `tests/parity_v045/capture.py`. `CONFIGS = ("v046", "v046_roster")` × 2/3/4P × seeds `42..141`, plus `v046_roster|mixed1` × 2/3/4P × seeds `42..91` (built with `run_v380_secret_faces_sweep.build_engine`). Commit `golden.json` first. Store it outside `tests/fixtures/` (write-protected).
+- `tests/test_locked_vuln_parity.py::test_v046_replays_golden`: **the v0.46 regression-reproduction test** (INV-LOCK-07).
 - `test_v047_flags_off_reproduce_v046`: `GameConfig.v047(colored_vuln_lock=False, helix_bypass_mode="LEGACY", helix_bypass_once_per_game=False, die_face_profile="V046_VULN_NOPREMIUM", vuln_band_thresholds=(4, 7, 10), vuln_min_target_by_version=(4, 4, 4))` gives the same digest as `v046` for 30 seeds × 2/3/4P.
 - The existing `tests/test_v460_parity.py` (v0.45 golden) and the v035–RSP-1 parity tests stay green.
 
@@ -535,19 +535,19 @@ Write the step-11 fields only when `lock_on`. Write the Helix fields only in `RE
 
 ## 11. Sweep outline for the product-owner
 
-All scripts are quiet by default, write JSON to `sim_results/v047/` and print summary tables only. Run them via WSL.
+All scripts are quiet by default, write JSON to `sim_results/locked_vuln_v046base/` and print summary tables only. Run them via WSL.
 
-### 11.1 `scripts/run_v047_sweep.py` (new; reuses `run_v046_sweep.play / play_all / metrics / guardrails`)
+### 11.1 `scripts/run_locked_vuln_sweep.py` (new; reuses `run_v046_sweep.play / play_all / metrics / guardrails`)
 
 - **`--step smoke`**:
-  - Runs `--assert-invariants` with 300 games per pod on `v047_roster`.
+  - Runs `--assert-invariants` with 300 games per pod on `v046_locked_roster`.
   - Installs the v0.46 checkers plus these:
     - **INV-LOCK-01:** wrap `Die.roll`. The engine sets a module dict `phase1_roll_deploy._ROLL_CTX = {"helix_active": bool}` around each reroll batch (a plain assignment, so no RNG and no behaviour change). The check asserts `not self.is_locked or _ROLL_CTX["helix_active"]`.
     - **INV-LOCK-02:** wrap `vulnerability.lock_in`. Every lockable ⚠ die must be locked, and Gray/White dice must not be ⚠-locked.
     - **INV-LOCK-03:** after Phase 1, no die is locked.
     - **INV-LOCK-05 / -06:** per-game counters.
 - **`--step main`**:
-  - Runs `v045_roster` (guardrail comparator), `v046_roster` (delta comparator) and `v047_roster`.
+  - Runs `v045_roster` (guardrail comparator), `v046_roster` (delta comparator) and `v046_locked_roster`.
   - Roster `mixed1`, seeds `42..1241`, 1,200 games per pod, 2P / 3P / 4P.
   - **Pre-check:** `v046_roster` must reproduce FINDINGS §62:
     - Green lost per player-game 2.42 / 2.08 / 1.86.
@@ -556,7 +556,7 @@ All scripts are quiet by default, write JSON to `sim_results/v047/` and print su
   - If it does not, stop and report.
 - **`--step arm --arm <id>`**: 1,200 games per pod at 2P / 3P / 4P. The arms below are override dicts, not presets:
 
-| Arm | Overrides on `v047_roster` | Purpose |
+| Arm | Overrides on `v046_locked_roster` | Purpose |
 |:---|:---|:---|
 | `A_nopremium` | `die_face_profile="V046_VULN_NOPREMIUM"` | D2 control |
 | `B_safe03` | bands `(4,7,10)`, min `(4,4,4)` | D1 control |
@@ -623,7 +623,7 @@ All scripts are quiet by default, write JSON to `sim_results/v047/` and print su
 
 ## 12. Implementation order (senior-engineer) and touched files
 
-1. **Capture the v0.46 golden** (`tests/parity_v046/`) on the untouched engine, and commit it.
+1. **Capture the v0.46 golden** (`tests/parity_v046_mixed/`) on the untouched engine, and commit it.
 2. `config.py`: add the fields, `VulnPolicyParams` additions, `_validate_v047`, `v047()` and `v047_roster()`.
 3. `vulnerability.py`: add the helpers (§4.1).
 4. `state.py`: add the Helix flags and accessor, and the telemetry fields (§5.1, §8.1).
@@ -632,7 +632,7 @@ All scripts are quiet by default, write JSON to `sim_results/v047/` and print su
 7. `end_game.py`: add `_v047_row`.
 8. Bots: `vulnerability_policy.py` (§6.1–§6.6), `base.py` hooks, `mixed_policy.py`, `reference_search.py`.
 9. Tests (§10); then run the parity suite (`-q`).
-10. Scripts (§11): `run_v047_sweep.py`, then add `--config` to the dominance matrix and the ref1 script.
+10. Scripts (§11): `run_locked_vuln_sweep.py`, then add `--config` to the dominance matrix and the ref1 script.
 
 Mirror rule (RB-07): `_run_round_six_phase` and `resume_round` stay untouched.
 

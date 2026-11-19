@@ -734,7 +734,120 @@ def determine_dominant_tray_color(
     return None
 
 
-def _resolve_signature_red(engine: GameEngine, locked_players: List[PlayerState]) -> None:
+def red_signature_recipient_pool(
+    state, cfg, locked_pids: AbstractSet[int], breached_pids: AbstractSet[int] = frozenset()
+) -> Dict[int, int]:
+    """Post-drain Market Share snapshot of every possible Red Signature recipient (v0.47 "lowest_rival").
+
+    Pure (no mutation). Keys are surviving player ids (Patient Zero / Phase 2 breached excluded), plus
+    ``SETEC_CORP_ID`` when SETEC Corp is eligible. Locked players are shown after the Market Share drain.
+    A locker's own pool is this dict minus its own id. Shared by the engine and the web preview.
+    """
+    drain = cfg.signature_red_drain_amount
+    snap: Dict[int, int] = {}
+    for p in state.players:
+        if p.is_patient_zero or p.player_id in breached_pids or p.market_share is None:
+            continue
+        ms = p.market_share
+        snap[p.player_id] = max(0, ms - drain) if p.player_id in locked_pids else ms
+    if cfg.signature_red_setec_eligible and getattr(state, "setec_corp_active", False):
+        snap[market_share.SETEC_CORP_ID] = int(state.setec_market_share)
+    return snap
+
+
+def _resolve_signature_red(
+    engine: GameEngine, locked_players: List[PlayerState], breached_pids: AbstractSet[int] = frozenset()
+) -> None:
+    """Dispatch on ``signature_red_recipient_rule`` ("non_locked" = v0.46 legacy, "lowest_rival" = v0.47)."""
+    if engine.config.signature_red_recipient_rule != "lowest_rival":
+        return _resolve_signature_red_v046(engine, locked_players)
+    return _resolve_signature_red_lowest_rival(engine, locked_players, breached_pids)
+
+
+def _resolve_signature_red_lowest_rival(
+    engine: GameEngine, locked_players: List[PlayerState], breached_pids: AbstractSet[int] = frozenset()
+) -> None:
+    """v0.47 Red Signature: -2 drain; each locker's lowest rival (or SETEC Corp at 2P) gains +2 (INV-SIG-RED v2)."""
+    from sim.bots.base import SetecRecipient, default_signature_red_recipient_heuristic
+
+    cfg = engine.config
+    state = engine.state
+    locked_pids = {p.player_id for p in locked_players}
+    drain_amt = cfg.signature_red_drain_amount
+    transfer_amt = cfg.signature_red_transfer_amount
+    setec_gain = cfg.signature_red_setec_gain if cfg.signature_red_setec_gain is not None else transfer_amt
+    ms_cap = int(getattr(cfg, "market_share_max", 20) or 20)
+    SETEC = market_share.SETEC_CORP_ID
+
+    state.signature_red_events += 1
+    # Frozen post-drain snapshot (pure; equals the live values after Epoch 1).
+    snap = red_signature_recipient_pool(state, cfg, locked_pids, breached_pids)
+
+    # Epoch 1: Simultaneous Drain
+    for p in locked_players:
+        if p.market_share is not None:
+            before = p.market_share
+            p.market_share = max(0, before - drain_amt)
+            p.market_share_lost_red += before - p.market_share
+            if p.market_share_min is None or p.market_share < p.market_share_min:
+                p.market_share_min = p.market_share
+        p.signature_attacks_suffered["red"] = p.signature_attacks_suffered.get("red", 0) + 1
+
+    by_pid = {p.player_id: p for p in state.players}
+    pending: Dict[int, int] = {}
+    chosen_by: Dict[int, int] = {}
+    for locker in locked_players:
+        pool = [k for k in snap if k != locker.player_id]
+        if not pool:
+            state.signature_red_fizzles += 1
+            continue
+        low = min(snap[k] for k in pool)
+        tied = [k for k in pool if snap[k] == low]
+        if len(tied) == 1:
+            chosen_key = tied[0]
+        else:
+            objs = [by_pid[k] if k != SETEC else SetecRecipient(market_share=snap[k]) for k in tied]
+            hook = getattr(locker.bot, "choose_signature_red_recipient", None) if locker.bot else None
+            pick = hook(locker, objs, state) if callable(hook) else None
+            if pick is None or not any(pick is o for o in objs):
+                pick = default_signature_red_recipient_heuristic(locker, objs, state)
+            chosen_key = pick.player_id
+        amount = setec_gain if chosen_key == SETEC else transfer_amt
+        pending[chosen_key] = pending.get(chosen_key, 0) + amount
+        chosen_by[locker.player_id] = chosen_key
+        locker.signature_red_transfers_sent += amount
+        if chosen_key in locked_pids:
+            state.signature_red_gifts_to_locked += 1
+
+    # Locker pairs that gave each other their gift
+    for a, b in chosen_by.items():
+        if a < b and chosen_by.get(b) == a:
+            state.signature_red_mutual_cancels += 1
+
+    # Epoch 2: apply all gains together, one cap per recipient
+    for k, amount in pending.items():
+        if k == SETEC:
+            before = state.setec_market_share
+            state.setec_market_share = min(ms_cap, before + amount)
+            gained = state.setec_market_share - before
+            state.signature_red_setec_gifts += 1
+            state.signature_red_setec_ms_gained += gained
+            if gained < amount:
+                state.signature_red_capped_gains += 1
+            continue
+        p = by_pid[k]
+        before = p.market_share
+        p.market_share = min(p.max_market_share, before + amount)
+        if p.market_share < before + amount:
+            state.signature_red_capped_gains += 1
+        if snap[k] == 0 and p.market_share > 0:
+            state.signature_red_zero_rescues += 1
+        if p.market_share_peak is None or p.market_share > p.market_share_peak:
+            p.market_share_peak = p.market_share
+        p.signature_red_transfers_received += amount
+
+
+def _resolve_signature_red_v046(engine: GameEngine, locked_players: List[PlayerState]) -> None:
     """Simultaneous Two-Epoch Market Share Drain & Transfer (INV-SIG-RED, INV-SIMUL-RED)."""
     cfg = engine.config
     state = engine.state
@@ -758,7 +871,9 @@ def _resolve_signature_red(engine: GameEngine, locked_players: List[PlayerState]
         p for p in state.players
         if not p.is_patient_zero and p.player_id not in locked_pids and p.market_share is not None
     ]
+    engine.state.signature_red_events += 1
     if not eligible:
+        engine.state.signature_red_fizzles += len(locked_players)
         return  # All-locked or solo-survivor edge case: transfer fizzles cleanly
 
     min_ms = min(p.market_share for p in eligible)
@@ -903,7 +1018,7 @@ def resolve_signature_attacks(engine: GameEngine, cr: CompileResult) -> None:
         return
 
     if dominant_color == CubeColor.RED:
-        _resolve_signature_red(engine, locked_players)
+        _resolve_signature_red(engine, locked_players, getattr(cr, "breached_pids", frozenset()))
     else:
         for p in locked_players:
             if dominant_color == CubeColor.BLUE:

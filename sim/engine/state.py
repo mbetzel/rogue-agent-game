@@ -479,6 +479,16 @@ class PlayerState:
         self.triage_milestones_claimed = []
         self.temp_release_bandwidth_bonus = 0
         self.prodigy_overrides_this_round = 0
+        # --- v0.48 Sprint Plan (docs/specs/sprint_plan_spec.md §4.2); unused when sprint_plan_enabled is off ---
+        self.current_sprint_ids: Set[int] = set()
+        self.release_l1_bw_bonus_this_round: int = 0
+        self.sprint_wait_streak: Dict[int, int] = {}
+        self.sprint_max_streak: Dict[str, int] = {"gray": 0, "colored": 0}
+        self.sprint_wait_hist: Dict[str, List[int]] = {"gray": [0] * 5, "colored": [0] * 5}
+        self.gray_removed_by_source: Dict[str, int] = {}
+        self.thin_rounds: List[int] = []
+        self.thin_forfeits: int = 0
+        self.gray_lock_blocked: int = 0
 
         self._has_emergency_hotfix = has_emergency_hotfix or (self.triage_level >= 2)
         self._has_passive_firewall = has_passive_firewall or (self.defense_level >= 2)
@@ -1297,6 +1307,21 @@ class RoundTelemetry:
     acoustic_cash_harvested: int = 0
     spook_gray_dice_burned: int = 0
     prodigy_overrides_executed: int = 0
+    # --- v0.48 Sprint Plan telemetry (populated only when sprint_plan_enabled; spec §4.3) ---
+    sprint_current_by_player: Dict[int, int] = field(default_factory=dict)
+    sprint_next_by_player: Dict[int, int] = field(default_factory=dict)
+    sprint_current_over_bw_by_player: Dict[int, bool] = field(default_factory=dict)
+    sprint_grad_current_by_player: Dict[int, int] = field(default_factory=dict)
+    sprint_grad_next_by_player: Dict[int, int] = field(default_factory=dict)
+    sprint_left_by_player: Dict[int, int] = field(default_factory=dict)
+    sprint_prod_to_current_by_player: Dict[int, bool] = field(default_factory=dict)
+    gray_owned_by_player: Dict[int, int] = field(default_factory=dict)
+    gray_ready_by_player: Dict[int, int] = field(default_factory=dict)
+    gray_rolled_by_player: Dict[int, int] = field(default_factory=dict)
+    colored_rolled_by_player: Dict[int, int] = field(default_factory=dict)
+    gray_vuln_kept_by_player: Dict[int, int] = field(default_factory=dict)
+    colored_vuln_kept_by_player: Dict[int, int] = field(default_factory=dict)
+    release_l1_bandwidth_graduates: int = 0
     # --- v0.46.0 Vulnerability Track telemetry (populated only under defense_mode == "VULNERABILITY") ---
     green_cubes_resolved: int = 0
     green_cubes_no_target: int = 0
@@ -1521,6 +1546,8 @@ class GameState:
     singularity_triggered: bool = False
     contractor_supply: int = 12
     next_die_id: int = 1
+    sprint_round: Dict[str, Dict[int, Any]] = field(default_factory=dict)  # v0.48: this round's Sprint Plan telemetry
+    rush_seed: int = 0  # sim-only: set by the sweep runner to the game seed (bot_research_rush="p0half"); draws no RNG
     pending_next_phase_locks: Set[str] = field(default_factory=set)
     active_phase1_locks: Set[str] = field(default_factory=set)
     rng: random.Random = field(default_factory=random.Random)
@@ -1560,6 +1587,15 @@ class GameState:
     setec_corp_mlb_1st_places: int = 0
     setec_corp_mlb_2nd_places: int = 0
     setec_corp_mlb_secrets_absorbed: int = 0
+    # --- v0.47.0 Red Signature telemetry (both recipient rules report these) ---
+    signature_red_events: int = 0
+    signature_red_gifts_to_locked: int = 0
+    signature_red_mutual_cancels: int = 0
+    signature_red_fizzles: int = 0
+    signature_red_setec_gifts: int = 0
+    signature_red_setec_ms_gained: int = 0
+    signature_red_capped_gains: int = 0
+    signature_red_zero_rescues: int = 0
 
     @property
     def setec_corp_final_market_share(self) -> int:

@@ -8,7 +8,7 @@ from __future__ import annotations
 import argparse, os, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
-from scripts import run_v047_sweep as s47  # noqa: E402
+from scripts import run_locked_vuln_sweep as s47  # noqa: E402
 from scripts import run_v046_dominance_matrix as dm  # noqa: E402
 from sim.engine import phase4_attack_resolution as p4  # noqa: E402
 
@@ -63,7 +63,7 @@ p1.resolve_release_l4_gray_face_override = _l4
 
 def helix(games, procs, extra):
     for pl in (2, 3, 4):
-        m = s47.metrics47(s47.play_all("v047_roster", "mixed1", pl, games, 42, dict(extra), procs, False), pl)
+        m = s47.metrics47(s47.play_all("v046_locked_roster", "mixed1", pl, games, 42, dict(extra), procs, False), pl)
         print(f"  {pl}P black={BLACK_MODE} extra={extra}: Helix win {m['helix_win_pct']:.1f}  use {m['helix_use_share_pct']:.1f}%"
               f"  burned {m['helix_lost_to_black_pct']:.1f}%  ⚠ removed/use {s47.f(m['helix_mean_vuln_removed'])}"
               f"  rounds-hist {m['helix_round_hist']}  seats {m['helix_seats']}")
@@ -71,7 +71,7 @@ def helix(games, procs, extra):
 
 def pen(games, procs, overrides, label):
     for pl in (2, 3):
-        cells = {f: dm.run_cell(pl, games, 42, f, "Adaptive", procs, overrides, "v047_roster") for f in ("Adaptive", "PenTestRush")}
+        cells = {f: dm.run_cell(pl, games, 42, f, "Adaptive", procs, overrides, "v046_locked_roster") for f in ("Adaptive", "PenTestRush")}
         a = dm.cell_stats(cells["Adaptive"], pl)
         p = dm.cell_stats(cells["PenTestRush"], pl)
         d, lo, hi = dm.paired_win_delta(cells["PenTestRush"], cells["Adaptive"])
@@ -80,7 +80,7 @@ def pen(games, procs, overrides, label):
 
 
 def star(games, procs):
-    for cfgname in ("v046_roster", "v047_roster"):
+    for cfgname in ("v046_roster", "v046_locked_roster"):
         m = s47.metrics47(s47.play_all(cfgname, "mixed1", 3, games, 42, {}, procs, False), 3)
         print(f"  {cfgname} 3P: P(star) {s47.f(m['p_star_per_colored_die'], 3)} by colour "
               + " ".join(f"{k}={s47.f(v, 3)}" for k, v in m["p_star_by_color"].items()))

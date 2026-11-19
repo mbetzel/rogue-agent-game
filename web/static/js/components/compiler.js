@@ -146,7 +146,7 @@ export function renderCompiler() {
           </div>
         </div>
 
-        <!-- Vulnerability Track (v0.46.0, Central SETEC Agent Board) -->
+        <!-- Vulnerability Track (v0.47.0, Central SETEC Agent Board) -->
         <div class="agent-corruption-track-box vulnerability-track-box">
           <div class="agent-track-header">
             <span class="track-title">VULNERABILITY TRACK (0–${(state.vulnerability_track || {}).max || 15})</span>
@@ -387,7 +387,7 @@ export function renderCompiler() {
   `;
 }
 
-// v0.46.0 Vulnerability Track: safe zone + damage bands, one marker per surviving player
+// v0.47.0 Vulnerability Track: safe zone + damage bands, one marker per surviving player
 function renderVulnerabilityTrack() {
   const vt = state.vulnerability_track || { max: 15, min_target: 4, bands: [] };
   const cells = [];

@@ -1,4 +1,4 @@
-# Too Many Secrets — Quick Reference Rules (v0.46.0)
+# Too Many Secrets — Quick Reference Rules (v0.48.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Format:** Simultaneous / Turn-Based Hybrid
 
@@ -35,11 +35,12 @@ You are a **White Hat Operative** contracted to defend a **Client Company** agai
      * **2 Gray Legacy Dice**
      * **1 Purple Specialist Die**
      * **1 Starting Colored Die** matching your Client Company (Red: *Meridian, Prometheus*; Blue: *DTO, Aegis*; Green: *Omnidyne, Helix*).
+   * Place **3 Gray Legacy Dice** into the **Current Sprint** of your **Sprint Plan** (5 Gray dice per player in all).
 5. **Starting Resources:**
    * **Money:** `$6`
    * **Research:** `0 🔬`
    * **Corporate Secrets:**
-     * **2–4 Players:** `5 Secrets` (`6` with *Data Scraper* as the `v1.0` card)
+     * **2–4 Players:** `6 Secrets` (`7` with *Data Scraper* as the `v1.0` card)
    * **Starting Market Share (track maximum `20`):**
      * **2 Players:** `14` *(plus place the neutral **SETEC Corp Black Cube** on **`0`**)*
      * **3–4 Players:** `18`
@@ -73,10 +74,10 @@ Each round consists of **6 Phases**:
    * If SETEC's corruption track filled last round, switch to the new version now: discard any unspent override from the previous version, unlock the new version override, and advance the marker.
    * Add **1 Black Cube** from the supply into the **Staging Cup**.
 2. **Roll Active Pool:** Roll all dice in your **Ready for Release Zone**.
-3. **Rerolls:** Up to **2 free rerolls** of any subset of dice (3 rolls total). *(At **Release Track Level 4**, after rerolls and Prodigy/Helix overrides, you may set `1` rolled Gray Legacy die to any printed face.)*
+3. **Rerolls:** Up to **2 free rerolls** of any subset of dice (3 rolls total). A **Gray die showing its ⚠ face** (`+$2 / +2 🔬`) must be kept (no reroll); colored dice may reroll ⚠. *(At **Release Track Level 4**, after rerolls and Prodigy/Helix overrides, you may set `1` rolled Gray Legacy die to any printed face.)*
 4. **Lock-in & Deploy Dice:**
-   * **Gain Vulnerability:** `+1` per ⚠ on your final faces (Secret faces included), max `15`.
-   * **Secret Faces (Face 5 on Red, Blue, Green, Purple):** Move **immediately to the Processing Box** in Under Development (banks secrets later upon exit).
+   * **Gain Vulnerability:** `+1` per ⚠ on your final faces (R&D faces included), max `15`.
+   * **R&D Faces (Face 5 on Red, Blue, Green, Purple):** Move **immediately to Research & Development** in Under Development (banks secrets later upon exit).
    * **In Production:** Place all other dice here (producing `$`, `🔬`, Market Share, or `★`). Choice faces (`/`) are committed now.
 
 ---
@@ -92,7 +93,7 @@ Each round consists of **6 Phases**:
    * **Player with Most [X] Loses:** Player(s) with highest resource lose printed amount. On ties, **all tied players suffer the full loss**.
    * **Least Takes from Most:** Player with least takes printed amount from player with most. If all players are tied, the effect fizzles.
    * **Lowest Vulnerability:** Player(s) with the lowest Vulnerability gain the printed Vulnerability (`+2`, or `+3`). On ties, all tied players gain it.
-   * **Return Dice:** Player(s) with most colored dice return printed amount to supply (Gray starter dice cannot be returned; returned processing dice lose their Secret).
+   * **Return Dice:** Player(s) with most colored dice return printed amount to supply (Gray starter dice cannot be returned; returned Research & Development dice lose their Secret).
 4. **Version Advance & Spillover:**
    * When `v1.0` (4 spaces) or `v2.0` (5 spaces) fills, excess Black cubes spill onto the next card immediately. The current version remains active for overrides through Phase 6; transition occurs at the start of next round's Phase 1.
    * **Singularity Trigger (`v3.0` Fills):** When the 6th space of `v3.0` is covered, resolve that space, then **the game ends immediately at the end of Phase 2!** Skip Phases 3–6 and proceed directly to Final Scoring.
@@ -125,8 +126,8 @@ No cube can be blocked. Resolve in order:
   * **Target Lock Signature Attack (Dominant Tray Color, Tie Priority `Green > Black > Blue > Red`):** If your Signature Cube exited in Phase 2, resolve the Signature Attack matching the most populous cube color in the tray (fizzles if `0` cubes exited):
     * **Green:** Place a green cube from the supply on the next space of **`2` Research Tracks** without green cubes (**`2× 🔬` cost** to advance into; each unplaceable cube gives `+2` Vulnerability).
     * **Black:** Mark your **Institutional Override** as **`Used`** for this Version; if already used, lose **`2` Corporate Secrets**.
-    * **Blue:** Move **`1` Gray Legacy Die** (from `Scanned Box`, else `In Production`) to the back of your **Processing Box** (`0` Secrets when triaged).
-    * **Red:** Lose **`2` Market Share**; the other *(non-locked)* surviving player with the least Market Share gains **`2`** *(if tied, you choose)*.
+    * **Blue:** Move **`1` Gray Legacy Die** (from either sprint of your `Sprint Plan`, else `In Production`) to the back of your **Research & Development** (`0` Secrets when triaged).
+    * **Red:** Lose **`2` Market Share**; the lowest surviving rival *(locked or not; 2P: SETEC Corp counts)* gains **`2`** *(read after all locked players lose `2`; if tied, you choose)*.
   * **Recycle Cubes & SETEC Corp (2P):** Place all exited Red, Blue, and Green Attack Cubes back into the **Staging Cup** for next round. In **2-player games**, if **any Red cubes (`>= 1`) exited the tray**, move the **SETEC Corp Black Cube** up **`+1` Market Share** (max `20`).
 * **End Game Check:**
   * If a surviving player's Secrets drop to `<= 0`, they become **Patient Zero** (eliminated; current round is the Final Round).
@@ -150,7 +151,7 @@ Starting with the First Player, each player takes their Operations Turn:
    * Does not count toward your limit of 2 hardware upgrades.
 4. **Purchase 1 Software Module Die (Limit 1 die per turn):**
    * Pay the `$` cost on the face-up Variant Card (`$4`–`$6`) to buy 1 colored die (**Red, Blue, Green, Yellow**).
-   * Place purchased die into your **Scanned Box** (must graduate in Phase 6 before rolling).
+   * Place purchased die into your **Next Sprint** (released at a later Sprint Review before rolling).
    * Purple dice cannot be purchased from the market.
 5. **Retain Research:** Research tokens have no storage cap and carry over.
 
@@ -158,10 +159,13 @@ Starting with the First Player, each player takes their Operations Turn:
 
 ### Phase 6: CI/CD Pipeline Shift (Simultaneous)
 
-1. **Production Return:** Move all dice from **In Production** to your **Scanned Box**.
-2. **Scanned Graduation (Hardware Throughput):** Move up to **Release Bandwidth** dice of your choice (`4` baseline, upgradable to `5` and `6`) from **Scanned Box $\to$ Ready for Release**.
-3. **Conveyor Triage (Hardware Throughput):** Move up to **Triage Bandwidth** dice (`1` at L0–L1, `2` at L2+) from **Processing Box $\to$ Scanned Box**, **oldest first** (FIFO order):
-   * Each die **banks its Secret** upon leaving Processing:
+1. **Production Return:** Move all dice from **In Production** to your **Sprint Plan**: the **Current Sprint** if it is empty, otherwise the **Next Sprint**.
+2. **Sprint Review (Hardware Throughput):** Exactly **Release Bandwidth** dice (`4` baseline, upgradable to `5` and `6`; all of them if fewer) move to **Ready for Release**:
+   * **Current Sprint first** until it is empty or bandwidth runs out (you choose if it has more dice than bandwidth).
+   * **Then the Next Sprint** to fill the bandwidth left (your choice of dice).
+   * Everything left in the Sprint Plan becomes the new **Current Sprint**.
+3. **Conveyor Triage (Hardware Throughput):** Move up to **Triage Bandwidth** dice (`1` at L0–L1, `2` at L2+) from **Research & Development $\to$ Next Sprint**, **oldest first** (FIFO order):
+   * Each die **banks its Secret** upon leaving Research & Development:
      * **Red:** `+2 Secrets`
      * **Blue:** `+2 Secrets` (`+3` if Pen Test $\ge$ Level 3)
      * **Green:** `+2 Secrets`, then lower Vulnerability by `2`
@@ -180,12 +184,12 @@ Starting with the First Player, each player takes their Operations Turn:
 
 | Track | Level 0 | Level 1 (`1 🔬`) | Level 2 (`2 🔬`) | Level 3 (`2 🔬`) | Level 4 (`3 🔬`) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Pen Test** | Limit: 1/turn (`2 🔬`/ea) | **★ Gain 1 Gray Die** | Limit: 2/turn | **★ Gain 1 Secret** *(+Blue +1)* | Limit: 3/turn + **free `−1` Vulnerability each turn** |
-| **Triage** | Bandwidth: 1 die | **★ Gain 1 Gray Die** | Bandwidth: 2 dice | **★ Gain 1 Secret** | Bandwidth: 2 + **Swap 1 Gray → Colored (`$0`, to Ready)** |
-| **Release** | Bandwidth: 4 dice | **★ Gain 1 Gray Die** | Bandwidth: 5 dice | **★ Gain 1 Secret** | Bandwidth: 6 dice + **Set 1 rolled Gray die to any face** |
-| **Public Relations** | Regain up to 1/turn (`$3`/ea) | **★ Gain `+$3` Cash** | Regain up to 2/turn (`$3`/ea) | **★ 2nd Purple Die (to Scanned)** | Regain up to 3/turn (`$3`/ea) + **`+2` Market Share now** |
+| **Pen Test** | Limit: 1/turn (`2 🔬`/ea) | **★ Gain 1 Secret** | Limit: 2/turn | **★ Return 1 Gray Die to the box** *(+Blue +1)* | Limit: 3/turn + **free `−1` Vulnerability each turn** |
+| **Triage** | Bandwidth: 1 die | **★ Gain `+$2` Cash** | Bandwidth: 2 dice | **★ Gain 1 Secret** | Bandwidth: 2 + **Swap 1 Gray → Colored (`$0`, to Ready)** |
+| **Release** | Bandwidth: 4 dice | **★ `+1` Release Bandwidth this round** | Bandwidth: 5 dice | **★ Return 1 Gray Die to the box** | Bandwidth: 6 dice + **Set 1 rolled Gray die to any face** |
+| **Public Relations** | Regain up to 1/turn (`$3`/ea) | **★ Gain `+$3` Cash** | Regain up to 2/turn (`$3`/ea) | **★ 2nd Purple Die (to Next Sprint)** | Regain up to 3/turn (`$3`/ea) + **`+2` Market Share now** |
 
-*Note: Level 1 Gray Legacy dice go directly into **Ready for Release**; Public Relations Level 3's 2nd Purple die goes to the **Scanned Box**.*
+*Note: a returned Gray die leaves the game from any zone (lost if you own none); Public Relations Level 3's 2nd Purple die, purchases and triaged dice go to the **Next Sprint**.*
 
 ---
 
@@ -202,13 +206,13 @@ Starting with the First Player, each player takes their Operations Turn:
    * **1st Place Market Share:** `+3 Secrets`
    * **2nd Place Market Share:** `+1 Secret`
    * *(Ties share full reward; Patient Zeros excluded).*
-2. **Score Secrets:** **`1 Corporate Secret = 1 VP`**. Dice left in the Processing Box score nothing.
+2. **Score Secrets:** **`1 Corporate Secret = 1 VP`**. Dice left in Research & Development score nothing.
 3. **Tiebreakers:**
    1. Highest final **Market Share**
    2. Most remaining **Money (`$`)**
    3. Most **Active Colored Module Dice** in Ready for Release (Gray dice do not count)
    4. Most remaining **Research Tokens (`🔬`)**
-   5. Fewest total dice in **Under Development** (Processing + Scanned)
+   5. Fewest total dice in **Under Development** (Research & Development + Sprint Plan)
    6. Shared victory
 
 *(Total Wipeout: SETEC wins; players are ranked by the tiebreaker hierarchy above).*

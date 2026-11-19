@@ -1,4 +1,4 @@
-"""Web round phase ids (v0.46.0, RULES.md Section 4).
+"""Web round phase ids (v0.47.0, RULES.md Section 4).
 
 The rules order Operations before the CI/CD Pipeline Shift (``GameConfig.operations_before_pipeline_shift``), so the
 web numbers its phases as the rules do. ``sim.config.RoundPhase`` keeps the legacy numbering (5 = Pipeline Shift,

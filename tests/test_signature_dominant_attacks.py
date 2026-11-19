@@ -515,5 +515,276 @@ class TestSignatureCubeDominantAttacks(unittest.TestCase):
         self.assertEqual(cfg_43.signature_attack_mode, SignatureAttackMode.DOMINANT_COLOR_EFFECTS.value)
 
 
+_V046_PARITY_DIGESTS = {
+    "2|42": "2530ee1af708",
+    "2|43": "a8ebe8db22cd",
+    "2|44": "06e2e804b93d",
+    "2|45": "acd016a3fba8",
+    "2|46": "e1f9d3562902",
+    "2|47": "543059852dac",
+    "2|48": "7bbb9761d915",
+    "2|49": "d5c9d38d0240",
+    "2|50": "5a3549679ba0",
+    "2|51": "259acdfa30c8",
+    "2|52": "3699194165ca",
+    "2|53": "351efba053b8",
+    "2|54": "7bb7d4ab0826",
+    "2|55": "47bf1998f8a0",
+    "2|56": "0f6c5b21469d",
+    "2|57": "62819b1f32e0",
+    "2|58": "8377041357f0",
+    "2|59": "352b0adb0c1e",
+    "2|60": "58635ed212fc",
+    "2|61": "35e7f5520c2e",
+    "3|42": "b711f7816464",
+    "3|43": "2f8f5d8852b6",
+    "3|44": "b62a2ed59bc9",
+    "3|45": "a5dc686e6ad9",
+    "3|46": "b7638117de31",
+    "3|47": "c65ce234833a",
+    "3|48": "c762c979a790",
+    "3|49": "094b75fd2cc6",
+    "3|50": "2db2f8713ea0",
+    "3|51": "f8088ead5c8d",
+    "3|52": "34ab74ad9b08",
+    "3|53": "9b26fa968774",
+    "3|54": "358e923c56ae",
+    "3|55": "30c0c446dfcf",
+    "3|56": "9f8db28b53e2",
+    "3|57": "1c995bd91c70",
+    "3|58": "a5f15147c228",
+    "3|59": "191e2239dca6",
+    "3|60": "28b85844f4bd",
+    "3|61": "34f31b90bb95",
+    "4|42": "51d1af3613c0",
+    "4|43": "30916257f952",
+    "4|44": "68e1a8663280",
+    "4|45": "1c0a1d075c62",
+    "4|46": "522aae2e77b6",
+    "4|47": "bbfe92edabbf",
+    "4|48": "8ba7f93937c3",
+    "4|49": "8e0be54b5c77",
+    "4|50": "7c6f2c92de77",
+    "4|51": "c88c7a979dac",
+    "4|52": "0a688566036e",
+    "4|53": "41a22c297f71",
+    "4|54": "b548380ec138",
+    "4|55": "37c05091e8a4",
+    "4|56": "a178a76eebf9",
+    "4|57": "83c4ea7bd098",
+    "4|58": "7c7d0d1570fa",
+    "4|59": "47005b795bec",
+    "4|60": "2e704bb67863",
+    "4|61": "87bbca9a0236",
+}
+
+
+class TestRedSignatureLowestRival(unittest.TestCase):
+    """TC-SIG-07b..08g: v0.47.0 Red Target Lock, lowest rival gains +2 (INV-SIG-RED v2, INV-SIMUL-RED v2)."""
+
+    def _engine(self, players: int = 3, **overrides) -> GameEngine:
+        return GameEngine(config=GameConfig.v047(num_players=players, **overrides), seed=7)
+
+    def _setup(self, eng: GameEngine, ms: List[int], locked: List[int]) -> List[PlayerState]:
+        ps = eng.state.players
+        for i, p in enumerate(ps):
+            p.market_share = ms[i]
+            p.target_locked = i in locked
+        return ps
+
+    def _cr(self, red: int = 3) -> CompileResult:
+        empty = {c: 0 for c in (CubeColor.RED, CubeColor.BLUE, CubeColor.GREEN, CubeColor.BLACK)}
+        ex = dict(empty)
+        ex[CubeColor.RED] = red
+        return CompileResult(
+            staged_before=dict(empty), stuck_before=dict(empty), exited_cubes=ex,
+            stuck_after=dict(empty), buffer_overflow=False,
+        )
+
+    def test_tc_sig_07b_locked_players_can_receive(self) -> None:
+        eng = self._engine(3)
+        ps = self._setup(eng, [10, 5, 6], [0, 1])
+        resolve_signature_attacks(eng, self._cr())
+        self.assertEqual([p.market_share for p in ps], [8, 5, 8])
+        self.assertEqual(eng.state.signature_red_gifts_to_locked, 1)
+        self.assertEqual(eng.state.signature_red_events, 1)
+
+    def test_tc_sig_07c_mutual_cancel(self) -> None:
+        eng = self._engine(3)
+        ps = self._setup(eng, [6, 6, 12], [0, 1])
+        resolve_signature_attacks(eng, self._cr())
+        self.assertEqual([p.market_share for p in ps], [6, 6, 12])
+        self.assertEqual(eng.state.signature_red_mutual_cancels, 1)
+
+    def test_tc_sig_07d_locked_at_zero(self) -> None:
+        eng = self._engine(3)
+        ps = self._setup(eng, [0, 7, 9], [0])
+        resolve_signature_attacks(eng, self._cr())
+        self.assertEqual(ps[0].market_share, 0)
+        self.assertEqual(ps[0].market_share_lost_red, 0)
+        self.assertEqual(ps[1].market_share, 9)
+
+    def test_tc_sig_07e_order_independent(self) -> None:
+        results = []
+        for rev in (False, True):
+            eng = self._engine(3)
+            ps = self._setup(eng, [10, 5, 6], [0, 1])
+            locked = [ps[1], ps[0]] if rev else [ps[0], ps[1]]
+            from sim.engine.phase4_attack_resolution import _resolve_signature_red
+            _resolve_signature_red(eng, locked)
+            results.append([p.market_share for p in ps])
+        self.assertEqual(results[0], results[1])
+        self.assertEqual(results[0], [8, 5, 8])
+
+    def _two_p_setec(self, setec_ms: int, **overrides) -> GameEngine:
+        eng = self._engine(2, setec_corp_enabled=True, **overrides)
+        self.assertTrue(eng.state.setec_corp_active)
+        eng.state.setec_market_share = setec_ms
+        return eng
+
+    def test_tc_sig_08b_setec_tie_default_and_spy(self) -> None:
+        eng = self._two_p_setec(6)
+        ps = self._setup(eng, [8, 6], [0])
+        resolve_signature_attacks(eng, self._cr())
+        self.assertEqual(eng.state.setec_market_share, 8)
+        self.assertEqual(ps[1].market_share, 6)
+        self.assertEqual(eng.state.signature_red_setec_gifts, 1)
+        # Spy hook picks the human rival instead
+        eng = self._two_p_setec(6)
+        ps = self._setup(eng, [8, 6], [0])
+        seen = []
+
+        class Spy(SignatureStubBot):
+            def choose_signature_red_recipient(self, player, tied_recipients, game_state=None, **kw):
+                seen.extend(tied_recipients)
+                return [r for r in tied_recipients if r.player_id == 1][0]
+
+        ps[0].bot = Spy(0)
+        resolve_signature_attacks(eng, self._cr())
+        self.assertEqual(ps[1].market_share, 8)
+        self.assertEqual(eng.state.setec_market_share, 6)
+        sentinel = [r for r in seen if getattr(r, "is_setec_corp", False)]
+        self.assertEqual(len(sentinel), 1)
+        self.assertEqual((sentinel[0].player_id, sentinel[0].market_share), (-1, 6))
+
+    def test_tc_sig_08c_setec_cap_and_reserve_gain(self) -> None:
+        eng = self._two_p_setec(19)
+        self._setup(eng, [8, 20], [0])
+        resolve_signature_attacks(eng, self._cr())
+        self.assertEqual(eng.state.setec_market_share, 20)
+        self.assertEqual(eng.state.signature_red_capped_gains, 1)
+        self.assertEqual(eng.state.signature_red_setec_ms_gained, 1)
+        eng = self._two_p_setec(3, signature_red_setec_gain=1)
+        self._setup(eng, [8, 12], [0])
+        resolve_signature_attacks(eng, self._cr())
+        self.assertEqual(eng.state.setec_market_share, 4)
+
+    def test_tc_sig_08d_gift_rescues_zero_before_collapse(self) -> None:
+        eng = self._engine(3)
+        ps = self._setup(eng, [2, 8, 9], [0, 1])
+        cr = self._cr()
+        commitments = [(p, [], {}) for p in ps]
+        execute_attack_resolution(eng, commitments, cr)
+        self.assertEqual(ps[0].market_share, 2)
+        self.assertNotEqual(eng.state.end_reason, EndGameReason.MARKET_COLLAPSE)
+        self.assertEqual(eng.state.signature_red_zero_rescues, 1)
+
+    def test_tc_sig_08e_patient_zero_never_recipient(self) -> None:
+        eng = self._engine(3)
+        ps = self._setup(eng, [9, 1, 12], [0])
+        ps[1].is_patient_zero = True
+        resolve_signature_attacks(eng, self._cr())
+        self.assertEqual((ps[0].market_share, ps[1].market_share, ps[2].market_share), (7, 1, 14))
+        # Phase 2 breached players are excluded too
+        eng = self._engine(3)
+        ps = self._setup(eng, [9, 1, 12], [0])
+        cr = self._cr()
+        cr.breached_pids = {1}
+        resolve_signature_attacks(eng, cr)
+        self.assertEqual(ps[1].market_share, 1)
+        self.assertEqual(ps[2].market_share, 14)
+        # Both rivals Patient Zero: drain, no gift, fizzle
+        eng = self._engine(3)
+        ps = self._setup(eng, [9, 1, 12], [0])
+        ps[1].is_patient_zero = ps[2].is_patient_zero = True
+        resolve_signature_attacks(eng, self._cr())
+        self.assertEqual(ps[0].market_share, 7)
+        self.assertEqual((ps[1].market_share, ps[2].market_share), (1, 12))
+        self.assertEqual(eng.state.signature_red_fizzles, 1)
+
+    def test_tc_sig_08f_v046_parity(self) -> None:
+        from scripts.run_v380_secret_faces_sweep import build_engine
+        import hashlib, json
+
+        bad = []
+        for key, want in _V046_PARITY_DIGESTS.items():
+            n, seed = (int(x) for x in key.split("|"))
+            r = build_engine("v046_roster", "mixed1", n, seed, {}).run_game()
+            d = (str(r.end_reason), r.total_rounds, list(r.winner_ids),
+                 [(x["player_id"], x["secrets"], x["money"]) for x in r.rankings])
+            if hashlib.sha1(json.dumps(d, default=str).encode()).hexdigest()[:12] != want:
+                bad.append(key)
+        self.assertEqual(bad, [])
+
+    def test_tc_sig_08g_config_validation(self) -> None:
+        cfg = GameConfig.v047()
+        self.assertEqual(cfg.signature_red_recipient_rule, "lowest_rival")
+        self.assertTrue(cfg.signature_red_setec_eligible)
+        self.assertEqual(GameConfig.v047_roster().signature_red_recipient_rule, "lowest_rival")
+        self.assertEqual(GameConfig.v046().signature_red_recipient_rule, "non_locked")
+        with self.assertRaises(ValueError):
+            GameConfig.v046(signature_red_setec_eligible=True)
+        with self.assertRaises(ValueError):
+            GameConfig.v047(signature_red_recipient_rule="bogus")
+        with self.assertRaises(ValueError):
+            GameConfig.v047(signature_red_setec_gain=-1)
+
+    def test_two_lockers_same_recipient_capped(self) -> None:
+        eng = self._engine(4)
+        ps = self._setup(eng, [20, 20, 18, 20], [0, 1])
+        for i in (0, 1):
+            bot = SignatureStubBot(i)
+            bot.red_recipient_override_pid = ps[2].player_id
+            ps[i].bot = bot
+        resolve_signature_attacks(eng, self._cr())
+        self.assertEqual(ps[2].market_share, 20)
+        self.assertEqual(eng.state.signature_red_capped_gains, 1)
+
+    def test_2p_both_locked_both_pick_setec(self) -> None:
+        eng = self._two_p_setec(18)
+        ps = self._setup(eng, [20, 20], [0, 1])
+        resolve_signature_attacks(eng, self._cr())
+        # Post-drain 18/18 and SETEC 18: +4 summed (22) then capped at 20; each locker's tie is {rival, SETEC}; default picks SETEC for both.
+        self.assertEqual(eng.state.setec_market_share, 20)
+        self.assertEqual(eng.state.signature_red_capped_gains, 1)
+        self.assertEqual(eng.state.signature_red_setec_gifts, 1)
+        self.assertEqual(eng.state.signature_red_setec_ms_gained, 2)
+        self.assertEqual([p.signature_red_transfers_sent for p in ps], [2, 2])
+
+    def test_setec_gift_then_step5_ordering(self) -> None:
+        eng = self._two_p_setec(19)
+        ps = self._setup(eng, [8, 20], [0])
+        cr = self._cr(red=1)
+        execute_attack_resolution(eng, [(p, [], {}) for p in ps], cr)
+        self.assertEqual(eng.state.setec_market_share, 20)
+        self.assertEqual(eng.state.signature_red_setec_ms_gained, 1)
+
+    def test_setec_corp_id_matches_engine(self) -> None:
+        from sim.bots import base
+        from sim.engine import market_share
+
+        self.assertEqual(base.SETEC_CORP_ID, market_share.SETEC_CORP_ID)
+
+    def test_fast_clone_preserves_red_telemetry(self) -> None:
+        eng = self._engine(3)
+        self._setup(eng, [10, 5, 6], [0, 1])
+        resolve_signature_attacks(eng, self._cr())
+        clone, _ = fast_clone.clone_engine(eng)
+        for f in ("events", "gifts_to_locked", "mutual_cancels", "fizzles", "setec_gifts",
+                  "setec_ms_gained", "capped_gains", "zero_rescues"):
+            self.assertEqual(getattr(clone.state, f"signature_red_{f}"), getattr(eng.state, f"signature_red_{f}"))
+        self.assertEqual(clone.state.signature_red_events, 1)
+
+
 if __name__ == "__main__":
     unittest.main()

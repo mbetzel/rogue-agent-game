@@ -24,7 +24,7 @@ BASE_KW = dict(starting_money=6, starting_gray_dice=3, starting_purple_dice=1, s
 _ORIG_ROLL = Die.roll
 
 
-def mk_engine(players=2, seed=42, cfg_name="v047_roster", **ov):
+def mk_engine(players=2, seed=42, cfg_name="v046_locked_roster", **ov):
     rng = random.Random(seed)
     bots = [AdaptiveBalancedBot(i) for i in range(players)]
     variants, deck = get_random_setup(rng, profile="STANDARD")
@@ -86,7 +86,7 @@ def lockable_cases():
 
 class TestConfig(unittest.TestCase):
     def test_v047_preset_values(self):
-        c = GameConfig.v047_roster(num_players=3)
+        c = GameConfig.v046_locked_roster(num_players=3)
         self.assertTrue(c.colored_vuln_lock and c.colored_vuln_lock_secret and c.helix_bypass_once_per_game)
         self.assertEqual(c.helix_bypass_mode, "REROLL_LOCKED")
         self.assertEqual(c.die_face_profile, "V046_VULN")
@@ -100,15 +100,15 @@ class TestConfig(unittest.TestCase):
         with self.assertRaises(ValueError):
             GameConfig(colored_vuln_lock=True)  # SHIELDS mode
         with self.assertRaises(ValueError):
-            GameConfig.v047(helix_bypass_mode="BOGUS")
+            GameConfig.v046_locked(helix_bypass_mode="BOGUS")
         with self.assertRaises(ValueError):
             GameConfig.v046(helix_bypass_mode="REROLL_LOCKED")
         with self.assertRaises(ValueError):
             GameConfig.v046(helix_bypass_once_per_game=True)
         with self.assertRaises(ValueError):
-            GameConfig.v047(vuln_bot_params=VulnPolicyParams(lock_policy="X"))
-        GameConfig.v047(colored_vuln_lock_secret=False)
-        GameConfig.v047(die_face_profile="V046_VULN_NOPREMIUM")  # arm A constructs
+            GameConfig.v046_locked(vuln_bot_params=VulnPolicyParams(lock_policy="X"))
+        GameConfig.v046_locked(colored_vuln_lock_secret=False)
+        GameConfig.v046_locked(die_face_profile="V046_VULN_NOPREMIUM")  # arm A constructs
 
     def test_v046_defaults_unchanged(self):
         c = GameConfig.v046()
@@ -487,8 +487,8 @@ class TestBots(unittest.TestCase):
         base = plan_for("v046_roster")
         flag_on_floor4 = plan_for("v046_roster", vuln_bot_params=VulnPolicyParams(pen_relative_to_floor=True))
         self.assertEqual(base, flag_on_floor4)  # floor 4: identity
-        on = plan_for("v047_roster")  # floor 5: thresholds shift +1
-        off = plan_for("v047_roster", vuln_bot_params=VulnPolicyParams(pen_relative_to_floor=False))
+        on = plan_for("v046_locked_roster")  # floor 5: thresholds shift +1
+        off = plan_for("v046_locked_roster", vuln_bot_params=VulnPolicyParams(pen_relative_to_floor=False))
         self.assertLessEqual(on, off)
 
     def test_ref1_portfolio(self):

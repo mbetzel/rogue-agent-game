@@ -1,10 +1,7 @@
-"""v0.46 parity golden (INV-LOCK-07): one short digest per game.
+"""v0.46 parity golden (INV-PARITY): one short digest per game, 100 seeds x 2/3/4P x {v046, v046_roster}.
 
-Keys: ``config|players|seed`` for the archetype-roster games (v046, v046_roster x 2/3/4P x seeds 42..141) and
-``config|mixed1|players|seed`` for the Mixed-seat games (v046_roster x 2/3/4P x seeds 42..91).
-
-Capture (on the engine before any v0.47 change):  python3 -m tests.parity_v046.capture
-The golden is ``golden.json``; the test is ``tests/test_v470_parity.py``.
+Capture (on the untouched engine):  python3 -m tests.parity_v046.capture
+The golden is ``golden.json`` ({"config|players|seed": digest}); the test is ``tests/test_v480_parity.py``.
 (Stored outside ``tests/fixtures/`` because that directory is write-protected in this workspace.)
 """
 
@@ -13,20 +10,41 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import random
 from typing import Any, Dict
 
-from tests.parity_v045.capture import build_engine as _build_arch
+from sim.config import GameConfig
+from sim.engine import GameEngine
+from sim.entities import get_random_companies, get_random_setup, get_random_white_hats
+from tests.fixtures.v035_parity.capture import _bot_classes
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 GOLDEN_PATH = os.path.join(HERE, "golden.json")
 CONFIGS = ("v046", "v046_roster")
 PLAYERS = (2, 3, 4)
 SEEDS = tuple(range(42, 142))
-MIXED_CONFIGS = ("v046_roster",)
-MIXED_SEEDS = tuple(range(42, 92))
 
 
-def _hash(res) -> str:
+def build_engine(config_name: str, players: int, seed: int) -> GameEngine:
+    classes = _bot_classes()
+    rng = random.Random(seed)
+    bots = [classes[(seed * players + i) % len(classes)](i) for i in range(players)]
+    rng.shuffle(bots)
+    for i, b in enumerate(bots):
+        b.player_id = i
+    variants, version_deck = get_random_setup(rng, profile="STANDARD")
+    companies = get_random_companies(players, rng)
+    white_hats = get_random_white_hats(players, rng)
+    cfg = getattr(GameConfig, config_name)(
+        num_players=players, starting_money=6, starting_gray_dice=3, starting_purple_dice=1,
+        starting_purple_reserve=1, corruption_track_profile="STANDARD", enable_corporate_asymmetry=True,
+    )
+    return GameEngine(config=cfg, bots=bots, seed=seed, variant_cards=variants, version_deck=version_deck,
+                      companies=companies, white_hats=white_hats)
+
+
+def digest(config_name: str, players: int, seed: int) -> str:
+    res = build_engine(config_name, players, seed).run_game()
     payload: Dict[str, Any] = {
         "end": str(getattr(res.end_reason, "value", res.end_reason)),
         "rounds": res.total_rounds,
@@ -38,34 +56,8 @@ def _hash(res) -> str:
     return hashlib.sha1(json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest()[:16]
 
 
-def digest(config_name: str, players: int, seed: int, roster: str = "archetypes") -> str:
-    if roster == "mixed1":
-        from scripts.run_v380_secret_faces_sweep import build_engine
-
-        return _hash(build_engine(config_name, "mixed1", players, seed, {}).run_game())
-    return _hash(_build_arch(config_name, players, seed).run_game())
-
-
-def keys():
-    for c in CONFIGS:
-        for p in PLAYERS:
-            for s in SEEDS:
-                yield f"{c}|{p}|{s}"
-    for c in MIXED_CONFIGS:
-        for p in PLAYERS:
-            for s in MIXED_SEEDS:
-                yield f"{c}|mixed1|{p}|{s}"
-
-
-def digest_for_key(key: str) -> str:
-    parts = key.split("|")
-    if parts[1] == "mixed1":
-        return digest(parts[0], int(parts[2]), int(parts[3]), "mixed1")
-    return digest(parts[0], int(parts[1]), int(parts[2]))
-
-
 def capture() -> Dict[str, str]:
-    return {k: digest_for_key(k) for k in keys()}
+    return {f"{c}|{p}|{s}": digest(c, p, s) for c in CONFIGS for p in PLAYERS for s in SEEDS}
 
 
 if __name__ == "__main__":

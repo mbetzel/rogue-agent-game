@@ -1,6 +1,8 @@
 # v0.47 Locked Faces: sweep report
 
-Seeds 42..1241 (1,200 per pod), mixed1 roster. Raw output: `sim_results/v047/main.json`. Pre-check: `v046_roster` reproduces FINDINGS section 62 at all pods (Green lost, rounds, Market Collapse within tolerance).
+> **Note (2026-11-19 merge):** these sweeps ran on the **v0.46.0 base** before main shipped v0.47.0 (Red Signature) and v0.48.0 (Sprint Plan & Gray Legacy Rotation). The preset is now `GameConfig.v046_locked_roster()`, which was `v047_roster()` on this branch. The numbers do not account for v0.48 and must be re-run on top of it.
+
+Seeds 42..1241 (1,200 per pod), mixed1 roster. Raw output: `sim_results/locked_vuln_v046base/main.json`. Pre-check: `v046_roster` reproduces FINDINGS section 62 at all pods (Green lost, rounds, Market Collapse within tolerance).
 
 ## Main (v0.47 vs v0.46; v0.45 comparator)
 | Metric | 2P v046 / v047 | 3P v046 / v047 | 4P v046 / v047 |

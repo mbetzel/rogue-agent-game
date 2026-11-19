@@ -9,7 +9,8 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 from sim.config import DieColor
-from sim.entities import create_colored_die, create_gray_die, create_white_die
+from sim.engine import secret_faces
+from sim.entities import Die, create_colored_die, create_gray_die, create_white_die
 
 if TYPE_CHECKING:
     from sim.config import GameConfig
@@ -45,6 +46,24 @@ BREAKTHROUGH_TEXT = {
     ("PATENT", 1): "Gain $3",
     ("PATENT", 3): "Gain your 2nd Purple die",
 }
+
+
+def breakthrough_text(cfg: Optional[GameConfig], track: str, level: int) -> Optional[str]:
+    """Breakthrough description for ``(track, level)``; v0.48 modes are config-aware (sprint_plan_spec §10.2)."""
+    t = normalize_track(track)
+    if cfg is not None:
+        if t == "DEFENSE" and level == 1 and cfg.pen_test_l1 == "SECRET":
+            n = int(cfg.pen_test_l1_secrets)
+            return f"Gain {n} Corporate Secret" + ("s" if n != 1 else "")
+        if t == "TRIAGE" and level == 1 and cfg.triage_l1_breakthrough == "CASH":
+            return f"Gain ${int(cfg.triage_l1_cash)}"
+        if t == "RELEASE" and level == 1 and cfg.release_l1_breakthrough == "BANDWIDTH":
+            return f"+{int(cfg.release_l1_bandwidth)} Release Bandwidth this round"
+        if t == "DEFENSE" and level == 3 and cfg.pen_test_l3_breakthrough == "THIN_GRAY":
+            return "Return 1 Gray Legacy die you own to the box; Blue R&D faces yield +3"
+        if t == "RELEASE" and level == 3 and cfg.release_l3_breakthrough == "THIN_GRAY":
+            return "Return 1 Gray Legacy die you own to the box"
+    return BREAKTHROUGH_TEXT.get((t, level))
 
 
 @dataclass
@@ -285,6 +304,12 @@ def _resolve_triage_replacement(
         if hit is not None:
             zone.remove(hit)
             break
+    if engine.config.sprint_plan_enabled:  # v0.48 telemetry + stale-id guard (spec §5, §10.3), paid L3 path included
+        from sim.engine import sprint_plan
+
+        src = "TRIAGE_L4" if cost == 0 else "TRIAGE_L3"
+        player.gray_removed_by_source[src] = player.gray_removed_by_source.get(src, 0) + 1
+        sprint_plan.prune(player)
     player.money -= opts.cost
     engine.state.market[color] -= 1
     new_die = create_colored_die(
@@ -300,6 +325,48 @@ def _resolve_triage_replacement(
         player.triage_l3_upgrade_color = color.value
     rec.outcome = "TAKEN"
     rec.detail = {"gray_die_id": gray_id, "new_color": color.value, "new_die_id": new_die.die_id, "paid": opts.cost}
+
+
+_THIN_ZONE_ATTR = {"glitched": "glitched_dice", "in_production": "in_production_dice", "ready": "ready_for_release_dice",
+                   "next": "scanned_dice", "current": "scanned_dice"}
+
+
+def _thin_gray(engine: GameEngine, player: PlayerState, source: str,
+               choice: Optional[BreakthroughChoice] = None) -> Optional[tuple]:
+    """v0.48 L3 thinning (sprint_plan_spec §10.3): returns ``(zone, die)`` or ``None`` when no Gray die is owned."""
+    from sim.engine import sprint_plan
+
+    cands = sprint_plan.owned_gray(player)
+    if not cands:
+        player.thin_forfeits += 1
+        return None
+    by_id = {d.die_id: (z, d) for z, d in cands}
+    pick = None
+    want = getattr(choice, "gray_die_id", None) if choice is not None else None
+    if want in by_id:
+        pick = by_id[want]
+    else:
+        hook = getattr(player.bot, "choose_thin_gray", None)
+        if hook is not None:
+            did = hook(player, engine.state, list(cands))
+            pick = by_id.get(did)
+    if pick is None:
+        pick = cands[0]
+    zone, die = pick
+    getattr(player, _THIN_ZONE_ATTR[zone]).remove(die)  # to the box: not the Central Market, no payout
+    if zone == "glitched":
+        secret_faces.lose_pending(player, die)
+    sprint_plan.prune(player)
+    player.gray_removed_by_source[source] = player.gray_removed_by_source.get(source, 0) + 1
+    player.thin_rounds.append(engine.state.current_round)
+    return pick
+
+
+def thin_gray(engine: GameEngine, player: PlayerState, source: str,
+              choice: Optional[BreakthroughChoice] = None) -> Optional["Die"]:
+    """Returns 1 owned Gray Legacy die to the box (default order R&D, Next, In Production, Current, Ready)."""
+    hit = _thin_gray(engine, player, source, choice)
+    return None if hit is None else hit[1]
 
 
 def resolve_breakthrough(
@@ -331,6 +398,26 @@ def resolve_breakthrough(
 
         zeroed = vulnerability.lower_vulnerability(player, player.vulnerability, "pen_l4_zero")
         rec.detail = {"vulnerability_lowered": zeroed}
+    elif t == "DEFENSE" and level == 1 and cfg.pen_test_l1 == "SECRET":
+        n = int(cfg.pen_test_l1_secrets)
+        player.gain_secrets(n, "breakthrough")
+        rec.detail = {"secrets": n}
+    elif t == "TRIAGE" and level == 1 and cfg.triage_l1_breakthrough == "CASH":
+        n = int(cfg.triage_l1_cash)
+        player.money += n
+        rec.detail = {"money": n}
+    elif t == "RELEASE" and level == 1 and cfg.release_l1_breakthrough == "BANDWIDTH":
+        n = int(cfg.release_l1_bandwidth)
+        player.temp_release_bandwidth_bonus += n
+        player.release_l1_bw_bonus_this_round += n
+        rec.detail = {"release_bandwidth_this_round": n}
+    elif ((t == "DEFENSE" and cfg.pen_test_l3_breakthrough == "THIN_GRAY")
+          or (t == "RELEASE" and cfg.release_l3_breakthrough == "THIN_GRAY")) and level == 3:
+        hit = _thin_gray(engine, player, "PEN_TEST_L3" if t == "DEFENSE" else "RELEASE_L3", choice)
+        if hit is None:
+            rec.outcome, rec.detail = "FORFEITED", {"reason": "no_gray_die"}
+        else:
+            rec.detail = {"gray_die_id": hit[1].die_id, "zone": hit[0]}
     elif t in ("DEFENSE", "RELEASE") and level == 1:
         die = create_gray_die(_new_die_id(engine), cfg.gray_face_profile)
         player.ready_for_release_dice.append(die)
@@ -473,15 +560,18 @@ def breakthrough_preview(player: PlayerState) -> Dict[str, Dict[str, Any]]:  # n
             "level": lvl,
             "next_level": nxt if nxt <= MAX_LEVEL else None,
             "next_upgrade_cost": player.get_track_upgrade_cost(t),
-            "breakthrough": BREAKTHROUGH_TEXT.get((t, nxt)) if cfg is not None and cfg.is_v035_tracks else None,
+            "breakthrough": breakthrough_text(cfg, t, nxt) if cfg is not None and cfg.is_v035_tracks else None,
         }
         if (t, nxt) == ("TRIAGE", 1) and getattr(cfg, "triage_l1_breakthrough", "") == "GRAY_DIE":
             out[t]["breakthrough"] = "Gain 1 Gray Legacy die"
         if t == "DEFENSE" and cfg is not None and getattr(cfg, "is_vulnerability", False):
             out[t]["display_name"] = track_display_name(cfg, t)
             out[t]["pen_test_limit"] = int(cfg.pen_test_limits[max(0, min(MAX_LEVEL, lvl))])
-            txt = {1: "Lower your Vulnerability to 0" if cfg.pen_test_l1 == "SET_ZERO" else "Gain 1 Gray Legacy die",
-                   3: "Gain 1 Corporate Secret; Blue Secret faces yield +3",
+            txt = {1: ("Lower your Vulnerability to 0" if cfg.pen_test_l1 == "SET_ZERO"
+                       else breakthrough_text(cfg, t, 1) if cfg.pen_test_l1 == "SECRET" else "Gain 1 Gray Legacy die"),
+                   3: ("Return 1 Gray Legacy die you own to the box; Blue R&D faces yield +3"
+                       if cfg.pen_test_l3_breakthrough == "THIN_GRAY"
+                       else "Gain 1 Corporate Secret; Blue Secret faces yield +3"),
                    4: "Pen Test limit 3; lower your Vulnerability by 1 at the start of each Operations Turn"}.get(nxt)
             if txt:
                 out[t]["breakthrough"] = txt

@@ -1,16 +1,16 @@
 """v0.47.0 Locked ⚠ Faces sweeps (docs/specs/locked_vuln_faces_spec.md §11.1).
 
-  --step smoke   v047_roster, 2P/3P/4P, 300 games per pod, every invariant asserted inside the loop
-  --step main    v045_roster (guardrail comparator), v046_roster (delta comparator), v047_roster; mixed1 roster rule,
+  --step smoke   v046_locked_roster, 2P/3P/4P, 300 games per pod, every invariant asserted inside the loop
+  --step main    v045_roster (guardrail comparator), v046_roster (delta comparator), v046_locked_roster; mixed1 roster rule,
                  seeds 42..1241, 1,200 per pod; pre-checks v046_roster against FINDINGS §62 and stops when it differs
-  --step arm --arm <id>   one sweep arm on v047_roster (override dict), 1,200 games per pod by default
+  --step arm --arm <id>   one sweep arm on v046_locked_roster (override dict), 1,200 games per pod by default
 
-Quiet by default: summary tables on stdout, raw per-game records in sim_results/v047/<name>.json.
+Quiet by default: summary tables on stdout, raw per-game records in sim_results/locked_vuln_v046base/<name>.json.
 ``--set`` / ``--vuln-params`` are layered onto the preset (``dataclasses.replace(cfg.vuln_bot_params, **json)``), never
 built from a fresh ``VulnPolicyParams`` (that would silently reset every other bot parameter).
-Examples (smoke sizes):  python3 scripts/run_v047_sweep.py --step smoke --games 10
-                         python3 scripts/run_v047_sweep.py --step main --games 20
-                         python3 scripts/run_v047_sweep.py --step arm --arm bots_aware --games 20
+Examples (smoke sizes):  python3 scripts/run_locked_vuln_sweep.py --step smoke --games 10
+                         python3 scripts/run_locked_vuln_sweep.py --step main --games 20
+                         python3 scripts/run_locked_vuln_sweep.py --step arm --arm bots_aware --games 20
 Pass ``--list-arms`` to print the arm ids.
 """
 
@@ -32,12 +32,12 @@ if ROOT not in sys.path:
 from scripts import run_v046_sweep as rv  # noqa: E402
 from scripts import v046_tables as tbl  # noqa: E402
 
-OUT_DIR = os.path.join(ROOT, "sim_results", "v047")
-CONFIG = "v047_roster"
+OUT_DIR = os.path.join(ROOT, "sim_results", "locked_vuln_v046base")
+CONFIG = "v046_locked_roster"
 COLORS = ("red", "blue", "green", "yellow")
 LOCKABLE = ("red", "blue", "green", "yellow", "purple")
 
-# Overrides on v047_roster (dicts, not presets). ``vuln_bot_params`` dicts are layered onto the preset's params.
+# Overrides on v046_locked_roster (dicts, not presets). ``vuln_bot_params`` dicts are layered onto the preset's params.
 ARMS: Dict[str, Dict[str, Any]] = {
     "A_nopremium": {"die_face_profile": "V046_VULN_NOPREMIUM"},                                        # D2 control
     "B_safe03": {"vuln_band_thresholds": (4, 7, 10), "vuln_min_target_by_version": (4, 4, 4)},          # D1 control
@@ -136,7 +136,7 @@ def check_game(eng: Any) -> None:
 # --------------------------------------------------------------------------------------------------
 def play(task: Tuple[str, str, int, int, Dict[str, Any], bool]) -> Dict[str, Any]:
     config_name, roster, players, seed, overrides, check = task
-    if check and config_name.startswith("v047"):
+    if check and config_name.startswith("v046_locked"):
         install_lock_checks()
     holder: List[Any] = []
     orig = rv.build_engine
@@ -439,7 +439,7 @@ def main() -> None:
     ap.add_argument("--roster", default="mixed1", choices=("mixed1", "archetypes"))
     ap.add_argument("--procs", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     ap.add_argument("--assert-invariants", action="store_true")
-    ap.add_argument("--set", default=None, help="extra GameConfig overrides (JSON) applied to v047_roster")
+    ap.add_argument("--set", default=None, help="extra GameConfig overrides (JSON) applied to v046_locked_roster")
     ap.add_argument("--vuln-params", default=None,
                     help="VulnPolicyParams overrides (JSON), LAYERED onto the preset's params (not rebuilt from defaults)")
     ap.add_argument("--out", default=None)

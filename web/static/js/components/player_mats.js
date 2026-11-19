@@ -15,7 +15,7 @@ import { renderVersionSlotBadge } from "./header.js";
 
 let renderAppCallback = null;
 
-// v0.46.0 Research Tracks (GLOSSARY.md Section 7): five-step strips (L0-L4), Breakthroughs (★) at L1 / L3, Capstone at L4.
+// v0.47.0 Research Tracks (GLOSSARY.md Section 7): five-step strips (L0-L4), Breakthroughs (★) at L1 / L3, Capstone at L4.
 function trackStrips(p) {
   const vt = state.vulnerability_track || {};
   const pen = vt.pen_test_limits || [1, 1, 2, 2, 3];
@@ -568,7 +568,7 @@ export function renderPlayerMats() {
             <div class="dice-tray ready-tray" id="ready_tray_${p.player_id}"></div>
           </div>
 
-          <!-- Zone 2: In Production (every die yields in Phase 3; nothing is blocked in v0.46.0) -->
+          <!-- Zone 2: In Production (every die yields in Phase 3; nothing is blocked in v0.47.0) -->
           <div class="operational-zone production-zone-panel">
             <div class="zone-header-strip">
               <div class="zone-title-wrap">
@@ -675,7 +675,7 @@ export function renderPlayerMats() {
           </div>
         </div>
 
-        <!-- 2b. Vulnerability (v0.46.0) -->
+        <!-- 2b. Vulnerability (v0.47.0) -->
         ${renderVulnerabilityCard(p)}
 
         <!-- 3. Corporate Secrets -->

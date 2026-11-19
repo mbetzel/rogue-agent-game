@@ -1,4 +1,4 @@
-"""Tabletop Simulator module builder for Too Many Secrets (v0.46.0).
+"""Tabletop Simulator module builder for Too Many Secrets (v0.48.0).
 
 Renders the Print-and-Play components (pnp/generate_pnp.py draw functions) to PNG
 images and writes a Tabletop Simulator save file that uses them.
@@ -27,7 +27,7 @@ from typing import Dict, List, Optional, Sequence, Tuple
 from pnp import generate_pnp as g
 from pnp.pdf_engine import PALETTE, PDFDocument, PDFPage, measure_text
 
-VERSION = "v0.46.0"
+VERSION = "v0.48.0"
 HERE = os.path.dirname(os.path.abspath(__file__))
 ASSET_DIR = os.path.join(HERE, "assets")
 SAVE_NAME = f"Too Many Secrets ({VERSION})"
@@ -439,8 +439,6 @@ def build_save(url_for) -> dict:
         dice = [sb.die(color, 0, 0) for _ in range(8)]
         objs.append(sb.bag(f"{color} dice (Central Market)", 18.6, z, dice, tint=DIE_TINTS[color],
                            description="Stack 2 x players on this colour's Variant Card."))
-    objs.append(sb.bag("Gray Legacy dice", 18.6, -4.6, [sb.die("Gray", 0, 0) for _ in range(12)],
-                       tint=DIE_TINTS["Gray"], description="Gained from Level 1 Breakthroughs."))
 
     vw, vd = 126 * K, 194 * K
     vdeck_sheet = sb.custom_deck("variant_cards", "variant_back", 4, 4)
@@ -483,15 +481,17 @@ def build_save(url_for) -> dict:
         objs.append(sb.tile(f"player_mat_{p_i}", f"Company Terminal Mat P{p_i} ({seat})", mx, mz, bw, bd,
                             locked=True, rot_y=rot))
         objs.append(sb.card(ref_deck, p_i - 1, f"Player Reference P{p_i}", kx, mz - f * 3.8, rw, rd, rot_y=rot,
-                            description="Front: dice & Secret yields. Flip: six-phase round."))
+                            description="Front: dice & R&D face yields. Flip: six-phase round."))
         for c_i, label in enumerate(PLAYER_CUBES):
             cx = kx - 1.6 + (c_i % 4) * 1.05
             cz = mz + f * (0.2 + (c_i // 4) * 1.05)
             objs.append(sb.cube(f"{label} ({seat})", tint, cx, cz))
-        dice = [("Gray", "Gray Legacy die"), ("Gray", "Gray Legacy die"), ("Purple", "Purple Specialist die"),
-                ("Purple", "Purple Specialist die (Personal Reserve)")]
+        dice = [("Gray", "Gray Legacy die (Ready for Release)"), ("Gray", "Gray Legacy die (Ready for Release)"),
+                ("Purple", "Purple Specialist die"), ("Purple", "Purple Specialist die (Personal Reserve)"),
+                ("Gray", "Gray Legacy die (Current Sprint)"), ("Gray", "Gray Legacy die (Current Sprint)"),
+                ("Gray", "Gray Legacy die (Current Sprint)")]
         for d_i, (color, name) in enumerate(dice):
-            objs.append(sb.die(color, kx - 1.6 + d_i * 1.05, mz + f * 2.9, nickname=name))
+            objs.append(sb.die(color, kx - 1.6 + (d_i % 4) * 1.05, mz + f * (2.9 + (d_i // 4) * 1.05), nickname=name))
         objs.append(sb.hand(seat, mx, mz - f * 11.6, rot))
 
     lua = open(os.path.join(HERE, "global.lua"), encoding="utf-8").read()
@@ -535,8 +535,8 @@ Rules: RULES.md / RULES_QUICKREF.md in the repo.
 3. Put the v1.0 tile's starting cubes into the Staging Cup bag.
 4. Shuffle each colour's Variant cards; 1 face up per Market slot, with 2 x players dice of that colour on it.
 5. Deal 1 Client Company and 1 White Hat Dossier card per player. Take your starting colored die from that colour's market stack.
-6. Each mat: 2 Gray + 1 Purple die in Ready for Release; the 2nd Purple die on the Personal Reserve outline (Public Relations L3).
-7. $6, 5 Corporate Secrets (+1 with Data Scraper), 0 Research. Market Share 14 (2P) or 18 (3-4P); 2P adds the SETEC Corp Black Cube at 0. Vulnerability 0. Signature Cube on its cradle.
+6. Each mat: 2 Gray + 1 Purple die in Ready for Release and 3 Gray dice in the Current Sprint; the 2nd Purple die on the Personal Reserve outline (Public Relations L3). Each player owns 5 Gray dice; no Gray dice are gained later.
+7. $6, 6 Corporate Secrets (+1 with Data Scraper), 0 Research. Market Share 14 (2P) or 18 (3-4P); 2P adds the SETEC Corp Black Cube at 0. Vulnerability 0. Signature Cube on its cradle.
 8. Randomly give out the First Player Marker.
 
 [b]Cube Tower[/b]

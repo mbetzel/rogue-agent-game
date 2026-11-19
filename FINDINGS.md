@@ -8,67 +8,14 @@ This document tracks verified balance takeaways, bot meta equilibria, card tieri
 > - [docs/findings/v0.8_to_v0.9_variant_and_archetype_sweeps.md](docs/findings/v0.8_to_v0.9_variant_and_archetype_sweeps.md): Choice faces, 15 Module Variants (★), Asymmetric Payloads, and Consultancy Archetypes.
 > - [docs/archive/FINDINGS_s01-s35.md](docs/archive/FINDINGS_s01-s35.md): Sections §1–§36 (Phases 15–45, v0.13–v0.36 baselines).
 > - [docs/archive/FINDINGS_s37-s43.md](docs/archive/FINDINGS_s37-s43.md): Sections §37–§43 (Market Share threshold probes, Market Leader Bonus, v0.38 exploration).
-> - [docs/archive/FINDINGS_s44-s49.md](docs/archive/FINDINGS_s44-s49.md): Sections §44–§53 (Phases 50–58, v0.38c–v0.40.1 baselines; file name kept for link stability).
+> - [docs/archive/FINDINGS_s44-s49.md](docs/archive/FINDINGS_s44-s49.md): Sections §44–§54 (Phases 50–59, v0.38c–v0.41.0 baselines; file name kept for link stability).
 
 ---
 
-> [!NOTE] Active Sections (§54–§62)
-> Section numbering continues here unchanged. **Agents: do not read the archives unless a task cites a specific §N ≤ 53.**
+> [!NOTE] Active Sections (§55–§63)
+> Section numbering continues here unchanged. **Agents: do not read the archives unless a task cites a specific §N ≤ 54.**
 
 ---
-
-## 54. Phase 59 Post-Telemetry Balance Assessment: Player-Specific SETEC Corruption Attacks: APPROVED
-
-Sources: `sim_results/player_specific_corruption/validation_report.md` (6,000-game dataset across 4P, 3P, and 2P pods, Seeds 42..1041); Technical Architecture Specification `docs/specs/player_specific_corruption_spec.md`; Pre-SDLC Analysis `docs/findings/player_specific_corruption_analysis.md`.
-
-- **Investigation Context & Architectural Rationale:**
-  In baseline `v0.40.1`, all 30 non-cube hazards across the 6 SETEC Version Cards (`v1.0 Script Kiddie`, `v1.0 Data Scraper`, `v2.0 RaaS`, `v2.0 Polymorphic Worm`, `v3.0 Zero-Day Override`, `v3.0 Corrupted Kernel`) resolved as flat, table-wide taxes ("All lose $2", "Lose 1 🔬"). This uniform model suffered from three structural weaknesses:
-  1. *Lack of Adversarial Threat Identity:* SETEC functioned as passive environmental weather rather than an active, targeted adversary.
-  2. *Anti-Catchup Dynamics:* Monolithic resource drains penalized trailing corporations operating on razor-thin margins far more severely than front-runners, exacerbating runaway leads.
-  3. *Static Margin Management:* Players could not tactically adjust resource holdings or pacing to divert SETEC scrutiny toward competitors.
-  
-  Under Phase 59, all 30 Corruption Track hazard spaces were refactored into **deterministic, player-specific attacks**:
-  - *Direct Leader Targeting:* Hazards target the player holding the "Most" of a tracked resource (Money, Research Tokens, Market Share, Colored Module Dice, Corporate Secrets) or "Fewest Glitched Shield Slots" (breaching pristine defenses).
-  - *Tie Resolution:* All tied leaders suffer the hazard simultaneously (`INV-TARGET-02`).
-  - *Robin Hood Transfers (`v2.0` Space 1):* The player with the "Least" siphons assets from the player with the "Most" (*Least Market Share siphons $1 Cash from Most Market Share*; *Least Research siphons 1 🔬 from Most Research*). Transfers cleanly fizzle if all players are tied (`INV-TARGET-04`), and receiving players tactically select donors when leaders tie (`INV-TARGET-05`).
-  - *Clock & Volume Invariance:* Cube distributions (Option B), total Attack Cubes (15 Zero-Day / 13 Kernel), and pacing black cubes are 100% conserved.
-
-- **Empirical Telemetry Verification (6,000 Games Across 4P, 3P, and 2P Pods):**
-
-  | Metric / Gate | Baseline (`player_specific=False`) | Candidate (`player_specific=True`) | Target Guardrail | Design Assessment |
-  | :--- | :---: | :---: | :---: | :--- |
-  | **Macro Pacing (4P)** | 8.72 ± 2.76 | 8.44 ± 2.73 | 8.00–11.00 rounds | **PASS** — Centered in sweet spot (-0.28 rds) |
-  | **Macro Pacing (3P)** | 8.93 ± 2.60 | 8.82 ± 2.57 | 8.00–11.00 rounds | **PASS** — Robust stability (-0.11 rds) |
-  | **Macro Pacing (2P)** | 8.69 ± 2.75 | 8.60 ± 2.71 | 8.00–11.00 rounds | **PASS** — Head-to-head consistency (-0.09 rds) |
-  | **End-Game: Singularity (4P / 3P / 2P)** | 34.7% / 39.7% / 35.1% | 28.0% / 33.1% / 32.3% | 20%–45% | **PASS** — Reliable macro pacing clock |
-  | **End-Game: Patient Zero (4P / 3P / 2P)** | 31.8% / 29.3% / 17.7% | 42.0% / 37.7% / 21.6% | 20%–50% | **PASS** — Heightened threat on exposed engines |
-  | **End-Game: Market Collapse (4P / 3P / 2P)** | 33.5% / 30.7% / 45.8% | 30.0% / 28.8% / 43.9% | 20%–50% | **PASS** — Active secondary terminal condition |
-  | **Total Wipeout Rate (4P / 3P / 2P)** | 0.00% / 0.30% / 1.40% | 0.00% / 0.40% / 2.20% | $\le 1.00\%$ table avg | **PASS** — 0.87% across all 6,000 games |
-  | **Survivor Mean Money (4P / 3P / 2P)** | $2.83 / $2.75 / $2.61 | $3.27 / $3.14 / $2.75 | Liquidity Preserved | **PASS** — Trailing seats unburdened (+15% cash) |
-  | **Survivor Mean Research (4P / 3P / 2P)** | 4.39 / 4.39 / 3.70 🔬 | 4.58 / 4.62 / 3.88 🔬 | Track Advancement | **PASS** — Sustained tech progression |
-  | **Archetype Equity Spread (4P / 3P / 2P)** | 33.9% / 40.2% / 28.5% | 34.5% / 42.0% / 24.3% | Controlled ($\le 45\%$) | **PASS** — 2P spread compressed (-4.2%) |
-
-- **Core Design Pillar Evaluations:**
-  1. *Macro Pacing & Invariance:*
-     - Pacing remains exceptionally stable across player counts (8.44 in 4P, 8.82 in 3P, 8.60 in 2P), confirming that targeted hazards shift tension rather than distorting game length.
-     - Option B cube staging, compiler drops, and internal baffle hold characteristics operate with zero structural drift.
-  2. *Tri-Modal End-Game Dynamics:*
-     - The end-game distribution maintains a vibrant tri-modal split: Singularity accounts for 28.0%–33.1%, Market Collapse represents 28.8%–43.9%, and Patient Zero increases to 21.6%–42.0%.
-     - Total Wipeouts remain negligible (0.00% in 4P, 0.40% in 3P, 2.20% in 2P; 0.87% overall), satisfying all safety thresholds.
-  3. *Dynamic Rubber-Banding & Economic Spread:*
-     - Removing collateral damage preserves critical liquidity for trailing players: mean survivor cash rose by +15.5% in 4P ($3.27 vs $2.83) and +14.2% in 3P ($3.14 vs $2.75). Trailing corporations avoid death spirals caused by arbitrary flat taxes.
-     - Front-runners are kept under sustained scrutiny, introducing meaningful tactical margin management: players must weigh the benefits of banking excess cash, research, or Market Share against attracting SETEC attacks.
-  4. *Robin Hood Siphon Mechanics & Zero-Sum Integrity:*
-     - In 4P pods, RaaS Space 1 executed 532 transfers ($472 siphoned) and Worm Space 1 executed 813 transfers (563 🔬 siphoned).
-     - Table-wide parity fizzles (`INV-TARGET-04`) cleanly resolved early symmetric states (5.8%–6.7% in 4P, 16.4%–16.6% in 3P, 40.6%–44.1% in 2P) without introducing artificial economic distortion.
-     - Receiving players broke donor ties toward high-threat rivals in 45.1% (RaaS) and 34.1% (Worm) of 4P triggers (`INV-TARGET-05`), giving trailing players active counter-play agency.
-     - Zero-floor drains prevented negative balances, and pure player-to-player transfers introduced zero synthetic inflation.
-  5. *Bot Archetype Equity & Meta Viability:*
-     - All 6 canonical bot archetypes remain competitive: `SecOpsTurtleBot` (45.1% 4P WR), `AdaptiveBalancedBot` (33.7% 4P WR), `MixedPolicyBot` (27.2% 4P WR), `AccelerationistBot` (18.9% 4P WR), `VentureGreedBot` (14.4% 4P WR), and `RecklessSaboteurBot` (10.7% 4P WR).
-     - Defensive investment gains high thematic value against targeted hazards, while greedy, unshielded strategies carry proportionate, player-specific vulnerability (VentureGreed 21.1% PZ, Saboteur 20.4% PZ) rather than table-wide wipeout hazards.
-
-- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.41.0 Baseline`).**
-  Player-Specific SETEC Corruption Attacks fulfill all design criteria: they introduce sharp adversarial identity, provide organic rubber-banding through Robin Hood transfers and leader targeting, maintain rock-solid macro pacing (8–11 rounds), and preserve healthy archetype diversity. Officially approved for rules synchronization (`RULES_APPENDIX.md §6C`) and Print-and-Play generation (`pnp/generate_pnp.py`).
 
 ## 55. Phase 60 Post-Telemetry Balance Assessment: Late-Game Patient Zero Threat Escalation (v3.0 Critical Breach): APPROVED
 
@@ -359,3 +306,141 @@ Reports:
   - *Data Scraper* games still run about `1.2` rounds shorter, with `3×` the breach of *Script Kiddie*: card pass later.
   - Gray and colored core ⚠ faces are rerolled most of the time: accepted by the User, and the per-face keep band is report-only.
 - **Open User decisions:** `D1–D7` in `docs/reports/v046_balance_assessment.md` §8.4.
+
+## 63. Red Signature "Lowest Rival" (`v0.47.0` candidate): Post-Telemetry Balance Assessment: APPROVED
+
+**Experiments:**
+- Pre-SDLC probe: 12,000 games per pod (base / A at 2P–4P; C / D1 at 2P), 4,000 for B / D2. Report: `docs/findings/red_signature_lowest_rival_analysis.md`.
+- Confirm sweep: `scripts/run_v047_red_signature_sweep.py` + `scripts/summarize_v047_red_signature.py`, 4,000 games per arm, seeds `42..4041`, `mixed1` roster, `v046_roster` vs `v047_roster` (2P also D1). Report: `sim_results/v047_red_signature/validation_report.md`.
+- Spec: `docs/specs/red_signature_lowest_rival_spec.md`.
+
+### Rule change (`v0.47.0` vs `v0.46.0`)
+- Red Target Lock Signature Attack: the locker takes `-2` Market Share (not below `0`); the **surviving rival with the least Market Share gains `+2`, locked or not**. In 2P, **SETEC Corp counts** as a rival.
+- Multi-lock rounds: all drains first, then each recipient is read from the post-drain positions.
+- The "every survivor is locked" fizzle is gone. It fizzles only if the locker has no surviving rival (never in 2P).
+- Card wording: "-2 Market Share; lowest rival gains +2 (2P: SETEC Corp counts)".
+
+### User decisions (2026-11-19)
+1. Arm **A** at all player counts.
+2. 2P SETEC Corp gains `+2`; **D1** (`+1` to SETEC) kept in reserve.
+3. Recipient read post-drain.
+4. Wording as above; version `v0.47.0`.
+5. 4P archetype spread is a watch item; a rise over `+4` blocks the release.
+
+### Headline sweep (4,000 games per arm, v046 → v047)
+| Pod | Rounds | Market Collapse % | Singularity % | Patient Zero % | Arch. spread | Company spread |
+|---|---|---|---|---|---|---|
+| 2P | 8.09 → 8.15 | 36.8 → 33.6 | 25.1 → 26.9 | 33.3 → 34.5 | 13.0 → 16.6 (D1 15.9) | 17.8 → 19.1 |
+| 3P | 7.84 → 8.11 | 23.4 → 14.8 | 20.7 → 27.0 | 54.5 → 56.6 | 14.4 → 17.0 | 17.1 → 16.0 |
+| 4P | 7.50 → 7.84 | 24.0 → 13.4 | 15.7 → 23.3 | 60.1 → 63.0 | 11.0 → 13.3 | 14.6 → 16.0 |
+
+- 2P fizzles: `52.1% → 0%` of Red Signature events. Total Wipeout unchanged (`4.8 / 1.4 / 0.3%`).
+- 2P SETEC Corp (v046 → A → D1): final Market Share `6.74 → 8.48 → 7.70`; MLB 1st places `0.37 → 0.81 → 0.67` per game; Secrets absorbed `1.65 → 2.81 → 2.44` per game. These match the analysis to within `0.07`. The 2P winner's Secrets fall `12.52 → 11.53`.
+- Every spec §9.2 / §9.3 criterion PASSES.
+
+### Takeaways
+1. **The §62 4P Market Collapse residual is cleared** (`24.0 → 13.4%`, 3P `23.4 → 14.8%`). The cost is `+0.3` rounds and Singularity at `23–27%`, as modelled.
+2. **3P spread `+2.6` (analysis `+1.5`).** This is noise, not drift. The confirm's own v046 arm already reads `14.4` (the 12k base read `12.9`). Spread moves under about `2` pts are noise at 4k games. The driver is Reckless `-1.9` (difference CI about `±3.2`). Pooled over 16k games the 3P move is about `+1.8`, with Reckless about `-1.1`.
+3. **The direction is consistent across pods.** SecOpsTurtle gains a little and Reckless loses a little (4P `+0.6 / -1.8`; 2P SecOps `+5.0`, pooled with the 12k probe about `+3.7`). This is the expected cost of giving the lowest rival a catch-up gift.
+4. **4P watch item not triggered:** `+2.4` (pooled about `+2.6`) against the `+4` block.
+5. **The 2P SETEC acceleration works as intended.** It doubles SETEC's MLB 1st places. D1 stays the reserve lever (about `-0.7` spread for about half the SETEC effect).
+
+**Verdict: APPROVED** as the `v0.47.0` Red Signature rule. **Watch items:**
+- 2P SecOpsTurtle at about `60%` (fair `50%`);
+- 4P spread against the `+4` block;
+- recheck both in the next sweep that touches 2P SETEC Corp or the company-power pass.
+## 64. Phase 69 Post-Telemetry Balance Assessment: Sprint Plan & Gray Legacy Rotation (`v0.48.0` Candidate): APPROVED (`v0.48.0 Baseline`)
+
+> **Version note (2026-11-19):** this package was built and swept as `v0.47.0` on top of `v0.46.0`, in parallel with the Red Signature change (§63) that shipped as `v0.47.0`. It is renumbered `v0.48.0` / Phase 69 and rebased onto `v0.47.0`; the numbers below are against `v0.46.0`. See the combined-rules re-sweep note at the end of this section.
+
+**Experiments:**
+- `scripts/run_v047_sweep.py`: arms S0–S3 and R0–R3, 1,200 games per pod, 2P / 3P / 4P, seeds `42..1241`, `mixed1` roster.
+- A re-run with fixed tooling (method-b income for every arm, win rates by bot / company / White Hat).
+- A game-designer lever probe: 600 games per pod, seeds `42..641`.
+
+Reports:
+- `docs/reports/v047_sweep_report.md`;
+- `docs/reports/v047_balance_assessment.md`;
+- `docs/reports/sprint_plan_analysis.md` §9;
+- `docs/specs/sprint_plan_spec.md` §17.
+
+### Key Changes (`v0.47.0` vs `v0.46.0`)
+1. **Sprint Plan with Gray Legacy Rotation.**
+   - Setup: Ready for Release holds 2 Gray dice, the Purple die and the company die. The Current Sprint holds 3 Gray dice.
+   - Gray dice have one ⚠, on F3, and that face is locked.
+2. **Thinning at Level 3.**
+   - Release L3 and Pen Test L3 read "return 1 Gray Legacy die you own to the box".
+   - Pen Test L3 keeps the Blue Secret +3.
+3. **QC Level 1 rewards:**
+   - Pen Test L1 gives +1 Corporate Secret.
+   - Triage L1 gives `+$2`.
+   - Release L1 gives +1 Release Bandwidth this round.
+4. **6 starting Corporate Secrets.**
+5. **Bots (sim-only):**
+   - `THINNING_AWARE` research focus;
+   - `bot_thin_tracks=("RELEASE",)`.
+
+### Telemetry & Balance Verdict (`PASS` on the like-for-like base)
+- **Against the spec base (S0 and v0.45, both LEGACY bots), S2 fails two guardrails:**
+  - Δ rounds +0.06 / +0.35 / +0.30;
+  - income ×v0.45 1.30 / 1.26 / 1.26.
+- **About 70% of the overshoot comes from the bots:**
+  - The bot fix alone on v0.46 rules (S3 − S0) adds +0.13 / +0.13 / +0.12 income.
+  - The v0.47 rules under the fixed bots (S2 − S3) add only +0.05 / +0.05 / +0.06.
+  - The fixed bots also lift v0.45 by ×1.10.
+- **Like-for-like, with both sides on `THINNING_AWARE`:**
+  - Δ rounds vs S3: +0.05 / +0.24 / +0.05.
+  - Income ×v0.45: 1.19 / 1.15 / 1.16.
+  - Singularity: 82–86% of S3.
+  - Green: 2.26 / 2.04 / 1.84. With the fixed bots, v0.46 itself breaks the 2P band at 2.75.
+- **S2 is preferred over S2b**, which also thins on Pen Test L3:
+  - White Hat spread 4.8 / 7.2 / 8.0 against 8.2 / 10.7 / 10.6 pp;
+  - company spread 19.6 / 17.4 / 15.8 against 26.4 / 19.0 / 18.9 pp;
+  - S2b's lower income is the only thing it does better.
+- **Lever probes, 600 per pod. None is useful:**
+  - **Triage L1 `+$1`:** no change. Breakthrough cash is outside the Phase 3 income metric.
+  - **Gray F3 `+$1 / +2 🔬`:** bit-identical to S2. The bots always take 🔬 on choice faces (`adjust_declared_choices`), so this lever cannot be tested in the sim.
+  - **5 Secrets at 3P / 4P:** −0.72 / −0.85 rounds against S2, an overcorrection.
+
+### Key findings
+1. **Guardrails must use the same bot policy on both sides.** The ×1.25 income cap and the ±0.30 rounds bar were calibrated with the LEGACY bots, which are known to undervalue research.
+2. **The income guardrail measures Phase 3 dice income only.** Breakthrough rewards (Triage L1 `+$2`, PR L1 `+$3`) are invisible to it.
+3. **The extra v0.47 income is early research:**
+   - 🔬 in R1–4 is 3.83 per seat-round, against 2.98;
+   - cash is 2.78, against 2.86.
+   - This is the intended 5-Gray start.
+
+### Residuals (none blocking)
+- **Rush edge:**
+  - v0.47: +0.3 / **+5.0** / +3.6 pp (bar +4).
+  - v0.46 with the fixed bots: −3.5 / +3.5 / +2.3 (600 games). The SE is about 2 pp, so v0.47 is within noise of it.
+  - v0.46 with the LEGACY bots: +12.4 pp at 3P.
+  - If every seat rushes (R3), games run +0.60 / +0.46 rounds at 3P / 4P. Watch this in playtest.
+- **Spook at 3P:** 38.0, against 38.8 in v0.46. Pre-existing.
+- **Helix** is the lowest company in every arm, and the company spread is unchanged. Both go to the planned company-power pass.
+- **Round 2 dip:** 0.43 Secret faces per roll at 3P, against 0.51. Dead turns are 0.3%, against 2.3%. The Round 1 company-die priority lever stays parked.
+
+### User decisions (2026-11-19)
+- **D-69-1 ACCEPTED:** the Δ-rounds and income guardrails are re-based on the fixed-bot baseline (S3 and V45TA); other bars stay absolute.
+- **D-69-2 ACCEPTED:** ship S2 (Release-only thinning focus) as `v048_roster`.
+- **D-69-3 ACCEPTED:** no `[TUNE]` change.
+- **Next:**
+  - the dominance matrix and ref1 on S2;
+  - a matched-bot V45TA reference arm in the sweep script;
+  - a bot cash/🔬 choice-face policy, needed before any Gray face-mix lever can be tested.
+
+### Combined-rules re-sweep (`v0.48.0` on top of `v0.47.0` Red Signature, 2026-11-19)
+`scripts/run_v048_sweep.py`, 1,200 games per pod, seeds `42..1241`, `mixed1`; S0 = `v047_roster`, S3 = `v047_roster` + fixed bots, S2 = `v048_roster` (`--assert-invariants`, no failures). Raw output is not committed.
+
+| Measure (2P / 3P / 4P) | S3 (fixed-bot v0.47) | S2 (v0.48) | Bar |
+|---|---|---|---|
+| Rounds | 8.28 / 8.11 / 8.09 | 8.31 / 8.37 / 8.12 (Δ +0.03 / +0.26 / +0.03) | Δ within ±0.30 vs S3: PASS |
+| Income ×v0.45 (old-bot ref) | 1.25 / 1.21 / 1.19 | 1.30 / 1.26 / 1.26 (Δ +0.05 / +0.05 / +0.07) | re-based (÷1.10 fixed-bot v0.45) ≈ 1.18 / 1.15 / 1.15: PASS |
+| Singularity % | 30.3 / 31.0 / 28.2 | 25.3 / 27.3 / 22.7 (83 / 88 / 80% of S3) | PASS |
+| Market Collapse % | 32.6 / 12.9 / 13.0 | 36.4 / 16.4 / 16.3 | watch (Red Signature's §63 gain partly given back, still well under v0.46's 21–24% at 3P/4P) |
+| Green lost / seat | 2.79 / 2.47 / 2.32 | 2.29 / 2.11 / 1.92 | 1.2–2.5: PASS |
+| Gray roll share % | — | 56.1 / 54.7 / 54.6 | ≥ 45: PASS |
+| Longest Gray streak | — | 5 / 8 / 6 | ≤ 8: PASS |
+| Seat-0 rush edge (R1 / R3 vs S2) | — | +1.7 / +5.6 / +4.1 pp; R3 −0.4 / +3.1 / +4.0 | 3P R1 over the +4 bar, as in the v0.46-based sweep (+5.0); residual |
+
+**Verdict:** the `v0.46`-based assessment above carries over to the combined rules unchanged. The Sprint Plan adds the same +0.05–0.07 income on top of `v0.47` as it did on `v0.46`; no interaction with the Red Signature rule beyond a +3 pp Market Collapse give-back at 3P/4P. APPROVED as `v0.48.0`. Watch items: 3P rush edge, 3P/4P Market Collapse, 2P SecOpsTurtle (§63).

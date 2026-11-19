@@ -4,7 +4,7 @@
 **Date:** 2026-11-19
 **Target version:** `v0.47.0` (from `v0.46.0`)
 **Status:** Awaiting User sign-off on the open decisions in §8. No changes to `RULES.md`, `GLOSSARY.md`, `sim/`, `pnp/`, `tts/` or `web/`.
-**Probe tooling (no engine edits):** `scripts/probe_v047_locked_vuln.py` (monkeypatch sim probe) and `scripts/probe_v047_locked_vuln_math.py` (exact per-die and per-pool math).
+**Probe tooling (no engine edits):** `scripts/probe_locked_vuln.py` (monkeypatch sim probe) and `scripts/probe_locked_vuln_math.py` (exact per-die and per-pool math).
 
 ---
 
@@ -192,8 +192,8 @@ Neither policy dominates. Never-reroll is mildly worse, and ★-chase is neutral
 1. Config flags:
    - `colored_vuln_lock: bool = False`.
    - `colored_vuln_lock_secret: bool = True`.
-   - Preset `GameConfig.v047()`, inheriting `v046()`: lock on, `die_face_profile = "V046_VULN"` (if D2), bands `(5, 8, 11)` and min target `(5, 5, 5)` (if D1).
-   - Add `v047_roster`.
+   - Preset `GameConfig.v046_locked()`, inheriting `v046()`: lock on, `die_face_profile = "V046_VULN"` (if D2), bands `(5, 8, 11)` and min target `(5, 5, 5)` (if D1).
+   - Add `v046_locked_roster`.
    - Validation: the lock requires `is_vulnerability`.
 2. Engine (`sim/engine/phase1_roll_deploy.py` about lines 436–530): extend `_evaluate_locks` so that `cfg.colored_vuln_lock and d.color != GRAY and face_vuln(face) > 0` sets `is_locked`.
    - Respect the Secret sub-flag.
@@ -219,7 +219,7 @@ Neither policy dominates. Never-reroll is mildly worse, and ★-chase is neutral
 **Staff engineer (review):** check that pre-v0.47 presets are unchanged (golden fixtures), the invariants from `run_v046_sweep --assert-invariants`, and the new invariant "INV-LOCK-01: no colored ⚠ die rerolled unless BFB/ACE".
 
 **Product owner (sweep design):**
-- Base run: `run_v046_sweep.py`-style, `v047_roster` vs `v046_roster`, mixed1, seeds 42–1241, 1,200 games per pod, 2P / 3P / 4P.
+- Base run: `run_v046_sweep.py`-style, `v046_locked_roster` vs `v046_roster`, mixed1, seeds 42–1241, 1,200 games per pod, 2P / 3P / 4P.
 - Arms:
   - A, B (± safe 0–4).
   - Counter-levers: damage `(1, 1, 2)`, Green yield 3, Pen Test cost 1.
