@@ -111,7 +111,8 @@ def install_lock_checks() -> None:
             for d in active_dice:
                 if vuln.lock_applies(cfg, d):
                     assert d.is_locked, "INV-LOCK-02: a lockable ⚠ die is not locked at Deploy"
-                if d.color in (DieColor.GRAY, DieColor.WHITE) and d.is_locked:
+                gray_ok = d.color == DieColor.GRAY and getattr(cfg, "vuln_lock_gray", False)  # v0.49 lock all dice
+                if d.color in (DieColor.GRAY, DieColor.WHITE) and d.is_locked and not gray_ok:
                     assert d.current_face is not None and d.current_face.is_glitch, "INV-LOCK-02: Gray/White ⚠-locked"
         return orig_lock_in(engine, p, active_dice)
 
@@ -136,7 +137,7 @@ def check_game(eng: Any) -> None:
 # --------------------------------------------------------------------------------------------------
 def play(task: Tuple[str, str, int, int, Dict[str, Any], bool]) -> Dict[str, Any]:
     config_name, roster, players, seed, overrides, check = task
-    if check and config_name.startswith("v046_locked"):
+    if check and config_name.startswith(("v046_locked", "v049")):
         install_lock_checks()
     holder: List[Any] = []
     orig = rv.build_engine
@@ -345,21 +346,21 @@ def extra_guardrails(m47: Dict[str, Any], m46: Dict[str, Any]) -> List[Tuple[str
 
     def add(name, val, rule, ok):
         rows.append((name, None if val is None else round(val, 2) if isinstance(val, float) else val, rule,
-                     None if val is None else bool(ok)))
+                     None if val is None else bool(ok(val) if callable(ok) else ok)))  # was bool(fn): always True
 
     flags = [(c, k) for c, d in m47["colour_parity"].items() for k in ("a_company", "b_bought", "c_weighted")
              if d[k + "_flag"]]
     rows.append(("Per-colour win-rate parity (a/b/c)", ", ".join(f"{c}:{k[0]}" for c, k in flags) or "none",
                  "no colour > 5 pp from the colour mean (Yellow named)", not flags))
     h47, h46 = m47["helix_win_pct"], m46["helix_win_pct"]
-    add(None if h47 is None else "Helix company win % vs v0.46", None if h47 is None or h46 is None else h47 - h46,
+    add(None if h47 is None else "Helix company win % vs base", None if h47 is None or h46 is None else h47 - h46,
         ">= -2 pp", lambda_ok(lambda v: v >= -2))
-    for key, label in (("prodigy_win_pct", "Prodigy win % vs v0.46"), ("operator_win_pct", "Operator win % vs v0.46")):
+    for key, label in (("prodigy_win_pct", "Prodigy win % vs base"), ("operator_win_pct", "Operator win % vs base")):
         a, b = m47[key], m46[key]
         add(label, None if a is None or b is None else a - b, "within +-3 pp", lambda_ok(lambda v: abs(v) <= 3))
     add("P(star) per colored die", m47["p_star_per_colored_die"], ">= 0.12", lambda_ok(lambda v: v >= 0.12))
     b47, b46 = m47["colored_dice_bought_per_game"], m46["colored_dice_bought_per_game"]
-    add("Colored dice bought / game vs v0.46", None if not b46 else b47 / b46 - 1, ">= -10 %",
+    add("Colored dice bought / game vs base", None if not b46 else b47 / b46 - 1, ">= -10 %",
         lambda_ok(lambda v: v >= -0.10))
     rows.append(("Release L4 share % (report only)", None if m47["release_l4_pct"] is None else round(m47["release_l4_pct"], 1),
                  "report", None))
@@ -443,10 +444,18 @@ def main() -> None:
     ap.add_argument("--vuln-params", default=None,
                     help="VulnPolicyParams overrides (JSON), LAYERED onto the preset's params (not rebuilt from defaults)")
     ap.add_argument("--out", default=None)
+    ap.add_argument("--config", default=None, help="lock preset to sweep (default v046_locked_roster; v049_roster = v0.49 on v0.48)")
+    ap.add_argument("--base", default=None, help="delta comparator preset (default v046_roster; use v048_roster for v0.49)")
+    ap.add_argument("--out-dir", default=None, help="results folder under sim_results/ (default locked_vuln_v046base)")
     ap.add_argument("--no-baseline", action="store_true", help="arm step: skip the v0.45 / v0.46 comparator runs")
     ap.add_argument("--verbose", action="store_true", help="keep per-game records in the JSON")
     ap.add_argument("--quiet", action="store_true", default=True, help="(default) summary only")
     a = ap.parse_args()
+    global CONFIG, OUT_DIR
+    CONFIG = a.config or CONFIG
+    base = a.base or "v046_roster"
+    if a.out_dir:
+        OUT_DIR = os.path.join(ROOT, "sim_results", a.out_dir)
     if a.list_arms:
         print("\n".join(ARMS))
         return
@@ -468,10 +477,10 @@ def main() -> None:
         out = {"step": "main", "pods": {}}
         for pl in pods:
             r45 = play_all("v045_roster", a.roster, pl, games, a.seed0, {}, a.procs, a.assert_invariants)
-            r46 = play_all("v046_roster", a.roster, pl, games, a.seed0, {}, a.procs, a.assert_invariants)
+            r46 = play_all(base, a.roster, pl, games, a.seed0, {}, a.procs, a.assert_invariants)
             m45, m46 = metrics47(r45, pl), metrics47(r46, pl)
             print(f"\n== {pl}P, {games} games/pod (v0.45 vs v0.46 vs v0.47) ==")
-            if not precheck(m46, pl, games, a.seed0):
+            if base == "v046_roster" and not precheck(m46, pl, games, a.seed0):
                 print("STOP: v0.46 does not reproduce FINDINGS §62; do not trust the v0.47 comparison.")
                 print("wrote", save(a.out or "main_precheck_failed.json", {"step": "main", "precheck": "FAILED",
                                                                            "pods": out["pods"], "m46": m46}))
@@ -487,7 +496,7 @@ def main() -> None:
             print(f"  {'guardrail':42}{'v0.47':>12}  {'rule':44}result")
             for name, val, rule, ok in gr:
                 print(f"  {name:42}{f(val):>12}  {rule:44}{'n/a' if ok is None else ('PASS' if ok else 'FAIL')}")
-            print("  GD section 9 rows vs v0.46")
+            print(f"  GD section 9 rows vs {base}")
             ex = extra_guardrails(m47, m46)
             print_guardrail_rows(ex)
             ci = print_ci_table(r47, r46)
@@ -513,7 +522,7 @@ def main() -> None:
         out["pods"][str(pl)] = {"metrics": m}
         if not a.no_baseline:
             r45 = play_all("v045_roster", a.roster, pl, games, a.seed0, {}, a.procs, False)
-            r46 = play_all("v046_roster", a.roster, pl, games, a.seed0, {}, a.procs, False)
+            r46 = play_all(base, a.roster, pl, games, a.seed0, {}, a.procs, False)
             m45, m46 = metrics47(r45, pl), metrics47(r46, pl)
             gr = rv.guardrails(m45, m, pl)
             print(f"  {'guardrail':42}{'arm':>12}  {'rule':44}result")
