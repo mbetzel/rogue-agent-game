@@ -59,6 +59,8 @@ def breakthrough_text(cfg: Optional[GameConfig], track: str, level: int) -> Opti
             return f"Gain ${int(cfg.triage_l1_cash)}"
         if t == "RELEASE" and level == 1 and cfg.release_l1_breakthrough == "BANDWIDTH":
             return f"+{int(cfg.release_l1_bandwidth)} Release Bandwidth this round"
+        if t == "DEFENSE" and level == 2 and cfg.pen_test_l2_breakthrough == "THIN_GRAY":
+            return "Return 1 Gray Legacy die you own to the box"
         if t == "DEFENSE" and level == 3 and cfg.pen_test_l3_breakthrough == "THIN_GRAY":
             return "Return 1 Gray Legacy die you own to the box; Blue R&D faces yield +3"
         if t == "RELEASE" and level == 3 and cfg.release_l3_breakthrough == "THIN_GRAY":
@@ -221,6 +223,9 @@ def has_level_effect(config: Optional[GameConfig], track: str, level: int) -> bo
     """Returns True if reaching ``level`` on ``track`` triggers an immediate Breakthrough or L4 Capstone effect."""
     if level in BREAKTHROUGH_LEVELS:
         return True
+    if (level == 2 and config is not None and normalize_track(track) == "DEFENSE"
+            and getattr(config, "pen_test_l2_breakthrough", "NONE") == "THIN_GRAY"):
+        return True  # v0.50 a1: Pen Test L2 returns 1 Gray die (docs/specs/gray_vuln_b23_spec.md §5)
     if level == MAX_LEVEL and config is not None:
         t = normalize_track(track)
         if t == "DEFENSE" and getattr(config, "pen_test_l4_set_zero_on_reach", False):
@@ -411,6 +416,12 @@ def resolve_breakthrough(
         player.temp_release_bandwidth_bonus += n
         player.release_l1_bw_bonus_this_round += n
         rec.detail = {"release_bandwidth_this_round": n}
+    elif t == "DEFENSE" and level == 2 and cfg.pen_test_l2_breakthrough == "THIN_GRAY":
+        hit = _thin_gray(engine, player, "PEN_TEST_L2", choice)
+        if hit is None:
+            rec.outcome, rec.detail = "FORFEITED", {"reason": "no_gray_die"}
+        else:
+            rec.detail = {"gray_die_id": hit[1].die_id, "zone": hit[0]}
     elif ((t == "DEFENSE" and cfg.pen_test_l3_breakthrough == "THIN_GRAY")
           or (t == "RELEASE" and cfg.release_l3_breakthrough == "THIN_GRAY")) and level == 3:
         hit = _thin_gray(engine, player, "PEN_TEST_L3" if t == "DEFENSE" else "RELEASE_L3", choice)
@@ -573,6 +584,8 @@ def breakthrough_preview(player: PlayerState) -> Dict[str, Dict[str, Any]]:  # n
                        if cfg.pen_test_l3_breakthrough == "THIN_GRAY"
                        else "Gain 1 Corporate Secret; Blue Secret faces yield +3"),
                    4: "Pen Test limit 3; lower your Vulnerability by 1 at the start of each Operations Turn"}.get(nxt)
+            if cfg.pen_test_l2_breakthrough == "THIN_GRAY" and nxt == 2:
+                txt = "Pen Test limit 2; return 1 Gray Legacy die you own to the box"
             if txt:
                 out[t]["breakthrough"] = txt
         if t == "PATENT" and cfg is not None and getattr(cfg, "is_share_regain", False):

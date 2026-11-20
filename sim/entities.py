@@ -1838,7 +1838,7 @@ def get_random_white_hats(num_players: int, rng: random.Random) -> List[WhiteHat
     return rng.sample(all_wh, num_players)
 
 
-GRAY_FACE_PROFILES = ("V034", "V035_D1", "V048_SPRINT")
+GRAY_FACE_PROFILES = ("V034", "V035_D1", "V048_SPRINT", "V050_GRAY2")
 
 
 def _v046_gray_faces() -> List[Face]:  # 2026-11-18 balance package: F1 = +$1 & +1 🔬 ⚠
@@ -1859,6 +1859,19 @@ def _v048_gray_faces() -> List[Face]:
     return [
         Face(name="+$1 & +1 🔬", money=1, patches=1),
         Face(name="+2 🔬", patches=2),
+        Face(name="+$2 / +2 🔬 ⚠", is_choice=True, vuln=1,
+             choices=(Face("+$2", money=2), Face("+2 🔬", patches=2))),
+        Face(name="+$1 / +1 🔬", is_choice=True, choices=(Face("+$1", money=1), Face("+1 🔬", patches=1))),
+        Face(name="+$1", money=1),
+        Face(name="+1 🔬", patches=1),
+    ]
+
+
+def _v050_gray_faces() -> List[Face]:
+    """``V050_GRAY2`` Gray table (docs/specs/gray_vuln_b23_spec.md §4): V048_SPRINT payouts, ⚠ on Face 2 and Face 3."""
+    return [
+        Face(name="+$1 & +1 🔬", money=1, patches=1),
+        Face(name="+2 🔬 ⚠", patches=2, vuln=1),
         Face(name="+$2 / +2 🔬 ⚠", is_choice=True, vuln=1,
              choices=(Face("+$2", money=2), Face("+2 🔬", patches=2))),
         Face(name="+$1 / +1 🔬", is_choice=True, choices=(Face("+$1", money=1), Face("+1 🔬", patches=1))),
@@ -1903,6 +1916,8 @@ def create_gray_die(die_id: int, profile: Optional[str] = "V035_D1") -> Die:
         faces = _v046_gray_faces()
     elif profile == "V048_SPRINT":
         faces = _v048_gray_faces()
+    elif profile == "V050_GRAY2":
+        faces = _v050_gray_faces()
     else:
         raise ValueError(f"Unknown Gray face profile: {profile}")
     return Die(
