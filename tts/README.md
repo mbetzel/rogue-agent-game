@@ -1,4 +1,4 @@
-# Too Many Secrets — Tabletop Simulator Module (`v0.49.1`)
+# Too Many Secrets — Tabletop Simulator Module (`v0.50.0`)
 
 A Tabletop Simulator save built from the Print-and-Play components in [`pnp/`](../pnp/README.md). The PnP draw functions render every board, card and token to PNG, so the module stays in step with the PDFs.
 

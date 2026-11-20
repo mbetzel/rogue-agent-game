@@ -189,12 +189,18 @@ def sprint_review(engine: "GameEngine", p: "PlayerState", chosen_die_ids: Option
     _tel(engine, "sprint_left_by_player")[pid] = len(left)
     _tel(engine, "gray_ready_by_player")[pid] = sum(d.color == DieColor.GRAY for d in p.ready_for_release_dice)
     _tel(engine, "gray_owned_by_player")[pid] = len(owned_gray(p))
+    g_now, rnd = len(owned_gray(p)), engine.state.current_round
+    p.gray_owned_by_round[rnd] = g_now  # v0.50 telemetry (spec §8.1)
+    if g_now <= 3 and p.gray_le3_round is None:
+        p.gray_le3_round = rnd
+    if g_now <= 2 and p.gray_le2_round is None:
+        p.gray_le2_round = rnd
     return graduates
 
 
 def record_roll(engine: "GameEngine", p: "PlayerState", active_dice: List["Die"]) -> None:
     """Phase 1 roll telemetry (spec §8): Gray / colored dice rolled and ⚠ kept per class."""
-    from sim.engine.vulnerability import face_vuln
+    from sim.engine.vulnerability import face_key, face_vuln
 
     pid = p.player_id
     for key in ("gray_rolled_by_player", "colored_rolled_by_player", "gray_vuln_kept_by_player",
@@ -205,5 +211,14 @@ def record_roll(engine: "GameEngine", p: "PlayerState", active_dice: List["Die"]
         rolled = _tel(engine, "gray_rolled_by_player" if gray else "colored_rolled_by_player")
         rolled[pid] += 1
         v = face_vuln(d.current_face)
+        if gray:  # v0.50 telemetry (spec §8.1)
+            row = p.gray_rolls_by_round.setdefault(engine.state.current_round, [0, 0])
+            row[0] += 1
+            p.gray_rolled_total += 1
+            if v:
+                row[1] += v
+                p.gray_vuln_kept_total += v
+                fk = face_key(d)
+                p.gray_vuln_kept_by_face[fk] = p.gray_vuln_kept_by_face.get(fk, 0) + v
         if v:
             _tel(engine, "gray_vuln_kept_by_player" if gray else "colored_vuln_kept_by_player")[pid] += v

@@ -15,24 +15,29 @@ import { renderVersionSlotBadge } from "./header.js";
 
 let renderAppCallback = null;
 
-// v0.49.0 Research Tracks (GLOSSARY.md Section 7): five-step strips (L0-L4), Breakthroughs (★) at L1 / L3, Capstone at L4.
+// v0.50.0 Research Tracks (GLOSSARY.md Section 7): five-step strips (L0-L4), Breakthroughs (★) at L1 / L3 and
+// Pen Test L2, Capstone at L4. Breakthrough text comes from the server (vulnerability_track.breakthroughs).
 function trackStrips(p) {
   const vt = state.vulnerability_track || {};
   const pen = vt.pen_test_limits || [1, 1, 2, 2, 3];
   const penCost = vt.pen_test_cost || 2;
   const regain = p.regain_cost || 3;
+  const bts = vt.breakthroughs || {};
+  const withBt = (key, steps) => steps.map((txt, i) => {
+    const bt = (bts[key] || {})[String(i)];
+    return bt ? `★ ${bt} · ${txt}` : txt;
+  });
   return [
     { key: "defense", label: "🧪 PEN TEST", color: "#4ade80", rgb: "74,222,128",
-      steps: [`−${pen[0]} Vulnerability / turn (${penCost} 🔬 each)`, `★ +1 Gray Legacy die · −${pen[1]} / turn`,
-        `−${pen[2]} / turn`, `★ +1 Secret · Blue R&D face +1 · −${pen[3]} / turn`,
-        `−${pen[4]} / turn + 1 free each Operations Turn`] },
+      steps: withBt("defense", [`−${pen[0]} Vulnerability / turn (${penCost} 🔬 each)`, `−${pen[1]} / turn`,
+        `−${pen[2]} / turn`, `−${pen[3]} / turn`, `−${pen[4]} / turn + 1 free each Operations Turn`]) },
     { key: "triage", label: "⚙️ TRIAGE", color: "#38bdf8", rgb: "56,189,248",
-      steps: ["Bandwidth 1", "★ +1 Gray Legacy die", "Bandwidth 2", "★ +1 Secret", "Bandwidth 2 + free Gray → Market die"] },
+      steps: withBt("triage", ["Bandwidth 1", "Bandwidth 1", "Bandwidth 2", "Bandwidth 2", "Bandwidth 2 + free Gray → Market die"]) },
     { key: "release", label: "🚀 RELEASE", color: "#06b6d4", rgb: "6,182,212",
-      steps: ["Bandwidth 4", "★ +1 Gray Legacy die", "Bandwidth 5", "★ +1 Secret", "Bandwidth 6 + set 1 Gray die's face"] },
+      steps: withBt("release", ["Bandwidth 4", "Bandwidth 4", "Bandwidth 5", "Bandwidth 5", "Bandwidth 6 + set 1 Gray die's face"]) },
     { key: "patent", label: "📣 PUBLIC RELATIONS", color: "#c084fc", rgb: "192,132,252",
-      steps: [`+1 Market Share / turn ($${regain})`, "★ +$3 · +1 / turn", "+2 Market Share / turn",
-        "★ 2nd Purple die · +2 / turn", "+3 Market Share / turn · +2 Market Share now"] },
+      steps: withBt("patent", [`+1 Market Share / turn ($${regain})`, "+1 / turn", "+2 Market Share / turn",
+        "+2 / turn", "+3 Market Share / turn · +2 Market Share now"]) },
   ];
 }
 
@@ -634,7 +639,7 @@ export function renderPlayerMats() {
             <span style="font-size: 0.65rem; color: var(--text-dim); margin-left: 8px;">Spend 🔬 in Phase 5: Operations (up to 2 upgrades per turn)</span>
           </div>
           <div style="font-size: 0.7rem; color: #a855f7;">
-            Step costs 1 / 2 / 2 / 3 🔬 · ★ = Breakthrough (L1, L3) · L4 = Capstone
+            Step costs 1 / 2 / 2 / 3 🔬 · ★ = Breakthrough (L1, L3; Pen Test L2) · L4 = Capstone
           </div>
         </div>
 

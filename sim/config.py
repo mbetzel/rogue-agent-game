@@ -47,11 +47,12 @@ V045_STARTING_SECRETS: Dict[int, int] = {2: 4, 3: 4, 4: 4}
 V046_STARTING_SECRETS: Dict[int, int] = {2: 5, 3: 5, 4: 5}
 V046_MARKET_SHARE_START: Dict[int, int] = {2: 14, 3: 18, 4: 18}
 V048_STARTING_SECRETS: Dict[int, int] = {2: 6, 3: 6, 4: 6}  # [TUNE] v0.48 Sprint Plan (docs/specs/sprint_plan_spec.md)
-V046_GRAY_FACE_PROFILES = ("V046_VULN", "V048_SPRINT", "V0491_ALIGNED")  # V0491_ALIGNED: V048_SPRINT with the ⚠ on F1
+V046_GRAY_FACE_PROFILES = ("V046_VULN", "V048_SPRINT", "V0491_ALIGNED", "V050_GRAY2")  # V0491_ALIGNED: V048_SPRINT with the ⚠ on F1; V050_GRAY2: ⚠ on F1 + F5
 _RELEASE_L1_MODES = ("GRAY_DIE", "BANDWIDTH")
 _L3_MODES = ("SECRET", "THIN_GRAY")
 _VULN_FACE_LOCK_MODES = ("NONE", "GRAY")
-_BOT_RESEARCH_MODES = ("LEGACY", "THINNING_AWARE")
+_BOT_RESEARCH_MODES = ("LEGACY", "THINNING_AWARE", "GRAY_AWARE")
+_PEN_TEST_L2_MODES = ("NONE", "THIN_GRAY")
 _BOT_RESEARCH_RUSH_MODES = ("none", "p0", "p0half", "all")
 _BOT_THIN_TRACKS = ("RELEASE", "DEFENSE")
 _DEFENSE_MODES = ("SHIELDS", "VULNERABILITY")
@@ -240,6 +241,37 @@ class PrPushParams:
                 raise ValueError(f"PrPushParams.{name} must be an int")
         if not self.push_min_share > self.dump_max_share:
             raise ValueError("PUSH_MIN_SHARE must exceed DUMP_MAX_SHARE (windows must be disjoint)")
+
+
+@dataclass(frozen=True)
+class GrayAwareParams:
+    """[TUNE-BOT] Gray-aware research bot (docs/specs/gray_vuln_b23_spec.md §3.2). Sim-only, not a rule.
+
+    Defaults equal ``GA_PARAMS`` of scripts/probe_gray_vuln_mitigation.py. Read by ``sim/bots/research_policy.py``."""
+
+    rolls_per_round: float = 0.56   # Gray rolls per owned Gray die per round
+    # TODO: equals GameConfig.pen_test_cost in every current preset; kept constant for probe fidelity (spec Q4).
+    rp_per_vuln: float = 2.0        # research per -1 Vulnerability
+    near_vuln: int = 3              # Vulnerability at or above this adds near_bonus
+    near_bonus: float = 1.0
+    v_thin: float = 1.5             # "hot" threshold: push thinning tracks
+    v_rel4: float = 2.5             # also push Release to L4 (set-Gray-face)
+    last_round: int = 9             # rounds left = max(1, last_round - current_round)
+    min_gray: int = 2               # only hot while owning >= min_gray Gray dice
+
+    def validate(self) -> None:
+        for name in ("rolls_per_round", "rp_per_vuln", "near_bonus", "v_thin", "v_rel4"):
+            v = getattr(self, name)
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or v < 0:
+                raise ValueError(f"GrayAwareParams.{name} must be a number >= 0, got {v!r}")
+        for name in ("near_vuln", "min_gray"):
+            v = getattr(self, name)
+            if isinstance(v, bool) or not isinstance(v, int) or v < 0:
+                raise ValueError(f"GrayAwareParams.{name} must be an int >= 0, got {v!r}")
+        if isinstance(self.last_round, bool) or not isinstance(self.last_round, int) or self.last_round < 1:
+            raise ValueError(f"GrayAwareParams.last_round must be an int >= 1, got {self.last_round!r}")
+        if self.v_rel4 < self.v_thin:
+            raise ValueError("GrayAwareParams.v_rel4 must be >= v_thin")
 
 
 @dataclass(frozen=True)
@@ -567,7 +599,7 @@ class GameConfig:
     release_l1_bandwidth: int = 1                  # [TUNE] Release L1 "BANDWIDTH": +Release Bandwidth this round
     pen_test_l3_breakthrough: str = "SECRET"       # "SECRET" | "THIN_GRAY"
     release_l3_breakthrough: str = "SECRET"        # "SECRET" | "THIN_GRAY"
-    bot_research_mode: str = "LEGACY"              # sim-only: "LEGACY" | "THINNING_AWARE"
+    bot_research_mode: str = "LEGACY"              # sim-only: "LEGACY" | "THINNING_AWARE" | "GRAY_AWARE"
     bot_thin_tracks: Tuple[str, ...] = ("RELEASE",)  # sim-only, ordered subset of ("RELEASE", "DEFENSE")
     bot_thin_gray_floor: int = 3                   # sim-only
     bot_research_rush: str = "none"                # sim-only stress: "none" | "p0" | "p0half" | "all"
@@ -597,6 +629,12 @@ class GameConfig:
     helix_bypass_face_set: bool = False            # [RULE] v0.49 H1B: Bypass also sets 1 rolled die to any non-star face of its colour
     helix_bypass_black_immune: bool = False        # [RULE] v0.49 H1B: Root Override Hijack cannot mark an unused Bypass Used
     helix_bypass_once_per_game: bool = False       # [RULE] Brute-Force Bypass once per game (DTO Slush Fund model)
+
+    # --- v0.50.0 Gray ⚠ B23 + Pen Test L2 thinning (docs/specs/gray_vuln_b23_spec.md); every default = v0.49 behaviour ---
+    pen_test_l2_breakthrough: str = "NONE"         # [RULE] "NONE" | "THIN_GRAY": reaching Pen Test L2 returns 1 owned Gray die to the box
+    bot_gray_aware_params: GrayAwareParams = field(default_factory=GrayAwareParams)  # sim-only [TUNE-BOT]
+    bot_gray_aware_seats: Optional[Tuple[int, ...]] = None  # sim-only: GRAY_AWARE seats (None = all); other seats use THINNING_AWARE
+    gray_vuln_telemetry: bool = False              # sim-only: emit the _v050_row end-row keys (no gameplay effect)
 
     # --- Step 0 exchange-rate probe levers (sim-only; default off => every preset is bit-identical) ---
     probe_bonus_seat: int = -1                 # seat that receives the probe bonus (-1 = off)
@@ -768,6 +806,7 @@ class GameConfig:
         self._validate_v046()
         self._validate_v048()
         self._validate_locked_vuln()
+        self._validate_v050()
         if self.starting_secrets_by_player_count is None:
             # NOTE: resolved once at construction. Re-assigning round_sequence later does NOT
             # re-resolve this dict; use GameConfig.legacy_v033() or pass round_sequence to __init__.
@@ -1267,6 +1306,27 @@ class GameConfig:
         return cls.v049(**overrides)
 
     @classmethod
+    def v050(cls, **overrides) -> "GameConfig":
+        """v0.50.0 Gray ⚠ B23 + Pen Test L2 Gray thinning (docs/specs/gray_vuln_b23_spec.md). Inherits v049()."""
+        for k, v in (
+            ("gray_face_profile", "V050_GRAY2"),          # B23: ⚠ on +$2 / +2 🔬 (F1) and +2 🔬 (F5), v0.49.1-aligned
+            ("pen_test_l2_breakthrough", "THIN_GRAY"),    # a1
+            ("gray_vuln_telemetry", True),
+        ):
+            overrides.setdefault(k, v)
+        return cls.v049(**overrides)
+
+    @classmethod
+    def v050_roster(cls, **overrides) -> "GameConfig":
+        """v0.50.0 + the roster bots with the Gray-aware research focus (sweep default)."""
+        for k, v in (
+            ("bot_pr_push", True), ("bot_pr_push_params", PrPushParams()),   # v0.49 roster defaults
+            ("bot_research_mode", "GRAY_AWARE"),
+        ):
+            overrides.setdefault(k, v)
+        return cls.v050(**overrides)
+
+    @classmethod
     def v046_locked(cls, **overrides) -> "GameConfig":
         """Locked ⚠ Faces draft (docs/specs/locked_vuln_faces_spec.md), swept on the v0.46 base. Inherits v046().
         Formerly ``v047()`` on this branch; renamed after main shipped v0.47.0 Red Signature."""
@@ -1285,6 +1345,30 @@ class GameConfig:
         overrides.setdefault("bot_pr_push", True)
         overrides.setdefault("bot_pr_push_params", PrPushParams())
         return cls.v046_locked(**overrides)
+
+    def _validate_v050(self) -> None:
+        """docs/specs/gray_vuln_b23_spec.md §3.4."""
+        if self.pen_test_l2_breakthrough not in _PEN_TEST_L2_MODES:
+            raise ValueError(f"pen_test_l2_breakthrough must be one of {_PEN_TEST_L2_MODES}, got {self.pen_test_l2_breakthrough!r}")
+        vuln = self.defense_mode == "VULNERABILITY"
+        if self.pen_test_l2_breakthrough == "THIN_GRAY" and not (self.is_v035_tracks and vuln):
+            raise ValueError("pen_test_l2_breakthrough='THIN_GRAY' requires is_v035_tracks and defense_mode='VULNERABILITY'")
+        if self.gray_face_profile == "V050_GRAY2" and not vuln:
+            raise ValueError("gray_face_profile='V050_GRAY2' requires defense_mode='VULNERABILITY'")
+        if self.bot_research_mode == "GRAY_AWARE" and self.share_regain_currency != "MONEY":
+            raise ValueError("bot_research_mode='GRAY_AWARE' requires share_regain_currency='MONEY'")
+        seats = self.bot_gray_aware_seats
+        if seats is not None:
+            if self.bot_research_mode != "GRAY_AWARE":
+                raise ValueError("bot_gray_aware_seats requires bot_research_mode='GRAY_AWARE'")
+            if (not isinstance(seats, tuple) or len(set(seats)) != len(seats)
+                    or any(isinstance(x, bool) or not isinstance(x, int) or not 0 <= x < self.num_players for x in seats)):
+                raise ValueError(f"bot_gray_aware_seats must be a duplicate-free tuple of ints in [0, {self.num_players}), got {seats!r}")
+        if not isinstance(self.bot_gray_aware_params, GrayAwareParams):
+            raise ValueError("bot_gray_aware_params must be a GrayAwareParams")
+        self.bot_gray_aware_params.validate()
+        if not isinstance(self.gray_vuln_telemetry, bool):
+            raise ValueError("gray_vuln_telemetry must be a bool")
 
     def _validate_locked_vuln(self) -> None:
         """spec §3.4 (Locked ⚠ Faces validation)."""

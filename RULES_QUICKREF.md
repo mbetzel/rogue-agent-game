@@ -1,4 +1,4 @@
-# Too Many Secrets — Quick Reference Rules (v0.49.1)
+# Too Many Secrets — Quick Reference Rules (v0.50.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Format:** Simultaneous / Turn-Based Hybrid
 
@@ -74,7 +74,7 @@ Each round consists of **6 Phases**:
    * If SETEC's corruption track filled last round, switch to the new version now: discard any unspent override from the previous version, unlock the new version override, and advance the marker.
    * Add **1 Black Cube** from the supply into the **Staging Cup**.
 2. **Roll Active Pool:** Roll all dice in your **Ready for Release Zone**.
-3. **Rerolls:** Up to **2 free rerolls** of any subset of dice (3 rolls total). Any die showing a **⚠ face** (colored ⚠ faces, R&D faces and the Gray `+$2 / +2 🔬` face; **every ⚠ is on Face 1 or 5**, Gray Face 1) is **locked**: it can't be rerolled this phase. It still produces its output. *(Helix *Brute-Force Bypass*, once per game: reroll locked dice this phase, then set `1` die to any non-★ face. At **Release Track Level 4**, after rerolls and Prodigy/Helix overrides, you may set `1` rolled Gray Legacy die to any printed face.)*
+3. **Rerolls:** Up to **2 free rerolls** of any subset of dice (3 rolls total). Any die showing a **⚠ face** (colored ⚠ faces, R&D faces and the Gray `+$2 / +2 🔬` and `+2 🔬` faces; **every ⚠ is on Face 1 or 5**) is **locked**: it can't be rerolled this phase. It still produces its output. *(Helix *Brute-Force Bypass*, once per game: reroll locked dice this phase, then set `1` die to any non-★ face. At **Release Track Level 4**, after rerolls and Prodigy/Helix overrides, you may set `1` rolled Gray Legacy die to any printed face.)*
 4. **Deploy Dice** (all locks end):
    * **Gain Vulnerability:** `+1` per ⚠ on your final faces (R&D faces included), max `15`.
    * **R&D Faces (Face 5 on Red, Blue, Green, Purple):** Move **immediately to Research & Development** in Under Development (banks secrets later upon exit).
@@ -141,7 +141,7 @@ Starting with the First Player, each player takes their Operations Turn:
 
 1. **Hardware Track Upgrades (Limit 2 upgrades per turn):**
    * Spend **`🔬`** to raise any track one step: **`1 🔬`** for Level 1, **`2 🔬`** for Level 2, **`2 🔬`** for Level 3, **`3 🔬`** for Level 4.
-   * **Breakthroughs (Levels 1 & 3):** Claim immediately when reaching that level (see Hardware Reference Table).
+   * **Breakthroughs (Levels 1 & 3, plus Pen Test Level 2):** Claim immediately when reaching that level (see Hardware Reference Table).
 2. **Public Relations (PR) Regain:**
    * Spend **`$3` Cash per `+1` Market Share** (up to your track level cap: 1/turn at L0–1, 2/turn at L2–3, 3/turn at L4).
    * Does not count toward your limit of 2 hardware upgrades.
@@ -184,7 +184,7 @@ Starting with the First Player, each player takes their Operations Turn:
 
 | Track | Level 0 | Level 1 (`1 🔬`) | Level 2 (`2 🔬`) | Level 3 (`2 🔬`) | Level 4 (`3 🔬`) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Pen Test** | Limit: 1/turn (`2 🔬`/ea) | **★ Gain 1 Secret** | Limit: 2/turn | **★ Return 1 Gray Die to the box** *(+Blue +1)* | Limit: 3/turn + **free `−1` Vulnerability each turn** |
+| **Pen Test** | Limit: 1/turn (`2 🔬`/ea) | **★ Gain 1 Secret** | Limit: 2/turn + **★ Return 1 Gray Die to the box** | **★ Return 1 Gray Die to the box** *(+Blue +1)* | Limit: 3/turn + **free `−1` Vulnerability each turn** |
 | **Triage** | Bandwidth: 1 die | **★ Gain `+$2` Cash** | Bandwidth: 2 dice | **★ Gain 1 Secret** | Bandwidth: 2 + **Swap 1 Gray → Colored (`$0`, to Ready)** |
 | **Release** | Bandwidth: 4 dice | **★ `+1` Release Bandwidth this round** | Bandwidth: 5 dice | **★ Return 1 Gray Die to the box** | Bandwidth: 6 dice + **Set 1 rolled Gray die to any face** |
 | **Public Relations** | Regain up to 1/turn (`$3`/ea) | **★ Gain `+$3` Cash** | Regain up to 2/turn (`$3`/ea) | **★ 2nd Purple Die (to Next Sprint)** | Regain up to 3/turn (`$3`/ea) + **`+2` Market Share now** |

@@ -84,6 +84,22 @@ def _regain(config: Any, player: Any) -> Tuple[Optional[int], int]:
     return research_tracks.regain_rate(config, player)
 
 
+
+def _breakthrough_table(cfg: Any) -> Dict[str, Dict[str, str]]:
+    """``{track: {level: text}}`` for every Breakthrough level (1-3) of each Terminal Hardware Track."""
+    from sim.engine import research_tracks
+
+    out: Dict[str, Dict[str, str]] = {}
+    for t in ("DEFENSE", "TRIAGE", "RELEASE", "PATENT"):
+        row = {}
+        for lvl in (1, 2, 3):
+            if research_tracks.has_level_effect(cfg, t, lvl):
+                txt = research_tracks.breakthrough_text(cfg, t, lvl)
+                if txt:
+                    row[str(lvl)] = txt
+        out[t.lower()] = row
+    return out
+
 class GameStateSerializer:
     """Serializes GameState, PlayerState, Dice, and telemetry objects into JSON-compatible dictionaries."""
 
@@ -485,6 +501,8 @@ class GameStateSerializer:
             "pen_test_cost": int(cfg.pen_test_cost),
             "pen_test_limits": list(cfg.pen_test_limits),
             "pen_test_l4_free": int(cfg.pen_test_l4_free),
+            # Breakthrough text per track and level (config-aware; v0.50 adds Pen Test L2)
+            "breakthroughs": _breakthrough_table(cfg),
         }
 
     @classmethod
@@ -575,7 +593,7 @@ class GameStateSerializer:
             "starting_secrets": state.config.get_starting_secrets(len(state.players)),
             # v0.37.0 Market Leader Bonus schedule for this player count ([] when disabled)
             "is_market_leader_bonus": bool(getattr(state.config, "is_market_leader_bonus", False)),
-            "rules_version": "v0.49.1",
+            "rules_version": "v0.50.0",
             "is_secret_faces": bool(getattr(state.config, "secret_face_enabled", False)),
             # v0.49.0 Vulnerability Track (Central SETEC Agent Board) and Pen Test Track
             "vulnerability_track": cls._vulnerability_track(state),

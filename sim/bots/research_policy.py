@@ -152,6 +152,76 @@ def _thinning_aware_want_order(policy: ResearchPolicy, player: PlayerState, conf
     return out
 
 
+_GRAY_VULN_SHARE_CACHE: Dict[Optional[str], float] = {}
+
+
+def gray_vuln_face_share(config: GameConfig) -> float:
+    """P(a Gray face carries ⚠) for ``config.gray_face_profile``: (#faces with face_vuln > 0) / #faces. Cached per profile."""
+    prof = config.gray_face_profile
+    if prof not in _GRAY_VULN_SHARE_CACHE:
+        from sim.engine.vulnerability import face_vuln
+        from sim.entities import create_gray_die
+
+        faces = create_gray_die(0, prof).faces
+        _GRAY_VULN_SHARE_CACHE[prof] = sum(1 for f in faces if face_vuln(f) > 0) / len(faces)
+    return _GRAY_VULN_SHARE_CACHE[prof]
+
+
+def gray_thin_value(player: PlayerState, state: Optional[GameState], config: GameConfig) -> float:
+    """V = rp_per_vuln x P(⚠ face) x rolls_per_round x max(1, last_round - current_round)
+         + (near_bonus if player.vulnerability >= near_vuln else 0)."""
+    P = config.bot_gray_aware_params
+    rnd = int(getattr(state, "current_round", 1)) if state is not None else 1
+    return (P.rp_per_vuln * gray_vuln_face_share(config) * P.rolls_per_round * max(1, P.last_round - rnd)
+            + (P.near_bonus if player.vulnerability >= P.near_vuln else 0.0))
+
+
+def is_gray_aware_seat(config: GameConfig, player: PlayerState) -> bool:
+    """bot_research_mode == "GRAY_AWARE" and (bot_gray_aware_seats is None or player.player_id in it)."""
+    if config.bot_research_mode != "GRAY_AWARE":
+        return False
+    seats = config.bot_gray_aware_seats
+    return seats is None or player.player_id in seats
+
+
+def _gray_aware_want_order(policy: ResearchPolicy, player: PlayerState, state: GameState, config: GameConfig,
+                           lv: Dict[str, int]) -> List[str]:
+    """v0.50 GRAY_AWARE research focus (docs/specs/gray_vuln_b23_spec.md §6.2), ported from the probe's ``ga_order``.
+
+    While the Gray thin value is high and the seat owns >= ``min_gray`` Gray dice, push the cheapest remaining
+    thinning track right after Triage L1 / Release L3, and Release to L4 once the value is higher still."""
+    from sim.engine import sprint_plan
+
+    P = config.bot_gray_aware_params
+    base = _thinning_aware_want_order(policy, player, config, lv)
+    g = len(sprint_plan.owned_gray(player))
+    v = gray_thin_value(player, state, config)
+    hot = v >= P.v_thin and g >= P.min_gray
+    if hot:
+        player.gray_aware_hot_rounds.add(int(getattr(state, "current_round", 1)) if state is not None else 1)
+    if not hot:
+        return base
+    costs = config.track_step_costs
+    pen_t = 2 if config.pen_test_l2_breakthrough == "THIN_GRAY" else 3
+    tri_t = 3 if getattr(config, "triage_l3_breakthrough", "SECRET") == "UPGRADE" else 4
+    opts = []
+    for t, tgt in (("DEFENSE", pen_t), ("TRIAGE", tri_t)):
+        if lv[t] < tgt:
+            opts.append((sum(costs[lv[t]:tgt]), t, tgt))
+    head = (["TRIAGE"] if lv["TRIAGE"] < 1 else []) + ["RELEASE"] * max(0, 3 - lv["RELEASE"])
+    for _, t, tgt in sorted(opts):
+        head += [t] * (tgt - lv[t])
+    if v >= P.v_rel4 and lv["RELEASE"] >= 3:
+        head += ["RELEASE"]
+    counts: Dict[str, int] = {}
+    out: List[str] = []
+    for t in head + base:
+        if counts.get(t, 0) < 4 - lv[t]:
+            out.append(t)
+            counts[t] = counts.get(t, 0) + 1
+    return out
+
+
 def _plan_research_share_regain(policy: ResearchPolicy, player: PlayerState, state: GameState, config: GameConfig,
                                 ms_policy: Any = None) -> Tuple[List[str], int, int]:
     from sim.bots import market_share_policy as msp
@@ -173,7 +243,9 @@ def _plan_research_share_regain(policy: ResearchPolicy, player: PlayerState, sta
         upgrades: List[str] = []
         max_ups = getattr(config, "max_hardware_upgrades_per_turn", 2)
         want_order = _want_list(policy, lv)
-        if config.bot_research_mode == "THINNING_AWARE":
+        if config.bot_research_mode == "GRAY_AWARE" and is_gray_aware_seat(config, player):
+            want_order = _gray_aware_want_order(policy, player, state, config, lv)
+        elif config.bot_research_mode in ("THINNING_AWARE", "GRAY_AWARE"):
             want_order = _thinning_aware_want_order(policy, player, config, lv)
         elif getattr(config, "triage_l4_free_die_replacement", False) and lv["TRIAGE"] < 2:
             triage_steps = ["TRIAGE"] * (2 - lv["TRIAGE"])

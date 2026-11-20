@@ -1,0 +1,757 @@
+{
+ "args": {
+  "config": "v050_roster",
+  "base": "v049_roster",
+  "set": "{\"pen_test_l2_breakthrough\":\"NONE\"}",
+  "base_set": "{}",
+  "base_ga": false,
+  "income_base": "v048_roster",
+  "roster": "mixed1",
+  "players": "2,3,4",
+  "games": 2400,
+  "seed0": 42,
+  "procs": 7,
+  "assert_invariants": false,
+  "verbose": false,
+  "quiet": true,
+  "name": "A_noL2",
+  "no_save": false
+ },
+ "pods": {
+  "2": {
+   "cand": {
+    "games": 2400,
+    "rounds": 8.322083333333333,
+    "pz_pct": 38.958333333333336,
+    "mc_pct": 28.666666666666668,
+    "pz_mc_pct": 67.625,
+    "sing_pct": 25.833333333333332,
+    "wipeout_pct": 6.541666666666667,
+    "green_lost_pg": 2.1554166666666665,
+    "income_per_seat_round": 7.62135069498269,
+    "dead_pct": 0.22477135327856146,
+    "helix_win": 40.524433849821214,
+    "spook_win": 56.835443037974684,
+    "prodigy_win": 48.5645933014354,
+    "operator_win": 48.43554443053817,
+    "company_spread_pp": 25.841545531622078,
+    "white_hat_spread_pp": 9.731195933727582,
+    "gray_held_by_round": {
+     "1": 4.98,
+     "2": 4.15,
+     "3": 3.96,
+     "4": 3.13,
+     "5": 2.85,
+     "6": 2.63,
+     "7": 2.44,
+     "8": 2.38
+    },
+    "gray_removed_per_seat": 2.457708333333333,
+    "gray_removed_by_source": {
+     "BURN_NOTICE": 0.178,
+     "PEN_TEST_L3": 0.857,
+     "RELEASE_L3": 0.995,
+     "TRIAGE_L4": 0.427
+    },
+    "le3_round": 4.1953178792747305,
+    "le3_never_pct": 9.229166666666666,
+    "le2_pct": 46.916666666666664,
+    "gray_kept_per_rolled": 0.321653957402051,
+    "gray_kept_per_seat_round": 0.6644306238287934,
+    "r2_gray_kept_per_seat": 1.0377083333333332,
+    "pen2": [
+     94.47916666666667,
+     3.4015435501653806
+    ],
+    "pen3": [
+     85.70833333333333,
+     4.241857073407876
+    ],
+    "tri4": [
+     53.958333333333336,
+     5.994594594594594
+    ],
+    "rel4": [
+     31.104166666666668,
+     5.909578030810449
+    ],
+    "hot_rounds_per_seat": 4.919791666666667,
+    "win_le3_early": 50.47541428959522,
+    "win_le3_late": 53.10650887573964,
+    "n_le3_early_late": [
+     3681,
+     676
+    ],
+    "l4_face_sets_per_seat": 0.7495833333333334,
+    "helix_face_sets_per_seat": 0.10458333333333333,
+    "helix_locked_rerolled_per_seat": 0.22479166666666667,
+    "thin_forfeits_per_seat": 0.0004166666666666667
+   },
+   "B0": {
+    "games": 2400,
+    "rounds": 8.40625,
+    "pz_pct": 39.375,
+    "mc_pct": 27.458333333333332,
+    "pz_mc_pct": 66.83333333333333,
+    "sing_pct": 25.583333333333332,
+    "wipeout_pct": 7.583333333333333,
+    "green_lost_pg": 1.8141666666666667,
+    "income_per_seat_round": 8.168021472392638,
+    "dead_pct": 0.16359918200409,
+    "helix_win": 43.146603098927294,
+    "spook_win": 59.87341772151898,
+    "prodigy_win": 49.40191387559808,
+    "operator_win": 49.436795994993744,
+    "company_spread_pp": 21.028654633031472,
+    "white_hat_spread_pp": 13.661296509397774,
+    "gray_held_by_round": {
+     "1": 4.97,
+     "2": 4.07,
+     "3": 3.93,
+     "4": 3.49,
+     "5": 3.35,
+     "6": 3.28,
+     "7": 3.25,
+     "8": 3.22
+    },
+    "gray_removed_per_seat": 1.7164583333333334,
+    "gray_removed_by_source": {
+     "BURN_NOTICE": 0.197,
+     "PEN_TEST_L3": 0.184,
+     "RELEASE_L3": 0.996,
+     "TRIAGE_L4": 0.34
+    },
+    "le3_round": 4.177142857142857,
+    "le3_never_pct": 41.666666666666664,
+    "le2_pct": 8.291666666666666,
+    "gray_kept_per_rolled": 0.17793105156273217,
+    "gray_kept_per_seat_round": 0.37530690069477096,
+    "r2_gray_kept_per_seat": 0.675625,
+    "pen2": [
+     53.041666666666664,
+     4.987824037706206
+    ],
+    "pen3": [
+     18.375,
+     4.303854875283447
+    ],
+    "tri4": [
+     36.833333333333336,
+     4.40893665158371
+    ],
+    "rel4": [
+     37.75,
+     3.44205298013245
+    ],
+    "hot_rounds_per_seat": 0.0,
+    "win_le3_early": 54.54113171659534,
+    "win_le3_late": 57.24533715925395,
+    "n_le3_early_late": [
+     2103,
+     697
+    ],
+    "l4_face_sets_per_seat": 1.4675,
+    "helix_face_sets_per_seat": 0.0925,
+    "helix_locked_rerolled_per_seat": 0.17354166666666668,
+    "thin_forfeits_per_seat": 0.00020833333333333335
+   },
+   "B0-GA": null,
+   "B48": {
+    "games": 2400,
+    "rounds": 8.309583333333334,
+    "pz_pct": 31.5,
+    "mc_pct": 36.708333333333336,
+    "pz_mc_pct": 68.20833333333333,
+    "sing_pct": 24.958333333333332,
+    "wipeout_pct": 6.833333333333333,
+    "green_lost_pg": 2.301041666666667,
+    "income_per_seat_round": 6.9650982419855225,
+    "dead_pct": 0.4136504653567735,
+    "helix_win": 42.789034564958286,
+    "spook_win": 52.65822784810127,
+    "prodigy_win": 47.00956937799043,
+    "operator_win": 48.18523153942428,
+    "company_spread_pp": 19.324367496897388,
+    "white_hat_spread_pp": 5.64865847011084,
+    "gray_held_by_round": {
+     "1": 4.98,
+     "2": 4.29,
+     "3": 4.02,
+     "4": 3.71,
+     "5": 3.52,
+     "6": 3.4,
+     "7": 3.35,
+     "8": 3.3
+    },
+    "gray_removed_per_seat": 1.6120833333333333,
+    "gray_removed_by_source": {
+     "BURN_NOTICE": 0.141,
+     "PEN_TEST_L3": 0.18,
+     "RELEASE_L3": 0.985,
+     "TRIAGE_L4": 0.305
+    },
+    "le3_round": 4.760404511863088,
+    "le3_never_pct": 46.4375,
+    "le2_pct": 5.791666666666667,
+    "gray_kept_per_rolled": 0.2768263906735509,
+    "gray_kept_per_seat_round": 0.6191185307103483,
+    "r2_gray_kept_per_seat": 0.9854166666666667,
+    "pen2": [
+     49.458333333333336,
+     5.346251053074979
+    ],
+    "pen3": [
+     18.041666666666668,
+     4.741339491916859
+    ],
+    "tri4": [
+     35.229166666666664,
+     4.958604376108811
+    ],
+    "rel4": [
+     35.708333333333336,
+     4.033838973162194
+    ],
+    "hot_rounds_per_seat": 0.0,
+    "win_le3_early": 57.12098009188361,
+    "win_le3_late": 53.43873517786562,
+    "n_le3_early_late": [
+     1306,
+     1265
+    ],
+    "l4_face_sets_per_seat": 1.4239583333333334,
+    "helix_face_sets_per_seat": 0.0,
+    "helix_locked_rerolled_per_seat": 0.0,
+    "thin_forfeits_per_seat": 0.0
+   },
+   "guardrails": [
+    [
+     "G1 PZ+MC vs stock B0",
+     "67.6 vs 66.8 (+0.8 pp)",
+     "<= +3.0 pp",
+     true
+    ],
+    [
+     "G2 Market Collapse (2P: report)",
+     "28.7%",
+     "n/a",
+     null
+    ],
+    [
+     "G3 Green Secrets lost / player-game",
+     "2.16",
+     "<= 2.5 (2P bar)",
+     true
+    ],
+    [
+     "G4 income vs v0.48",
+     "x1.094",
+     "<= x1.2",
+     true
+    ],
+    [
+     "G5 dead turns",
+     "0.22%",
+     "<= 0.5%",
+     true
+    ],
+    [
+     "G6 invariants",
+     "clean",
+     "clean",
+     true
+    ]
+   ]
+  },
+  "3": {
+   "cand": {
+    "games": 2400,
+    "rounds": 8.239166666666666,
+    "pz_pct": 60.458333333333336,
+    "mc_pct": 11.875,
+    "pz_mc_pct": 72.33333333333333,
+    "sing_pct": 25.916666666666668,
+    "wipeout_pct": 1.75,
+    "green_lost_pg": 1.9120833333333334,
+    "income_per_seat_round": 7.704225842383737,
+    "dead_pct": 0.23670286828181564,
+    "helix_win": 28.68525896414343,
+    "spook_win": 39.565943238731215,
+    "prodigy_win": 31.6722972972973,
+    "operator_win": 29.401853411962932,
+    "company_spread_pp": 17.969181819108904,
+    "white_hat_spread_pp": 10.164089826768286,
+    "gray_held_by_round": {
+     "1": 4.97,
+     "2": 4.14,
+     "3": 3.95,
+     "4": 3.11,
+     "5": 2.82,
+     "6": 2.58,
+     "7": 2.38,
+     "8": 2.32
+    },
+    "gray_removed_per_seat": 2.479861111111111,
+    "gray_removed_by_source": {
+     "BURN_NOTICE": 0.19,
+     "PEN_TEST_L3": 0.86,
+     "RELEASE_L3": 0.997,
+     "TRIAGE_L4": 0.433
+    },
+    "le3_round": 4.139813374805599,
+    "le3_never_pct": 10.694444444444445,
+    "le2_pct": 49.416666666666664,
+    "gray_kept_per_rolled": 0.32313530607634966,
+    "gray_kept_per_seat_round": 0.6615916826994228,
+    "r2_gray_kept_per_seat": 1.038888888888889,
+    "pen2": [
+     94.79166666666667,
+     3.3964835164835163
+    ],
+    "pen3": [
+     86.0,
+     4.241925064599483
+    ],
+    "tri4": [
+     52.513888888888886,
+     6.031737635546151
+    ],
+    "rel4": [
+     29.52777777777778,
+     5.956255879586077
+    ],
+    "hot_rounds_per_seat": 5.0472222222222225,
+    "win_le3_early": 34.3126586869786,
+    "win_le3_late": 32.64192139737992,
+    "n_le3_early_late": [
+     5514,
+     916
+    ],
+    "l4_face_sets_per_seat": 0.7004166666666667,
+    "helix_face_sets_per_seat": 0.11527777777777778,
+    "helix_locked_rerolled_per_seat": 0.2586111111111111,
+    "thin_forfeits_per_seat": 0.0002777777777777778
+   },
+   "B0": {
+    "games": 2400,
+    "rounds": 8.344583333333333,
+    "pz_pct": 59.25,
+    "mc_pct": 12.5,
+    "pz_mc_pct": 71.75,
+    "sing_pct": 26.125,
+    "wipeout_pct": 2.125,
+    "green_lost_pg": 1.6263888888888889,
+    "income_per_seat_round": 8.24701030927835,
+    "dead_pct": 0.15120274914089346,
+    "helix_win": 27.88844621513944,
+    "spook_win": 42.23706176961603,
+    "prodigy_win": 32.34797297297297,
+    "operator_win": 30.32855939342881,
+    "company_spread_pp": 16.371482501717484,
+    "white_hat_spread_pp": 13.027439776488874,
+    "gray_held_by_round": {
+     "1": 4.97,
+     "2": 4.06,
+     "3": 3.93,
+     "4": 3.48,
+     "5": 3.33,
+     "6": 3.27,
+     "7": 3.24,
+     "8": 3.21
+    },
+    "gray_removed_per_seat": 1.7209722222222221,
+    "gray_removed_by_source": {
+     "BURN_NOTICE": 0.198,
+     "PEN_TEST_L3": 0.183,
+     "RELEASE_L3": 0.997,
+     "TRIAGE_L4": 0.343
+    },
+    "le3_round": 4.156961418643662,
+    "le3_never_pct": 42.041666666666664,
+    "le2_pct": 8.777777777777779,
+    "gray_kept_per_rolled": 0.17856901446532378,
+    "gray_kept_per_seat_round": 0.3725365767671426,
+    "r2_gray_kept_per_seat": 0.6826388888888889,
+    "pen2": [
+     51.47222222222222,
+     4.95763626551538
+    ],
+    "pen3": [
+     18.333333333333332,
+     4.323484848484848
+    ],
+    "tri4": [
+     36.583333333333336,
+     4.396735003796508
+    ],
+    "rel4": [
+     37.291666666666664,
+     3.4350093109869646
+    ],
+    "hot_rounds_per_seat": 0.0,
+    "win_le3_early": 38.31598864711447,
+    "win_le3_late": 39.72055888223553,
+    "n_le3_early_late": [
+     3171,
+     1002
+    ],
+    "l4_face_sets_per_seat": 1.4495833333333332,
+    "helix_face_sets_per_seat": 0.09888888888888889,
+    "helix_locked_rerolled_per_seat": 0.19055555555555556,
+    "thin_forfeits_per_seat": 0.0002777777777777778
+   },
+   "B0-GA": null,
+   "B48": {
+    "games": 2400,
+    "rounds": 8.36375,
+    "pz_pct": 54.708333333333336,
+    "mc_pct": 17.166666666666668,
+    "pz_mc_pct": 71.875,
+    "sing_pct": 26.541666666666668,
+    "wipeout_pct": 1.5833333333333333,
+    "green_lost_pg": 2.1102777777777777,
+    "income_per_seat_round": 7.012399670714139,
+    "dead_pct": 0.36701653289428554,
+    "helix_win": 25.41832669322709,
+    "spook_win": 38.898163606010016,
+    "prodigy_win": 29.898648648648653,
+    "operator_win": 28.89637742207245,
+    "company_spread_pp": 17.65859638369599,
+    "white_hat_spread_pp": 10.001786183937567,
+    "gray_held_by_round": {
+     "1": 4.98,
+     "2": 4.28,
+     "3": 4.01,
+     "4": 3.68,
+     "5": 3.5,
+     "6": 3.39,
+     "7": 3.33,
+     "8": 3.3
+    },
+    "gray_removed_per_seat": 1.6176388888888888,
+    "gray_removed_by_source": {
+     "BURN_NOTICE": 0.144,
+     "PEN_TEST_L3": 0.173,
+     "RELEASE_L3": 0.985,
+     "TRIAGE_L4": 0.316
+    },
+    "le3_round": 4.698919197117859,
+    "le3_never_pct": 46.02777777777778,
+    "le2_pct": 5.722222222222222,
+    "gray_kept_per_rolled": 0.27359969594755096,
+    "gray_kept_per_seat_round": 0.6006779661016949,
+    "r2_gray_kept_per_seat": 0.9790277777777778,
+    "pen2": [
+     47.736111111111114,
+     5.3590340413151
+    ],
+    "pen3": [
+     17.27777777777778,
+     4.677652733118971
+    ],
+    "tri4": [
+     34.84722222222222,
+     4.938620964527701
+    ],
+    "rel4": [
+     34.52777777777778,
+     4.079646017699115
+    ],
+    "hot_rounds_per_seat": 0.0,
+    "win_le3_early": 37.9746835443038,
+    "win_le3_late": 36.24454148471616,
+    "n_le3_early_late": [
+     2054,
+     1832
+    ],
+    "l4_face_sets_per_seat": 1.4145833333333333,
+    "helix_face_sets_per_seat": 0.0,
+    "helix_locked_rerolled_per_seat": 0.0,
+    "thin_forfeits_per_seat": 0.0002777777777777778
+   },
+   "guardrails": [
+    [
+     "G1 PZ+MC vs stock B0",
+     "72.3 vs 71.8 (+0.6 pp)",
+     "<= +3.0 pp",
+     true
+    ],
+    [
+     "G2 Market Collapse",
+     "11.9%",
+     ">= 8%",
+     true
+    ],
+    [
+     "G3 Green Secrets lost / player-game",
+     "1.91",
+     "<= 2.5 (2P bar)",
+     null
+    ],
+    [
+     "G4 income vs v0.48",
+     "x1.099",
+     "<= x1.2",
+     true
+    ],
+    [
+     "G5 dead turns",
+     "0.24%",
+     "<= 0.5%",
+     true
+    ],
+    [
+     "G6 invariants",
+     "clean",
+     "clean",
+     true
+    ]
+   ]
+  },
+  "4": {
+   "cand": {
+    "games": 2400,
+    "rounds": 8.160833333333333,
+    "pz_pct": 63.666666666666664,
+    "mc_pct": 12.458333333333334,
+    "pz_mc_pct": 76.125,
+    "sing_pct": 23.333333333333332,
+    "wipeout_pct": 0.5416666666666666,
+    "green_lost_pg": 1.7861458333333333,
+    "income_per_seat_round": 7.704641017554925,
+    "dead_pct": 0.23651844843897823,
+    "helix_win": 17.536140791954747,
+    "spook_win": 31.11668757841907,
+    "prodigy_win": 23.121019108280255,
+    "operator_win": 22.50464972101674,
+    "company_spread_pp": 18.17379217574787,
+    "white_hat_spread_pp": 8.612037857402333,
+    "gray_held_by_round": {
+     "1": 4.97,
+     "2": 4.13,
+     "3": 3.95,
+     "4": 3.13,
+     "5": 2.84,
+     "6": 2.59,
+     "7": 2.39,
+     "8": 2.33
+    },
+    "gray_removed_per_seat": 2.437291666666667,
+    "gray_removed_by_source": {
+     "BURN_NOTICE": 0.185,
+     "PEN_TEST_L3": 0.84,
+     "RELEASE_L3": 0.994,
+     "TRIAGE_L4": 0.418
+    },
+    "le3_round": 4.170326409495549,
+    "le3_never_pct": 12.239583333333334,
+    "le2_pct": 47.447916666666664,
+    "gray_kept_per_rolled": 0.32483369528729095,
+    "gray_kept_per_seat_round": 0.6647552820110196,
+    "r2_gray_kept_per_seat": 1.0425,
+    "pen2": [
+     93.5625,
+     3.391115564462258
+    ],
+    "pen3": [
+     84.05208333333333,
+     4.259635642582724
+    ],
+    "tri4": [
+     51.479166666666664,
+     6.039053014973695
+    ],
+    "rel4": [
+     29.083333333333332,
+     6.062679083094556
+    ],
+    "hot_rounds_per_seat": 5.073333333333333,
+    "win_le3_early": 25.915492957746476,
+    "win_le3_late": 23.245283018867923,
+    "n_le3_early_late": [
+     7100,
+     1325
+    ],
+    "l4_face_sets_per_seat": 0.695625,
+    "helix_face_sets_per_seat": 0.10697916666666667,
+    "helix_locked_rerolled_per_seat": 0.2465625,
+    "thin_forfeits_per_seat": 0.0004166666666666667
+   },
+   "B0": {
+    "games": 2400,
+    "rounds": 8.197916666666666,
+    "pz_pct": 65.875,
+    "mc_pct": 10.958333333333334,
+    "pz_mc_pct": 76.83333333333333,
+    "sing_pct": 22.708333333333332,
+    "wipeout_pct": 0.4583333333333333,
+    "green_lost_pg": 1.4748958333333333,
+    "income_per_seat_round": 8.22864610559331,
+    "dead_pct": 0.158128593831678,
+    "helix_win": 19.10747957259585,
+    "spook_win": 32.8732747804266,
+    "prodigy_win": 22.038216560509554,
+    "operator_win": 23.06261624302542,
+    "company_spread_pp": 16.6007654948281,
+    "white_hat_spread_pp": 10.835058219917043,
+    "gray_held_by_round": {
+     "1": 4.97,
+     "2": 4.05,
+     "3": 3.93,
+     "4": 3.48,
+     "5": 3.35,
+     "6": 3.29,
+     "7": 3.26,
+     "8": 3.23
+    },
+    "gray_removed_per_seat": 1.6996875,
+    "gray_removed_by_source": {
+     "BURN_NOTICE": 0.182,
+     "PEN_TEST_L3": 0.181,
+     "RELEASE_L3": 0.997,
+     "TRIAGE_L4": 0.339
+    },
+    "le3_round": 4.169077757685352,
+    "le3_never_pct": 42.395833333333336,
+    "le2_pct": 7.916666666666667,
+    "gray_kept_per_rolled": 0.17628803972255638,
+    "gray_kept_per_seat_round": 0.36983193728522334,
+    "r2_gray_kept_per_seat": 0.67875,
+    "pen2": [
+     51.34375,
+     4.967133292757151
+    ],
+    "pen3": [
+     18.145833333333332,
+     4.305396096440872
+    ],
+    "tri4": [
+     36.354166666666664,
+     4.387965616045845
+    ],
+    "rel4": [
+     37.96875,
+     3.4060356652949246
+    ],
+    "hot_rounds_per_seat": 0.0,
+    "win_le3_early": 30.002362390739428,
+    "win_le3_late": 28.296067848882032,
+    "n_le3_early_late": [
+     4233,
+     1297
+    ],
+    "l4_face_sets_per_seat": 1.4688541666666666,
+    "helix_face_sets_per_seat": 0.08895833333333333,
+    "helix_locked_rerolled_per_seat": 0.19114583333333332,
+    "thin_forfeits_per_seat": 0.00020833333333333335
+   },
+   "B0-GA": null,
+   "B48": {
+    "games": 2400,
+    "rounds": 8.1525,
+    "pz_pct": 60.375,
+    "mc_pct": 15.458333333333334,
+    "pz_mc_pct": 75.83333333333333,
+    "sing_pct": 23.75,
+    "wipeout_pct": 0.4166666666666667,
+    "green_lost_pg": 1.923125,
+    "income_per_seat_round": 7.014582017266793,
+    "dead_pct": 0.3908717624763108,
+    "helix_win": 18.290383406662478,
+    "spook_win": 30.050188205771644,
+    "prodigy_win": 22.1656050955414,
+    "operator_win": 23.37259764414135,
+    "company_spread_pp": 17.175795752386882,
+    "white_hat_spread_pp": 7.884583110230242,
+    "gray_held_by_round": {
+     "1": 4.98,
+     "2": 4.29,
+     "3": 4.02,
+     "4": 3.69,
+     "5": 3.5,
+     "6": 3.4,
+     "7": 3.34,
+     "8": 3.3
+    },
+    "gray_removed_per_seat": 1.5978125,
+    "gray_removed_by_source": {
+     "BURN_NOTICE": 0.138,
+     "PEN_TEST_L3": 0.171,
+     "RELEASE_L3": 0.986,
+     "TRIAGE_L4": 0.303
+    },
+    "le3_round": 4.704119850187266,
+    "le3_never_pct": 47.15625,
+    "le2_pct": 5.552083333333333,
+    "gray_kept_per_rolled": 0.27424143982220817,
+    "gray_kept_per_seat_round": 0.6025883922615076,
+    "r2_gray_kept_per_seat": 0.9589583333333334,
+    "pen2": [
+     47.25,
+     5.3831569664903
+    ],
+    "pen3": [
+     17.09375,
+     4.657525898842169
+    ],
+    "tri4": [
+     33.375,
+     4.962234706616729
+    ],
+    "rel4": [
+     35.270833333333336,
+     4.116361488481985
+    ],
+    "hot_rounds_per_seat": 0.0,
+    "win_le3_early": 30.64097814005187,
+    "win_le3_late": 25.695029486099408,
+    "n_le3_early_late": [
+     2699,
+     2374
+    ],
+    "l4_face_sets_per_seat": 1.3455208333333333,
+    "helix_face_sets_per_seat": 0.0,
+    "helix_locked_rerolled_per_seat": 0.0,
+    "thin_forfeits_per_seat": 0.00010416666666666667
+   },
+   "guardrails": [
+    [
+     "G1 PZ+MC vs stock B0",
+     "76.1 vs 76.8 (-0.7 pp)",
+     "<= +3.0 pp",
+     true
+    ],
+    [
+     "G2 Market Collapse",
+     "12.5%",
+     ">= 8%",
+     true
+    ],
+    [
+     "G3 Green Secrets lost / player-game",
+     "1.79",
+     "<= 2.5 (2P bar)",
+     null
+    ],
+    [
+     "G4 income vs v0.48",
+     "x1.098",
+     "<= x1.2",
+     true
+    ],
+    [
+     "G5 dead turns",
+     "0.24%",
+     "<= 0.5%",
+     true
+    ],
+    [
+     "G6 invariants",
+     "clean",
+     "clean",
+     true
+    ]
+   ]
+  }
+ }
+}

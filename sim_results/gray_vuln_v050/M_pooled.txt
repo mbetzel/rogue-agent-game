@@ -1,0 +1,38 @@
+cand     2P n=2400 rnd 8.45 PZ 37.4 MC 29.4 SING 25.9 TW 7.3 green 2.20 inc 7.63 dead 0.29% removed 2.77 le3 3.35 helix 42.6 spook 56.1
+B0       2P n=2400 rnd 8.41 PZ 39.4 MC 27.5 SING 25.6 TW 7.6 green 1.81 inc 8.17 dead 0.16% removed 1.72 le3 4.18 helix 43.1 spook 59.9
+B0-GA    2P n=2400 rnd 8.42 PZ 37.7 MC 28.2 SING 26.8 TW 7.3 green 1.84 inc 8.03 dead 0.21% removed 2.30 le3 4.37 helix 42.3 spook 57.7
+B48      2P n=2400 rnd 8.31 PZ 31.5 MC 36.7 SING 25.0 TW 6.8 green 2.30 inc 6.97 dead 0.41% removed 1.61 le3 4.76 helix 42.8 spook 52.7
+  Guardrails 2P
+    [PASS] G1 PZ+MC vs stock B0               66.8 vs 66.8 (+0.0 pp)             bar <= +3.0 pp
+    [n/a ] G1 PZ+MC vs B0-GA (report)         66.8 vs 65.9 (+0.9 pp)             bar report only (Q6: stock B0 is the bar)
+    [n/a ] G2 Market Collapse (2P: report)    29.4%                              bar n/a
+    [PASS] G3 Green Secrets lost / player-game 2.20                               bar <= 2.5 (2P bar)
+    [PASS] G4 income vs v0.48                 x1.096                             bar <= x1.2
+    [PASS] G5 dead turns                      0.29%                              bar <= 0.5%
+    [PASS] G6 invariants                      clean                              bar clean
+cand     3P n=2400 rnd 8.38 PZ 59.2 MC 11.5 SING 27.6 TW 1.7 green 1.97 inc 7.73 dead 0.26% removed 2.79 le3 3.33 helix 26.5 spook 41.6
+B0       3P n=2400 rnd 8.34 PZ 59.2 MC 12.5 SING 26.1 TW 2.1 green 1.63 inc 8.25 dead 0.15% removed 1.72 le3 4.16 helix 27.9 spook 42.2
+B0-GA    3P n=2400 rnd 8.43 PZ 57.4 MC 13.3 SING 27.7 TW 1.6 green 1.63 inc 8.10 dead 0.18% removed 2.33 le3 4.34 helix 26.2 spook 42.2
+B48      3P n=2400 rnd 8.36 PZ 54.7 MC 17.2 SING 26.5 TW 1.6 green 2.11 inc 7.01 dead 0.37% removed 1.62 le3 4.70 helix 25.4 spook 38.9
+  Guardrails 3P
+    [PASS] G1 PZ+MC vs stock B0               70.7 vs 71.8 (-1.0 pp)             bar <= +3.0 pp
+    [n/a ] G1 PZ+MC vs B0-GA (report)         70.7 vs 70.7 (+0.0 pp)             bar report only (Q6: stock B0 is the bar)
+    [PASS] G2 Market Collapse                 11.5%                              bar >= 8%
+    [n/a ] G3 Green Secrets lost / player-game 1.97                               bar <= 2.5 (2P bar)
+    [PASS] G4 income vs v0.48                 x1.103                             bar <= x1.2
+    [PASS] G5 dead turns                      0.26%                              bar <= 0.5%
+    [PASS] G6 invariants                      clean                              bar clean
+cand     4P n=2400 rnd 8.32 PZ 61.7 MC 12.1 SING 25.7 TW 0.6 green 1.82 inc 7.72 dead 0.29% removed 2.75 le3 3.32 helix 20.2 spook 31.0
+B0       4P n=2400 rnd 8.20 PZ 65.9 MC 11.0 SING 22.7 TW 0.5 green 1.47 inc 8.23 dead 0.16% removed 1.70 le3 4.17 helix 19.1 spook 32.9
+B0-GA    4P n=2400 rnd 8.38 PZ 61.2 MC 12.4 SING 26.1 TW 0.3 green 1.52 inc 8.09 dead 0.18% removed 2.34 le3 4.32 helix 18.9 spook 30.5
+B48      4P n=2400 rnd 8.15 PZ 60.4 MC 15.5 SING 23.8 TW 0.4 green 1.92 inc 7.01 dead 0.39% removed 1.60 le3 4.70 helix 18.3 spook 30.1
+  Guardrails 4P
+    [PASS] G1 PZ+MC vs stock B0               73.8 vs 76.8 (-3.1 pp)             bar <= +3.0 pp
+    [n/a ] G1 PZ+MC vs B0-GA (report)         73.8 vs 73.6 (+0.1 pp)             bar report only (Q6: stock B0 is the bar)
+    [PASS] G2 Market Collapse                 12.1%                              bar >= 8%
+    [n/a ] G3 Green Secrets lost / player-game 1.82                               bar <= 2.5 (2P bar)
+    [PASS] G4 income vs v0.48                 x1.100                             bar <= x1.2
+    [PASS] G5 dead turns                      0.29%                              bar <= 0.5%
+    [PASS] G6 invariants                      clean                              bar clean
+saved sim_results/gray_vuln_v050/M_pooled.json
+OVERALL PASS

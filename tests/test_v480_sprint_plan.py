@@ -660,6 +660,7 @@ class TestBreakthroughs(unittest.TestCase):
         self.assertEqual(rt.breakthrough_text(c, "RELEASE", 1), "+1 Release Bandwidth this round")
         self.assertEqual(rt.breakthrough_text(c, "DEFENSE", 3), "Return 1 Gray Legacy die you own to the box; Blue R&D faces yield +3")
         self.assertEqual(rt.breakthrough_text(c, "RELEASE", 3), "Return 1 Gray Legacy die you own to the box")
+        self.assertEqual(rt.breakthrough_text(c, "TRIAGE", 3), "Gain 1 Corporate Secret")
         c6 = GameConfig.v046(num_players=3)
         self.assertEqual(rt.breakthrough_text(c6, "RELEASE", 3), "Gain 1 Corporate Secret")
         self.assertEqual(rt.breakthrough_text(c6, "RELEASE", 1), "Gain 1 Gray Legacy die")

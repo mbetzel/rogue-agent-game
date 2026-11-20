@@ -122,7 +122,7 @@ def _execute_bot_operations_v035(controller: GameController, player: PlayerState
             )
     for b in player.breakthroughs[bt0:]:
         controller.event_log.append(
-            f"{meta['name']} {_level_effect_label(b)} ({_track_label(controller, b.track)} L{b.level}): {_breakthrough_log(b)}.")
+            f"{meta['name']} {_level_effect_label(b)} ({_track_label(controller, b.track)} L{b.level}): {_breakthrough_log(b, controller.state.config)}.")
     new_dice = [d for d in player.ready_for_release_dice if d.die_id not in dice0]
     if new_dice:
         controller.event_log.append(
@@ -147,21 +147,19 @@ def _execute_bot_operations_v035(controller: GameController, player: PlayerState
     )
 
 
-def _breakthrough_log(b: Any) -> str:
-    text = {
-        ("DEFENSE", 1): "Gain 1 Gray Legacy die",
-        ("DEFENSE", 3): "Gain 1 Corporate Secret",
-        ("DEFENSE", 4): "Pen Test limit 3; -1 Vulnerability free at the start of each later Operations Turn",
-        ("TRIAGE", 1): "Gain 1 Gray Legacy die",
-        ("TRIAGE", 3): "Gain 1 Corporate Secret",
-        ("TRIAGE", 4): "Replace 1 Gray Legacy die with a Central Market colored die (free)",
-        ("RELEASE", 1): "Gain 1 Gray Legacy die",
-        ("RELEASE", 3): "Gain 1 Corporate Secret",
-        ("RELEASE", 4): "Set 1 rolled Gray Legacy die to any printed face each Phase 1",
-        ("PATENT", 1): "Gain $3",
-        ("PATENT", 3): "Gain your 2nd Purple die",
-        ("PATENT", 4): "Gain +2 Market Share",
-    }.get((b.track, b.level), research_tracks.BREAKTHROUGH_TEXT.get((b.track, b.level), ""))
+_CAPSTONE_LOG = {
+    "DEFENSE": "Pen Test limit 3; -1 Vulnerability free at the start of each later Operations Turn",
+    "TRIAGE": "Replace 1 Gray Legacy die with a Central Market colored die (free)",
+    "RELEASE": "Set 1 rolled Gray Legacy die to any printed face each Phase 1",
+    "PATENT": "Gain +2 Market Share",
+}
+
+
+def _breakthrough_log(b: Any, cfg: Any = None) -> str:
+    if b.level == research_tracks.MAX_LEVEL:
+        text = _CAPSTONE_LOG.get(b.track, "")
+    else:  # config-aware text (v0.48 Level 1 / Level 3 modes, v0.50 Pen Test Level 2)
+        text = research_tracks.breakthrough_text(cfg, b.track, b.level) or ""
     if b.outcome == "TAKEN":
         if b.track == "TRIAGE" and b.detail.get("new_color"):
             paid = b.detail.get("paid", 0)
@@ -195,7 +193,7 @@ def resolve_pending_breakthrough(
     rec = research_tracks.resolve_breakthrough(controller.engine, player, info["track"], info["level"], choice)
     if rec is not None:
         controller.event_log.append(
-            f"{meta['name']} {_level_effect_label(rec)} ({_track_label(controller, rec.track)} L{rec.level}): {_breakthrough_log(rec)}."
+            f"{meta['name']} {_level_effect_label(rec)} ({_track_label(controller, rec.track)} L{rec.level}): {_breakthrough_log(rec, controller.state.config)}."
         )
     return controller.get_full_state()
 
@@ -693,7 +691,7 @@ def upgrade_hardware_track(
             if rec is not None:
                 controller.event_log.append(
                     f"{meta['name']} {_level_effect_label(rec)} ({_track_label(controller, rec.track)} L{rec.level}): "
-                    f"{_breakthrough_log(rec)}."
+                    f"{_breakthrough_log(rec, controller.state.config)}."
                 )
     return controller.get_full_state()
 

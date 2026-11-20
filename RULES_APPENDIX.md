@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Section 6 (v0.49.1)
+# Too Many Secrets — Rules Section 6 (v0.50.0)
 
 Split out of `RULES.md`; this file is canonical for Section 6.
 
@@ -8,7 +8,7 @@ Split out of `RULES.md`; this file is canonical for Section 6.
 
 | Die Type | Cost | Face 1 | Face 2 | Face 3 | Face 4 | Face 5 | Face 6 |
 | :--- | :---: | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Gray (Legacy)** | Starter (5) | `+$2 / +2 🔬` ⚠ `[TUNE: v0.49.1]` | `+2 🔬` | `+$1 & +1 🔬` | `+$1 / +1 🔬` | `+$1` | `+1 🔬` `[TUNE: v0.48.0]` |
+| **Gray (Legacy)** | Starter (5) | `+$2 / +2 🔬` ⚠ `[TUNE: v0.49.1]` | `+$1` | `+$1 & +1 🔬` | `+$1 / +1 🔬` | `+2 🔬` ⚠ `[TUNE: v0.50.0]` | `+1 🔬` `[TUNE: v0.48.0]` |
 | **Red (Marketing)** | `$4–$5` (Variant) | `+1 Market Share & +1 🔬` ⚠ `[TUNE: v0.49.0]` | `+$2` | `+$2` | `+$2` | **R&D face** ⚠ | `Red ★` |
 | **Blue (Firewall)** | `$4–$5` (Variant) | `+$2 & +1 🔬` ⚠ `[TUNE: v0.49.1]` | `+2 🔬` | `+1 Corporate Secret` | `+1 🔬 / +$1` | **R&D face** ⚠ | `Blue ★` |
 | **Green (Antivirus)** | `$4–$5` (Variant) | `+3 🔬` ⚠ `[TUNE: v0.49.0]` | `+1 🔬` | `+2 🔬` | `+1 🔬 / +$1` | **R&D face** ⚠ | `Green ★` |
@@ -16,7 +16,7 @@ Split out of `RULES.md`; this file is canonical for Section 6.
 | **Purple (Specialist)** | Starter / Public Relations L3 | `+$1 & +2 🔬` ⚠ `[TUNE: v0.49.1]` | `+$1 / +1 🔬` | `+$2` | `+$1 / +1 🔬` | **R&D face** ⚠ | `Purple ★ (Signature Protocol)` |
 
 * **Choice Faces (`/`):** Faces with a slash (`/`) indicate a Choice Face. During Phase 1 Step 4, the player declares which of the two options the die fulfills for this round (e.g. `+1 Market Share / +$1`).
-* **Vulnerability (⚠):** Each ⚠ on the final face of a rolled die raises your Vulnerability by `1` at Deploy (Phase 1 Step 4), including R&D faces, which always carry ⚠. `★` faces never carry ⚠. **Every ⚠ face is on Face 1 or Face 5** `[TUNE: v0.49.1]`, so a roll of `1` or `5` on a colored die (`1` on a Gray die) means ⚠. Gray dice have one ⚠ face (Face 1); each colored die has its ⚠ core face on Face 1 and its R&D face on Face 5 (Yellow, which has no R&D face, has a second ⚠ core face on Face 5). Any die showing a ⚠ face during rerolls (R&D faces included) is a **Locked Die**: it can't be rerolled this phase `[TUNE: v0.49.0]`. Colored ⚠ core faces pay a premium over that die's clean faces. A ⚠ on a choice face counts whichever option you choose. *Arbitrary Code Execution*, *Brute-Force Bypass* and Release Level 4 change the face, so ⚠ is counted on the face they set.
+* **Vulnerability (⚠):** Each ⚠ on the final face of a rolled die raises your Vulnerability by `1` at Deploy (Phase 1 Step 4), including R&D faces, which always carry ⚠. `★` faces never carry ⚠. **Every ⚠ face is on Face 1 or Face 5** `[TUNE: v0.49.1]`, so a roll of `1` or `5` on any die means ⚠. Gray dice have two ⚠ faces, Face 1 and Face 5 `[TUNE: v0.50.0]`; each colored die has its ⚠ core face on Face 1 and its R&D face on Face 5 (Yellow, which has no R&D face, has a second ⚠ core face on Face 5). Any die showing a ⚠ face during rerolls (R&D faces included) is a **Locked Die**: it can't be rerolled this phase `[TUNE: v0.49.0]`. Colored ⚠ core faces pay a premium over that die's clean faces. A ⚠ on a choice face counts whichever option you choose. *Arbitrary Code Execution*, *Brute-Force Bypass* and Release Level 4 change the face, so ⚠ is counted on the face they set.
 * **Market Share Faces:** Red and Yellow Market Share outputs resolve in Phase 3: Income; they cannot raise Market Share above the track maximum (`20`) and do not count toward your Public Relations limit.
 * **R&D Faces:** Face 5 on Red, Blue, Green and Purple dice. A die showing it after rerolls moves to **Research & Development** with no other output and banks its Secret when it leaves (yields: Red `+2` and triggers the Market Leader Bonus; Blue `+2`, or `+3` if Pen Test $\ge$ Level 3; Green `+2`, then lower your Vulnerability by `2`; Purple `+1`; see Phase 6 *R&D Face Yields*). It always carries ⚠, so a die showing it during rerolls is locked. Yellow dice have no R&D face.
 * **Zero Blank or Glitch Faces:** Every face on every Software Module Die produces a resource, Secret, or Star (`★`) output (`0` blank faces and `0` Glitch faces).

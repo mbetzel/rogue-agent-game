@@ -204,6 +204,27 @@ def _v047_row(cfg: Any, p: Any) -> Dict[str, Any]:
     return out
 
 
+def _v050_row(cfg: Any, p: Any) -> Dict[str, Any]:
+    """v0.50.0 Gray ⚠ telemetry (docs/specs/gray_vuln_b23_spec.md §8.2); only emitted under ``gray_vuln_telemetry``."""
+    removed = dict(p.gray_removed_by_source)
+    return {
+        "gray_owned_by_round": dict(p.gray_owned_by_round),
+        "gray_le3_round": p.gray_le3_round,
+        "gray_le2_round": p.gray_le2_round,
+        "gray_removed_by_source": removed,
+        "gray_removed_total": sum(removed.values()),
+        "thin_rounds": list(p.thin_rounds),
+        "thin_forfeits": p.thin_forfeits,
+        "gray_rolled_total": p.gray_rolled_total,
+        "gray_vuln_kept_total": p.gray_vuln_kept_total,
+        "gray_vuln_kept_by_face": dict(p.gray_vuln_kept_by_face),
+        "gray_rolls_by_round": {r: list(v) for r, v in p.gray_rolls_by_round.items()},
+        "gray_aware_hot_rounds": sorted(p.gray_aware_hot_rounds),
+        "release_gray_face_sets": int(p.l4_payouts.get("release_gray_face_sets", 0)),
+        "pen_test_l2_round": p.level_reached_round.get("DEFENSE", {}).get(2),
+    }
+
+
 def evaluate_end_game(engine: GameEngine) -> EndGameResult:
     cfg = engine.config
     _return_held_contractors(engine)
@@ -351,6 +372,7 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
                 **(_v038_row(cfg, p, bonus, end_award) if getattr(cfg, "secret_face_enabled", False) else {}),
                 **(_v046_row(cfg, p) if getattr(cfg, "is_vulnerability", False) else {}),
                 **(_v047_row(cfg, p) if getattr(cfg, "colored_vuln_lock", False) else {}),
+                **(_v050_row(cfg, p) if getattr(cfg, "gray_vuln_telemetry", False) else {}),
             }
         )
 

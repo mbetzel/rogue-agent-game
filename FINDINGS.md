@@ -9,68 +9,12 @@ This document tracks verified balance takeaways, bot meta equilibria, card tieri
 > - [docs/archive/FINDINGS_s01-s35.md](docs/archive/FINDINGS_s01-s35.md): Sections §1–§36 (Phases 15–45, v0.13–v0.36 baselines).
 > - [docs/archive/FINDINGS_s37-s43.md](docs/archive/FINDINGS_s37-s43.md): Sections §37–§43 (Market Share threshold probes, Market Leader Bonus, v0.38 exploration).
 > - [docs/archive/FINDINGS_s44-s49.md](docs/archive/FINDINGS_s44-s49.md): Sections §44–§54 (Phases 50–59, v0.38c–v0.41.0 baselines; file name kept for link stability).
-> - [docs/archive/FINDINGS_s55-s56.md](docs/archive/FINDINGS_s55-s56.md): Sections §55–§56 (Phases 60–61, v3.0 escalation and Target Lock / v0.42.0).
+> - [docs/archive/FINDINGS_s55-s57.md](docs/archive/FINDINGS_s55-s57.md): Sections §55–§57 (Phases 60–62, v3.0 escalation, Target Lock / v0.42.0, Dominant Cube Color Signature Attacks / v0.43.0).
 
 ---
 
-> [!NOTE] Active Sections (§57–§65)
-> Section numbering continues here unchanged. **Agents: do not read the archives unless a task cites a specific §N ≤ 56.**
-
----
-
-## 57. Phase 62 Post-Telemetry Balance Assessment: Dominant Cube Color Signature Attacks: APPROVED (`v0.43.0 Baseline`)
-
-*(Cross-Reference: Phase 62 task prompt cited as §56 / Phase 62; numbered §57 to maintain strict monotonic section sequence following §56 Phase 61).*
-
-Sources: `sim_results/signature_dominant_attacks/validation_report.md` (7,200-game dataset across 4P, 3P, and 2P pods, Seeds 42..1241); Technical Architecture Specification `docs/specs/signature_cube_dominant_attacks_spec.md`; Pre-SDLC Research Report `docs/findings/signature_cube_mechanics_investigation.md` (§7–§11).
-
-- **Investigation Context & Architectural Rationale:**
-  While `v0.42.0` successfully established the tactile attention loop of Operative Signature Cubes (banking Secrets queues the cube into staging; drops through tower with ~40% baffle retention; returns to mat on exit), the resulting Target Lock penalty—facing `+1 dominant Attack Cube`—was deemed too generic and unexciting by players. It felt like an anonymous compiler drop rather than SETEC aggressively targeting that operative's corporate terminal.
-  Under Phase 62 (`v0.43.0 Baseline`), the generic `+1` Attack Cube is replaced with **Dominant Cube Color Signature Attacks** printed directly on the Central Board alongside the threat matrix, resolving against the most populous cube color in the Exit Tray under preset priority order **`GREEN > BLACK > BLUE > RED`**:
-  - **Red (*Market Manipulation*):** Drains `2` Market Share from the locked player; the other surviving player with the least Market Share gains `2` MS. Executes under the **Two-Step Simultaneous Epoch Rule (`INV-SIMUL-RED`)** (all locked players drain simultaneously first, then transfers resolve; drops where all survivors are locked cleanly cancel transfers).
-  - **Blue (*Buffer Congestion*):** In Phase 4 (after shields block), moves `1` Gray Legacy die from the Scanned Box (or In Production) to the back of the Processing Box (`0 Secrets`), taxing Conveyor Triage without re-queuing signature cubes (`INV-SIG-BLUE-TRIAGE`).
-  - **Green (*Malware Encryption*):** Places green cubes from the general token supply onto the next space of `2` Research Tracks that do not already have green cubes; those spaces cost double research (`2x 🔬`) to advance into (`INV-GREEN-SUPPLY`). Invariant `INV-GREEN-OVERFLOW` spills unplaced cubes into Glitched Shield Slots.
-  - **Black (*Root Override Hijack*):** Marks the locked player's Client Company Institutional Override as "Used" for the current SETEC Version; if already used, the player suffers a `-2 Corporate Secrets` fallback.
-  - **Preset Priority Tie-Breaking (`GREEN > BLACK > BLUE > RED`):** Evaluated across all 24 permutations in pre-SDLC modeling (§11 Rank #1), this order provides instant deterministic resolution with zero decision lag while counterbalancing the raw compiler physics (where Red is unique top in 28.5% of drops while Green is only 9.5% and Black does not recycle).
-
-- **Empirical Telemetry Verification (7,200 Games Across 4P, 3P, and 2P Pods):**
-
-  | Metric / Gate | Baseline (`v0.42.0`) | Candidate (`v0.43.0`) | Target Guardrail | Design Assessment |
-  | :--- | :---: | :---: | :---: | :--- |
-  | **Macro Pacing (Overall)** | 7.71 rounds | **7.60 rounds** | $\|\Delta\| \le 0.50$ rds (7.5–11.0) | **PASS** — Crisp, rock-solid macro pacing ($\Delta = -0.11$ rds) |
-  | **Macro Pacing (4P / 3P / 2P)** | 7.51 / 7.90 / 7.73 | **7.43 / 7.78 / 7.58** | 7.00–11.00 rounds | **PASS** — Flawless pacing parity across all player counts |
-  | **Total Wipeout Rate (Overall)** | 6.22% | **5.75%** | $\le$ Baseline | **PASS** — **Wipeouts reduced across all pods** (-0.47% table avg) |
-  | **Total Wipeout Rate (4P / 3P / 2P)** | 2.25% / 5.08% / 11.33% | **2.08% / 4.33% / 10.83%** | $\le$ Baseline | **PASS** — 4P wipeouts drop to 2.08%; zero early wipeouts ($\le 6$ rds) |
-  | **End-Game: Singularity (4P / 3P / 2P)** | 4.5% / 7.1% / 8.9% | **4.7% / 8.2% / 8.2%** | Active clock | **PASS** — Macro clock preserved |
-  | **End-Game: Patient Zero (4P / 3P / 2P)** | 70.3% / 64.0% / 39.3% | **73.8% / 65.2% / 43.5%** | Active pressure | **PASS** — Healthy attrition on overextended engines |
-  | **End-Game: Market Collapse (4P / 3P / 2P)** | 22.9% / 23.8% / 40.4% | **19.4% / 22.3% / 37.5%** | Active condition | **PASS** — Active secondary terminal condition |
-  | **Baffle Retention Rate** | 40.3% / 39.5% / 39.8% | **40.1% / 38.7% / 40.0%** | Model B Physics (~40%) | **PASS** — Verified physical baffle retention |
-  | **Mean Baffle Hold Duration** | 0.48 / 0.48 / 0.48 | **0.48 / 0.47 / 0.49** | Latent threat delay | **PASS** — Multi-round suspense preserved |
-  | **TL Cadence (Table / Seat-Game)** | 2.11 / 2.34 / 2.49 | **2.09 / 2.33 / 2.42** | ~2.00–2.50 / seat-game | **PASS** — Stable trigger frequency on Secret engines |
-  | **4-Color Trigger Distribution** | N/A (+1 cube) | **G: 29.2%, K: 22.6%, B: 15.7%, R: 28.3%** | Balanced spread | **PASS** — Confirms Rank #1 mathematical model within $\pm 1\%$ |
-
-- **Subroutine Mechanical Verification:**
-  1. *Red (*Market Manipulation*):* In 4P, 2,960 Red signature attacks drained 5,616 actual Market Share and transferred 5,646 MS to non-locked trailing players. All-locked drops cleanly canceled transfers (4.6% in 4P, 13.9% in 3P, 38.5% in 2P), completely preventing turn-order ping-pong bugs.
-  2. *Blue (*Buffer Congestion*):* 1,475 Gray Legacy dice moved to Processing Boxes in 4P (0.31/seat-game). All moved dice triaged out cleanly with 0 Secrets and zero re-queued signature cubes (`INV-SIG-BLUE-TRIAGE`).
-  3. *Green (*Malware Encryption*):* Placed 5,201 track cubes in 4P; players completed 1,785 doubled-cost upgrades (`2x 🔬`), spending 2,087 extra 🔬. Only 12 saturation spillover glitched slots occurred table-wide across 1,200 games, confirming smooth track placement without track demotion exploits.
-  4. *Black (*Root Override Hijack*):* Unused Client Company Overrides absorbed Black hits in **31.3%–33.0%** of cases, while the `-2 Corporate Secrets` fallback resolved in **67.0%–68.7%** of cases. Helix (*Brute-Force Bypass*) and DTO (*Slush Fund*) frequently held available overrides into Phase 4 Step 2, providing natural thematic defense.
-
-- **Core Design Pillar Evaluations:**
-  1. *Tactile & Thematic Central Board Drama:*
-     - Players no longer face an abstract generic cube; Target Lock now triggers distinct, thematic operational crises (extortion, malware encryption, pipeline congestion, or root breach).
-     - Preset priority order (`GREEN > BLACK > BLUE > RED`) eliminates all decision lag and cognitive friction while guaranteeing a balanced 4-color distribution.
-  2. *Enhanced Archetype Equity & Compression of Runaway Turtles:*
-     - In 4P pods, `SecOpsTurtleBot` win rate compressed by **-6.8%** (53.3% $\to$ 46.6%) as Black and Green attacks bypass shield-stacking turtle strategies.
-     - Trailing archetypes gained substantial competitive equity: `VentureGreedBot` rose **+3.3%** (11.2% $\to$ 14.6%) and `AccelerationistBot` rose **+3.5%** (16.9% $\to$ 20.4%).
-  3. *Client Company Parity Normalization:*
-     - `Helix Biomedical Consortium` gained **+5.2%** win equity in 4P (16.0% $\to$ 21.3%) due to its unspent Phase 1 override absorbing Black hits.
-     - Overall Client Company 4P win spread tightened from **14.2%** under `v0.42` to **13.3%** under `v0.43` (Omnidyne 31.2%, DTO 29.0%, Aegis 28.3%, Meridian 22.4%, Helix 21.3%, Prometheus 17.9%).
-
-- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.43.0 Baseline`).**
-  Dominant Cube Color Signature Attacks successfully elevate Target Lock into an exciting, thematic, and balanced centerpiece mechanic. Pacing, wipeout guardrails, color parity, and archetype equity are 100% validated across 7,200 games. Recommended for full release synchronization across rules documentation, Print-and-Play assets, and quick-reference aids.
-
-- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.43.1`).**
-  Synchronized across `RULES.md`, `RULES_APPENDIX.md`, `sim/` (`GameConfig.white_hat_6f_rebalance=True` in `v043()`), and `pnp/generate_pnp.py`.
+> [!NOTE] Active Sections (§58–§66)
+> Section numbering continues here unchanged. **Agents: do not read the archives unless a task cites a specific §N ≤ 57.**
 
 ---
 
@@ -405,3 +349,74 @@ Reports:
   - print the Helix face-set and Black-blocked counters in the sweep summary;
   - web sync to v0.49.
 
+
+## 66. Phase 71 Post-Telemetry Balance Assessment: Gray ⚠ B23 + Pen Test L2 Gray Thinning (`v0.50.0` Candidate): APPROVED (residuals open)
+
+**Experiments** (`mixed1` roster, `--assert-invariants` clean):
+- `scripts/run_gray_vuln_sweep.py` at HEAD `547135c`, pooled seeds `42..2441` (2,400 games per pod). Arms: M = `v050_roster`, B0 = `v049_roster`, B0-GA, B48, A-stock, A-noL2.
+- `scripts/probe_v050_motivation.py` (game designer, same seeds). It makes paired seat-0 policy swaps and gives seat 0 a −1 Gray handicap, on v0.50 and on v0.49 + the GRAY_AWARE bot.
+
+**Reports:**
+- `docs/plans/gray_vulnerability_gd_plan.md` (pre-SDLC, §9 follow-up);
+- `docs/specs/gray_vuln_b23_spec.md`;
+- `docs/reports/v050_gray_vuln_sweeps.md`.
+
+### Key Changes (`v0.50.0` vs `v0.49.0`)
+1. **Gray Legacy ⚠ on Face 2 (`+2 🔬`) and Face 3 (`+$2 / +2 🔬`)** (B23). It was on Face 3 only.
+   - Per face, Gray now carries the Market-die ⚠ rate (1/3).
+   - Per unit of output it is the heaviest liability in the pool: 0.22 ⚠ per resource, against 0.13–0.17 for Market dice.
+2. **The Pen Test Level 2 Breakthrough** returns `1` Gray Legacy die you own to the box (a1). The Pen Test L3 thin is unchanged.
+3. **Sim only:** the roster research focus becomes `GRAY_AWARE`. It weighs Gray ⚠ exposure and how close the seat is to Vulnerability 5 when it picks thinning tracks.
+4. **Terms:** no new terms.
+
+### Telemetry & Balance Verdict (`PASS` with residuals), v0.49 (B0) → v0.50 (M), 2P / 3P / 4P
+- **Guardrails** (all PASS):
+  - Patient Zero + Collapse is `66.8 / 70.7 / 73.8` (`+0.0 / −1.0 / −3.1` pp).
+  - Collapse is `29.4 / 11.5 / 12.1`%.
+  - Green lost is `2.20 / 1.97 / 1.82`.
+  - Income is ×`1.10` vs v0.48, about 7% below v0.49.
+  - Dead turns are `0.26–0.29`%.
+  - Invariants are clean.
+  - The 4P −3.1 is mostly the bot: B0-GA is already `73.6`, and M vs B0-GA is `+0.1`.
+- **Pacing:** rounds are `8.45 / 8.38 / 8.32` (B0 `8.41 / 8.34 / 8.20`) and Singularity is `25.9 / 27.6 / 25.7`.
+  - With the stock bots and no L2 (A-noL2), the PZ + MC rise comes back (`+0.8 / +0.5 / −0.7`). With stock bots, A-stock games run `−0.1 / −0.2 / −0.2` rounds shorter.
+- **Mitigation adoption:**
+  - Gray removed per seat is `2.77` (B0 `1.72`). The removals come from Release L3 `1.00`, Pen Test L2 `0.94`, Triage L4 `0.48`, Burn Notice `0.18` and Pen Test L3 `0.16`.
+  - A seat first holds ≤ 3 Gray in round `3.33` (B0 `4.17`), and only 4–5% never get there.
+  - Gray held per seat at R8 is about `2.05` (B0 about `3.2`).
+- **Motivation (paired seat-0 swaps, win pp / Secrets):**
+
+| Test | v0.50 | v0.49 + GRAY_AWARE |
+|:---|:---|:---|
+| Cost of not mitigating (field GA, seat 0 stock) | `−1.9 / −3.1 / −0.8` pp, `−0.36 / −0.49 / −0.35` Secrets | `−3.1 / −4.5 / −2.4` pp |
+| Value of 1 fewer Gray at setup | `+4.5 / +2.4 / +4.0` pp, `+0.85 / +0.45 / +0.76` Secrets | `+5.3 / +3.8 / +4.5` pp |
+| GA seat in a stock field | `+1.8 / +3.0 / −0.1` pp | — |
+
+  The SE of a paired difference is about 1–1.2 pp.
+- **Key findings:**
+  1. **The early-vs-late thinner gap (about ±3 pp) is a cohort artefact, not missing motivation.**
+     - Under GA, 95% of seats reach ≤ 3 Gray by R4. The "late" group (n `262–490`) is the starved or behind tail.
+     - The probe's `+5 / +7.5 / +7` came from a1 with **stock** bots, where about half the seats thinned late.
+     - The probe's own GA + a1 arm also read `−3 / −3 / +4`, which matches the PO.
+     - When everyone mitigates early, that comparison stops measuring the payoff. Paired swaps do measure it.
+  2. **Mitigation is rewarded, not dominant.**
+     - One Gray die is worth about `+2.5` to `+4.5` pp and about `0.5–0.9` Secrets.
+     - Skipping the mitigation focus costs `1–3` pp.
+     - There is no forced line, which suits a Euro.
+  3. **v0.50 raises how much mitigation happens and how early, not the value of each step.**
+     - Per-die and per-policy values are flat to slightly lower than on v0.49 + the same bot.
+     - The reason is that Pen Test L2 hands even the stock bots a cheap thin (they remove `2.17` vs `1.72`), so the field converges.
+     - Players should *feel* Gray as a liability: they see 2 ⚠ faces, and roughly 1 ⚠ arrives from the 3 forced Gray rolls in R2. The EV case for mitigating already held in v0.49.
+  4. **Bandwidth levers were rejected in the probe.** Release Bandwidth +1 breaks the 2P Green cap (`2.62–2.72`) and the income cap.
+- **Residuals:**
+  - Helix is below par: `42.6 / 26.5 / 20.2` (B0 4P `19.1`).
+  - Spook is above par: `56.1 / 41.6 / 31.0` (B0 4P `32.9`).
+  - The 2P company spread is `21.6` pp.
+  - All three pre-date v0.50.
+  - The `GRAY_AWARE` parameters are first guesses.
+- **`[TUNE]` recommendations:** none required. Don't raise the per-⚠ cost (band damage) just to make mitigation bite harder: it would push 2P Green toward the cap.
+- **Next:**
+  - a dominance matrix with a no-thinning stance and `GRAY_AWARE`, plus a ref1 run on v0.50;
+  - the company-power pass (Helix / Spook);
+  - doc, PnP, TTS and web sync to v0.50.0;
+  - FINDINGS now has 9 recent sections, so archive §57.

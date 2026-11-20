@@ -491,6 +491,15 @@ class PlayerState:
         self.thin_rounds: List[int] = []
         self.thin_forfeits: int = 0
         self.gray_lock_blocked: int = 0
+        # --- v0.50 Gray ⚠ telemetry (docs/specs/gray_vuln_b23_spec.md §8.1); never read by gameplay ---
+        self.gray_owned_by_round: Dict[int, int] = {}
+        self.gray_le3_round: Optional[int] = None
+        self.gray_le2_round: Optional[int] = None
+        self.gray_rolled_total: int = 0
+        self.gray_vuln_kept_total: int = 0
+        self.gray_vuln_kept_by_face: Dict[str, int] = {}
+        self.gray_rolls_by_round: Dict[int, List[int]] = {}
+        self.gray_aware_hot_rounds: Set[int] = set()
 
         self._has_emergency_hotfix = has_emergency_hotfix or (self.triage_level >= 2)
         self._has_passive_firewall = has_passive_firewall or (self.defense_level >= 2)

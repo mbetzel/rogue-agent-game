@@ -258,7 +258,7 @@ class TestWebRedSignatureLowestRival(unittest.TestCase):
         _to_phase4(gc)
         return gc, _signature_choices
 
-    def test_web_uses_v049_preset(self):
+    def test_web_uses_v049_rules(self):
         cfg = _fresh().state.config
         self.assertEqual(cfg.signature_red_recipient_rule, "lowest_rival")
         self.assertTrue(cfg.signature_red_setec_eligible)
@@ -310,7 +310,7 @@ class TestWebV046Config(unittest.TestCase):
         self.assertTrue(cfg.operations_before_pipeline_shift)
         self.assertFalse(cfg.glitched_shield_slots_enabled)
         st = gc.get_full_state()
-        self.assertEqual(st["rules_version"], "v0.49.1")
+        self.assertEqual(st["rules_version"], "v0.50.0")
         self.assertEqual(st["phase_names"][5], "Operations")
         self.assertEqual(st["phase_names"][6], "CI/CD Pipeline Shift")
         self.assertEqual(st["vulnerability_track"]["min_target"], 5)
@@ -318,10 +318,10 @@ class TestWebV046Config(unittest.TestCase):
         self.assertEqual([b["damage"] for b in st["vulnerability_track"]["bands"]], [1, 2, 3])
 
     def test_legacy_rules_versions_rejected(self):
-        for v in ("v0.38.0", "v0.37.0", "v0.40.0", "v0.45.0", "v0.46.0", "v0.47.0", "v0.48.0"):
+        for v in ("v0.38.0", "v0.37.0", "v0.40.0", "v0.45.0", "v0.46.0", "v0.47.0", "v0.48.0", "v0.49.0", "v0.49.1"):
             with self.assertRaises(ValueError):
                 GameController().new_game(num_players=2, seed=1, rules_version=v)
-        GameController().new_game(num_players=2, seed=1, rules_version="v0.49.1")
+        GameController().new_game(num_players=2, seed=1, rules_version="v0.50.0")
 
     def test_no_shield_or_defense_grid_fields_serialized(self):
         gc = _fresh()
@@ -579,7 +579,7 @@ class TestWebV046Http(unittest.TestCase):
     def test_endpoints(self):
         code, body = self._post("/api/game/new", {"num_players": 2, "seed": 4})
         self.assertEqual(code, 200)
-        self.assertEqual(body["state"]["rules_version"], "v0.49.1")
+        self.assertEqual(body["state"]["rules_version"], "v0.50.0")
         code, _ = self._post("/api/game/new", {"num_players": 2, "seed": 4, "rules_version": "v0.38.0"})
         self.assertEqual(code, 400)
         self._post("/api/game/new", {"num_players": 2, "seed": 4})
@@ -589,6 +589,38 @@ class TestWebV046Http(unittest.TestCase):
         self.assertEqual(body["state"]["phase"], 2)
         for retired in ("commit", "hotfix", "patent", "debug_unlock"):
             self.assertEqual(self._post(f"/api/game/action/{retired}", {"player_id": 0})[0], 404, retired)
+
+
+class TestWebV050Gray(unittest.TestCase):
+    """v0.50.0 in the web engine: Gray ⚠ on Faces 1 and 5, Pen Test Level 2 Gray return, Breakthrough labels."""
+
+    def test_web_uses_v050_preset(self):
+        cfg = _fresh().state.config
+        self.assertEqual(cfg.gray_face_profile, "V050_GRAY2")
+        self.assertEqual(cfg.pen_test_l2_breakthrough, "THIN_GRAY")
+
+    def test_gray_die_has_two_vuln_faces(self):
+        gc = _fresh()
+        from sim.engine import sprint_plan as sp
+        gray = sp.owned_gray(gc.state.players[0])[0][1]
+        self.assertEqual([i + 1 for i, f in enumerate(gray.faces) if f.vuln], [1, 5])
+
+    def test_breakthrough_table(self):
+        bts = _fresh().get_full_state()["vulnerability_track"]["breakthroughs"]
+        self.assertEqual(sorted(bts["defense"]), ["1", "2", "3"])
+        self.assertEqual(bts["defense"]["2"], "Return 1 Gray Legacy die you own to the box")
+        self.assertEqual(bts["triage"], {"1": "Gain $2", "3": "Gain 1 Corporate Secret"})
+        self.assertEqual(bts["release"]["3"], "Return 1 Gray Legacy die you own to the box")
+        self.assertNotIn("2", bts["release"])
+
+    def test_pen_test_l2_logs_gray_return(self):
+        from web.controller.phase5_operations_actions import _breakthrough_log
+        from sim.engine import research_tracks as rt
+        gc = _fresh()
+        p = gc.state.players[0]
+        rec = rt.resolve_breakthrough(gc.engine, p, "DEFENSE", 2, None)
+        self.assertIsNotNone(rec)
+        self.assertTrue(_breakthrough_log(rec, gc.state.config).startswith("Return 1 Gray Legacy die"))
 
 
 class TestWebV049Rules(unittest.TestCase):
