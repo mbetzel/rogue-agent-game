@@ -16,6 +16,37 @@ if TYPE_CHECKING:
     from sim.engine.core import GameEngine
     from sim.engine.state import PlayerState
 
+# Test/sweep hook (INV-LOCK-01): a plain dict the reroll batch updates; no RNG, no behaviour change.
+_ROLL_CTX: Dict[str, bool] = {"in_reroll": False, "helix_active": False}
+
+
+def _record_lock_telemetry(player: "PlayerState", active_dice: List[Die], locked_this_phase: set,
+                           helix_fired_vuln: Dict[int, int], rnd: int) -> None:
+    """Spec §8.1 step-11 fields (final faces); written only under ``colored_vuln_lock``. Consumes no RNG."""
+    player.lock_dice_by_round[rnd] = player.lock_dice_by_round.get(rnd, 0) + len(locked_this_phase)
+    removed = 0
+    for d in active_dice:
+        f = d.current_face
+        v = vulnerability.face_vuln(f)
+        lockable = d.color in vulnerability.LOCKABLE_COLORS
+        c = d.color.value
+        if lockable:
+            player.colored_dice_rolled_by_color[c] = player.colored_dice_rolled_by_color.get(c, 0) + 1
+            if f is not None and f.is_star:
+                player.colored_star_by_color[c] = player.colored_star_by_color.get(c, 0) + 1
+        if v > 0:
+            src = "gray" if d.color == DieColor.GRAY else ("secret" if f.secrets_pending else "core")
+            if not lockable and d.color != DieColor.GRAY:
+                src = "other"
+            player.vuln_kept_by_source[src] = player.vuln_kept_by_source.get(src, 0) + v
+            player.vuln_kept_by_color[c] = player.vuln_kept_by_color.get(c, 0) + v
+            if d.die_id in locked_this_phase:
+                k = vulnerability.face_key(d)
+                player.locked_vuln_kept_by_face[k] = player.locked_vuln_kept_by_face.get(k, 0) + v
+        if d.die_id in helix_fired_vuln:
+            removed += max(0, helix_fired_vuln[d.die_id] - v)
+    player.helix_bypass_vuln_removed += removed
+
 
 def get_face_signature(face: Optional[Face]) -> Optional[Tuple]:
     """Returns a hashable signature representing the printed output of a face.
@@ -92,6 +123,7 @@ def resolve_prodigy_purple_star_override(
     target_idx: Optional[int] = None,
     target_face: Optional[Face] = None,
     excluded_targets: Optional[set] = None,
+    game_state: Optional[Any] = None,
 ) -> bool:
     """Prodigy Face 6 Protocol (Arbitrary Code Execution):
     Turn any 1 other rolled die to any legal non-Star face of choice.
@@ -104,7 +136,12 @@ def resolve_prodigy_purple_star_override(
         return False
 
     if target_idx is None or target_face is None:
-        choice = player.bot.choose_prodigy_purple_star_override(player, active_dice, rng)
+        if game_state is not None and getattr(getattr(player, "config", None), "colored_vuln_lock", False):
+            # v0.47.0: lock-aware ACE target (the v0.46 call below is unchanged)
+            choice = player.bot.choose_prodigy_purple_star_override(
+                player, active_dice, rng, excluded_targets=excluded_targets, game_state=game_state)
+        else:
+            choice = player.bot.choose_prodigy_purple_star_override(player, active_dice, rng)
         if choice is not None:
             target_idx, target_face = choice
 
@@ -412,6 +449,10 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
 
         # Roll Active Pool (ready_for_release_dice + contractor_dice)
         active_dice: List[Die] = list(player.ready_for_release_dice) + list(player.contractor_dice)
+        lock_on = bool(getattr(engine.config, "colored_vuln_lock", False))
+        helix_mode = getattr(engine.config, "helix_bypass_mode", "LEGACY") == "REROLL_LOCKED"
+        locked_this_phase: set = set()
+        player.helix_bypass_active = False
         for die in active_dice:
             die.is_locked = False
             res_face = die.roll(engine.rng)
@@ -444,11 +485,19 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
                     continue
                 if face.is_glitch:
                     d.is_locked = True
+                elif lock_on and not d.is_locked and vulnerability.lock_applies(engine.config, d):
+                    d.is_locked = True
+                    player.lock_events += 1
+                    _k = vulnerability.face_key(d)
+                    player.lock_events_by_face[_k] = player.lock_events_by_face.get(_k, 0) + 1
+                    locked_this_phase.add(d.die_id)
 
         _evaluate_locks(active_dice)
 
-        is_helix = has_company_override(player, CompanyCode.HELIX, legacy_bridge_enabled(engine)) and player.is_ability_available(active_ver)
+        is_helix_co = has_company_override(player, CompanyCode.HELIX, legacy_bridge_enabled(engine))
+        is_helix = is_helix_co and player.is_ability_available(active_ver) and not helix_mode
         helix_active = False
+        helix_fired_vuln: Dict[int, int] = {}
         if is_helix:
             use_helix = player.bot.choose_helix_override(
                 player_state=player,
@@ -470,6 +519,23 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
         # Pure Rerolls: ZERO debug actions, ZERO patch deductions
         rerolls_remaining = max_free_rerolls
         while rerolls_remaining > 0:
+            # v0.47.0 Brute-Force Bypass (REROLL_LOCKED): offered at every reroll step while unused and some die is locked
+            if (helix_mode and is_helix_co and not helix_active
+                    and player.is_helix_bypass_available(active_ver)
+                    and any(d.is_locked for d in active_dice)):
+                if player.bot.choose_helix_bypass(player, active_dice, rerolls_remaining, engine.state):
+                    helix_active = True
+                    player.helix_bypass_active = True
+                    player.mark_ability_used(active_ver)
+                    if engine.config.helix_bypass_once_per_game:
+                        player.helix_bypass_used_game = True
+                    player.helix_bypass_uses += 1
+                    player.helix_bypass_use_log.append({
+                        "round": engine.state.current_round, "version": active_ver,
+                        "step": max_free_rerolls - rerolls_remaining,
+                        "locked": sum(1 for d in active_dice if d.is_locked)})
+                    helix_fired_vuln = {d.die_id: vulnerability.face_vuln(d.current_face)
+                                        for d in active_dice if d.is_locked}
             # Choose rerolls among unlocked dice (or any dice if helix_active)
             reroll_res = player.bot.choose_yahtzee_rerolls(
                 player_state=player,
@@ -492,20 +558,22 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
             if engine.config.is_vulnerability:
                 from sim.bots import vulnerability_policy
 
-                reroll_indices = vulnerability_policy.adjust_rerolls(
-                    player.bot, player, active_dice, list(reroll_indices), engine.state, rerolls_remaining)
+                if lock_on:
+                    _decl: Dict[str, int] = {}
+                    reroll_indices = vulnerability_policy.adjust_rerolls(
+                        player.bot, player, active_dice, list(reroll_indices), engine.state, rerolls_remaining,
+                        stats=_decl)
+                    for _dk, _dv in _decl.items():
+                        player.lock_declined_rerolls[_dk] = player.lock_declined_rerolls.get(_dk, 0) + _dv
+                else:
+                    reroll_indices = vulnerability_policy.adjust_rerolls(
+                        player.bot, player, active_dice, list(reroll_indices), engine.state, rerolls_remaining)
 
-            # Filter reroll indices: Helix/Prodigy override may reroll locked dice; standard players cannot
-            if helix_active:
-                valid_rerolls = [
-                    idx for idx in reroll_indices
-                    if 0 <= idx < len(active_dice)
-                ]
-            else:
-                valid_rerolls = [
-                    idx for idx in reroll_indices
-                    if 0 <= idx < len(active_dice) and not active_dice[idx].is_locked
-                ]
+            # Filter reroll indices: a locked die can't be rerolled unless Brute-Force Bypass is active
+            valid_rerolls = [
+                idx for idx in reroll_indices
+                if 0 <= idx < len(active_dice) and vulnerability.reroll_allowed(active_dice[idx], helix_active)
+            ]
             # v0.48 Gray lock (sprint_plan_spec §8): a Gray die showing ⚠ cannot be rerolled (Helix is exempt)
             _lock_on = engine.config.vuln_face_lock != "NONE" and not helix_active
             if _lock_on:
@@ -519,13 +587,10 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
                 for _i, _d in enumerate(active_dice):
                     if _lock_on and vulnerability.is_reroll_locked(engine.config, _d):
                         continue  # no choice was offered
-                    if not _d.is_locked and vulnerability.face_vuln(_d.current_face) > 0:
+                    if vulnerability.reroll_allowed(_d, helix_active if lock_on else False) and vulnerability.face_vuln(_d.current_face) > 0:
                         _ev += 1
                         _kept += 0 if _i in _rr else 1
-                        _fi = next((k for k, f in enumerate(_d.faces) if f is _d.current_face), None)
-                        if _fi is None:
-                            _fi = _d.faces.index(_d.current_face)
-                        _fk = player.vuln_keep_by_face.setdefault(f"{_d.color.value}:{_fi + 1}", [0, 0])
+                        _fk = player.vuln_keep_by_face.setdefault(vulnerability.face_key(_d), [0, 0])
                         _fk[0] += 0 if _i in _rr else 1
                         _fk[1] += 1
                 if _ev:
@@ -537,11 +602,17 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
             if not valid_rerolls:
                 break
 
+            _ROLL_CTX["in_reroll"] = True
+            _ROLL_CTX["helix_active"] = helix_active
             for r_idx in valid_rerolls:
+                if helix_active and helix_mode and active_dice[r_idx].is_locked:
+                    player.helix_bypass_locked_rerolled += 1
                 res_face = active_dice[r_idx].roll(engine.rng)
                 if res_face and active_dice[r_idx].current_face != res_face:
                     active_dice[r_idx].current_face = res_face
                 active_dice[r_idx].is_locked = False
+            _ROLL_CTX["in_reroll"] = False
+            _ROLL_CTX["helix_active"] = False
 
             _evaluate_locks(active_dice)
             if is_operator_operative and not operator_contingent_staffing_triggered:
@@ -557,6 +628,10 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
 
         # Prodigy Face 6 protocol check after rerolls (Arbitrary Code Execution)
         player.prodigy_overrides_this_round = 0
+        if lock_on and is_prodigy_operative:
+            _ace_pre = {i: active_dice[i].current_face for i, d in enumerate(active_dice) if d.is_locked}
+        else:
+            _ace_pre = None
         if is_prodigy_operative:
             if getattr(engine.config, "white_hat_6f_rebalance", False):
                 purple_count = sum(
@@ -572,15 +647,30 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
                     if player.prodigy_overrides_this_round >= remaining_stars:
                         break
                     if not resolve_prodigy_purple_star_override(
-                        player, active_dice, engine.rng, excluded_targets=overridden_targets
+                        player, active_dice, engine.rng, excluded_targets=overridden_targets,
+                        game_state=engine.state
                     ):
                         break
             else:
                 resolve_prodigy_purple_star_override(player, active_dice, engine.rng)
+            if _ace_pre:
+                player.ace_lock_breaks += sum(1 for i, f in _ace_pre.items() if active_dice[i].current_face is not f)
             _evaluate_locks(active_dice)
 
-        # Helix face override (Brute-Force Bypass)
-        if helix_active and v038:
+        # Helix face override (Brute-Force Bypass); REROLL_LOCKED has no face-set
+        if helix_mode:
+            if helix_active and getattr(engine.config, "helix_bypass_face_set", False):
+                # v0.49 H1B: set 1 rolled die to any non-star face of its colour (R&D face allowed); ⚠ is counted
+                # by the final lock pass and lock_in below.
+                override = player.bot.choose_helix_face_override_v038(player, active_dice, engine.state)
+                if override:
+                    die_idx, target_face = override
+                    if 0 <= die_idx < len(active_dice) and not target_face.is_star and target_face in active_dice[die_idx].faces:
+                        active_dice[die_idx].current_face = target_face
+                        active_dice[die_idx].is_locked = False
+                        active_dice[die_idx].chosen_choice_index = None
+                        player.helix_bypass_face_sets += 1
+        elif helix_active and v038:
             override = player.bot.choose_helix_face_override_v038(player, active_dice, engine.state)
             if override:
                 die_idx, target_face = override
@@ -610,9 +700,18 @@ def _phase1_players(engine: GameEngine, player_ids: Optional[set], prelude: bool
         # Final lock evaluation pass
         _evaluate_locks(active_dice)
 
+        if lock_on:
+            _record_lock_telemetry(player, active_dice, locked_this_phase, helix_fired_vuln, engine.state.current_round)
+
         if engine.config.is_vulnerability:
             # v0.46.0 lock-in: +1 Vulnerability per ⚠ on the final faces (after Prodigy, Helix and Release L4)
             vulnerability.lock_in(engine, player, active_dice)
+
+        if lock_on:
+            # INV-LOCK-03: nothing leaves Phase 1 locked; the bypass window closes with the phase
+            for d in active_dice:
+                d.is_locked = False
+            player.helix_bypass_active = False
 
         # 5. Assign Defenses & Declare Choices (RULES.md v0.8)
         declared_choices = player.bot.declare_choices(

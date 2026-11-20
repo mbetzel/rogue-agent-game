@@ -402,6 +402,15 @@ class BaseBot:
     choose_operator_ability = choose_meridian_override
     choose_phreaker_ability = choose_omnidyne_override
     choose_prodigy_ability = choose_helix_override
+
+    def choose_helix_bypass(self, player_state: PlayerState, active_dice: List[Die], rerolls_remaining: int,
+                            game_state: Any) -> bool:
+        """v0.47.0 Brute-Force Bypass (``helix_bypass_mode='REROLL_LOCKED'``): pure, no RNG (spec §6.4).
+
+        The legacy ``choose_helix_override`` hook is not called in this mode."""
+        from sim.bots import vulnerability_policy
+
+        return vulnerability_policy.helix_bypass_default(player_state, active_dice, rerolls_remaining, game_state)
     choose_prodigy_face_override = choose_helix_face_override
 
     def choose_malware_sacrifice(
@@ -1225,8 +1234,17 @@ class BaseBot:
         player_state: PlayerState,
         active_dice: List[Die],
         rng: random.Random,
+        excluded_targets: Optional[set] = None,
+        game_state: Any = None,
     ) -> Optional[Tuple[int, Face]]:
         """Selects 1 other rolled die in active pool to turn to an optimal legal non-Star, non-Secret face."""
+        _cfg = getattr(player_state, "config", None)
+        if (game_state is not None and getattr(_cfg, "colored_vuln_lock", False)
+                and getattr(_cfg, "white_hat_6f_rebalance", False)):
+            from sim.bots import vulnerability_policy
+
+            return vulnerability_policy.choose_ace_target(
+                player_state, active_dice, game_state, excluded_targets)
         if not getattr(getattr(player_state, "config", None), "white_hat_6f_rebalance", False):
             for idx, d in enumerate(active_dice):
                 eff = d.effective_face or d.current_face

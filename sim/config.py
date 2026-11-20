@@ -260,6 +260,12 @@ class VulnPolicyParams:
     pen_value: float = 1.75              # money-equivalent of 1 research token spent on Pen Test
     rival_vuln_per_die: float = 0.40     # expected pre-roll Vulnerability per rival rolled die
     reroll_margin: float = 0.0
+    # --- v0.47.0 Locked ⚠ Faces (docs/specs/locked_vuln_faces_spec.md §3.2); read only under colored_vuln_lock ---
+    lock_policy: str = "LAMBDA_AWARE"    # "NONE" | "AWARE" | "LAMBDA" | "LAMBDA_AWARE"
+    lock_reroll_margin: float = 0.0      # extra money-equivalent a clean colored reroll must clear (λ rule)
+    helix_min_gain: float = 1.0          # min λ-priced gain before the bot spends Brute-Force Bypass
+    pen_relative_to_floor: Optional[bool] = None  # None = follow cfg.colored_vuln_lock
+    pen_lock_headroom: int = 0           # optional arm (OQ-5): extra Pen Test headroom under the lock (0 = off)
 
 
 @dataclass
@@ -583,6 +589,15 @@ class GameConfig:
     data_scraper_secret_bonus: int = 0
     vuln_bot_params: VulnPolicyParams = field(default_factory=VulnPolicyParams)  # sim-only [TUNE-BOT]
 
+    # --- v0.47.0 Locked ⚠ Faces (docs/specs/locked_vuln_faces_spec.md §3.1; defaults reproduce v0.46) ---
+    colored_vuln_lock: bool = False                # [RULE] a colored die showing a ⚠ face is locked for the rest of Phase 1 Step 3
+    colored_vuln_lock_secret: bool = True          # [RULE] the Secret face F5 (⚠) locks too (read only under colored_vuln_lock)
+    vuln_lock_gray: bool = False                   # [RULE] v0.49 "lock all dice": Gray dice showing ⚠ lock too (sets is_locked; requires colored_vuln_lock)
+    helix_bypass_mode: str = "LEGACY"              # "LEGACY" | "REROLL_LOCKED"
+    helix_bypass_face_set: bool = False            # [RULE] v0.49 H1B: Bypass also sets 1 rolled die to any non-star face of its colour
+    helix_bypass_black_immune: bool = False        # [RULE] v0.49 H1B: Root Override Hijack cannot mark an unused Bypass Used
+    helix_bypass_once_per_game: bool = False       # [RULE] Brute-Force Bypass once per game (DTO Slush Fund model)
+
     # --- Step 0 exchange-rate probe levers (sim-only; default off => every preset is bit-identical) ---
     probe_bonus_seat: int = -1                 # seat that receives the probe bonus (-1 = off)
     probe_bonus_starting_secrets: int = 0      # one-off +Secrets at setup for that seat
@@ -752,6 +767,7 @@ class GameConfig:
         self._validate_v040()
         self._validate_v046()
         self._validate_v048()
+        self._validate_locked_vuln()
         if self.starting_secrets_by_player_count is None:
             # NOTE: resolved once at construction. Re-assigning round_sequence later does NOT
             # re-resolve this dict; use GameConfig.legacy_v033() or pass round_sequence to __init__.
@@ -1224,6 +1240,66 @@ class GameConfig:
         overrides.setdefault("bot_pr_push", True)
         overrides.setdefault("bot_pr_push_params", PrPushParams())
         return cls.v047(**overrides)
+
+    @classmethod
+    def v049(cls, **overrides) -> "GameConfig":
+        """v0.49.0 Locked ⚠ Faces, "lock all dice" (docs/specs/locked_vuln_faces_spec.md). Inherits v048().
+        Any die showing a ⚠ face (colored core ⚠, Secret/R&D face, or Gray ⚠) is locked for the rest of Phase 1 rerolls.
+        v0.48's own Gray filter (``vuln_face_lock="GRAY"``) stays on; it is redundant with ``vuln_lock_gray`` but keeps its telemetry."""
+        for k, v in (
+            ("colored_vuln_lock", True), ("colored_vuln_lock_secret", True), ("vuln_lock_gray", True),
+            ("die_face_profile", "V046_VULN"),                                          # D2 premium faces
+            ("vuln_band_thresholds", (5, 8, 11)), ("vuln_min_target_by_version", (5, 5, 5)),  # D1 safe zone 0-4
+            ("helix_bypass_mode", "REROLL_LOCKED"), ("helix_bypass_once_per_game", True),     # D3
+            ("helix_bypass_face_set", True), ("helix_bypass_black_immune", True),             # H1B
+        ):
+            overrides.setdefault(k, v)
+        return cls.v048(**overrides)
+
+    @classmethod
+    def v049_roster(cls, **overrides) -> "GameConfig":
+        """v0.49.0 + the v0.48 roster bots (PR push, thinning-aware research)."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        overrides.setdefault("bot_research_mode", "THINNING_AWARE")
+        return cls.v049(**overrides)
+
+    @classmethod
+    def v046_locked(cls, **overrides) -> "GameConfig":
+        """Locked ⚠ Faces draft (docs/specs/locked_vuln_faces_spec.md), swept on the v0.46 base. Inherits v046().
+        Formerly ``v047()`` on this branch; renamed after main shipped v0.47.0 Red Signature."""
+        for k, v in (
+            ("colored_vuln_lock", True), ("colored_vuln_lock_secret", True),           # D5
+            ("die_face_profile", "V046_VULN"),                                          # D2 premium faces
+            ("vuln_band_thresholds", (5, 8, 11)), ("vuln_min_target_by_version", (5, 5, 5)),  # D1 safe zone 0-4
+            ("helix_bypass_mode", "REROLL_LOCKED"), ("helix_bypass_once_per_game", True),     # D3
+        ):
+            overrides.setdefault(k, v)
+        return cls.v046(**overrides)
+
+    @classmethod
+    def v046_locked_roster(cls, **overrides) -> "GameConfig":
+        """Locked ⚠ Faces draft + bot autonomous PR push and cash allocation policies enabled."""
+        overrides.setdefault("bot_pr_push", True)
+        overrides.setdefault("bot_pr_push_params", PrPushParams())
+        return cls.v046_locked(**overrides)
+
+    def _validate_locked_vuln(self) -> None:
+        """spec §3.4 (Locked ⚠ Faces validation)."""
+        if self.colored_vuln_lock and self.defense_mode != "VULNERABILITY":
+            raise ValueError("colored_vuln_lock requires defense_mode='VULNERABILITY'")
+        if self.vuln_lock_gray and not self.colored_vuln_lock:
+            raise ValueError("vuln_lock_gray requires colored_vuln_lock")
+        if self.helix_bypass_mode not in ("LEGACY", "REROLL_LOCKED"):
+            raise ValueError(f"helix_bypass_mode must be 'LEGACY' or 'REROLL_LOCKED', got {self.helix_bypass_mode!r}")
+        if self.helix_bypass_mode == "REROLL_LOCKED" and not self.colored_vuln_lock:
+            raise ValueError("helix_bypass_mode='REROLL_LOCKED' requires colored_vuln_lock")
+        if self.helix_bypass_once_per_game and self.helix_bypass_mode != "REROLL_LOCKED":
+            raise ValueError("helix_bypass_once_per_game requires helix_bypass_mode='REROLL_LOCKED'")
+        if (self.helix_bypass_face_set or self.helix_bypass_black_immune) and not self.helix_bypass_once_per_game:
+            raise ValueError("helix_bypass_face_set / helix_bypass_black_immune require helix_bypass_once_per_game")
+        if self.vuln_bot_params.lock_policy not in ("NONE", "AWARE", "LAMBDA", "LAMBDA_AWARE"):
+            raise ValueError(f"unknown vuln_bot_params.lock_policy {self.vuln_bot_params.lock_policy!r}")
 
     def _validate_tower_config(self) -> None:
         """Validates Cube Tower physics parameters (spec §2.4)."""

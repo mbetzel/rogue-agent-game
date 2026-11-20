@@ -257,6 +257,26 @@ class PlayerState:
         if int(getattr(config, "pr_l4_instant_market_share", 0) or 0) > 0:
             self.l4_payouts["pr_instant_market_share"] = 0
         self.slush_fund_used_game = False
+        # v0.47.0 Brute-Force Bypass (REROLL_LOCKED) state + Locked ⚠ Faces telemetry (spec §5.1, §8.1)
+        self.helix_bypass_used_game = False   # once-per-game flag (mirror of slush_fund_used_game)
+        self.helix_bypass_active = False      # transient: this Phase 1 only
+        self.lock_events: int = 0
+        self.lock_events_by_face: Dict[str, int] = {}
+        self.lock_dice_by_round: Dict[int, int] = {}
+        self.locked_vuln_kept_by_face: Dict[str, int] = {}
+        self.vuln_kept_by_source: Dict[str, int] = {}
+        self.vuln_kept_by_color: Dict[str, int] = {}
+        self.colored_dice_rolled_by_color: Dict[str, int] = {}
+        self.colored_star_by_color: Dict[str, int] = {}
+        self.lock_declined_rerolls: Dict[str, int] = {}
+        self.ace_lock_breaks: int = 0
+        self.helix_bypass_uses: int = 0
+        self.helix_bypass_use_log: List[Dict[str, Any]] = []
+        self.helix_bypass_locked_rerolled: int = 0
+        self.helix_bypass_vuln_removed: int = 0
+        self.helix_bypass_lost_to_black: int = 0
+        self.helix_bypass_face_sets: int = 0
+        self.helix_bypass_black_blocked: int = 0
         self.triage_l3_upgrade_color: Optional[str] = None
         self.triage_l4_upgrade_color: Optional[str] = None
         self.excess_hardware_upgrades_requested = 0
@@ -546,6 +566,14 @@ class PlayerState:
     @dto_slush_fund_used.setter
     def dto_slush_fund_used(self, val: bool) -> None:
         self.slush_fund_used_game = bool(val)
+
+    @property
+    def helix_bypass_used(self) -> bool:
+        return bool(self.helix_bypass_used_game)
+
+    @helix_bypass_used.setter
+    def helix_bypass_used(self, val: bool) -> None:
+        self.helix_bypass_used_game = bool(val)
 
     # --- v0.36.0 Market Share (INV-MS-LEDGER-01) ---
     def init_market_share(self, start: int, max_share: Optional[int] = None) -> None:
@@ -856,6 +884,13 @@ class PlayerState:
         """DTO Slush Fund: once per version (v0.34) or once per game (v0.35, INV-RT-SLUSH-ONCE-01)."""
         cfg = getattr(self, "config", None)
         if cfg is not None and getattr(cfg, "slush_fund_once_per_game", False) and self.slush_fund_used_game:
+            return False
+        return self.is_ability_available(active_ver)
+
+    def is_helix_bypass_available(self, active_ver: Optional[str] = None) -> bool:
+        """Helix Brute-Force Bypass (REROLL_LOCKED): the Version's Override must be AVAILABLE and, once per game, unused."""
+        cfg = getattr(self, "config", None)
+        if cfg is not None and getattr(cfg, "helix_bypass_once_per_game", False) and self.helix_bypass_used_game:
             return False
         return self.is_ability_available(active_ver)
 

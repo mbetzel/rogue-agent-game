@@ -52,8 +52,8 @@ def parse_set(set_json, vuln_params_json=None):
     from scripts.v046_tables import coerce_overrides
     out = coerce_overrides(json.loads(set_json or "{}"))
     if vuln_params_json:
-        from sim.config import VulnPolicyParams
-        out["vuln_bot_params"] = VulnPolicyParams(**json.loads(vuln_params_json))
+        # kept as a dict: layered onto the preset's own VulnPolicyParams in make_config (never rebuilt from defaults)
+        out["vuln_bot_params"] = json.loads(vuln_params_json)
     return out
 
 
@@ -61,6 +61,10 @@ def make_config(cfg_name, players, pr_push=False, pr_params=None, pr_scope="all"
     from sim.config import GameConfig, PrPushParams
     kw = dict(num_players=players)
     kw.update(extra or {})
+    if isinstance(kw.get("vuln_bot_params"), dict):
+        import dataclasses
+        kw["vuln_bot_params"] = dataclasses.replace(getattr(GameConfig, cfg_name)(num_players=players).vuln_bot_params,
+                                                    **kw["vuln_bot_params"])
     kw["bot_pr_push"] = bool(pr_push)  # explicit either way: never inherit a roster default silently
     if pr_params:
         kw["bot_pr_push_params"] = PrPushParams(**pr_params)
@@ -130,7 +134,12 @@ def play(task):
                                   "keep_face": {k: list(v) for k, v in p.vuln_keep_by_face.items()},
                                   "levels": [p.defense_level, p.triage_level, p.release_level, p.patent_level],
                                   "stance_hist": dict(getattr(p.bot, "stats", {}).get("stance_hist", {}))}
-                                 if eng.config.is_vulnerability else {})))
+                                 if eng.config.is_vulnerability else {}),
+                              # v0.47.0 Locked ⚠ Faces: ⚠ kept per player-round and Helix bypass timing
+                              **({"icons": p.vuln_icons_kept_total, "player_rounds": len(p.vuln_by_round),
+                                  "helix_uses": p.helix_bypass_uses, "helix_log": list(p.helix_bypass_use_log),
+                                  "lock_events": p.lock_events}
+                                 if getattr(eng.config, "colored_vuln_lock", False) else {})))
         return dict(cfg=cfg_name, cell=cell, players=players, seed=seed, ms=ms, special=special,
                     winner_ids=list(res.winner_ids), end_reason=res.end_reason.value,
                     end_triggers=list(res.end_triggers), rounds=res.total_rounds,

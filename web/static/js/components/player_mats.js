@@ -79,7 +79,7 @@ function renderVulnerabilityCard(p) {
             <span style="width: ${pct}%;"></span>
           </div>
           <div class="reserve-card-footer">
-            +1 per ⚠ at lock-in | Pen Test: −${p.pen_test_limit} / turn (L${p.pen_test_level})
+            +1 per ⚠ at Deploy | Pen Test: −${p.pen_test_limit} / turn (L${p.pen_test_level})
           </div>
         </div>`;
 }
@@ -554,7 +554,7 @@ export function renderPlayerMats() {
               <div class="zone-subtext">
                 ${isActivelyRolling 
                   ? (p.is_human && state.phase === 1 
-                      ? `Free Rerolls: <strong>${p.rerolls_remaining || 0}</strong>/${p.max_rerolls || 2} | Click dice to reroll (a Secret face may be kept or rerolled) | +1 Vulnerability per ⚠ at lock-in` 
+                      ? `Free Rerolls: <strong>${p.rerolls_remaining || 0}</strong>/${p.max_rerolls || 2} | Click dice to reroll (⚠ dice are Locked Dice) | +1 Vulnerability per ⚠ at Deploy` 
                       : `Phase 1 Rolling | Secret faces → Processing Box after rerolls`)
                   : (p.has_committed 
                       ? (readyCount > 0 ? 'Dice ready for next round' : 'All dice deployed to In Production | Scanned dice graduate here in Phase 6 (≤ Release Bandwidth)')
@@ -775,7 +775,7 @@ export function renderPlayerMats() {
           if (isGlitch) badgeHtml += `<span class="badge-glitch">⚠️ GLITCH</span> `;
           if (isChoice) badgeHtml += `<span class="badge-choice">CHOICE</span> `;
           if (d.current_face && d.current_face.secrets_pending) badgeHtml += `<span class="badge-choice">🔒 SECRET → PROCESSING BOX</span> `;
-          if (d.current_face && d.current_face.vuln) badgeHtml += `<span class="badge-vuln" title="+${d.current_face.vuln} Vulnerability at lock-in">⚠${d.current_face.vuln > 1 ? "×" + d.current_face.vuln : ""}</span> `;
+          if (d.current_face && d.current_face.vuln) badgeHtml += `<span class="badge-vuln" title="+${d.current_face.vuln} Vulnerability at Deploy">⚠${d.current_face.vuln > 1 ? "×" + d.current_face.vuln : ""}</span> `;
 
           let faceNameDisplay = faceName;
           if (d.effective_face && d.chosen_choice_index !== null && d.chosen_choice_index !== undefined) {

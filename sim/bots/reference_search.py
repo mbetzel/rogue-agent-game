@@ -124,7 +124,7 @@ class MarketShareDumpBot(_ResearchLineBot):
         return out
 
 
-def build_portfolio(bot_id: int, vulnerability: bool = False) -> List[Tuple[str, BaseBot]]:
+def build_portfolio(bot_id: int, vulnerability: bool = False, locked: bool = False) -> List[Tuple[str, BaseBot]]:
     """Spec §5.3: 5 archetypes + 4 Adaptive Balanced focus rotations + 2 Market Share policy variants
     + Public Relations push + Market Share dump (13; FINDINGS §40 follow-up).
 
@@ -150,6 +150,11 @@ def build_portfolio(bot_id: int, vulnerability: bool = False) -> List[Tuple[str,
             b.vuln_strategy = strat
             if strat == "PEN_TEST_RUSH":
                 b.research_focus_v036 = ("DEFENSE", "TRIAGE", "RELEASE", "PATENT")
+            members.append((f"AdaptiveBalanced[{label}]", b))
+    if vulnerability and locked:  # v0.47.0 only: appended after the V046 members (v0.46 candidate order unchanged)
+        for label, strat in (("no_color_reroll", "NO_COLOR_REROLL"), ("star_chase", "STAR_CHASE")):
+            b = AdaptiveBalancedBot(bot_id)
+            b.vuln_strategy = strat
             members.append((f"AdaptiveBalanced[{label}]", b))
     for _, b in members:
         force_fixed_focus(b)
@@ -322,7 +327,8 @@ class ReferenceSearchBot(BaseBot):
                 and getattr(getattr(engine, "config", None), "is_vulnerability", False)):
             # v0.46.0 only: stance members are appended after the v0.45 members (candidate order unchanged)
             self._vuln_members_added = True
-            for label, m in build_portfolio(self.bot_id, vulnerability=True)[len(self.portfolio):]:
+            _locked = bool(getattr(engine.config, "colored_vuln_lock", False))
+            for label, m in build_portfolio(self.bot_id, vulnerability=True, locked=_locked)[len(self.portfolio):]:
                 force_fixed_focus(m)
                 m.pr_push_reference_owned = True
                 self.portfolio.append((label, m))

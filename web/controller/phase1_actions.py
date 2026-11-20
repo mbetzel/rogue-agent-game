@@ -409,7 +409,7 @@ def lock_in(
     if not meta["has_rolled"]:
         raise ValueError("Must roll the Ready Pool before locking in")
     if meta["has_committed"]:
-        raise ValueError("Dice have already been locked in this round")
+        raise ValueError("Dice have already been deployed this round")
 
     rolled = meta["rolled_pool"]
     choice_decls: Dict[int, int] = {}
@@ -433,7 +433,7 @@ def lock_in(
     icons = sum(vulnerability.face_vuln(d.current_face) for d in rolled)
     lost = icons - gained
     controller.event_log.append(
-        f"{meta['name']} locked in {len(rolled)} dice: {icons} ⚠, Vulnerability {before} -> {player.vulnerability}"
+        f"{meta['name']} deployed {len(rolled)} dice: {icons} ⚠, Vulnerability {before} -> {player.vulnerability}"
         + (f" ({lost} lost at the top of the Vulnerability Track)" if lost > 0 else "") + "."
     )
 
@@ -449,7 +449,7 @@ def lock_in(
         controller.phase = int(RoundPhase.COMPILER_DROP_AND_CORRUPTION)
         controller.phase_name = ROUND_PHASE_NAMES[controller.phase]
         controller.subphase = "ready_for_compile"
-        controller.event_log.append("All corporations have locked in. Ready for Compile Drop.")
+        controller.event_log.append("All corporations have deployed their dice. Ready for Compile Drop.")
 
     return controller.get_full_state()
 

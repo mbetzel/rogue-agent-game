@@ -1,0 +1,47 @@
+{
+ "2": {
+  "rounds": 8.406666666666666,
+  "patient_zero_pct": 41.833333333333336,
+  "market_collapse_pct": 26.083333333333332,
+  "green_lost_per_player_game": 1.8245833333333332,
+  "helix_win_pct": 39.523809523809526,
+  "helix_use_share_pct": 33.57142857142857,
+  "helix_lost_to_black_pct": 40.23809523809524,
+  "helix_mean_vuln_removed": 1.0921985815602837,
+  "company_spread_pp": null,
+  "liquid_per_player_round": 8.175042319085907,
+  "b2b_unaffordable_per_game": 0.3983333333333333,
+  "green_no_target_r7_pct": 74.20482348829081,
+  "singularity_pct": 24.166666666666668
+ },
+ "3": {
+  "rounds": 8.3075,
+  "patient_zero_pct": 60.666666666666664,
+  "market_collapse_pct": 10.333333333333334,
+  "green_lost_per_player_game": 1.6216666666666666,
+  "helix_win_pct": 26.917057902973397,
+  "helix_use_share_pct": 39.123630672926446,
+  "helix_lost_to_black_pct": 35.36776212832551,
+  "helix_mean_vuln_removed": 1.204,
+  "company_spread_pp": null,
+  "liquid_per_player_round": 8.264323474782111,
+  "b2b_unaffordable_per_game": 0.435,
+  "green_no_target_r7_pct": 63.687996970844374,
+  "singularity_pct": 26.5
+ },
+ "4": {
+  "rounds": 8.055833333333334,
+  "patient_zero_pct": 68.41666666666667,
+  "market_collapse_pct": 10.083333333333334,
+  "green_lost_per_player_game": 1.4535416666666667,
+  "helix_win_pct": 16.767922235722963,
+  "helix_use_share_pct": 39.00364520048603,
+  "helix_lost_to_black_pct": 34.02187120291616,
+  "helix_mean_vuln_removed": 1.3021806853582554,
+  "company_spread_pp": 20.139808437593743,
+  "liquid_per_player_round": 8.251701796112524,
+  "b2b_unaffordable_per_game": 0.6083333333333333,
+  "green_no_target_r7_pct": 55.51492992078001,
+  "singularity_pct": 21.166666666666668
+ }
+}

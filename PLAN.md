@@ -3,6 +3,18 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
+- [x] **Rules Draft `v0.49.0`** captured in [RULES.md](./RULES.md) (Locked ⚠ Faces: lock all dice)
+- [ ] **Phase 70: Locked ⚠ Faces, "Lock All Dice" (`v0.49.0 Baseline`)**: any die showing ⚠ during Phase 1 rerolls is a **Locked Die** (colored ⚠, R&D faces, Gray Face 3); premium colored ⚠ faces; safe zone `0–4` (bands `5–7 / 8–10 / 11+`); Helix *Brute-Force Bypass* H1B (once per game: reroll locked dice + set 1 face; immune to Root Override Hijack); *Lock-in* → **Deploy**; override status *Locked* → **Pending**.
+  - [x] *Pre-SDLC Game Designer Modeling:* `docs/plans/locked_vuln_faces_gd_plan.md` (User sign-off 2026-11-19, §8 and §11).
+  - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/locked_vuln_faces_spec.md` (INV-LOCK-01..12).
+  - [x] *Implementation (`senior-engineer`) + Code Review (`staff-engineer` PASS with minor fixes):* `GameConfig.v049()` / `v049_roster()` on v0.48 (the v0.46-base draft is kept as `v046_locked()`); H1B in b344770.
+  - [x] *Validation Sweeps (`product-owner`) + Balance Assessment (`game-designer`):* `docs/reports/v049_lock_all_dice_sweeps.md`, `docs/reports/v049_balance_assessment.md`, `FINDINGS.md` §65 APPROVED (re-based guardrails).
+  - [x] *Documentation Sync (Main Agent) + PnP / TTS / web labels (`graphic-designer`):* RULES, QUICKREF, GLOSSARY (new **Locked Die** entry), APPENDIX, `pnp/` (regenerated), `tts/` (rebuilt, `--check` clean) at `v0.49.0`.
+  - [ ] *Follow-ups:*
+    - [ ] Staff-review minor items: the LEGACY-Helix bot strip under the lock (`sim/bots/vulnerability_policy.py`); `_ROLL_CTX` try/finally (`sim/engine/phase1_roll_deploy.py`).
+    - [ ] Sweep summary: print `helix_bypass_face_sets` and `helix_bypass_black_blocked`; v0.48 ref1 at 1,200 games; a double-capstone stance in the dominance matrix.
+    - [ ] Company-power pass: 4P spread `18.4` pp (Spook leads; Helix `19.2`); per-colour parity.
+    - [ ] Web: Helix text, deprecated v0.48 terms, and switching the web engine to `v049()`.
 - [x] **Rules Draft `v0.48.0`** captured in [RULES.md](./RULES.md) (Sprint Plan & Gray Legacy Rotation)
 - [ ] **Phase 69: Sprint Plan & Gray Legacy Rotation (`v0.48.0 Baseline`)**: Scanned Box → **Sprint Plan** (**Current Sprint** / **Next Sprint**; Current graduates first, forced up to Release Bandwidth; leftover bandwidth may take Next; leftovers become Current); Processing Box → **Research & Development**; Secret face → **R&D face**; Scanned Graduation → **Sprint Review**; new arrivals (R&D, purchases, PR L3 Purple, Blue Signature Gray) enter the Next Sprint. Gray dice: `1` ⚠ (Face 3) and locked on ⚠ (colored dice not locked). Start: 2 Gray + Purple + company die in Ready, 3 Gray in the Current Sprint; `6` Secrets. Tracks: Pen Test L1 `+1` Secret / L3 return 1 Gray; Triage L1 `+$2` / L3 `+1` Secret; Release L1 `+1` Release Bandwidth this round / L3 return 1 Gray; PR unchanged. *Deep R&D Vault* → *Deep Data Vault*; "Terminal Hardware & R&D Upgrade Tracks" → "Terminal Hardware Tracks".
   - [x] *Pre-SDLC Game Designer Modeling:* `docs/reports/sprint_plan_analysis.md` §1–§9 (User sign-off 2026-11-19, arm QC + 6 Secrets).
@@ -17,7 +29,7 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
   - [ ] *Follow-ups — balance (`game-designer`):*
     - [ ] Company-power pass: Helix trails and Spook leads in every arm (pre-existing in v0.46 / v0.47); also the v0.47 items below.
     - [ ] Watch (FINDINGS §64 combined-rules re-sweep): 3P seat-0 rush edge `+5.6 pp` vs the `+4` bar; 3P/4P Market Collapse `13% → 16%` (gives back part of the §63 Red Signature gain); 2P SecOpsTurtle (§63).
-  - [ ] *Follow-ups — parked rule options (need User approval first; `docs/specs/sprint_plan_spec.md` §19 item 8):* stranding backup rule (leftover Current dice stay Current; Next joins only when Current is empty); `STRICT` Sprint Review reading; Round 2 company-die priority (the Round 2 R&D-face dip); colored dice also locked on ⚠ (`vuln_face_lock="ALL"`, overlaps the locked-⚠ proposal branch, which now needs v0.49+); Gray Face 3 `+$1 / +2 🔬` income lever.
+  - [ ] *Follow-ups — parked rule options (need User approval first; `docs/specs/sprint_plan_spec.md` §19 item 8):* stranding backup rule (leftover Current dice stay Current; Next joins only when Current is empty); `STRICT` Sprint Review reading; Round 2 company-die priority (the Round 2 R&D-face dip); ~~colored dice also locked on ⚠~~ (done in v0.49.0, Phase 70); Gray Face 3 `+$1 / +2 🔬` income lever.
   - [ ] *Web follow-up (spec §19 item 9; web still plays `v047()`):*
     - [ ] Switch the web to `GameConfig.v048()` and bump its `rules_version`.
     - [ ] Display relabelling (`sim/engine/terms.py`, spec §13 — never built): Sprint Plan / Current Sprint / Next Sprint / Research & Development / R&D face / Sprint Review / *Deep Data Vault*.

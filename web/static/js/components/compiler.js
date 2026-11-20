@@ -154,8 +154,8 @@ export function renderCompiler() {
           </div>
           ${renderVulnerabilityTrack()}
           <div class="agent-track-footnote">
-            <strong>+1 per ⚠</strong> on your final faces at lock-in (Phase 1). Each Green cube hits the highest Vulnerability at
-            <strong>${(state.vulnerability_track || {}).min_target || 4}+</strong> (ties all hit), costs Corporate Secrets by band, and resets it to 0.
+            <strong>+1 per ⚠</strong> on your final faces at Deploy (Phase 1). Each Green cube hits the highest Vulnerability at
+            <strong>${(state.vulnerability_track || {}).min_target || 5}+</strong> (ties all hit), costs Corporate Secrets by band, and resets it to 0.
             Lower it with the <strong>Pen Test Track</strong> in Phase 5.
           </div>
         </div>
@@ -283,7 +283,7 @@ export function renderCompiler() {
           <div class="cube-threat-row green-row">
             <span class="threat-pill green">▲ GREEN // MALWARE</span>
             <div class="threat-row-text">
-              <strong>One cube at a time:</strong> hits the player(s) with the highest <strong>Vulnerability</strong> at ${(state.vulnerability_track || {}).min_target || 4}+ (${((state.vulnerability_track || {}).bands || []).map((b) => `${b.from}–${b.to}: −${b.damage}`).join(", ")} Corporate Secrets), then resets them to 0. <em>Players in the safe zone are never hit.</em>
+              <strong>One cube at a time:</strong> hits the player(s) with the highest <strong>Vulnerability</strong> at ${(state.vulnerability_track || {}).min_target || 5}+ (${((state.vulnerability_track || {}).bands || []).map((b) => `${b.from}–${b.to}: −${b.damage}`).join(", ")} Corporate Secrets), then resets them to 0. <em>Players in the safe zone are never hit.</em>
             </div>
           </div>
         </div>
@@ -311,7 +311,7 @@ export function renderCompiler() {
               <strong>1. Pulse:</strong> Add +1 Black → Staging Cup.<br>
               <strong>2. Roll:</strong> Roll every die in Ready for Release.<br>
               <strong>3. Rerolls:</strong> Up to 2 free rerolls (a Secret face may be kept or rerolled), then Prodigy / Helix / Release L4 overrides.<br>
-              <strong>4. Lock-in &amp; Assign Dice:</strong> +1 Vulnerability per ⚠ on your final faces. Secret faces → Processing Box; every other die → In Production.
+              <strong>4. Deploy Dice:</strong> +1 Vulnerability per ⚠ on your final faces. R&D faces → Research & Development; every other die → In Production.
             </div>
           </div>
 
