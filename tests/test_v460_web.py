@@ -1,8 +1,8 @@
 """v0.46.0 web flow: the web plays ``GameConfig.v046()`` only (Vulnerability Track, no shields, no Defense Grid).
 
-Covers the config choice, Phase 1 lock-in (+1 Vulnerability per ⚠), the rules' phase order (5 Operations, then
+Covers the config choice, Phase 1 Deploy (+1 Vulnerability per ⚠), the rules' phase order (5 Operations, then
 6 CI/CD Pipeline Shift), Phase 4 (Red / Blue, table-wide Green, Patient Zero, Target Lock Signature Attacks), the
-Pen Test Track, purchases into the Scanned Box, Market Share regain for cash, retired-term hygiene in the web UI
+Pen Test Track, purchases into the Sprint Plan, Market Share regain for cash, retired-term hygiene in the web UI
 text, and a fuzz run of complete games with random human decisions (invariants checked after every action).
 """
 
@@ -133,9 +133,14 @@ def _phase4(gc, pid, rng):
 
 def _pipeline(gc, pid, rng):
     info = gc.pending_graduation[pid]
-    ids = [c["die_id"] for c in info["candidates"]]
-    k = rng.randint(0, info["n"])
-    grads = rng.sample(ids, min(k, len(ids)))
+    if info.get("sprint_plan"):  # v0.48+: exactly current_picks Current + next_picks Next Sprint dice
+        cur = [c["die_id"] for c in info["candidates"] if c["sprint"] == "current"]
+        nxt = [c["die_id"] for c in info["candidates"] if c["sprint"] == "next"]
+        grads = rng.sample(cur, info["current_picks"]) + rng.sample(nxt, info["next_picks"])
+    else:
+        ids = [c["die_id"] for c in info["candidates"]]
+        k = rng.randint(0, info["n"])
+        grads = rng.sample(ids, min(k, len(ids)))
     splice = None
     if info["splice_available"] and info["processing_box"] and rng.random() < 0.6:
         splice = rng.choice(info["processing_box"])["die_id"]
@@ -253,10 +258,14 @@ class TestWebRedSignatureLowestRival(unittest.TestCase):
         _to_phase4(gc)
         return gc, _signature_choices
 
-    def test_web_uses_v047_preset(self):
+    def test_web_uses_v049_preset(self):
         cfg = _fresh().state.config
         self.assertEqual(cfg.signature_red_recipient_rule, "lowest_rival")
         self.assertTrue(cfg.signature_red_setec_eligible)
+        self.assertTrue(cfg.sprint_plan_enabled)
+        self.assertTrue(cfg.colored_vuln_lock and cfg.vuln_lock_gray)
+        self.assertEqual(cfg.helix_bypass_mode, "REROLL_LOCKED")
+        self.assertTrue(cfg.helix_bypass_once_per_game)
 
     def test_2p_tie_includes_setec(self):
         gc, choices = self._setup(2)
@@ -294,25 +303,25 @@ class TestWebRedSignatureLowestRival(unittest.TestCase):
 
 
 class TestWebV046Config(unittest.TestCase):
-    def test_default_is_v047_only(self):
+    def test_default_is_v049_only(self):
         gc = _fresh()
         cfg = gc.state.config
         self.assertTrue(cfg.is_vulnerability)
         self.assertTrue(cfg.operations_before_pipeline_shift)
         self.assertFalse(cfg.glitched_shield_slots_enabled)
         st = gc.get_full_state()
-        self.assertEqual(st["rules_version"], "v0.47.0")
+        self.assertEqual(st["rules_version"], "v0.49.0")
         self.assertEqual(st["phase_names"][5], "Operations")
         self.assertEqual(st["phase_names"][6], "CI/CD Pipeline Shift")
-        self.assertEqual(st["vulnerability_track"]["min_target"], 4)
-        self.assertEqual(st["vulnerability_track"]["safe_max"], 3)
+        self.assertEqual(st["vulnerability_track"]["min_target"], 5)
+        self.assertEqual(st["vulnerability_track"]["safe_max"], 4)
         self.assertEqual([b["damage"] for b in st["vulnerability_track"]["bands"]], [1, 2, 3])
 
     def test_legacy_rules_versions_rejected(self):
-        for v in ("v0.38.0", "v0.37.0", "v0.40.0", "v0.45.0", "v0.46.0"):
+        for v in ("v0.38.0", "v0.37.0", "v0.40.0", "v0.45.0", "v0.46.0", "v0.47.0", "v0.48.0"):
             with self.assertRaises(ValueError):
                 GameController().new_game(num_players=2, seed=1, rules_version=v)
-        GameController().new_game(num_players=2, seed=1, rules_version="v0.47.0")
+        GameController().new_game(num_players=2, seed=1, rules_version="v0.49.0")
 
     def test_no_shield_or_defense_grid_fields_serialized(self):
         gc = _fresh()
@@ -570,7 +579,7 @@ class TestWebV046Http(unittest.TestCase):
     def test_endpoints(self):
         code, body = self._post("/api/game/new", {"num_players": 2, "seed": 4})
         self.assertEqual(code, 200)
-        self.assertEqual(body["state"]["rules_version"], "v0.47.0")
+        self.assertEqual(body["state"]["rules_version"], "v0.49.0")
         code, _ = self._post("/api/game/new", {"num_players": 2, "seed": 4, "rules_version": "v0.38.0"})
         self.assertEqual(code, 400)
         self._post("/api/game/new", {"num_players": 2, "seed": 4})
@@ -580,6 +589,86 @@ class TestWebV046Http(unittest.TestCase):
         self.assertEqual(body["state"]["phase"], 2)
         for retired in ("commit", "hotfix", "patent", "debug_unlock"):
             self.assertEqual(self._post(f"/api/game/action/{retired}", {"player_id": 0})[0], 404, retired)
+
+
+class TestWebV049Rules(unittest.TestCase):
+    """v0.49.0 in the web engine: Locked Dice, once-per-game Brute-Force Bypass, Sprint Plan setup and Sprint Review."""
+
+    def _rolled_with_lock(self, company=None):
+        for seed in range(60):
+            gc = GameController()
+            cfgs = [{"is_human": True, **({"company": company} if company else {})}, {"is_human": False}]
+            gc.new_game(num_players=2, seed=seed, players_config=cfgs)
+            if company and gc.state.players[0].company.code.value != company:
+                self.skipTest(f"company {company} not assignable")
+            gc.roll_pool(0)
+            rolled = gc.player_meta[0]["rolled_pool"]
+            locked = [i for i, d in enumerate(rolled) if d.is_locked]
+            if locked:
+                return gc, rolled, locked
+        self.skipTest("no locked die rolled in 60 seeds")
+
+    def test_vuln_faces_lock_and_cannot_be_rerolled(self):
+        gc, rolled, locked = self._rolled_with_lock()
+        for i, d in enumerate(rolled):
+            self.assertEqual(d.is_locked, vulnerability.face_vuln(d.current_face) > 0, f"die {i}: {d.current_face.name}")
+        with self.assertRaises(ValueError):
+            gc.perform_reroll(0, [locked[0]])
+
+    def test_helix_bypass_rerolls_locked_dice_once_per_game(self):
+        gc, rolled, locked = self._rolled_with_lock("HELIX")
+        p = gc.state.players[0]
+        self.assertTrue(gc.get_action_capabilities(0)["can_prodigy"])
+        gc.perform_reroll(0, [locked[0]], use_prodigy_ability=True)
+        self.assertTrue(p.helix_bypass_used_game)
+        # face-set after rerolls: any non-Star face (R&D allowed), and it ends the rerolls
+        die = rolled[0]
+        k = next(i for i, f in enumerate(die.faces) if not f.is_star)
+        gc.override_face(0, 0, k, "helix")
+        self.assertEqual(gc.player_meta[0]["rerolls_remaining"], 0)
+        self.assertEqual(die.is_locked, vulnerability.face_vuln(die.faces[k]) > 0)
+        # a new SETEC Version would refresh a per-Version Override, but the Bypass is once per game
+        self.assertFalse(p.is_helix_bypass_available(gc.state.active_version.version_str))
+
+    def test_setup_puts_three_gray_in_current_sprint(self):
+        gc = _fresh()
+        for p in gc.state.players:
+            self.assertEqual(sum(d.color == DieColor.GRAY for d in p.ready_for_release_dice), 2)
+            self.assertEqual(sorted(d.die_id for d in p.scanned_dice), sorted(p.current_sprint_ids))
+            self.assertEqual(len(p.scanned_dice), 3)
+        st = gc.get_full_state()
+        me = next(x for x in st["players"] if x["player_id"] == 0)
+        self.assertTrue(me["sprint_plan_enabled"])
+        self.assertEqual(len(me["current_sprint_ids"]), 3)
+
+    def test_sprint_review_releases_current_sprint_first(self):
+        from sim.engine import sprint_plan
+
+        for seed in range(30):
+            gc = _fresh(seed=seed)
+            _to_phase4(gc)
+            while gc.phase == 4:
+                gc.confirm_attacks(0)
+            while gc.phase == phases.OPERATIONS:
+                gc.end_turn(gc.active_player_index)
+            if gc.phase != phases.PIPELINE_SHIFT or 0 not in gc.pending_graduation:
+                continue
+            info = gc.pending_graduation[0]
+            p = gc.state.players[0]
+            cur = [c["die_id"] for c in info["candidates"] if c["sprint"] == "current"]
+            nxt = [c["die_id"] for c in info["candidates"] if c["sprint"] == "next"]
+            self.assertEqual(info["current_picks"], min(len(cur), p.effective_release_bandwidth))
+            if info["current_picks"] and nxt:
+                with self.assertRaises(ValueError):  # skipping a forced Current Sprint die is illegal
+                    gc.choose_graduates(0, nxt[:info["current_picks"] + info["next_picks"]])
+            gc.choose_graduates(0, info["default_graduate_ids"])
+            ready = {d.die_id for d in p.ready_for_release_dice}
+            self.assertTrue(set(cur[:info["current_picks"]]) <= ready or info["current_picks"] == 0)
+            triaged = set(gc.last_pipeline_result[0]["triaged_ids"])  # Conveyor Triage (after the review) -> Next Sprint
+            self.assertEqual({d.die_id for d in sprint_plan.current_sprint(p)}, {d.die_id for d in p.scanned_dice} - triaged)
+            self.assertEqual({d.die_id for d in sprint_plan.next_sprint(p)}, triaged)  # leftovers became Current
+            return
+        self.skipTest("no human Sprint Review choice in 30 seeds")
 
 
 class TestRetiredTermsInWebUi(unittest.TestCase):
@@ -592,6 +681,10 @@ class TestRetiredTermsInWebUi(unittest.TestCase):
         # retired in v0.46.0
         "Shield Slot", "Glitched Shield Slot", "Defense Grid", "Block 1 Any", "Critical Breach", "Generic (Any)",
         "Any Shield", "Commit Defenses", "Defense Track", "Defense Capacity",
+        # retired in v0.48.0
+        "Processing Box", "Scanned Box", "Secret face", "Scanned Graduation", "Lock-in", "Deep R&D Vault",
+        # retired in v0.39.0
+        "Redundant Crew",
     ]
 
     def _web_text(self):

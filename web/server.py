@@ -149,7 +149,7 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     self._send_json_response(payload, code)
 
                 elif clean_path == "/api/game/action/lock_in":
-                    # Phase 1 Step 4: Lock-in & Assign Dice (Choice Face declarations by rolled-pool index)
+                    # Phase 1 Step 4: Deploy Dice (Choice Face declarations by rolled-pool index)
                     pid = get_target_pid(default_to_human=True)
                     decls = data.get("choice_declarations")
                     if decls is not None and not isinstance(decls, dict):
@@ -219,7 +219,7 @@ class RogueAgentRequestHandler(SimpleHTTPRequestHandler):
                     self._send_json_response(payload, code)
 
                 elif clean_path == "/api/game/action/choose_graduates":
-                    # Phase 6: CI/CD Pipeline Shift (Scanned Graduation, <= Release Bandwidth)
+                    # Phase 6: CI/CD Pipeline Shift (Sprint Review, <= Release Bandwidth)
                     pid = get_target_pid(default_to_human=True)
                     grads = data.get("graduate_die_ids")
                     if not isinstance(grads, list):

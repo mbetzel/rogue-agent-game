@@ -116,6 +116,7 @@ class TestPhase20Sync(unittest.TestCase):
         sim_p0.patches = 0
         sim_p0.secrets = 1
         ctrl.state.players[1].is_patient_zero = True
+        ctrl.engine.config.sprint_plan_enabled = False  # legacy v0.33 Phase 3 FIFO graduation predates the Sprint Plan
 
         execute_phase_3(ctrl.engine)
         self.assertIn(y_die, sim_p0.ready_dice)

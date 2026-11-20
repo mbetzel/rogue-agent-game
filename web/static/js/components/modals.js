@@ -35,7 +35,7 @@ export function renderGameOverModal() {
   const secretsCell = (r) => mlb && !r.is_patient_zero
     ? `${r.secrets_before_bonus} + ${r.end_bonus || 0} = ${r.secrets} Secrets`
     : `${r.secrets} Secrets`;
-  const stranded = (r) => (r.stranded_dice || 0) > 0 ? ` · ${r.stranded_dice} die${r.stranded_dice > 1 ? "s" : ""} left in the Processing Box (no Secrets)` : "";
+  const stranded = (r) => (r.stranded_dice || 0) > 0 ? ` · ${r.stranded_dice} die${r.stranded_dice > 1 ? "s" : ""} left in Research & Development (no Secrets)` : "";
 
   let rows = res.rankings.map((r) => `
     <tr style="border-bottom: 1px solid var(--border-color); text-align: left;">

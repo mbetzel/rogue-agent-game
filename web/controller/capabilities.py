@@ -100,7 +100,9 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         for d in player.in_production_dice
     )
     # Phreaker Jumper Diagnostics / Spook Burn Notice: Phase 3 Income (Purple ★ still In Production, OQ-2)
-    can_phreaker_diagnostics = bool(in_income and is_phreaker_white_hat and purple_in_prod)
+    # v0.43+ (``white_hat_6f_rebalance``): Jumper Diagnostics is +$1 / +1 Release Bandwidth with no target to pick
+    can_phreaker_diagnostics = bool(in_income and is_phreaker_white_hat and purple_in_prod
+                                    and not getattr(controller.state.config, "white_hat_6f_rebalance", False))
     is_spook_white_hat = has_signature_protocol(player, WhiteHatCode.SPOOK, legacy_bridge_enabled(controller))
     can_spook_burn = bool(in_income and is_spook_white_hat and purple_in_prod)
 
@@ -168,8 +170,18 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
     in_roll = bool(controller.phase == 1 and meta["has_rolled"] and not meta["has_committed"] and not is_eliminated)
     purple_stars = [i for i, d in enumerate(rolled_pool)
                     if d.current_face and d.current_face.is_star and d.current_face.star_code == "PURPLE_STAR"]
+    # v0.49 Brute-Force Bypass (REROLL_LOCKED): once per game, reroll locked dice; the face-set comes after rerolls
+    helix_v049 = getattr(controller.state.config, "helix_bypass_mode", "LEGACY") == "REROLL_LOCKED"
+    if helix_v049:
+        bypass_avail = player.is_helix_bypass_available(active_ver) if active_ver else player.is_helix_bypass_available()
+        bypass_avail = bool(meta.get("prodigy_active", False) or bypass_avail)
+        face_set_ok = bool(getattr(controller.state.config, "helix_bypass_face_set", False))
+    else:
+        bypass_avail = bool(meta.get("prodigy_active", False) or ability_avail)
+        face_set_ok = True
+    any_locked = any(getattr(d, "is_locked", False) for d in rolled_pool)
     can_override_helix = bool(in_roll and is_prodigy and not meta.get("helix_override_used")
-                              and (meta.get("prodigy_active", False) or ability_avail))
+                              and bypass_avail and face_set_ok)
     can_override_release_l4 = bool(in_roll and not meta.get("release_l4_used")
                                    and release_l4_gray_faces(player, rolled_pool))
     can_override_ace = bool(in_roll and has_signature_protocol(player, WhiteHatCode.PRODIGY, legacy_bridge_enabled(controller))
@@ -180,9 +192,11 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         and not meta["has_committed"]
         and not is_eliminated
         and is_prodigy
-        and (meta.get("prodigy_active", False) or ability_avail)
-        # Brute-Force Bypass adds a free reroll
+        and bypass_avail
+        # v0.38 Bypass adds a free reroll; v0.49 Bypass needs a locked die to be worth firing
         and len(rolled_pool) > 0
+        and (any_locked or not helix_v049)
+        and meta.get("rerolls_remaining", 0) > 0
     )
     can_reroll = (
         controller.phase == 1
@@ -192,7 +206,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         and meta.get("rerolls_remaining", 0) > 0
         and (
             any(not getattr(d, "is_locked", False) for d in rolled_pool)
-            or (is_prodigy and (meta.get("prodigy_active", False) or ability_avail) and len(rolled_pool) > 0)
+            or (is_prodigy and bypass_avail and len(rolled_pool) > 0)
         )
     )
     can_lock_in = (controller.phase == 1 and meta["has_rolled"] and not meta["has_committed"] and not is_eliminated)
@@ -363,7 +377,7 @@ def get_action_capabilities(controller: GameController, player_id: int) -> Dict[
         "ad_campaign_cost": cfg.r2_share_cost,
         "ad_campaign_actions": getattr(player, "r2_actions_available", 0),
         "track_names": {t.lower(): research_tracks.track_display_name(cfg, t) for t in research_tracks.TRACKS},
-        # v0.47.0 Pen Test Track
+        # v0.49.0 Pen Test Track
         "can_pen_test": pen_max_now > 0,
         "pen_test_max_now": pen_max_now,
         "pen_test_limit": pen_limit,

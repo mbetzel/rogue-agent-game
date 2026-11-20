@@ -14,7 +14,7 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
     - [ ] Staff-review minor items: the LEGACY-Helix bot strip under the lock (`sim/bots/vulnerability_policy.py`); `_ROLL_CTX` try/finally (`sim/engine/phase1_roll_deploy.py`).
     - [ ] Sweep summary: print `helix_bypass_face_sets` and `helix_bypass_black_blocked`; v0.48 ref1 at 1,200 games; a double-capstone stance in the dominance matrix.
     - [ ] Company-power pass: 4P spread `18.4` pp (Spook leads; Helix `19.2`); per-colour parity.
-    - [ ] Web: Helix text, deprecated v0.48 terms, and switching the web engine to `v049()`.
+    - [x] Web: Helix text, deprecated v0.48 terms, and switching the web engine to `v049()` (done; see the Phase 69 web follow-up below).
 - [x] **Rules Draft `v0.48.0`** captured in [RULES.md](./RULES.md) (Sprint Plan & Gray Legacy Rotation)
 - [ ] **Phase 69: Sprint Plan & Gray Legacy Rotation (`v0.48.0 Baseline`)**: Scanned Box → **Sprint Plan** (**Current Sprint** / **Next Sprint**; Current graduates first, forced up to Release Bandwidth; leftover bandwidth may take Next; leftovers become Current); Processing Box → **Research & Development**; Secret face → **R&D face**; Scanned Graduation → **Sprint Review**; new arrivals (R&D, purchases, PR L3 Purple, Blue Signature Gray) enter the Next Sprint. Gray dice: `1` ⚠ (Face 3) and locked on ⚠ (colored dice not locked). Start: 2 Gray + Purple + company die in Ready, 3 Gray in the Current Sprint; `6` Secrets. Tracks: Pen Test L1 `+1` Secret / L3 return 1 Gray; Triage L1 `+$2` / L3 `+1` Secret; Release L1 `+1` Release Bandwidth this round / L3 return 1 Gray; PR unchanged. *Deep R&D Vault* → *Deep Data Vault*; "Terminal Hardware & R&D Upgrade Tracks" → "Terminal Hardware Tracks".
   - [x] *Pre-SDLC Game Designer Modeling:* `docs/reports/sprint_plan_analysis.md` §1–§9 (User sign-off 2026-11-19, arm QC + 6 Secrets).
@@ -30,11 +30,14 @@ Canonical workspace roadmap for building and running Monte Carlo simulations aga
     - [ ] Company-power pass: Helix trails and Spook leads in every arm (pre-existing in v0.46 / v0.47); also the v0.47 items below.
     - [ ] Watch (FINDINGS §64 combined-rules re-sweep): 3P seat-0 rush edge `+5.6 pp` vs the `+4` bar; 3P/4P Market Collapse `13% → 16%` (gives back part of the §63 Red Signature gain); 2P SecOpsTurtle (§63).
   - [ ] *Follow-ups — parked rule options (need User approval first; `docs/specs/sprint_plan_spec.md` §19 item 8):* stranding backup rule (leftover Current dice stay Current; Next joins only when Current is empty); `STRICT` Sprint Review reading; Round 2 company-die priority (the Round 2 R&D-face dip); ~~colored dice also locked on ⚠~~ (done in v0.49.0, Phase 70); Gray Face 3 `+$1 / +2 🔬` income lever.
-  - [ ] *Web follow-up (spec §19 item 9; web still plays `v047()`):*
-    - [ ] Switch the web to `GameConfig.v048()` and bump its `rules_version`.
-    - [ ] Display relabelling (`sim/engine/terms.py`, spec §13 — never built): Sprint Plan / Current Sprint / Next Sprint / Research & Development / R&D face / Sprint Review / *Deep Data Vault*.
-    - [ ] Two Sprint drop zones; forced Current Sprint picks at the Sprint Review (400 from `check_picks` on an illegal pick).
-    - [ ] Phase 1 rejection of Gray ⚠ rerolls; Level 3 thinning picker; Blue Signature Gray choice hook (`choose_signature_blue_gray`, spec §19 OQ-1).
+  - [ ] *Web follow-up (spec §19 item 9):*
+    - [x] Switch the web to `GameConfig.v049()` (skipping `v048()`) and bump its `rules_version` to `v0.49.0` (Main Agent, 2026-11-19). Phase 1 ports Locked Dice (`vulnerability.lock_applies`, Gray included) and the once-per-game *Brute-Force Bypass* (reroll locked dice; face-set after rerolls ends them).
+    - [x] Display relabelling done directly in `web/` player-facing text, not via `sim/engine/terms.py` (still never built): Sprint Plan / Current Sprint / Next Sprint / Research & Development / R&D face / Sprint Review / Deploy / *Deep Data Vault*. `TestRetiredTermsInWebUi` now also bans the v0.48 retired terms. API routes and sim identifiers (`lock_in`, `choose_graduates`, `scanned_dice`, `glitched_dice`) keep their names.
+    - [x] Sprint Review UI: separate Current Sprint and Next Sprint groups with exact pick counts; illegal picks return 400 (`sprint_plan.check_picks`). Mat dice show CURRENT / NEXT badges.
+    - [x] Phase 1 rejection of Gray ⚠ rerolls (covered by the v0.49 lock).
+    - [ ] Level 3 thinning picker (Pen Test / Release L3 Breakthrough: the web resolves it with the default Gray die, no human choice).
+    - [ ] Blue Signature Gray choice hook (`choose_signature_blue_gray`, spec §19 OQ-1; not in `sim/` yet either).
+    - [x] White Hat card fallbacks in `web/` aligned with `RULES_APPENDIX.md` §6 (Jumper Diagnostics `+$1` / `+1` Release Bandwidth; *Resonance Sensor*; *Arbitrary Code Execution*); the obsolete Jumper Diagnostics target picker is hidden; *Burn Notice* now offers Gray Legacy dice for `+$3` (it offered colored dice for `+1` Secret, which the engine ignored).
   - [ ] *Follow-up — PnP visual check:* review the regenerated player board (wider Sprint Plan box) for clipping or overlap.
 - [x] **Rules Draft `v0.47.0`** captured in [RULES.md](./RULES.md) (Red Signature "lowest rival"; Phase 68 in [docs/archive/PLAN_completed_phases.md](./docs/archive/PLAN_completed_phases.md))
 - [x] **Rules Draft `v0.46.0`** captured in [RULES.md](./RULES.md)

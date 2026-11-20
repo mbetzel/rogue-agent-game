@@ -15,7 +15,7 @@ import { renderVersionSlotBadge } from "./header.js";
 
 let renderAppCallback = null;
 
-// v0.47.0 Research Tracks (GLOSSARY.md Section 7): five-step strips (L0-L4), Breakthroughs (★) at L1 / L3, Capstone at L4.
+// v0.49.0 Research Tracks (GLOSSARY.md Section 7): five-step strips (L0-L4), Breakthroughs (★) at L1 / L3, Capstone at L4.
 function trackStrips(p) {
   const vt = state.vulnerability_track || {};
   const pen = vt.pen_test_limits || [1, 1, 2, 2, 3];
@@ -24,7 +24,7 @@ function trackStrips(p) {
   return [
     { key: "defense", label: "🧪 PEN TEST", color: "#4ade80", rgb: "74,222,128",
       steps: [`−${pen[0]} Vulnerability / turn (${penCost} 🔬 each)`, `★ +1 Gray Legacy die · −${pen[1]} / turn`,
-        `−${pen[2]} / turn`, `★ +1 Secret · Blue Secret face +1 · −${pen[3]} / turn`,
+        `−${pen[2]} / turn`, `★ +1 Secret · Blue R&D face +1 · −${pen[3]} / turn`,
         `−${pen[4]} / turn + 1 free each Operations Turn`] },
     { key: "triage", label: "⚙️ TRIAGE", color: "#38bdf8", rgb: "56,189,248",
       steps: ["Bandwidth 1", "★ +1 Gray Legacy die", "Bandwidth 2", "★ +1 Secret", "Bandwidth 2 + free Gray → Market die"] },
@@ -112,7 +112,7 @@ const COMPANIES_DATA = {
     sector: "Industrial Automation",
     overrideName: "Magnetic Splice",
     timing: "P6: PIPELINE SHIFT",
-    description: "Once per Rogue Agent Version, move 1 die from your Processing Box directly to Ready for Release for free (bypassing Scanned Box); it banks its Secret now.",
+    description: "Once per Rogue Agent Version, move 1 die from your Research & Development directly to Ready for Release for free (bypassing the Sprint Plan); it banks its Secret now.",
     themeColor: "#4ade80",
     startingSetupDesc: "All tracks Level 0; Green starting die.",
   },
@@ -142,7 +142,7 @@ const COMPANIES_DATA = {
     sector: "Genomic R&D",
     overrideName: "Brute-Force Bypass",
     timing: "P1: REROLLS",
-    description: "Once per Rogue Agent Version, during Phase 1 rerolls, gain 1 extra free reroll, and turn 1 rolled die to any legal non-Star face of its color (the Secret face is allowed).",
+    description: "Once per game: for the rest of this phase you may reroll locked dice; after rerolls, turn 1 rolled die to any legal non-Star face of its color (the R&D face is allowed). Root Override Hijack can't mark an unused Bypass Used.",
     themeColor: "#f43f5e",
     startingSetupDesc: "All tracks Level 0; Green starting die.",
   },
@@ -165,7 +165,7 @@ const WHITE_HATS_DATA = {
     role: "Tactical Staffing & Logistics Lead",
     flavor: "Dedicated telemetry pipelines harvest live operational diagnostics on zero notice.",
     protocolName: "Logistics Bounty",
-    protocolDesc: "Phase 3 Income, when rolled on Purple ★: gain +1 🔬 Research Token per Purple ★ die still In Production.",
+    protocolDesc: "When Face 6 (Purple ★) is rolled, gain +1 🔬 Research Token per different color die currently in your Sprint Plan (both sprints; all colors including Gray, Purple, and Yellow).",
     passiveDesc: "Harvests operational telemetry from active proprietary subroutines.",
     themeColor: "#f59e0b",
   },
@@ -175,8 +175,8 @@ const WHITE_HATS_DATA = {
     role: "Hardware Tinkerer // Emergency Relays",
     flavor: "A strip of Mylar splicing tape and a 2600-Hz whistle will fix what ten grand of silicon can't.",
     protocolName: "Jumper Diagnostics",
-    protocolDesc: "Phase 3 Income, when rolled on Purple ★: move 1 die from your Processing Box to your Scanned Box, banking its Secret now. If the Processing Box is empty, roll 1 Scanned Box die and collect its $ / 🔬 (it stays in place); if Under Development is empty, gain +$1.",
-    passiveDesc: "Diagnostic jumper triggers on an offline die in the Processing Box or Scanned Box.",
+    protocolDesc: "When Face 6 (Purple ★) is rolled, gain +$1 cash AND +1 Release Bandwidth this round (applies in Phase 6 Step 3).",
+    passiveDesc: "Each Purple ★ still In Production in Phase 3 widens this round's Sprint Review by 1 die.",
     themeColor: "#4ade80",
   },
   ACOUSTIC: {
@@ -184,8 +184,8 @@ const WHITE_HATS_DATA = {
     name: "The Acoustic",
     role: "Pattern Genius // Mainframe Resonance",
     flavor: "Every mainframe hums before it strikes. Listen to the baffles -- you can hear which packet drops next.",
-    protocolName: "Harmonic Tap",
-    protocolDesc: "Phase 3 Income: Gain +$1 for each distinct attack cube color in Exit Tray (Red, Blue, Green, Black; max +$4).",
+    protocolName: "Resonance Sensor",
+    protocolDesc: "When Face 6 (Purple ★) is rolled, gain +$1 cash per unique colored cube that exited the Cube Tower this round (including Operative Signature Cubes), up to +$5 max.",
     passiveDesc: "Converts compiler telemetry diversity directly into liquid capital.",
     themeColor: "#38bdf8",
   },
@@ -195,8 +195,8 @@ const WHITE_HATS_DATA = {
     role: "Ex-Intelligence // OpSec & Slush Funds",
     flavor: "Every breach has a price tag. That's what non-attributable slush accounts are for.",
     protocolName: "Burn Notice",
-    protocolDesc: "Phase 3 Income: Gain +$2; optional: permanently return 1 owned colored die to market for +1 Corporate Secret.",
-    passiveDesc: "Once per Purple ★ die in Phase 3, burn 1 owned colored die for +1 Secret.",
+    protocolDesc: "When Face 6 (Purple ★) is rolled, gain an immediate +$2 cash payout; in addition, you may optionally permanently return 1 owned Gray Legacy die to the box to gain +$3 cash.",
+    passiveDesc: "Once per Purple ★ die in Phase 3, you may burn 1 owned Gray Legacy die for +$3.",
     themeColor: "#a855f7",
   },
   PRODIGY: {
@@ -204,8 +204,8 @@ const WHITE_HATS_DATA = {
     name: "The Prodigy",
     role: "Reckless Hacker // Lock Bypassing",
     flavor: "Locked memory is just a polite suggestion from someone who left debug interrupts enabled.",
-    protocolName: "Zero-Day Override",
-    protocolDesc: "Phase 1, when rolled on Purple ★: turn 1 other rolled die to any legal non-Star face of its color other than the Secret face.",
+    protocolName: "Arbitrary Code Execution",
+    protocolDesc: "After all rerolls are finished (before assigning dice to In Production), turn 1 other rolled die in your active pool to any legal non-Star face of that die's color other than the R&D face.",
     passiveDesc: "Deterministic face manipulation during Phase 1 Roll & Deploy.",
     themeColor: "#f43f5e",
   },
@@ -215,7 +215,7 @@ const WHITE_HATS_DATA = {
     role: "Mathematician // Algorithmic Arbitrage",
     flavor: "Why pay retail for entropy when SETEC's own arbitrage equations subsidize the upgrade?",
     protocolName: "Algorithmic Parity",
-    protocolDesc: "Phase 3 Income: Collect +$2 cash and +1 🔬 Research Token.",
+    protocolDesc: "When Face 6 (Purple ★) is rolled, gain an additional +$2 cash income AND +1 🔬 Research Token.",
     passiveDesc: "Purple Specialist Die faces yield optimized cryptographic output.",
     themeColor: "#00d4ff",
   },
@@ -321,7 +321,7 @@ function renderSchematicSvg(code) {
         <circle cx="140" cy="58" r="4" fill="none" stroke="#f59e0b" stroke-width="1.1"/>
         <path d="M 50 35 Q 65 75, 110 58" fill="none" stroke="#f59e0b" stroke-width="1.8"/>
         <path d="M 80 35 Q 110 12, 140 58" fill="none" stroke="#ffd700" stroke-width="1.8"/>
-        <text x="100" y="94" fill="#f59e0b" font-size="6.5" font-family="monospace" text-anchor="middle" letter-spacing="1">DISPATCH // REDUNDANT CREW</text>
+        <text x="100" y="94" fill="#f59e0b" font-size="6.5" font-family="monospace" text-anchor="middle" letter-spacing="1">DISPATCH // CAPITAL INJECTION</text>
       </svg>
     `;
   }
@@ -555,9 +555,9 @@ export function renderPlayerMats() {
                 ${isActivelyRolling 
                   ? (p.is_human && state.phase === 1 
                       ? `Free Rerolls: <strong>${p.rerolls_remaining || 0}</strong>/${p.max_rerolls || 2} | Click dice to reroll (⚠ dice are Locked Dice) | +1 Vulnerability per ⚠ at Deploy` 
-                      : `Phase 1 Rolling | Secret faces → Processing Box after rerolls`)
+                      : `Phase 1 Rolling | R&D faces → Research & Development after rerolls`)
                   : (p.has_committed 
-                      ? (readyCount > 0 ? 'Dice ready for next round' : 'All dice deployed to In Production | Scanned dice graduate here in Phase 6 (≤ Release Bandwidth)')
+                      ? (readyCount > 0 ? 'Dice ready for next round' : 'All dice deployed to In Production | Sprint Plan dice are released here at the Sprint Review (≤ Release Bandwidth)')
                       : 'Start: 2 Gray + 1 Company colored die + 1 Purple Specialist Die | Phase 1: Roll every Ready die | Offline dice do not roll')}
               </div>
             </div>
@@ -568,7 +568,7 @@ export function renderPlayerMats() {
             <div class="dice-tray ready-tray" id="ready_tray_${p.player_id}"></div>
           </div>
 
-          <!-- Zone 2: In Production (every die yields in Phase 3; nothing is blocked in v0.47.0) -->
+          <!-- Zone 2: In Production (every die yields in Phase 3; nothing is blocked in v0.49.0) -->
           <div class="operational-zone production-zone-panel">
             <div class="zone-header-strip">
               <div class="zone-title-wrap">
@@ -576,13 +576,13 @@ export function renderPlayerMats() {
                 <span class="zone-count-badge">(${(p.in_production_dice || []).length})</span>
               </div>
               <div class="zone-subtext">
-                Collect $, 🔬, Market Share &amp; ★ in Phase 3 | Returns through the Scanned Box in Phase 6
+                Collect $, 🔬, Market Share &amp; ★ in Phase 3 | Returns through the Sprint Plan in Phase 6
               </div>
             </div>
             <div class="dice-tray" id="income_tray_${p.player_id}"></div>
           </div>
 
-          <!-- Zone 3: Under Development (Processing Box -> Scanned Box) -->
+          <!-- Zone 3: Under Development (Research & Development -> Sprint Plan) -->
           <div class="operational-zone pipeline-zone-panel" style="border: 1px solid rgba(244, 63, 94, 0.3); background: rgba(15, 23, 42, 0.4); border-radius: 6px; padding: 10px; margin-bottom: 12px;">
             <div class="zone-header-strip">
               <div class="zone-title-wrap">
@@ -591,31 +591,31 @@ export function renderPlayerMats() {
                 <span class="zone-count-badge" style="background: rgba(244, 63, 94, 0.2); color: #f43f5e; font-size: 0.7rem;">TRIAGE: ${p.triage_bandwidth || 2}/RND | RELEASE: ${p.release_bandwidth || 4}/RND</span>
               </div>
               <div class="zone-subtext">
-                Processing Box → Scanned Box → Ready for Release
+                Research & Development → Sprint Plan → Ready for Release
               </div>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
-              <!-- Processing Box -->
+              <!-- Research & Development -->
               <div style="border: 1px solid rgba(244, 63, 94, 0.4); background: rgba(244, 63, 94, 0.08); border-radius: 6px; padding: 8px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                  <span style="font-weight: 600; color: #f43f5e; font-size: 0.85rem;">🔒 PROCESSING BOX (${(p.glitched_dice || []).length})</span>
-                  <span style="font-size: 0.75rem; color: var(--text-dim);">Secret faces, oldest first</span>
+                  <span style="font-weight: 600; color: #f43f5e; font-size: 0.85rem;">🔒 RESEARCH &amp; DEVELOPMENT (${(p.glitched_dice || []).length})</span>
+                  <span style="font-size: 0.75rem; color: var(--text-dim);">R&amp;D faces, oldest first</span>
                 </div>
                 <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 6px;">
-                  Conveyor Triage in Phase 6 moves up to ${p.triage_bandwidth || 2} dice to the Scanned Box, oldest first, banking each Secret face yield
+                  Conveyor Triage in Phase 6 moves up to ${p.triage_bandwidth || 2} dice to the Next Sprint, oldest first, banking each R&amp;D face yield
                 </div>
                 <div class="dice-tray" id="glitched_tray_${p.player_id}" style="min-height: 48px;"></div>
               </div>
 
-              <!-- Scanned Box -->
+              <!-- Sprint Plan -->
               <div style="border: 1px solid rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.08); border-radius: 6px; padding: 8px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                  <span style="font-weight: 600; color: #38bdf8; font-size: 0.85rem;">✓ SCANNED BOX (${(p.scanned_dice || []).length})</span>
+                  <span style="font-weight: 600; color: #38bdf8; font-size: 0.85rem;">✓ SPRINT PLAN (${(p.scanned_dice || []).length})</span>
                   <span style="font-size: 0.75rem; color: ${(p.scanned_over_release || 0) > 0 ? '#f59e0b' : '#4ade80'};">Release Bandwidth: ${Math.min((p.scanned_dice || []).length, p.release_bandwidth || 4)} / ${p.release_bandwidth || 4}${(p.scanned_over_release || 0) > 0 ? ` (${p.scanned_over_release} over)` : ''}</span>
                 </div>
                 <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 6px;">
-                  In Production → Scanned Box → Ready for Release in Phase 6 (≤ Release Bandwidth, your choice)
+                  In Production → Sprint Plan → Ready for Release at the Sprint Review (≤ Release Bandwidth, Current Sprint first)
                 </div>
                 <div class="dice-tray" id="scanned_tray_${p.player_id}" style="min-height: 48px;"></div>
               </div>
@@ -675,7 +675,7 @@ export function renderPlayerMats() {
           </div>
         </div>
 
-        <!-- 2b. Vulnerability (v0.47.0) -->
+        <!-- 2b. Vulnerability (v0.49.0) -->
         ${renderVulnerabilityCard(p)}
 
         <!-- 3. Corporate Secrets -->
@@ -709,7 +709,7 @@ export function renderPlayerMats() {
               const sched = state.is_round_leader_bonus ? state.round_leader_bonus_schedule : (state.is_market_leader_bonus ? state.market_leader_bonus_schedule : []);
               if (!sched || !sched.length) return '';
               const txt = sched.map((b, i) => `${i + 1}${["st", "nd", "rd"][i] || "th"} +${b}`).filter((t) => !t.endsWith("+0")).join(" · ");
-              const when = state.is_round_leader_bonus ? "at the end of Phase 6 when a Red Secret face was banked, and at game end" : "at game end";
+              const when = state.is_round_leader_bonus ? "at the end of Phase 6 when a Red R&D face was banked, and at game end" : "at game end";
               return `<br><span title="Market Leader Bonus: survivors gain Corporate Secrets by Market Share place (ties share the better place)">Market Leader Bonus (${when}): ${txt}</span>`;
             })()}
           </div>
@@ -774,7 +774,7 @@ export function renderPlayerMats() {
           if (isLocked) badgeHtml += `<span class="badge-locked">🔒 LOCKED</span> `;
           if (isGlitch) badgeHtml += `<span class="badge-glitch">⚠️ GLITCH</span> `;
           if (isChoice) badgeHtml += `<span class="badge-choice">CHOICE</span> `;
-          if (d.current_face && d.current_face.secrets_pending) badgeHtml += `<span class="badge-choice">🔒 SECRET → PROCESSING BOX</span> `;
+          if (d.current_face && d.current_face.secrets_pending) badgeHtml += `<span class="badge-choice">🔒 R&D → RESEARCH &amp; DEVELOPMENT</span> `;
           if (d.current_face && d.current_face.vuln) badgeHtml += `<span class="badge-vuln" title="+${d.current_face.vuln} Vulnerability at Deploy">⚠${d.current_face.vuln > 1 ? "×" + d.current_face.vuln : ""}</span> `;
 
           let faceNameDisplay = faceName;
@@ -880,27 +880,35 @@ export function renderPlayerMats() {
       }
     }
 
-    // Processing Box Tray (oldest first; the first Triage Bandwidth dice move in Phase 6)
+    // Research & Development Tray (oldest first; the first Triage Bandwidth dice move in Phase 6)
     const glitchedTray = terminalMat.querySelector(`#glitched_tray_${p.player_id}`);
     if (glitchedTray) {
       (p.processing_box_dice || p.glitched_dice || []).forEach((d, i) => {
         const chip = document.createElement("div");
         chip.className = `die-chip ${d.color}`;
         const nextUp = d.will_triage !== undefined ? d.will_triage : i < (p.triage_bandwidth || 2);
-        chip.title = `Secret face (entered #${d.processing_entry_seq}): banks ${d.secret_yield !== undefined ? '+' + d.secret_yield : 'its yield'} Corporate Secrets when it leaves the Processing Box${nextUp ? " (next Conveyor Triage)" : ""}`;
+        chip.title = `R&D face (entered #${d.processing_entry_seq}): banks ${d.secret_yield !== undefined ? '+' + d.secret_yield : 'its yield'} Corporate Secrets when it leaves Research & Development${nextUp ? " (next Conveyor Triage)" : ""}`;
         chip.innerHTML = `<span>${d.color.toUpperCase()} <span class="badge-choice">#${i + 1}${d.secret_yield !== undefined ? ` · +${d.secret_yield} Secrets` : ''}</span>${nextUp ? ' <span class="badge-contractor">NEXT</span>' : ''}</span>`;
         glitchedTray.appendChild(chip);
       });
     }
 
-    // Scanned Box Tray
+    // Sprint Plan Tray
     const scannedTray = terminalMat.querySelector(`#scanned_tray_${p.player_id}`);
     if (scannedTray) {
       (p.scanned_dice || []).forEach((d) => {
         const chip = document.createElement("div");
         chip.className = `die-chip ${d.color}`;
-        chip.title = "Scanned: graduates to Ready for Release at end of round";
-        chip.innerHTML = `<span>${d.color.toUpperCase()}</span>`;
+        if (p.sprint_plan_enabled) {
+          const isCur = (p.current_sprint_ids || []).includes(d.die_id);
+          chip.title = isCur
+            ? "Current Sprint: released first at the Sprint Review (Phase 6)"
+            : "Next Sprint: fills any Release Bandwidth left after the Current Sprint; the rest join the Current Sprint";
+          chip.innerHTML = `<span>${d.color.toUpperCase()} <span class="badge-choice">${isCur ? "CURRENT" : "NEXT"}</span></span>`;
+        } else {
+          chip.title = "Sprint Plan: released to Ready for Release at the Sprint Review (Phase 6)";
+          chip.innerHTML = `<span>${d.color.toUpperCase()}</span>`;
+        }
         scannedTray.appendChild(chip);
       });
     }
