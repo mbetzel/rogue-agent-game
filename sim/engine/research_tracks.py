@@ -61,6 +61,8 @@ def breakthrough_text(cfg: Optional[GameConfig], track: str, level: int) -> Opti
             return f"+{int(cfg.release_l1_bandwidth)} Release Bandwidth this round"
         if t == "DEFENSE" and level == 2 and cfg.pen_test_l2_breakthrough == "THIN_GRAY":
             return "Return 1 Gray Legacy die you own to the box"
+        if t == "TRIAGE" and level == 3 and getattr(cfg, "triage_l3_breakthrough", "UPGRADE") == "SECRET":
+            return "Gain 1 Corporate Secret"
         if t == "DEFENSE" and level == 3 and cfg.pen_test_l3_breakthrough == "THIN_GRAY":
             return "Return 1 Gray Legacy die you own to the box; Blue R&D faces yield +3"
         if t == "RELEASE" and level == 3 and cfg.release_l3_breakthrough == "THIN_GRAY":
