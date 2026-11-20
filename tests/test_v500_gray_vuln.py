@@ -82,8 +82,10 @@ class TestFaces(unittest.TestCase):
     def test_t_face_1_table(self):
         b23, v48 = create_gray_die(1, "V050_GRAY2").faces, create_gray_die(2, "V048_SPRINT").faces
         self.assertEqual(len(b23), 6)
-        self.assertEqual({i for i, f in enumerate(b23) if vuln.face_vuln(f) > 0}, {1, 2})
-        for a, b in zip(b23, v48):
+        # v0.49.1 alignment: the ⚠ faces print on Face 1 (+$2 / +2 🔬) and Face 5 (+2 🔬)
+        self.assertEqual({i for i, f in enumerate(b23) if vuln.face_vuln(f) > 0}, {0, 4})
+        # same payouts as V048_SPRINT, reprinted: v48 F3->F1, F5->F2, F1->F3, F4->F4, F2->F5, F6->F6
+        for a, b in zip(b23, [v48[i] for i in (2, 4, 0, 3, 1, 5)]):
             for fld in V050_PAYOUT_FIELDS:
                 self.assertEqual(getattr(a, fld, None), getattr(b, fld, None), fld)
         self.assertEqual([vuln.face_vuln(f) for f in v48], [0, 0, 1, 0, 0, 0])  # v0.48 table untouched
@@ -91,33 +93,33 @@ class TestFaces(unittest.TestCase):
     def test_t_face_2_lock_and_reroll_filter(self):
         e = mk_engine(cfg_name="v050_roster")
         cfg = e.config
-        for idx, expect in enumerate((False, True, True, False, False, False)):
+        for idx, expect in enumerate((True, False, False, False, True, False)):
             g = create_gray_die(970 + idx, cfg.gray_face_profile)
             g.current_face = g.faces[idx]
             self.assertEqual(vuln.lock_applies(cfg, g), expect, idx)
             self.assertEqual(vuln.is_reroll_locked(cfg, g), expect, idx)
-        # a reroll request for a locked F2 is filtered out (v0.49 lock path: die.is_locked, no reroll used)
+        # a reroll request for a locked F1 is filtered out (v0.49 lock path: die.is_locked, no reroll used)
         g = create_gray_die(980, cfg.gray_face_profile)
-        h = Scripted(e, [g], {980: [1, 0]}, [[0]])
+        h = Scripted(e, [g], {980: [0, 1]}, [[0]])
         h.run()
-        self.assertEqual(g.current_face, g.faces[1])
+        self.assertEqual(g.current_face, g.faces[0])
         self.assertEqual(h.p.total_rerolls_used, 0)
         # B23 without the v0.49 lock: the v0.48 Gray filter blocks it and counts it (gray_lock_blocked +1)
         e2 = mk_engine(cfg_name="v050_roster", vuln_lock_gray=False)
         g2 = create_gray_die(981, e2.config.gray_face_profile)
-        h2 = Scripted(e2, [g2], {981: [1, 0]}, [[0]])
+        h2 = Scripted(e2, [g2], {981: [0, 1]}, [[0]])
         h2.run()
-        self.assertEqual(g2.current_face, g2.faces[1])
+        self.assertEqual(g2.current_face, g2.faces[0])
         self.assertEqual(h2.p.gray_lock_blocked, 1)
 
     def test_t_face_3_deploy_counts_vuln_by_face(self):
         e = mk_engine(cfg_name="v050_roster")
         gs = [create_gray_die(990 + i, e.config.gray_face_profile) for i in range(3)]
-        h = Scripted(e, gs, {990: [1], 991: [2], 992: [4]}, [])
+        h = Scripted(e, gs, {990: [0], 991: [4], 992: [1]}, [])
         v0 = h.p.vulnerability
         h.run()
         self.assertEqual(h.p.vulnerability - v0, 2)
-        self.assertEqual(h.p.gray_vuln_kept_by_face, {"gray:2": 1, "gray:3": 1})
+        self.assertEqual(h.p.gray_vuln_kept_by_face, {"gray:1": 1, "gray:5": 1})
         self.assertEqual((h.p.gray_rolled_total, h.p.gray_vuln_kept_total), (3, 2))
         self.assertEqual(h.p.gray_rolls_by_round[e.state.current_round], [3, 2])
 
@@ -442,20 +444,20 @@ class TestGrayAwareBot(unittest.TestCase):
 
 # ------------------------------------------------------------------------------------------------ edge cases
 class TestEdgeCases(unittest.TestCase):
-    def test_t_edge_2_release_l4_sets_locked_f2(self):
+    def test_t_edge_2_release_l4_sets_locked_f1(self):
         e = mk_engine(cfg_name="v050_roster")
         p = e.state.players[0]
         p.release_level = 4
         g = create_gray_die(930, e.config.gray_face_profile)
-        g.current_face, g.is_locked = g.faces[1], True
-        self.assertTrue(p1.resolve_release_l4_gray_face_override(p, [g], None, 0, g.faces[0]))
+        g.current_face, g.is_locked = g.faces[0], True
+        self.assertTrue(p1.resolve_release_l4_gray_face_override(p, [g], None, 0, g.faces[1]))
         self.assertFalse(g.is_locked)
         self.assertEqual(vuln.face_vuln(g.current_face), 0)
         self.assertEqual(p.l4_payouts["release_gray_face_sets"], 1)
         # no Gray in the active dice: returns False, no exception
         self.assertFalse(p1.resolve_release_l4_gray_face_override(p, [colored(DieColor.RED, 931)], None, 0, g.faces[0]))
 
-    def test_t_edge_3_ace_breaks_lock_on_gray_f3(self):
+    def test_t_edge_3_ace_breaks_lock_on_gray_f5(self):
         from sim.bots import vulnerability_policy as vp
 
         e = mk_engine(cfg_name="v050_roster")
@@ -463,21 +465,21 @@ class TestEdgeCases(unittest.TestCase):
         e.state.staging_cup[G] = 3
         p.vulnerability = 4
         pur, g = colored(DieColor.PURPLE, 932), create_gray_die(933, e.config.gray_face_profile)
-        h = Scripted(e, [pur, g], {932: [5], 933: [2]}, [])
+        h = Scripted(e, [pur, g], {932: [5], 933: [4]}, [])
         p.white_hat = next(w for w in get_all_white_hats() if w.code == WhiteHatCode.PRODIGY)
-        with mock.patch.object(vp, "choose_ace_target", return_value=(1, g.faces[0])):
+        with mock.patch.object(vp, "choose_ace_target", return_value=(1, g.faces[1])):
             h.run()
-        self.assertEqual(g.current_face, g.faces[0])
+        self.assertEqual(g.current_face, g.faces[1])
         self.assertEqual(p.ace_lock_breaks, 1)
         self.assertEqual(p.vuln_gained_by_source.get("lockin", 0), 0)
 
-    def test_t_edge_4_helix_bypass_rerolls_locked_f2_once_per_game(self):
+    def test_t_edge_4_helix_bypass_rerolls_locked_f1_once_per_game(self):
         e = mk_engine(cfg_name="v050_roster")
         p = e.state.players[0]
         p.company = next(c for c in get_all_companies() if c.code == CompanyCode.HELIX)
         p.bot.choose_helix_bypass = lambda *a: True
         g = create_gray_die(934, e.config.gray_face_profile)
-        Scripted(e, [g], {934: [1, 0]}, [[0]]).run()
+        Scripted(e, [g], {934: [0, 1]}, [[0]]).run()
         self.assertEqual((p.helix_bypass_uses, p.helix_bypass_locked_rerolled), (1, 1))
         self.assertFalse(p.is_helix_bypass_available("v1.0"))
 

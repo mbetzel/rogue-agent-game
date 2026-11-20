@@ -22,8 +22,8 @@ class TestV049Config(unittest.TestCase):
         self.assertTrue(c.colored_vuln_lock and c.colored_vuln_lock_secret and c.vuln_lock_gray)
         self.assertTrue(c.sprint_plan_enabled)  # inherits v0.48
         self.assertEqual(c.vuln_face_lock, "GRAY")
-        self.assertEqual(c.gray_face_profile, "V048_SPRINT")
-        self.assertEqual(c.die_face_profile, "V046_VULN")
+        self.assertEqual(c.gray_face_profile, "V0491_ALIGNED")  # v0.49.1: V048_SPRINT payouts, ⚠ on Face 1
+        self.assertEqual(c.die_face_profile, "V0491_ALIGNED")  # v0.49.1: V046_VULN payouts, ⚠ on Faces 1 + 5
         self.assertEqual(tuple(c.vuln_band_thresholds), (5, 8, 11))
         self.assertEqual(tuple(c.vuln_min_target_by_version), (5, 5, 5))
         self.assertEqual((c.helix_bypass_mode, c.helix_bypass_once_per_game), ("REROLL_LOCKED", True))

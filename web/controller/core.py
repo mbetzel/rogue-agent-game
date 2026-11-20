@@ -116,7 +116,7 @@ class GameController:
 
     @staticmethod
     def _build_config(num_players: int, enable_corporate_asymmetry: bool, rules_version: Optional[str]) -> GameConfig:
-        """Web ruleset: v0.50.0 (``GameConfig.v050()``: Gray ⚠ on Faces 2 and 3, Pen Test L2 Gray return, Locked Dice, Sprint Plan) only; older rulesets are retired."""
+        """Web ruleset: v0.50.0 (``GameConfig.v050()``: Gray ⚠ on Faces 1 and 5, Pen Test L2 Gray return, Locked Dice, Sprint Plan) only; older rulesets are retired."""
         version = str(rules_version or WEB_DEFAULT_RULES_VERSION).lower().lstrip("v")
         if version not in ("0.50.0", "0.50", "050"):
             raise ValueError(f"Unknown rules_version {rules_version!r}; the web supports {WEB_DEFAULT_RULES_VERSION} only")

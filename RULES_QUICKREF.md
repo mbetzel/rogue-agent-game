@@ -74,7 +74,7 @@ Each round consists of **6 Phases**:
    * If SETEC's corruption track filled last round, switch to the new version now: discard any unspent override from the previous version, unlock the new version override, and advance the marker.
    * Add **1 Black Cube** from the supply into the **Staging Cup**.
 2. **Roll Active Pool:** Roll all dice in your **Ready for Release Zone**.
-3. **Rerolls:** Up to **2 free rerolls** of any subset of dice (3 rolls total). Any die showing a **⚠ face** (colored ⚠ faces, R&D faces and the Gray `+2 🔬` and `+$2 / +2 🔬` faces) is **locked**: it can't be rerolled this phase. It still produces its output. *(Helix *Brute-Force Bypass*, once per game: reroll locked dice this phase, then set `1` die to any non-★ face. At **Release Track Level 4**, after rerolls and Prodigy/Helix overrides, you may set `1` rolled Gray Legacy die to any printed face.)*
+3. **Rerolls:** Up to **2 free rerolls** of any subset of dice (3 rolls total). Any die showing a **⚠ face** (colored ⚠ faces, R&D faces and the Gray `+$2 / +2 🔬` and `+2 🔬` faces; **every ⚠ is on Face 1 or 5**) is **locked**: it can't be rerolled this phase. It still produces its output. *(Helix *Brute-Force Bypass*, once per game: reroll locked dice this phase, then set `1` die to any non-★ face. At **Release Track Level 4**, after rerolls and Prodigy/Helix overrides, you may set `1` rolled Gray Legacy die to any printed face.)*
 4. **Deploy Dice** (all locks end):
    * **Gain Vulnerability:** `+1` per ⚠ on your final faces (R&D faces included), max `15`.
    * **R&D Faces (Face 5 on Red, Blue, Green, Purple):** Move **immediately to Research & Development** in Under Development (banks secrets later upon exit).
@@ -104,7 +104,7 @@ Each round consists of **6 Phases**:
 ### Phase 3: Income (Simultaneous)
 
 Collect all resources produced by dice still deployed **In Production**:
-* Collect **`$` Cash**, **`🔬` Research Tokens**, and **Corporate Secrets** (Blue Face 1).
+* Collect **`$` Cash**, **`🔬` Research Tokens**, and **Corporate Secrets** (Blue Face 3).
 * **Market Share:** Resolve Red Face 1 and Yellow Market Share faces (capped at the track maximum `20`).
 * **Star (`★`) Effects:** Resolve immediate card abilities and operative Signature Protocols (*B3* lowers Vulnerability by `1`, *G1* by `2`).
 * **Customer Poaching (*R3*):** Clockwise from First Player, take `1` Market Share from the rival with the most Market Share (> 0).

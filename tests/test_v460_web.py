@@ -318,7 +318,7 @@ class TestWebV046Config(unittest.TestCase):
         self.assertEqual([b["damage"] for b in st["vulnerability_track"]["bands"]], [1, 2, 3])
 
     def test_legacy_rules_versions_rejected(self):
-        for v in ("v0.38.0", "v0.37.0", "v0.40.0", "v0.45.0", "v0.46.0", "v0.47.0", "v0.48.0", "v0.49.0"):
+        for v in ("v0.38.0", "v0.37.0", "v0.40.0", "v0.45.0", "v0.46.0", "v0.47.0", "v0.48.0", "v0.49.0", "v0.49.1"):
             with self.assertRaises(ValueError):
                 GameController().new_game(num_players=2, seed=1, rules_version=v)
         GameController().new_game(num_players=2, seed=1, rules_version="v0.50.0")
@@ -592,7 +592,7 @@ class TestWebV046Http(unittest.TestCase):
 
 
 class TestWebV050Gray(unittest.TestCase):
-    """v0.50.0 in the web engine: Gray ⚠ on Faces 2 and 3, Pen Test Level 2 Gray return, Breakthrough labels."""
+    """v0.50.0 in the web engine: Gray ⚠ on Faces 1 and 5, Pen Test Level 2 Gray return, Breakthrough labels."""
 
     def test_web_uses_v050_preset(self):
         cfg = _fresh().state.config
@@ -603,7 +603,7 @@ class TestWebV050Gray(unittest.TestCase):
         gc = _fresh()
         from sim.engine import sprint_plan as sp
         gray = sp.owned_gray(gc.state.players[0])[0][1]
-        self.assertEqual([i + 1 for i, f in enumerate(gray.faces) if f.vuln], [2, 3])
+        self.assertEqual([i + 1 for i, f in enumerate(gray.faces) if f.vuln], [1, 5])
 
     def test_breakthrough_table(self):
         bts = _fresh().get_full_state()["vulnerability_track"]["breakthroughs"]

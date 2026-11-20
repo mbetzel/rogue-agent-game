@@ -58,7 +58,7 @@ class TestV049Golden(unittest.TestCase):
 class TestV050Neutral(unittest.TestCase):
     def test_t_par_3_flags_at_v049_values_equal_v049_roster(self):
         """INV-GV-PARITY-02: v050_roster with every v0.50 flag back at its v0.49 value digests like v049_roster."""
-        neutral = dict(gray_face_profile="V048_SPRINT", pen_test_l2_breakthrough="NONE",
+        neutral = dict(gray_face_profile="V0491_ALIGNED", pen_test_l2_breakthrough="NONE",
                        bot_research_mode="THINNING_AWARE", gray_vuln_telemetry=False)
         bad = []
         for players in (2, 3, 4):

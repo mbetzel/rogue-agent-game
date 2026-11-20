@@ -137,7 +137,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         name="The Operator",
         role="Tactical Staffing & Logistics Lead",
         flavor='"Optimized resource pipelines yield sustained intelligence."',
-        purple_faces=("+$1 / +1 {RESEARCH}", "+$1 / +1 {RESEARCH}", "+$2", "+$1 & +2 {RESEARCH} {WARN}", "{SECRET} R&D {WARN}", "{PURPLE} {STAR}"),
+        purple_faces=("+$1 & +2 {RESEARCH} {WARN}", "+$1 / +1 {RESEARCH}", "+$2", "+$1 / +1 {RESEARCH}", "{SECRET} R&D {WARN}", "{PURPLE} {STAR}"),
         protocol_name="Logistics Bounty",
         protocol_timing="P3: INCOME",
         protocol_desc=(
@@ -149,7 +149,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         name="The Phreaker",
         role="Hardware Intrusion Specialist",
         flavor='"Raw voltage pulses extract signal from dormant silicon."',
-        purple_faces=("+$1 / +1 {RESEARCH}", "+$1 / +1 {RESEARCH}", "+$2", "+$1 & +2 {RESEARCH} {WARN}", "{SECRET} R&D {WARN}", "{PURPLE} {STAR}"),
+        purple_faces=("+$1 & +2 {RESEARCH} {WARN}", "+$1 / +1 {RESEARCH}", "+$2", "+$1 / +1 {RESEARCH}", "{SECRET} R&D {WARN}", "{PURPLE} {STAR}"),
         protocol_name="Jumper Diagnostics",
         protocol_timing="P3: INCOME",
         protocol_desc=(
@@ -161,7 +161,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         name="The Acoustic",
         role="Side-Channel Cryptanalyst",
         flavor='"Harmonic resonance frequencies decode physical chassis vibrations."',
-        purple_faces=("+$1 / +1 {RESEARCH}", "+$1 / +1 {RESEARCH}", "+$2", "+$1 & +2 {RESEARCH} {WARN}", "{SECRET} R&D {WARN}", "{PURPLE} {STAR}"),
+        purple_faces=("+$1 & +2 {RESEARCH} {WARN}", "+$1 / +1 {RESEARCH}", "+$2", "+$1 / +1 {RESEARCH}", "{SECRET} R&D {WARN}", "{PURPLE} {STAR}"),
         protocol_name="Resonance Sensor",
         protocol_timing="P3: INCOME",
         protocol_desc=(
@@ -174,7 +174,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         name="The Spook",
         role="Covert Intelligence Specialist",
         flavor='"Scorched-earth protocols ensure zero forensic recovery."',
-        purple_faces=("+$1 / +1 {RESEARCH}", "+$1 / +1 {RESEARCH}", "+$2", "+$1 & +2 {RESEARCH} {WARN}", "{SECRET} R&D {WARN}", "{PURPLE} {STAR}"),
+        purple_faces=("+$1 & +2 {RESEARCH} {WARN}", "+$1 / +1 {RESEARCH}", "+$2", "+$1 / +1 {RESEARCH}", "{SECRET} R&D {WARN}", "{PURPLE} {STAR}"),
         protocol_name="Burn Notice",
         protocol_timing="P3: INCOME",
         protocol_desc=(
@@ -187,7 +187,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         name="The Prodigy",
         role="Autonomous Exploit Hacker",
         flavor='"Payload injection executes before memory boundaries establish."',
-        purple_faces=("+$1 / +1 {RESEARCH}", "+$1 / +1 {RESEARCH}", "+$2", "+$1 & +2 {RESEARCH} {WARN}", "{SECRET} R&D {WARN}", "{PURPLE} {STAR}"),
+        purple_faces=("+$1 & +2 {RESEARCH} {WARN}", "+$1 / +1 {RESEARCH}", "+$2", "+$1 / +1 {RESEARCH}", "{SECRET} R&D {WARN}", "{PURPLE} {STAR}"),
         protocol_name="Arbitrary Code Execution",
         protocol_timing="P1: STEP 4",
         protocol_desc=(
@@ -200,7 +200,7 @@ WHITE_HATS: List[WhiteHatDossierSpec] = [
         name="The Cipher",
         role="Distributed Ledger Architect",
         flavor='"Parity calculations balance zero-knowledge proofs flawlessly."',
-        purple_faces=("+$1 / +1 {RESEARCH}", "+$1 / +1 {RESEARCH}", "+$2", "+$1 & +2 {RESEARCH} {WARN}", "{SECRET} R&D {WARN}", "{PURPLE} {STAR}"),
+        purple_faces=("+$1 & +2 {RESEARCH} {WARN}", "+$1 / +1 {RESEARCH}", "+$2", "+$1 / +1 {RESEARCH}", "{SECRET} R&D {WARN}", "{PURPLE} {STAR}"),
         protocol_name="Algorithmic Parity",
         protocol_timing="P3: INCOME",
         protocol_desc=(
@@ -226,8 +226,8 @@ DICE_SPECS: List[DieSpec] = [
         title="GRAY",
         subtitle="Legacy Code",
         cost_str="Starter (5 each)",
-        faces=("+$1 & +1 {RESEARCH}", "+2 {RESEARCH} {WARN}", "+$2 / +2 {RESEARCH} {WARN}", "+$1 / +1 {RESEARCH}", "+$1", "+1 {RESEARCH}"),
-        notes="Start: 2 Gray + 1 starting colored die + 1 Purple in Ready for Release; 3 Gray in Current Sprint. No Gray dice gained later. Faces 3-4 are Choices (/): declare in Phase 1 Step 4. Faces 2 and 3 carry {WARN}; a Gray die showing {WARN} is a Locked Die (no reroll).",
+        faces=("+$2 / +2 {RESEARCH} {WARN}", "+$1", "+$1 & +1 {RESEARCH}", "+$1 / +1 {RESEARCH}", "+2 {RESEARCH} {WARN}", "+1 {RESEARCH}"),
+        notes="Start: 2 Gray + 1 starting colored die + 1 Purple in Ready for Release; 3 Gray in Current Sprint. No Gray dice gained later. Faces 1 and 4 are Choices (/): declare in Phase 1 Step 4. Faces 1 and 5 carry {WARN}; a Gray die showing {WARN} is a Locked Die (no reroll).",
     ),
     DieSpec(
         color_key="red",
@@ -242,7 +242,7 @@ DICE_SPECS: List[DieSpec] = [
         title="BLUE",
         subtitle="Firewall",
         cost_str="$4-$5 (by Variant)",
-        faces=("+1 Corporate Secret", "+2 {RESEARCH}", "+$2 & +1 {RESEARCH} {WARN}", "+1 {RESEARCH} / +$1", "{SECRET} R&D {WARN}", "{BLUE} {STAR}"),
+        faces=("+$2 & +1 {RESEARCH} {WARN}", "+2 {RESEARCH}", "+1 Corporate Secret", "+1 {RESEARCH} / +$1", "{SECRET} R&D {WARN}", "{BLUE} {STAR}"),
         notes="Direct Secrets. Face 5 R&D face (+2, or +3 at Pen Test L3+), Face 6 Blue {STAR}.",
     ),
     DieSpec(
@@ -266,8 +266,8 @@ DICE_SPECS: List[DieSpec] = [
         title="PURPLE",
         subtitle="Specialist AI",
         cost_str="Not sold (Public Rel. L3)",
-        faces=("+$1 / +1 {RESEARCH}", "+$1 / +1 {RESEARCH}", "+$2", "+$1 & +2 {RESEARCH} {WARN}", "{SECRET} R&D {WARN}", "{PURPLE} {STAR}"),
-        notes="Not purchasable. 2nd Purple die only from Public Relations Track Level 3. Faces 1-2 are Choices (/). Face 5 R&D face (+1), Face 6 Purple {STAR} Signature Protocol.",
+        faces=("+$1 & +2 {RESEARCH} {WARN}", "+$1 / +1 {RESEARCH}", "+$2", "+$1 / +1 {RESEARCH}", "{SECRET} R&D {WARN}", "{PURPLE} {STAR}"),
+        notes="Not purchasable. 2nd Purple die only from Public Relations Track Level 3. Faces 2 and 4 are Choices (/). Face 5 R&D face (+1), Face 6 Purple {STAR} Signature Protocol.",
     ),
 ]
 
@@ -659,7 +659,7 @@ def _draw_white_hat_card(page: PDFPage, x: float, y: float, w: float, h: float, 
     page.rich_paragraph(
         x + ds + 26.0, r_y + 7.5, w - ds - 32.0,
         "**PERSONAL RESERVE** (2nd Purple die; not purchasable)\n"
-        "1-2: +$1 / +1{RESEARCH} | 3: +$2 | 4: +$1 & +1{RESEARCH} {WARN}\n"
+        "1: +$1 & +2{RESEARCH} {WARN} | 2, 4: +$1 / +1{RESEARCH} | 3: +$2\n"
         "5: R&D face {WARN} (+1 Secret) | 6: {STAR} Signature Protocol",
         size=4.6, leading=6.6, color=PALETTE["ink_soft"],
     )
@@ -1241,7 +1241,7 @@ def render_white_hat_dossiers_page(page: PDFPage) -> None:
 
     wh_rules_text = (
         "**1. Personal Reserve:** Your 2nd Purple Specialist Die sits on Public Relations Track L3 and moves to your **Next Sprint** at **Level 3** (not purchasable; not replaced if lost).\n"
-        "**2. Faces 1-5:** **1-2:** +$1 / +1 {RESEARCH}  |  **3:** +$2  |  **4:** +$1 & +1 {RESEARCH} {WARN}  |  **5:** R&D face {WARN} (+1 Secret on exit).\n"
+        "**2. Faces 1-5:** **1:** +$1 & +2 {RESEARCH} {WARN}  |  **2, 4:** +$1 / +1 {RESEARCH}  |  **3:** +$2  |  **5:** R&D face {WARN} (+1 Secret on exit).\n"
         "**3. Face 6 Signature Protocol:** Repeatable per Purple {STAR} die rolled (Phase 3 protocols require the die to still be In Production; Prodigy fires in Phase 1 Step 4)."
     )
     page.rich_paragraph(rx + 10.0, ry + 27.0, rw - 20.0, wh_rules_text, size=7.2, leading=11.0, color=PALETTE["ink"])
@@ -1754,7 +1754,7 @@ def render_master_dice_reference(page: PDFPage) -> None:
             (
                 "- **Slash ( / ):** Choose **1** option in Phase 1 Step 4 *(e.g. Red Face 1: +1 Market Share OR +$1)*. **Ampersand ( & ):** gain **both**.\n"
                 "- **{WARN} Vulnerability:** each {WARN} on your final faces (R&D faces always) = **+1 Vulnerability** at Deploy (max 15). {GREEN} cubes hit the highest at **5+**: **-1 / -2 / -3** Secrets, then reset to **0**. Pen Test (P5): **2 {RESEARCH} = -1**.\n"
-                "- **R&D face:** yields Corporate Secrets, not {RESEARCH}. **Any {WARN} face is a Locked Die:** no reroll this phase (still produces output)."
+                "- **R&D face:** yields Corporate Secrets, not {RESEARCH}. **Any {WARN} face is a Locked Die:** no reroll this phase (still produces output). **{WARN} is always Face 1 or 5** (every die, Gray included)."
             ),
         ),
         (
@@ -1791,7 +1791,7 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
     page.line(20.0, mid_y, 772.0, mid_y, stroke=PALETTE["muted"], width=0.5, dash=(4, 3))
 
     compact_rows = [
-        ("gray", "GRAY", "Starter", ("+$1 &\n+1{RESEARCH}", "+2{RESEARCH} {WARN}", "+$2 /\n+2{RESEARCH} {WARN}", "+$1 /\n+1{RESEARCH}", "+$1", "+1{RESEARCH}")),
+        ("gray", "GRAY", "Starter", ("+$2 /\n+2{RESEARCH} {WARN}", "+$1", "+$1 &\n+1{RESEARCH}", "+$1 /\n+1{RESEARCH}", "+2{RESEARCH} {WARN}", "+1{RESEARCH}")),
         ("red", "RED", "$4-$5", ("+1 Share\n/ +$1 {WARN}", "+$2", "+$2", "+$2", "{SECRET} R&D {WARN}", "{RED} {STAR}")),
         ("blue", "BLUE", "$4-$5", ("+1 Secret", "+2{RESEARCH}", "+$2 {WARN}", "+1{RESEARCH}\n/ +$1", "{SECRET} R&D {WARN}", "{BLUE} {STAR}")),
         ("green", "GREEN", "$4-$5", ("+2{RESEARCH} {WARN}", "+1{RESEARCH}", "+2{RESEARCH}", "+1{RESEARCH}\n/ +$1", "{SECRET} R&D {WARN}", "{GREEN} {STAR}")),

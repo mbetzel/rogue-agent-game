@@ -32,7 +32,7 @@ _VARIANT_PROFILES = ("V037", "V038_DRAFT", "V044", "V046")
 # _F3 = V038_YELLOW_MS with Yellow F3 "+$1 & +1 Market Share" (spec §14.5.1, RSP-1)
 V038_DIE_FACE_PROFILES = ("V038_DRAFT", "V038_YELLOW_MS", "V038_YELLOW_MS_ALT", "V038_YELLOW_MS_F3", "V038D", "V038F", "V043_BLUE_TUNE")
 # v0.46.0 Vulnerability Track face profiles (spec §4.2); both are also V038-style (Secret Face 5) profiles
-V046_DIE_FACE_PROFILES = ("V046_VULN", "V046_VULN_NOPREMIUM")
+V046_DIE_FACE_PROFILES = ("V046_VULN", "V046_VULN_NOPREMIUM", "V0491_ALIGNED")  # V0491_ALIGNED: V046_VULN with ⚠ on F1 + F5
 V038_DIE_FACE_PROFILES = V038_DIE_FACE_PROFILES + V046_DIE_FACE_PROFILES
 _DIE_FACE_PROFILES = ("V037",) + V038_DIE_FACE_PROFILES
 V038B_STARTING_SECRETS = {2: 3, 3: 4, 4: 4}  # [TUNE] §14.3
@@ -47,7 +47,7 @@ V045_STARTING_SECRETS: Dict[int, int] = {2: 4, 3: 4, 4: 4}
 V046_STARTING_SECRETS: Dict[int, int] = {2: 5, 3: 5, 4: 5}
 V046_MARKET_SHARE_START: Dict[int, int] = {2: 14, 3: 18, 4: 18}
 V048_STARTING_SECRETS: Dict[int, int] = {2: 6, 3: 6, 4: 6}  # [TUNE] v0.48 Sprint Plan (docs/specs/sprint_plan_spec.md)
-V046_GRAY_FACE_PROFILES = ("V046_VULN", "V048_SPRINT", "V050_GRAY2")
+V046_GRAY_FACE_PROFILES = ("V046_VULN", "V048_SPRINT", "V0491_ALIGNED", "V050_GRAY2")  # V0491_ALIGNED: V048_SPRINT with the ⚠ on F1; V050_GRAY2: ⚠ on F1 + F5
 _RELEASE_L1_MODES = ("GRAY_DIE", "BANDWIDTH")
 _L3_MODES = ("SECRET", "THIN_GRAY")
 _VULN_FACE_LOCK_MODES = ("NONE", "GRAY")
@@ -1282,12 +1282,14 @@ class GameConfig:
 
     @classmethod
     def v049(cls, **overrides) -> "GameConfig":
-        """v0.49.0 Locked ⚠ Faces, "lock all dice" (docs/specs/locked_vuln_faces_spec.md). Inherits v048().
+        """v0.49.1 Locked ⚠ Faces, "lock all dice" (docs/specs/locked_vuln_faces_spec.md). Inherits v048().
+        v0.49.1 moves every ⚠ face to F1 + F5 (Gray: F1) so a rolled ⚠ reads off the number; payouts are unchanged.
         Any die showing a ⚠ face (colored core ⚠, Secret/R&D face, or Gray ⚠) is locked for the rest of Phase 1 rerolls.
         v0.48's own Gray filter (``vuln_face_lock="GRAY"``) stays on; it is redundant with ``vuln_lock_gray`` but keeps its telemetry."""
         for k, v in (
             ("colored_vuln_lock", True), ("colored_vuln_lock_secret", True), ("vuln_lock_gray", True),
-            ("die_face_profile", "V046_VULN"),                                          # D2 premium faces
+            ("die_face_profile", "V0491_ALIGNED"),     # D2 premium faces; v0.49.1: ⚠ on F1 + F5 (Gray: F1)
+            ("gray_face_profile", "V0491_ALIGNED"),
             ("vuln_band_thresholds", (5, 8, 11)), ("vuln_min_target_by_version", (5, 5, 5)),  # D1 safe zone 0-4
             ("helix_bypass_mode", "REROLL_LOCKED"), ("helix_bypass_once_per_game", True),     # D3
             ("helix_bypass_face_set", True), ("helix_bypass_black_immune", True),             # H1B
@@ -1307,7 +1309,7 @@ class GameConfig:
     def v050(cls, **overrides) -> "GameConfig":
         """v0.50.0 Gray ⚠ B23 + Pen Test L2 Gray thinning (docs/specs/gray_vuln_b23_spec.md). Inherits v049()."""
         for k, v in (
-            ("gray_face_profile", "V050_GRAY2"),          # B23: ⚠ on F2 +2 🔬 and F3 +$2 / +2 🔬
+            ("gray_face_profile", "V050_GRAY2"),          # B23: ⚠ on +$2 / +2 🔬 (F1) and +2 🔬 (F5), v0.49.1-aligned
             ("pen_test_l2_breakthrough", "THIN_GRAY"),    # a1
             ("gray_vuln_telemetry", True),
         ):
@@ -1591,8 +1593,8 @@ class GameConfig:
         if any(t not in _BOT_THIN_TRACKS for t in tt) or len(set(tt)) != len(tt):
             raise ValueError(f"bot_thin_tracks must be a duplicate-free subset of {_BOT_THIN_TRACKS}")
         vuln = self.defense_mode == "VULNERABILITY"
-        if self.gray_face_profile == "V048_SPRINT" and not vuln:
-            raise ValueError("gray_face_profile='V048_SPRINT' requires defense_mode='VULNERABILITY'")
+        if self.gray_face_profile in ("V048_SPRINT", "V0491_ALIGNED") and not vuln:
+            raise ValueError(f"gray_face_profile={self.gray_face_profile!r} requires defense_mode='VULNERABILITY'")
         if self.vuln_face_lock == "GRAY" and not vuln:
             raise ValueError("vuln_face_lock='GRAY' requires defense_mode='VULNERABILITY'")
         if self.sprint_plan_enabled:
