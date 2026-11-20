@@ -575,7 +575,7 @@ class GameStateSerializer:
             "starting_secrets": state.config.get_starting_secrets(len(state.players)),
             # v0.37.0 Market Leader Bonus schedule for this player count ([] when disabled)
             "is_market_leader_bonus": bool(getattr(state.config, "is_market_leader_bonus", False)),
-            "rules_version": "v0.49.0",
+            "rules_version": "v0.49.1",
             "is_secret_faces": bool(getattr(state.config, "secret_face_enabled", False)),
             # v0.49.0 Vulnerability Track (Central SETEC Agent Board) and Pen Test Track
             "vulnerability_track": cls._vulnerability_track(state),
