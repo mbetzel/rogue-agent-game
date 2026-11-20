@@ -61,8 +61,8 @@ from web.controller import (
 )
 
 
-WEB_DEFAULT_RULES_VERSION = "v0.49.0"
-WEB_RULES_VERSIONS = ("v0.49.0",)
+WEB_DEFAULT_RULES_VERSION = "v0.49.1"
+WEB_RULES_VERSIONS = ("v0.49.1",)
 
 
 class GameController:
@@ -116,9 +116,9 @@ class GameController:
 
     @staticmethod
     def _build_config(num_players: int, enable_corporate_asymmetry: bool, rules_version: Optional[str]) -> GameConfig:
-        """Web ruleset: v0.49.0 (``GameConfig.v049()``: Locked Dice, Sprint Plan, Vulnerability Track) only; older rulesets are retired."""
+        """Web ruleset: v0.49.1 (``GameConfig.v049()``: Locked Dice, Sprint Plan, Vulnerability Track) only; older rulesets are retired."""
         version = str(rules_version or WEB_DEFAULT_RULES_VERSION).lower().lstrip("v")
-        if version not in ("0.49.0", "0.49", "049"):
+        if version not in ("0.49.1", "0.49", "049"):
             raise ValueError(f"Unknown rules_version {rules_version!r}; the web supports {WEB_DEFAULT_RULES_VERSION} only")
         return GameConfig.v049(num_players=num_players, enable_corporate_asymmetry=enable_corporate_asymmetry,
                                round_sequence=RoundSequence.SIX_PHASE)  # the web is SIX_PHASE only (OQ-7)

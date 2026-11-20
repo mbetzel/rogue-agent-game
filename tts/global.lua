@@ -1,5 +1,5 @@
 --[[
-Too Many Secrets (v0.49.0) -- Tabletop Simulator Global script.
+Too Many Secrets (v0.49.1) -- Tabletop Simulator Global script.
 Generated alongside the save by `python3 -m tts.build_tts`; edit tts/global.lua, not the save.
 
 1. Fit: every object whose GM Notes read "fit:<w>x<d>" is scaled to exactly

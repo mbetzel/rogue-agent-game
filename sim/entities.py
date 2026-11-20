@@ -1838,7 +1838,7 @@ def get_random_white_hats(num_players: int, rng: random.Random) -> List[WhiteHat
     return rng.sample(all_wh, num_players)
 
 
-GRAY_FACE_PROFILES = ("V034", "V035_D1", "V048_SPRINT")
+GRAY_FACE_PROFILES = ("V034", "V035_D1", "V048_SPRINT", "V0491_ALIGNED")
 
 
 def _v046_gray_faces() -> List[Face]:  # 2026-11-18 balance package: F1 = +$1 & +1 🔬 ⚠
@@ -1865,6 +1865,16 @@ def _v048_gray_faces() -> List[Face]:
         Face(name="+$1", money=1),
         Face(name="+1 🔬", patches=1),
     ]
+
+
+def _align_vuln_face_to_f1(faces: List[Face]) -> List[Face]:
+    """v0.49.1: swap the die's ⚠ core face (the ⚠ face other than the Face 5 R&D face) into Face 1.
+
+    Payouts are unchanged; only print order moves, so every ⚠ sits on Face 1 or Face 5 (Gray: Face 1)."""
+    faces = list(faces)
+    i = next(k for k, f in enumerate(faces) if f.vuln and k != 4)
+    faces[0], faces[i] = faces[i], faces[0]
+    return faces
 
 
 def create_gray_die(die_id: int, profile: Optional[str] = "V035_D1") -> Die:
@@ -1903,6 +1913,8 @@ def create_gray_die(die_id: int, profile: Optional[str] = "V035_D1") -> Die:
         faces = _v046_gray_faces()
     elif profile == "V048_SPRINT":
         faces = _v048_gray_faces()
+    elif profile == "V0491_ALIGNED":
+        faces = _align_vuln_face_to_f1(_v048_gray_faces())
     else:
         raise ValueError(f"Unknown Gray face profile: {profile}")
     return Die(
@@ -2158,6 +2170,10 @@ def _create_colored_die_v038(color: DieColor, die_id: int, variant_card: Optiona
 def _create_colored_die_v046(color: DieColor, die_id: int, star_face: Face, var_code: Optional[str],
                              die_cost: int, profile: str = "V046_VULN") -> Die:
     """spec §4.2 V046 colored tables. ``V046_VULN_NOPREMIUM`` = the v0.45 core faces with ⚠ (premium removed)."""
+    if profile == "V0491_ALIGNED":
+        die = _create_colored_die_v046(color, die_id, star_face, var_code, die_cost, "V046_VULN")
+        die.faces = _align_vuln_face_to_f1(die.faces)
+        return die
     np_ = profile == "V046_VULN_NOPREMIUM"
     c = _choice
 

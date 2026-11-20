@@ -3,7 +3,8 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
-- [x] **Rules Draft `v0.49.0`** captured in [RULES.md](./RULES.md) (Locked ⚠ Faces: lock all dice)
+- [x] **Rules Draft `v0.49.1`** captured in [RULES.md](./RULES.md) (Locked ⚠ Faces: lock all dice; v0.49.1 prints every ⚠ face on Face 1 or Face 5, Gray on Face 1)
+- [x] **`v0.49.1` ⚠ face alignment (Main Agent, 2026-11-19, User request):** Blue F1↔F3, Purple F1↔F4 and Gray F1↔F3 swap so a rolled `1` or `5` is a ⚠ at a glance on the lookup chart. Payouts unchanged, so no balance sweep is needed (every face is equally likely, and nothing reads a face's position). `GameConfig.v049()` now uses the `V0491_ALIGNED` die and Gray profiles; RULES, QUICKREF, GLOSSARY, APPENDIX, web `rules_version`, `pnp/` and `tts/` are synced.
 - [ ] **Phase 70: Locked ⚠ Faces, "Lock All Dice" (`v0.49.0 Baseline`)**: any die showing ⚠ during Phase 1 rerolls is a **Locked Die** (colored ⚠, R&D faces, Gray Face 3); premium colored ⚠ faces; safe zone `0–4` (bands `5–7 / 8–10 / 11+`); Helix *Brute-Force Bypass* H1B (once per game: reroll locked dice + set 1 face; immune to Root Override Hijack); *Lock-in* → **Deploy**; override status *Locked* → **Pending**.
   - [x] *Pre-SDLC Game Designer Modeling:* `docs/plans/locked_vuln_faces_gd_plan.md` (User sign-off 2026-11-19, §8 and §11).
   - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/locked_vuln_faces_spec.md` (INV-LOCK-01..12).
