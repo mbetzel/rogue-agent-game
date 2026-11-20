@@ -9,6 +9,7 @@ Reads the native §8 telemetry (no monkeypatches). Mixed1 roster. One summary li
   --income-base  preset for the G4 income comparator (default v048_roster; "" skips it)
   --players 2,3,4  --games 1200  --seed0 42  --procs N  --assert-invariants  --quiet/--verbose  --no-save
 
+Pooled 2 x 1,200 blocks (seeds 42..1241 + 1242..2441): run once with  --games 2400 --seed0 42  (same seeds, one pooled pod).
 Examples (smoke):  python3 scripts/run_gray_vuln_sweep.py --games 20 --players 3 --assert-invariants
 Full run (not part of the implementation step): see spec §11.4.
 """
@@ -212,8 +213,8 @@ def guardrails(m: Dict[str, Any], b0: Dict[str, Any], b0ga: Optional[Dict[str, A
     rows.append(("G1 PZ+MC vs stock B0", f"{m['pz_mc_pct']:.1f} vs {b0['pz_mc_pct']:.1f} ({d1:+.1f} pp)", f"<= +{G1_BAR_PP} pp", d1 <= G1_BAR_PP))
     if b0ga is not None:
         d = m["pz_mc_pct"] - b0ga["pz_mc_pct"]
-        rows.append(("G1 PZ+MC vs Gray-aware B0-GA", f"{m['pz_mc_pct']:.1f} vs {b0ga['pz_mc_pct']:.1f} ({d:+.1f} pp)",
-                     f"<= +{G1_BAR_PP} pp", d <= G1_BAR_PP))
+        rows.append(("G1 PZ+MC vs B0-GA (report)", f"{m['pz_mc_pct']:.1f} vs {b0ga['pz_mc_pct']:.1f} ({d:+.1f} pp)",
+                     f"report only (Q6: stock B0 is the bar)", None))
     if players >= 3:
         rows.append(("G2 Market Collapse", f"{m['mc_pct']:.1f}%", ">= 8%", m["mc_pct"] >= G2_MIN_MC))
     else:
@@ -227,7 +228,7 @@ def guardrails(m: Dict[str, Any], b0: Dict[str, Any], b0ga: Optional[Dict[str, A
         rows.append(("G4 income vs v0.48", "no comparator", f"<= x{G4_X}", None))
     dd = m["dead_pct"]
     rows.append(("G5 dead turns", f"{dd:.2f}%" + (" (flag > 0.4%)" if DEAD_FLAG < dd <= DEAD_BAR else ""), f"<= {DEAD_BAR}%", dd <= DEAD_BAR))
-    rows.append(("G6 invariants", "clean" if invariants_checked else "not checked", "clean", True if invariants_checked else None))
+    rows.append(("G6 invariants", "clean" if invariants_checked else "not checked", "clean", True if invariants_checked else False))
     return rows
 
 
@@ -261,7 +262,7 @@ def main() -> int:
     ap.add_argument("--games", type=int, default=1200)
     ap.add_argument("--seed0", type=int, default=42)
     ap.add_argument("--procs", type=int, default=max(1, (os.cpu_count() or 2) - 1))
-    ap.add_argument("--assert-invariants", action="store_true")
+    ap.add_argument("--assert-invariants", action="store_true", help="accepted for compatibility; the candidate always asserts invariants (G6)")
     ap.add_argument("--verbose", action="store_true", help="print the full metric dict per pod")
     ap.add_argument("--quiet", action="store_true", default=True)
     ap.add_argument("--name", default=None, help="output file stem (default: config + seed0)")
@@ -275,7 +276,7 @@ def main() -> int:
         def run(cfg: str, ov: Dict[str, Any], check: bool) -> Dict[str, Any]:
             return metrics(play_all(cfg, a.roster, pl, a.games, a.seed0, ov, a.procs, check), pl)
 
-        mc = run(a.config, {**cand_ov}, a.assert_invariants)
+        mc = run(a.config, {**cand_ov}, True)  # G6: invariants are always asserted on the candidate
         b0 = run(a.base, {**tele, **base_ov}, False)
         b0ga = run(a.base, {**tele, "bot_research_mode": "GRAY_AWARE", **base_ov}, False) if a.base_ga else None
         b48 = run(a.income_base, {}, False) if a.income_base else None
@@ -285,7 +286,7 @@ def main() -> int:
             print(summary_line("B0-GA", pl, b0ga))
         if b48:
             print(summary_line("B48", pl, b48))
-        rows = guardrails(mc, b0, b0ga, b48, pl, a.assert_invariants)
+        rows = guardrails(mc, b0, b0ga, b48, pl, True)
         all_ok &= print_guardrails(rows, pl)
         if a.verbose:
             print(json.dumps(mc, indent=1, default=str))

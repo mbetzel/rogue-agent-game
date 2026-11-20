@@ -373,9 +373,31 @@ class TestGrayAwareBot(unittest.TestCase):
         self.assertTrue(rp.is_gray_aware_seat(c, e.state.players[0]))
         self.assertFalse(rp.is_gray_aware_seat(c, e.state.players[1]))
         self.assertFalse(rp.is_gray_aware_seat(GameConfig.v049_roster(num_players=3), e.state.players[0]))
-        e.run_game()
+        seen = []
+        orig = rp._gray_aware_want_order
+
+        def spy(policy, player, state, config, lv):
+            seen.append(player.player_id)
+            return orig(policy, player, state, config, lv)
+
+        with mock.patch.object(rp, "_gray_aware_want_order", spy):
+            e.run_game()
+        self.assertTrue(seen)
+        self.assertEqual(set(seen), {0})
         self.assertEqual(e.state.players[1].gray_aware_hot_rounds, set())
         self.assertEqual(e.state.players[2].gray_aware_hot_rounds, set())
+        # seat 1 under hot conditions plans exactly what THINNING_AWARE plans
+        plans = []
+        for mode in ("GRAY_AWARE", "THINNING_AWARE"):
+            e2 = mk50(3, 42, bot_research_mode=mode, bot_gray_aware_seats=(0,) if mode == "GRAY_AWARE" else None)
+            p = e2.state.players[1]
+            clear_pipeline(p)
+            for i in range(4):
+                p.ready_for_release_dice.append(gray(e2, 800 + i))
+            p.research_tokens, p.vulnerability, e2.state.current_round = 20, 4, 2
+            plans.append(rp.plan_research3(rp.ResearchPolicy(), p, e2.state, e2.config))
+        self.assertEqual(plans[0], plans[1])
+        self.assertTrue(plans[0][0])
 
     def test_inv_bot_01_never_called_without_mode(self):
         e = mk50(3, 42, bot_research_mode="THINNING_AWARE")
@@ -409,8 +431,11 @@ class TestGrayAwareBot(unittest.TestCase):
             c.setstate(e.rng.getstate())
             e.rng = c
             Counting.n = 0
+            res0 = p.research_tokens
             plan = p6.resolve_operations_plan(p.bot, p, e.state, e.rng)
             p6.execute_player_operations_turn(e, p, plan)
+            self.assertTrue(plan.track_upgrades, mode)  # research was actually bought
+            self.assertLess(p.research_tokens, res0, mode)
             counts.append(Counting.n)
         self.assertEqual(counts[0], counts[1])
 
