@@ -3,6 +3,18 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
+- [x] **Rules Draft `v0.50.0`** captured in [RULES.md](./RULES.md) (Gray ⚠ B23 + Pen Test Level 2 Gray thinning)
+- [ ] **Phase 71: Gray ⚠ B23 + Pen Test Level 2 Gray Thinning (`v0.50.0` Baseline)**: Gray Legacy dice carry ⚠ on Face 2 `+2 🔬` and Face 3 `+$2 / +2 🔬` (payouts unchanged; both lock); Pen Test Level 2 is a Breakthrough that returns `1` Gray Legacy die to the box (Level 3 keeps its own); sim-only `GRAY_AWARE` research bot is the `v050_roster` sweep policy.
+  - [x] *Pre-SDLC Game Designer Modeling:* `docs/plans/gray_vulnerability_gd_plan.md` §1–§9 (User sign-off 2026-11-19: B23, lever a1, Gray-aware bot; 3 ⚠ and Release Bandwidth levers rejected).
+  - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/gray_vuln_b23_spec.md` (§13 Q3–Q6 ruled by the Main Agent).
+  - [x] *Implementation (`senior-engineer`) + Code Review (`staff-engineer` PASS with minor fixes, applied in 547135c):* `GameConfig.v050()` / `v050_roster()`, `tests/test_v500_*.py`, v0.49 parity golden `tests/parity_v049/`, `scripts/run_gray_vuln_sweep.py`, `scripts/check_gray_vuln_port.py`.
+  - [x] *Validation Sweep (`product-owner`) + Balance Assessment (`game-designer`):* `docs/reports/v050_gray_vuln_sweeps.md`, `FINDINGS.md` §66 APPROVED with residuals (User accepted 2026-11-20).
+  - [x] *Documentation Sync (Main Agent) + PnP / TTS (`graphic-designer`):* RULES, QUICKREF, APPENDIX, GLOSSARY, `CLAUDE.md` pillars, `pnp/` (regenerated), `tts/` (rebuilt, `--check` clean) at `v0.50.0`; FINDINGS §57 archived to `docs/archive/FINDINGS_s55-s57.md`.
+  - [ ] *Follow-ups:*
+    - [x] Web: switched to `GameConfig.v050()` (`rules_version` `v0.50.0`; v0.49.0 now rejected). Gray Face 2 ⚠ comes from the engine. Track strips now take their Breakthrough text from the server (`vulnerability_track.breakthroughs`, built from `research_tracks.breakthrough_text`). This fixed the stale v0.44 labels and added Pen Test L2. The log text is also config-aware (it fixed Triage L3 "Gain 1 Corporate Secret"). The L2 Gray return uses the default thinning order, with no picker, the same as L3.
+    - [ ] Dominance matrix with a no-thinning stance and a reference-bot run on `v050_roster`.
+    - [ ] Tune the `GRAY_AWARE` bot parameters (first guesses; `rp_per_vuln` constant 2.0 = `pen_test_cost`).
+    - [ ] Company-power pass (pre-existing): Helix 4P `20.2`, Spook 4P `31.0`, 2P company spread `21.6` pp.
 - [x] **Rules Draft `v0.49.0`** captured in [RULES.md](./RULES.md) (Locked ⚠ Faces: lock all dice)
 - [ ] **Phase 70: Locked ⚠ Faces, "Lock All Dice" (`v0.49.0 Baseline`)**: any die showing ⚠ during Phase 1 rerolls is a **Locked Die** (colored ⚠, R&D faces, Gray Face 3); premium colored ⚠ faces; safe zone `0–4` (bands `5–7 / 8–10 / 11+`); Helix *Brute-Force Bypass* H1B (once per game: reroll locked dice + set 1 face; immune to Root Override Hijack); *Lock-in* → **Deploy**; override status *Locked* → **Pending**.
   - [x] *Pre-SDLC Game Designer Modeling:* `docs/plans/locked_vuln_faces_gd_plan.md` (User sign-off 2026-11-19, §8 and §11).

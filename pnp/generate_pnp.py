@@ -1,4 +1,4 @@
-"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.49.0 Baseline).
+"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.50.0 Baseline).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
   - 01_Player_Boards.pdf (6 pages — 4x Company Terminal Mats with CI/CD Pipeline loop + 6x Client Company Cards sheet + 6x White Hat Dossier Cards sheet)
@@ -19,7 +19,7 @@ from pnp.pdf_engine import PALETTE, Color, PDFDocument, PDFPage, measure_text
 
 
 # =============================================================================
-# Canonical Game Data (Synchronized 1:1 with RULES.md v0.49.0 Baseline & sim/entities.py)
+# Canonical Game Data (Synchronized 1:1 with RULES.md v0.50.0 Baseline & sim/entities.py)
 # =============================================================================
 
 @dataclass(frozen=True)
@@ -226,8 +226,8 @@ DICE_SPECS: List[DieSpec] = [
         title="GRAY",
         subtitle="Legacy Code",
         cost_str="Starter (5 each)",
-        faces=("+$1 & +1 {RESEARCH}", "+2 {RESEARCH}", "+$2 / +2 {RESEARCH} {WARN}", "+$1 / +1 {RESEARCH}", "+$1", "+1 {RESEARCH}"),
-        notes="Start: 2 Gray + 1 starting colored die + 1 Purple in Ready for Release; 3 Gray in Current Sprint. No Gray dice gained later. Faces 3-4 are Choices (/): declare in Phase 1 Step 4. Only Face 3 carries {WARN}; a Gray die showing {WARN} is a Locked Die (no reroll).",
+        faces=("+$1 & +1 {RESEARCH}", "+2 {RESEARCH} {WARN}", "+$2 / +2 {RESEARCH} {WARN}", "+$1 / +1 {RESEARCH}", "+$1", "+1 {RESEARCH}"),
+        notes="Start: 2 Gray + 1 starting colored die + 1 Purple in Ready for Release; 3 Gray in Current Sprint. No Gray dice gained later. Faces 3-4 are Choices (/): declare in Phase 1 Step 4. Faces 2 and 3 carry {WARN}; a Gray die showing {WARN} is a Locked Die (no reroll).",
     ),
     DieSpec(
         color_key="red",
@@ -665,18 +665,18 @@ def _draw_white_hat_card(page: PDFPage, x: float, y: float, w: float, h: float, 
     )
 
 
-TRACK_STEP_COSTS = (None, 1, 2, 2, 3)  # {RESEARCH} to reach L1..L4 (RULES.md v0.49.0 baseline)
+TRACK_STEP_COSTS = (None, 1, 2, 2, 3)  # {RESEARCH} to reach L1..L4 (RULES.md v0.50.0 baseline)
 
 
 def _draw_track_cells(page: PDFPage, cells: Sequence[Tuple[float, float, float, float]],
                       levels: Sequence[Tuple[str, str]], accent: Color, compact: bool = False) -> None:
     """Draw a 5-level (L0-L4) track. levels[i] = (main value, effect text).
 
-    L1 and L3 cells get a solid accent header (one-time reward on reaching that level).
+    Breakthrough cells (L1, L3, and Pen Test L2) get a solid accent header (one-time reward on reaching that level).
     compact=True puts the level label in a left tab (for short, wide rows).
     """
     for lv, ((cx, cy, cw, ch), (main, effect)) in enumerate(zip(cells, levels)):
-        once = lv in (1, 3) or (lv == 2 and "+1 {SECRET}" in effect)
+        once = lv in (1, 3) or (lv == 2 and effect != "")
         edge = accent if lv else PALETTE["rule"]
         page.rounded_rect(cx, cy, cw, ch, r=2.0, stroke=edge,
                           fill=PALETTE["purple_light"] if once else PALETTE["white"], line_width=0.65)
@@ -729,7 +729,7 @@ def _cells_col(x: float, y: float, w: float, h: float, gap: float = 2.0) -> List
 PEN_TEST_LEVELS = [
     ("Limit 1", ""),
     ("Limit 1", "+1 {SECRET} Corporate Secret"),
-    ("Limit 2", ""),
+    ("Limit 2", "Return 1 Gray Legacy die to the box"),
     ("Limit 2", "Return 1 Gray Legacy die to the box; Blue R&D face +1"),
     ("Limit 3", "Free -1 Vulnerability at start of each Operations Turn"),
 ]
@@ -747,7 +747,7 @@ RELEASE_LEVELS = [
     ("5 dice", "Return 1 Gray Legacy die to the box"),
     ("6 dice", "Set 1 rolled Gray die to any face (P1 Step 3)"),
 ]
-PR_REGAIN_COST_MONEY = 3  # $ Cash per +1 Market Share (RULES.md v0.49.0 baseline)
+PR_REGAIN_COST_MONEY = 3  # $ Cash per +1 Market Share (RULES.md v0.50.0 baseline)
 PUBLIC_RELATIONS_LEVELS = [
     ("Regain up to 1/turn", ""),
     ("Regain up to 1/turn", "+$3"),
@@ -756,7 +756,7 @@ PUBLIC_RELATIONS_LEVELS = [
     ("Regain up to 3/turn", "+2 Market Share now"),
 ]
 
-# Market Share track (RULES.md v0.49.0): start = 14 (2P) / 18 (3-4P); max = 20; 0 = Market Collapse;
+# Market Share track (RULES.md v0.50.0): start = 14 (2P) / 18 (3-4P); max = 20; 0 = Market Collapse;
 # Market Leader Bonus by Market Share place (1st +3 Secrets; 2nd +1).
 MARKET_SHARE_MAX = 20
 MARKET_SHARE_START = {14: "2P START", 18: "3-4P START"}
@@ -929,7 +929,7 @@ def render_player_board(
     draw_board_outer_frame(
         page,
         left_tag=f"TOO MANY SECRETS // COMPANY TERMINAL MAT [TERM-0{idx}/4] // CI/CD PIPELINE & PEN TEST",
-        right_tag="PNP PROTOTYPE v0.49.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.50.0 // US LETTER",
     )
 
     # -------------------------------------------------------------------------
@@ -1156,7 +1156,7 @@ def render_company_cards_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x CLIENT COMPANY CARDS [PAGE 5/6]",
-        right_tag="PNP PROTOTYPE v0.49.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.50.0 // US LETTER",
     )
 
     page.text(
@@ -1204,7 +1204,7 @@ def render_white_hat_dossiers_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x WHITE HAT DOSSIER CARDS [PAGE 6/6]",
-        right_tag="PNP PROTOTYPE v0.49.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.50.0 // US LETTER",
     )
 
     page.text(
@@ -1255,7 +1255,7 @@ def render_agent_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // CENTRAL ROGUE AGENT & MARKET SHARE BOARD [1/2]",
-        right_tag="PNP PROTOTYPE v0.49.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.50.0 // US LETTER",
     )
 
     # Top Title Bar inside board
@@ -1486,7 +1486,7 @@ def render_market_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // SOFTWARE MODULE MARKET & CENTRAL SUPPLY [2/2]",
-        right_tag="PNP PROTOTYPE v0.49.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.50.0 // US LETTER",
     )
 
     # Top Title Bar
@@ -1627,7 +1627,7 @@ def render_master_dice_reference(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // MASTER DICE PIP & ABILITY VISUAL AID [1/4]",
-        right_tag="PNP PROTOTYPE v0.49.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.50.0 // US LETTER",
     )
 
     page.rect(40.0, 32.0, 712.0, 24.0, stroke=PALETTE["ink"], fill=PALETTE["ink"], line_width=1.0)
@@ -1760,7 +1760,7 @@ def render_master_dice_reference(page: PDFPage) -> None:
         (
             "BREAKTHROUGHS & MILESTONES // TRACKS 1/2/2/3 {RESEARCH}",
             (
-                "- **Pen Test:** L1 +1 Secret | L2 limit 2 | L3 return 1 Gray die (Blue R&D +1) | L4 limit 3 + free -1 Vulnerability each Operations Turn.\n"
+                "- **Pen Test:** L1 +1 Secret | L2 limit 2 + return 1 Gray die | L3 return 1 Gray die (Blue R&D +1) | L4 limit 3 + free -1 Vulnerability each Operations Turn.\n"
                 "- **Release:** L1 +1 Release Bandwidth this round | L3 return 1 Gray die | L4 BW 6 + set 1 rolled Gray die to any face.\n"
                 "- **Triage:** L1 +$2 | L2 BW 2 | L3 +1 Secret | L4 BW 2 + Replace 1 Gray -> Colored ($0, to Ready).\n"
                 "- **Public Relations** ($3 Cash per +1 Market Share): L1 +$3 Cash | L3 2nd Purple die (to Next Sprint) | L4 Regain up to 3/turn + +2 MS now.\n"
@@ -1791,7 +1791,7 @@ def render_four_player_pocket_aids(page: PDFPage) -> None:
     page.line(20.0, mid_y, 772.0, mid_y, stroke=PALETTE["muted"], width=0.5, dash=(4, 3))
 
     compact_rows = [
-        ("gray", "GRAY", "Starter", ("+$1 &\n+1{RESEARCH}", "+2{RESEARCH}", "+$2 /\n+2{RESEARCH} {WARN}", "+$1 /\n+1{RESEARCH}", "+$1", "+1{RESEARCH}")),
+        ("gray", "GRAY", "Starter", ("+$1 &\n+1{RESEARCH}", "+2{RESEARCH} {WARN}", "+$2 /\n+2{RESEARCH} {WARN}", "+$1 /\n+1{RESEARCH}", "+$1", "+1{RESEARCH}")),
         ("red", "RED", "$4-$5", ("+1 Share\n/ +$1 {WARN}", "+$2", "+$2", "+$2", "{SECRET} R&D {WARN}", "{RED} {STAR}")),
         ("blue", "BLUE", "$4-$5", ("+1 Secret", "+2{RESEARCH}", "+$2 {WARN}", "+1{RESEARCH}\n/ +$1", "{SECRET} R&D {WARN}", "{BLUE} {STAR}")),
         ("green", "GREEN", "$4-$5", ("+2{RESEARCH} {WARN}", "+1{RESEARCH}", "+2{RESEARCH}", "+1{RESEARCH}\n/ +$1", "{SECRET} R&D {WARN}", "{GREEN} {STAR}")),
@@ -1898,7 +1898,7 @@ def render_four_player_round_reference_cards(page: PDFPage) -> None:
         ),
         (
             "P5: OPERATIONS (Clockwise from First Player)",
-            "Upgrade Tracks (<= 2/turn [1/2/2/3 {RESEARCH}]; L1/L3 Breakthroughs resolve at once) | Regain Market Share ($3 each, up to PR limit 1/1/2/2/3) | **Pen Test** (2 {RESEARCH} = -1 Vulnerability, up to limit 1/1/2/2/3) | Buy <= 1 die -> Next Sprint.",
+            "Upgrade Tracks (<= 2/turn [1/2/2/3 {RESEARCH}]; Breakthroughs resolve at once) | Regain Market Share ($3 each, up to PR limit 1/1/2/2/3) | **Pen Test** (2 {RESEARCH} = -1 Vulnerability, up to limit 1/1/2/2/3) | Buy <= 1 die -> Next Sprint.",
         ),
         (
             "P6: CI/CD PIPELINE SHIFT (Simultaneous)",
@@ -2256,7 +2256,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated: List[str] = []
 
     # 1. Player Terminal Mats & Split Cards (6 pages: 4x Mats with vertical resource holders, expanded PR & FIFO Research & Development + 1x Company Cards + 1x White Hat Cards)
-    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.49.0)")
+    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.50.0)")
     for idx in range(1, 5):
         p = doc_players.add_page()
         render_player_board(p, idx)
@@ -2298,7 +2298,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated.append(path_versions)
 
     # 5. Combined Master Print-and-Play Pack (All 14 pages)
-    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.49.0)")
+    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.50.0)")
     for sub_doc in (doc_central, doc_players, doc_dice, doc_versions):
         for pg in sub_doc.pages:
             doc_master.pages.append(pg)

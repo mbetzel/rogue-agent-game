@@ -1,4 +1,4 @@
-# Rogue Agent — Archived Findings §55–§56
+# Rogue Agent — Archived Findings §55–§57
 
 Moved from `FINDINGS.md` on 2026-11-19 (section numbering unchanged).
 
@@ -107,3 +107,60 @@ Sources: `sim_results/target_lock_validation/validation_report.md` (7,200-game d
 - **Official Balance Verdict: OFFICIALLY APPROVED (`v0.42.0 Baseline`).**
   The Operative Signature Cube & Target Lock Protocol successfully infuses character, thematic identity, and healthy anti-snowball tension into the Cube Tower without compromising Euro player agency or macro pacing. Officially approved for rules synchronization across all documentation, Print-and-Play assets, and quick-reference aids.
 
+## 57. Phase 62 Post-Telemetry Balance Assessment: Dominant Cube Color Signature Attacks: APPROVED (`v0.43.0 Baseline`)
+
+*(Cross-Reference: Phase 62 task prompt cited as §56 / Phase 62; numbered §57 to maintain strict monotonic section sequence following §56 Phase 61).*
+
+Sources: `sim_results/signature_dominant_attacks/validation_report.md` (7,200-game dataset across 4P, 3P, and 2P pods, Seeds 42..1241); Technical Architecture Specification `docs/specs/signature_cube_dominant_attacks_spec.md`; Pre-SDLC Research Report `docs/findings/signature_cube_mechanics_investigation.md` (§7–§11).
+
+- **Investigation Context & Architectural Rationale:**
+  While `v0.42.0` successfully established the tactile attention loop of Operative Signature Cubes (banking Secrets queues the cube into staging; drops through tower with ~40% baffle retention; returns to mat on exit), the resulting Target Lock penalty—facing `+1 dominant Attack Cube`—was deemed too generic and unexciting by players. It felt like an anonymous compiler drop rather than SETEC aggressively targeting that operative's corporate terminal.
+  Under Phase 62 (`v0.43.0 Baseline`), the generic `+1` Attack Cube is replaced with **Dominant Cube Color Signature Attacks** printed directly on the Central Board alongside the threat matrix, resolving against the most populous cube color in the Exit Tray under preset priority order **`GREEN > BLACK > BLUE > RED`**:
+  - **Red (*Market Manipulation*):** Drains `2` Market Share from the locked player; the other surviving player with the least Market Share gains `2` MS. Executes under the **Two-Step Simultaneous Epoch Rule (`INV-SIMUL-RED`)** (all locked players drain simultaneously first, then transfers resolve; drops where all survivors are locked cleanly cancel transfers).
+  - **Blue (*Buffer Congestion*):** In Phase 4 (after shields block), moves `1` Gray Legacy die from the Scanned Box (or In Production) to the back of the Processing Box (`0 Secrets`), taxing Conveyor Triage without re-queuing signature cubes (`INV-SIG-BLUE-TRIAGE`).
+  - **Green (*Malware Encryption*):** Places green cubes from the general token supply onto the next space of `2` Research Tracks that do not already have green cubes; those spaces cost double research (`2x 🔬`) to advance into (`INV-GREEN-SUPPLY`). Invariant `INV-GREEN-OVERFLOW` spills unplaced cubes into Glitched Shield Slots.
+  - **Black (*Root Override Hijack*):** Marks the locked player's Client Company Institutional Override as "Used" for the current SETEC Version; if already used, the player suffers a `-2 Corporate Secrets` fallback.
+  - **Preset Priority Tie-Breaking (`GREEN > BLACK > BLUE > RED`):** Evaluated across all 24 permutations in pre-SDLC modeling (§11 Rank #1), this order provides instant deterministic resolution with zero decision lag while counterbalancing the raw compiler physics (where Red is unique top in 28.5% of drops while Green is only 9.5% and Black does not recycle).
+
+- **Empirical Telemetry Verification (7,200 Games Across 4P, 3P, and 2P Pods):**
+
+  | Metric / Gate | Baseline (`v0.42.0`) | Candidate (`v0.43.0`) | Target Guardrail | Design Assessment |
+  | :--- | :---: | :---: | :---: | :--- |
+  | **Macro Pacing (Overall)** | 7.71 rounds | **7.60 rounds** | $\|\Delta\| \le 0.50$ rds (7.5–11.0) | **PASS** — Crisp, rock-solid macro pacing ($\Delta = -0.11$ rds) |
+  | **Macro Pacing (4P / 3P / 2P)** | 7.51 / 7.90 / 7.73 | **7.43 / 7.78 / 7.58** | 7.00–11.00 rounds | **PASS** — Flawless pacing parity across all player counts |
+  | **Total Wipeout Rate (Overall)** | 6.22% | **5.75%** | $\le$ Baseline | **PASS** — **Wipeouts reduced across all pods** (-0.47% table avg) |
+  | **Total Wipeout Rate (4P / 3P / 2P)** | 2.25% / 5.08% / 11.33% | **2.08% / 4.33% / 10.83%** | $\le$ Baseline | **PASS** — 4P wipeouts drop to 2.08%; zero early wipeouts ($\le 6$ rds) |
+  | **End-Game: Singularity (4P / 3P / 2P)** | 4.5% / 7.1% / 8.9% | **4.7% / 8.2% / 8.2%** | Active clock | **PASS** — Macro clock preserved |
+  | **End-Game: Patient Zero (4P / 3P / 2P)** | 70.3% / 64.0% / 39.3% | **73.8% / 65.2% / 43.5%** | Active pressure | **PASS** — Healthy attrition on overextended engines |
+  | **End-Game: Market Collapse (4P / 3P / 2P)** | 22.9% / 23.8% / 40.4% | **19.4% / 22.3% / 37.5%** | Active condition | **PASS** — Active secondary terminal condition |
+  | **Baffle Retention Rate** | 40.3% / 39.5% / 39.8% | **40.1% / 38.7% / 40.0%** | Model B Physics (~40%) | **PASS** — Verified physical baffle retention |
+  | **Mean Baffle Hold Duration** | 0.48 / 0.48 / 0.48 | **0.48 / 0.47 / 0.49** | Latent threat delay | **PASS** — Multi-round suspense preserved |
+  | **TL Cadence (Table / Seat-Game)** | 2.11 / 2.34 / 2.49 | **2.09 / 2.33 / 2.42** | ~2.00–2.50 / seat-game | **PASS** — Stable trigger frequency on Secret engines |
+  | **4-Color Trigger Distribution** | N/A (+1 cube) | **G: 29.2%, K: 22.6%, B: 15.7%, R: 28.3%** | Balanced spread | **PASS** — Confirms Rank #1 mathematical model within $\pm 1\%$ |
+
+- **Subroutine Mechanical Verification:**
+  1. *Red (*Market Manipulation*):* In 4P, 2,960 Red signature attacks drained 5,616 actual Market Share and transferred 5,646 MS to non-locked trailing players. All-locked drops cleanly canceled transfers (4.6% in 4P, 13.9% in 3P, 38.5% in 2P), completely preventing turn-order ping-pong bugs.
+  2. *Blue (*Buffer Congestion*):* 1,475 Gray Legacy dice moved to Processing Boxes in 4P (0.31/seat-game). All moved dice triaged out cleanly with 0 Secrets and zero re-queued signature cubes (`INV-SIG-BLUE-TRIAGE`).
+  3. *Green (*Malware Encryption*):* Placed 5,201 track cubes in 4P; players completed 1,785 doubled-cost upgrades (`2x 🔬`), spending 2,087 extra 🔬. Only 12 saturation spillover glitched slots occurred table-wide across 1,200 games, confirming smooth track placement without track demotion exploits.
+  4. *Black (*Root Override Hijack*):* Unused Client Company Overrides absorbed Black hits in **31.3%–33.0%** of cases, while the `-2 Corporate Secrets` fallback resolved in **67.0%–68.7%** of cases. Helix (*Brute-Force Bypass*) and DTO (*Slush Fund*) frequently held available overrides into Phase 4 Step 2, providing natural thematic defense.
+
+- **Core Design Pillar Evaluations:**
+  1. *Tactile & Thematic Central Board Drama:*
+     - Players no longer face an abstract generic cube; Target Lock now triggers distinct, thematic operational crises (extortion, malware encryption, pipeline congestion, or root breach).
+     - Preset priority order (`GREEN > BLACK > BLUE > RED`) eliminates all decision lag and cognitive friction while guaranteeing a balanced 4-color distribution.
+  2. *Enhanced Archetype Equity & Compression of Runaway Turtles:*
+     - In 4P pods, `SecOpsTurtleBot` win rate compressed by **-6.8%** (53.3% $\to$ 46.6%) as Black and Green attacks bypass shield-stacking turtle strategies.
+     - Trailing archetypes gained substantial competitive equity: `VentureGreedBot` rose **+3.3%** (11.2% $\to$ 14.6%) and `AccelerationistBot` rose **+3.5%** (16.9% $\to$ 20.4%).
+  3. *Client Company Parity Normalization:*
+     - `Helix Biomedical Consortium` gained **+5.2%** win equity in 4P (16.0% $\to$ 21.3%) due to its unspent Phase 1 override absorbing Black hits.
+     - Overall Client Company 4P win spread tightened from **14.2%** under `v0.42` to **13.3%** under `v0.43` (Omnidyne 31.2%, DTO 29.0%, Aegis 28.3%, Meridian 22.4%, Helix 21.3%, Prometheus 17.9%).
+
+- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.43.0 Baseline`).**
+  Dominant Cube Color Signature Attacks successfully elevate Target Lock into an exciting, thematic, and balanced centerpiece mechanic. Pacing, wipeout guardrails, color parity, and archetype equity are 100% validated across 7,200 games. Recommended for full release synchronization across rules documentation, Print-and-Play assets, and quick-reference aids.
+
+- **Official Balance Verdict: OFFICIALLY APPROVED (`v0.43.1`).**
+  Synchronized across `RULES.md`, `RULES_APPENDIX.md`, `sim/` (`GameConfig.white_hat_6f_rebalance=True` in `v043()`), and `pnp/generate_pnp.py`.
+
+---
+
+*§57 moved from `FINDINGS.md` on 2026-11-20.*
