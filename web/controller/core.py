@@ -61,15 +61,15 @@ from web.controller import (
 )
 
 
-WEB_DEFAULT_RULES_VERSION = "v0.47.0"
-WEB_RULES_VERSIONS = ("v0.47.0",)
+WEB_DEFAULT_RULES_VERSION = "v0.49.0"
+WEB_RULES_VERSIONS = ("v0.49.0",)
 
 
 class GameController:
     """Manages the full game lifecycle and the v0.34 six-phase turn state machine.
 
     Phases (``web.controller.phases``): 1 Roll & Deploy, 2 Compiler Drop & Corruption, 3 Income,
-    4 Attack Resolution, 5 Operations, 6 CI/CD Pipeline Shift, 7 Game Over (v0.47.0 order).
+    4 Attack Resolution, 5 Operations, 6 CI/CD Pipeline Shift, 7 Game Over (v0.49.0 order).
     """
 
     def __init__(self) -> None:
@@ -116,11 +116,11 @@ class GameController:
 
     @staticmethod
     def _build_config(num_players: int, enable_corporate_asymmetry: bool, rules_version: Optional[str]) -> GameConfig:
-        """Web ruleset: v0.47.0 (``GameConfig.v047()``, Vulnerability Track) only; older rulesets are retired."""
+        """Web ruleset: v0.49.0 (``GameConfig.v049()``: Locked Dice, Sprint Plan, Vulnerability Track) only; older rulesets are retired."""
         version = str(rules_version or WEB_DEFAULT_RULES_VERSION).lower().lstrip("v")
-        if version not in ("0.47.0", "0.47", "047"):
+        if version not in ("0.49.0", "0.49", "049"):
             raise ValueError(f"Unknown rules_version {rules_version!r}; the web supports {WEB_DEFAULT_RULES_VERSION} only")
-        return GameConfig.v047(num_players=num_players, enable_corporate_asymmetry=enable_corporate_asymmetry,
+        return GameConfig.v049(num_players=num_players, enable_corporate_asymmetry=enable_corporate_asymmetry,
                                round_sequence=RoundSequence.SIX_PHASE)  # the web is SIX_PHASE only (OQ-7)
 
     def new_game(
@@ -278,7 +278,7 @@ class GameController:
         ]
         for p in self.state.players:
             p_name = self.player_meta[p.player_id]["name"]
-            if p.company:  # v0.47.0 has no company setup bonuses (``company_setup_bonuses=False``)
+            if p.company:  # v0.49.0 has no company setup bonuses (``company_setup_bonuses=False``)
                 wh_str = f" / {p.white_hat.name}" if p.white_hat else ""
                 self.event_log.append(
                     f"{p_name} contracted with {p.company.name} ({p.company.override_name}){wh_str}."
@@ -396,7 +396,7 @@ class GameController:
         return phase1_actions.perform_reroll(self, player_id, reroll_indices, use_prodigy_ability)
 
     def lock_in(self, player_id: int, choice_declarations: Optional[Dict[int, int]] = None) -> Dict[str, Any]:
-        """Phase 1 Step 4: Lock-in & Assign Dice."""
+        """Phase 1 Step 4: Deploy Dice."""
         return phase1_actions.lock_in(self, player_id, choice_declarations)
 
     def override_face(self, player_id: int, die_index: int, face_index: int, source: str = "helix") -> Dict[str, Any]:
@@ -512,7 +512,7 @@ class GameController:
         graduate_die_ids: Optional[List[int]] = None,
         splice_die_id: Optional[int] = None,
     ) -> Dict[str, Any]:
-        """Phase 6: CI/CD Pipeline Shift (Scanned Graduation choice)."""
+        """Phase 6: CI/CD Pipeline Shift (Sprint Review choice)."""
         return phase6_pipeline_actions.choose_graduates(self, player_id, graduate_die_ids, splice_die_id=splice_die_id)
 
     def end_turn(self, player_id: int) -> Dict[str, Any]:

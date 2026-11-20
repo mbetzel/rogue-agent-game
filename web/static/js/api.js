@@ -247,7 +247,7 @@ export async function doConfirmAttacks(choices = {}) {
   }
 }
 
-// Phase 6: CI/CD Pipeline Shift (Scanned Graduation <= Release Bandwidth; Magnetic Splice target)
+// Phase 6: CI/CD Pipeline Shift (Sprint Review <= Release Bandwidth; Magnetic Splice target)
 export async function doChooseGraduates(graduateDieIds = [], spliceDieId = null) {
   const payload = {
     player_id: getHumanPlayerId(),

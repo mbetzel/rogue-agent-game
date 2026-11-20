@@ -146,7 +146,7 @@ export function renderCompiler() {
           </div>
         </div>
 
-        <!-- Vulnerability Track (v0.47.0, Central SETEC Agent Board) -->
+        <!-- Vulnerability Track (v0.49.0, Central SETEC Agent Board) -->
         <div class="agent-corruption-track-box vulnerability-track-box">
           <div class="agent-track-header">
             <span class="track-title">VULNERABILITY TRACK (0–${(state.vulnerability_track || {}).max || 15})</span>
@@ -310,7 +310,7 @@ export function renderCompiler() {
               <strong>0. Version Transition:</strong> Apply queued Version upgrade at start of round.<br>
               <strong>1. Pulse:</strong> Add +1 Black → Staging Cup.<br>
               <strong>2. Roll:</strong> Roll every die in Ready for Release.<br>
-              <strong>3. Rerolls:</strong> Up to 2 free rerolls (a Secret face may be kept or rerolled), then Prodigy / Helix / Release L4 overrides.<br>
+              <strong>3. Rerolls:</strong> Up to 2 free rerolls (⚠ dice, R&D faces included, are Locked Dice), then Prodigy / Helix / Release L4 overrides.<br>
               <strong>4. Deploy Dice:</strong> +1 Vulnerability per ⚠ on your final faces. R&D faces → Research & Development; every other die → In Production.
             </div>
           </div>
@@ -347,7 +347,7 @@ export function renderCompiler() {
           <div class="seq-card">
             <div class="seq-card-header">PHASE 5: OPERATIONS (Clockwise)</div>
             <div class="seq-card-body">
-              Upgrade up to 2 Research Tracks (🔬), Pen Test (2 🔬 per −1 Vulnerability, up to your limit), regain Market Share on the Public Relations Track ($), buy 1 die into the Scanned Box.
+              Upgrade up to 2 Research Tracks (🔬), Pen Test (2 🔬 per −1 Vulnerability, up to your limit), regain Market Share on the Public Relations Track ($), buy 1 die into the Sprint Plan.
             </div>
           </div>
 
@@ -355,11 +355,11 @@ export function renderCompiler() {
           <div class="seq-card">
             <div class="seq-card-header">PHASE 6: CI/CD PIPELINE SHIFT (Simultaneous)</div>
             <div class="seq-card-body">
-              1. <strong>Magnetic Splice:</strong> Processing Box → Ready for Release (Omnidyne), banking its Secret.<br>
-              2. <strong>Production Return:</strong> In Production → Scanned Box.<br>
-              3. <strong>Scanned Graduation:</strong> Scanned → Ready (≤ Release Bandwidth, your choice).<br>
-              4. <strong>Conveyor Triage:</strong> Processing Box → Scanned, oldest first (≤ Triage Bandwidth), banking Secret face yields (Green also −2 Vulnerability).<br>
-              ${state.is_round_leader_bonus ? `5. <strong>Market Leader Bonus:</strong> if a Red Secret face was banked this round (${(state.round_leader_bonus_schedule || []).map((b, i) => `${i + 1}${["st", "nd", "rd"][i] || "th"} +${b}`).filter((t) => !t.endsWith("+0")).join(", ")} by Market Share place).` : ""}
+              1. <strong>Magnetic Splice:</strong> Research & Development → Ready for Release (Omnidyne), banking its Secret.<br>
+              2. <strong>Production Return:</strong> In Production → Current Sprint if empty, else Next Sprint.<br>
+              3. <strong>Sprint Review:</strong> Sprint Plan → Ready (Release Bandwidth: Current Sprint first, then Next Sprint dice of your choice).<br>
+              4. <strong>Conveyor Triage:</strong> Research & Development → Next Sprint, oldest first (≤ Triage Bandwidth), banking R&D face yields (Green also −2 Vulnerability).<br>
+              ${state.is_round_leader_bonus ? `5. <strong>Market Leader Bonus:</strong> if a Red R&D face was banked this round (${(state.round_leader_bonus_schedule || []).map((b, i) => `${i + 1}${["st", "nd", "rd"][i] || "th"} +${b}`).filter((t) => !t.endsWith("+0")).join(", ")} by Market Share place).` : ""}
             </div>
           </div>
 
@@ -368,8 +368,8 @@ export function renderCompiler() {
             <div class="seq-card-header">SECRETS VICTORY &amp; TIEBREAKERS</div>
             <div class="seq-card-body">
               <strong>Surviving White Hat Operatives Only</strong> (Patient Zero eliminated):<br>
-              ${bonusSchedule() ? `<strong>Market Leader Bonus:</strong> survivors gain Corporate Secrets by final <strong>Market Share</strong> place (${bonusSchedule()}; ties share the better place)${state.is_round_leader_bonus ? ", also at the end of Phase 6 in any round a Red Secret face was banked" : ""}.<br>` : ""}
-              <strong>Primary Victory Goal:</strong> Most <strong>Corporate Secrets</strong>${bonusSchedule() ? " (held + Market Leader Bonus)" : " held"}. Dice still in the Processing Box at game end yield nothing.<br>
+              ${bonusSchedule() ? `<strong>Market Leader Bonus:</strong> survivors gain Corporate Secrets by final <strong>Market Share</strong> place (${bonusSchedule()}; ties share the better place)${state.is_round_leader_bonus ? ", also at the end of Phase 6 in any round a Red R&D face was banked" : ""}.<br>` : ""}
+              <strong>Primary Victory Goal:</strong> Most <strong>Corporate Secrets</strong>${bonusSchedule() ? " (held + Market Leader Bonus)" : " held"}. Dice still in Research & Development at game end yield nothing.<br>
               ${state.is_market_share ? `<strong>Tiebreaker 1:</strong> Highest <strong>Market Share</strong>.<br>
               <strong>Tiebreaker 2:</strong> Most remaining <strong>Money ($)</strong>.<br>
               <strong>Tiebreaker 3:</strong> Most <strong>Active Colored Module Dice</strong> in Ready for Release.<br>
@@ -387,7 +387,7 @@ export function renderCompiler() {
   `;
 }
 
-// v0.47.0 Vulnerability Track: safe zone + damage bands, one marker per surviving player
+// v0.49.0 Vulnerability Track: safe zone + damage bands, one marker per surviving player
 function renderVulnerabilityTrack() {
   const vt = state.vulnerability_track || { max: 15, min_target: 4, bands: [] };
   const cells = [];

@@ -1,6 +1,6 @@
 """Web Phase 5: Operations (Operations Turns, clockwise from the First Player), then Phase 6: CI/CD Pipeline Shift.
 
-v0.47.0 order (RULES.md Section 4, ``operations_before_pipeline_shift``).
+v0.49.0 order (RULES.md Section 4, ``operations_before_pipeline_shift``).
 """
 
 from __future__ import annotations
@@ -291,7 +291,7 @@ def buy_die(
     )
     controller.state.next_die_id += 1
     if controller.state.config.purchased_dice_to_scanned:
-        player.scanned_dice.append(new_die)  # v0.40+: bought dice go to the Scanned Box and graduate in Phase 6
+        player.scanned_dice.append(new_die)  # v0.40+: bought dice go to the Sprint Plan and are released at the Sprint Review
         player.scanned_dice_purchased_this_turn += 1
     else:
         player.ready_dice.append(new_die)
@@ -543,7 +543,7 @@ def execute_star_action(
 
     if action_type == "B2":
         if not player.b2_available:
-            raise ValueError("B2 Deep R&D Vault ability is not available this turn")
+            raise ValueError("B2 Deep Data Vault ability is not available this turn")
         cost = controller.state.config.b2_secret_cost
         cap = controller.state.config.b2_secret_cap
         if player.money < cost:
@@ -553,7 +553,7 @@ def execute_star_action(
         player.money -= cost
         player.secrets += 1
         player.b2_available = False
-        controller.event_log.append(f"{meta['name']} activated B2 Deep R&D Vault: +1 Corporate Secret for ${cost}.")
+        controller.event_log.append(f"{meta['name']} activated B2 Deep Data Vault: +1 Corporate Secret for ${cost}.")
 
     elif action_type == "Y1":
         if not player.y1_available:
@@ -707,7 +707,7 @@ def _level_effect_label(rec: Any) -> str:
 
 
 def regain_market_share(controller: GameController, player_id: int) -> Dict[str, Any]:
-    """Human action (Public Relations Track): +1 Market Share for the current level's price (cash in v0.47.0).
+    """Human action (Public Relations Track): +1 Market Share for the current level's price (cash in v0.49.0).
 
     Runs ``sim.engine.phase6_operations.execute_share_regain`` for one step (cost and per-turn cap by level)."""
     cfg = controller.state.config

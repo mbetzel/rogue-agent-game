@@ -132,7 +132,7 @@ export function renderActionDock() {
       rerollInfo.style.fontSize = "0.8rem";
       rerollInfo.style.color = "#38bdf8";
       rerollInfo.style.fontWeight = "600";
-      rerollInfo.innerText = `Rerolls: ${rerollsLeft}/${maxRerolls} left | Click dice to reroll (a Secret face may be kept or rerolled)`;
+      rerollInfo.innerText = `Rerolls: ${rerollsLeft}/${maxRerolls} left | Click dice to reroll (⚠ dice are Locked Dice)`;
       controls.appendChild(rerollInfo);
 
       if (caps.can_reroll && selectedRerollIndices.size > 0) {
@@ -180,7 +180,7 @@ export function renderActionDock() {
           : ` (safe zone 0–${vt.min_target - 1}: Green cubes never hit you)`);
       controls.appendChild(vulnInfo);
 
-      // Choice Face selectors and Secret face notes for the rolled pool
+      // Choice Face selectors and R&D face notes for the rolled pool
       rolled.forEach((d, idx) => {
         const face = d.current_face;
         if (!face || face.is_glitch) return;
@@ -190,7 +190,7 @@ export function renderActionDock() {
           const noteWrap = document.createElement("div");
           noteWrap.style.fontSize = "0.8rem";
           const yNow = (human.secret_yield_now || {})[d.color];
-          noteWrap.innerHTML = `<span style="color: ${colStr};">Die #${idx + 1} (${d.color.toUpperCase()}):</span> <span class="secret-face-tag">🔒 SECRET FACE ⚠ → PROCESSING BOX${yNow !== undefined ? ` (+${yNow} Corporate Secrets if it left now)` : ""}</span>`;
+          noteWrap.innerHTML = `<span style="color: ${colStr};">Die #${idx + 1} (${d.color.toUpperCase()}):</span> <span class="secret-face-tag">🔒 R&D FACE ⚠ → RESEARCH & DEVELOPMENT${yNow !== undefined ? ` (+${yNow} Corporate Secrets if it left now)` : ""}</span>`;
           controls.appendChild(noteWrap);
           return;
         }
@@ -483,7 +483,7 @@ export function renderActionDock() {
     if (caps.can_star && caps.can_star.B2) {
       const b2Btn = document.createElement("button");
       b2Btn.className = "action-btn";
-      b2Btn.innerText = "B2: Deep R&D ($4 -> +1 Secret)";
+      b2Btn.innerText = "B2: Deep Data Vault ($4 -> +1 Secret)";
       b2Btn.onclick = () => doStarAction("B2");
       controls.appendChild(b2Btn);
     }
@@ -651,7 +651,7 @@ export function renderActionDock() {
 
 
 // ---------------------------------------------------------------------------
-// Phase 4: Attack Resolution (v0.47.0) — nothing is blocked. Red & Blue hit every survivor, Green cubes hit the
+// Phase 4: Attack Resolution (v0.49.0) — nothing is blocked. Red & Blue hit every survivor, Green cubes hit the
 // highest Vulnerability at the minimum target or more (one cube at a time), then Target Lock Signature Attacks.
 // The human only declares Institutional Override and Target Lock choices before damage resolves.
 // ---------------------------------------------------------------------------
@@ -828,9 +828,10 @@ function renderIncomePanel(controls, human, caps) {
   const panel = document.createElement("div");
   panel.className = "confirm-income-panel";
   const details = inc.details || [];
-  const ownedColored = []
+  // Burn Notice (v0.43+): permanently return 1 owned Gray Legacy die to the box for +$3
+  const burnable = []
     .concat(human.in_production_dice || [], human.glitched_dice || [], human.scanned_dice || [], human.ready_for_release_dice || [])
-    .filter((d) => d.color !== "gray" && d.color !== "white");
+    .filter((d) => d.color === "gray");
   const pbox = human.processing_box_dice || [];
   const ud = [].concat(human.glitched_dice || [], human.scanned_dice || []);
 
@@ -867,14 +868,14 @@ function renderIncomePanel(controls, human, caps) {
   const burnSelects = [];
   let diagSelect = null;
   const triggers = Math.max(1, inc.purple_star_triggers || 1);
-  if (caps.can_spook_burn && ownedColored.length > 0) {
+  if (caps.can_spook_burn && burnable.length > 0) {
     // One Burn Notice per Purple ★ trigger (OQ-17); the same die cannot be burned twice.
     for (let t = 0; t < triggers; t++) {
       const burnSelect = document.createElement("select");
       burnSelect.style.padding = "4px 8px";
       burnSelect.className = "burn-notice-select";
       burnSelect.innerHTML = `<option value="">Burn Notice ${triggers > 1 ? "#" + (t + 1) + " " : ""}: decline</option>` +
-        ownedColored.map((d) => `<option value="${d.die_id}">Burn Notice ${triggers > 1 ? "#" + (t + 1) + " " : ""}: ${d.color.toUpperCase()} #${d.die_id} (+1 Secret)</option>`).join("");
+        burnable.map((d) => `<option value="${d.die_id}">Burn Notice ${triggers > 1 ? "#" + (t + 1) + " " : ""}: return GRAY #${d.die_id} to the box (+$3)</option>`).join("");
       bar.appendChild(burnSelect);
       burnSelects.push(burnSelect);
     }
@@ -883,9 +884,9 @@ function renderIncomePanel(controls, human, caps) {
     diagSelect = document.createElement("select");
     diagSelect.style.padding = "4px 8px";
     diagSelect.innerHTML = pbox.length > 0
-      ? pbox.map((d) => `<option value="${d.die_id}">Jumper Diagnostics: Processing Box ${d.color.toUpperCase()} #${d.die_id} → Scanned Box (+${d.secret_yield} Secrets now)</option>`).join("")
+      ? pbox.map((d) => `<option value="${d.die_id}">Jumper Diagnostics: Research & Development ${d.color.toUpperCase()} #${d.die_id} → Sprint Plan (+${d.secret_yield} Secrets now)</option>`).join("")
       : ((human.scanned_dice || []).length > 0
-        ? (human.scanned_dice || []).map((d) => `<option value="${d.die_id}">Jumper Diagnostics: roll Scanned Box ${d.color.toUpperCase()} #${d.die_id}</option>`).join("")
+        ? (human.scanned_dice || []).map((d) => `<option value="${d.die_id}">Jumper Diagnostics: roll Sprint Plan ${d.color.toUpperCase()} #${d.die_id}</option>`).join("")
         : `<option value="">Jumper Diagnostics: empty Under Development (+$1)</option>`);
     bar.appendChild(diagSelect);
   }
@@ -917,7 +918,7 @@ function renderIncomePanel(controls, human, caps) {
 }
 
 // ---------------------------------------------------------------------------
-// Phase 6: CI/CD Pipeline Shift — Magnetic Splice, Scanned Graduation choice
+// Phase 6: CI/CD Pipeline Shift — Magnetic Splice, Sprint Review choice
 // ---------------------------------------------------------------------------
 function renderGraduationPanel(controls, human, caps) {
   const pendMap = state.pending_graduation || {};
@@ -934,29 +935,44 @@ function renderGraduationPanel(controls, human, caps) {
     initSelectedGraduateIds(pend.default_graduate_ids || []);
   }
   const chosen = selectedGraduateIds || new Set();
+  const cands = pend.candidates || [];
+  const sprintOn = Boolean(pend.sprint_plan);
+  const curIds = cands.filter((c) => c.sprint === "current").map((c) => c.die_id);
+  const nextIds = cands.filter((c) => c.sprint === "next").map((c) => c.die_id);
+  const nCur = [...chosen].filter((id) => curIds.includes(id)).length;
+  const nNext = [...chosen].filter((id) => nextIds.includes(id)).length;
+  const groups = sprintOn
+    ? [
+        { title: "CURRENT SPRINT (released first)", note: `${nCur} / ${pend.current_picks} released`, dice: cands.filter((c) => c.sprint === "current") },
+        { title: "NEXT SPRINT (fills the spare Release Bandwidth)", note: `${nNext} / ${pend.next_picks} released`, dice: cands.filter((c) => c.sprint === "next") },
+      ].filter((g) => g.dice.length > 0)
+    : [{ title: "", note: "", dice: cands }];
+  const picksOk = !sprintOn || (nCur === pend.current_picks && nNext === pend.next_picks);
   const panel = document.createElement("div");
   panel.className = "confirm-income-panel";
   panel.innerHTML = `
     <div class="confirm-income-header">
       <div class="confirm-income-title-wrap">
         <span class="confirm-badge">PHASE 6: CI/CD PIPELINE SHIFT</span>
-        <span class="confirm-income-title">SCANNED GRADUATION (${chosen.size} / ${pend.n} — Release Bandwidth ${pend.release_bandwidth})</span>
+        <span class="confirm-income-title">SPRINT REVIEW (${chosen.size} / ${pend.n} — Release Bandwidth ${pend.release_bandwidth})</span>
       </div>
       <span style="font-size: 0.72rem; color: var(--text-dim);">
-        Magnetic Splice → In Production → Scanned Box → Ready for Release (≤ Release Bandwidth, your choice; fewer is allowed) → Conveyor Triage: Processing Box → Scanned Box (≤ Triage Bandwidth, oldest first, no choice)
+        Magnetic Splice → Production Return (In Production → Sprint Plan) → Sprint Review: Sprint Plan → Ready for Release (≤ Release Bandwidth, Current Sprint first) → Conveyor Triage: Research & Development → Next Sprint (≤ Triage Bandwidth, oldest first, no choice)
       </span>
     </div>
+    ${groups.map((g) => `
+    ${g.title ? `<div class="confirm-income-card-hdr" style="margin-top: 6px;"><span>${g.title}</span><span>${g.note}</span></div>` : ""}
     <div class="confirm-malware-grid">
-      ${(pend.candidates || []).map((c) => `
-        <div class="malware-die-card ${c.color} ${chosen.has(c.die_id) ? "selected" : ""}" data-die-id="${c.die_id}">
+      ${g.dice.map((c) => `
+        <div class="malware-die-card ${c.color} ${chosen.has(c.die_id) ? "selected" : ""}" data-die-id="${c.die_id}" data-sprint="${c.sprint || ""}">
           <div class="malware-die-top"><span style="font-weight: 700; font-size: 0.72rem; color: #fff;">${c.color.toUpperCase()} DIE #${c.die_id}</span></div>
-          <div class="malware-die-status">${chosen.has(c.die_id) ? "✓ GRADUATES TO READY" : "○ Held in Scanned Box"}</div>
+          <div class="malware-die-status">${chosen.has(c.die_id) ? "✓ RELEASED TO READY" : (c.sprint === "next" ? "○ Joins the Current Sprint" : "○ Stays in the Current Sprint")}</div>
         </div>`).join("")}
-    </div>
+    </div>`).join("")}
     ${(pend.processing_box || []).length > 0 ? `
     <div class="confirm-income-card" style="border-color: rgba(244, 63, 94, 0.4); margin-top: 8px;">
       <div class="confirm-income-card-hdr">
-        <span style="color: #fda4af;">CONVEYOR TRIAGE (PROCESSING BOX, OLDEST FIRST)</span>
+        <span style="color: #fda4af;">CONVEYOR TRIAGE (RESEARCH & DEVELOPMENT, OLDEST FIRST)</span>
         <span>Triage Bandwidth ${pend.triage_bandwidth}</span>
       </div>
       <div class="confirm-dice-chips">
@@ -967,7 +983,13 @@ function renderGraduationPanel(controls, human, caps) {
   `;
   panel.querySelectorAll(".malware-die-card").forEach((card) => {
     card.onclick = () => {
-      toggleSelectedGraduateId(parseInt(card.getAttribute("data-die-id"), 10), pend.n);
+      const sprint = card.getAttribute("data-sprint");
+      if (sprintOn && sprint) {
+        toggleSelectedGraduateId(parseInt(card.getAttribute("data-die-id"), 10),
+          sprint === "current" ? pend.current_picks : pend.next_picks, sprint === "current" ? curIds : nextIds);
+      } else {
+        toggleSelectedGraduateId(parseInt(card.getAttribute("data-die-id"), 10), pend.n);
+      }
       renderActionDock();
     };
   });
@@ -982,7 +1004,9 @@ function renderGraduationPanel(controls, human, caps) {
   }
   const btn = document.createElement("button");
   btn.className = "action-btn btn-confirm-income";
-  btn.innerText = `✓ Confirm Pipeline Shift (${chosen.size} graduate${chosen.size === 1 ? "" : "s"})`;
+  btn.innerText = `✓ Confirm Pipeline Shift (${chosen.size} released)`;
+  btn.disabled = !picksOk;
+  if (!picksOk) btn.title = `Release exactly ${pend.current_picks} Current Sprint and ${pend.next_picks} Next Sprint dice`;
   btn.onclick = () => {
     const spliceId = spliceSelect && spliceSelect.value !== "" ? parseInt(spliceSelect.value, 10) : null;
     doChooseGraduates(Array.from(chosen), spliceId);
@@ -1013,8 +1037,8 @@ function buildOverridePanel(controls, human, source, onlyIndices = null) {
   label.style.fontSize = "0.8rem";
   label.style.color = "#38bdf8";
   label.innerText = {
-    helix: "⚡ Brute-Force Bypass (+1 free reroll; set 1 die to any non-Star face, Secret face allowed):",
-    prodigy: "⚡ Arbitrary Code Execution (set 1 other die to any non-Star, non-Secret face):",
+    helix: "⚡ Brute-Force Bypass (once per game: reroll locked dice this phase; after rerolls, turn 1 rolled die to any legal non-Star face of its color, R&D face allowed):",
+    prodigy: "⚡ Arbitrary Code Execution (set 1 other die to any legal non-Star face other than the R&D face):",
     release_l4: "🚀 Release Track Level 4 (set 1 rolled Gray Legacy die to any printed face):",
   }[source];
   const dieSel = document.createElement("select");
@@ -1036,7 +1060,7 @@ function buildOverridePanel(controls, human, source, onlyIndices = null) {
       if (source === "prodigy" && f.secrets_pending) return;
       const o = document.createElement("option");
       o.value = String(fi);
-      o.innerText = (f.secrets_pending ? "Secret face" : f.name) + (f.vuln && !String(f.name).includes("⚠") ? " ⚠" : "");
+      o.innerText = (f.secrets_pending ? "R&D face" : f.name) + (f.vuln && !String(f.name).includes("⚠") ? " ⚠" : "");
       faceSel.appendChild(o);
     });
   };

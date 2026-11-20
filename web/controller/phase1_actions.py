@@ -99,7 +99,7 @@ def hire_contractors(
 
         player.mark_ability_used(active_ver)
         controller.event_log.append(
-            f"{meta['name']} triggered Redundant Crew: hired {total_hire} Contractor dice for ${cost}."
+            f"{meta['name']} triggered Capital Injection: hired {total_hire} Contractor dice for ${cost}."
         )
         return controller.get_full_state()
 
@@ -159,15 +159,10 @@ def roll_pool(controller: GameController, player_id: int) -> Dict[str, Any]:
 
     meta["rolled_pool"] = list(active_dice)
     meta["has_rolled"] = True
+    player.helix_bypass_active = False
     controller.subphase = "waiting_for_commit"
 
-    # Evaluate locks
-    for die in active_dice:
-        face = die.current_face
-        if not face:
-            continue
-        if face.is_glitch:
-            die.is_locked = True
+    _evaluate_locks(controller, player, active_dice)
 
     face_names = [
         f"{d.current_face.name}{' [LOCKED]' if d.is_locked else ''}" if d.current_face else "?"
@@ -178,6 +173,28 @@ def roll_pool(controller: GameController, player_id: int) -> Dict[str, Any]:
 
 
 
+def _helix_reroll_locked(controller: GameController) -> bool:
+    """v0.49 Brute-Force Bypass mode: once per game, reroll locked dice for the rest of the phase (no extra reroll)."""
+    return getattr(controller.state.config, "helix_bypass_mode", "LEGACY") == "REROLL_LOCKED"
+
+
+def _evaluate_locks(controller: GameController, player: PlayerState, dice: List[Die]) -> None:
+    """Mirrors ``phase1_roll_deploy._evaluate_locks``: a die showing a ⚠ face is a Locked Die (v0.49 ``lock_applies``)."""
+    cfg = controller.state.config
+    lock_on = bool(getattr(cfg, "colored_vuln_lock", False))
+    for d in dice:
+        face = d.current_face
+        if not face:
+            continue
+        if face.is_glitch:
+            d.is_locked = True
+        elif lock_on and not d.is_locked and vulnerability.lock_applies(cfg, d):
+            d.is_locked = True
+            player.lock_events += 1
+            k = vulnerability.face_key(d)
+            player.lock_events_by_face[k] = player.lock_events_by_face.get(k, 0) + 1
+
+
 def _activate_bypass(controller: GameController, player: PlayerState, meta: Dict[str, Any]) -> None:
     """Helix Brute-Force Bypass (Phase 1 Step 4): +1 free reroll this phase (v0.38), Glitch dice may be rerolled,
     and one rolled die may be turned to any legal non-Star face of its colour (``override_face``)."""
@@ -186,9 +203,21 @@ def _activate_bypass(controller: GameController, player: PlayerState, meta: Dict
         raise ValueError("Player does not have the Brute-Force Bypass override")
     if meta.get("prodigy_active", False):
         return
-    if not player.is_ability_available(controller.state.active_version.version_str):
+    ver = controller.state.active_version.version_str
+    if _helix_reroll_locked(controller):
+        if not player.is_helix_bypass_available(ver):
+            raise ValueError("Brute-Force Bypass is not available (once per game)")
+        player.mark_ability_used(ver)
+        if controller.state.config.helix_bypass_once_per_game:
+            player.helix_bypass_used_game = True
+        player.helix_bypass_active = True
+        player.helix_bypass_uses += 1
+        meta["prodigy_active"] = True
+        controller.event_log.append(f"{meta['name']} activated Brute-Force Bypass: locked dice may be rerolled this phase.")
+        return
+    if not player.is_ability_available(ver):
         raise ValueError("Brute-Force Bypass is not available")
-    player.mark_ability_used(controller.state.active_version.version_str)
+    player.mark_ability_used(ver)
     meta["prodigy_active"] = True
     if controller.state.config.power_profile == "V038_DRAFT":
         meta["rerolls_remaining"] = meta.get("rerolls_remaining", 0) + 1
@@ -200,8 +229,8 @@ def override_face(controller: GameController, player_id: int, die_index: int, fa
                   source: str = "helix") -> Dict[str, Any]:
     """Turns one rolled die to a legal non-Star face of its colour.
 
-    ``source="helix"``: Brute-Force Bypass (once; the Secret face is allowed). ``source="prodigy"``: Arbitrary Code
-    Execution (needs a rolled Purple ``★`` on another die; the Secret face is not allowed)."""
+    ``source="helix"``: Brute-Force Bypass (once per game; the R&D face is allowed). ``source="prodigy"``: Arbitrary Code
+    Execution (needs a rolled Purple ``★`` on another die; the R&D face is not allowed)."""
     if controller.phase != 1:
         raise ValueError(f"Cannot override a face in phase {controller.phase}")
     if player_id not in controller.player_meta:
@@ -221,11 +250,16 @@ def override_face(controller: GameController, player_id: int, die_index: int, fa
     target = die.faces[face_index]
     if target.is_star:
         raise ValueError("Star faces cannot be chosen")
+    ends_rerolls = False
     if source == "helix":
         if meta.get("helix_override_used"):
             raise ValueError("Brute-Force Bypass face override already used this round")
+        if _helix_reroll_locked(controller) and not getattr(controller.state.config, "helix_bypass_face_set", False):
+            raise ValueError("This Brute-Force Bypass has no face-set")
         _activate_bypass(controller, player, meta)
         meta["helix_override_used"] = True
+        player.helix_bypass_face_sets += 1
+        ends_rerolls = _helix_reroll_locked(controller)  # v0.49: the face-set comes after rerolls
         label = "Brute-Force Bypass"
     elif source == "prodigy":
         if not has_signature_protocol(player, WhiteHatCode.PRODIGY, legacy_bridge_enabled(controller)):
@@ -237,7 +271,7 @@ def override_face(controller: GameController, player_id: int, die_index: int, fa
         if die_index in stars:
             raise ValueError("Arbitrary Code Execution must target another die")
         if target.secrets_pending and not getattr(controller.state.config, "ace_allows_secret_face", False):
-            raise ValueError("Arbitrary Code Execution cannot set the Secret face")
+            raise ValueError("Arbitrary Code Execution cannot set the R&D face")
         meta["ace_uses"] = meta.get("ace_uses", 0) + 1
         label = "Arbitrary Code Execution"
     elif source == "release_l4":
@@ -252,7 +286,11 @@ def override_face(controller: GameController, player_id: int, die_index: int, fa
     die.current_face = target
     die.is_locked = bool(target.is_glitch)
     die.chosen_choice_index = None
+    _evaluate_locks(controller, player, [die])  # a ⚠ face set here is a Locked Die (engine's final lock pass)
     controller.event_log.append(f"{meta['name']} used {label}: {die.color.value.capitalize()} die #{die_index + 1} -> '{target.name}'.")
+    if ends_rerolls and meta.get("rerolls_remaining", 0) > 0:
+        meta["rerolls_remaining"] = 0
+        controller.event_log.append(f"{meta['name']}'s rerolls are over (Brute-Force Bypass sets its face after rerolls).")
     return controller.get_full_state()
 
 
@@ -292,6 +330,8 @@ def perform_reroll(
     rerolled_faces = []
     for idx in reroll_indices:
         die = rolled[idx]
+        if die.is_locked and _helix_reroll_locked(controller):
+            player.helix_bypass_locked_rerolled += 1
         new_face = die.roll(controller.engine.rng)
         die.is_locked = False
         rerolled_faces.append(f"#{idx + 1} ({new_face.name})")
@@ -299,13 +339,7 @@ def perform_reroll(
     meta["rerolls_remaining"] -= 1
     player.total_rerolls_used += 1
 
-    # Re-evaluate locks on all dice in rolled_pool
-    for d in rolled:
-        face = d.current_face
-        if not face:
-            continue
-        if face.is_glitch:
-            d.is_locked = True
+    _evaluate_locks(controller, player, rolled)
 
     # Operator Contingent Staffing Face 6 Protocol (if not triggered yet)
     is_operator_op = has_signature_protocol(player, WhiteHatCode.OPERATOR, legacy_bridge_enabled(controller))
@@ -334,7 +368,7 @@ def finalize_assignment(
     active_dice: List[Die],
 ) -> None:
     """Phase 1 Step 4 post-processing for a human (mirrors ``sim.engine.phase1_roll_deploy``): White Contractor
-    Glitch -> supply, Secret faces -> Processing Box, every other die deployed In Production."""
+    Glitch -> supply, R&D faces -> Research & Development, every other die deployed In Production."""
     st = controller.state
     surviving_active: List[Die] = []
     for die in active_dice:
@@ -343,7 +377,7 @@ def finalize_assignment(
             if die in player.ready_for_release_dice:
                 player.ready_for_release_dice.remove(die)
             secret_faces.enter_processing_box(player, die, st.current_round)
-            _log_pipeline(controller, meta, f"{die.color.value.capitalize()} die showed a Secret face: moved to the Processing Box.")
+            _log_pipeline(controller, meta, f"{die.color.value.capitalize()} die showed an R&D face: moved to Research & Development.")
         elif face and face.is_glitch:
             if die.color == DieColor.WHITE:
                 if die in player.contractor_dice:
@@ -391,11 +425,11 @@ def lock_in(
     player_id: int,
     choice_declarations: Optional[Dict[int, int]] = None,
 ) -> Dict[str, Any]:
-    """Phase 1 Step 4 for a human: Lock-in & Assign Dice.
+    """Phase 1 Step 4 for a human: Deploy Dice.
 
     Declares Choice Faces (``choice_declarations`` maps rolled-pool index -> option index; default option 0), gains
-    ``+1`` Vulnerability per ⚠ on the final faces (``vulnerability.lock_in``), sends Secret faces to the Processing
-    Box and deploys every other die In Production. Nothing is blocked in v0.47.0, so there is no shield step."""
+    ``+1`` Vulnerability per ⚠ on the final faces (``vulnerability.lock_in``), sends R&D faces to Research &
+    Development and deploys every other die In Production. Nothing is blocked in v0.49.0, so there is no shield step."""
     if controller.phase != 1:
         raise ValueError(f"Cannot lock in dice in phase {controller.phase}")
     if player_id not in controller.player_meta:

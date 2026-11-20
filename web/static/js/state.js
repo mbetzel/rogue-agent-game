@@ -10,7 +10,7 @@ export let cipherDiscountSelected = false;
 export let selectedRerollIndices = new Set();
 export let selectedChoiceDeclarations = {};
 export let selectedGraduateIds = null; // Phase 6: Set of die ids (null = not yet initialised from server default)
-export const PHASE_OPERATIONS = 5; // v0.47.0 rules order: Phase 5 Operations, then Phase 6 CI/CD Pipeline Shift
+export const PHASE_OPERATIONS = 5; // v0.49.0 rules order: Phase 5 Operations, then Phase 6 CI/CD Pipeline Shift
 export const PHASE_PIPELINE = 6;
 export let activePlayerTab = "human"; // "human", player_id number, or "all"
 export let activeBoardView = "tabletop"; // "tabletop", "terminals", "agent", "market"
@@ -80,7 +80,7 @@ export function sanitizeSelectionState(newState) {
     selectedPhreakerDieId = unpatched.length > 0 ? unpatched[0].die_id : null;
   }
 
-  // 5. Phase 6 Scanned Graduation selection
+  // 5. Phase 6 Sprint Review selection
   if (newState.phase !== PHASE_PIPELINE) {
     selectedGraduateIds = null;
   }
@@ -90,11 +90,18 @@ export function initSelectedGraduateIds(ids) {
   selectedGraduateIds = new Set(ids);
 }
 
-export function toggleSelectedGraduateId(dieId, maxAllowed) {
+// groupIds (Sprint Review, v0.48+): the cap applies within that sprint; a full group swaps its oldest pick out.
+export function toggleSelectedGraduateId(dieId, maxAllowed, groupIds = null) {
   if (!selectedGraduateIds) selectedGraduateIds = new Set();
   if (selectedGraduateIds.has(dieId)) {
     selectedGraduateIds.delete(dieId);
-  } else if (selectedGraduateIds.size < maxAllowed) {
+    return;
+  }
+  const inGroup = groupIds ? [...selectedGraduateIds].filter((id) => groupIds.includes(id)) : [...selectedGraduateIds];
+  if (inGroup.length < maxAllowed) {
+    selectedGraduateIds.add(dieId);
+  } else if (groupIds && maxAllowed > 0) {
+    selectedGraduateIds.delete(inGroup[0]);
     selectedGraduateIds.add(dieId);
   }
 }

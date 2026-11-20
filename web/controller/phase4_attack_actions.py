@@ -1,4 +1,4 @@
-"""Web Phase 4: Attack Resolution (v0.47.0, RULES.md Section 4 Phase 4). No cube can be blocked.
+"""Web Phase 4: Attack Resolution (v0.49.0, RULES.md Section 4 Phase 4). No cube can be blocked.
 
 Order (same as ``sim.engine.phase4_attack_resolution.execute_attack_resolution``):
 1. Red & Blue for every survivor (bots in ``enter_phase_4``, humans in ``confirm_attacks``),
@@ -29,7 +29,7 @@ _SIG_TRACKS = ("DEFENSE", "TRIAGE", "RELEASE", "PR")
 _SIG_EFFECTS = {
     "green": "Malware Encryption: a green cube on the next space of 2 Research Tracks (2x 🔬 to advance)",
     "black": "Root Override Hijack: Institutional Override marked Used (or lose 2 Corporate Secrets)",
-    "blue": "Buffer Congestion: 1 Gray Legacy die to the back of the Processing Box",
+    "blue": "Buffer Congestion: 1 Gray Legacy die to the back of Research & Development",
     "red": "Market Manipulation: lose 2 Market Share; the rival with the least Market Share gains 2 (2P: SETEC Corp counts)",
 }
 

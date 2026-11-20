@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 def build_round_commitments(controller: GameController) -> List[Tuple[PlayerState, List[Die], Dict[int, Any]]]:
     """Builds the engine's per-player Phase 1 tuples from the web metadata (alive players only).
 
-    v0.47.0 has no shields, so every commitment map is empty; the engine still takes the tuple shape."""
+    v0.49.0 has no shields, so every commitment map is empty; the engine still takes the tuple shape."""
     return [(player, controller.player_meta[pid]["rolled_pool"], {})
             for pid, player in enumerate(controller.state.players) if not player.is_patient_zero]
 
@@ -34,7 +34,7 @@ def enter_game_over(controller: GameController) -> None:
     if reason == EndGameReason.SINGULARITY:
         controller.event_log.append(
             "SINGULARITY REACHED! Project: SETEC completed v3.0 compilation. Game Over! "
-            "(Dice still in a Processing Box yield nothing.)")
+            "(Dice still in Research & Development yield nothing.)")
     elif reason == EndGameReason.MARKET_COLLAPSE:
         controller.event_log.append("MARKET COLLAPSE ending: the Final Round is complete.")
     fr = controller.final_result or {}

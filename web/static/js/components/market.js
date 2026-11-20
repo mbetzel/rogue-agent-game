@@ -19,7 +19,7 @@ const DIE_GLYPHS = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
 /** Two text rows (faces 1-3, faces 4-6) from the printed faces the server sends for the active ruleset. */
 function faceRows(color) {
   const names = (state && state.die_faces && state.die_faces[color]) || [];
-  const fmt = (i) => `${DIE_GLYPHS[i]} ${names[i] === "Secret" ? "Secret face" : names[i]}`;
+  const fmt = (i) => `${DIE_GLYPHS[i]} ${names[i] === "Secret" ? "R&D face" : names[i]}`;
   if (names.length < 6) return ["", ""];
   return [[0, 1, 2].map(fmt).join(" | "), [3, 4, 5].map(fmt).join(" | ")];
 }
@@ -27,14 +27,14 @@ function faceRows(color) {
 function secretNote(color) {
   const y = (state && state.secret_yields) || {};
   if (!state || !state.is_secret_faces || color === "yellow") return null;
-  if (color === "red") return `Secret face: +${y.red} Corporate Secrets when it leaves the Processing Box`;
+  if (color === "red") return `R&D face: +${y.red} Corporate Secrets when it leaves Research & Development`;
   if (color === "blue") {
-    return `Secret face: +${y.blue_base} Corporate Secrets (+${y.blue_grid} at Pen Test Level 3+; max ${y.blue_cap})`;
+    return `R&D face: +${y.blue_base} Corporate Secrets (+${y.blue_grid} at Pen Test Level 3+; max ${y.blue_cap})`;
   }
   if (color === "green") {
-    return `Secret face: +${y.green_base} Corporate Secrets, then −${y.green_vuln_reduction || 2} Vulnerability`;
+    return `R&D face: +${y.green_base} Corporate Secrets, then −${y.green_vuln_reduction || 2} Vulnerability`;
   }
-  return `Secret face: +${y.purple} Corporate Secret`;
+  return `R&D face: +${y.purple} Corporate Secret`;
 }
 
 export function renderMarket() {
@@ -75,7 +75,7 @@ export function renderMarket() {
           <span>WHITE CONTRACTOR SUPPLY (12 DICE TOTAL — ${state.contractor_supply || 0} IN POOL)</span>
         </div>
         <div class="contractor-rules-note">
-          Phase 1 Staffing | Max 3/Round | Pays income in Phase 3 | Returns to supply after Phase 4 | Never enters the Processing Box
+          Phase 1 Staffing | Max 3/Round | Pays income in Phase 3 | Returns to supply after Phase 4 | Never enters Research & Development
         </div>
       </div>
       <div class="contractor-cost-tiers">

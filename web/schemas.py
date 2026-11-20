@@ -38,24 +38,25 @@ ARCHETYPE_FLAVOR: Dict[str, Dict[str, str]] = {
 }
 
 
-# v0.47.0 card texts (RULES_APPENDIX.md Section 6 D); several simulation entities still carry older wording.
+# v0.49.0 card texts (RULES_APPENDIX.md Section 6 D); several simulation entities still carry older wording.
 V046_COMPANY_TEXT: Dict[str, str] = {
     "MERIDIAN": "Gain an immediate +$3 cash payout from the bank.",
-    "OMNIDYNE": "Move 1 die from your Processing Box directly to your Ready for Release Zone for free "
-                "(bypassing Scanned); it banks its Secret now.",
+    "OMNIDYNE": "Move 1 die from your Research & Development directly to your Ready for Release Zone for free "
+                "(bypassing the Sprint Plan); it banks its Secret now.",
     "AEGIS": "Ignore the damage of 1 Attack Cube for yourself this round: 1 Red cube (no Market Share loss), 1 Blue "
              "cube (no Secret loss), or 1 Green cube that hits you (no Secret loss; your Vulnerability still resets "
              "to 0). (All exited cubes remain in the exit tray and recycle into the Staging Cup as normal.)",
     "DTO": "Absorb up to 2 Corporate Secret loss from Blue cubes for free (once per game). Any additional Secret loss "
            "applies as normal.",
-    "HELIX": "Gain 1 extra free reroll this phase. In addition, turn 1 of your rolled dice to any legal non-Star face "
-             "of its color (the Secret face is allowed).",
+    "HELIX": "Once per game: for the rest of this phase you may reroll locked dice; after rerolls, turn 1 rolled die "
+             "to any legal non-Star face of its color (the R&D face is allowed). Root Override Hijack can't mark an "
+             "unused Bypass Used.",
     "PROMETHEUS": "Purchase 1 Colored Die from the Central Market at a $2 discount (minimum cost $0), OR gain an "
                   "immediate +$2 cash payout from the bank.",
 }
 V046_WHITE_HAT_TEXT: Dict[str, str] = {
     "OPERATOR": "When Face 6 (Purple ★) is rolled, gain +1 🔬 Research Token per different color die currently in "
-                "your Scanned Box (all colors including Gray, Purple, and Yellow).",
+                "your Sprint Plan (both sprints; all colors including Gray, Purple, and Yellow).",
     "PHREAKER": "When Face 6 (Purple ★) is rolled, gain +$1 cash AND +1 Release Bandwidth this round (applies in "
                 "Phase 6 Step 3).",
     "ACOUSTIC": "When Face 6 (Purple ★) is rolled, gain +$1 cash per unique colored cube that exited the Cube Tower "
@@ -63,7 +64,7 @@ V046_WHITE_HAT_TEXT: Dict[str, str] = {
     "SPOOK": "When Face 6 (Purple ★) is rolled, gain an immediate +$2 cash payout; in addition, you may optionally "
              "permanently return 1 owned Gray Legacy die to the box to gain +$3 cash.",
     "PRODIGY": "After all rerolls are finished (before assigning dice to In Production), turn 1 other rolled die in "
-               "your active pool to any legal non-Star face of that die's color other than the Secret face.",
+               "your active pool to any legal non-Star face of that die's color other than the R&D face.",
     "CIPHER": "When Face 6 (Purple ★) is rolled, gain an additional +$2 cash income AND +1 🔬 Research Token.",
 }
 
@@ -108,7 +109,7 @@ class GameStateSerializer:
             # v0.38.0
             "secrets_pending": bool(getattr(face, "secrets_pending", False)),
             "market_share": int(getattr(face, "market_share", 0)),
-            "vuln": int(getattr(face, "vuln", 0) or 0),  # v0.47.0 ⚠ icons on this face
+            "vuln": int(getattr(face, "vuln", 0) or 0),  # v0.49.0 ⚠ icons on this face
         }
 
     @staticmethod
@@ -365,7 +366,7 @@ class GameStateSerializer:
             "secrets": player.secrets,
             "patches": player.patches,
             "research_tokens": getattr(player, "research_tokens", player.patches),
-            # v0.47.0 Vulnerability Track & Pen Test Track
+            # v0.49.0 Vulnerability Track & Pen Test Track
             **cls._vulnerability(player, config),
             "triage_bandwidth": getattr(player, "triage_bandwidth", 2),
             "release_bandwidth": getattr(player, "release_bandwidth", 4),
@@ -404,7 +405,7 @@ class GameStateSerializer:
             "ready_for_release_dice": [cls.serialize_die(d) for d in player.ready_for_release_dice],
             "in_production_dice": [cls.serialize_die(d) for d in player.in_production_dice],
             "glitched_dice": [cls.serialize_die(d) for d in player.glitched_dice],
-            # v0.38.0 Processing Box (same zone as ``glitched_dice``), oldest first, with each die's current yield
+            # Research & Development (same zone as ``glitched_dice``), oldest first, with each die's current yield
             "processing_box_dice": cls._processing_box(player, config),
             "secret_yield_now": cls._secret_yield_now(player, config),
             "company_color": getattr(player, "company_color", None),
@@ -412,6 +413,10 @@ class GameStateSerializer:
             "under_development_count": len(player.glitched_dice) + len(player.scanned_dice),
             "glitched_count": len(player.glitched_dice),
             "scanned_count": len(player.scanned_dice),
+            # v0.48+ Sprint Plan split (``scanned_dice`` = the Sprint Plan): ids in the Current Sprint; the rest are Next
+            "sprint_plan_enabled": bool(getattr(config, "sprint_plan_enabled", False)),
+            "current_sprint_ids": sorted(d.die_id for d in player.scanned_dice
+                                         if d.die_id in getattr(player, "current_sprint_ids", set())),
             # Backward compatibility aliases
             "ready_dice": [cls.serialize_die(d) for d in visual_ready],
             "all_ready_dice": [cls.serialize_die(d) for d in player.ready_dice],
@@ -570,9 +575,9 @@ class GameStateSerializer:
             "starting_secrets": state.config.get_starting_secrets(len(state.players)),
             # v0.37.0 Market Leader Bonus schedule for this player count ([] when disabled)
             "is_market_leader_bonus": bool(getattr(state.config, "is_market_leader_bonus", False)),
-            "rules_version": "v0.47.0",
+            "rules_version": "v0.49.0",
             "is_secret_faces": bool(getattr(state.config, "secret_face_enabled", False)),
-            # v0.47.0 Vulnerability Track (Central SETEC Agent Board) and Pen Test Track
+            # v0.49.0 Vulnerability Track (Central SETEC Agent Board) and Pen Test Track
             "vulnerability_track": cls._vulnerability_track(state),
             "is_round_leader_bonus": bool(getattr(state.config, "is_red_secret_payout", False)),
             "round_leader_bonus_schedule": list(state.config.red_secret_payout_schedule(len(state.players))
