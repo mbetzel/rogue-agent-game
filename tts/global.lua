@@ -11,9 +11,12 @@ Generated alongside the save by `python3 -m tts.build_tts`; edit tts/global.lua,
 3. Quick Setup: the 2P / 3P / 4P buttons run RULES.md Section 3 for that many
    seats. SETUP (from the builder) holds the object GUIDs and the table spots,
    computed from the PnP board layout.
+4. Dice: every die is a Custom Dice d6 drawn from pnp DICE_SPECS (GM Notes
+   "die:<colour>"). Its six rotation values are renamed to the face yields
+   (DIE_FACES, from the builder), so rolls and tooltips read e.g. "5: R&D face".
 ]]
 
--- __CONFIG__ (replaced by the builder: STAGING_CUP_GUID, TOWER_GUID, TRAY_ORIGIN, CUBE_TEMPLATES, SETUP)
+-- __CONFIG__ (replaced by the builder: STAGING_CUP_GUID, TOWER_GUID, TRAY_ORIGIN, CUBE_TEMPLATES, SETUP, DIE_FACES)
 
 -- Shogun Baffle physics (GameConfig.v047(): sim/config.py)
 local PHYS = {
@@ -76,19 +79,39 @@ function fitObject(obj)
   end
 end
 
+-- Rename a custom die's rotation values ("1".."6") to its face names.
+function nameDieFaces(obj)
+  if obj == nil or DIE_FACES == nil then return end
+  local key = (obj.getGMNotes() or ""):match("die:(%a+)")
+  local names = key and DIE_FACES[key]
+  if names == nil then return end
+  local rv = obj.getRotationValues()
+  if rv == nil then return end
+  local changed = false
+  for _, entry in ipairs(rv) do
+    local n = tonumber(entry.value)
+    if n and names[n] then
+      entry.value = names[n]
+      changed = true
+    end
+  end
+  if changed then obj.setRotationValues(rv) end
+end
+
 function fitAll()
   for _, obj in ipairs(getObjects()) do
     fitObject(obj)
+    nameDieFaces(obj)
   end
 end
 
--- Cards drawn from a deck keep the card's own fit.
+-- Cards drawn from a deck keep the card's own fit; dice drawn from a bag get their face names.
 function onObjectLeaveContainer(container, obj)
-  Wait.frames(function() fitObject(obj) end, 2)
+  Wait.frames(function() fitObject(obj); nameDieFaces(obj) end, 2)
 end
 
 function onObjectSpawn(obj)
-  Wait.frames(function() fitObject(obj) end, 2)
+  Wait.frames(function() fitObject(obj); nameDieFaces(obj) end, 2)
 end
 
 -- ---------------------------------------------------------------- tower
