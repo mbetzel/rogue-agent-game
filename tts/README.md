@@ -38,4 +38,13 @@ Dice are standard tinted d6s, matching the PnP (the reference cards map pips to 
   - **Drop Staging Cup:** compiles the bag's contents with the Shogun Baffle model from `sim/tower.py`, using the `GameConfig.v046()` odds. Exited cubes appear beside the tower in the Exit Tray area. Stuck cubes stay hidden in the script state, which is saved with the game.
   - **Prime the Compiler:** the setup drop. Cubes that exit go back to the supply.
   - **Empty tower:** reset or game end.
+- **Quick Setup panel** (below the Cube Tower panel): **2P / 3P / 4P** runs RULES.md Section 3 for that many seats. It uses the seated colours if exactly that many players sit at a mat, else the first mats in order (White, Pink, Teal, Orange). It:
+  - deals 1 `v1.0` / `v2.0` / `v3.0` tile into the Agent Board slots, puts the Active Version Marker on `v1.0`, primes the compiler and puts the `v1.0` tile's starting cubes in the Staging Cup;
+  - deals 1 Variant card per Market slot with `2 × players` dice beside it;
+  - deals each player a Client Company and a White Hat Dossier (face up, beside the mat) and moves that company's starting colored die from its Market stack into Ready for Release;
+  - sets each mat: 2 Gray + colored + Purple in Ready for Release, 3 Gray in the Current Sprint, the 2nd Purple die on the Personal Reserve outline, the four track cubes on Level 0, the Operative Signature Cube on its cradle, `$6` and `6` Corporate Secrets (`7` with *Data Scraper*);
+  - puts each Vulnerability marker on `0` and each Market Share Marker on `14` (2P) or `18` (3–4P), plus the SETEC Corp Black Cube on `0` in 2-player games;
+  - gives the First Player Marker to a random player and posts the deal in chat.
+
+  It runs once per game. The spots come from the PnP board layout (`board_point` and the `MAT_*` / `AGENT_*` / `MARKET_*` constants in `build_tts.py`), so move them if `pnp/generate_pnp.py` moves a zone.
 - Everything else is resolved by hand, as in the paper game: Black cubes onto the Corruption Track, Signature Cubes back to their mats, and recycling Red, Blue and Green cubes into the Staging Cup. The save's Notes tab has the setup checklist.
