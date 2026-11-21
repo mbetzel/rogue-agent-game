@@ -71,6 +71,89 @@ PLAYER_CUBES = [
     "Vulnerability marker",
     "Operative Signature Cube",
 ]
+CUBE_KEYS = ["pen", "triage", "release", "pr", "override", "share", "vuln", "sig"]  # Quick Setup keys, same order
+
+# Quick Setup starting values (RULES.md Section 3 / RULES_APPENDIX.md 6C).
+START_MONEY = 6
+START_SECRETS = 6
+START_SHARE = {2: 14, 3: 18, 4: 18}
+
+
+# =============================================================================
+# 0. Quick Setup spots (PnP points on a 792 x 612 board -> table units)
+# =============================================================================
+# The numbers below repeat the layout of pnp/generate_pnp.py render_player_board,
+# render_agent_board and render_market_board. Move them with that layout.
+
+def board_point(bx: float, bz: float, px: float, py: float, south: bool = True) -> List[float]:
+    """A point on a board image (top-left origin, points) -> table [x, z].
+
+    A board at rotY 180 (south) reads upright from -z: image top is +z, image left is -x.
+    A board at rotY 0 (north) is turned half a turn.
+    """
+    s = 1.0 if south else -1.0
+    return [round(bx + s * (px - 396.0) * K, 3), round(bz + s * (306.0 - py) * K, 3)]
+
+
+# Company Terminal Mat (render_player_board)
+MAT_READY_SLOTS = [(314.0 + 44.0 * i, 71.0) for i in range(4)]      # Gray, Gray, Company die, Purple
+MAT_CURRENT_SPRINT = [(303.0, 478.0), (347.0, 478.0), (391.0, 478.0)]
+MAT_PERSONAL_RESERVE = (237.0, 483.5)                                # Public Relations L3 die outline
+MAT_TRACK_L0 = {
+    "release": (305.0, 170.0),
+    "pen": (393.0, 343.0),
+    "triage": (460.0, 460.0),
+    "pr": (242.0, 335.0),
+}
+MAT_SIGNATURE_CRADLE = (454.0, 530.0)
+MAT_TOKEN_WELLS = {"secret": (62.0, 75.0), "money": (62.0, 155.0), "research": (62.0, 235.0)}
+
+# SETEC Central Agent & Market Share Board (render_agent_board)
+_SLOT_TOP, _SLOT_H = 144.0, 128.0
+_SLOT_GAP = (578.0 - _SLOT_TOP - 3 * _SLOT_H) / 2.0  # 25 pt
+AGENT_VERSION_SLOTS = {ver: (188.0, _SLOT_TOP + i * (_SLOT_H + _SLOT_GAP) + _SLOT_H / 2.0)
+                       for i, ver in enumerate(("v3.0", "v2.0", "v1.0"))}
+AGENT_VERSION_MARKER = (-45.0, AGENT_VERSION_SLOTS["v1.0"][1])  # just off the left edge, pointing at v1.0
+_VULN_X0, _VULN_CW = 158.0, (752.0 - 6.0 - 158.0 - 15 * 2.0) / 16.0
+AGENT_VULN_ZERO = (_VULN_X0 + _VULN_CW / 2.0, 98.0)
+SEAT_OFFSETS = [(-1, -1), (1, -1), (-1, 1), (1, 1)]  # 2 x 2 grid in a shared track cell, by seat
+
+
+def market_share_cell(value: int) -> Tuple[float, float]:
+    """Centre of a Central Market Share Track cell (20 down to 0, 3 columns x 7 rows)."""
+    cw = (238.0 - 16.0 - 10.0) / 3.0
+    ch = (312.0 - 24.0) / 7.0
+    i = g.MARKET_SHARE_MAX - value
+    r, c = divmod(i, 3)
+    cy = 197.0 + r * (ch + 4.0) + ch / 2.0
+    if value in g.MARKET_SHARE_START:
+        cy += 5.0  # below the START header strip
+    return 522.0 + c * (cw + 5.0) + cw / 2.0, cy
+
+
+# Software Module Market & Central Supply Board (render_market_board)
+MARKET_SLOT_COLORS = ["Red", "Blue", "Green", "Yellow"]
+MARKET_VARIANT_SLOTS = {c: (123.0 + 182.0 * i, 360.0) for i, c in enumerate(MARKET_SLOT_COLORS)}
+# 8 dice beside the Variant card: a row of 4 in the band below it, then a row of 4 in the band above it.
+MARKET_DICE_GRID = [(dx, dy) for dy in (117.5, -117.5) for dx in (-60.0, -20.0, 20.0, 60.0)]
+
+
+def version_payloads() -> Tuple[Dict[str, Dict[str, int]], Dict[str, int]]:
+    """Staging Cup starting cubes and starting-Secret bonus per v1.0 tile, read from its banner."""
+    import re
+    payload: Dict[str, Dict[str, int]] = {}
+    bonus: Dict[str, int] = {}
+    for t in g.VERSION_TILES:
+        if t.version != "v1.0":
+            continue
+        name = f"{t.version} {t.name}"
+        m = re.search(r"Add (.*?) to Staging Cup", t.banner_text)
+        cubes = {c.title(): int(n) for n, c in re.findall(r"(\d+) \{(RED|BLUE|GREEN|BLACK)\}", m.group(1))} if m else {}
+        payload[name] = cubes
+        b = re.search(r"start with \+(\d+) Secret", t.banner_text)
+        if b:
+            bonus[name] = int(b.group(1))
+    return payload, bonus
 
 
 # =============================================================================
@@ -389,6 +472,19 @@ def build_save(url_for) -> dict:
     sb = SaveBuilder(url_for)
     objs: List[dict] = []
     bw, bd = 792 * K, 612 * K  # 16 x 12.36
+    agent_c, market_c = (-8.4, 0.0), (8.4, 0.0)
+    payload, secret_bonus = version_payloads()
+    setup: dict = {
+        "start": {"money": START_MONEY, "secrets": START_SECRETS,
+                  "share": {str(k): v for k, v in START_SHARE.items()}},
+        "payload": payload,
+        "secret_bonus": secret_bonus,
+        "company_die": {c.name: c.starting_die.title() for c in g.COMPANIES},
+        "version_decks": {}, "version_slots": {}, "variant_decks": {}, "variant_slots": {},
+        "market_bags": {}, "cube_bags": {}, "token_bags": {},
+        "market_dice_grid": [[round(dx * K, 3), round(-dy * K, 3)] for dx, dy in MARKET_DICE_GRID],
+        "seats": [],
+    }
 
     # ---- central boards ----------------------------------------------------
     objs.append(sb.tile("agent_board", "SETEC Central Agent & Market Share Board", -8.4, 0, bw, bd, locked=True,
@@ -409,36 +505,45 @@ def build_save(url_for) -> dict:
         cards = _cards_from_sheet(sb, vdeck, [n for _, n in entries], tw, td, [i for i, _ in entries])
         objs.append(sb.deck(cards, f"SETEC Version {ver} tiles", -20.2, vz, tw, td,
                             description=f"Shuffle and deal 1 {ver} tile face up into its slot on the Agent Board."))
+        setup["version_decks"][ver] = objs[-1]["GUID"]
+        setup["version_slots"][ver] = board_point(*agent_c, *AGENT_VERSION_SLOTS[ver])
 
     # ---- Client Company + White Hat decks ----------------------------------
     cw, cd = g.CARD_W * K, g.COMPANY_CARD_H * K
     cdeck = sb.custom_deck("company_cards", "company_back", 3, 2)
     objs.append(sb.deck(_cards_from_sheet(sb, cdeck, [c.name for c in g.COMPANIES], cw, cd),
                         "Client Company deck", -25.6, 4.4, cw, cd, description="Shuffle; deal 1 per player."))
+    setup["company_deck"] = objs[-1]["GUID"]
     wd = g.WHITE_HAT_CARD_H * K
     wdeck = sb.custom_deck("white_hat_cards", "white_hat_back", 3, 2)
     objs.append(sb.deck(_cards_from_sheet(sb, wdeck, [w.name for w in g.WHITE_HATS], cw, wd),
                         "White Hat Dossier deck", -25.6, 0.9, cw, wd, description="Shuffle; deal 1 per player."))
+    setup["white_hat_deck"] = objs[-1]["GUID"]
 
     # ---- tokens (left column, lower) ----------------------------------------
-    for i, (img, name, desc) in enumerate((
-        ("token_secret", "Corporate Secret", "1 Secret = 1 VP."),
-        ("token_research", "Research Token", "Spent on the 4 Research Tracks and Pen Test."),
-        ("token_money_1", "$1", "Money."),
-        ("token_money_5", "$5", "Money."),
+    for i, (key, img, name, desc) in enumerate((
+        ("secret", "token_secret", "Corporate Secret", "1 Secret = 1 VP."),
+        ("research", "token_research", "Research Token", "Spent on the 4 Research Tracks and Pen Test."),
+        ("money1", "token_money_1", "$1", "Money."),
+        ("money5", "token_money_5", "$5", "Money."),
     )):
         tok = sb.tile(img, name, 0, 0, 0.9, 0.9, tile_type=2, thickness=0.1, stackable=True, description=desc)
         objs.append(sb.bag(f"{name} supply", -19.6 - i * 2.1, -4.6, [tok], infinite=True))
+        setup["token_bags"][key] = objs[-1]["GUID"]
     objs.append(sb.tile("first_player_marker", "First Player Marker", -28.6, -2.0, 86 * K, 56 * K, tile_type=3,
                         thickness=0.15, description="Passes clockwise at the end of Phase 6."))
+    setup["first_player"] = objs[-1]["GUID"]
     objs.append(sb.tile("version_marker", "Active Version Marker", -28.6, -4.2, 86 * K, 56 * K, tile_type=3,
                         thickness=0.15, description="Starts on v1.0."))
+    setup["version_marker"] = objs[-1]["GUID"]
+    setup["version_marker_spot"] = board_point(*agent_c, *AGENT_VERSION_MARKER)
 
     # ---- market dice + Variant cards (right column) -------------------------
     for color, z in (("Red", 5.0), ("Blue", 2.6), ("Green", 0.2), ("Yellow", -2.2)):
         dice = [sb.die(color, 0, 0) for _ in range(8)]
         objs.append(sb.bag(f"{color} dice (Central Market)", 18.6, z, dice, tint=DIE_TINTS[color],
                            description="Stack 2 x players on this colour's Variant Card."))
+        setup["market_bags"][color] = objs[-1]["GUID"]
 
     vw, vd = 126 * K, 194 * K
     vdeck_sheet = sb.custom_deck("variant_cards", "variant_back", 4, 4)
@@ -449,6 +554,8 @@ def build_save(url_for) -> dict:
         cards = _cards_from_sheet(sb, vdeck_sheet, names, vw, vd, [row * 4 + ci for row in range(3)])
         objs.append(sb.deck(cards, f"{color} Variant cards", x, z, vw, vd,
                             description="Shuffle; place 1 face up in this colour's Market slot."))
+        setup["variant_decks"][color] = objs[-1]["GUID"]
+        setup["variant_slots"][color] = board_point(*market_c, *MARKET_VARIANT_SLOTS[color])
     dividers = [sb.card(vdeck_sheet, 12 + ci, f"{c} Variant summary", 0, 0, vw, vd)
                 for ci, c in enumerate(("Red", "Blue", "Green", "Yellow"))]
     objs.append(sb.deck(dividers, "Variant summary cards", 27.0, 2.2, vw, vd, face_down=False))
@@ -460,10 +567,13 @@ def build_save(url_for) -> dict:
         template = sb.cube(label, CUBE_TINTS[color])
         templates[color] = copy.deepcopy(template)
         objs.append(sb.bag(f"{label} supply", 29.6, z, [template], tint=CUBE_TINTS[color], infinite=True))
+        setup["cube_bags"][color] = objs[-1]["GUID"]
 
     cup = sb.bag("Staging Cup", 21.0, -7.4, [], tint=(0.85, 0.85, 0.9),
                  description="Public: anyone may look inside. Phase 2: press 'Drop Staging Cup' on the Cube Tower panel.")
     objs.append(cup)
+    setup["staging_cup_spot"] = [21.0, -7.4]
+    setup["setec_share_spot"] = board_point(*agent_c, *market_share_cell(0))
     tower = sb.base("BlockSquare", "Cube Tower", sb.transform(24.6, -7.4, y=1.8, scale=(1.8, 3.2, 1.8)),
                     "Scripted: use the Cube Tower panel (top right). Stuck cubes stay hidden inside.",
                     color=(0.12, 0.14, 0.2), locked=True)
@@ -482,17 +592,51 @@ def build_save(url_for) -> dict:
                             locked=True, rot_y=rot))
         objs.append(sb.card(ref_deck, p_i - 1, f"Player Reference P{p_i}", kx, mz - f * 3.8, rw, rd, rot_y=rot,
                             description="Front: dice & R&D face yields. Flip: six-phase round."))
+        cubes: Dict[str, str] = {}
         for c_i, label in enumerate(PLAYER_CUBES):
             cx = kx - 1.6 + (c_i % 4) * 1.05
             cz = mz + f * (0.2 + (c_i // 4) * 1.05)
             objs.append(sb.cube(f"{label} ({seat})", tint, cx, cz))
+            cubes[CUBE_KEYS[c_i]] = objs[-1]["GUID"]
         dice = [("Gray", "Gray Legacy die (Ready for Release)"), ("Gray", "Gray Legacy die (Ready for Release)"),
                 ("Purple", "Purple Specialist die"), ("Purple", "Purple Specialist die (Personal Reserve)"),
                 ("Gray", "Gray Legacy die (Current Sprint)"), ("Gray", "Gray Legacy die (Current Sprint)"),
                 ("Gray", "Gray Legacy die (Current Sprint)")]
+        dice_guids: List[str] = []
         for d_i, (color, name) in enumerate(dice):
             objs.append(sb.die(color, kx - 1.6 + (d_i % 4) * 1.05, mz + f * (2.9 + (d_i // 4) * 1.05), nickname=name))
+            dice_guids.append(objs[-1]["GUID"])
         objs.append(sb.hand(seat, mx, mz - f * 11.6, rot))
+
+        def mat(pt, _mx=mx, _mz=mz, _s=south):
+            return board_point(_mx, _mz, pt[0], pt[1], _s)
+
+        def shared(pt, _i=p_i - 1, dx=9.5, dy=8.0):
+            ox, oy = SEAT_OFFSETS[_i]
+            return board_point(*agent_c, pt[0] + ox * dx, pt[1] + oy * dy)
+
+        setup["seats"].append({
+            "color": seat,
+            "rot": rot,
+            "dice": {"ready": dice_guids[0:2], "purple": dice_guids[2], "reserve": dice_guids[3],
+                     "sprint": dice_guids[4:7]},
+            "cubes": cubes,
+            "spots": {
+                "ready": [mat(p) for p in MAT_READY_SLOTS],
+                "sprint": [mat(p) for p in MAT_CURRENT_SPRINT],
+                "reserve": mat(MAT_PERSONAL_RESERVE),
+                **{k: mat(p) for k, p in MAT_TRACK_L0.items()},
+                "sig": mat(MAT_SIGNATURE_CRADLE),
+                **{k: mat(p) for k, p in MAT_TOKEN_WELLS.items()},
+                "vuln": shared(AGENT_VULN_ZERO),
+                "share": {str(v): shared(market_share_cell(v), dx=14.0, dy=9.0) for v in sorted(set(START_SHARE.values()))},
+                # Kit column beside the mat: free once the dice and cubes move onto the mat.
+                "company": [round(kx, 3), round(mz + f * 0.5, 3)],
+                "override": [round(kx - side * 2.85, 3), round(mz + f * 0.5, 3)],
+                "white_hat": [round(kx, 3), round(mz + f * 3.65, 3)],
+                "first_player": [round(kx, 3), round(mz + f * 5.75, 3)],
+            },
+        })
 
     lua = open(os.path.join(HERE, "global.lua"), encoding="utf-8").read()
     cfg = (
@@ -500,8 +644,9 @@ def build_save(url_for) -> dict:
         f'TOWER_GUID = "{tower["GUID"]}"\n'
         f"TRAY_ORIGIN = {{ {tray_origin[0]}, {tray_origin[1]}, {tray_origin[2]} }}\n"
         f"CUBE_TEMPLATES = JSON.decode([==[{json.dumps(templates)}]==])\n"
+        f"SETUP = JSON.decode([==[{json.dumps(setup)}]==])\n"
     )
-    lua = lua.replace("-- __CONFIG__ (replaced by the builder: STAGING_CUP_GUID, TOWER_GUID, TRAY_ORIGIN, CUBE_TEMPLATES)", cfg)
+    lua = lua.replace("-- __CONFIG__ (replaced by the builder: STAGING_CUP_GUID, TOWER_GUID, TRAY_ORIGIN, CUBE_TEMPLATES, SETUP)", cfg)
     xml = open(os.path.join(HERE, "global.xml"), encoding="utf-8").read()
 
     return {
@@ -529,7 +674,10 @@ def build_save(url_for) -> dict:
 NOTE = f"""[b]Too Many Secrets {VERSION} -- Tabletop Simulator PnP module[/b]
 Rules: RULES.md / RULES_QUICKREF.md in the repo.
 
-[b]Setup[/b]
+[b]Quick Setup[/b]
+Press [b]2P[/b], [b]3P[/b] or [b]4P[/b] on the Quick Setup panel (top right) to do steps 1-8 below. It uses the seated colours if exactly that many players sit at a mat, else the first mats (White, Pink, Teal, Orange). It runs once per game; load the save again to start over.
+
+[b]Setup (by hand)[/b]
 1. Shuffle each SETEC Version tile stack; deal 1 v1.0, 1 v2.0 and 1 v3.0 face up into the Agent Board slots. Active Version Marker on v1.0.
 2. Cube Tower panel (top right): press [b]Prime the Compiler[/b] (drops 1 Red, 1 Blue, 1 Green, 1 Black; exits return to the supply).
 3. Put the v1.0 tile's starting cubes into the Staging Cup bag.

@@ -12,3 +12,15 @@
     <Text id="towerStatus" fontSize="11" color="#CBD5E1" alignment="MiddleCenter" preferredHeight="28">Tower ready.</Text>
   </VerticalLayout>
 </Panel>
+<Panel id="setupPanel" width="230" height="112" rectAlignment="UpperRight" offsetXY="-12 -246"
+       color="#0F172AE6" outline="#475569" outlineSize="1 1" allowDragging="true" returnToOriginalPositionWhenReleased="false">
+  <VerticalLayout padding="10 10 8 8" spacing="6" childForceExpandHeight="false">
+    <Text fontSize="15" fontStyle="Bold" alignment="MiddleCenter" preferredHeight="20">QUICK SETUP</Text>
+    <HorizontalLayout id="setupButtons" spacing="6" preferredHeight="30">
+      <Button onClick="uiSetup2" tooltip="Set up a 2-player game (Section 3 of the rules)">2P</Button>
+      <Button onClick="uiSetup3" tooltip="Set up a 3-player game (Section 3 of the rules)">3P</Button>
+      <Button onClick="uiSetup4" tooltip="Set up a 4-player game (Section 3 of the rules)">4P</Button>
+    </HorizontalLayout>
+    <Text id="setupStatus" fontSize="10" color="#CBD5E1" alignment="MiddleCenter" preferredHeight="34">Deals cards, primes the tower and sets every mat. Seated colours are used if they match the count.</Text>
+  </VerticalLayout>
+</Panel>
