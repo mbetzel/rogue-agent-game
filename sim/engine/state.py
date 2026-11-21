@@ -382,6 +382,10 @@ class PlayerState:
         self.green_hits_by_damage: Dict[int, int] = {}
         self.green_hits_cancelled: int = 0
         self.green_secrets_cancelled: int = 0
+        self.green_landing_unsafe: int = 0       # v0.51: hits whose landing is >= the min target
+        self.green_cap_skips: int = 0            # v0.51: cubes that skipped this player under the one-hit rule
+        self.green_hit_rounds: List[int] = []    # v0.51: round of every Green hit (cancelled included)
+        self.corruption_vuln_into_target: Dict[int, int] = {}  # v0.51: Corruption gain -> times it took this player from < min target to >= min target
         self.pen_test_steps: int = 0
         self.pen_test_research_spent: int = 0
         self.pen_test_this_turn: int = 0
@@ -1336,6 +1340,7 @@ class RoundTelemetry:
     # --- v0.46.0 Vulnerability Track telemetry (populated only under defense_mode == "VULNERABILITY") ---
     green_cubes_resolved: int = 0
     green_cubes_no_target: int = 0
+    green_cubes_cap_no_target: int = 0  # v0.51.0: no-target cubes caused by the one-hit rule (subset of green_cubes_no_target)
     green_secrets_lost_by_player: Dict[int, int] = field(default_factory=dict)
     vuln_after_lockin_by_player: Dict[int, int] = field(default_factory=dict)
     vuln_after_p4_by_player: Dict[int, int] = field(default_factory=dict)
@@ -1546,6 +1551,7 @@ class GameState:
     green_resolved_round: int = 0  # v0.46.0: idempotence guard for vulnerability.resolve_green
     green_hit_events: List[Dict[str, Any]] = field(default_factory=list)  # v0.46.0 telemetry
     green_round_stats: Dict[str, Any] = field(default_factory=dict)  # v0.46.0: this round's Green summary (-> RoundTelemetry)
+    green_cap_no_target: int = 0  # v0.51.0: Green cubes with no target because of the one-hit rule (game total)
     vuln_p1_cup_green: int = 0  # v0.46.0: public staging-cup Green count at Phase 1 (telemetry)
     # v0.46.0: every player's pre-roll Vulnerability and die count, snapshotted once at the start of Phase 1 so the
     # bot policy never sees an earlier seat's post-roll value (plain dict: fast_clone copies it)

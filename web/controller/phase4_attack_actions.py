@@ -48,17 +48,24 @@ def green_preview(controller: GameController) -> List[Dict[str, Any]]:
     floor = vulnerability.min_target(cfg, s)
     seat = {p.player_id: (i - s.first_player_index) % len(s.players) for i, p in enumerate(s.players)}
     v = {p.player_id: p.vulnerability for p in s.players if vulnerability.eligible_for_green(s, cr, p)}
+    cap = bool(cfg.vuln_one_hit_per_round)
+    done: set = set()
     out = []
     for k in range(n):
-        elig = [pid for pid, val in v.items() if val >= floor]
+        above = [pid for pid, val in v.items() if val >= floor]
+        elig = [pid for pid in above if not (cap and pid in done)]
         if not elig:
-            out.append({"cube": k, "pids": [], "v": None, "damage": 0, "cancelled": []})
+            out.append({"cube": k, "pids": [], "v": None, "damage": 0, "cancelled": [], "land": None,
+                        "capped": bool(above)})
             continue
         top = max(v[pid] for pid in elig)
         hit = sorted((pid for pid in elig if v[pid] == top), key=lambda pid: seat[pid])
+        land = vulnerability.hit_landing(cfg, top)
         for pid in hit:
-            v[pid] = cfg.vuln_hit_reset
-        out.append({"cube": k, "pids": hit, "v": top, "damage": vulnerability.band_damage(cfg, top), "cancelled": []})
+            v[pid] = land
+            done.add(pid)
+        out.append({"cube": k, "pids": hit, "v": top, "damage": vulnerability.band_damage(cfg, top), "cancelled": [],
+                    "land": land})
     return out
 
 
@@ -263,6 +270,10 @@ def _log_green_and_signature(controller: GameController, sig: Dict[str, Any]) ->
     names = {pid: m["name"] for pid, m in controller.player_meta.items()}
     stats = s.green_round_stats if (s.green_round_stats or {}).get("round") == s.current_round else {}
     for e in stats.get("events", []):
+        if not e["pids"] and e.get("capped"):
+            controller.event_log.append(f"Green cube {e['cube'] + 1}: every player at Vulnerability "
+                                        f"{vulnerability.min_target(s.config, s)}+ was already hit by Green this round (no effect).")
+            continue
         if not e["pids"]:
             controller.event_log.append(f"Green cube {e['cube'] + 1}: no player at Vulnerability "
                                         f"{vulnerability.min_target(s.config, s)}+ (no effect).")
@@ -270,7 +281,7 @@ def _log_green_and_signature(controller: GameController, sig: Dict[str, Any]) ->
         who = ", ".join(names[p] + (" (Baffle Echo: no Secret loss)" if p in e["cancelled"] else "") for p in e["pids"])
         controller.event_log.append(
             f"Green cube {e['cube'] + 1} hits {who} at Vulnerability {e['v']}: -{e['damage']} Corporate "
-            f"Secret{'s' if e['damage'] != 1 else ''}, Vulnerability reset to {s.config.vuln_hit_reset}.")
+            f"Secret{'s' if e['damage'] != 1 else ''}, Vulnerability drops to {e.get('land', s.config.vuln_hit_reset)}.")
     if sig.get("dominant_color") and sig.get("locked_pids"):
         who = ", ".join(names[p] for p in sig["locked_pids"])
         controller.event_log.append(

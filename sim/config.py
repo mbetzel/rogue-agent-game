@@ -636,6 +636,10 @@ class GameConfig:
     bot_gray_aware_seats: Optional[Tuple[int, ...]] = None  # sim-only: GRAY_AWARE seats (None = all); other seats use THINNING_AWARE
     gray_vuln_telemetry: bool = False              # sim-only: emit the _v050_row end-row keys (no gameplay effect)
 
+    # --- v0.51.0 Green hit landing + one hit per round (docs/specs/green_landing_spec.md); every default = v0.50 behaviour ---
+    vuln_hit_landing_by_band: Optional[Tuple[int, ...]] = None  # [TUNE] Vulnerability after a Green hit, per band; None = vuln_hit_reset
+    vuln_one_hit_per_round: bool = False           # [RULE] a player is hit by at most one Green cube per Phase 4
+
     # --- Step 0 exchange-rate probe levers (sim-only; default off => every preset is bit-identical) ---
     probe_bonus_seat: int = -1                 # seat that receives the probe bonus (-1 = off)
     probe_bonus_starting_secrets: int = 0      # one-off +Secrets at setup for that seat
@@ -807,6 +811,7 @@ class GameConfig:
         self._validate_v048()
         self._validate_locked_vuln()
         self._validate_v050()
+        self._validate_v051()
         if self.starting_secrets_by_player_count is None:
             # NOTE: resolved once at construction. Re-assigning round_sequence later does NOT
             # re-resolve this dict; use GameConfig.legacy_v033() or pass round_sequence to __init__.
@@ -1327,6 +1332,21 @@ class GameConfig:
         return cls.v050(**overrides)
 
     @classmethod
+    def v051(cls, **overrides) -> "GameConfig":
+        """v0.51.0 Green hit landing (2 / 5 / 8 by band) + one Green hit per player per round
+        (docs/specs/green_landing_spec.md). Inherits v050()."""
+        overrides.setdefault("vuln_hit_landing_by_band", (2, 5, 8))
+        overrides.setdefault("vuln_one_hit_per_round", True)
+        return cls.v050(**overrides)
+
+    @classmethod
+    def v051_roster(cls, **overrides) -> "GameConfig":
+        """v0.51.0 + the v0.50 roster bots (PR push, Gray-aware research; sweep default)."""
+        overrides.setdefault("vuln_hit_landing_by_band", (2, 5, 8))
+        overrides.setdefault("vuln_one_hit_per_round", True)
+        return cls.v050_roster(**overrides)
+
+    @classmethod
     def v046_locked(cls, **overrides) -> "GameConfig":
         """Locked ⚠ Faces draft (docs/specs/locked_vuln_faces_spec.md), swept on the v0.46 base. Inherits v046().
         Formerly ``v047()`` on this branch; renamed after main shipped v0.47.0 Red Signature."""
@@ -1369,6 +1389,30 @@ class GameConfig:
         self.bot_gray_aware_params.validate()
         if not isinstance(self.gray_vuln_telemetry, bool):
             raise ValueError("gray_vuln_telemetry must be a bool")
+
+    def _validate_v051(self) -> None:
+        """docs/specs/green_landing_spec.md §3.2."""
+        if not isinstance(self.vuln_one_hit_per_round, bool):
+            raise ValueError("vuln_one_hit_per_round must be a bool")
+        land = self.vuln_hit_landing_by_band
+        if land is not None:
+            if not isinstance(land, tuple):
+                raise ValueError(f"vuln_hit_landing_by_band must be None or a tuple, got {land!r}")
+            th = self.vuln_band_thresholds
+            mt = self.vuln_min_target_by_version
+            if len(land) != len(th):
+                raise ValueError(f"vuln_hit_landing_by_band must have {len(th)} entries (one per band), got {land!r}")
+            if any(isinstance(x, bool) or not isinstance(x, int) or x < 0 for x in land):
+                raise ValueError(f"vuln_hit_landing_by_band entries must be ints >= 0, got {land!r}")
+            if any(land[i] > land[i + 1] for i in range(len(land) - 1)):
+                raise ValueError(f"vuln_hit_landing_by_band must be non-decreasing, got {land!r}")
+            if land[0] >= min(mt):
+                raise ValueError(f"vuln_hit_landing_by_band[0] must be below the min target {min(mt)}, got {land!r}")
+            for i in range(1, len(land)):
+                if land[i] >= th[i]:
+                    raise ValueError(f"vuln_hit_landing_by_band[{i}] must be below band threshold {th[i]}, got {land!r}")
+        if (land is not None or self.vuln_one_hit_per_round) and self.defense_mode != "VULNERABILITY":
+            raise ValueError("vuln_hit_landing_by_band / vuln_one_hit_per_round require defense_mode='VULNERABILITY'")
 
     def _validate_locked_vuln(self) -> None:
         """spec §3.4 (Locked ⚠ Faces validation)."""

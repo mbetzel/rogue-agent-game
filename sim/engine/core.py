@@ -551,6 +551,7 @@ class GameEngine:
         gs = s.green_round_stats if s.green_round_stats.get("round") == rnd else {}
         tel.green_cubes_resolved = int(gs.get("resolved", 0))
         tel.green_cubes_no_target = int(gs.get("no_target", 0))
+        tel.green_cubes_cap_no_target = int(gs.get("cap_no_target", 0))
         tel.green_secrets_lost_by_player = dict(gs.get("lost_by_player", {}))
         tel.green_hit_events = list(gs.get("events", []))
         tel.staging_cup_green_at_p1 = int(s.vuln_p1_cup_green)

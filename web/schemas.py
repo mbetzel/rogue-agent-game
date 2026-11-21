@@ -491,13 +491,16 @@ class GameStateSerializer:
         for i, (t, d) in enumerate(zip(th, cfg.vuln_band_damage)):
             lo, hi = max(t, floor), ((th[i + 1] - 1) if i + 1 < len(th) else cfg.vuln_track_max)
             if lo <= hi:
-                bands.append({"from": lo, "to": hi, "damage": int(d)})
+                bands.append({"from": lo, "to": hi, "damage": int(d), "land": vulnerability.hit_landing(cfg, t)})
         return {
             "max": int(cfg.vuln_track_max),
             "safe_max": floor - 1,
             "min_target": floor,
             "bands": bands,
             "hit_reset": int(cfg.vuln_hit_reset),
+            "hit_landing_by_band": (list(cfg.vuln_hit_landing_by_band)
+                                    if cfg.vuln_hit_landing_by_band is not None else None),
+            "one_hit_per_round": bool(cfg.vuln_one_hit_per_round),
             "pen_test_cost": int(cfg.pen_test_cost),
             "pen_test_limits": list(cfg.pen_test_limits),
             "pen_test_l4_free": int(cfg.pen_test_l4_free),
@@ -593,7 +596,7 @@ class GameStateSerializer:
             "starting_secrets": state.config.get_starting_secrets(len(state.players)),
             # v0.37.0 Market Leader Bonus schedule for this player count ([] when disabled)
             "is_market_leader_bonus": bool(getattr(state.config, "is_market_leader_bonus", False)),
-            "rules_version": "v0.50.0",
+            "rules_version": "v0.51.0",
             "is_secret_faces": bool(getattr(state.config, "secret_face_enabled", False)),
             # v0.49.0 Vulnerability Track (Central SETEC Agent Board) and Pen Test Track
             "vulnerability_track": cls._vulnerability_track(state),

@@ -264,8 +264,12 @@ def _v046_corruption_demote(engine: GameEngine, space: CorruptionSpace, legacy_a
     if crit == TargetCriterion.FEWEST_GLITCHED:
         crit = TargetCriterion.LOWEST_VULNERABILITY
     gain = cfg.corruption_lowest_vuln_gain if space.demote_dice == 1 else cfg.corruption_lowest_vuln_gain_double
+    floor = vulnerability.min_target(cfg, engine.state)
     for p in get_targeted_players(engine, TargetCriterion.ALL if legacy_all else crit):
+        before = p.vulnerability
         vulnerability.raise_vulnerability(cfg, p, gain, "corruption")
+        if before < floor <= p.vulnerability:  # v0.51 telemetry only
+            p.corruption_vuln_into_target[gain] = p.corruption_vuln_into_target.get(gain, 0) + 1
 
 
 def resolve_corruption_transfer(engine: GameEngine, space: CorruptionSpace) -> List[Dict[str, Any]]:
