@@ -8,7 +8,7 @@ A Tabletop Simulator save built from the Print-and-Play components in [`pnp/`](.
 python3 -m tts.build_tts
 ```
 
-- Renders 23 images into `tts/assets/` (needs `pdftoppm`, from poppler-utils).
+- Renders 29 images into `tts/assets/` (needs `pdftoppm`, from poppler-utils).
 - Writes `tts/TooManySecrets.json`, whose images point at GitHub raw URLs on `main`. Use this one for multiplayer once the assets are pushed. Each URL carries a `?v=<hash>` so TTS reloads changed images.
 - Add `--install-dir "<TTS Saves folder>"` to copy the images there and write `TooManySecrets_local.json` (it uses `file:///` paths, so it works before pushing, but only on that machine).
 - Add `--skip-render` to reuse the existing images.
@@ -29,7 +29,7 @@ Edit `tts/global.lua` / `tts/global.xml` for the script and UI, not the generate
 | Right | Red / Blue / Green / Yellow market dice (`8` each), Variant (`★`) card decks per colour and the summary cards, Attack Cube and Corruption Cube supplies, **Staging Cup** bag, **Cube Tower** |
 | Each seat (White, Pink, Teal, Orange) | Company Terminal Mat, a 2-sided Player Reference card (dice front, round back), `8` player cubes (named per track or marker), `5` Gray + `2` Purple dice |
 
-Dice are standard tinted d6s, matching the PnP (the reference cards map pips to abilities).
+Dice are TTS **Custom Dice** with their yields printed on each face, drawn from `DICE_SPECS` in `pnp/generate_pnp.py` (one texture per colour, `tts/assets/die_<colour>.png`). Each face keeps its pip number in the corner, so it still matches the reference cards and the PnP's plain d6s; ⚠ faces carry a LOCKED band (a **Locked Die** during rerolls). The textures follow TTS's own `Modding/Dice Templates/D6.png` layout (`DIE_FACE_CELLS` in `build_tts.py`). The Global script renames each die's six rotation values to the face yields, so roll messages and tooltips read, for example, `5: R&D face [Locked Die]`.
 
 ## Scripting
 

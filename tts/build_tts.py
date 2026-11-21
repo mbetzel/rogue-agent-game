@@ -239,6 +239,104 @@ def _variant_grid() -> List[Tuple[str, object]]:
     return cells
 
 
+# -- custom dice ----------------------------------------------------------------
+# TTS Custom Dice (d6) texture, from Modding/Dice Templates/D6.png (2048 x 2048 px):
+# a 3 x 3 grid with the top row unused. Middle row: faces 2, 4, 5. Bottom row:
+# faces 1, 3, 6, with 1 and 6 drawn upside down. The white face squares are
+# 613 px wide on a 690 px pitch, centred at x 333 / 1023 / 1713 and y 1023 / 1714.
+DIE_TEX_PT = 576.0                     # page size; rendered at 256 dpi = 2048 px
+DIE_TEX_DPI = 256
+_PX = DIE_TEX_PT / 2048.0
+DIE_FACE_PT = 613 * _PX                # 172 pt face square
+DIE_FACE_CELLS = {                     # face -> (centre x px, centre y px, upside down?)
+    2: (333.0, 1023.5, False), 4: (1023.5, 1023.5, False), 5: (1713.0, 1023.5, False),
+    1: (333.0, 1714.0, True), 3: (1023.5, 1714.0, False), 6: (1713.0, 1714.0, True),
+}
+DIE_BODY = {"gray": "gray", "red": "red", "blue": "blue", "green": "green", "yellow": "yellow_fill", "purple": "purple"}
+
+
+def _face_parts(face: str) -> List[List[str]]:
+    """'+$2 / +2 {RESEARCH} {WARN}' -> [['+$2'], ['+2 {RESEARCH}']]: Choices (/), each a list of Dual (&) yields."""
+    t = face.replace("{WARN}", "").replace("Corporate Secret", "Secret").strip()
+    return [[p.strip() for p in alt.split(" & ")] for alt in t.split(" / ")]
+
+
+def die_face_name(color: str, n: int, face: str) -> str:
+    """Plain-text face name for TTS roll messages and tooltips (TTS fonts lack the icons)."""
+    t = face.replace("{WARN}", "").strip()
+    if "{STAR}" in t:
+        t = "Purple Star: Signature Protocol" if color == "purple" else f"{color.title()} Star: Variant Card"
+    elif "R&D" in t:
+        t = "R&D face"
+    t = t.replace("{RESEARCH}", "Research").replace(" / ", " or ").replace(" & ", " and ")
+    return f"{n}: {t}" + (" [Locked Die]" if "{WARN}" in face else "")
+
+
+def _rich_width(page: PDFPage, markup: str, size: float) -> float:
+    return sum(page._span_width(sp, size) for sp in page._parse_rich_tokens(markup, base_font="bold"))
+
+
+def _draw_die_face(page: PDFPage, cx: float, cy: float, spec, n: int) -> None:
+    key = spec.color_key
+    body = PALETTE[DIE_BODY[key]]
+    face = spec.faces[n - 1]
+    h = DIE_FACE_PT / 2.0
+    page.rounded_rect(cx - h + 9, cy - h + 9, 2 * h - 18, 2 * h - 18, r=14.0, stroke=None,
+                      fill=PALETTE.get(f"{key}_light", PALETTE["paper_tint"]))
+    # Face number (pips, as on the reference cards) and the ⚠ mark.
+    page.draw_pip_die(cx - h + 34, cy - h + 34, 30.0, n, stroke=body, fill=PALETTE["white"], pip_color=body)
+    warn = "{WARN}" in face
+    if warn:
+        page.draw_warn_icon(cx + h - 34, cy - h + 36, 34.0)
+        page.rounded_rect(cx - h + 18, cy + h - 40, 2 * h - 36, 24.0, r=5.0, stroke=None, fill=PALETTE["yellow_fill"])
+        page.text(cx, cy + h - 21.5, "LOCKED", font="bold", size=15.0, color=PALETTE["ink"], align="center")
+    top, bottom = cy - h + 56, cy + h - (46 if warn else 18)
+    mid = (top + bottom) / 2.0
+    if "{STAR}" in face:
+        page.draw_star_icon(cx, mid - 14, 62.0, fill=body)
+        label = "PROTOCOL" if key == "purple" else "VARIANT"
+        page.text(cx, mid + 40, label, font="bold", size=17.0, color=PALETTE["ink"], align="center")
+        return
+    if "R&D" in face:
+        page.draw_secret_icon(cx, mid - 18, 48.0, color=PALETTE["blue"])
+        page.text(cx, mid + 30, "R&D", font="bold", size=26.0, color=PALETTE["ink"], align="center")
+        return
+    # Yields: Choices (/) separated by "or", Dual (&) yields stacked.
+    alts = _face_parts(face)
+    lines = [ln for alt in alts for ln in alt]
+    max_w = 2 * h - 34
+    sizes = {ln: min(30.0, 30.0 * max_w / _rich_width(page, f"**{ln}**", 30.0)) for ln in lines}
+    or_h = 15.0
+    total = sum(sizes[ln] * 1.08 for ln in lines) + (len(alts) - 1) * or_h
+    if total > bottom - top:
+        k = (bottom - top) / total
+        sizes = {ln: v * k for ln, v in sizes.items()}
+        total = bottom - top
+    y = mid - total / 2.0
+    for a_i, alt in enumerate(alts):
+        if a_i:
+            page.line(cx - 46, y + or_h / 2.0 - 1, cx - 14, y + or_h / 2.0 - 1, stroke=PALETTE["muted"], width=1.0)
+            page.line(cx + 14, y + or_h / 2.0 - 1, cx + 46, y + or_h / 2.0 - 1, stroke=PALETTE["muted"], width=1.0)
+            page.text(cx, y + or_h / 2.0 + 3, "or", font="italic", size=11.0, color=PALETTE["muted"], align="center")
+            y += or_h
+        for ln in alt:
+            size = sizes[ln]
+            y += size * 1.08
+            page.rich_line(cx, y - size * 0.22, f"**{ln}**", size=size, color=PALETTE["ink"], align="center")
+
+
+def draw_die_texture(page: PDFPage, spec) -> None:
+    """One TTS Custom Dice texture for a DieSpec (all six faces)."""
+    page.rect(0, 0, DIE_TEX_PT, DIE_TEX_PT, stroke=None, fill=PALETTE[DIE_BODY[spec.color_key]])
+    for n, (px, py, flip) in DIE_FACE_CELLS.items():
+        cx, cy = px * _PX, py * _PX
+        if flip:  # half a turn about the face centre (PDF user space is y-up)
+            page.raw(f"q -1 0 0 -1 {2 * cx:.2f} {2 * (DIE_TEX_PT - cy):.2f} cm")
+        _draw_die_face(page, cx, cy, spec, n)
+        if flip:
+            page.raw("Q")
+
+
 def build_asset_book() -> AssetBook:
     book = AssetBook()
 
@@ -293,6 +391,10 @@ def build_asset_book() -> AssetBook:
         Raster("first_player_marker", 300, (40.0, 62.0, 86.0, 56.0)),
         Raster("version_marker", 300, (126.0, 62.0, 86.0, 56.0)),
     ))
+
+    # Custom Dice textures, one per die colour.
+    for spec in g.DICE_SPECS:
+        draw_die_texture(book.page(DIE_TEX_PT, DIE_TEX_PT, Raster(f"die_{spec.color_key}", DIE_TEX_DPI)), spec)
 
     # Round resource tokens.
     d = 120.0
@@ -398,8 +500,19 @@ class SaveBuilder:
         return obj
 
     def die(self, color: str, x: float, z: float, nickname: str = "", y: float = 1.5) -> dict:
+        """A TTS Custom Dice d6 with this colour's faces (die_<colour>.png). The global script
+        renames the six rotation values to the face yields (GM Notes "die:<colour>")."""
         label = nickname or f"{color} die"
-        return self.base("Die_6", label, self.transform(x, z, y=y, scale=(0.75, 0.75, 0.75)), color=DIE_TINTS[color])
+        obj = self.base("Custom_Dice", label, self.transform(x, z, y=y, scale=(0.75, 0.75, 0.75)),
+                        gm_notes=f"die:{color.lower()}")
+        obj["CustomImage"] = {
+            "ImageURL": self.url_for(f"die_{color.lower()}"),
+            "ImageSecondaryURL": "",
+            "ImageScalar": 1.0,
+            "WidthScale": 0.0,
+            "CustomDice": {"Type": 1},  # DiceType d6
+        }
+        return obj
 
     def cube(self, nickname: str, tint, x: float = 0.0, z: float = 0.0, y: float = 1.5, description: str = "") -> dict:
         return self.base("BlockSquare", nickname, self.transform(x, z, y=y, scale=(0.38, 0.38, 0.38)), description,
@@ -638,6 +751,8 @@ def build_save(url_for) -> dict:
             },
         })
 
+    die_faces = {spec.color_key: [die_face_name(spec.color_key, n, f) for n, f in enumerate(spec.faces, start=1)]
+                 for spec in g.DICE_SPECS}
     lua = open(os.path.join(HERE, "global.lua"), encoding="utf-8").read()
     cfg = (
         f'STAGING_CUP_GUID = "{cup["GUID"]}"\n'
@@ -645,8 +760,12 @@ def build_save(url_for) -> dict:
         f"TRAY_ORIGIN = {{ {tray_origin[0]}, {tray_origin[1]}, {tray_origin[2]} }}\n"
         f"CUBE_TEMPLATES = JSON.decode([==[{json.dumps(templates)}]==])\n"
         f"SETUP = JSON.decode([==[{json.dumps(setup)}]==])\n"
+        f"DIE_FACES = JSON.decode([==[{json.dumps(die_faces)}]==])\n"
     )
-    lua = lua.replace("-- __CONFIG__ (replaced by the builder: STAGING_CUP_GUID, TOWER_GUID, TRAY_ORIGIN, CUBE_TEMPLATES, SETUP)", cfg)
+    placeholder = "-- __CONFIG__ (replaced by the builder: STAGING_CUP_GUID, TOWER_GUID, TRAY_ORIGIN, CUBE_TEMPLATES, SETUP, DIE_FACES)"
+    if placeholder not in lua:
+        raise SystemExit("tts/global.lua: the __CONFIG__ placeholder line is missing or changed")
+    lua = lua.replace(placeholder, cfg)
     xml = open(os.path.join(HERE, "global.xml"), encoding="utf-8").read()
 
     return {
