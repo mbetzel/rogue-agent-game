@@ -310,7 +310,7 @@ class TestWebV046Config(unittest.TestCase):
         self.assertTrue(cfg.operations_before_pipeline_shift)
         self.assertFalse(cfg.glitched_shield_slots_enabled)
         st = gc.get_full_state()
-        self.assertEqual(st["rules_version"], "v0.50.0")
+        self.assertEqual(st["rules_version"], "v0.51.0")
         self.assertEqual(st["phase_names"][5], "Operations")
         self.assertEqual(st["phase_names"][6], "CI/CD Pipeline Shift")
         self.assertEqual(st["vulnerability_track"]["min_target"], 5)
@@ -318,10 +318,10 @@ class TestWebV046Config(unittest.TestCase):
         self.assertEqual([b["damage"] for b in st["vulnerability_track"]["bands"]], [1, 2, 3])
 
     def test_legacy_rules_versions_rejected(self):
-        for v in ("v0.38.0", "v0.37.0", "v0.40.0", "v0.45.0", "v0.46.0", "v0.47.0", "v0.48.0", "v0.49.0", "v0.49.1"):
+        for v in ("v0.38.0", "v0.37.0", "v0.40.0", "v0.45.0", "v0.46.0", "v0.47.0", "v0.48.0", "v0.49.0", "v0.49.1", "v0.50.0"):
             with self.assertRaises(ValueError):
                 GameController().new_game(num_players=2, seed=1, rules_version=v)
-        GameController().new_game(num_players=2, seed=1, rules_version="v0.50.0")
+        GameController().new_game(num_players=2, seed=1, rules_version="v0.51.0")
 
     def test_no_shield_or_defense_grid_fields_serialized(self):
         gc = _fresh()
@@ -496,7 +496,7 @@ class TestWebV046Flow(unittest.TestCase):
         hits = gc.last_attack_result["green_hits"]
         self.assertEqual(hits[0]["pids"], [0])
         self.assertEqual(hits[0]["damage"], 2)
-        self.assertEqual(ps[0].vulnerability, 0)
+        self.assertEqual(ps[0].vulnerability, 5)  # v0.51: an 8-10 hit lands at 5
         self.assertLessEqual(ps[0].secrets, secrets - 2)
 
     def test_signature_attack_runs_in_web_phase4(self):
@@ -579,7 +579,7 @@ class TestWebV046Http(unittest.TestCase):
     def test_endpoints(self):
         code, body = self._post("/api/game/new", {"num_players": 2, "seed": 4})
         self.assertEqual(code, 200)
-        self.assertEqual(body["state"]["rules_version"], "v0.50.0")
+        self.assertEqual(body["state"]["rules_version"], "v0.51.0")
         code, _ = self._post("/api/game/new", {"num_players": 2, "seed": 4, "rules_version": "v0.38.0"})
         self.assertEqual(code, 400)
         self._post("/api/game/new", {"num_players": 2, "seed": 4})

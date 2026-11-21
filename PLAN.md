@@ -3,6 +3,17 @@
 Canonical workspace roadmap for building and running Monte Carlo simulations against [RULES.md](./RULES.md).
 
 ## Current Status
+- [x] **Rules Draft `v0.51.0`** captured in [RULES.md](./RULES.md) (Green hits drop Vulnerability to `2 / 5 / 8`; one Green hit per player each round)
+- [ ] **Phase 72: Green Landing + One Hit per Round (`v0.51.0` Baseline)**: a Green hit moves the player's Vulnerability marker down to `2` / `5` / `8` (hit at `5–7` / `8–10` / `11+`) instead of `0`; a player can be hit by only one Green cube each round (later cubes skip them; no valid target, no effect). Aegis *Baffle Echo* cancel still uses up that player's hit.
+  - [x] *Pre-SDLC Game Designer Modeling:* `docs/plans/green_landing_gd_plan.md` (probe `scripts/probe_green_drop_band.py`, arm `S2H1`). User sign-off 2026-11-20: D1 (+3 pp PZ + MC bar waived; residual `+4.0 / +2.6 / +4.5` pp), D2 (2P Green lost `2.77` accepted), D3 (flat repeat cost dropped), D4 (Aegis ruling), D5 (`v0.51.0` + CLAUDE.md pillar text).
+  - [x] *Technical Architecture Spec (`principal-engineer`):* `docs/specs/green_landing_spec.md` (INV-LAND / TC-LAND-01..24; §12.1 Q1–Q3 ruled by the Main Agent: web in scope).
+  - [x] *Implementation (`senior-engineer`) + Code Review (`staff-engineer` PASS WITH FIXES; 4 script fixes applied by the Main Agent):* `GameConfig.v051()` / `v051_roster()`, `tests/test_v510_{parity,green_landing,web}.py`, v0.50 parity golden `tests/parity_v050/`, `scripts/check_green_landing_port.py` (200/200 identical to the probe arm S2H1), `scripts/run_green_landing_sweep.py`. Full suite: 1,333 OK.
+  - [x] *Validation Sweep (`product-owner`) + Balance Assessment (`game-designer`):* `docs/reports/v051_green_landing_sweeps.md` (2 × 1,200 pooled seeds, OVERALL PASS L1–L11), `FINDINGS.md` §67 APPROVED WITH RESIDUALS (D1 PZ + MC `+4.1 / +2.8 / +4.1` pp; D2 2P Green lost `2.78`).
+  - [x] *Documentation Sync (Main Agent) + PnP / TTS (`graphic-designer`):* RULES, QUICKREF, APPENDIX, GLOSSARY, `CLAUDE.md` pillar, `pnp/` (regenerated; Vulnerability Track bands print "then to 2 / 5 / 8"), `tts/` (rebuilt, `--check` clean) at `v0.51.0`; FINDINGS §58 and §60 archived to `docs/archive/FINDINGS_s58-s60.md`.
+  - [ ] *Follow-ups:*
+    - [ ] The +3 Corruption gain (2 printed demotes) only exists on the legacy Aggressive Version cards, so it can never fire in current setups; decide whether to drop it from RULES.md (FINDINGS §67).
+    - [ ] Corruption +2 now lifts the lowest player into 5+ about 1.2–1.3 times per game (v0.50: about 0.87); watch it.
+    - [ ] Company-power pass (carried over): Helix below par (`44.0 / 29.4 / 20.7`), Spook and Aegis above.
 - [x] **Rules Draft `v0.50.0`** captured in [RULES.md](./RULES.md) (Gray ⚠ B23 + Pen Test Level 2 Gray thinning)
 - [ ] **Phase 71: Gray ⚠ B23 + Pen Test Level 2 Gray Thinning (`v0.50.0` Baseline)**: Gray Legacy dice carry ⚠ on `+$2 / +2 🔬` and `+2 🔬`, printed v0.49.1-aligned on Face 1 and Face 5 (payouts unchanged; both lock); Pen Test Level 2 is a Breakthrough that returns `1` Gray Legacy die to the box (Level 3 keeps its own); sim-only `GRAY_AWARE` research bot is the `v050_roster` sweep policy.
   - [x] *Pre-SDLC Game Designer Modeling:* `docs/plans/gray_vulnerability_gd_plan.md` §1–§9 (User sign-off 2026-11-19: B23, lever a1, Gray-aware bot; 3 ⚠ and Release Bandwidth levers rejected).

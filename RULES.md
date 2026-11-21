@@ -1,4 +1,4 @@
-# Too Many Secrets — Rules Draft (v0.50.0)
+# Too Many Secrets — Rules Draft (v0.51.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Weight:** Medium Euro / Dice-Pool Survival  
 **Aesthetic:** Tape-Punk / Lo-Fi Cryptography (Early 1990s ARPANET relays, monochrome CRT terminals, reel-to-reel magnetic tape, acoustic couplers)
@@ -25,7 +25,7 @@ When the dust settles, any player who suffers a **Total Data Breach** (`<= 0 Sec
 * **Compiler Cubes (4 Colors):**
   * **Red Cubes (Market Manipulation):** Lowers your **Market Share** by `1` per cube (Red cubes cannot be blocked; no Money or Corporate Secrets are lost).
   * **Blue Cubes (Spyware / Data Exfiltration):** Steals `1` **Corporate Secret** per cube in every version (Blue cubes cannot be blocked).
-  * **Green Cubes (Malware / Logic Bombs):** Hunts the most vulnerable operative. Each Green cube, one at a time, hits the surviving player(s) highest on the **Vulnerability Track** at `5` or more (all tied players are hit). Each hit player loses Corporate Secrets by band (`5–7`: `1`; `8–10`: `2`; `11+`: `3`) `[TUNE: v0.49.0]` and resets their Vulnerability to `0`. A Green cube with no player at `5` or more has no effect (see Phase 4).
+  * **Green Cubes (Malware / Logic Bombs):** Hunts the most vulnerable operative. Each Green cube, one at a time, hits the surviving player(s) highest on the **Vulnerability Track** at `5` or more (all tied players are hit). Each hit player loses Corporate Secrets by band (`5–7`: `1`; `8–10`: `2`; `11+`: `3`) `[TUNE: v0.49.0]`, then moves their Vulnerability marker down to `2` / `5` / `8` (hit at `5–7` / `8–10` / `11+`) `[TUNE: v0.51.0]`. A player can be hit by only one Green cube each round `[TUNE: v0.51.0]`. A Green cube with no player left to hit has no effect (see Phase 4).
   * **Black Cubes (Corrupted Code / Master Key Search):** Advances the active **Version Corruption Track** toward cryptographic Singularity.
 * **Vulnerability Track** (on the Central SETEC Agent Board, numbered `0` to `15` `[TUNE: v0.46.0]`, with 1 Vulnerability marker per player): spaces `0–4` are the **safe zone** (Green never targets them) `[TUNE: v0.49.0]`; the bands `5–7`, `8–10` and `11–15` are printed with their Green damage (`−1 / −2 / −3` Secrets). Your Vulnerability rises by `1` per ⚠ on your kept dice in Phase 1 and can't go above `15` (excess is lost). It falls through the **Pen Test Track** and some `★` and R&D-face effects (never below `0`).
 * **SETEC Version Deck (`v1.0`, `v2.0`, `v3.0`):** Setup cards defining the threat's starting payload (`v1.0`) and each version's bespoke **Corruption Track** (where every space triggers a game-wide hazard or injects new cubes into the compiler).
@@ -258,12 +258,12 @@ Calculate the total attack strength of **Red**, **Blue**, and **Green** from exi
    * *(Institutional Override Timing: Contracting **Department of Telecommunications Oversight [DTO]** may trigger Slush Fund here to absorb up to 2 Corporate Secret loss from Blue cubes for free; **once per game**, and you choose whether to use it when it would apply).*
    * *(Institutional Override Timing: Defending **Aegis Defense Relay** may trigger Baffle Echo here to ignore `1` exited Red or Blue cube for themselves this round, or save it for a Green hit in Step 2).*
 2. **Green (whole table, one cube at a time):** For each exited Green cube in turn:
-   * Find the surviving player(s) with the **highest Vulnerability**, counting only players at **`5` or more**. Every player tied for highest is hit.
-   * Each hit player loses Corporate Secrets by their band: **`5–7`: `1`**, **`8–10`: `2`**, **`11+`: `3`** `[TUNE: v0.49.0]`. Then they **reset their Vulnerability to `0`**.
-   * The next Green cube checks again from the new positions, so a second cube usually hits a different player.
-   * If no surviving player is at `5` or more, the cube has no effect (players in the safe zone `0–4` are never hit). It still recycles in Step 5.
+   * Find the surviving player(s) with the **highest Vulnerability**, counting only players at **`5` or more** who have **not already been hit by Green this round**. Every player tied for highest is hit.
+   * Each hit player loses Corporate Secrets by their band: **`5–7`: `1`**, **`8–10`: `2`**, **`11+`: `3`** `[TUNE: v0.49.0]`. Then they **move their Vulnerability marker down to `2` / `5` / `8`** (hit at `5–7` / `8–10` / `11+`) `[TUNE: v0.51.0]`.
+   * **One Green hit per player each round** `[TUNE: v0.51.0]`: later Green cubes this round skip a player who has been hit, even if they are still at `5` or more. The next cube checks again from the new positions, so it hits the next most vulnerable player.
+   * If no surviving player at `5` or more is left who has not been hit this round, the cube has no effect (players in the safe zone `0–4` are never hit). It still recycles in Step 5.
    * A player taken to `0` Secrets by Blue this phase can still be hit by Green.
-   * *(Institutional Override Timing: **Aegis Defense Relay** may use Baffle Echo, if still unused this version, to cancel the Secret loss of `1` Green hit. Their Vulnerability still resets to `0`).*
+   * *(Institutional Override Timing: **Aegis Defense Relay** may use Baffle Echo, if still unused this version, to cancel the Secret loss of `1` Green hit. Their Vulnerability still moves down, and that cancelled hit is still their one Green hit this round).*
 3. **Patient Zero Check:** If your Corporate Secrets are now **`0` (or below)**, you suffer a **Total Data Breach** and become **Patient Zero**.
 4. **Target Lock:** Resolve any **Target Lock** Signature Attacks (see below).
 5. **Snowball Recycle & SETEC Corp (2-Player Only):** Place **all exited Red, Blue, and Green cubes** from the tray back into the **Staging Cup** for next round, including Green cubes that hit no one. In **2-player games**, if **any Red cubes (`>= 1`) exited the Cube Tower tray** this round, move the neutral **SETEC Corp Black Cube** up **`+1` Market Share** (capped at `20`).

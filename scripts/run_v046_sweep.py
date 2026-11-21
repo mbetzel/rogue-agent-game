@@ -81,7 +81,11 @@ def install_invariant_checks() -> None:
         assert snap(engine) == before, "INV-VULN-05: Green changed dice / money / research / Market Share"
         assert pz == [p.is_patient_zero for p in engine.state.players], "INV-VULN-06: Green set Patient Zero"
         hit = Counter(pid for e in ev for pid in e["pids"])
-        assert all(n <= 1 for n in hit.values()), "INV-VULN-05: a player was hit twice in a round"
+        cfg = engine.config  # v0.51: a landing at/above the min target with the one-hit rule off (TC-LAND-24) may hit twice
+        land = getattr(cfg, "vuln_hit_landing_by_band", None)
+        if (land is None or getattr(cfg, "vuln_one_hit_per_round", False)
+                or max(land) < min(cfg.vuln_min_target_by_version)):
+            assert all(n <= 1 for n in hit.values()), "INV-VULN-05: a player was hit twice in a round"
         for p in engine.state.players:
             assert 0 <= p.vulnerability <= engine.config.vuln_track_max, "INV-VULN-02: out of range"
         return ev

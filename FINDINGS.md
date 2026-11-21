@@ -10,63 +10,12 @@ This document tracks verified balance takeaways, bot meta equilibria, card tieri
 > - [docs/archive/FINDINGS_s37-s43.md](docs/archive/FINDINGS_s37-s43.md): Sections §37–§43 (Market Share threshold probes, Market Leader Bonus, v0.38 exploration).
 > - [docs/archive/FINDINGS_s44-s49.md](docs/archive/FINDINGS_s44-s49.md): Sections §44–§54 (Phases 50–59, v0.38c–v0.41.0 baselines; file name kept for link stability).
 > - [docs/archive/FINDINGS_s55-s57.md](docs/archive/FINDINGS_s55-s57.md): Sections §55–§57 (Phases 60–62, v3.0 escalation, Target Lock / v0.42.0, Dominant Cube Color Signature Attacks / v0.43.0).
+> - [docs/archive/FINDINGS_s58-s60.md](docs/archive/FINDINGS_s58-s60.md): Sections §58 and §60 (Phases 63 and 65, v0.44.0 research tracks / capstones and F6 overhaul; §59 was never assigned).
 
 ---
 
-> [!NOTE] Active Sections (§58–§66)
-> Section numbering continues here unchanged. **Agents: do not read the archives unless a task cites a specific §N ≤ 57.**
-
----
-
-## 60. Phase 65 Post-Telemetry Balance Assessment: Colored Die F6 Variant Overhaul & Glitched Shield Slot Flow: APPROVED (`v0.44.0 Baseline`)
-
-Sources: `docs/findings/v044_f6_overhaul_sweep.md` (1,800-game v0.44.0 vs v0.43.0 sweep across 2P/3P/4P, seeds `42..341`); `docs/specs/f6_variant_overhaul_spec.md`; `docs/plans/f6_overhaul_gd_plan.md`.
-
-- **Design Changes (`v0.44.0 Baseline`):**
-  1. **Unified Phase 3 Resolution:** All 12 Central Market Colored Die F6 (`★`) abilities resolve in **Phase 3: Income** (zero Phase 5 paid `★` actions, zero Phase 4 damage-conditional `★` tracking, legacy phrasing removed):
-     - *R1 Brand Protection (`$5`):* `+$2 & +1 Market Share`.
-     - *R2 Ad Campaign (`$4`):* Pay `$2` → `+2 Market Share`.
-     - *R3 Customer Poaching (`$5`):* Clockwise from First Player, take `1` Market Share from the rival with the most Market Share.
-     - *B1 Honeypot Telemetry (`$5`):* `+2 🔬` if `0` Blue cubes in Exit Tray, or `+$3` if `1+` Blue cubes in Exit Tray.
-     - *B2 Deep R&D Vault (`$5`, down from `$6`):* `+$2`, or spend `1` Corporate Secret → `+3 Market Share` (spending a last Secret immediately triggers Total Data Breach / Patient Zero).
-     - *B3 Air-Gapped Backup (`$4`):* `+$1`, plus `+$1` per Shield In Production (clean or glitched).
-     - *G1 Self-Healing Kernel (`$5`):* Clean `1` Glitched Shield Slot + `+1 🔬` (frees an assigned shield on that slot to block in Phase 4).
-     - *G2 Universal Sandbox (`$5`, up from `$4`):* `+2 🔬`, plus `+1 🔬` per Glitched Shield Slot.
-     - *G3 Live Reboot (`$4`):* `+1 🔬 & +$1`, and move `1` die from Scanned Box to Ready for Release.
-     - *Y1 Algorithmic Trading (`$6`):* `+$4`, or pay `$2` → `+1 Corporate Secret`.
-     - *Y2 Cloud Monopoly (`$5`):* `+$2`, plus `+$1` per different Central Market die color owned (`Red`, `Blue`, `Green`, `Yellow`; excludes `Purple`; max `+$6`).
-     - *Y3 Proprietary Training (`$5`):* `+1 Corporate Secret`, plus `+$1` per Gray Legacy die owned.
-  2. **Streamlined Glitched Shield Slot Flow:** In Phase 1 Step 4, players assign `Block 1 Any` shields to *any* Shield Slot (clean or glitched) up to `defense_capacity`. In Phase 4, shields on glitched slots purge the green cube and move to **Scanned Box** (no tower block, no Defense L4 cash); shields on clean slots block tower cubes.
-
-- **Empirical Telemetry (`v0.44.0` vs `v0.43.0`, N=900 each):**
-  - **Pacing & Endings:** `7.32` mean rounds (`v0.43.0`: `7.59`); Patient Zero `63.4%`, Market Collapse `23.3%`, Total Wipeout `7.1%` (2P: `13.3%`), Singularity `6.1%`.
-  - **4P Seat Fairness:** `25.7% / 24.3% / 22.7% / 27.3%` (tightened to a `4.6pp` spread vs `8.0pp` in `v0.43.0`).
-  - **F6 & Purge Telemetry:** `10,077` glitched slot purges (`0.513/player-round`); `0` B2 suicide breaches (`255` cash vs `122` secret activations); G1 promoted an assigned shield in `33.7%` of activations (`172/511`); G3 fizzled cleanly in `21.9%` (`123/562`).
-  - **Inherited Guardrails Noted for Follow-Up `[TUNE]`:** 2P Total Wipeout rate (`13.3%` vs `11.7%` in `v0.43.0`) and Red-starter equity lag (Prometheus `25.1%`, Meridian `28.9%` vs Omnidyne `42.0%`) are inherited from `v0.43.0` and flagged for a dedicated follow-up `[TUNE]` pass.
-
-- **Official Balance Verdict: APPROVED (`v0.44.0 Baseline`).**
-
-
-
-
-
-
----
-
-## 58. Phase 63 Post-Telemetry Balance Assessment: Research Tracks & Capstones (`v0.44.0 Baseline`): APPROVED
-
-Sources: `docs/findings/research_tracks_balance_review.md` (Pre-SDLC modeling), `docs/specs/v440_research_tracks_spec.md` (Technical Architecture Spec), `sim_results/v440_research_tracks/validation_report.md` (7,200 games across 4P, 3P, 2P pods, Seeds 42..1241).
-
-- **Changes Approved for `v0.44.0`:**
-  1. **Defense Grid:** L4 drops `$3` cap (`+$1` per Attack Cube blocked, naturally capped at `$4` by Defense Capacity `4`); L3 notes Blue Secret `+1` passive in Section 2 track table.
-  2. **Triage Track (Option B):** L1 ★ `1` Gray die → L2 `Bandwidth 2` → L3 ★ `+1 Corporate Secret` → L4 `Replace 1 Gray die with a Central Market colored die ($0 free, to Ready for Release)`. Removed dead `+1 🔬 per die beyond 2nd` text from Phase 6.
-  3. **Release Track:** Retained `2` base rerolls (1-reroll sweep breached 4P wipeout guardrail at `3.17%`); **L4** grants `Bandwidth 6` + **set `1` rolled Gray Legacy die to any printed face** in Phase 1 Step 3 (strictly after *Prodigy* and *Helix*).
-  4. **Public Relations:** L3 ★ 2nd Purple Specialist die routes to **Scanned Box**; **L4** grants **`+2` Market Share immediately** (clamped at `20`) + regain up to `3`/turn at `$3` Cash; fixed `3 🔬` → `$3` typo in `RULES.md:52`.
-
-- **Telemetry Highlights (`v0.43.0` → `v0.44.0`, 7,200 games):**
-  - **Pacing & Wipeouts:** 4P `7.43` → `7.30` rds, Total Wipeout `2.08%` → **`2.00%`** ($\le 2.0\%$ guardrail); 3P `7.61` rds (`4.50%`); 2P `7.49` rds (`11.00%`). Zero stalls ($\ge 13$ rds).
-  - **Capstones & Engagement:** Triage L2+ surged `39.4%` → **`93.4%`** (4P); Triage L4 `21.81%` (96.3% replacement rate); Release L4 `26.31%` (`2.19` Gray sets/L4 seat); Defense L4 `4.19%` (`$1.82`/L4 seat). Anti-snowballing (`2+` L4 tracks): **`0.00%`**. *(Note: PR L3/L4 `0.00%` reflects bot `_want_list` priorities in `sim/bots/research_policy.py`, not a rules defect.)*
-  - **Client Company Parity (4P):** Spread narrowed from `13.30` pts (`17.90%–31.20%`) to **`9.75` pts** (**`20.46%–30.21%`**).
+> [!NOTE] Active Sections (§61–§67)
+> Section numbering continues here unchanged. **Agents: do not read the archives unless a task cites a specific §N ≤ 60.**
 
 ---
 
@@ -420,3 +369,89 @@ Reports:
   - the company-power pass (Helix / Spook);
   - doc, PnP, TTS and web sync to v0.50.0;
   - FINDINGS now has 9 recent sections, so archive §57.
+
+## 67. Phase 72 Post-Telemetry Balance Assessment: Green Hit Landing + One Hit per Round (S2H1, `v0.51.0` Candidate): APPROVED WITH RESIDUALS
+
+**Experiments** (`mixed1` roster, `--assert-invariants` clean):
+- `scripts/run_green_landing_sweep.py --players 2,3,4`, pooled seeds `42..2441` (2,400 games per pod). Arms: M = `v051_roster`, B0 = `v050_roster`, B48 = `v048_roster` (the income comparator).
+- `scripts/probe_green_drop_band.py` (pre-SDLC monkeypatch probe, seeds `42..2041`, 2,000 games per pod).
+
+**Reports:**
+- `docs/plans/green_landing_gd_plan.md` (pre-SDLC, §0–§9);
+- `docs/specs/green_landing_spec.md`;
+- `docs/reports/v051_green_landing_sweeps.md`.
+
+### Key Changes (`v0.51.0` vs `v0.50.0`)
+1. **A Green hit moves the player down to the bottom of the next lower band.** `5–7` lands at `2` (not `0`), `8–10` at `5` and `11+` at `8`. The Secret cost by band (`1 / 2 / 3`) is unchanged.
+2. **At most one Green hit per player per Phase 4.**
+   - Each later cube hits the highest player(s) at `5`+ who have not been hit this phase. Ties still hit all tied players.
+   - If no valid target remains, the cube has no effect and recycles, as in the existing rule.
+   - An Aegis Baffle Echo cancel still uses up that player's one hit, and their Vulnerability still drops.
+3. **Config:**
+   - `vuln_hit_landing_by_band = (2, 5, 8)` and `vuln_one_hit_per_round = True` `[TUNE: v0.51.0]`.
+   - The defaults (`None` / `False`) reproduce v0.50.
+   - The bot `loss_if` replays the cap and the landing.
+4. **Terms:** no new terms.
+
+### Probe history (2,000 games per pod; ΔPZ + MC vs v0.50 R0, 2P / 3P / 4P)
+
+| Arm | Rule | ΔPZ + MC | Why not / why |
+|:---|:---|:---|:---|
+| DB | `5–7 → 0`, `8–10 → 5`, `11+ → 8` | `+1.1 / +0.3 / +1.8` | 89% of hits are at 5–7 and stay the same as today, so the effect is small |
+| S2 / S3 / S4 | `5–7` lands at `2 / 3 / 4` | S2: `+4.4 / +3.1 / +4.6` | User picked S2. Repeat hits allowed a 6-Secret round |
+| S2S1, S2PT | S2 + 1 starting Secret / first Pen Test step at cost 1 | S2S1: `−5.7 / −11.0 / −31.6` (4P Singularity `56%`) | S2S1 overshoots; S2PT trims eliminations by only `0–1.4` pp |
+| S2F1 | S2 + repeat hit costs a flat 1 | `+4.3 / +3.1 / +4.6` | the flat cost only bites after an 11+ hit; worst round `5`; superseded |
+| SFA / SFA1 / SFA0 / SFA9 | rule-aware bot / `5–7 → 1` / 2P levers | SFA ≈ S2F1; SFA1 `+1.3 / +1.8 / +2.2` | the bot's awareness is worth 0; 2P levers undo the change or overshoot |
+| S2HX | cap + 1 Secret per cube beyond the alive-player count | 2P elim `36.1%`, Total Wipeout `12.7%` | rejected (an overflow penalty) |
+| **S2H1** | **S2 + one hit per player per round** | `+4.0 / +2.6 / +4.5` | **chosen**: worst round `3`, no multi-hit rounds |
+
+### Telemetry & Balance Verdict (`PASS` with accepted residuals), v0.50 (B0) → v0.51 (M), 2P / 3P / 4P
+- **Guardrails** (L1–L11 all PASS, re-based on the S2H1 probe per D1):
+  - PZ + MC is `70.6 / 73.6 / 79.5` (probe `70.6 / 73.5 / 80.0`, ± 2).
+  - Eliminated seats are `30.0 / 26.4 / 23.1`%.
+  - Rounds are `8.21 / 8.16 / 8.11` (B0 `8.41 / 8.41 / 8.32`).
+  - Green lost is `2.78 / 2.41 / 2.24`.
+  - Back-to-back hits are `23.7 / 20.2 / 17.9`% (B0 `4.4 / 3.1 / 2.3`).
+  - Multi-hit seat-rounds are `0`, and the worst round is `3`.
+  - Collapse is `11.7 / 11.5`% at 3P / 4P.
+  - 2P Total Wipeout is `8.9`%.
+  - Income is ×`1.09` vs v0.48.
+  - Invariants: 0 violations.
+- **Exactness (INV-LAND-02):** with the one-hit cap, the Secrets lost in a single Phase 4 equal v0.50's for the same starting Vulnerabilities. A hit player is skipped, just as a reset-to-0 player could not be targeted.
+  - All the extra pressure is **carry-over**: about 12–15% of hits land at 5+, and players re-enter band sooner.
+  - The **reset-as-cleanse exploit is closed**: an 11+ hit now leaves the player at 8, 4 Pen Test steps from safety.
+- **Pacing:**
+  - Singularity is `20.5 / 24.5 / 19.5`% (`−6.3 / −3.0 / −4.5` pp). That is the matching cost of the PZ + MC rise.
+  - All three end triggers stay live.
+  - Rounds are `−0.20 / −0.25 / −0.21`.
+- **Parity:**
+  - Company spread is `18.6 / 14.3 / 10.9` pp (B0 about `24 / 14 / 17` in the probe), the best 4P spread since v0.48.
+  - Helix is `44.0 / 29.4 / 20.7` (v0.50 `42.6 / 26.5 / 20.2`).
+  - Aegis is `62.6 / 43.0 / 31.6`, and Spook `55.4 / 39.9 / 31.2`.
+  - White Hat spread is `9.9 / 9.4 / 8.7`.
+- **Corruption check** (game designer, 300-game instrumented runs):
+  - The `+3` into-target counter reads `0.000` because the `+3` path is unreachable. The `+3` gain (`corruption_lowest_vuln_gain_double`) only fires on spaces with 2 printed demotes, and those exist only on the legacy Aggressive Version cards. Every space on the current cards has a single demote.
+  - The counter is wired correctly. The `+2` key fires about `1.18 / 1.26 / 1.33` times per game on v0.51, against about `0.87 / 0.85 / 0.87` on v0.50.
+  - That is a **+40–50% rise in Corruption pushing the lowest-Vulnerability player into Green range** (from 3–4). More seats now sit at 3–4 after a landing at 2 plus Phase 1 lock-in.
+  - This is already inside the measured totals, so it is a mechanism note, not a new risk.
+- **Pillars:**
+  - Green still hunts the highest player at 5+.
+  - Red and Blue are untouched.
+  - No extra random draws.
+  - Pen Test becomes more valuable (about +0.8 steps per seat).
+  - The CLAUDE.md Cube Tower pillar text ("resets them to `0`") is now stale (D5).
+- **Accepted residuals (User, 2026-11-20):**
+  - **D1:** PZ + MC `+4.1 / +2.8 / +4.1` pp vs v0.50, waiving the +3 bar. This is intended pressure from the carry-over.
+  - **D2:** 2P Green lost `2.78` vs the `2.5` cap. With the worst round unchanged at 3, it measures sustained pressure, not spikes. Re-state the 2P cap as `≤ 2.8` going forward.
+  - Carried forward:
+    - Helix is below par at every count;
+    - Spook and Aegis are above par;
+    - rules text still says "`+3` on Aggressive spaces" (RULES.md §Phase 2), which no current card can trigger.
+- **`[TUNE]` recommendations:** none.
+  - Don't add a 2P lever: "2P lands at 0" undoes the change, and "+1 starting Secret at 2P" overshoots (eliminations −6 pp, +0.75 rounds).
+- **Next:**
+  - D5: the v0.51.0 version bump and the CLAUDE.md pillar text (User);
+  - doc, PnP, TTS and web sync to v0.51.0;
+  - decide whether the `+3` Corruption rule text and `corruption_lowest_vuln_gain_double` should stay;
+  - the company-power pass (Helix / Spook / Aegis);
+  - ~~archive §58~~ (done: §58 and §60 moved to `docs/archive/FINDINGS_s58-s60.md`).

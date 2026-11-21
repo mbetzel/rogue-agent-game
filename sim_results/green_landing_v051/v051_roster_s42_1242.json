@@ -1,0 +1,954 @@
+{
+ "args": {
+  "config": "v051_roster",
+  "base": "v050_roster",
+  "income_base": "v048_roster",
+  "set": "{}",
+  "roster": "mixed1",
+  "players": "2,3,4",
+  "games": 1200,
+  "seed0": "42,1242",
+  "procs": 7,
+  "assert_invariants": true,
+  "quiet": true,
+  "no_save": false
+ },
+ "pods": {
+  "2": {
+   "M": {
+    "games": 2400,
+    "rounds": 8.212916666666667,
+    "pzmc_pct": 70.625,
+    "pz_pct": 42.333333333333336,
+    "mc_pct": 28.291666666666668,
+    "sing_pct": 20.5,
+    "tw_pct": 8.875,
+    "elim_pct": 30.041666666666668,
+    "green_lost_pg": 2.776666666666667,
+    "b2b_pct": 23.728956941037136,
+    "multi_hit_sr": 0,
+    "worst_round_loss": 3,
+    "income_per_seat_round": 7.59018056928761,
+    "dead_pct": 0.2810011968569496,
+    "land_unsafe_pct": 11.909850398290267,
+    "capped_cubes_pg": 0.17333333333333334,
+    "band_mix": {
+     "1": 88.1,
+     "2": 10.9,
+     "3": 1.0
+    },
+    "corr3_into_target_pg": 0.0,
+    "pen_l4_pct": 12.687499999999998,
+    "win_helix": 44.0,
+    "win_aegis": 62.6,
+    "win_spook": 55.4,
+    "co_spread": 18.647936301193123,
+    "wh_spread": 9.883192414837982,
+    "win_by_co": {
+     "aegis": 62.6,
+     "dto": 54.9,
+     "helix": 44.0,
+     "meridian": 46.3,
+     "omnidyne": 48.5,
+     "prometheus": 44.5
+    },
+    "win_by_wh": {
+     "acoustic": 45.6,
+     "cipher": 49.2,
+     "operator": 49.1,
+     "phreaker": 49.6,
+     "prodigy": 51.0,
+     "spook": 55.4
+    },
+    "invariant_violations": 0,
+    "first_violation": null
+   },
+   "B0": {
+    "games": 2400,
+    "rounds": 8.408333333333333,
+    "pzmc_pct": 66.5,
+    "pz_pct": 36.75,
+    "mc_pct": 29.75,
+    "sing_pct": 26.791666666666668,
+    "tw_pct": 6.708333333333333,
+    "elim_pct": 25.083333333333336,
+    "green_lost_pg": 2.191666666666667,
+    "b2b_pct": 4.4392770320262125,
+    "multi_hit_sr": 0,
+    "worst_round_loss": 3,
+    "income_per_seat_round": 7.618115274365274,
+    "dead_pct": 0.31224406224406226,
+    "land_unsafe_pct": 0.0,
+    "capped_cubes_pg": 0.0,
+    "band_mix": {
+     "1": 89.5,
+     "2": 9.7,
+     "3": 0.8
+    },
+    "corr3_into_target_pg": 0.0,
+    "pen_l4_pct": 14.833333333333334,
+    "win_helix": 39.9,
+    "win_aegis": 65.1,
+    "win_spook": 54.7,
+    "co_spread": 25.14883329442267,
+    "wh_spread": 7.707997328250493,
+    "win_by_co": {
+     "aegis": 65.1,
+     "dto": 57.5,
+     "helix": 39.9,
+     "meridian": 47.3,
+     "omnidyne": 44.8,
+     "prometheus": 46.4
+    },
+    "win_by_wh": {
+     "acoustic": 47.0,
+     "cipher": 48.4,
+     "operator": 47.2,
+     "phreaker": 51.1,
+     "prodigy": 51.6,
+     "spook": 54.7
+    },
+    "invariant_violations": 0,
+    "first_violation": null
+   },
+   "B48": {
+    "games": 2400,
+    "rounds": 8.309583333333334,
+    "pzmc_pct": 68.20833333333333,
+    "pz_pct": 31.5,
+    "mc_pct": 36.708333333333336,
+    "sing_pct": 24.958333333333332,
+    "tw_pct": 6.833333333333333,
+    "elim_pct": 22.583333333333332,
+    "green_lost_pg": 2.301041666666667,
+    "b2b_pct": 12.338693666865197,
+    "multi_hit_sr": 0,
+    "worst_round_loss": 3,
+    "income_per_seat_round": 6.9650982419855225,
+    "dead_pct": 0.4136504653567735,
+    "land_unsafe_pct": 0.0,
+    "capped_cubes_pg": 0.0,
+    "band_mix": {
+     "1": 90.6,
+     "2": 8.5,
+     "3": 0.9
+    },
+    "corr3_into_target_pg": 0.0,
+    "pen_l4_pct": 16.020833333333336,
+    "win_helix": 42.8,
+    "win_aegis": 62.1,
+    "win_spook": 52.7,
+    "co_spread": 19.324367496897388,
+    "wh_spread": 5.64865847011084,
+    "win_by_co": {
+     "aegis": 62.1,
+     "dto": 53.6,
+     "helix": 42.8,
+     "meridian": 47.6,
+     "omnidyne": 50.1,
+     "prometheus": 44.6
+    },
+    "win_by_wh": {
+     "acoustic": 49.9,
+     "cipher": 51.6,
+     "operator": 48.2,
+     "phreaker": 50.7,
+     "prodigy": 47.0,
+     "spook": 52.7
+    },
+    "invariant_violations": 0,
+    "first_violation": null
+   },
+   "blocks": {
+    "42": {
+     "games": 1200,
+     "rounds": 8.2775,
+     "pzmc_pct": 70.0,
+     "pz_pct": 42.666666666666664,
+     "mc_pct": 27.333333333333332,
+     "sing_pct": 20.333333333333332,
+     "tw_pct": 9.666666666666666,
+     "elim_pct": 31.0,
+     "green_lost_pg": 2.8266666666666667,
+     "b2b_pct": 23.98542322345536,
+     "multi_hit_sr": 0,
+     "worst_round_loss": 3,
+     "income_per_seat_round": 7.602497935590421,
+     "dead_pct": 0.26321222130470684,
+     "land_unsafe_pct": 11.45357686453577,
+     "capped_cubes_pg": 0.195,
+     "band_mix": {
+      "1": 88.5,
+      "2": 10.5,
+      "3": 0.9
+     },
+     "corr3_into_target_pg": 0.0,
+     "pen_l4_pct": 12.541666666666668,
+     "win_helix": 42.4,
+     "win_aegis": 62.0,
+     "win_spook": 53.5,
+     "co_spread": 19.572775125474358,
+     "wh_spread": 8.170087064676611,
+     "win_by_co": {
+      "aegis": 62.0,
+      "dto": 51.7,
+      "helix": 42.4,
+      "meridian": 46.6,
+      "omnidyne": 50.3,
+      "prometheus": 47.7
+     },
+     "win_by_wh": {
+      "acoustic": 45.3,
+      "cipher": 49.4,
+      "operator": 50.4,
+      "phreaker": 49.0,
+      "prodigy": 52.2,
+      "spook": 53.5
+     },
+     "invariant_violations": 0,
+     "first_violation": null
+    },
+    "1242": {
+     "games": 1200,
+     "rounds": 8.148333333333333,
+     "pzmc_pct": 71.25,
+     "pz_pct": 42.0,
+     "mc_pct": 29.25,
+     "sing_pct": 20.666666666666668,
+     "tw_pct": 8.083333333333332,
+     "elim_pct": 29.083333333333332,
+     "green_lost_pg": 2.7266666666666666,
+     "b2b_pct": 23.461272475795298,
+     "multi_hit_sr": 0,
+     "worst_round_loss": 3,
+     "income_per_seat_round": 7.577657676566272,
+     "dead_pct": 0.29908699758631546,
+     "land_unsafe_pct": 12.385867407701468,
+     "capped_cubes_pg": 0.15166666666666667,
+     "band_mix": {
+      "1": 87.6,
+      "2": 11.4,
+      "3": 1.0
+     },
+     "corr3_into_target_pg": 0.0,
+     "pen_l4_pct": 12.833333333333332,
+     "win_helix": 45.6,
+     "win_aegis": 63.3,
+     "win_spook": 57.5,
+     "co_spread": 22.145877378435525,
+     "wh_spread": 11.672700086566456,
+     "win_by_co": {
+      "aegis": 63.3,
+      "dto": 58.2,
+      "helix": 45.6,
+      "meridian": 46.1,
+      "omnidyne": 46.7,
+      "prometheus": 41.2
+     },
+     "win_by_wh": {
+      "acoustic": 45.8,
+      "cipher": 49.1,
+      "operator": 47.7,
+      "phreaker": 50.3,
+      "prodigy": 49.8,
+      "spook": 57.5
+     },
+     "invariant_violations": 0,
+     "first_violation": null
+    }
+   },
+   "guardrails": [
+    [
+     "L1 PZ + MC %",
+     "70.6",
+     "70.6 +/- 2.0",
+     true
+    ],
+    [
+     "L2 eliminated seats %",
+     "30.0",
+     "30.1 +/- 2.0",
+     true
+    ],
+    [
+     "L3 rounds (mean)",
+     "8.21",
+     "8.22 +/- 0.15",
+     true
+    ],
+    [
+     "L4 Green Secrets lost / player-game",
+     "2.78",
+     "2.77 +/- 0.15",
+     true
+    ],
+    [
+     "L5 back-to-back hit %",
+     "23.7",
+     "24.0 +/- 3.0",
+     true
+    ],
+    [
+     "L6 multi-hit seat-rounds",
+     "0",
+     "== 0",
+     true
+    ],
+    [
+     "L7 worst per-seat round Green loss",
+     "3",
+     "<= 3",
+     true
+    ],
+    [
+     "L8 Market Collapse % (3P, 4P)",
+     "28.3",
+     "n/a at 2P",
+     null
+    ],
+    [
+     "L9 Total Wipeout % (2P)",
+     "8.9",
+     "< 15",
+     true
+    ],
+    [
+     "L10 income per seat-round vs B48",
+     "x1.090",
+     "<= x1.20",
+     true
+    ],
+    [
+     "L11 invariants",
+     "0 violations",
+     "clean",
+     true
+    ]
+   ]
+  },
+  "3": {
+   "M": {
+    "games": 2400,
+    "rounds": 8.161666666666667,
+    "pzmc_pct": 73.58333333333333,
+    "pz_pct": 61.916666666666664,
+    "mc_pct": 11.666666666666666,
+    "sing_pct": 24.5,
+    "tw_pct": 1.9166666666666665,
+    "elim_pct": 26.375,
+    "green_lost_pg": 2.4119444444444444,
+    "b2b_pct": 20.206688490917262,
+    "multi_hit_sr": 0,
+    "worst_round_loss": 3,
+    "income_per_seat_round": 7.674964912280702,
+    "dead_pct": 0.25263157894736843,
+    "land_unsafe_pct": 11.90552441953563,
+    "capped_cubes_pg": 0.10958333333333334,
+    "band_mix": {
+     "1": 88.1,
+     "2": 10.9,
+     "3": 1.0
+    },
+    "corr3_into_target_pg": 0.0,
+    "pen_l4_pct": 12.402777777777779,
+    "win_helix": 29.4,
+    "win_aegis": 43.0,
+    "win_spook": 39.9,
+    "co_spread": 14.280586177709337,
+    "wh_spread": 9.40278166503285,
+    "win_by_co": {
+     "aegis": 43.0,
+     "dto": 38.3,
+     "helix": 29.4,
+     "meridian": 30.1,
+     "omnidyne": 30.3,
+     "prometheus": 28.7
+    },
+    "win_by_wh": {
+     "acoustic": 33.1,
+     "cipher": 31.4,
+     "operator": 30.5,
+     "phreaker": 33.6,
+     "prodigy": 31.4,
+     "spook": 39.9
+    },
+    "invariant_violations": 0,
+    "first_violation": null
+   },
+   "B0": {
+    "games": 2400,
+    "rounds": 8.407083333333333,
+    "pzmc_pct": 70.83333333333333,
+    "pz_pct": 58.375,
+    "mc_pct": 12.458333333333334,
+    "sing_pct": 27.541666666666668,
+    "tw_pct": 1.625,
+    "elim_pct": 24.569444444444443,
+    "green_lost_pg": 1.9556944444444444,
+    "b2b_pct": 3.1374696815585637,
+    "multi_hit_sr": 0,
+    "worst_round_loss": 3,
+    "income_per_seat_round": 7.7287353965976635,
+    "dead_pct": 0.29890004782400764,
+    "land_unsafe_pct": 0.0,
+    "capped_cubes_pg": 0.0,
+    "band_mix": {
+     "1": 89.4,
+     "2": 9.8,
+     "3": 0.7
+    },
+    "corr3_into_target_pg": 0.0,
+    "pen_l4_pct": 14.277777777777779,
+    "win_helix": 27.3,
+    "win_aegis": 41.9,
+    "win_spook": 39.9,
+    "co_spread": 14.692323822120423,
+    "wh_spread": 10.32948764649873,
+    "win_by_co": {
+     "aegis": 41.9,
+     "dto": 41.7,
+     "helix": 27.3,
+     "meridian": 30.4,
+     "omnidyne": 29.2,
+     "prometheus": 29.7
+    },
+    "win_by_wh": {
+     "acoustic": 33.9,
+     "cipher": 30.4,
+     "operator": 29.6,
+     "phreaker": 33.7,
+     "prodigy": 32.3,
+     "spook": 39.9
+    },
+    "invariant_violations": 0,
+    "first_violation": null
+   },
+   "B48": {
+    "games": 2400,
+    "rounds": 8.36375,
+    "pzmc_pct": 71.875,
+    "pz_pct": 54.708333333333336,
+    "mc_pct": 17.166666666666668,
+    "sing_pct": 26.541666666666668,
+    "tw_pct": 1.5833333333333335,
+    "elim_pct": 23.333333333333332,
+    "green_lost_pg": 2.1102777777777777,
+    "b2b_pct": 10.0398406374502,
+    "multi_hit_sr": 0,
+    "worst_round_loss": 3,
+    "income_per_seat_round": 7.012399670714139,
+    "dead_pct": 0.36701653289428554,
+    "land_unsafe_pct": 0.0,
+    "capped_cubes_pg": 0.0,
+    "band_mix": {
+     "1": 89.6,
+     "2": 9.3,
+     "3": 1.1
+    },
+    "corr3_into_target_pg": 0.0,
+    "pen_l4_pct": 15.861111111111112,
+    "win_helix": 25.4,
+    "win_aegis": 43.1,
+    "win_spook": 38.9,
+    "co_spread": 17.65859638369599,
+    "wh_spread": 10.001786183937567,
+    "win_by_co": {
+     "aegis": 43.1,
+     "dto": 41.0,
+     "helix": 25.4,
+     "meridian": 29.6,
+     "omnidyne": 35.3,
+     "prometheus": 25.7
+    },
+    "win_by_wh": {
+     "acoustic": 35.9,
+     "cipher": 31.8,
+     "operator": 28.9,
+     "phreaker": 34.4,
+     "prodigy": 29.9,
+     "spook": 38.9
+    },
+    "invariant_violations": 0,
+    "first_violation": null
+   },
+   "blocks": {
+    "42": {
+     "games": 1200,
+     "rounds": 8.141666666666667,
+     "pzmc_pct": 73.16666666666667,
+     "pz_pct": 62.833333333333336,
+     "mc_pct": 10.333333333333334,
+     "sing_pct": 24.833333333333332,
+     "tw_pct": 2.0,
+     "elim_pct": 26.916666666666668,
+     "green_lost_pg": 2.3994444444444443,
+     "b2b_pct": 20.18018018018018,
+     "multi_hit_sr": 0,
+     "worst_round_loss": 3,
+     "income_per_seat_round": 7.6923212274774775,
+     "dead_pct": 0.20059121621621623,
+     "land_unsafe_pct": 11.831754695777814,
+     "capped_cubes_pg": 0.11666666666666667,
+     "band_mix": {
+      "1": 88.2,
+      "2": 11.0,
+      "3": 0.8
+     },
+     "corr3_into_target_pg": 0.0,
+     "pen_l4_pct": 12.63888888888889,
+     "win_helix": 30.4,
+     "win_aegis": 45.1,
+     "win_spook": 41.0,
+     "co_spread": 17.410721993611695,
+     "wh_spread": 11.765248472270262,
+     "win_by_co": {
+      "aegis": 45.1,
+      "dto": 36.6,
+      "helix": 30.4,
+      "meridian": 29.7,
+      "omnidyne": 30.9,
+      "prometheus": 27.7
+     },
+     "win_by_wh": {
+      "acoustic": 31.6,
+      "cipher": 29.3,
+      "operator": 30.9,
+      "phreaker": 34.3,
+      "prodigy": 33.1,
+      "spook": 41.0
+     },
+     "invariant_violations": 0,
+     "first_violation": null
+    },
+    "1242": {
+     "games": 1200,
+     "rounds": 8.181666666666667,
+     "pzmc_pct": 74.0,
+     "pz_pct": 61.0,
+     "mc_pct": 13.0,
+     "sing_pct": 24.166666666666668,
+     "tw_pct": 1.8333333333333333,
+     "elim_pct": 25.833333333333336,
+     "green_lost_pg": 2.4244444444444446,
+     "b2b_pct": 20.23306441285696,
+     "multi_hit_sr": 0,
+     "worst_round_loss": 3,
+     "income_per_seat_round": 7.657710607332773,
+     "dead_pct": 0.3043660789252729,
+     "land_unsafe_pct": 11.978917105893627,
+     "capped_cubes_pg": 0.1025,
+     "band_mix": {
+      "1": 88.0,
+      "2": 10.8,
+      "3": 1.2
+     },
+     "corr3_into_target_pg": 0.0,
+     "pen_l4_pct": 12.166666666666668,
+     "win_helix": 28.4,
+     "win_aegis": 41.1,
+     "win_spook": 38.8,
+     "co_spread": 12.676180408738546,
+     "wh_spread": 9.122956709179093,
+     "win_by_co": {
+      "aegis": 41.1,
+      "dto": 40.2,
+      "helix": 28.4,
+      "meridian": 30.6,
+      "omnidyne": 29.8,
+      "prometheus": 29.7
+     },
+     "win_by_wh": {
+      "acoustic": 34.6,
+      "cipher": 33.7,
+      "operator": 30.1,
+      "phreaker": 32.8,
+      "prodigy": 29.7,
+      "spook": 38.8
+     },
+     "invariant_violations": 0,
+     "first_violation": null
+    }
+   },
+   "guardrails": [
+    [
+     "L1 PZ + MC %",
+     "73.6",
+     "73.5 +/- 2.0",
+     true
+    ],
+    [
+     "L2 eliminated seats %",
+     "26.4",
+     "26.3 +/- 2.0",
+     true
+    ],
+    [
+     "L3 rounds (mean)",
+     "8.16",
+     "8.14 +/- 0.15",
+     true
+    ],
+    [
+     "L4 Green Secrets lost / player-game",
+     "2.41",
+     "2.40 +/- 0.15",
+     true
+    ],
+    [
+     "L5 back-to-back hit %",
+     "20.2",
+     "20.0 +/- 3.0",
+     true
+    ],
+    [
+     "L6 multi-hit seat-rounds",
+     "0",
+     "== 0",
+     true
+    ],
+    [
+     "L7 worst per-seat round Green loss",
+     "3",
+     "<= 3",
+     true
+    ],
+    [
+     "L8 Market Collapse % (3P, 4P)",
+     "11.7",
+     ">= 8",
+     true
+    ],
+    [
+     "L9 Total Wipeout % (2P)",
+     "1.9",
+     "n/a above 2P",
+     null
+    ],
+    [
+     "L10 income per seat-round vs B48",
+     "x1.094",
+     "<= x1.20",
+     true
+    ],
+    [
+     "L11 invariants",
+     "0 violations",
+     "clean",
+     true
+    ]
+   ]
+  },
+  "4": {
+   "M": {
+    "games": 2400,
+    "rounds": 8.110416666666667,
+    "pzmc_pct": 79.45833333333333,
+    "pz_pct": 67.95833333333333,
+    "mc_pct": 11.5,
+    "sing_pct": 19.541666666666668,
+    "tw_pct": 1.0,
+    "elim_pct": 23.072916666666668,
+    "green_lost_pg": 2.2360416666666665,
+    "b2b_pct": 17.88600707833712,
+    "multi_hit_sr": 0,
+    "worst_round_loss": 3,
+    "income_per_seat_round": 7.67727416298168,
+    "dead_pct": 0.25794904190355866,
+    "land_unsafe_pct": 14.577581446714522,
+    "capped_cubes_pg": 0.1,
+    "band_mix": {
+     "1": 85.4,
+     "2": 13.0,
+     "3": 1.6
+    },
+    "corr3_into_target_pg": 0.0,
+    "pen_l4_pct": 12.083333333333334,
+    "win_helix": 20.7,
+    "win_aegis": 31.6,
+    "win_spook": 31.2,
+    "co_spread": 10.948238319523554,
+    "wh_spread": 8.675512091608256,
+    "win_by_co": {
+     "aegis": 31.6,
+     "dto": 28.1,
+     "helix": 20.7,
+     "meridian": 25.5,
+     "omnidyne": 21.5,
+     "prometheus": 22.6
+    },
+    "win_by_wh": {
+     "acoustic": 26.7,
+     "cipher": 22.6,
+     "operator": 22.7,
+     "phreaker": 23.9,
+     "prodigy": 23.0,
+     "spook": 31.2
+    },
+    "invariant_violations": 0,
+    "first_violation": null
+   },
+   "B0": {
+    "games": 2400,
+    "rounds": 8.323333333333334,
+    "pzmc_pct": 75.41666666666667,
+    "pz_pct": 62.291666666666664,
+    "mc_pct": 13.125,
+    "sing_pct": 24.0,
+    "tw_pct": 0.5833333333333334,
+    "elim_pct": 20.46875,
+    "green_lost_pg": 1.8357291666666666,
+    "b2b_pct": 2.348136804492088,
+    "multi_hit_sr": 0,
+    "worst_round_loss": 3,
+    "income_per_seat_round": 7.7080670103092785,
+    "dead_pct": 0.2847938144329897,
+    "land_unsafe_pct": 0.0,
+    "capped_cubes_pg": 0.0,
+    "band_mix": {
+     "1": 86.4,
+     "2": 12.5,
+     "3": 1.0
+    },
+    "corr3_into_target_pg": 0.0,
+    "pen_l4_pct": 14.395833333333332,
+    "win_helix": 17.0,
+    "win_aegis": 33.2,
+    "win_spook": 32.0,
+    "co_spread": 16.240997598082753,
+    "wh_spread": 9.590953489051534,
+    "win_by_co": {
+     "aegis": 33.2,
+     "dto": 27.3,
+     "helix": 17.0,
+     "meridian": 28.2,
+     "omnidyne": 22.4,
+     "prometheus": 21.9
+    },
+    "win_by_wh": {
+     "acoustic": 25.0,
+     "cipher": 23.7,
+     "operator": 23.0,
+     "phreaker": 22.4,
+     "prodigy": 23.8,
+     "spook": 32.0
+    },
+    "invariant_violations": 0,
+    "first_violation": null
+   },
+   "B48": {
+    "games": 2400,
+    "rounds": 8.1525,
+    "pzmc_pct": 75.83333333333333,
+    "pz_pct": 60.375,
+    "mc_pct": 15.458333333333334,
+    "sing_pct": 23.75,
+    "tw_pct": 0.4166666666666667,
+    "elim_pct": 18.9375,
+    "green_lost_pg": 1.923125,
+    "b2b_pct": 8.7916742300478,
+    "multi_hit_sr": 0,
+    "worst_round_loss": 3,
+    "income_per_seat_round": 7.014582017266793,
+    "dead_pct": 0.3908717624763108,
+    "land_unsafe_pct": 0.0,
+    "capped_cubes_pg": 0.0,
+    "band_mix": {
+     "1": 87.2,
+     "2": 11.4,
+     "3": 1.4
+    },
+    "corr3_into_target_pg": 0.0,
+    "pen_l4_pct": 15.270833333333334,
+    "win_helix": 18.3,
+    "win_aegis": 35.5,
+    "win_spook": 30.1,
+    "co_spread": 17.175795752386882,
+    "wh_spread": 7.884583110230242,
+    "win_by_co": {
+     "aegis": 35.5,
+     "dto": 27.2,
+     "helix": 18.3,
+     "meridian": 23.2,
+     "omnidyne": 26.1,
+     "prometheus": 19.5
+    },
+    "win_by_wh": {
+     "acoustic": 25.5,
+     "cipher": 24.4,
+     "operator": 23.4,
+     "phreaker": 24.5,
+     "prodigy": 22.2,
+     "spook": 30.1
+    },
+    "invariant_violations": 0,
+    "first_violation": null
+   },
+   "blocks": {
+    "42": {
+     "games": 1200,
+     "rounds": 8.1675,
+     "pzmc_pct": 79.83333333333333,
+     "pz_pct": 68.16666666666667,
+     "mc_pct": 11.666666666666666,
+     "sing_pct": 19.25,
+     "tw_pct": 0.9166666666666666,
+     "elim_pct": 23.020833333333332,
+     "green_lost_pg": 2.2564583333333332,
+     "b2b_pct": 17.907025224098394,
+     "multi_hit_sr": 0,
+     "worst_round_loss": 3,
+     "income_per_seat_round": 7.6871212121212125,
+     "dead_pct": 0.23510971786833856,
+     "land_unsafe_pct": 14.09177301113223,
+     "capped_cubes_pg": 0.09416666666666666,
+     "band_mix": {
+      "1": 85.9,
+      "2": 12.6,
+      "3": 1.5
+     },
+     "corr3_into_target_pg": 0.0,
+     "pen_l4_pct": 12.458333333333334,
+     "win_helix": 22.8,
+     "win_aegis": 30.8,
+     "win_spook": 31.4,
+     "co_spread": 9.836229401834503,
+     "wh_spread": 10.58039914821968,
+     "win_by_co": {
+      "aegis": 30.8,
+      "dto": 28.3,
+      "helix": 22.8,
+      "meridian": 25.0,
+      "omnidyne": 21.0,
+      "prometheus": 22.3
+     },
+     "win_by_wh": {
+      "acoustic": 25.5,
+      "cipher": 24.7,
+      "operator": 24.4,
+      "phreaker": 23.0,
+      "prodigy": 20.9,
+      "spook": 31.4
+     },
+     "invariant_violations": 0,
+     "first_violation": null
+    },
+    "1242": {
+     "games": 1200,
+     "rounds": 8.053333333333333,
+     "pzmc_pct": 79.08333333333333,
+     "pz_pct": 67.75,
+     "mc_pct": 11.333333333333334,
+     "sing_pct": 19.833333333333332,
+     "tw_pct": 1.0833333333333335,
+     "elim_pct": 23.125,
+     "green_lost_pg": 2.215625,
+     "b2b_pct": 17.864410410195994,
+     "multi_hit_sr": 0,
+     "worst_round_loss": 3,
+     "income_per_seat_round": 7.667276681519202,
+     "dead_pct": 0.2811372798642054,
+     "land_unsafe_pct": 15.080033698399326,
+     "capped_cubes_pg": 0.10583333333333333,
+     "band_mix": {
+      "1": 84.9,
+      "2": 13.4,
+      "3": 1.7
+     },
+     "corr3_into_target_pg": 0.0,
+     "pen_l4_pct": 11.708333333333334,
+     "win_helix": 18.4,
+     "win_aegis": 32.4,
+     "win_spook": 31.0,
+     "co_spread": 14.060172079856976,
+     "wh_spread": 10.58992069263637,
+     "win_by_co": {
+      "aegis": 32.4,
+      "dto": 27.9,
+      "helix": 18.4,
+      "meridian": 26.1,
+      "omnidyne": 21.9,
+      "prometheus": 22.9
+     },
+     "win_by_wh": {
+      "acoustic": 27.8,
+      "cipher": 20.4,
+      "operator": 21.0,
+      "phreaker": 24.7,
+      "prodigy": 25.0,
+      "spook": 31.0
+     },
+     "invariant_violations": 0,
+     "first_violation": null
+    }
+   },
+   "guardrails": [
+    [
+     "L1 PZ + MC %",
+     "79.5",
+     "80.0 +/- 2.0",
+     true
+    ],
+    [
+     "L2 eliminated seats %",
+     "23.1",
+     "23.4 +/- 2.0",
+     true
+    ],
+    [
+     "L3 rounds (mean)",
+     "8.11",
+     "8.10 +/- 0.15",
+     true
+    ],
+    [
+     "L4 Green Secrets lost / player-game",
+     "2.24",
+     "2.23 +/- 0.15",
+     true
+    ],
+    [
+     "L5 back-to-back hit %",
+     "17.9",
+     "18.0 +/- 3.0",
+     true
+    ],
+    [
+     "L6 multi-hit seat-rounds",
+     "0",
+     "== 0",
+     true
+    ],
+    [
+     "L7 worst per-seat round Green loss",
+     "3",
+     "<= 3",
+     true
+    ],
+    [
+     "L8 Market Collapse % (3P, 4P)",
+     "11.5",
+     ">= 8",
+     true
+    ],
+    [
+     "L9 Total Wipeout % (2P)",
+     "1.0",
+     "n/a above 2P",
+     null
+    ],
+    [
+     "L10 income per seat-round vs B48",
+     "x1.094",
+     "<= x1.20",
+     true
+    ],
+    [
+     "L11 invariants",
+     "0 violations",
+     "clean",
+     true
+    ]
+   ]
+  }
+ }
+}

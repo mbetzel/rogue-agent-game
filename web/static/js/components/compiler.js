@@ -155,7 +155,7 @@ export function renderCompiler() {
           ${renderVulnerabilityTrack()}
           <div class="agent-track-footnote">
             <strong>+1 per ⚠</strong> on your final faces at Deploy (Phase 1). Each Green cube hits the highest Vulnerability at
-            <strong>${(state.vulnerability_track || {}).min_target || 5}+</strong> (ties all hit), costs Corporate Secrets by band, and resets it to 0.
+            <strong>${(state.vulnerability_track || {}).min_target || 5}+</strong> (ties all hit), costs Corporate Secrets by band (${(((state.vulnerability_track || {}).bands) || []).map((b) => `${b.from}–${b.to}: −${b.damage}, drops to ${b.land}`).join("; ")}).${(state.vulnerability_track || {}).one_hit_per_round ? " A player is hit by only one Green cube each round." : ""}
             Lower it with the <strong>Pen Test Track</strong> in Phase 5.
           </div>
         </div>
@@ -283,7 +283,7 @@ export function renderCompiler() {
           <div class="cube-threat-row green-row">
             <span class="threat-pill green">▲ GREEN // MALWARE</span>
             <div class="threat-row-text">
-              <strong>One cube at a time:</strong> hits the player(s) with the highest <strong>Vulnerability</strong> at ${(state.vulnerability_track || {}).min_target || 5}+ (${((state.vulnerability_track || {}).bands || []).map((b) => `${b.from}–${b.to}: −${b.damage}`).join(", ")} Corporate Secrets), then resets them to 0. <em>Players in the safe zone are never hit.</em>
+              <strong>One cube at a time:</strong> hits the player(s) with the highest <strong>Vulnerability</strong> at ${(state.vulnerability_track || {}).min_target || 5}+ (${((state.vulnerability_track || {}).bands || []).map((b) => `${b.from}–${b.to}: −${b.damage}`).join(", ")} Corporate Secrets), then drops their Vulnerability (${((state.vulnerability_track || {}).bands || []).map((b) => `${b.from}–${b.to} → ${b.land}`).join(", ")}).${(state.vulnerability_track || {}).one_hit_per_round ? " A player is hit by only one Green cube each round." : ""} <em>Players in the safe zone are never hit.</em>
             </div>
           </div>
         </div>

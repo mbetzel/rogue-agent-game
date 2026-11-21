@@ -204,6 +204,25 @@ def _v047_row(cfg: Any, p: Any) -> Dict[str, Any]:
     return out
 
 
+def _v051_enabled(cfg: Any) -> bool:
+    """The v0.51 end-row gate: either Green-landing flag is non-default."""
+    return getattr(cfg, "vuln_hit_landing_by_band", None) is not None or bool(getattr(cfg, "vuln_one_hit_per_round", False))
+
+
+def _v051_row(cfg: Any, p: Any) -> Dict[str, Any]:
+    """v0.51.0 Green landing telemetry (docs/specs/green_landing_spec.md §6.2)."""
+    rounds = list(p.green_hit_rounds)
+    rset = set(rounds)
+    return {
+        "green_landing_unsafe": p.green_landing_unsafe,
+        "green_cap_skips": p.green_cap_skips,
+        "green_hit_rounds": rounds,
+        "green_multi_hit_rounds": sum(1 for r in rset if rounds.count(r) >= 2),
+        "green_back_to_back": sum(1 for r in rset if r + 1 in rset),
+        "corruption_vuln_into_target": dict(p.corruption_vuln_into_target),
+    }
+
+
 def _v050_row(cfg: Any, p: Any) -> Dict[str, Any]:
     """v0.50.0 Gray ⚠ telemetry (docs/specs/gray_vuln_b23_spec.md §8.2); only emitted under ``gray_vuln_telemetry``."""
     removed = dict(p.gray_removed_by_source)
@@ -373,6 +392,7 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
                 **(_v046_row(cfg, p) if getattr(cfg, "is_vulnerability", False) else {}),
                 **(_v047_row(cfg, p) if getattr(cfg, "colored_vuln_lock", False) else {}),
                 **(_v050_row(cfg, p) if getattr(cfg, "gray_vuln_telemetry", False) else {}),
+                **(_v051_row(cfg, p) if _v051_enabled(cfg) else {}),
             }
         )
 

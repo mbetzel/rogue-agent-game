@@ -1,4 +1,4 @@
-# Too Many Secrets — Quick Reference Rules (v0.50.0)
+# Too Many Secrets — Quick Reference Rules (v0.51.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Format:** Simultaneous / Turn-Based Hybrid
 
@@ -116,7 +116,7 @@ Collect all resources produced by dice still deployed **In Production**:
 No cube can be blocked. Resolve in order:
 1. **Red (Market Manipulation):** Every surviving player loses **`1` Market Share** per Red cube (minimum 0).
 2. **Blue (Spyware):** Every surviving player loses **`1` Corporate Secret** per Blue cube, in every version.
-3. **Green (Malware), one cube at a time:** The player(s) with the **highest Vulnerability at `5`+** are hit (ties: all). Lose Secrets by band, then reset Vulnerability to `0`. The next cube re-checks. No one at `5`+: the cube does nothing.
+3. **Green (Malware), one cube at a time:** The player(s) with the **highest Vulnerability at `5`+** are hit (ties: all). Lose Secrets by band, then move Vulnerability down to `2` / `5` / `8` (hit at `5–7` / `8–10` / `11+`). One Green hit per player each round: the next cube re-checks, skipping players already hit. No one left at `5`+ to hit: the cube does nothing.
 
    | Vulnerability | `0–4` | `5–7` | `8–10` | `11–15` |
    | :--- | :---: | :---: | :---: | :---: |

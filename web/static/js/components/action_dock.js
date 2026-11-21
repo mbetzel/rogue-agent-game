@@ -680,8 +680,10 @@ function renderAttackPanel(controls, human, caps) {
       return `<div class="confirm-threat-row ${mine ? "threat-row-hit" : ""}">
         <span class="threat-label green">▲ GREEN CUBE ${g.cube + 1}</span>
         <span>${who
-          ? `hits <strong>${who}</strong> at Vulnerability ${g.v} → <strong class="${mine ? "loss" : ""}">−${g.damage} Corporate Secret${g.damage === 1 ? "" : "s"}</strong>, reset to 0`
-          : `no player at Vulnerability ${vt.min_target}+ (no effect)`}</span>
+          ? `hits <strong>${who}</strong> at Vulnerability ${g.v} → <strong class="${mine ? "loss" : ""}">−${g.damage} Corporate Secret${g.damage === 1 ? "" : "s"}</strong>, Vulnerability drops to ${g.land ?? vt.hit_reset}`
+          : g.capped
+            ? `every player at Vulnerability ${vt.min_target}+ already hit this round (no effect)`
+            : `no player at Vulnerability ${vt.min_target}+ (no effect)`}</span>
       </div>`;
     }).join("");
 
