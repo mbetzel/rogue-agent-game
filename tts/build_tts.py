@@ -406,6 +406,12 @@ def build_asset_book() -> AssetBook:
     ):
         _draw_round_token(book.page(d, d, Raster(name, 200)), d, label, sub, ck, icon)
 
+    # Table surface: TTS stretches it over the Custom Rectangle table (22:13).
+    tw, th = 1584.0, 936.0
+    p = book.page(tw, th, Raster("table_surface", 50))
+    p.rect(0, 0, tw, th, stroke=None, fill=PALETTE["ink"])
+    p.rect(24, 24, tw - 48, th - 48, stroke=PALETTE["ink_soft"], fill=None, line_width=3.0)
+
     return book
 
 
@@ -779,7 +785,10 @@ def build_save(url_for) -> dict:
         "Tags": [],
         "Gravity": 0.5,
         "PlayArea": 0.75,
-        "Table": "Table_RPG",
+        # Custom Rectangle: deep enough for the mats (outer edge z = +/-20.6) with room
+        # to spare; on Table_RPG the near edge of each mat hung off the table.
+        "Table": "Table_Custom",
+        "TableURL": url_for("table_surface"),
         "Sky": "Sky_Museum",
         "Note": NOTE,
         "TabStates": {},
