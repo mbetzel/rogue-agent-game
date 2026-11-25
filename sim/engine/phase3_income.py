@@ -762,6 +762,9 @@ def execute_player_income(
 ) -> IncomeRecord:
     """One player's Phase 3: (a) production income incl. contractors / Acoustic / Cipher / Spook +$2 /
     Y2 / B3 / Y3 (Y3 dice -> Glitched), then (b) Signature Protocols per Purple ★ die."""
+    from sim.engine import ms_stack
+
+    ms_stack.ensure_batch(engine.state, "income")  # v0.52: Phase 3 Market Share moves are simultaneous (closed in finalize_income)
     money0, research0, secrets0 = player.money, player.research_tokens, player.secrets
     triggers = len(purple_star_dice_in_production(player))  # latched at Phase 3 start (OQ-2)
     record = collect_player_production_income(engine, player)
@@ -807,6 +810,7 @@ def finalize_income(engine: GameEngine) -> List[Dict[str, Any]]:
 
     The web controller must call this once after all players' Income. No-op under RANSOM.
     """
-    from sim.engine import market_share
+    from sim.engine import market_share, ms_stack
 
+    ms_stack.end_batch(engine.state, "income")  # v0.52: close the simultaneous Income batch before Customer Poaching
     return market_share.resolve_poaches(engine)

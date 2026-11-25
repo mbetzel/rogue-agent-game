@@ -1,10 +1,10 @@
 --[[
-Too Many Secrets (v0.51.0) -- Tabletop Simulator Global script.
+Too Many Secrets (v0.52.0) -- Tabletop Simulator Global script.
 Generated alongside the save by `python3 -m tts.build_tts`; edit tts/global.lua, not the save.
 
 1. Fit: every object whose GM Notes read "fit:<w>x<d>" is scaled to exactly
    <w> x <d> table units, so card and board images keep their PnP proportions.
-2. Cube Tower: the Shogun Baffle model from sim/tower.py (the v0.51.0 preset).
+2. Cube Tower: the Shogun Baffle model from sim/tower.py (the v0.52.0 preset).
    Cubes stuck on the internal baffles are kept hidden in the script state.
    "Drop Staging Cup" compiles everything in the Staging Cup bag; the cubes that
    exit appear in the Exit Tray area beside the tower.
@@ -399,6 +399,24 @@ function quickSetup(player, n)
 
   -- 4. Each Company Terminal Mat: dice, track cubes at Level 0, markers, starting tokens.
   local share = SETUP.start.share[tostring(n)]
+  -- Market Share Markers start as one stack: the First Player's marker on top, then
+  -- each next player clockwise beneath it. SETUP.seats runs counter-clockwise (White,
+  -- Pink, Teal, Orange), so clockwise means stepping back through that list.
+  local firstIdx = math.random(#seats)
+  local ring = #SETUP.seats
+  for k, si in ipairs(seats) do
+    local rank = (seats[firstIdx] - si) % ring      -- clockwise steps from the First Player
+    SETUP.seats[si].stackRank = rank
+  end
+  local ranks = {}
+  for _, si in ipairs(seats) do table.insert(ranks, SETUP.seats[si].stackRank) end
+  table.sort(ranks)                                  -- 0 = First Player (top of the stack)
+  for _, si in ipairs(seats) do
+    local s = SETUP.seats[si]
+    for pos, r in ipairs(ranks) do
+      if r == s.stackRank then s.stackY = SETUP_Y + (#seats - pos + 1) * 0.6 end
+    end
+  end
   for _, si in ipairs(seats) do
     local s = SETUP.seats[si]
     local sp, dice, cubes = s.spots, s.dice, s.cubes
@@ -411,7 +429,7 @@ function quickSetup(player, n)
     moveTo(cubes.sig, sp.sig)
     moveTo(cubes.override, sp.override)
     moveTo(cubes.vuln, sp.vuln)
-    moveTo(cubes.share, sp.share[tostring(share)])
+    moveTo(cubes.share, sp.share[tostring(share)], nil, s.stackY)
     spawnTokens("secret", sp.secret, secrets, s.rot)
     spawnTokens("money5", sp.money, math.floor(SETUP.start.money / 5), s.rot)
     spawnTokens("money1", sp.money, SETUP.start.money % 5, s.rot, SETUP_Y + 1.0)
@@ -431,8 +449,8 @@ function quickSetup(player, n)
     dealMany(SETUP.white_hat_deck, whiteHatSpots, rots)
   end, 1.5)
 
-  -- 6. Random First Player Marker.
-  local first = SETUP.seats[seats[math.random(#seats)]]
+  -- 6. First Player Marker (the player whose Market Share Marker is on top).
+  local first = SETUP.seats[seats[firstIdx]]
   moveTo(SETUP.first_player, first.spots.first_player, first.rot, SETUP_Y + 0.4)
 
   local who = (player and player.steam_name) or "A player"

@@ -75,6 +75,33 @@ def _patent_track_name(config: Any) -> str:
     return research_tracks.track_display_name(config, "PATENT")
 
 
+def _ms_live_stack(state: Any) -> Optional[List[int]]:
+    """Marker ids (players, plus SETEC Corp = -1 in 2P) that are on the Market Share track, top of the order first.
+    None when stacking is off or a simultaneous batch is open (ranking reads are not allowed then)."""
+    st = getattr(state, "ms_stack", None)
+    if st is None or st.batch_tag is not None:
+        return None
+    return st.order(st.live_ids())
+
+
+def _ms_height(player: Any) -> Optional[int]:
+    """1 = bottom of its space among the live markers on that space."""
+    st = getattr(player, "ms_stack", None)
+    pid = player.player_id
+    if st is None or st.batch_tag is not None or pid not in st.seq:
+        return None
+    return st.height(pid, st.live_ids())
+
+
+def _ms_rank(player: Any) -> Optional[int]:
+    """1 = top of the whole Market Share order (highest space, then highest in the stack)."""
+    st = getattr(player, "ms_stack", None)
+    if st is None or st.batch_tag is not None:
+        return None
+    order = st.order(st.live_ids())
+    return order.index(player.player_id) + 1 if player.player_id in order else None
+
+
 def _regain(config: Any, player: Any) -> Tuple[Optional[int], int]:
     """(research per +1 Market Share, per-turn cap) under the Public Relations Track, else (None, 0)."""
     if not getattr(config, "is_share_regain", False):
@@ -401,6 +428,8 @@ class GameStateSerializer:
             # v0.36.0 Market Share / Public Relations Track (None under the v0.35 ruleset)
             "market_share": getattr(player, "market_share", None),
             "market_share_max": getattr(player, "market_share_max", None),
+            "market_share_stack_height": _ms_height(player),
+            "market_share_stack_rank": _ms_rank(player),
             "patent_track_name": _patent_track_name(config),
             "target_locked": bool(getattr(player, "target_locked", False)),
             "encrypted_research_tracks": sorted(getattr(player, "encrypted_research_tracks", set()) or []),
@@ -478,6 +507,19 @@ class GameStateSerializer:
             "pen_test_level": int(player.defense_level),
             "pen_test_limit": vulnerability.pen_test_limit(config, player),
             "pen_test_this_turn": int(getattr(player, "pen_test_this_turn", 0)),
+        }
+
+    @staticmethod
+    def _market_share_stack(state: GameState) -> Optional[Dict[str, Any]]:
+        """v0.52.0: Market Share order, top first (players and SETEC Corp in 2P, id -1)."""
+        st = getattr(state, "ms_stack", None)
+        order = _ms_live_stack(state)
+        if st is None or order is None:
+            return None
+        return {
+            "max": int(state.config.ms_max()),
+            "order": [{"id": m, "is_setec_corp": m == -1, "market_share": int(st.space[m]),
+                       "height": st.height(m, order), "rank": i + 1} for i, m in enumerate(order)],
         }
 
     @staticmethod
@@ -596,7 +638,9 @@ class GameStateSerializer:
             "starting_secrets": state.config.get_starting_secrets(len(state.players)),
             # v0.37.0 Market Leader Bonus schedule for this player count ([] when disabled)
             "is_market_leader_bonus": bool(getattr(state.config, "is_market_leader_bonus", False)),
-            "rules_version": "v0.51.0",
+            "rules_version": "v0.52.0",
+            # v0.52.0 Market Share stack order (top first); None when stacking is off
+            "market_share_stack": cls._market_share_stack(state),
             "is_secret_faces": bool(getattr(state.config, "secret_face_enabled", False)),
             # v0.49.0 Vulnerability Track (Central SETEC Agent Board) and Pen Test Track
             "vulnerability_track": cls._vulnerability_track(state),

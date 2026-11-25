@@ -41,7 +41,7 @@ export function renderGameOverModal() {
     <tr style="border-bottom: 1px solid var(--border-color); text-align: left;">
       <td style="padding: 6px;">#${r.rank}</td>
       <td style="padding: 6px;">${r.bot_name}</td>
-      <td style="padding: 6px;">${secretsCell(r)}${r.market_share !== null && r.market_share !== undefined ? ` · ${r.market_share} Market Share` : ""}${stranded(r)}</td>
+      <td style="padding: 6px;">${secretsCell(r)}${r.market_share !== null && r.market_share !== undefined ? ` · ${r.market_share} Market Share${r.market_share_place ? ` (${ordinal(r.market_share_place)})` : ""}` : ""}${stranded(r)}</td>
       ${mlb ? `<td style="padding: 6px;">${bonusCell(r)}${r.round_bonus_total ? ` <span style="color: var(--text-dim);">(+${r.round_bonus_total} earlier)</span>` : ""}</td>` : ""}
       <td style="padding: 6px;">${r.overflow_penalties}</td>
       <td style="padding: 6px; font-weight: 700; color: var(--accent-gold);">${r.net_score}</td>

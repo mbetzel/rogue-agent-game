@@ -1,4 +1,4 @@
-# Too Many Secrets — Quick Reference Rules (v0.51.0)
+# Too Many Secrets — Quick Reference Rules (v0.52.0)
 
 **Players:** 2–4 | **Playtime:** ~45–60 min | **Format:** Simultaneous / Turn-Based Hybrid
 
@@ -41,7 +41,7 @@ You are a **White Hat Operative** contracted to defend a **Client Company** agai
    * **Research:** `0 🔬`
    * **Corporate Secrets:**
      * **2–4 Players:** `6 Secrets` (`7` with *Data Scraper* as the `v1.0` card)
-   * **Starting Market Share (track maximum `20`):**
+   * **Starting Market Share (track maximum `25`):** stack the markers with the **First Player on top**, then clockwise beneath (last player at the bottom).
      * **2 Players:** `14` *(plus place the neutral **SETEC Corp Black Cube** on **`0`**)*
      * **3–4 Players:** `18`
 6. Randomly assign the **First Player Marker**.
@@ -105,9 +105,9 @@ Each round consists of **6 Phases**:
 
 Collect all resources produced by dice still deployed **In Production**:
 * Collect **`$` Cash**, **`🔬` Research Tokens**, and **Corporate Secrets** (Blue Face 3).
-* **Market Share:** Resolve Red Face 1 and Yellow Market Share faces (capped at the track maximum `20`).
+* **Market Share:** Resolve Red Face 1 and Yellow Market Share faces (capped at the track maximum `25`).
 * **Star (`★`) Effects:** Resolve immediate card abilities and operative Signature Protocols (*B3* lowers Vulnerability by `1`, *G1* by `2`).
-* **Customer Poaching (*R3*):** Clockwise from First Player, take `1` Market Share from the rival with the most Market Share (> 0).
+* **Customer Poaching (*R3*):** Clockwise from First Player, take `1` Market Share from the rival with the most Market Share (> 0; on a shared space, the one on top).
 
 ---
 
@@ -173,8 +173,8 @@ Starting with the First Player, each player takes their Operations Turn:
    * **Queue Signature Cube:** When banking at least 1 Secret, if your **Operative Signature Cube** is on your mat, move it to the **Staging Cup** for next round's compile.
 4. **Market Leader Bonus Check:** If any player banked a **Red Secret** this round (Phase 3 or 6), award the **Market Leader Bonus** by current Market Share (including **SETEC Corp** in 2-player games):
    * **1st Place:** `+3 Secrets`
-   * **2nd Place:** `+1 Secret`
-   * *(Tied players each receive the full reward for that place. Patient Zeros are excluded).*
+   * **2nd Place:** `+1 Secret` (`+2` at 4 players)
+   * *(No ties: on a shared space, the marker higher in the stack places first. Patient Zeros are excluded).*
 
 *Pass First Player Marker clockwise unless this was the Final Round.*
 
@@ -204,15 +204,9 @@ Starting with the First Player, each player takes their Operations Turn:
 ### Final Scoring (Surviving Operatives)
 1. **Final Market Leader Bonus:** Awarded on all endings except Total Wipeout:
    * **1st Place Market Share:** `+3 Secrets`
-   * **2nd Place Market Share:** `+1 Secret`
-   * *(Ties share full reward; Patient Zeros excluded).*
+   * **2nd Place Market Share:** `+1 Secret` (`+2` at 4 players)
+   * *(No ties: higher in the stack places first; Patient Zeros excluded).*
 2. **Score Secrets:** **`1 Corporate Secret = 1 VP`**. Dice left in Research & Development score nothing.
-3. **Tiebreakers:**
-   1. Highest final **Market Share**
-   2. Most remaining **Money (`$`)**
-   3. Most **Active Colored Module Dice** in Ready for Release (Gray dice do not count)
-   4. Most remaining **Research Tokens (`🔬`)**
-   5. Fewest total dice in **Under Development** (Research & Development + Sprint Plan)
-   6. Shared victory
+3. **Tiebreaker:** Better final **Market Share position** (more Market Share; on a shared space, higher in the stack). There is always one winner.
 
-*(Total Wipeout: SETEC wins; players are ranked by the tiebreaker hierarchy above).*
+*(Total Wipeout: SETEC wins; players are ranked by Market Share position).*

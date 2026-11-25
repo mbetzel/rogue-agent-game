@@ -368,9 +368,9 @@ export function renderCompiler() {
             <div class="seq-card-header">SECRETS VICTORY &amp; TIEBREAKERS</div>
             <div class="seq-card-body">
               <strong>Surviving White Hat Operatives Only</strong> (Patient Zero eliminated):<br>
-              ${bonusSchedule() ? `<strong>Market Leader Bonus:</strong> survivors gain Corporate Secrets by final <strong>Market Share</strong> place (${bonusSchedule()}; ties share the better place)${state.is_round_leader_bonus ? ", also at the end of Phase 6 in any round a Red R&D face was banked" : ""}.<br>` : ""}
+              ${bonusSchedule() ? `<strong>Market Leader Bonus:</strong> survivors gain Corporate Secrets by final <strong>Market Share</strong> place (${bonusSchedule()}; on the same space, the player on top of the stack ranks higher)${state.is_round_leader_bonus ? ", also at the end of Phase 6 in any round a Red R&D face was banked" : ""}.<br>` : ""}
               <strong>Primary Victory Goal:</strong> Most <strong>Corporate Secrets</strong>${bonusSchedule() ? " (held + Market Leader Bonus)" : " held"}. Dice still in Research & Development at game end yield nothing.<br>
-              ${state.is_market_share ? `<strong>Tiebreaker 1:</strong> Highest <strong>Market Share</strong>.<br>
+              ${state.is_market_share ? `<strong>Tiebreaker 1:</strong> Highest <strong>Market Share</strong> position (the player on top of the stack wins a shared space).<br>
               <strong>Tiebreaker 2:</strong> Most remaining <strong>Money ($)</strong>.<br>
               <strong>Tiebreaker 3:</strong> Most <strong>Active Colored Module Dice</strong> in Ready for Release.<br>
               <strong>Tiebreaker 4:</strong> Most remaining <strong>Research Tokens (🔬)</strong>.<br>

@@ -281,13 +281,17 @@ def reset_round_flags(state: Any) -> None:
 def red_secret_payout_awards(cfg: "GameConfig", state: Any) -> dict:
     """player_id -> (place, Secrets) for the non-Patient-Zero players (plus SETEC Corp in 2P) by current
     Market Share (ties share the better place; schedule by starting player count). Pure; {} when off or nobody survives."""
-    from sim.engine.market_share import include_setec_in_shares, market_leader_bonus_awards
+    from sim.engine.market_share import (
+        include_setec_in_order, include_setec_in_shares, market_leader_bonus_awards, stack_order,
+    )
 
     sched = cfg.red_secret_payout_schedule(len(state.players))
     shares = {q.player_id: int(q.market_share or 0) for q in state.players if not q.is_patient_zero}
     if not sched or not shares:
         return {}
-    return market_leader_bonus_awards(include_setec_in_shares(shares, state), sched)
+    # v0.52: strict places by Market Share position (order None = legacy, ties share the better place)
+    order = include_setec_in_order(stack_order(state, shares), state)
+    return market_leader_bonus_awards(include_setec_in_shares(shares, state), sched, order)
 
 
 def fire_round_payout(cfg: "GameConfig", state: Any) -> bool:
@@ -300,6 +304,13 @@ def fire_round_payout(cfg: "GameConfig", state: Any) -> bool:
     awards = red_secret_payout_awards(cfg, state)
     if not awards:
         return False
+    if getattr(state, "ms_tie_tel", None) is not None:
+        from sim.engine.market_share import include_setec_in_shares
+        from sim.engine.ms_stack import record_mlb_award
+
+        live = {q.player_id: int(q.market_share or 0) for q in state.players if not q.is_patient_zero}
+        record_mlb_award(state.ms_tie_tel, state, include_setec_in_shares(live, state), awards,
+                         cfg.red_secret_payout_schedule(len(state.players)))
     by_pid = {q.player_id: q for q in state.players}
     shares, places, gains = {}, {}, {}
     for pid, (place, k) in sorted(awards.items()):

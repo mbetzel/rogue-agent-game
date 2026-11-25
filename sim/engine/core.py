@@ -50,6 +50,7 @@ from sim.engine.state import CompileResult, EndGameResult, GameState, PlayerStat
 from sim.engine import (
     end_game,
     legacy_v033,
+    ms_stack,
     phase1_roll_deploy,
     phase2_compiler,
     phase3_income,
@@ -320,6 +321,11 @@ class GameEngine:
             and bool(getattr(config, "setec_corp_enabled", False))
             and bool(config.is_market_share)
         )
+        if config.is_market_share and (config.market_share_stacking or config.ms_tie_telemetry):
+            if config.ms_tie_telemetry:
+                self.state.ms_tie_tel = ms_stack.MsTieTelemetry()
+            if ms_stack.build_for_state(self.state, config) is not None:
+                self.state.ms_stack.tel = self.state.ms_tie_tel
 
         self._prime_compiler()
 
@@ -585,6 +591,7 @@ class GameEngine:
         cr = self._run_phase_2_compiler(commitments)
         if sprint_on:
             sprint_plan.prune_all(s)
+        ms_stack.audit(s)
         tel = self._begin_telemetry(cr)
         tel.phase_snapshots[1] = p1_snap
         tel.phase_snapshots[2] = self._snapshot_players()
@@ -614,6 +621,7 @@ class GameEngine:
                 elif p.white_hat.code == WhiteHatCode.ACOUSTIC:
                     tel.acoustic_cash_harvested += rec.purple_star_triggers * rec.acoustic_colors_count
             tel.spook_gray_dice_burned += len(rec.burned_gray_die_ids)
+        ms_stack.audit(s)
         tel.phases_executed.append(3)
         tel.phase_snapshots[3] = self._snapshot_players()
 
@@ -621,6 +629,7 @@ class GameEngine:
         tel.attack_strengths = self._run_phase_4_attack_resolution(commitments, cr)
         if sprint_on:
             sprint_plan.prune_all(s)
+        ms_stack.audit(s)
         tel.phases_executed.append(4)
         tel.phase_snapshots[4] = self._snapshot_players()
         tel.player_snapshots = tel.phase_snapshots[4]
@@ -669,6 +678,8 @@ class GameEngine:
             tel.phases_executed.append(6)
             tel.phase_snapshots[6] = self._snapshot_players()
 
+        ms_stack.audit(s)
+        ms_stack.observe_round_end(s)
         if s.is_final_round:
             s.game_over = True
         else:

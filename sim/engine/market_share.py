@@ -13,7 +13,7 @@ Every function is a no-op unless ``config.is_market_share``. No RNG is drawn any
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from sim.config import EndGameReason
 from sim.engine.state import VersionComparisonRecord
@@ -39,7 +39,7 @@ def survivors(state: "GameState") -> List["PlayerState"]:
 # ---------------------------------------------------------------------------
 # v0.37.0 Market Leader Bonus (pure helpers: no state mutation, no RNG)
 # ---------------------------------------------------------------------------
-SETEC_CORP_ID = -1
+SETEC_CORP_ID = -1  # same value as ms_stack.SETEC_CORP_ID
 
 
 def include_setec_in_shares(shares: Dict[int, int], state: Any) -> Dict[int, int]:
@@ -50,11 +50,34 @@ def include_setec_in_shares(shares: Dict[int, int], state: Any) -> Dict[int, int
     return out
 
 
-def market_share_places(shares: Dict[int, int]) -> Dict[int, int]:
+def stack_order(state: Any, mids: Iterable[int]) -> Optional[Dict[int, int]]:
+    """mid -> arrival sequence when ``state.ms_stack`` is set, else None. Raises if a batch is open (INV-MS-STACK-09)."""
+    st = getattr(state, "ms_stack", None)
+    if st is None:
+        return None
+    st._check_closed()
+    return {m: st.seq[m] for m in mids if m in st.seq}
+
+
+def include_setec_in_order(order: Optional[Dict[int, int]], state: Any) -> Optional[Dict[int, int]]:
+    """Adds SETEC Corp's arrival sequence (2P) to ``order``, mirroring ``include_setec_in_shares``."""
+    if order is None:
+        return None
+    out = dict(order)
+    st = getattr(state, "ms_stack", None)
+    if st is not None and getattr(state, "setec_corp_active", False) and out and SETEC_CORP_ID in st.seq:
+        out[SETEC_CORP_ID] = st.seq[SETEC_CORP_ID]
+    return out
+
+
+def market_share_places(shares: Dict[int, int], order: Optional[Dict[int, int]] = None) -> Dict[int, int]:
     """Competition ranking (1-based) of player_id -> place by Market Share, highest first.
 
-    place = 1 + number of entries with strictly greater share. Tied players share the better place
-    (INV-MLB-TIES-01)."""
+    ``order`` None: place = 1 + number of entries with strictly greater share. Tied players share the better place
+    (INV-MLB-TIES-01). ``order`` given: strict places 1..k by (share desc, order desc) (INV-MS-STACK-08)."""
+    if order is not None:
+        ranked = sorted(shares, key=lambda pid: (shares[pid], order[pid]), reverse=True)
+        return {pid: i + 1 for i, pid in enumerate(ranked)}
     vals = list(shares.values())
     return {pid: 1 + sum(1 for v in vals if v > s) for pid, s in shares.items()}
 
@@ -63,18 +86,27 @@ def _bonus_at(schedule: Sequence[int], idx: int) -> int:
     return int(schedule[idx]) if 0 <= idx < len(schedule) else 0
 
 
-def market_leader_bonus_awards(shares: Dict[int, int], schedule: Sequence[int]) -> Dict[int, Tuple[int, int]]:
+def market_leader_bonus_awards(shares: Dict[int, int], schedule: Sequence[int],
+                               order: Optional[Dict[int, int]] = None) -> Dict[int, Tuple[int, int]]:
     """player_id -> (place, bonus) for the survivors in ``shares``; bonus = schedule[place - 1] (0 past the end)."""
-    return {pid: (place, _bonus_at(schedule, place - 1)) for pid, place in market_share_places(shares).items()}
+    return {pid: (place, _bonus_at(schedule, place - 1)) for pid, place in market_share_places(shares, order).items()}
 
 
-def expected_market_leader_bonus(share: int, rival_shares: Iterable[int], schedule: Sequence[int]) -> float:
+def expected_market_leader_bonus(share: int, rival_shares: Iterable[int], schedule: Sequence[int], *,
+                                 stacked: bool = False, ahead_on_space: int = 0) -> float:
     """Bot estimate (reference: the §38 probe). hi = #rivals with share > s, tie = #rivals == s;
     mean of schedule[hi : hi + tie + 1] (0-padded). Used only by bots, never by scoring.
 
     Deliberately not the rule's tie outcome (the rule gives every tied player ``schedule[hi]``): averaging over the
-    places a tie spans values breaking a tie (spec §3 note, OQ-3)."""
+    places a tie spans values breaking a tie (spec §3 note, OQ-3).
+
+    ``stacked=True`` (v0.52): no ties. A mover that matches a rival's space ranks above it, so
+    idx = #rivals strictly above + ``ahead_on_space`` (rivals on the same space that stay above), and the
+    estimate is ``schedule[idx]`` (0 past the end)."""
     rivals = list(rival_shares)
+    if stacked:
+        idx = sum(1 for r in rivals if r > share) + int(ahead_on_space)
+        return float(_bonus_at(schedule, idx))
     hi = sum(1 for r in rivals if r > share)
     tie = sum(1 for r in rivals if r == share)
     span = [_bonus_at(schedule, i) for i in range(hi, hi + tie + 1)]
@@ -188,9 +220,17 @@ def resolve_poaches(engine: "GameEngine") -> List[Dict]:
                 else:
                     top = max(p.market_share for p in cands)
                     tied = [p.player_id for p in cands if p.market_share == top]
-                    if len(tied) == 1:
+                    stack = s.ms_stack
+                    if stack is not None:
+                        # v0.52 (R2): the highest-ranked eligible rival; no actor choice, hooks not called.
+                        tpid = stack.highest([p.player_id for p in cands])
+                        if len(tied) > 1 and s.ms_tie_tel is not None:
+                            s.ms_tie_tel.add("poach_stack_decided")
+                    elif len(tied) == 1:
                         tpid = tied[0]
                     else:
+                        if s.ms_tie_tel is not None:
+                            s.ms_tie_tel.add("poach_stack_decided")
                         hook = getattr(actor.bot, "choose_poach_target", None)
                         tpid = hook(actor, s, list(tied)) if callable(hook) else None
                         if tpid not in tied:

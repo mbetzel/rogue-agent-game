@@ -711,11 +711,18 @@ export function renderPlayerMats() {
           <div class="reserve-card-footer ${p.market_share <= 0 ? 'breach-alert' : ''}">
             ${p.market_share <= 0 ? '<strong style="color: #ff0055;">MARKET COLLAPSE (FINAL ROUND)</strong>' : `−1 per Red cube | Regain: $${p.regain_cost} each, +${p.regain_cap} / turn`}
             ${(() => {
+              const stack = state.market_share_stack;
+              if (!stack || !stack.order || !stack.order.length) return '';
+              const nm = (e) => e.is_setec_corp ? 'SETEC Corp' : ((state.players || [])[e.id] || {}).name || `Player ${e.id + 1}`;
+              const line = stack.order.map((e) => e.id === p.player_id ? `<strong>${nm(e)} ${e.market_share}</strong>` : `${nm(e)} ${e.market_share}`).join(' &gt; ');
+              return `<br><span title="Players on the same Market Share space are ordered by stack position, top first">Stack order (top first): ${line}</span>`;
+            })()}
+            ${(() => {
               const sched = state.is_round_leader_bonus ? state.round_leader_bonus_schedule : (state.is_market_leader_bonus ? state.market_leader_bonus_schedule : []);
               if (!sched || !sched.length) return '';
               const txt = sched.map((b, i) => `${i + 1}${["st", "nd", "rd"][i] || "th"} +${b}`).filter((t) => !t.endsWith("+0")).join(" · ");
               const when = state.is_round_leader_bonus ? "at the end of Phase 6 when a Red R&D face was banked, and at game end" : "at game end";
-              return `<br><span title="Market Leader Bonus: survivors gain Corporate Secrets by Market Share place (ties share the better place)">Market Leader Bonus (${when}): ${txt}</span>`;
+              return `<br><span title="Market Leader Bonus: survivors gain Corporate Secrets by Market Share place (on the same space, the player on top of the stack ranks higher)">Market Leader Bonus (${when}): ${txt}</span>`;
             })()}
           </div>
         </div>` : ''}
