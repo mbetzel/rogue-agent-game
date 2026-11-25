@@ -64,7 +64,7 @@ class TestWebLanding(unittest.TestCase):
         self.assertEqual(st["hit_landing_by_band"], [2, 5, 8])
 
     def test_tc_land_19_rules_version(self):
-        self.assertEqual(_fresh(n=2, seed=3).get_full_state()["rules_version"], "v0.51.0")
+        self.assertEqual(_fresh(n=2, seed=3).get_full_state()["rules_version"], "v0.52.0")
         with self.assertRaises(ValueError):
             GameController().new_game(num_players=2, seed=1, rules_version="v0.50.0")
 

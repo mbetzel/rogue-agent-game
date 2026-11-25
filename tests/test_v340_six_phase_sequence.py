@@ -1157,10 +1157,10 @@ class TestSharedVictory(SixPhaseHarness):
             p.ready_for_release_dice.clear(); p.in_production_dice.clear()
             p.glitched_dice.clear(); p.scanned_dice.clear()
         out = ctrl._serialize_end_game_result(ctrl.engine.evaluate_end_game())
-        self.assertTrue(out["is_shared_victory"])
-        self.assertEqual(sorted(out["winner_ids"]), [0, 1])
-        self.assertIsNone(out["winner_id"])
-        self.assertIn("shared victory", out["winner_name"])
+        # v0.52.0: Market Share position (stack order) breaks the tie, so there is a single winner (the player on top)
+        self.assertFalse(out["is_shared_victory"])
+        top = ctrl.state.ms_stack.order([p.player_id for p in ctrl.state.players])[0]
+        self.assertEqual(out["winner_id"], top)
 
 
 if __name__ == "__main__":

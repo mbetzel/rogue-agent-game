@@ -11,30 +11,14 @@ This document tracks verified balance takeaways, bot meta equilibria, card tieri
 > - [docs/archive/FINDINGS_s44-s49.md](docs/archive/FINDINGS_s44-s49.md): Sections §44–§54 (Phases 50–59, v0.38c–v0.41.0 baselines; file name kept for link stability).
 > - [docs/archive/FINDINGS_s55-s57.md](docs/archive/FINDINGS_s55-s57.md): Sections §55–§57 (Phases 60–62, v3.0 escalation, Target Lock / v0.42.0, Dominant Cube Color Signature Attacks / v0.43.0).
 > - [docs/archive/FINDINGS_s58-s60.md](docs/archive/FINDINGS_s58-s60.md): Sections §58 and §60 (Phases 63 and 65, v0.44.0 research tracks / capstones and F6 overhaul; §59 was never assigned).
+> - [docs/archive/FINDINGS_s61.md](docs/archive/FINDINGS_s61.md): Section §61 (Phase 66, v0.45.0 baseline).
 
 ---
 
-> [!NOTE] Active Sections (§61–§67)
-> Section numbering continues here unchanged. **Agents: do not read the archives unless a task cites a specific §N ≤ 60.**
+> [!NOTE] Active Sections (§62–§68)
+> Section numbering continues here unchanged. **Agents: do not read the archives unless a task cites a specific §N ≤ 61.**
 
 ---
-
-## 61. Phase 66 Post-Telemetry Balance Assessment: Glitched Shield Slots Rework, 2P SETEC Corp, Starting Secrets, & WS-OPERATOR (`v0.45.0 Baseline`): APPROVED
-
-**Experiments:** `scripts/run_v045_sweep.py` (`sim_results/v045_telemetry_report.md`, 6,000 paired games: 1,000/pod/variant across 2P/3P/4P, seeds `42..1041`).
-
-### Key Changes (`v0.45.0` vs `v0.44.0`)
-1. **Glitched Shield Slots Rework (`Defense Grid Overflow`):** Each Shield Slot holds up to `2` Green cubes (distributed evenly); `1` Shield purges all Green cubes in `1` slot in Phase 4; a `3rd` Green cube triggers **Defense Grid Overflow** (`-1` Corporate Secret).
-2. **2P SETEC Corp Neutral Black Cube:** Strictly 2P; starts at `0` Market Share, gains `+1` in Phase 4 whenever `>= 1` Red cube exits the tray (cap `20`), and ranks normally in the Market Leader Bonus (`+3`/`+1`), immune to Market Collapse and Patient Zero.
-3. **Starting Corporate Secrets:** Unified at **`4`** across all player counts (`2P`, `3P`, `4P`).
-4. **The Operator (`WS-OPERATOR`) & Card Text Sync:** `+1 🔬` per different color die in Scanned Box (all colors including Gray, Purple, Yellow; `0` base); `COMP-MERIDIAN` cleaned; all die abilities confirmed in Phase 3.
-
-### Telemetry & Balance Verdict (`PASS`)
-- **Pacing & Endings (2P / 3P / 4P):** Mean rounds `7.47 / 6.92 / 6.65` (vs `7.19 / 7.42 / 7.08`); `v1.0` breach rate `11.0% / 20.4% / 24.3%` (2P cut nearly in half from `19.2%`); Total Wipeout `12.6% / 4.8% / 1.1%` (all under `< 15%` guardrail).
-- **Defense Grid Overflow:** `55.1%–57.8%` of games trigger overflow (`2.83 / 3.43 / 3.70` events/game), raising final Green slot utilization from `40.1%–41.2%` to **`60.7%–67.2%`**.
-- **2P SETEC Corp:** Mean final MS **`6.33`** (1st: `44.0%`, 2nd: `18.1%`, 3rd: `37.9%`); humans retain **`85.9%`** of Market Leader Bonus Secrets while Market Collapse remains active at `34.1%`.
-- **WS-OPERATOR Parity:** Win rates `46.9%` (2P), `35.7%` (3P), `23.0%` (4P), yielding `1.11–1.20 🔬` per trigger.
-- **Watch Item:** 3P/4P Patient Zero rises to `74.5% / 78.0%` (`6.92 / 6.65` rounds); if physical playtesting feels fragile in 3P/4P, a `[TUNE]` to `5` Starting Secrets (3P/4P only) is a clean follow-up lever.
 
 ## 62. Vulnerability Track Redesign: Post-Telemetry Balance Assessment (`v0.46.0` Defaults): APPROVED (residuals open)
 
@@ -455,3 +439,75 @@ Reports:
   - decide whether the `+3` Corruption rule text and `corruption_lowest_vuln_gain_double` should stay;
   - the company-power pass (Helix / Spook / Aegis);
   - ~~archive §58~~ (done: §58 and §60 moved to `docs/archive/FINDINGS_s58-s60.md`).
+
+---
+
+## 68. Phase 73 Post-Telemetry Balance Assessment: Market Share Markers Arrive On Top, Track Maximum 25, 4P Market Leader Bonus `+3 / +2` (`v0.52.0` Candidate): APPROVED WITH RESIDUALS
+
+**Experiments** (`mixed1` roster):
+- `scripts/run_ms_stack_sweep.py --players 2,3,4 --games 2400 --seed0 {42,10042}`, pooled 2 × 2,400 games per arm per pod. Arms: B = `v051_roster` + tie telemetry, M = `v052_roster` (`FIRST_SEAT_TOP`).
+- Ablations (1,200 games, 3P / 4P, seed0 `42`): `LAST_SEAT_TOP`, `bot_ms_stack_aware = false`.
+- Pre-SDLC probe: `scripts/probe_ms_ties.py` (monkeypatch, 3,000 games per pod; S32 / S321 rows before plan §9 are invalid).
+
+**Reports:**
+- `docs/plans/ms_tie_stagnation_probe.md` (§1–§2 diagnosis, §7 on top vs beneath, §8 decisions, §9 schedule correction);
+- `docs/specs/ms_stack_order_spec.md` (Amendment A1 overrides the spec body);
+- `docs/reports/v052_ms_stack_sweeps.md`.
+
+### Key Changes (`v0.52.0` vs `v0.51.0`)
+1. **On top.** A Market Share marker that moves onto an occupied space goes on top; a higher marker ranks ahead of those beneath it. Markers that reach a space at the same moment keep their previous order (Red, the clamp at `0`, *Baffle Echo*, Red Signature, Phase 3 gains). There are no Market Share ties.
+2. **Setup:** all markers start on one space with the **First Player on top** (A1a). `LAST_SEAT_TOP` stays a sweep arm only.
+3. **Track maximum `20 → 25`** at every player count; starts stay `14 / 18 / 18`.
+4. **Market Leader Bonus:** 2P / 3P `+3 / +1` (unchanged), 4P `+3 / +2` (A1b).
+5. **Targets read the stack:** Customer Poaching "most" and the Red Signature "least" pick the highest / lowest-ranked eligible marker (R2); a poaching actor lands on top of the rival (R4). A Patient Zero's marker stays frozen and takes no Market Leader Bonus place (R1).
+6. **Section 5 tiebreakers trimmed** to Market Share position (R3); Money, ready dice, Research and fewest Under Development leave the ranking path.
+7. **Terms:** no new terms (D2).
+
+### Headline (pooled, v0.51 B → v0.52 M, Δ)
+
+| Metric | 2P | 3P | 4P |
+|:---|:---|:---|:---|
+| Effective MLB 1st tie % | `12.1 → 0` | `25.9 → 0` | `32.5 → 0` |
+| Raw top-space tie % | `12.1 → 13.4` (+1.3) | `25.9 → 20.7` (−5.3) | `32.5 → 25.5` (−7.0) |
+| Lead changes / game | `1.07 → 1.80` | `1.39 → 2.57` | `1.45 → 2.96` |
+| End MS spread | `2.04 → 2.02` | `3.19 → 3.49` | `4.36 → 4.73` |
+| PZ / MC / Singularity % | `42.8 / 30.1 / 19.3` (−0.4 / **+2.0** / −0.7) | `64.7 / 12.5 / 21.4` (+2.4 / +0.8 / −2.7) | `67.8 / 12.1 / 19.7` (−0.9 / −0.1 / +1.2) |
+| Rounds | `8.18` (+0.03) | `8.16` (−0.05) | `8.08` (0.00) |
+| MLB Secrets / game | `10.28` (−0.20) | `16.14` (−1.08) | `23.73` (**+1.98**) |
+| Winner Secrets | `9.56` (+0.27) | `11.87` (+0.49) | `13.73` (**+1.23**) |
+| Company win spread pp | `15.5` (−4.2) | `12.0` (−2.7) | `9.3` (−1.9) |
+| Seat win spread pp | **`4.2`** (+3.1) | `1.7` (−0.7) | `3.5` (+1.3) |
+| Final tiebreak decided by stack, % games | `1.5` | `1.1` | `1.6` |
+
+All acceptance lines PASS (unique winner 100%, tied-paid MLB places 0 in every run); 2P seat spread is WATCH.
+
+### Telemetry & Balance Verdict (`PASS` with residuals)
+- **Original goal (plan §1–§2) met.**
+  - *Ties for 1st:* the Market Leader Bonus can no longer be shared (effective tie `0` at every count). Raw same-space finishes at the top fall 5–7 pp at 3P / 4P, so players now pass rather than match.
+  - *Movement:* the sole leader changes hands **1.7–2.0× as often** (4P `2.96` vs `1.45`, above the probe's `2.9`). The 4P end spread widens slightly (`4.73`), better than the probe's on-top arm feared (plan §7: tighter track).
+  - 2P raw top ties are flat (+1.3): with 2 markers (plus SETEC Corp) there was little crowding to fix. The rule still removes the shared award.
+- **Pacing neutral.** Every end trigger is within ±3 pp and rounds within ±0.05. The §8 "PZ about +4 pp" cost of on top did not appear: first seat on top plus the 4P `+3 / +2` schedule absorbed it.
+- **Parity improves.** Company spread narrows at every count (2P −4.2 pp), which fits trimmed tiebreakers that no longer reward Money / dice hoarding.
+- **Ruling, 2P seat edge (seat 0 `52.1%` pooled, blocks `52.5 / 51.7`): ACCEPT, WATCH.**
+  - Real, not noise: the SE of a 2P seat spread at 4,800 games is about `1.4` pp, so `4.2` is about 3σ above v0.51's `1.1`.
+  - Cause: the First Player starts on top, so every untouched start tie and every same-moment move favours seat 0. That is the price of A1a, which fixed the far worse `LAST_SEAT_TOP` skew (3P last seat `38.3%`, 4P `21–29%`).
+  - It stays under the 5 pp line and is the size of an ordinary first-player edge. No `[TUNE]` now. If playtests feel it, the only clean lever is a 2P-only "second player on top" probe (`LAST_SEAT_TOP` at 2P); expect it to flip the edge rather than remove it, since seat 1 also acts later in Phase 5.
+- **Ruling, 2P MC `+2.0` pp: ACCEPT.**
+  - Marginal: the SE of the difference is about `0.9` pp (≈2σ), and PZ moves −0.4, so PZ + MC is +1.6 pp, within the ±5 band and far below §67's accepted D1.
+  - No mechanism points at the stack: stack-decided Red Signatures are `0.06` / game at 2P (unchanged). Market Collapse is a non-elimination ending, so no dead-turn risk. Re-check in the web / playtest pass only.
+- **Ruling, 4P MLB `+1.98` Secrets / game and winner `+1.23`: ACCEPT (intended).**
+  - Plan §2: about a quarter to half of v0.51's 4P MLB came from shared ties. Removing ties with `+3 / +1` cut the faucet to about `16.4` and raised PZ about +6 pp (plan §9). `+3 / +2` refills it slightly past par (`23.7` vs `21.8`).
+  - The extra ≈`0.5` Secret per player per game buys pacing parity (PZ −0.9, rounds 0). The winner's score scale rises about 10%, but the 2nd-place award narrows the 1st–2nd gap (`+3 / +2`), so it is anti-runaway, and the 4P company spread improves to `9.3`.
+  - `+3 / +2 / +1` was too soft (A1b: PZ `64.3`). No further change.
+- **Pillars:**
+  - Red stays unblockable and simultaneous. Same-moment moves keep their order, so Red still never changes a gap; only gains reorder the stack.
+  - Ranking is read off the board with no hidden lookup, and no extra random draws.
+  - The Market Leader Bonus still pays on Red Secret rounds and once at game end (none on a Total Wipeout).
+- **Accepted residuals / watch items:**
+  1. **2P seat spread `4.2`** (WATCH, above).
+  2. **3P PZ + MC `+3.2` pp** with Singularity −2.7 and MLB −1.1 / game. The 3P `+3 / +1` choice (A1b) leaves 3P the only pod that got harsher. In band; re-check if 3P playtests feel fragile (the lever is 3P `+3 / +2`, which gave PZ `59.5`, about −3 pp vs v0.51).
+  3. **Bot stack awareness is load-bearing.** Without it, 3P PZ is +5.5 pp over B and the 4P company spread widens +5.3 pp. Humans read the stack naturally, so this is a sim-fidelity note, but any future bot changes must keep `bot_ms_stack_aware`.
+  4. **Not emitted:** per-company win rates (spread only), White Hat spread, elimination split. The §67 carry-forwards (Helix below par, Spook / Aegis above) are not re-measured here.
+  5. **Stale text:** the spec §1 scope table still lists `LAST_SEAT_TOP` and the `D4` schedule (A1 overrides it). The CLAUDE.md pillar still says "ties share the better place", "3P/4P `+1` 2nd" and the 5-step tiebreaker hierarchy (User to update).
+- **`[TUNE]` recommendations:** none.
+- **Next:** v0.52.0 version bump; RULES / QUICKREF / GLOSSARY wording sync (no new term); track-25 art in PnP, TTS (rebuild) and web; CLAUDE.md pillar text (User); ~~archive §61~~ (done: moved to `docs/archive/FINDINGS_s61.md`).

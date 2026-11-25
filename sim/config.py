@@ -59,6 +59,15 @@ _DEFENSE_MODES = ("SHIELDS", "VULNERABILITY")
 _PEN_TEST_L1_MODES = ("GRAY_DIE", "SET_ZERO", "SECRET")
 _AEGIS_ECHO_MODES = ("IGNORE_CUBE", "IGNORE_DAMAGE_V046")
 DEFAULT_MARKET_SHARE_MAX: int = 20
+V052_MARKET_SHARE_MAX: int = 25                                              # [TUNE] v0.52 D3
+V052_RED_SECRET_PAYOUT: Dict[int, Tuple[int, ...]] = {2: (3, 1), 3: (3, 1, 0), 4: (3, 2, 0, 0)}  # [TUNE] v0.52 ruling: only 4P changes (+3/+2)
+
+
+def _v052_defaults():
+    return (("market_share_stacking", True), ("market_share_stack_setup", "FIRST_SEAT_TOP"),  # ruling: the First Player starts on top
+            ("market_share_max", V052_MARKET_SHARE_MAX),
+            ("red_secret_payout_by_player_count", dict(V052_RED_SECRET_PAYOUT)),
+            ("ms_tie_telemetry", True))
 _TRIAGE_ORDER_RULES = ("BOT", "OLDEST_FIRST")
 _TRIAGE_L1_MODES = ("WHITE_CONTRACTORS", "GRAY_DIE", "CASH")
 _GREEN_TRIAGE_CLEAN_MODES = ("NONE", "COUNT_THEN_CLEAN", "CLEAN_THEN_COUNT")
@@ -640,6 +649,12 @@ class GameConfig:
     vuln_hit_landing_by_band: Optional[Tuple[int, ...]] = None  # [TUNE] Vulnerability after a Green hit, per band; None = vuln_hit_reset
     vuln_one_hit_per_round: bool = False           # [RULE] a player is hit by at most one Green cube per Phase 4
 
+    # --- v0.52.0 Market Share on-top stacking + track maximum 25 (docs/specs/ms_stack_order_spec.md); defaults = v0.51 ---
+    market_share_stacking: bool = False            # [RULE] strict Market Share position: (space, height); moves land on top
+    market_share_stack_setup: str = "LAST_SEAT_TOP"  # [TUNE] "LAST_SEAT_TOP" | "FIRST_SEAT_TOP" (v052 default; the other is a sweep arm)
+    bot_ms_stack_aware: Optional[bool] = None      # sim-only: None -> market_share_stacking
+    ms_tie_telemetry: bool = False                 # sim-only: emit the ms_tie end-row block (no gameplay effect)
+
     # --- Step 0 exchange-rate probe levers (sim-only; default off => every preset is bit-identical) ---
     probe_bonus_seat: int = -1                 # seat that receives the probe bonus (-1 = off)
     probe_bonus_starting_secrets: int = 0      # one-off +Secrets at setup for that seat
@@ -812,6 +827,7 @@ class GameConfig:
         self._validate_locked_vuln()
         self._validate_v050()
         self._validate_v051()
+        self._validate_v052(ms)
         if self.starting_secrets_by_player_count is None:
             # NOTE: resolved once at construction. Re-assigning round_sequence later does NOT
             # re-resolve this dict; use GameConfig.legacy_v033() or pass round_sequence to __init__.
@@ -1347,6 +1363,21 @@ class GameConfig:
         return cls.v050_roster(**overrides)
 
     @classmethod
+    def v052(cls, **overrides) -> "GameConfig":
+        """v0.52.0 Market Share on-top stacking + max 25 + Market Leader Bonus 4P +3/+2 (3P stays +3/+1), First Player on top at setup
+        (docs/specs/ms_stack_order_spec.md). Inherits v051()."""
+        for k, v in _v052_defaults():
+            overrides.setdefault(k, v)
+        return cls.v051(**overrides)
+
+    @classmethod
+    def v052_roster(cls, **overrides) -> "GameConfig":
+        """v0.52.0 + the v0.51 roster bots (sweep default). Inherits v051_roster()."""
+        for k, v in _v052_defaults():
+            overrides.setdefault(k, v)
+        return cls.v051_roster(**overrides)
+
+    @classmethod
     def v046_locked(cls, **overrides) -> "GameConfig":
         """Locked ⚠ Faces draft (docs/specs/locked_vuln_faces_spec.md), swept on the v0.46 base. Inherits v046().
         Formerly ``v047()`` on this branch; renamed after main shipped v0.47.0 Red Signature."""
@@ -1413,6 +1444,24 @@ class GameConfig:
                     raise ValueError(f"vuln_hit_landing_by_band[{i}] must be below band threshold {th[i]}, got {land!r}")
         if (land is not None or self.vuln_one_hit_per_round) and self.defense_mode != "VULNERABILITY":
             raise ValueError("vuln_hit_landing_by_band / vuln_one_hit_per_round require defense_mode='VULNERABILITY'")
+
+    def _validate_v052(self, ms: bool) -> None:
+        """docs/specs/ms_stack_order_spec.md §3.3, §7, §9."""
+        if self.market_share_stack_setup not in ("LAST_SEAT_TOP", "FIRST_SEAT_TOP"):
+            raise ValueError(f"market_share_stack_setup must be 'LAST_SEAT_TOP' or 'FIRST_SEAT_TOP', got {self.market_share_stack_setup!r}")
+        if self.market_share_stacking and not ms:
+            raise ValueError("market_share_stacking requires red_mode=MARKET_SHARE")
+        if self.bot_ms_stack_aware is None:
+            self.bot_ms_stack_aware = bool(self.market_share_stacking)
+        if self.bot_ms_stack_aware and not self.market_share_stacking:
+            raise ValueError("bot_ms_stack_aware=True requires market_share_stacking")
+        if self.market_share_max is not None and self.market_share_max < max(self.market_share_start_by_player_count.values()):
+            raise ValueError("market_share_max must be >= the largest market_share_start_by_player_count value")
+
+    def ms_max(self) -> int:
+        """The configured Market Share track maximum (spec §6). When ``market_share_max`` is None (pre-v0.52 presets
+        that never set it) the maximum falls back to the starting value for the player count, i.e. ``start = max``."""
+        return int(self.get_market_share_max(self.num_players))
 
     def _validate_locked_vuln(self) -> None:
         """spec §3.4 (Locked ⚠ Faces validation)."""

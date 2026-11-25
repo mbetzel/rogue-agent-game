@@ -66,14 +66,18 @@ def red_secret_face_value(player: "PlayerState", state: "GameState") -> float:
         if o.player_id != player.player_id:
             q *= 1.0 - msp.p_red_bank(o, state)
     own = sf.secret_yield(state.config, player, DieColor.RED)
-    return own + q * msp.expected_payout_value(int(player.market_share or 0), rivals, sched)
+    here = int(player.market_share or 0)
+    if msp.stack_aware(state):  # v0.52: matching a rival ranks above it only when moving; staying put uses the real height
+        return own + q * msp.expected_payout_value(here, rivals, sched, stacked=True,
+                                                   ahead_on_space=msp.ahead_on_space(player, state, here))
+    return own + q * msp.expected_payout_value(here, rivals, sched)
 
 
 def share_value(player: "PlayerState", state: Optional["GameState"], n: int, share: Optional[int] = None) -> float:
     """Money-equivalent of +n Market Share (clamped at the maximum): base, Red yield tier crossings for owned /
     pending Red dice, Market Collapse risk (when enabled) and the expected Market Leader Bonus."""
     share = int(player.market_share or 0) if share is None else int(share)
-    gain = max(0, min(int(n), int(player.market_share_max or 20) - share))
+    gain = max(0, min(int(n), int(player.max_market_share) - share))
     if gain <= 0:
         return 0.0
     v = SHARE_VALUE * gain
@@ -101,7 +105,9 @@ def share_value(player: "PlayerState", state: Optional["GameState"], n: int, sha
         sched = cfg.market_leader_bonus_schedule(len(state.players))
         rivals = [int(q.market_share or 0) for q in state.players
                   if q.player_id != player.player_id and not q.is_patient_zero]
-        d = expected_market_leader_bonus(share + gain, rivals, sched) - expected_market_leader_bonus(share, rivals, sched)
+        sk = {"stacked": True} if msp.stack_aware(state) else {}
+        d = (expected_market_leader_bonus(share + gain, rivals, sched, **sk)
+             - expected_market_leader_bonus(share, rivals, sched, **sk))
         v += msp.leader_bonus_time_weight(state, pol) * SECRET_VALUE * d
     return v
 

@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 from sim.config import CubeColor, DieColor, EndGameReason, ShieldColor, SignatureCubeLocation
 from sim.entities import CorruptionSpace, Die, TargetCriterion, TransferType
 from sim.engine.state import CompileResult
-from sim.engine import market_share
+from sim.engine import market_share, ms_stack
 
 if TYPE_CHECKING:
     from sim.engine.core import GameEngine
@@ -412,8 +412,9 @@ def resolve_corruption_space(
 
         # 3b. Lose Market Share
         if getattr(space, "lose_market_share", 0) > 0:
-            for player in engine.state.players:
-                player.change_market_share(-space.lose_market_share, "corruption")
+            with ms_stack.batch(engine.state, "corruption"):
+                for player in engine.state.players:
+                    player.change_market_share(-space.lose_market_share, "corruption")
 
         # 4. Demote Dice (v0.38 Glitched Shield Slots; v0.46 Vulnerability)
         if space.demote_dice > 0 and engine.config.is_vulnerability:
@@ -480,8 +481,9 @@ def resolve_corruption_space(
     if getattr(space, "lose_market_share", 0) > 0:
         crit = space.target_market_share_criterion or space.target_criterion
         targets = get_targeted_players(engine, crit)
-        for player in targets:
-            player.change_market_share(-space.lose_market_share, "corruption")
+        with ms_stack.batch(engine.state, "corruption"):
+            for player in targets:
+                player.change_market_share(-space.lose_market_share, "corruption")
 
     # Demote Dice (Glitched Shield Slots; v0.46 Vulnerability)
     if space.demote_dice > 0 and engine.config.is_vulnerability:

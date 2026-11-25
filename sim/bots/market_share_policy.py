@@ -72,9 +72,28 @@ def payout_active(player: Any, state: Any, pol: MarketSharePolicy) -> bool:
     return bool(getattr(cfg, "is_red_secret_payout", False) and is_aware(state) and pol.leader_bonus_aware)
 
 
-def expected_payout_value(share: int, rival_shares: Any, schedule: Any) -> float:
-    """``expected_market_leader_bonus`` generalised to any place schedule (same tie handling)."""
-    return expected_market_leader_bonus(share, rival_shares, schedule)
+def expected_payout_value(share: int, rival_shares: Any, schedule: Any, *, stacked: bool = False,
+                          ahead_on_space: int = 0) -> float:
+    """``expected_market_leader_bonus`` generalised to any place schedule (same tie handling; v0.52 ``stacked``)."""
+    return expected_market_leader_bonus(share, rival_shares, schedule, stacked=stacked, ahead_on_space=ahead_on_space)
+
+
+def stack_aware(state: Any) -> bool:
+    """v0.52 (INV-MS-STACK-BOT-01): the bot estimate reads the Market Share stack."""
+    cfg = getattr(state, "config", None)
+    return bool(getattr(cfg, "bot_ms_stack_aware", False)) and getattr(state, "ms_stack", None) is not None
+
+
+def ahead_on_space(player: Any, state: Any, share: int) -> int:
+    """#live rivals (incl. SETEC Corp) on ``share`` that sit above the player, if ``share`` is the player's current
+    Market Share (the player stays put); 0 otherwise (a mover arrives on top). Reads ``seq`` only (bots never write)."""
+    st = getattr(state, "ms_stack", None)
+    if st is None or player.market_share is None or int(share) != int(player.market_share):
+        return 0
+    me = st.seq.get(player.player_id)
+    if me is None:
+        return 0
+    return sum(1 for m in st.live_ids() if m != player.player_id and st.space[m] == int(share) and st.seq[m] > me)
 
 
 def estimated_rounds_left(state: Any) -> int:
@@ -140,10 +159,17 @@ def payout_share_delta(player: Any, state: Any, before: int, after: int, rivals:
                        pol: Optional[MarketSharePolicy] = None) -> float:
     """Δ expected payout value x discounted (E_in + P_end), in Corporate Secrets."""
     sched = state.config.red_secret_payout_schedule(len(state.players))
+    hypothetical = rivals is not None  # estimated post-Red rivals: nobody is known to stay on top of a shared space
     if rivals is None:
         rivals = _rival_shares(player, state)
     rivals = list(rivals)
-    d = expected_payout_value(after, rivals, sched) - expected_payout_value(before, rivals, sched)
+    if stack_aware(state):
+        a_b = 0 if hypothetical else ahead_on_space(player, state, before)
+        a_a = 0 if hypothetical else ahead_on_space(player, state, after)
+        d = (expected_payout_value(after, rivals, sched, stacked=True, ahead_on_space=a_a)
+             - expected_payout_value(before, rivals, sched, stacked=True, ahead_on_space=a_b))
+    else:
+        d = expected_payout_value(after, rivals, sched) - expected_payout_value(before, rivals, sched)
     return d * expected_red_payouts_remaining(state, pol)
 
 
@@ -261,7 +287,7 @@ def estimated_rival_shares(player: "PlayerState", state: "GameState", red_attack
         for p in state.players if p.player_id != player.player_id and not p.is_patient_zero
     }
     if getattr(state, "setec_corp_active", False):
-        max_ms = int(getattr(state.config, "market_share_max", 20) or 20)
+        max_ms = state.config.ms_max()
         setec_ms = int(getattr(state, "setec_market_share", 0))
         out[-1] = min(max_ms, setec_ms + (1 if int(red_attack) >= 1 else 0))
     return out
@@ -323,8 +349,9 @@ def _marginal_block_value_v037(color: CubeColor, rem: Dict[CubeColor, int], play
         # v0.37.0 (spec §5.2): expected Market Leader Bonus gained by keeping this Market Share
         sched = state.config.market_leader_bonus_schedule(len(state.players))
         rivals = list(estimated_rival_shares(player, state, attack.get(CubeColor.RED, 0)).values())
-        d = (expected_market_leader_bonus(max(0, share - r + 1), rivals, sched)
-             - expected_market_leader_bonus(max(0, share - r), rivals, sched))
+        sk = {"stacked": True} if stack_aware(state) else {}
+        d = (expected_market_leader_bonus(max(0, share - r + 1), rivals, sched, **sk)
+             - expected_market_leader_bonus(max(0, share - r), rivals, sched, **sk))
         v += leader_bonus_time_weight(state, pol) * pol.blue_value * d
     if payout_active(player, state, pol):
         # RSP-1 (spec §14.5.6): Red Secret payouts kept by this Market Share (no rival-denial term)
@@ -409,9 +436,11 @@ def urgent_regain(player: "PlayerState", state: "GameState", pol: MarketSharePol
         rivals = _rival_shares(player, state)
         if rivals:
             sched = state.config.market_leader_bonus_schedule(len(state.players))
-            base = expected_market_leader_bonus(player.market_share, rivals, sched)
+            sk = {"stacked": True} if stack_aware(state) else {}
+            a0 = ahead_on_space(player, state, player.market_share) if sk else 0
+            base = expected_market_leader_bonus(player.market_share, rivals, sched, ahead_on_space=a0, **sk)
             for k in range(1, room + 1):
-                if expected_market_leader_bonus(player.market_share + k, rivals, sched) > base:
+                if expected_market_leader_bonus(player.market_share + k, rivals, sched, **sk) > base:
                     return max(k0, k)
     return k0
 

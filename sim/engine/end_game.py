@@ -5,7 +5,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 
 from sim.config import DieColor, EndGameReason, TiebreakOrder
-from sim.engine.market_share import include_setec_in_shares, market_leader_bonus_awards, market_share_places
+from sim.engine.market_share import (
+    include_setec_in_order, include_setec_in_shares, market_leader_bonus_awards, market_share_places, stack_order,
+)
+from sim.engine.ms_stack import end_block as ms_stack_end_block
 from sim.engine.state import EndGameResult
 
 if TYPE_CHECKING:
@@ -30,7 +33,18 @@ def _wipeout_key_ms(r: Dict) -> Tuple:
     return (r["market_share"], r["money"], r["ready_colored_dice_count"], r["patches"], -r["unpatched_dice_count"])
 
 
+# v0.52 (R3): Corporate Secrets, then Market Share position (value, then height). Nothing else is compared.
+def _standard_key_ms_stack(r: Dict) -> Tuple:
+    return (r["secrets"], r["market_share"], r["market_share_stack_seq"])
+
+
+def _wipeout_key_ms_stack(r: Dict) -> Tuple:
+    return (r["market_share"], r["market_share_stack_seq"])
+
+
 _KEY_FIELDS = {
+    _standard_key_ms_stack: ("secrets", "market_share", "market_share_stack"),
+    _wipeout_key_ms_stack: ("market_share", "market_share_stack"),
     _standard_key: ("secrets", "money", "ready_colored_dice_count", "patches", "unpatched_dice_count"),
     _wipeout_key_six_phase: ("money", "ready_colored_dice_count", "patches", "unpatched_dice_count"),
     _standard_key_ms: ("secrets", "market_share", "money", "ready_colored_dice_count", "patches", "unpatched_dice_count"),
@@ -257,8 +271,11 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
     bonus_schedule = list(cfg.market_leader_bonus_schedule(len(players))) if bonus_on else []
     survivor_shares = {p.player_id: int(p.market_share or 0) for p in players if not p.is_patient_zero}
     ranked_shares = include_setec_in_shares(survivor_shares, engine.state) if survivor_shares else {}
-    places = market_share_places(ranked_shares) if cfg.is_market_share and not all_patient_zero else {}
-    awards = market_leader_bonus_awards(ranked_shares, bonus_schedule) if bonus_on else {}
+    stacked = getattr(engine.state, "ms_stack", None) is not None
+    ranked_order = (include_setec_in_order(stack_order(engine.state, survivor_shares), engine.state)
+                    if stacked and survivor_shares else None)
+    places = market_share_places(ranked_shares, ranked_order) if cfg.is_market_share and not all_patient_zero else {}
+    awards = market_leader_bonus_awards(ranked_shares, bonus_schedule, ranked_order) if bonus_on else {}
     # RSP-1 end payout (spec §14.5.3 step 7, INV-RSP-04): after the contractor return and (telemetry-only) stranded
     # pass, before ranking; final Market Share; skipped on a Total Wipeout, and on a Market Collapse end
     # unless red_secret_payout_skip_on_collapse is False (spec §14.5.10). Like the Market
@@ -271,6 +288,15 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
         from sim.engine import secret_faces
 
         end_awards = secret_faces.red_secret_payout_awards(cfg, engine.state)
+    ms_tel = engine.state.ms_tie_tel.snapshot() if getattr(engine.state, "ms_tie_tel", None) is not None else None
+    if ms_tel is not None:
+        from sim.engine.ms_stack import record_mlb_award
+
+        if awards:
+            record_mlb_award(ms_tel, engine.state, ranked_shares, awards, bonus_schedule)
+        if end_awards:
+            record_mlb_award(ms_tel, engine.state, ranked_shares, end_awards,
+                             cfg.red_secret_payout_schedule(len(players)))
 
     rankings: List[Dict] = []
 
@@ -393,12 +419,15 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
                 **(_v047_row(cfg, p) if getattr(cfg, "colored_vuln_lock", False) else {}),
                 **(_v050_row(cfg, p) if getattr(cfg, "gray_vuln_telemetry", False) else {}),
                 **(_v051_row(cfg, p) if _v051_enabled(cfg) else {}),
+                **({"market_share_stack_seq": engine.state.ms_stack.seq[p.player_id]} if stacked else {}),
             }
         )
 
     ms_first = getattr(cfg, "tiebreak_order", TiebreakOrder.V035) == TiebreakOrder.MARKET_SHARE_FIRST
     std_key = _standard_key_ms if ms_first else _standard_key
     wipe_key = _wipeout_key_ms if ms_first else _wipeout_key_six_phase
+    if stacked:  # v0.52 (R3): trimmed keys; the strict Market Share position leaves a unique winner
+        std_key, wipe_key = _standard_key_ms_stack, _wipeout_key_ms_stack
 
     if not all_patient_zero:
         # Standard Ending: Survivors ranked strictly by Corporate Secrets, with hierarchical tiebreakers:
@@ -482,6 +511,7 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
             r["rank"] = rank
     # Legacy v0.33 path keeps winner_id = first in seat-stable sort order and sequential ranks (parity).
 
+    decided_by = _tiebreak_decided_by(win_pool, win_key)
     return EndGameResult(
         end_reason=engine.state.end_reason,
         total_rounds=engine.state.current_round,
@@ -497,7 +527,8 @@ def evaluate_end_game(engine: GameEngine) -> EndGameResult:
         market_collapse_pids=list(engine.state.market_collapse_pids),
         market_collapse_round=engine.state.market_collapse_round,
         version_comparisons=[r.as_dict() for r in engine.state.version_comparisons],
-        tiebreak_decided_by=_tiebreak_decided_by(win_pool, win_key),
+        tiebreak_decided_by=decided_by,
+        ms_tie=ms_stack_end_block(engine.state, ms_tel, decided_by),
         setup=_setup_record(engine),
         collapse_trigger_pids_were_secret_leaders=list(engine.state.market_collapse_secret_leaders),
         market_collapse_context=dict(engine.state.market_collapse_context),

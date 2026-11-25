@@ -1,4 +1,4 @@
-"""Tabletop Simulator module builder for Too Many Secrets (v0.51.0).
+"""Tabletop Simulator module builder for Too Many Secrets (v0.52.0).
 
 Renders the Print-and-Play components (pnp/generate_pnp.py draw functions) to PNG
 images and writes a Tabletop Simulator save file that uses them.
@@ -27,7 +27,7 @@ from typing import Dict, List, Optional, Sequence, Tuple
 from pnp import generate_pnp as g
 from pnp.pdf_engine import PALETTE, PDFDocument, PDFPage, measure_text
 
-VERSION = "v0.51.0"
+VERSION = "v0.52.0"
 HERE = os.path.dirname(os.path.abspath(__file__))
 ASSET_DIR = os.path.join(HERE, "assets")
 SAVE_NAME = f"Too Many Secrets ({VERSION})"
@@ -120,11 +120,12 @@ SEAT_OFFSETS = [(-1, -1), (1, -1), (-1, 1), (1, 1)]  # 2 x 2 grid in a shared tr
 
 
 def market_share_cell(value: int) -> Tuple[float, float]:
-    """Centre of a Central Market Share Track cell (20 down to 0, 3 columns x 7 rows)."""
-    cw = (238.0 - 16.0 - 10.0) / 3.0
-    ch = (312.0 - 24.0) / 7.0
+    """Centre of a Central Market Share Track cell (25 down to 0, 4 columns x 7 rows)."""
+    cols = g.MARKET_SHARE_COLS
+    cw = (238.0 - 16.0 - 5.0 * (cols - 1)) / cols
+    ch = (g.MARKET_SHARE_GRID_H - 24.0) / 7.0
     i = g.MARKET_SHARE_MAX - value
-    r, c = divmod(i, 3)
+    r, c = divmod(i, cols)
     cy = 197.0 + r * (ch + 4.0) + ch / 2.0
     if value in g.MARKET_SHARE_START:
         cy += 5.0  # below the START header strip
@@ -742,7 +743,7 @@ def build_save(url_for) -> dict:
                 "sig": mat(MAT_SIGNATURE_CRADLE),
                 **{k: mat(p) for k, p in MAT_TOKEN_WELLS.items()},
                 "vuln": shared(AGENT_VULN_ZERO),
-                "share": {str(v): shared(market_share_cell(v), dx=14.0, dy=9.0) for v in sorted(set(START_SHARE.values()))},
+                "share": {str(v): shared(market_share_cell(v), dx=0.0, dy=0.0) for v in sorted(set(START_SHARE.values()))},
                 # Kit column beside the mat: free once the dice and cubes move onto the mat.
                 "company": [round(kx, 3), round(mz + f * 0.5, 3)],
                 "override": [round(kx - side * 2.85, 3), round(mz + f * 0.5, 3)],

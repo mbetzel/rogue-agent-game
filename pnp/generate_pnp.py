@@ -1,4 +1,4 @@
-"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.51.0 Baseline).
+"""Master Print-and-Play PDF Generator for Too Many Secrets (Rogue Agent v0.52.0 Baseline).
 
 Generates minimalist, ink-saver, print-ready US Letter (11" x 8.5") PDFs:
   - 01_Player_Boards.pdf (6 pages — 4x Company Terminal Mats with CI/CD Pipeline loop + 6x Client Company Cards sheet + 6x White Hat Dossier Cards sheet)
@@ -19,7 +19,7 @@ from pnp.pdf_engine import PALETTE, Color, PDFDocument, PDFPage, measure_text
 
 
 # =============================================================================
-# Canonical Game Data (Synchronized 1:1 with RULES.md v0.51.0 Baseline & sim/entities.py)
+# Canonical Game Data (Synchronized 1:1 with RULES.md v0.52.0 Baseline & sim/entities.py)
 # =============================================================================
 
 @dataclass(frozen=True)
@@ -305,7 +305,7 @@ VARIANT_CARDS: List[VariantCardSpec] = [
         'R3', 'red', 'RED // MARKETING', '$5',
         '{PIP1} +1 Share & 1{RESEARCH} {WARN} | {PIP2}{PIP3}{PIP4} +$2', '{PIP5} R&D {WARN} | {PIP6} {STAR}',
         'Customer Poaching', 'P3 AFTER ALL INCOME',
-        'After all players collect Income, take **1 Market Share** from the surviving rival with the **most** *(you choose among ties)*. At your max, the rival still loses 1.',
+        'After all players collect Income, take **1 Market Share** from the surviving rival with the **most** *(on a shared space, the one on top of the stack)*. At your max, the rival still loses 1.',
         'Poaching: take 1 Market Share from the leader.',
     ),
     VariantCardSpec(
@@ -665,7 +665,7 @@ def _draw_white_hat_card(page: PDFPage, x: float, y: float, w: float, h: float, 
     )
 
 
-TRACK_STEP_COSTS = (None, 1, 2, 2, 3)  # {RESEARCH} to reach L1..L4 (RULES.md v0.51.0 baseline)
+TRACK_STEP_COSTS = (None, 1, 2, 2, 3)  # {RESEARCH} to reach L1..L4 (RULES.md v0.52.0 baseline)
 
 
 def _draw_track_cells(page: PDFPage, cells: Sequence[Tuple[float, float, float, float]],
@@ -747,7 +747,7 @@ RELEASE_LEVELS = [
     ("5 dice", "Return 1 Gray Legacy die to the box"),
     ("6 dice", "Set 1 rolled Gray die to any face (P1 Step 3)"),
 ]
-PR_REGAIN_COST_MONEY = 3  # $ Cash per +1 Market Share (RULES.md v0.51.0 baseline)
+PR_REGAIN_COST_MONEY = 3  # $ Cash per +1 Market Share (RULES.md v0.52.0 baseline)
 PUBLIC_RELATIONS_LEVELS = [
     ("Regain up to 1/turn", ""),
     ("Regain up to 1/turn", "+$3"),
@@ -756,9 +756,11 @@ PUBLIC_RELATIONS_LEVELS = [
     ("Regain up to 3/turn", "+2 Market Share now"),
 ]
 
-# Market Share track (RULES.md v0.51.0): start = 14 (2P) / 18 (3-4P); max = 20; 0 = Market Collapse;
-# Market Leader Bonus by Market Share place (1st +3 Secrets; 2nd +1).
-MARKET_SHARE_MAX = 20
+# Market Share track (RULES.md v0.52.0): start = 14 (2P) / 18 (3-4P); max = 25; 0 = Market Collapse;
+# Market Leader Bonus by Market Share place (1st +3 Secrets; 2nd +1 at 2-3P, +2 at 4P).
+MARKET_SHARE_MAX = 25
+MARKET_SHARE_COLS = 4
+MARKET_SHARE_GRID_H = 280.0
 MARKET_SHARE_START = {14: "2P START", 18: "3-4P START"}
 
 
@@ -929,7 +931,7 @@ def render_player_board(
     draw_board_outer_frame(
         page,
         left_tag=f"TOO MANY SECRETS // COMPANY TERMINAL MAT [TERM-0{idx}/4] // CI/CD PIPELINE & PEN TEST",
-        right_tag="PNP PROTOTYPE v0.51.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.52.0 // US LETTER",
     )
 
     # -------------------------------------------------------------------------
@@ -966,7 +968,7 @@ def render_player_board(
         line1="Start: **$6**",
         line2="P5: Buy 1 die ($4-$6) -> Next Sprint",
         line3="P5: Regain Market Share ($3 each)",
-        line4="Tiebreaker #2",
+        line4="",
     )
 
     # 3. Research Tokens (🔬) Holder (y = 190..266, h = 76)
@@ -981,7 +983,7 @@ def render_player_board(
         line1="Start: **0 {RESEARCH}**",
         line2="P5: Track Upgrades (1/2/2/3 {RESEARCH})",
         line3="Max 2 upgrades per turn",
-        line4="Tiebreaker #4",
+        line4="",
     )
 
     # 4. Expanded Public Relations Track & Personal Reserve (y = 272..576, h = 304)
@@ -1156,7 +1158,7 @@ def render_company_cards_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x CLIENT COMPANY CARDS [PAGE 5/6]",
-        right_tag="PNP PROTOTYPE v0.51.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.52.0 // US LETTER",
     )
 
     page.text(
@@ -1204,7 +1206,7 @@ def render_white_hat_dossiers_page(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // 6x WHITE HAT DOSSIER CARDS [PAGE 6/6]",
-        right_tag="PNP PROTOTYPE v0.51.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.52.0 // US LETTER",
     )
 
     page.text(
@@ -1255,7 +1257,7 @@ def render_agent_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // CENTRAL ROGUE AGENT & MARKET SHARE BOARD [1/2]",
-        right_tag="PNP PROTOTYPE v0.51.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.52.0 // US LETTER",
     )
 
     # Top Title Bar inside board
@@ -1424,57 +1426,58 @@ def render_agent_board(page: PDFPage) -> None:
 
     # Subheader / Start & Max instruction strip
     page.rect(g_x + 6.0, col_top + 26.0, g_w - 12.0, 22.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.6)
-    page.rich_line(g_x + g_w / 2.0, col_top + 36.0, "**START:** **14** (2P)  |  **18** (3-4P)  ·  **MAX:** **20**", size=7.2, color=PALETTE["ink"], align="center")
+    page.rich_line(g_x + g_w / 2.0, col_top + 36.0, "**START:** **14** (2P)  |  **18** (3-4P)  ·  **MAX:** **25**", size=7.2, color=PALETTE["ink"], align="center")
     page.rich_line(g_x + g_w / 2.0, col_top + 45.0, "**-1** per {RED} cube  |  **0** = Market Collapse", size=5.8, color=PALETTE["ink_soft"], align="center")
 
-    # 21-space Track Grid (20 down to 0) in 3 columns x 7 rows — large cells for multiple player markers!
+    # 26-space Track Grid (25 down to 0) in 4 columns x 7 rows — markers stack on a shared space
     grid_top = col_top + 53.0
-    grid_h = 312.0
+    grid_h = MARKET_SHARE_GRID_H
     pad_x = 8.0
     gap_c = 5.0
     gap_r = 4.0
-    cw = (g_w - 2 * pad_x - 2 * gap_c) / 3.0  # ~70.6 pt wide
-    ch = (grid_h - 6 * gap_r) / 7.0           # ~50.3 pt tall
+    cw = (g_w - 2 * pad_x - (MARKET_SHARE_COLS - 1) * gap_c) / float(MARKET_SHARE_COLS)  # ~51.8 pt wide
+    ch = (grid_h - 6 * gap_r) / 7.0           # ~36.6 pt tall
 
     for idx_val, val in enumerate(range(MARKET_SHARE_MAX, -1, -1)):
-        r_i = idx_val // 3
-        c_i = idx_val % 3
+        r_i = idx_val // MARKET_SHARE_COLS
+        c_i = idx_val % MARKET_SHARE_COLS
         cx = g_x + pad_x + c_i * (cw + gap_c)
         cy = grid_top + r_i * (ch + gap_r)
         tag = MARKET_SHARE_START.get(val)
         if val == 0:
             page.rounded_rect(cx, cy, cw, ch, r=3.0, stroke=PALETTE["red"], fill=PALETTE["red"], line_width=1.0)
-            page.text(cx + cw / 2.0, cy + 16.5, "0", font="bold", size=15.0, color=PALETTE["white"], align="center")
-            page.text(cx + cw / 2.0, cy + 27.5, "MARKET", font="mono_bold", size=6.0, color=PALETTE["white"], align="center")
-            page.text(cx + cw / 2.0, cy + 35.5, "COLLAPSE", font="mono_bold", size=6.0, color=PALETTE["white"], align="center")
-            page.text(cx + cw / 2.0, cy + 45.0, "Final Round", font="italic", size=5.4, color=PALETTE["white"], align="center")
+            page.text(cx + cw / 2.0, cy + 13.0, "0", font="bold", size=13.0, color=PALETTE["white"], align="center")
+            page.text(cx + cw / 2.0, cy + 21.5, "MARKET", font="mono_bold", size=5.6, color=PALETTE["white"], align="center")
+            page.text(cx + cw / 2.0, cy + 28.5, "COLLAPSE", font="mono_bold", size=5.6, color=PALETTE["white"], align="center")
+            page.text(cx + cw / 2.0, cy + 34.5, "Final Round", font="italic", size=5.0, color=PALETTE["white"], align="center")
         elif tag:
             page.rounded_rect(cx, cy, cw, ch, r=3.0, stroke=PALETTE["red"], fill=PALETTE["red_light"], line_width=1.0)
             page.rect(cx, cy, cw, 12.0, stroke=PALETTE["red"], fill=PALETTE["red"], line_width=0.6)
             page.text(cx + cw / 2.0, cy + 8.6, tag, font="mono_bold", size=5.8, color=PALETTE["white"], align="center")
-            page.text(cx + cw / 2.0, cy + 36.0, str(val), font="bold", size=17.0, color=PALETTE["ink"], align="center")
+            page.text(cx + cw / 2.0, cy + 31.5, str(val), font="bold", size=15.0, color=PALETTE["ink"], align="center")
         elif val == MARKET_SHARE_MAX:
             page.rounded_rect(cx, cy, cw, ch, r=3.0, stroke=PALETTE["red"], fill=PALETTE["paper_tint"], line_width=0.9)
             page.rect(cx, cy, cw, 12.0, stroke=PALETTE["red"], fill=PALETTE["red_light"], line_width=0.6)
             page.text(cx + cw / 2.0, cy + 8.6, "TRACK MAX", font="mono_bold", size=5.8, color=PALETTE["red"], align="center")
-            page.text(cx + cw / 2.0, cy + 36.0, str(val), font="bold", size=17.0, color=PALETTE["ink"], align="center")
+            page.text(cx + cw / 2.0, cy + 31.5, str(val), font="bold", size=15.0, color=PALETTE["ink"], align="center")
         else:
             page.rounded_rect(cx, cy, cw, ch, r=3.0, stroke=PALETTE["rule"], fill=PALETTE["paper_tint"], line_width=0.7)
-            page.text(cx + cw / 2.0, cy + 31.0, str(val), font="bold", size=16.0, color=PALETTE["ink"], align="center")
+            page.text(cx + cw / 2.0, cy + 25.0, str(val), font="bold", size=16.0, color=PALETTE["ink"], align="center")
 
     # Market Leader Bonus & Collapse Callout Box at bottom of Right Column
     mb_y = grid_top + grid_h + 6.0
     mb_h = col_bot - mb_y - 6.0
     page.rounded_rect(g_x + 6.0, mb_y, g_w - 12.0, mb_h, r=3.0, stroke=PALETTE["ink"], fill=PALETTE["paper_tint"], line_width=0.8)
     page.rect(g_x + 6.0, mb_y, g_w - 12.0, 14.5, stroke=PALETTE["ink"], fill=PALETTE["ink"], line_width=0.6)
-    page.text(g_x + g_w / 2.0, mb_y + 10.2, "MARKET LEADER BONUS & TIEBREAKERS", font="bold", size=6.6, color=PALETTE["white"], align="center")
+    page.text(g_x + g_w / 2.0, mb_y + 10.2, "MARKET LEADER BONUS & STACKS", font="bold", size=6.6, color=PALETTE["white"], align="center")
     page.rich_paragraph(
         g_x + 10.0, mb_y + 23.0, g_w - 20.0,
-        "**Bonus (no Patient Zeros):** **1st +3**, **2nd +1** Secrets *(ties share)*.\n"
-        "**When:** End of P6 if a **Red R&D face** banked, & **Game End** *(not Wipeout)*.\n"
-        "**2P SETEC Corp ({BLACK}):** Starts **0**; **+1** MS if **>=1** {RED} exits tray; ranks in MLB.\n"
-        "**Ties:** Market Share > $ > Ready Colored > {RESEARCH} > Fewest Under Dev.",
-        size=5.8, leading=7.8, color=PALETTE["ink"],
+        "**Same space = stack:** a marker that moves onto an occupied space goes on top; markers that move together keep their order. Higher in the stack ranks ahead.\n"
+        "**Setup:** First Player's marker on top.\n"
+        "**Bonus (no Patient Zeros):** **1st +3**, **2nd +1** Secrets *(4P: 2nd +2)*; P6 if **Red R&D face** banked, & **Game End**.\n"
+        "**2P SETEC Corp ({BLACK}):** Starts **0**; **+1** if **>=1** {RED} exits tray.\n"
+        "**Tiebreaker:** Market Share position.",
+        size=6.0, leading=7.6, color=PALETTE["ink"],
     )
 
 
@@ -1486,7 +1489,7 @@ def render_market_board(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="PROJECT: SETEC // SOFTWARE MODULE MARKET & CENTRAL SUPPLY [2/2]",
-        right_tag="PNP PROTOTYPE v0.51.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.52.0 // US LETTER",
     )
 
     # Top Title Bar
@@ -1590,7 +1593,7 @@ def render_market_board(page: PDFPage) -> None:
     page.text(48.0, fy + 11.8, "SETUP QUICK-REFERENCE & COMPILER PRIMING", font="bold", size=7.8, color=PALETTE["ink"])
     page.rich_paragraph(
         48.0, fy + 27.5, fw - 16.0,
-        "- **2P / 3P / 4P:** **$6** | **6** Secrets | **14 (2P) / 18 (3-4P)** Share [Max 20] | **0** {RESEARCH}\n"
+        "- **2P / 3P / 4P:** **$6** | **6** Secrets | **14 (2P) / 18 (3-4P)** Share [Max 25] | **0** {RESEARCH}\n"
         "- **Market:** **4 / 6 / 8** dice/color | All tracks L0 | Vulnerability **0** | 2P: **SETEC {BLACK}** at **0**\n"
         "- **Player Start:** 2 Gray + 1 Company die + 1 Purple in Ready; 3 Gray in Current Sprint; 1 Purple in Reserve",
         size=6.6, leading=9.5, color=PALETTE["ink"],
@@ -1600,11 +1603,11 @@ def render_market_board(page: PDFPage) -> None:
     rx_f = 40.0 + fw + 14.0
     page.rect(rx_f, fy, fw, fh, stroke=PALETTE["ink"], fill=PALETTE["white"], line_width=1.0)
     page.rect(rx_f, fy, fw, 16.5, stroke=PALETTE["ink"], fill=PALETTE["panel_tint"], line_width=0.7)
-    page.text(rx_f + 8.0, fy + 11.8, "SECRETS VICTORY & TIEBREAKERS  (SURVIVING OPERATIVES)", font="bold", size=7.8, color=PALETTE["ink"])
+    page.text(rx_f + 8.0, fy + 11.8, "SECRETS VICTORY & TIEBREAKER  (SURVIVING OPERATIVES)", font="bold", size=7.8, color=PALETTE["ink"])
     page.rich_paragraph(
         rx_f + 8.0, fy + 27.5, fw - 16.0,
-        "- **Market Leader Bonus:** **1st +3**, **2nd +1** Secrets *(ties share; P6 if Red R&D face & End)*\n"
-        "- **Victory:** Most **Corporate Secrets** wins. **Ties:** Share > $ > Ready Colored > {RESEARCH} > Fewest Dev.\n"
+        "- **Market Leader Bonus:** **1st +3**, **2nd +1** Secrets *(4P: 2nd +2; P6 if Red R&D face & End)*\n"
+        "- **Victory:** Most **Corporate Secrets** wins. **Ties:** Market Share position (higher in the stack).\n"
         "- **Ends:** Singularity | Final Round (**Patient Zero** or **Market Collapse**) | Total Wipeout",
         size=6.4, leading=9.5, color=PALETTE["ink"],
     )
@@ -1627,7 +1630,7 @@ def render_master_dice_reference(page: PDFPage) -> None:
     draw_board_outer_frame(
         page,
         left_tag="TOO MANY SECRETS // MASTER DICE PIP & ABILITY VISUAL AID [1/4]",
-        right_tag="PNP PROTOTYPE v0.51.0 // US LETTER",
+        right_tag="PNP PROTOTYPE v0.52.0 // US LETTER",
     )
 
     page.rect(40.0, 32.0, 712.0, 24.0, stroke=PALETTE["ink"], fill=PALETTE["ink"], line_width=1.0)
@@ -1929,7 +1932,7 @@ def render_four_player_round_reference_cards(page: PDFPage) -> None:
             page.rect(x + 5.0, vy, cw - 10.0, 21.0, stroke=PALETTE["red"], fill=PALETTE["red_light"], line_width=0.6)
             page.rich_paragraph(
                 x + 8.0, vy + 7.5, cw - 16.0,
-                "**VICTORY & MARKET LEADER BONUS:** **1st +3**, **2nd +1** Secrets by Share (ties share; no PZ) at P6 if Red R&D face banked & at Game End. Most **Secrets** wins! *Ties: Share > $ > Ready Colored > {RESEARCH} > Fewest Dev.*",
+                "**VICTORY & MARKET LEADER BONUS:** **1st +3**, **2nd +1** (4P: +2) Secrets by Share (no PZ) at P6 if Red R&D face banked & at Game End. Most **Secrets** wins! *Ties: Market Share position (higher in the stack).*",
                 size=5.3, leading=6.8, color=PALETTE["ink"],
             )
 
@@ -2244,7 +2247,6 @@ def render_pnp_tokens_page(page: PDFPage) -> None:
             page.rect(bx, by, sw, ch_h, stroke=PALETTE["ink_soft"], fill=fill_c, line_width=0.55, dash=(3, 1.5))
             page.text(bx + 18.0, by + 18.5, val, font="bold", size=11.0, color=PALETTE["ink"], align="center")
             page.text(bx + 34.0, by + 13.5, sub, font="mono_bold", size=5.8, color=PALETTE["ink_soft"])
-            page.text(bx + 34.0, by + 22.0, "Tiebreak Asset", font="regular", size=5.4, color=PALETTE["muted"])
 
 
 # =============================================================================
@@ -2256,7 +2258,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated: List[str] = []
 
     # 1. Player Terminal Mats & Split Cards (6 pages: 4x Mats with vertical resource holders, expanded PR & FIFO Research & Development + 1x Company Cards + 1x White Hat Cards)
-    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.51.0)")
+    doc_players = PDFDocument("Too Many Secrets - Player Terminal Mats & Split Cards (v0.52.0)")
     for idx in range(1, 5):
         p = doc_players.add_page()
         render_player_board(p, idx)
@@ -2298,7 +2300,7 @@ def generate_all_pdfs(out_dir: str) -> List[str]:
     generated.append(path_versions)
 
     # 5. Combined Master Print-and-Play Pack (All 14 pages)
-    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.51.0)")
+    doc_master = PDFDocument("Too Many Secrets - Complete Print and Play Prototype (v0.52.0)")
     for sub_doc in (doc_central, doc_players, doc_dice, doc_versions):
         for pg in sub_doc.pages:
             doc_master.pages.append(pg)

@@ -6,7 +6,9 @@ import random
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
-from sim.config import CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor, SignatureCubeLocation
+from sim.config import (
+    DEFAULT_MARKET_SHARE_MAX, CubeColor, DieColor, EndGameReason, GameConfig, ShieldColor, SignatureCubeLocation,
+)
 from sim.entities import (
     AbilityStatus,
     ArchetypeCard,
@@ -240,6 +242,7 @@ class PlayerState:
         **kwargs: Any,
     ) -> None:
         self.config = config
+        self.ms_stack: Optional[Any] = None  # v0.52 MarketShareStack (shared with GameState); None = stacking off
         # v0.35.0 research telemetry / ledger (INV-RT-RESEARCH-LEDGER-01)
         self.research_earned_total = 0
         self.research_earned_by_source: Dict[str, int] = {}
@@ -547,7 +550,7 @@ class PlayerState:
             return int(self.market_share_max)
         if self.config is not None:
             return int(self.config.get_market_share_max())
-        return 20
+        return DEFAULT_MARKET_SHARE_MAX
 
     @max_market_share.setter
     def max_market_share(self, val: Optional[int]) -> None:
@@ -608,6 +611,8 @@ class PlayerState:
         after = max(0, min(self.market_share_max, before + int(delta)))
         actual = after - before
         self.market_share = after
+        if actual != 0 and self.ms_stack is not None:
+            self.ms_stack.on_move(self.player_id, before, after, source)
         if source == "red":
             self.market_share_lost_red += -actual
             self.market_share_red_overflow += max(0, -int(delta)) - (-actual)
@@ -1494,6 +1499,8 @@ class EndGameResult:
     red_secret_payout_end_awards: Dict[int, int] = field(default_factory=dict)
     red_pending_at_end: int = 0
     other_pending_at_end: int = 0
+    # --- v0.52.0 Market Share tie telemetry block (None unless ms_tie_telemetry) ---
+    ms_tie: Optional[Dict[str, Any]] = None
 
 
 @dataclass
@@ -1613,6 +1620,9 @@ class GameState:
     signature_red_setec_ms_gained: int = 0
     signature_red_capped_gains: int = 0
     signature_red_zero_rescues: int = 0
+    # --- v0.52.0 Market Share stack (None / None when the flags are off) ---
+    ms_stack: Optional[Any] = field(default=None, compare=False, repr=False)
+    ms_tie_tel: Optional[Any] = field(default=None, compare=False, repr=False)
 
     @property
     def setec_corp_final_market_share(self) -> int:

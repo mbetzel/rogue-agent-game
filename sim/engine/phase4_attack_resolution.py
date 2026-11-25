@@ -17,7 +17,7 @@ from sim.config import AnyShieldPolicy, CubeColor, DieColor, EndGameReason, RedV
 from sim.entities import has_company_override, has_signature_protocol, legacy_bridge_enabled
 from sim.entities import ArchetypeCode, CompanyCode, Die
 from sim.engine.state import ProductionRole
-from sim.engine import market_share, research_tracks
+from sim.engine import market_share, ms_stack, research_tracks
 
 if TYPE_CHECKING:
     from sim.engine.core import GameEngine
@@ -235,6 +235,7 @@ def resolve_player_defense_and_wear(
     legacy-only web hook (deprecated v0.34; remove in v0.35). ``aegis_color_override`` lets a web human
     choose the *Baffle Echo* color (``None`` = ask the bot).
     """
+    ms_stack.ensure_batch(engine.state, "red")
     active_ver = engine.state.active_version.version_str
     six_phase = malware_target_policy == MALWARE_POLICY_SIX_PHASE
     is_v044 = getattr(engine.config, "variant_profile", None) == "V044"
@@ -776,14 +777,17 @@ def _resolve_signature_red_lowest_rival(
     drain_amt = cfg.signature_red_drain_amount
     transfer_amt = cfg.signature_red_transfer_amount
     setec_gain = cfg.signature_red_setec_gain if cfg.signature_red_setec_gain is not None else transfer_amt
-    ms_cap = int(getattr(cfg, "market_share_max", 20) or 20)
+    ms_cap = cfg.ms_max()
     SETEC = market_share.SETEC_CORP_ID
+    stack = state.ms_stack
 
     state.signature_red_events += 1
     # Frozen post-drain snapshot (pure; equals the live values after Epoch 1).
     snap = red_signature_recipient_pool(state, cfg, locked_pids, breached_pids)
 
     # Epoch 1: Simultaneous Drain
+    if stack is not None:
+        stack.begin("sig_red_drain")
     for p in locked_players:
         if p.market_share is not None:
             before = p.market_share
@@ -791,7 +795,10 @@ def _resolve_signature_red_lowest_rival(
             p.market_share_lost_red += before - p.market_share
             if p.market_share_min is None or p.market_share < p.market_share_min:
                 p.market_share_min = p.market_share
+            ms_stack.on_move(state, p.player_id, before, p.market_share, "sig_red_drain")
         p.signature_attacks_suffered["red"] = p.signature_attacks_suffered.get("red", 0) + 1
+    if stack is not None:
+        stack.end()
 
     by_pid = {p.player_id: p for p in state.players}
     pending: Dict[int, int] = {}
@@ -803,9 +810,16 @@ def _resolve_signature_red_lowest_rival(
             continue
         low = min(snap[k] for k in pool)
         tied = [k for k in pool if snap[k] == low]
-        if len(tied) == 1:
+        if stack is not None:
+            # v0.52 (R2): the lowest-ranked marker in the post-drain pool; no actor choice, hooks not called.
+            chosen_key = stack.lowest(pool)
+            if len(tied) > 1 and state.ms_tie_tel is not None:
+                state.ms_tie_tel.add("sig_red_stack_decided")
+        elif len(tied) == 1:
             chosen_key = tied[0]
         else:
+            if state.ms_tie_tel is not None:
+                state.ms_tie_tel.add("sig_red_stack_decided")
             objs = [by_pid[k] if k != SETEC else SetecRecipient(market_share=snap[k]) for k in tied]
             hook = getattr(locker.bot, "choose_signature_red_recipient", None) if locker.bot else None
             pick = hook(locker, objs, state) if callable(hook) else None
@@ -825,6 +839,8 @@ def _resolve_signature_red_lowest_rival(
             state.signature_red_mutual_cancels += 1
 
     # Epoch 2: apply all gains together, one cap per recipient
+    if stack is not None:
+        stack.begin("sig_red_gain")
     for k, amount in pending.items():
         if k == SETEC:
             before = state.setec_market_share
@@ -834,6 +850,7 @@ def _resolve_signature_red_lowest_rival(
             state.signature_red_setec_ms_gained += gained
             if gained < amount:
                 state.signature_red_capped_gains += 1
+            ms_stack.on_move(state, SETEC, before, state.setec_market_share, "sig_red_gain")
             continue
         p = by_pid[k]
         before = p.market_share
@@ -845,6 +862,9 @@ def _resolve_signature_red_lowest_rival(
         if p.market_share_peak is None or p.market_share > p.market_share_peak:
             p.market_share_peak = p.market_share
         p.signature_red_transfers_received += amount
+        ms_stack.on_move(state, p.player_id, before, p.market_share, "sig_red_gain")
+    if stack is not None:
+        stack.end()
 
 
 def _resolve_signature_red_v046(engine: GameEngine, locked_players: List[PlayerState]) -> None:
@@ -864,6 +884,7 @@ def _resolve_signature_red_v046(engine: GameEngine, locked_players: List[PlayerS
             p.market_share_lost_red += actual_lost
             if p.market_share_min is None or p.market_share < p.market_share_min:
                 p.market_share_min = p.market_share
+            ms_stack.on_move(state, p.player_id, before, p.market_share, "sig_red_drain")
         p.signature_attacks_suffered["red"] = p.signature_attacks_suffered.get("red", 0) + 1
 
     # Epoch 2: Transfer to Eligible Non-Locked Survivors
@@ -891,7 +912,9 @@ def _resolve_signature_red_v046(engine: GameEngine, locked_players: List[PlayerS
 
                 chosen = default_signature_red_recipient_heuristic(p, tied_recipients, state)
         max_ms = chosen.max_market_share
+        before_ms = chosen.market_share
         chosen.market_share = min(max_ms, chosen.market_share + transfer_amt)
+        ms_stack.on_move(state, chosen.player_id, before_ms, chosen.market_share, "sig_red_gain")
         if chosen.market_share_peak is None or chosen.market_share > chosen.market_share_peak:
             chosen.market_share_peak = chosen.market_share
         p.signature_red_transfers_sent += transfer_amt
@@ -1002,6 +1025,7 @@ def resolve_signature_attacks(engine: GameEngine, cr: CompileResult) -> None:
     """Resolves Dominant Cube Color Signature Attacks in Phase 4 after base shields (INV-SIG-01..03)."""
     cfg = engine.config
     state = engine.state
+    ms_stack.end_batch(state, "red")  # web path: close the Red batch before any ranking read
     if cr.buffer_overflow:
         state.last_dominant_color = None
         return
@@ -1133,6 +1157,7 @@ def execute_attack_resolution(
                 malware_target_selector=(malware_selectors_by_pid or {}).get(player.player_id),
                 aegis_color_override=(aegis_colors_by_pid or {}).get(player.player_id),
             )
+        ms_stack.end_batch(engine.state, "red")
 
         if engine.config.is_vulnerability:
             from sim.engine import vulnerability
@@ -1196,6 +1221,7 @@ def resolve_player_red_blue_v046(
     """v0.46.0 (spec §9.1): one survivor's Red + Blue. No blocking path (INV-RB-01); Blue is x1; Green resolves
     table-wide afterwards (``vulnerability.resolve_green``); no Patient Zero flag here (INV-VULN-06)."""
     cfg = engine.config
+    ms_stack.ensure_batch(engine.state, "red")  # v0.52: Phase 4 step 1 Red is simultaneous (closed before Green / Signature)
     active_ver = engine.state.active_version.version_str
     if cfg.is_market_share and engine.state.phase4_snapshot_round != engine.state.current_round:
         engine.state.phase4_snapshot_round = engine.state.current_round
@@ -1303,6 +1329,7 @@ def resolve_player_attack(
 
 def finalize_attack_resolution(engine: GameEngine, cr: CompileResult) -> None:
     """Closing steps of Phase 4: 2P SETEC Corp advance, Snowball Recycle, Contractor Expiration, End Game Trigger check."""
+    ms_stack.end_batch(engine.state, "red")  # web path: the per-player Red batch closes here at the latest
     if engine.config.is_vulnerability:
         from sim.engine import vulnerability
 
@@ -1314,10 +1341,13 @@ def finalize_attack_resolution(engine: GameEngine, cr: CompileResult) -> None:
                 p.vuln_by_round[-1]["post_p4"] = p.vulnerability
     if getattr(engine.state, "setec_corp_active", False):
         if cr.exited_cubes.get(CubeColor.RED, 0) >= 1:
-            max_ms = int(getattr(engine.config, "market_share_max", 20) or 20)
+            max_ms = engine.config.ms_max()
             if engine.state.setec_market_share < max_ms:
-                engine.state.setec_market_share = min(max_ms, engine.state.setec_market_share + 1)
+                before_ms = engine.state.setec_market_share
+                engine.state.setec_market_share = min(max_ms, before_ms + 1)
                 engine.state.setec_corp_advances_total += 1
+                ms_stack.on_move(engine.state, market_share.SETEC_CORP_ID, before_ms, engine.state.setec_market_share,
+                                 "setec_advance")
     apply_snowball_recycle(engine, cr.exited_cubes)
     expire_contractors(engine)
     check_end_triggers_after_attacks(engine)
